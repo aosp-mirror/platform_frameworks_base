@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"toegang tot je fysieke activiteit"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"foto\'s maken en video opnemen"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Bluetooth-apparaten in de buurt"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"bluetooth-apparaten in de buurt vinden en er verbinding mee maken"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Apparaten in de buurt"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"apparaten in de buurt vinden en er verbinding mee maken"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Gesprekslijsten"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"gesprekslijst lezen en schrijven"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefoon"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Hiermee kan de app bluetooth-apparaten in de buurt vinden en koppelen"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"verbinding maken met gekoppelde bluetooth-apparaten"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Hiermee kan de app verbinding maken met gekoppelde bluetooth-apparaten"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"adverteren op bluetooth-apparaten in de buurt"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Hiermee kan de app adverteren op bluetooth-apparaten in de buurt"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"relatieve positie tussen ultrabreedbandapparaten in de buurt bepalen"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"De app toestaan om de relatieve positie tussen ultrabreedbandapparaten in de buurt te bepalen"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informatie over voorkeursservice voor NFC-betaling"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Hiermee kun je zorgen dat de app informatie krijgt over de voorkeursservice voor NFC-betaling, zoals geregistreerde hulpmiddelen en routebestemmingen."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication regelen"</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Je kunt nu een deel van je scherm vergroten"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Aanzetten in Instellingen"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Sluiten"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; heeft toegang tot de microfoon van je apparaat nodig om door te gaan."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; heeft toegang tot de camera van je apparaat nodig om door te gaan."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Aanzetten"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Blokkeren van apparaatmicrofoon opheffen"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Blokkeren van apparaatcamera opheffen"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Voor &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; en alle andere apps en services"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Blokkeren opheffen"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorprivacy"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"App-icoon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Merkafbeelding voor app"</string>
