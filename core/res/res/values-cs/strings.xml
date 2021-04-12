@@ -1893,7 +1893,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="2250286190237669079">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (příští budík)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Dokud tuto funkci nevypnete"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Dokud funkci nevypnete"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Dokud nevypnete režim Nerušit"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Sbalit"</string>

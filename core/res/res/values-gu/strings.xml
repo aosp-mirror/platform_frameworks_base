@@ -1547,7 +1547,7 @@
     <string name="sending" msgid="206925243621664438">"મોકલી રહ્યાં છે…"</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"બ્રાઉઝર લોન્ચ કરીએ?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"કૉલ સ્વીકારીએ?"</string>
-    <string name="activity_resolver_use_always" msgid="5575222334666843269">"હંમેશા"</string>
+    <string name="activity_resolver_use_always" msgid="5575222334666843269">"હંમેશાં"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"ફક્ત એક વાર"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s કાર્ય પ્રોફાઇલનું સમર્થન કરતું નથી"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ટેબ્લેટ"</string>
