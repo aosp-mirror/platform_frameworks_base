@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"신체 활동 정보에 액세스"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"카메라"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"사진 및 동영상 촬영"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"근처의 블루투스 기기"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"근처의 블루투스 기기를 찾고 연결"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"근처 기기"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"근처 기기 검색 및 연결"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"통화 기록"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"통화 기록 읽고 쓰기"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"전화"</string>
@@ -538,10 +538,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"앱이 근처의 블루투스 기기를 찾고 페어링하도록 허용"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"페어링된 블루투스 기기에 연결"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"앱이 페어링된 블루투스 기기에 연결하도록 허용"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
     <skip />
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"근처 초광대역 기기 간 상대적 위치 파악"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"앱이 근처의 초광대역 기기 간 상대적 위치를 파악하도록 허용"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"기본 NFC 결제 서비스 정보"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"앱이 등록된 AID와 경로 목적지 같은 기본 NFC 결제 서비스 정보를 확인하도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
@@ -2259,9 +2261,14 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"이제 화면 일부를 확대할 수 있습니다."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"설정에서 사용 설정"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"닫기"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"계속하려면 &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;에서 기기 마이크에 액세스해야 합니다."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"계속하려면 &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;에서 기기 카메라에 액세스해야 합니다."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"사용"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
+    <skip />
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"센서 개인정보 보호"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"애플리케이션 아이콘"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"애플리케이션 브랜드 이미지"</string>

@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"toegang tot jou fisieke aktiwiteit"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"foto\'s en video te neem"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Bluetooth-toestelle in die omtrek"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"ontdek en koppel aan Bluetooth-toestelle in die omtrek"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Toestelle in die omtrek"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"ontdek en koppel aan toestelle in die omtrek"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Oproeprekords"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"lees en skryf foonoproeprekord"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Foon"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Laat die program toe om Bluetooth-toestelle in die omtrek te ontdek en saam te bind"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"koppel aan saamgebinde Bluetooth-toestelle"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Laat die program toe om aan saamgebinde Bluetooth-toestelle te koppel"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"adverteer op Bluetooth-toestelle in die omtrek"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Laat die program toe om op Bluetooth-toestelle in die omtrek te adverteer"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"bepaal relatiewe posisie tussen ultrabreëbandtoestelle in die omtrek"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Laat die program toe om relatiewe posisie tussen ultrabreëbandtoestelle in die omtrek te bepaal"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Voorkeur-NFC-betalingdiensinligting"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Laat die program toe om voorkeur-NFC-betalingdiensinligting soos geregistreerde hulpmiddels en roetebestemming te kry."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"beheer kortveldkommunikasie"</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Jy kan nou \'n deel van jou skerm vergroot"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Skakel aan in Instellings"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Maak toe"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Om voort te gaan, moet &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; toegang tot jou toestel se mikrofoon hê."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Om voort te gaan, moet &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; toegang tot jou toestel se kamera hê."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Skakel aan"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Deblokkeer toestelmikrofoon"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Deblokkeer toestelkamera"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Vir &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; en alle programme en dienste"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Deblokkeer"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorprivaatheid"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Programikoon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Programhandelsmerkprent"</string>
