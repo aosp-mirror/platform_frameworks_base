@@ -227,7 +227,7 @@ class WindowContextListenerController {
         }
 
         @Override
-        public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        public void onMergedOverrideConfigurationChanged(Configuration mergedOverrideConfig) {
             reportConfigToWindowTokenClient();
         }
 
