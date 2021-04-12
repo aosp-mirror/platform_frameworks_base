@@ -133,16 +133,6 @@ package android.net {
     method @NonNull public android.net.NetworkRequest.Builder setUids(@Nullable java.util.Set<android.util.Range<java.lang.Integer>>);
   }
 
-  public final class TcpRepairWindow {
-    ctor public TcpRepairWindow(int, int, int, int, int, int);
-    field public final int maxWindow;
-    field public final int rcvWnd;
-    field public final int rcvWndScale;
-    field public final int rcvWup;
-    field public final int sndWl1;
-    field public final int sndWnd;
-  }
-
   public final class TestNetworkInterface implements android.os.Parcelable {
     ctor public TestNetworkInterface(@NonNull android.os.ParcelFileDescriptor, @NonNull String);
     method public int describeContents();
