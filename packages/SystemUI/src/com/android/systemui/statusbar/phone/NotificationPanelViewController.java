@@ -76,7 +76,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
-import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -798,11 +797,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguarStatusBarViewController =
                 statusBarViewComponent.getKeyguardStatusBarViewController();
         mKeyguarStatusBarViewController.init();
-
-        // Re-associate the clock container with the keyguard clock switch.
-        KeyguardClockSwitchController keyguardClockSwitchController =
-                statusViewComponent.getKeyguardClockSwitchController();
-        keyguardClockSwitchController.setBigClockContainer(mBigClockContainer);
 
         if (mKeyguardUserSwitcherController != null) {
             // Try to close the switcher so that callbacks are triggered if necessary.
