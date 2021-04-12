@@ -176,8 +176,6 @@ public class PowerWhitelistManager {
     /** @hide */
     public static final int REASON_DEVICE_DEMO_MODE = PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
     /** @hide */
-    public static final int REASON_EXEMPTED_PACKAGE = PowerExemptionManager.REASON_EXEMPTED_PACKAGE;
-    /** @hide */
     public static final int REASON_ALLOWLISTED_PACKAGE =
             PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
     /** @hide */
@@ -341,7 +339,6 @@ public class PowerWhitelistManager {
             REASON_INSTR_BACKGROUND_FGS_PERMISSION,
             REASON_SYSTEM_ALERT_WINDOW_PERMISSION,
             REASON_DEVICE_DEMO_MODE,
-            REASON_EXEMPTED_PACKAGE,
             REASON_ALLOWLISTED_PACKAGE,
             REASON_APPOP,
             // temp and system allowlist reasons.
