@@ -311,6 +311,11 @@ java_defaults {
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        tag: ".jar",
+        dest: "android-non-updatable.jar",
+    }
 }
 
 java_library_static {
@@ -318,6 +323,9 @@ java_library_static {
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":api-stubs-docs-non-updatable"],
     libs: modules_public_stubs,
+    dist: {
+        dir: "apistubs/android/public",
+    },
 }
 
 java_library_static {
@@ -325,6 +333,9 @@ java_library_static {
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [ ":system-api-stubs-docs-non-updatable" ],
     libs: modules_system_stubs,
+    dist: {
+        dir: "apistubs/android/system",
+    },
 }
 
 java_library_static {
@@ -336,6 +347,9 @@ java_library_static {
         // NOTE: The below can be removed once the prebuilt stub contains IKE.
         "sdk_system_current_android.net.ipsec.ike",
     ],
+    dist: {
+        dir: "apistubs/android/module-lib",
+    },
 }
 
 java_library_static {
@@ -343,6 +357,9 @@ java_library_static {
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":test-api-stubs-docs-non-updatable"],
     libs: modules_system_stubs,
+    dist: {
+        dir: "apistubs/android/test",
+    },
 }
 
 java_defaults {
