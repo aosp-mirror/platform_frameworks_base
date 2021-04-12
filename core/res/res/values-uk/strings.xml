@@ -1798,7 +1798,7 @@
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Скасовано"</string>
     <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"Помилка записування вмісту"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"невідомо"</string>
-    <string name="reason_service_unavailable" msgid="5288405248063804713">"Службу друку не ввімкнено"</string>
+    <string name="reason_service_unavailable" msgid="5288405248063804713">"Сервіс друку не ввімкнено"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"Установлено службу <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"Торкніться, щоб увімкнути"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Введіть PIN-код адміністратора"</string>

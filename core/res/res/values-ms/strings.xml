@@ -1183,7 +1183,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Sentiasa tunjukkan"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah dibina untuk versi yang tidak serasi dengan OS Android dan mungkin menunjukkan gelagat yang tidak dijangka. Versi kemas kini apl mungkin tersedia."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Sentiasa tunjukkan"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Semak kemas kini"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Semak kemaskinian"</string>
     <string name="smv_application" msgid="3775183542777792638">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="smv_process" msgid="1398801497130695446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefon sedang mengemas kini…"</string>
@@ -1892,7 +1892,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Apl tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia sekarang."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Apl ini dibina untuk versi Android yang lebih lama dan mungkin tidak berfungsi dengan betul. Cuba semak kemas kini atau hubungi pembangun."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Semak kemas kini"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Semak kemaskinian"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Anda mempunyai mesej baharu"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Buka apl SMS untuk melihat"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Sesetengah fungsi mungkin terhad"</string>

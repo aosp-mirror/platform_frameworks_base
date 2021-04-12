@@ -297,7 +297,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acceder aos teus contactos"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Localización"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"acceder á localización deste dispositivo"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendario"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder ao teu calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar e consultar mensaxes de SMS"</string>

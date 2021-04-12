@@ -1113,9 +1113,9 @@
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> on käynnissä"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Hanki lisätietoja tai sulje sovellus napauttamalla."</string>
     <string name="ok" msgid="2646370155170753815">"OK"</string>
-    <string name="cancel" msgid="6908697720451760115">"Peruuta"</string>
+    <string name="cancel" msgid="6908697720451760115">"Peru"</string>
     <string name="yes" msgid="9069828999585032361">"OK"</string>
-    <string name="no" msgid="5122037903299899715">"Peruuta"</string>
+    <string name="no" msgid="5122037903299899715">"Peru"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Huomio"</string>
     <string name="loading" msgid="3138021523725055037">"Ladataan…"</string>
     <string name="capital_on" msgid="2770685323900821829">"PÄÄLLÄ"</string>
@@ -1269,7 +1269,7 @@
     <string name="sms_short_code_details" msgid="2723725738333388351">"Tämä "<b>"voi aiheuttaa kuluja"</b>" matkapuhelinliittymälaskuusi."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Tämä aiheuttaa kuluja matkapuhelinliittymälaskuusi."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Lähetä"</string>
-    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Peruuta"</string>
+    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Peru"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Muista valintani"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Muuta kohd. Asetukset &gt; Sovellukset"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Salli aina"</string>
@@ -1490,7 +1490,7 @@
     <string name="date_picker_prev_month_button" msgid="3418694374017868369">"Edellinen kuukausi"</string>
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"Seuraava kuukausi"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Peruuta"</string>
+    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Peru"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Poista"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Valmis"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Tilan muutos"</string>
@@ -1667,7 +1667,7 @@
     <string name="error_message_title" msgid="4082495589294631966">"Virhe"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Järjestelmänvalvoja ei salli tätä muutosta."</string>
     <string name="app_not_found" msgid="3429506115332341800">"Tätä toimintoa käsittelevää sovellusta ei löydy"</string>
-    <string name="revoke" msgid="5526857743819590458">"Peruuta"</string>
+    <string name="revoke" msgid="5526857743819590458">"Peru"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>
     <string name="mediasize_iso_a1" msgid="4063589931031977223">"ISO A1"</string>
     <string name="mediasize_iso_a2" msgid="2779860175680233980">"ISO A2"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Järjestelmänvalvoja päivitti tämän."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Järjestelmänvalvoja poisti tämän."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Parantaakseen akunkestoa Virransäästö\n\n•·laittaa tumman teeman päälle\n•·laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Ok Google).\n\n"<annotation id="url">"Lue lisää"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Parantaakseen akunkestoa Virransäästö\n\n•·laittaa tumman teeman päälle\n•·laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Ok Google)."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Parantaakseen akunkestoa Virransäästö\n\n• laittaa tumman teeman päälle\n• laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Ok Google).\n\n"<annotation id="url">"Lue lisää"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Parantaakseen akunkestoa Virransäästö\n\n• laittaa tumman teeman päälle\n• laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Ok Google)."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Otetaanko Data Saver käyttöön?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ota käyttöön"</string>

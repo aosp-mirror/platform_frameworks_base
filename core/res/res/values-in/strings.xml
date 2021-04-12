@@ -1200,7 +1200,7 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Menyiapkan <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Memulai aplikasi."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Menyelesaikan boot."</string>
-    <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> berjalan"</string>
+    <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> sedang berjalan"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Ketuk untuk kembali ke game"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Pilih game"</string>
     <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"Agar performa tetap maksimal, hanya 1 game yang dapat dibuka sekaligus."</string>
@@ -1295,7 +1295,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Tidak perlu izin"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ini mungkin tidak gratis"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"Oke"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Mengisi daya perangkat ini via USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Daya perangkat sedang diisi via USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Mengisi daya perangkat yang terhubung via USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transfer file USB diaktifkan"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB diaktifkan"</string>
@@ -1565,7 +1565,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Transmisi layar ke perangkat"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Menelusuri perangkat…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Setelan"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan sambungan"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan koneksi"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Memindai..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Menyambung..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Tersedia"</string>

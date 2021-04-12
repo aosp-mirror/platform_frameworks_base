@@ -704,7 +704,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Шифровать данные приложений в хранилище."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Отключение камер"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Запретить использование камер на устройстве."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Отключение функций"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Отключение функций блокировки"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Запретить использовать некоторые функции блокировки экрана."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Домашний"</item>

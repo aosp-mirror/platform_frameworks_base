@@ -305,7 +305,7 @@
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"šalje i pregleda SMS poruke"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"Datoteke i mediji"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"pristupa slikama, medijima i datotekama na uređaju"</string>
+    <string name="permgroupdesc_storage" msgid="6351503740613026600">"pristupa slikama, medijima i fajlovima na uređaju"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snima zvuk"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fizičke aktivnosti"</string>
@@ -682,13 +682,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava Android TV uređaj ili briše sve podatke ovog korisnika ako se unese previše netačnih lozinki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava telefon ili briše sve podatke ovog korisnika ako se unese previše netačnih lozinki."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Promena zaključavanja ekrana"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Promenite zaključavanje ekrana."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Menja zaključavanje ekrana."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Zaključavanje ekrana"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Kontrolišite način i vreme zaključavanja ekrana."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Kontrola načina i vremena zaključavanja ekrana."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Brisanje svih podataka"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Brisanje podataka na tabletu bez upozorenja resetovanjem na fabrička podešavanja."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Briše podatke Android TV uređaja bez upozorenja pomoću resetovanja na fabrička podešavanja."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Izbrišite podatke na telefonu bez upozorenja resetovanjem na fabrička podešavanja."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Brisanje podataka na telefonu bez upozorenja resetovanjem na fabrička podešavanja."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Obriši podatke korisnika"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Briše podatke ovog korisnika na ovom tabletu bez upozorenja."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Briše podatke ovog korisnika na ovom Android TV uređaju bez upozorenja."</string>
@@ -1425,7 +1425,7 @@
     <string name="ime_action_previous" msgid="6548799326860401611">"Prethodno"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Izvrši"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Biraj broj\nkoristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="6200708808003692594">"Kreirajte kontakt\nkoristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="6200708808003692594">"Napravite kontakt\nkoristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Sledeće aplikacije zahtevaju dozvolu za pristup nalogu, kako sada, tako i ubuduće."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Želite da odobrite ovaj zahtev?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Zahtev za pristup"</string>

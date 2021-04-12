@@ -1258,7 +1258,7 @@
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"ଏକ ଅଜଣା ନେଟ୍‌ୱର୍କ ପ୍ରକାର"</string>
-    <string name="accept" msgid="5447154347815825107">"ସ୍ୱୀକାର କରନ୍ତୁ"</string>
+    <string name="accept" msgid="5447154347815825107">"ଗ୍ରହଣ କରନ୍ତୁ"</string>
     <string name="decline" msgid="6490507610282145874">"ପ୍ରତ୍ୟାଖ୍ୟାନ"</string>
     <string name="select_character" msgid="3352797107930786979">"ବର୍ଣ୍ଣ ଲେଖନ୍ତୁ"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"SMS ମେସେଜ୍‌ଗୁଡ଼ିକୁ ପଠାଯାଉଛି"</string>
