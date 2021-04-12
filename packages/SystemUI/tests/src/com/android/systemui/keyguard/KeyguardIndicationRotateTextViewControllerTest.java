@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard;
 
 
-import static com.android.keyguard.KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
@@ -77,7 +76,7 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
         MockitoAnnotations.initMocks(this);
         when(mView.getTextColors()).thenReturn(ColorStateList.valueOf(Color.WHITE));
         mController = new KeyguardIndicationRotateTextViewController(mView, mExecutor,
-                mStatusBarStateController, LOCK_SCREEN_MODE_LAYOUT_1);
+                mStatusBarStateController);
         mController.onViewAttached();
 
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());

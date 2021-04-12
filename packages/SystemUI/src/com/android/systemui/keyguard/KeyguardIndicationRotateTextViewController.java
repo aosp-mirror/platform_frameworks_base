@@ -19,6 +19,7 @@ package com.android.systemui.keyguard;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.text.TextUtils;
 import android.view.View;
 
 import androidx.annotation.IntDef;
@@ -69,8 +70,7 @@ public class KeyguardIndicationRotateTextViewController extends
     public KeyguardIndicationRotateTextViewController(
             KeyguardIndicationTextView view,
             @Main DelayableExecutor executor,
-            StatusBarStateController statusBarStateController,
-            int lockScreenMode
+            StatusBarStateController statusBarStateController
     ) {
         super(view);
         mMaxAlpha = view.getAlpha();
@@ -78,7 +78,6 @@ public class KeyguardIndicationRotateTextViewController extends
         mInitialTextColorState = mView != null
                 ? mView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         mStatusBarStateController = statusBarStateController;
-        mView.setLockScreenMode(lockScreenMode);
         init();
     }
 
@@ -102,7 +101,7 @@ public class KeyguardIndicationRotateTextViewController extends
      *                        the IndicationQueue comes around.
      */
     public void updateIndication(@IndicationType int type, KeyguardIndication newIndication,
-            boolean showImmediately) {
+            boolean updateImmediately) {
         if (type == INDICATION_TYPE_NOW_PLAYING
                 || type == INDICATION_TYPE_REVERSE_CHARGING) {
             // temporarily don't show here, instead use AmbientContainer b/181049781
@@ -125,7 +124,7 @@ public class KeyguardIndicationRotateTextViewController extends
             return;
         }
 
-        final boolean showNow = showImmediately
+        final boolean showNow = updateImmediately
                 || mCurrIndicationType == INDICATION_TYPE_NONE
                 || mCurrIndicationType == type;
         if (hasNewIndication) {
@@ -139,7 +138,7 @@ public class KeyguardIndicationRotateTextViewController extends
 
         if (mCurrIndicationType == type
                 && !hasNewIndication
-                && showImmediately) {
+                && updateImmediately) {
             if (mShowNextIndicationRunnable != null) {
                 mShowNextIndicationRunnable.runImmediately();
             } else {
@@ -154,6 +153,10 @@ public class KeyguardIndicationRotateTextViewController extends
      * If the current indication is of this type, immediately stops showing the message.
      */
     public void hideIndication(@IndicationType int type) {
+        if (!mIndicationMessages.containsKey(type)
+                || TextUtils.isEmpty(mIndicationMessages.get(type).getMessage())) {
+            return;
+        }
         updateIndication(type, null, true);
     }
 
