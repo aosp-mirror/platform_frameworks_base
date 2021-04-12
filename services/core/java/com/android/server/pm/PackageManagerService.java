@@ -23695,11 +23695,17 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public int getComponentEnabledSetting(@NonNull ComponentName component, int userId) {
-        if (component == null) return COMPONENT_ENABLED_STATE_DEFAULT;
-        if (!mUserManager.exists(userId)) return COMPONENT_ENABLED_STATE_DISABLED;
         int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                 false /*checkShell*/, "getComponentEnabled");
+        return getComponentEnabledSettingInternal(component, callingUid, userId);
+    }
+
+    private int getComponentEnabledSettingInternal(ComponentName component, int callingUid,
+            int userId) {
+        if (component == null) return COMPONENT_ENABLED_STATE_DEFAULT;
+        if (!mUserManager.exists(userId)) return COMPONENT_ENABLED_STATE_DISABLED;
+
         synchronized (mLock) {
             try {
                 if (shouldFilterApplicationLocked(
@@ -27123,6 +27129,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 return setting.getEnabled(userId);
             }
+        }
+
+        @Override
+        public @PackageManager.EnabledState int getComponentEnabledSetting(
+                @NonNull ComponentName componentName, int callingUid, int userId) {
+            return PackageManagerService.this.getComponentEnabledSettingInternal(componentName,
+                    callingUid, userId);
         }
 
         @Override
