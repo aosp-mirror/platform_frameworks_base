@@ -601,6 +601,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 return;
             }
 
+            mTmpFinishedControls.clear();
+            mTmpRunningAnims.clear();
             InsetsState state = new InsetsState(mState, true /* copySources */);
             for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
                 RunningAnimation runningAnimation = mRunningAnimations.get(i);
@@ -633,12 +635,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                             anim.getTypeMask(), anim.getInterpolatedFraction()));
                 }
             }
-            mTmpRunningAnims.clear();
 
             for (int i = mTmpFinishedControls.size() - 1; i >= 0; i--) {
                 dispatchAnimationEnd(mTmpFinishedControls.get(i).getAnimation());
             }
-            mTmpFinishedControls.clear();
         };
     }
 
