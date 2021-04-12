@@ -94,6 +94,7 @@ import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -187,6 +188,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     @Mock
     private BubbleLogger mBubbleLogger;
     @Mock
+    private TaskStackListenerImpl mTaskStackListener;
+    @Mock
     private ShellTaskOrganizer mShellTaskOrganizer;
 
     private TestableBubblePositioner mPositioner;
@@ -253,6 +256,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mWindowManagerShellWrapper,
                 mLauncherApps,
                 mBubbleLogger,
+                mTaskStackListener,
                 mShellTaskOrganizer,
                 mPositioner,
                 syncExecutor,
