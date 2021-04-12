@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
+import com.android.systemui.statusbar.policy.BatteryController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -96,6 +97,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private AnimatableClockView mClockView;
     @Mock
     private AnimatableClockView mLargeClockView;
+    @Mock
+    BatteryController mBatteryController;
 
     private KeyguardClockSwitchController mController;
 
@@ -127,7 +130,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 mPluginManager,
                 mFeatureFlags,
-                mExecutor);
+                mExecutor,
+                mBatteryController);
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mColorExtractor.getColors(anyInt())).thenReturn(mGradientColors);

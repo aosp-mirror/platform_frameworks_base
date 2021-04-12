@@ -42,6 +42,7 @@
             android:typeface="monospace"
             android:elegantTextHeight="false"
             android:singleLine="true"
+            chargeAnimationDelay="350"
             dozeWeight="200"
             lockScreenWeight="400"
         />
@@ -62,6 +63,7 @@
             android:fontFamily="@font/clock"
             android:typeface="monospace"
             android:elegantTextHeight="false"
+            chargeAnimationDelay="200"
             dozeWeight="200"
             lockScreenWeight="400"
         />
