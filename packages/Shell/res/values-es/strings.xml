@@ -30,7 +30,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Toca para compartir el informe de errores sin captura de pantalla o espera a que se haga la captura."</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Los informes de errores contienen datos de los distintos archivos de registro del sistema, que pueden incluir información confidencial (como los datos de uso de las aplicaciones o los de ubicación). Comparte los informes de errores únicamente con usuarios y aplicaciones en los que confíes."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"No volver a mostrar"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"Informes de error"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Informes de errores"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"No se ha podido leer el archivo del informe de errores"</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"No se han podido añadir los detalles del informe de errores al archivo ZIP"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"sin nombre"</string>
