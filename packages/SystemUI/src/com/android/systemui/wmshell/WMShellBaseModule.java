@@ -186,14 +186,15 @@ public abstract class WMShellBaseModule {
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps,
+            TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return Optional.of(BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
-                windowManagerShellWrapper, launcherApps, uiEventLogger, organizer,
-                mainExecutor, mainHandler));
+                windowManagerShellWrapper, launcherApps, taskStackListener,
+                uiEventLogger, organizer, mainExecutor, mainHandler));
     }
 
     //
