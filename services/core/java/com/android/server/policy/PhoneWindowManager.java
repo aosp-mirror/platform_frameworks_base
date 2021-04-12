@@ -405,6 +405,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mEnableCarDockHomeCapture = true;
 
     boolean mBootMessageNeedsHiding;
+    volatile boolean mBootAnimationDismissable;
     private KeyguardServiceDelegate mKeyguardDelegate;
     private boolean mKeyguardBound;
     final Runnable mWindowManagerDrawCallback = new Runnable() {
@@ -4305,6 +4306,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     0 /* cookie */);
             updateScreenOffSleepToken(false);
             mDefaultDisplayPolicy.screenTurnedOn(screenOnListener);
+            mBootAnimationDismissable = false;
 
             synchronized (mLock) {
                 if (mKeyguardDelegate != null && mKeyguardDelegate.hasKeyguard()) {
@@ -4379,6 +4381,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn", 0 /* cookie */);
 
+        enableScreen(listener, true /* report */);
+    }
+
+    private void enableScreen(ScreenOnListener listener, boolean report) {
         final boolean enableScreen;
         final boolean awake = mDefaultDisplayPolicy.isAwake();
         synchronized (mLock) {
@@ -4396,17 +4402,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        if (listener != null) {
-            listener.onScreenOn();
-        }
-
-        for (int i = mScreenOnListeners.size() - 1; i >= 0; i--) {
-            final ScreenOnListener screenOnListener = mScreenOnListeners.valueAt(i);
-            if (screenOnListener != null) {
-                screenOnListener.onScreenOn();
+        if (report) {
+            if (listener != null) {
+                listener.onScreenOn();
             }
+
+            for (int i = mScreenOnListeners.size() - 1; i >= 0; i--) {
+                final ScreenOnListener screenOnListener = mScreenOnListeners.valueAt(i);
+                if (screenOnListener != null) {
+                    screenOnListener.onScreenOn();
+                }
+            }
+            mScreenOnListeners.clear();
         }
-        mScreenOnListeners.clear();
 
         if (enableScreen) {
             try {
@@ -4614,13 +4622,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         startedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         finishedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
-        screenTurningOn(DEFAULT_DISPLAY, mDefaultDisplayPolicy.getScreenOnListener());
-        screenTurnedOn(DEFAULT_DISPLAY);
+
+        int defaultDisplayState = mDisplayManager.getDisplay(DEFAULT_DISPLAY).getState();
+        boolean defaultDisplayOn = defaultDisplayState == Display.STATE_ON;
+        boolean defaultScreenTurningOn = mDefaultDisplayPolicy.getScreenOnListener() != null;
+        if (defaultDisplayOn || defaultScreenTurningOn) {
+            // Now that system is booted, wait for keyguard and windows to be drawn before
+            // updating the orientation listener, stopping the boot animation and enabling screen.
+            screenTurningOn(DEFAULT_DISPLAY, mDefaultDisplayPolicy.getScreenOnListener());
+            screenTurnedOn(DEFAULT_DISPLAY);
+        } else {
+            // We're not turning the screen on, so don't wait for keyguard to be drawn
+            // to dismiss the boot animation and finish booting
+            mBootAnimationDismissable = true;
+            enableScreen(null, false /* report */);
+        }
     }
 
     @Override
     public boolean canDismissBootAnimation() {
-        return mDefaultDisplayPolicy.isKeyguardDrawComplete();
+        // Allow to dismiss the boot animation if the keyguard has finished drawing,
+        // or mBootAnimationDismissable has been set
+        return mDefaultDisplayPolicy.isKeyguardDrawComplete() || mBootAnimationDismissable;
     }
 
     ProgressDialog mBootMsgDialog = null;
