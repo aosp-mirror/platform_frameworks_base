@@ -1359,7 +1359,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
                         "com.android.systemui:AOD_INTERRUPT_END");
             }
-            mAuthController.onCancelAodInterrupt();
+            mAuthController.onCancelUdfps();
             mIsUdfpsRunningWhileDozing = false;
         }
     };
