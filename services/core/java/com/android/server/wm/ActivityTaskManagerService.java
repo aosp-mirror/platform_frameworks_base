@@ -35,9 +35,7 @@ import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
@@ -114,7 +112,6 @@ import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_O
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_ONLY;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.Task.REPARENT_KEEP_ROOT_TASK_AT_FRONT;
-import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
 import android.Manifest;
@@ -147,7 +144,6 @@ import android.app.PictureInPictureParams;
 import android.app.ProfilerInfo;
 import android.app.RemoteAction;
 import android.app.WaitResult;
-import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -227,7 +223,6 @@ import android.view.WindowManager;
 import android.window.IWindowOrganizerController;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
-import android.window.WindowContainerTransaction;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -1897,57 +1892,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return null;
     }
 
-    @Override
-    public boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
-        enforceTaskPermission("setTaskWindowingMode()");
-        synchronized (mGlobalLock) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                if (isInLockTaskMode() && windowingMode != WINDOWING_MODE_FULLSCREEN) {
-                    Slog.w(TAG, "setTaskWindowingMode: Is in lock task mode="
-                            + getLockTaskModeState());
-                    return false;
-                }
-
-                if (WindowConfiguration.isSplitScreenWindowingMode(windowingMode)) {
-                    return setTaskWindowingModeSplitScreen(taskId, windowingMode, toTop);
-                }
-                final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                        MATCH_ATTACHED_TASK_ONLY);
-                if (task == null) {
-                    Slog.w(TAG, "setTaskWindowingMode: No task for id=" + taskId);
-                    return false;
-                }
-
-                ProtoLog.d(WM_DEBUG_TASKS, "setTaskWindowingMode: moving task=%d "
-                        + "to windowingMode=%d toTop=%b", taskId, windowingMode, toTop);
-
-                if (!task.isActivityTypeStandardOrUndefined()) {
-                    throw new IllegalArgumentException("setTaskWindowingMode: Attempt to move"
-                            + " non-standard task " + taskId + " to windowing mode="
-                            + windowingMode);
-                }
-
-                final Task rootTask = task.getRootTask();
-                if (toTop) {
-                    rootTask.moveToFront("setTaskWindowingMode", task);
-                }
-                // Convert some windowing-mode changes into root-task reparents for split-screen.
-                if (rootTask.inSplitScreenWindowingMode()) {
-                    rootTask.getDisplayArea().onSplitScreenModeDismissed();
-
-                } else {
-                    rootTask.setWindowingMode(windowingMode);
-                    rootTask.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
-                            true /* notifyClients */);
-                }
-                return true;
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
     /**
      * Sets the locusId for a particular activity.
      *
@@ -2222,59 +2166,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
         }
-    }
-
-    /**
-     * Moves the specified task into a split-screen tile.
-     */
-    private boolean setTaskWindowingModeSplitScreen(int taskId, int windowingMode, boolean toTop) {
-        if (!WindowConfiguration.isSplitScreenWindowingMode(windowingMode)) {
-            throw new IllegalArgumentException("Calling setTaskWindowingModeSplitScreen with non"
-                    + "split-screen mode: " + windowingMode);
-        }
-
-        final Task task = mRootWindowContainer.anyTaskForId(taskId,
-                MATCH_ATTACHED_TASK_ONLY);
-        if (task == null) {
-            Slog.w(TAG, "setTaskWindowingModeSplitScreenPrimary: No task for id=" + taskId);
-            return false;
-        }
-        if (!task.isActivityTypeStandardOrUndefined()) {
-            throw new IllegalArgumentException("setTaskWindowingMode: Attempt to move"
-                    + " non-standard task " + taskId + " to split-screen windowing mode");
-        }
-        if (!task.supportsSplitScreenWindowingMode()) {
-            return false;
-        }
-
-        final int prevMode = task.getWindowingMode();
-        if (prevMode == windowingMode) {
-            // The task is already in split-screen and with correct windowing mode.
-            return true;
-        }
-
-        moveTaskToSplitScreenPrimaryTask(task, toTop);
-        return prevMode != task.getWindowingMode();
-    }
-
-    void moveTaskToSplitScreenPrimaryTask(Task task, boolean toTop) {
-        final TaskDisplayArea taskDisplayArea = task.getDisplayArea();
-        final Task primarySplitTask = taskDisplayArea.getRootSplitScreenPrimaryTask();
-        if (primarySplitTask == null) {
-            throw new IllegalStateException("Can't enter split without associated organized task");
-        }
-
-        if (toTop) {
-            taskDisplayArea.positionChildAt(POSITION_TOP, primarySplitTask,
-                    false /* includingParents */);
-        }
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        // Clear out current windowing mode before reparenting to split taks.
-        wct.setWindowingMode(
-                task.getRootTask().mRemoteToken.toWindowContainerToken(), WINDOWING_MODE_UNDEFINED);
-        wct.reparent(task.getRootTask().mRemoteToken.toWindowContainerToken(),
-                primarySplitTask.mRemoteToken.toWindowContainerToken(), toTop);
-        mWindowOrganizerController.applyTransaction(wct);
     }
 
     /**
@@ -3398,47 +3289,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             enterPipRunnable.run();
         }
         return true;
-    }
-
-    // TODO(b/149338177): remove when CTS no-longer requires it
-    @Override
-    public void resizePrimarySplitScreen(Rect dockedBounds, Rect tempDockedTaskBounds,
-            Rect tempDockedTaskInsetBounds,
-            Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds) {
-        enforceTaskPermission("resizePrimarySplitScreen()");
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final TaskDisplayArea tc = mRootWindowContainer.getDefaultTaskDisplayArea();
-                final Task primary = tc.getRootSplitScreenPrimaryTask();
-                final Task secondary = tc.getTask(t -> t.mCreatedByOrganizer && t.isRootTask()
-                        && t.inSplitScreenSecondaryWindowingMode());
-                if (primary == null || secondary == null) {
-                    return;
-                }
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                final Rect primaryRect =
-                        tempDockedTaskInsetBounds != null ? tempDockedTaskInsetBounds
-                                : (tempDockedTaskBounds != null ? tempDockedTaskBounds
-                                        : dockedBounds);
-                wct.setBounds(primary.mRemoteToken.toWindowContainerToken(), primaryRect);
-                Rect otherRect = tempOtherTaskInsetBounds != null ? tempOtherTaskInsetBounds
-                        : tempOtherTaskBounds;
-                if (otherRect == null) {
-                    // Temporary estimation... again this is just for tests.
-                    otherRect = new Rect(secondary.getBounds());
-                    if (tc.getBounds().width() > tc.getBounds().height()) {
-                        otherRect.left = primaryRect.right + 6;
-                    } else {
-                        otherRect.top = primaryRect.bottom + 6;
-                    }
-                }
-                wct.setBounds(secondary.mRemoteToken.toWindowContainerToken(), otherRect);
-                mWindowOrganizerController.applyTransaction(wct);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
     }
 
     @Override

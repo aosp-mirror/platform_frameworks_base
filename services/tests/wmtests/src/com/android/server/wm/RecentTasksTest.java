@@ -1030,9 +1030,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertNotRestoreTask(() -> mAtm.cancelTaskWindowTransition(taskId));
         assertNotRestoreTask(
                 () -> mAtm.resizeTask(taskId, null /* bounds */, 0 /* resizeMode */));
-        assertNotRestoreTask(
-                () -> mAtm.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
-                        false/* toTop */));
     }
 
     @Test
@@ -1196,8 +1193,6 @@ public class RecentTasksTest extends WindowTestsBase {
                 () -> mAtm.removeRootTasksWithActivityTypes(
                         new int[]{ACTIVITY_TYPE_UNDEFINED}));
         assertSecurityException(expectCallable, () -> mAtm.removeTask(0));
-        assertSecurityException(expectCallable,
-                () -> mAtm.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
                 () -> mAtm.moveTaskToRootTask(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable, () -> mAtm.getAllRootTaskInfos());
