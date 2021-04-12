@@ -114,7 +114,7 @@ droidstubs {
         last_released: {
             api_file: ":android-non-updatable.api.public.latest",
             removed_api_file: ":android-non-updatable-removed.api.public.latest",
-            baseline_file: ":android-incompatibilities.api.public.latest",
+            baseline_file: ":android-non-updatable-incompatibilities.api.public.latest",
         },
         api_lint: {
             enabled: true,
@@ -166,7 +166,7 @@ droidstubs {
         last_released: {
             api_file: ":android-non-updatable.api.system.latest",
             removed_api_file: ":android-non-updatable-removed.api.system.latest",
-            baseline_file: ":android-incompatibilities.api.system.latest"
+            baseline_file: ":android-non-updatable-incompatibilities.api.system.latest"
         },
         api_lint: {
             enabled: true,
