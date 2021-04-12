@@ -426,6 +426,11 @@
     <!-- The padding between the notifications and the quick settings container -->
     <dimen name="qs_notification_padding">@dimen/notification_side_paddings</dimen>
 
+    <!-- In split shade mode notifications should be aligned to QS header so the value should be
+         adjusted to qs header height and height of centered content inside of it:
+        (quick_qs_offset_height (60dp)  - ongoing_appops_chip_height (24dp) ) / 2 -->
+    <dimen name="notifications_top_padding_split_shade">18dp</dimen>
+
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">124dp</dimen>
 
