@@ -1452,6 +1452,8 @@
     <dimen name="wallet_empty_state_corner_radius">24dp</dimen>
     <dimen name="wallet_tile_card_view_height">32dp</dimen>
     <dimen name="wallet_tile_card_view_width">50dp</dimen>
+    <dimen name="wallet_button_horizontal_padding">24dp</dimen>
+    <dimen name="wallet_button_vertical_padding">8dp</dimen>
 
     <!-- Ongoing call chip -->
     <dimen name="ongoing_call_chip_side_padding">12dp</dimen>
