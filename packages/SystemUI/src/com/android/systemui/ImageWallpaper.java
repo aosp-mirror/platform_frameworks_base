@@ -198,8 +198,8 @@ public class ImageWallpaper extends WallpaperService {
                 }
                 mImgHeight = b.getHeight();
                 mImgWidth = b.getWidth();
-                mMiniBitmap = Bitmap.createScaledBitmap(b, Math.round(scale * b.getWidth()),
-                        Math.round(scale * b.getHeight()), false);
+                mMiniBitmap = Bitmap.createScaledBitmap(b, (int) Math.ceil(scale * b.getWidth()),
+                        (int) Math.ceil(scale * b.getHeight()), false);
                 computeAndNotifyLocalColors(mLocalColorsToAdd, mMiniBitmap);
                 mLocalColorsToAdd.clear();
             });
