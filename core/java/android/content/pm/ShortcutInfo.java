@@ -148,7 +148,13 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_CACHED_ALL =
             FLAG_CACHED_NOTIFICATIONS | FLAG_CACHED_BUBBLES | FLAG_CACHED_PEOPLE_TILE;
 
-    /** @hide */
+    /**
+     * Bitmask-based flags indicating different states associated with the shortcut. Note that if
+     * new value is added here, consider adding also the corresponding string representation and
+     * queries in {@link AppSearchShortcutInfo}.
+     *
+     * @hide
+     */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_DYNAMIC,
             FLAG_PINNED,
