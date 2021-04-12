@@ -19,7 +19,7 @@ package android.hardware.input;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Binder;
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.NullVibrator;
 import android.os.VibrationAttributes;
 import android.os.Vibrator;
@@ -125,7 +125,7 @@ public class InputDeviceVibratorManager extends VibratorManager
     }
 
     @Override
-    public void vibrate(int uid, String opPkg, @NonNull CombinedVibrationEffect effect,
+    public void vibrate(int uid, String opPkg, @NonNull CombinedVibration effect,
             String reason, @Nullable VibrationAttributes attributes) {
         mInputManager.vibrate(mDeviceId, effect, mToken);
     }
