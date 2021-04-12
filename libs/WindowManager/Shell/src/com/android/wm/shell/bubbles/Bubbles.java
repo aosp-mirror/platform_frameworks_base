@@ -248,6 +248,8 @@ public interface Bubbles {
 
     /** Callback to tell SysUi components execute some methods. */
     interface SysuiProxy {
+        void isNotificationShadeExpand(Consumer<Boolean> callback);
+
         void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback);
 
         void getShouldRestoredEntries(ArraySet<String> savedBubbleKeys,
