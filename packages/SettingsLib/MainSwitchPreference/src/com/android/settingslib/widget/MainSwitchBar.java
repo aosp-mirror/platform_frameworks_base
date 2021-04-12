@@ -28,7 +28,8 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import androidx.core.content.res.TypedArrayUtils;
+import androidx.annotation.ColorInt;
+import androidx.core.os.BuildCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +43,11 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
     private final List<OnMainSwitchChangeListener> mSwitchChangeListeners = new ArrayList<>();
 
-    private View mAboveDivider;
-    private View mBelowDivider;
+    @ColorInt
+    private int mBackgroundColor;
+    @ColorInt
+    private int mBackgroundActivatedColor;
+
     protected TextView mTextView;
     protected Switch mSwitch;
 
@@ -66,6 +70,14 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         LayoutInflater.from(context).inflate(resourceId(context, "layout", "main_switch_bar"),
                 this);
 
+        if (!BuildCompat.isAtLeastS()) {
+            final TypedArray a = context.obtainStyledAttributes(
+                    new int[]{android.R.attr.colorAccent});
+            mBackgroundActivatedColor = a.getColor(0, 0);
+            mBackgroundColor = context.getColor(R.color.switchbar_background_color);
+            a.recycle();
+        }
+
         setFocusable(true);
         setClickable(true);
 
@@ -80,12 +92,13 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
             final TypedArray a = context.obtainStyledAttributes(attrs,
                     androidx.preference.R.styleable.Preference, 0 /*defStyleAttr*/,
                     0 /*defStyleRes*/);
-            final CharSequence title = TypedArrayUtils.getText(a,
-                    androidx.preference.R.styleable.Preference_title,
+            final CharSequence title = a.getText(
                     androidx.preference.R.styleable.Preference_android_title);
             setTitle(title);
             a.recycle();
         }
+
+        setBackground(true);
     }
 
     @Override
@@ -105,6 +118,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         if (mSwitch != null) {
             mSwitch.setChecked(checked);
         }
+        setBackground(checked);
     }
 
     /**
@@ -187,6 +201,14 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         for (int n = 0; n < count; n++) {
             mSwitchChangeListeners.get(n).onSwitchChanged(mSwitch, isChecked);
         }
+    }
+
+    private void setBackground(boolean checked) {
+        if (BuildCompat.isAtLeastS()) {
+            return;
+        }
+
+        setBackgroundColor(checked ? mBackgroundActivatedColor : mBackgroundColor);
     }
 
     static class SavedState extends BaseSavedState {
