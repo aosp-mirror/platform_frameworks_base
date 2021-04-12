@@ -603,11 +603,20 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             // Repeating vibrations always take precedence.
             return null;
         }
-        if (mCurrentVibration != null && mCurrentVibration.getVibration().isRepeating()) {
-            if (DEBUG) {
-                Slog.d(TAG, "Ignoring incoming vibration in favor of previous alarm vibration");
+        if (mCurrentVibration != null) {
+            if (mCurrentVibration.getVibration().attrs.getUsage()
+                    == VibrationAttributes.USAGE_ALARM) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of alarm vibration");
+                }
+                return Vibration.Status.IGNORED_FOR_ALARM;
             }
-            return Vibration.Status.IGNORED_FOR_ALARM;
+            if (mCurrentVibration.getVibration().isRepeating()) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of repeating vibration");
+                }
+                return Vibration.Status.IGNORED_FOR_ONGOING;
+            }
         }
         return null;
     }
