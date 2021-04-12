@@ -168,7 +168,7 @@ public class SystemVibrator extends Vibrator {
             return false;
         }
         VibrationAttributes attr = new VibrationAttributes.Builder(attributes, effect).build();
-        CombinedVibrationEffect combinedEffect = CombinedVibrationEffect.createSynced(effect);
+        CombinedVibration combinedEffect = CombinedVibration.createParallel(effect);
         return mVibratorManager.setAlwaysOnEffect(uid, opPkg, alwaysOnId, combinedEffect, attr);
     }
 
@@ -179,7 +179,7 @@ public class SystemVibrator extends Vibrator {
             Log.w(TAG, "Failed to vibrate; no vibrator manager.");
             return;
         }
-        CombinedVibrationEffect combinedEffect = CombinedVibrationEffect.createSynced(effect);
+        CombinedVibration combinedEffect = CombinedVibration.createParallel(effect);
         mVibratorManager.vibrate(uid, opPkg, combinedEffect, reason, attributes);
     }
 

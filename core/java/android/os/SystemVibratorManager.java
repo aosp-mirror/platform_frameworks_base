@@ -117,7 +117,7 @@ public class SystemVibratorManager extends VibratorManager {
 
     @Override
     public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
-            @Nullable CombinedVibrationEffect effect, @Nullable VibrationAttributes attributes) {
+            @Nullable CombinedVibration effect, @Nullable VibrationAttributes attributes) {
         if (mService == null) {
             Log.w(TAG, "Failed to set always-on effect; no vibrator manager service.");
             return false;
@@ -131,7 +131,7 @@ public class SystemVibratorManager extends VibratorManager {
     }
 
     @Override
-    public void vibrate(int uid, String opPkg, @NonNull CombinedVibrationEffect effect,
+    public void vibrate(int uid, String opPkg, @NonNull CombinedVibration effect,
             String reason, @Nullable VibrationAttributes attributes) {
         if (mService == null) {
             Log.w(TAG, "Failed to vibrate; no vibrator manager service.");
@@ -240,7 +240,7 @@ public class SystemVibratorManager extends VibratorManager {
             try {
                 VibrationAttributes attr = new VibrationAttributes.Builder(
                         attributes, effect).build();
-                CombinedVibrationEffect combined = CombinedVibrationEffect.startSynced()
+                CombinedVibration combined = CombinedVibration.startParallel()
                         .addVibrator(mVibratorInfo.getId(), effect)
                         .combine();
                 return mService.setAlwaysOnEffect(uid, opPkg, alwaysOnId, combined, attr);
@@ -259,7 +259,7 @@ public class SystemVibratorManager extends VibratorManager {
                 return;
             }
             try {
-                CombinedVibrationEffect combined = CombinedVibrationEffect.startSynced()
+                CombinedVibration combined = CombinedVibration.startParallel()
                         .addVibrator(mVibratorInfo.getId(), vibe)
                         .combine();
                 mService.vibrate(uid, opPkg, combined, attributes, reason, mToken);

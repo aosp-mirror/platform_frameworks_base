@@ -23,7 +23,7 @@ import static junit.framework.Assert.fail;
 import android.Manifest;
 import android.content.Context;
 import android.os.Binder;
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.IVibratorManagerService;
 import android.os.IVibratorStateListener;
 import android.os.Process;
@@ -50,8 +50,8 @@ import org.junit.runners.JUnit4;
 public class VibratorManagerServicePermissionTest {
 
     private static final String PACKAGE_NAME = "com.android.framework.permission.tests";
-    private static final CombinedVibrationEffect EFFECT =
-            CombinedVibrationEffect.createSynced(
+    private static final CombinedVibration EFFECT =
+            CombinedVibration.createParallel(
                     VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
     private static final VibrationAttributes ATTRS = new VibrationAttributes.Builder()
             .setUsage(VibrationAttributes.USAGE_ALARM)
