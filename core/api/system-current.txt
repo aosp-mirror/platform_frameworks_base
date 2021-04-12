@@ -2523,6 +2523,10 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES) public void startActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
   }
 
+  public class DataLoaderParams {
+    method @NonNull public static final android.content.pm.DataLoaderParams forIncremental(@NonNull android.content.ComponentName, @NonNull String);
+  }
+
   public final class InstantAppInfo implements android.os.Parcelable {
     ctor public InstantAppInfo(android.content.pm.ApplicationInfo, String[], String[]);
     ctor public InstantAppInfo(String, CharSequence, String[], String[]);
@@ -2613,6 +2617,7 @@ package android.content.pm {
 
   public class PackageInstaller {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
+    field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
   }
 
   public static class PackageInstaller.Session implements java.io.Closeable {

@@ -12085,7 +12085,6 @@ package android.content.pm {
   }
 
   public class DataLoaderParams {
-    method @NonNull public static final android.content.pm.DataLoaderParams forIncremental(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public static final android.content.pm.DataLoaderParams forStreaming(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public final String getArguments();
     method @NonNull public final android.content.ComponentName getComponentName();
@@ -12330,7 +12329,6 @@ package android.content.pm {
     field public static final String ACTION_SESSION_COMMITTED = "android.content.pm.action.SESSION_COMMITTED";
     field public static final String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
     field public static final String ACTION_SESSION_UPDATED = "android.content.pm.action.SESSION_UPDATED";
-    field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
     field public static final int DATA_LOADER_TYPE_NONE = 0; // 0x0
     field public static final int DATA_LOADER_TYPE_STREAMING = 1; // 0x1
     field public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
