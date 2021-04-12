@@ -22,6 +22,8 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
+import static android.system.OsConstants.EINVAL;
+import static android.system.OsConstants.ENOSYS;
 import static android.system.OsConstants.F_OK;
 import static android.system.OsConstants.O_ACCMODE;
 import static android.system.OsConstants.O_APPEND;
@@ -441,7 +443,19 @@ public final class FileUtils {
                 final StructStat st_in = Os.fstat(in);
                 final StructStat st_out = Os.fstat(out);
                 if (S_ISREG(st_in.st_mode) && S_ISREG(st_out.st_mode)) {
-                    return copyInternalSendfile(in, out, count, signal, executor, listener);
+                    try {
+                        return copyInternalSendfile(in, out, count, signal, executor, listener);
+                    } catch (ErrnoException e) {
+                        if (e.errno == EINVAL || e.errno == ENOSYS) {
+                            // sendfile(2) will fail in at least any of the following conditions:
+                            // 1. |in| doesn't support mmap(2)
+                            // 2. |out| was opened with O_APPEND
+                            // We fallback to userspace copy if that fails
+                            return copyInternalUserspace(in, out, count, signal, executor,
+                                    listener);
+                        }
+                        throw e;
+                    }
                 } else if (S_ISFIFO(st_in.st_mode) || S_ISFIFO(st_out.st_mode)) {
                     return copyInternalSplice(in, out, count, signal, executor, listener);
                 }
