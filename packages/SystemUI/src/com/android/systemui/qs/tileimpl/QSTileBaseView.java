@@ -72,7 +72,6 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     protected final ImageView mBg;
     private final int mColorActive;
     private final int mColorInactive;
-    private final int mColorDisabled;
     private int mCircleColor;
     private int mBgSize;
 
@@ -131,10 +130,9 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         setBackground(mTileBackground);
 
-        mColorActive = Utils.getColorAttrDefaultColor(context, android.R.attr.colorAccent);
-        mColorDisabled = Utils.getDisabled(context,
-                Utils.getColorAttrDefaultColor(context, android.R.attr.colorControlActivated));
-        mColorInactive = Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary);
+        mColorActive = Utils.getColorAttrDefaultColor(context,
+                com.android.internal.R.attr.colorAccentPrimary);
+        mColorInactive = Utils.getColorAttrDefaultColor(context, R.attr.offStateColor);
 
         setPadding(0, 0, 0, 0);
         setClipChildren(false);
@@ -324,7 +322,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
                 return mColorActive;
             case Tile.STATE_INACTIVE:
             case Tile.STATE_UNAVAILABLE:
-                return mColorDisabled;
+                return mColorInactive;
             default:
                 Log.e(TAG, "Invalid state " + state);
                 return 0;
