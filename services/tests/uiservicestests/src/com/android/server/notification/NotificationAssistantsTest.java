@@ -18,10 +18,12 @@ package com.android.server.notification;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -38,6 +40,8 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.testing.TestableContext;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.TypedXmlPullParser;
 import android.util.Xml;
@@ -53,6 +57,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class NotificationAssistantsTest extends UiServiceTestCase {
@@ -73,6 +78,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     @Mock
     private ManagedServices.UserProfiles mUserProfiles;
 
+    private TestableContext mContext = spy(getContext());
     Object mLock = new Object();
 
 
@@ -82,10 +88,11 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        getContext().setMockPackageManager(mPm);
-        getContext().addMockSystemService(Context.USER_SERVICE, mUm);
-        mAssistants = spy(mNm.new NotificationAssistants(getContext(), mLock, mUserProfiles, miPm));
+        mContext.setMockPackageManager(mPm);
+        mContext.addMockSystemService(Context.USER_SERVICE, mUm);
+        mAssistants = spy(mNm.new NotificationAssistants(mContext, mLock, mUserProfiles, miPm));
         when(mNm.getBinderService()).thenReturn(mINm);
+        mContext.ensureTestableResources();
 
         List<ResolveInfo> approved = new ArrayList<>();
         ResolveInfo resolve = new ResolveInfo();
@@ -113,6 +120,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         profileIds.add(10);
         profileIds.add(12);
         when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
+        when(mNm.isNASMigrationDone(anyInt())).thenReturn(true);
     }
 
     @Test
@@ -188,5 +196,123 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
                 true, true);
         verify(mNm, never()).setNotificationAssistantAccessGrantedForUserInternal(
                 any(ComponentName.class), eq(mZero.id), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testLoadDefaultsFromConfig() {
+        ComponentName oldDefaultComponent = ComponentName.unflattenFromString("package/Component1");
+        ComponentName newDefaultComponent = ComponentName.unflattenFromString("package/Component2");
+
+        doReturn(new ArraySet<>(Arrays.asList(oldDefaultComponent, newDefaultComponent)))
+                .when(mAssistants).queryPackageForServices(any(), anyInt(), anyInt());
+        // Test loadDefaultsFromConfig() add the config value to mDefaultComponents instead of
+        // mDefaultFromConfig
+        when(mContext.getResources().getString(
+                com.android.internal.R.string.config_defaultAssistantAccessComponent))
+                .thenReturn(oldDefaultComponent.flattenToString());
+        mAssistants.loadDefaultsFromConfig();
+        assertEquals(new ArraySet<>(Arrays.asList(oldDefaultComponent)),
+                mAssistants.getDefaultComponents());
+        assertNull(mAssistants.getDefaultFromConfig());
+
+        // Test loadDefaultFromConfig(false) only updates the mDefaultFromConfig
+        when(mContext.getResources().getString(
+                com.android.internal.R.string.config_defaultAssistantAccessComponent))
+                .thenReturn(newDefaultComponent.flattenToString());
+        mAssistants.loadDefaultsFromConfig(false);
+        assertEquals(new ArraySet<>(Arrays.asList(oldDefaultComponent)),
+                mAssistants.getDefaultComponents());
+        assertEquals(newDefaultComponent, mAssistants.getDefaultFromConfig());
+
+        // Test resetDefaultFromConfig updates the mDefaultComponents to new config value
+        mAssistants.resetDefaultFromConfig();
+        assertEquals(new ArraySet<>(Arrays.asList(newDefaultComponent)),
+                mAssistants.getDefaultComponents());
+        assertEquals(newDefaultComponent, mAssistants.getDefaultFromConfig());
+    }
+
+    @Test
+    public void testNASSettingUpgrade_userNotSet_differentDefaultNAS() {
+        ComponentName oldDefaultComponent = ComponentName.unflattenFromString("package/Component1");
+        ComponentName newDefaultComponent = ComponentName.unflattenFromString("package/Component2");
+
+        when(mNm.isNASMigrationDone(anyInt())).thenReturn(false);
+        doReturn(new ArraySet<>(Arrays.asList(newDefaultComponent)))
+                .when(mAssistants).queryPackageForServices(any(), anyInt(), anyInt());
+        when(mContext.getResources().getString(
+                com.android.internal.R.string.config_defaultAssistantAccessComponent))
+                .thenReturn(newDefaultComponent.flattenToString());
+
+        // User hasn't set the default NAS, set the oldNAS as the default with userSet=false here.
+        mAssistants.setPackageOrComponentEnabled(oldDefaultComponent.flattenToString(),
+                mZero.id, true, true /*enabled*/, false /*userSet*/);
+
+
+        // The migration for userSet==false happens in resetDefaultAssistantsIfNecessary
+        mAssistants.resetDefaultAssistantsIfNecessary();
+
+        // Verify the migration happened: setDefaultAssistantForUser should be called to
+        // update defaults
+        verify(mNm, times(1)).setNASMigrationDone(eq(mZero.id));
+        verify(mNm, times(1)).setDefaultAssistantForUser(eq(mZero.id));
+        assertEquals(new ArraySet<>(Arrays.asList(newDefaultComponent)),
+                mAssistants.getDefaultComponents());
+
+        when(mNm.isNASMigrationDone(anyInt())).thenReturn(true);
+
+        // Test resetDefaultAssistantsIfNecessary again since it will be called on every reboot
+        mAssistants.resetDefaultAssistantsIfNecessary();
+
+        // The migration should not happen again, the invoke time for migration should not increase
+        verify(mNm, times(1)).setNASMigrationDone(eq(mZero.id));
+        // The invoke time outside migration part should increase by 1
+        verify(mNm, times(2)).setDefaultAssistantForUser(eq(mZero.id));
+    }
+
+    @Test
+    public void testNASSettingUpgrade_userNotSet_sameDefaultNAS() {
+        ComponentName defaultComponent = ComponentName.unflattenFromString("package/Component1");
+
+        when(mNm.isNASMigrationDone(anyInt())).thenReturn(false);
+        doReturn(new ArraySet<>(Arrays.asList(defaultComponent)))
+                .when(mAssistants).queryPackageForServices(any(), anyInt(), anyInt());
+        when(mContext.getResources().getString(
+                com.android.internal.R.string.config_defaultAssistantAccessComponent))
+                .thenReturn(defaultComponent.flattenToString());
+
+        // User hasn't set the default NAS, set the oldNAS as the default with userSet=false here.
+        mAssistants.setPackageOrComponentEnabled(defaultComponent.flattenToString(),
+                mZero.id, true, true /*enabled*/, false /*userSet*/);
+
+        // The migration for userSet==false happens in resetDefaultAssistantsIfNecessary
+        mAssistants.resetDefaultAssistantsIfNecessary();
+
+        verify(mNm, times(1)).setNASMigrationDone(eq(mZero.id));
+        verify(mNm, times(1)).setDefaultAssistantForUser(eq(mZero.id));
+        assertEquals(new ArraySet<>(Arrays.asList(defaultComponent)),
+                mAssistants.getDefaultComponents());
+    }
+
+    @Test
+    public void testNASSettingUpgrade_userNotSet_defaultNASNone() {
+        ComponentName oldDefaultComponent = ComponentName.unflattenFromString("package/Component1");
+        when(mNm.isNASMigrationDone(anyInt())).thenReturn(false);
+        doReturn(new ArraySet<>(Arrays.asList(oldDefaultComponent)))
+                .when(mAssistants).queryPackageForServices(any(), anyInt(), anyInt());
+        // New default is none
+        when(mContext.getResources().getString(
+                com.android.internal.R.string.config_defaultAssistantAccessComponent))
+                .thenReturn("");
+
+        // User hasn't set the default NAS, set the oldNAS as the default with userSet=false here.
+        mAssistants.setPackageOrComponentEnabled(oldDefaultComponent.flattenToString(),
+                mZero.id, true, true /*enabled*/, false /*userSet*/);
+
+        // The migration for userSet==false happens in resetDefaultAssistantsIfNecessary
+        mAssistants.resetDefaultAssistantsIfNecessary();
+
+        verify(mNm, times(1)).setNASMigrationDone(eq(mZero.id));
+        verify(mNm, times(1)).setDefaultAssistantForUser(eq(mZero.id));
+        assertEquals(new ArraySet<>(), mAssistants.getDefaultComponents());
     }
 }
