@@ -2260,7 +2260,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 netId = nai.network.getNetId();
             }
             boolean ok = addLegacyRouteToHost(lp, addr, netId, uid);
-            if (DBG) log("requestRouteToHostAddress ok=" + ok);
+            if (DBG) {
+                log("requestRouteToHostAddress " + addr + nai.toShortString() + " ok=" + ok);
+            }
             return ok;
         } finally {
             Binder.restoreCallingIdentity(token);
