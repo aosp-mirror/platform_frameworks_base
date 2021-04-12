@@ -12734,7 +12734,6 @@ package android.content.pm {
     field public static final String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
     field public static final String FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT = "android.hardware.touchscreen.multitouch.distinct";
     field public static final String FEATURE_TOUCHSCREEN_MULTITOUCH_JAZZHAND = "android.hardware.touchscreen.multitouch.jazzhand";
-    field public static final String FEATURE_TRANSLATION = "android.software.translation";
     field public static final String FEATURE_USB_ACCESSORY = "android.hardware.usb.accessory";
     field public static final String FEATURE_USB_HOST = "android.hardware.usb.host";
     field public static final String FEATURE_VERIFIED_BOOT = "android.software.verified_boot";
