@@ -269,7 +269,7 @@
     <string name="notification_hidden_text" msgid="2835519769868187223">"కొత్త నోటిఫికేషన్"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"వర్చువల్ కీబోర్డ్"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"భౌతిక కీబోర్డ్"</string>
-    <string name="notification_channel_security" msgid="8516754650348238057">"భద్రత"</string>
+    <string name="notification_channel_security" msgid="8516754650348238057">"సెక్యూరిటీ"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"కార్‌ మోడ్"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"ఖాతా స్థితి"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"డెవలపర్ సందేశాలు"</string>
@@ -294,7 +294,7 @@
     <string name="user_owner_label" msgid="8628726904184471211">"వ్యక్తిగత ప్రొఫైల్‌కి మార్చు"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"కార్యాలయ ప్రొఫైల్‌కి మార్చు"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"కాంటాక్ట్‌లు"</string>
-    <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ పరిచయాలను యాక్సెస్ చేయడానికి"</string>
+    <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ కాంటాక్ట్‌లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"లొకేషన్"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
@@ -699,7 +699,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"కెమెరాలను నిలిపివేయండి"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"అన్ని పరికర కెమెరాల వినియోగాన్ని నిరోధించండి."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"కొన్ని స్క్రీన్ లాక్ ఫీచర్‌లు నిలిపివేయండి"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"కొన్ని స్క్రీన్ లాక్ లక్షణాల వినియోగాన్ని నిరోధిస్తుంది."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"స్క్రీన్ లాక్‌కు చెందిన కొన్ని ఫీచర్‌ల వినియోగాన్ని నిరోధిస్తుంది."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"ఇల్లు"</item>
     <item msgid="7740243458912727194">"మొబైల్"</item>
@@ -1537,7 +1537,7 @@
     <string name="validity_period" msgid="1717724283033175968">"చెల్లుబాటు:"</string>
     <string name="issued_on" msgid="5855489688152497307">"జారీ చేసినది:"</string>
     <string name="expires_on" msgid="1623640879705103121">"గడువు ముగిసేది:"</string>
-    <string name="serial_number" msgid="3479576915806623429">"క్రమ సంఖ్య:"</string>
+    <string name="serial_number" msgid="3479576915806623429">"సీరియల్ నంబర్:"</string>
     <string name="fingerprints" msgid="148690767172613723">"వేలిముద్రలు:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 వేలిముద్ర:"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 వేలిముద్ర:"</string>
@@ -1661,9 +1661,9 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ఫీచర్ల మధ్య మారడానికి, మూడు చేతి వేళ్ళతో పైకి స్వైప్ చేసి పట్టుకోండి."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"మాగ్నిఫికేషన్"</string>
     <string name="user_switched" msgid="7249833311585228097">"ప్రస్తుత వినియోగదారు <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>కి మారుస్తోంది…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> యూజర్‌కు స్విచ్ అవుతోంది…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ని లాగ్ అవుట్ చేస్తోంది…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"యజమాని"</string>
+    <string name="owner_name" msgid="8713560351570795743">"ఓనర్"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ఎర్రర్"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ఈ మార్పును మీ నిర్వాహకులు అనుమతించలేదు"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ఈ చర్యను నిర్వహించడానికి యాప్ ఏదీ కనుగొనబడలేదు"</string>
@@ -1852,7 +1852,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS అభ్యర్థన వీడియో కాల్‌కి మార్చబడింది"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS అభ్యర్థన USSD అభ్యర్థనకు మార్చబడింది"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"కొత్త SS అభ్యర్థనకు మార్చబడింది"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"కార్యాలయ ప్రొఫైల్‌"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"హెచ్చరించబడింది"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"విస్తరింపజేయి"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"కుదించు"</string>

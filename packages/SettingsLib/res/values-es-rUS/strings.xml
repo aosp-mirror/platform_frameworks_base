@@ -219,7 +219,7 @@
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Conectado actualmente"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Detalles del dispositivo"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Olvidar"</string>
-    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Huellas digitales del dispositivo: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Huellas dactilares del dispositivo: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Error de conexión"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Asegúrate de que <xliff:g id="DEVICE_NAME">%1$s</xliff:g> esté conectado a la red correcta."</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Vincular con dispositivo"</string>

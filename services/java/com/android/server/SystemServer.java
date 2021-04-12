@@ -306,6 +306,8 @@ public final class SystemServer {
             "com.android.server.blob.BlobStoreManagerService";
     private static final String ROLLBACK_MANAGER_SERVICE_CLASS =
             "com.android.server.rollback.RollbackManagerService";
+    private static final String ALARM_MANAGER_SERVICE_CLASS =
+            "com.android.server.alarm.AlarmManagerService";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -1143,7 +1145,7 @@ public final class SystemServer {
             }
 
             t.traceBegin("StartAlarmManagerService");
-            mSystemServiceManager.startService(new AlarmManagerService(context));
+            mSystemServiceManager.startService(ALARM_MANAGER_SERVICE_CLASS);
             t.traceEnd();
 
             t.traceBegin("StartInputManagerService");

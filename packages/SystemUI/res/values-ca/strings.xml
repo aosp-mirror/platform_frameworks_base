@@ -544,7 +544,7 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Certificats de CA"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Desactiva la VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Desconnecta la VPN"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Consulta les polítiques"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Mostra les polítiques"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"El dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nL\'administrador de TI pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions, les dades associades al dispositiu i la informació d\'ubicació.\n\nPer obtenir més informació, contacta amb l\'administrador de TI."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"El dispositiu pertany a la teva organització.\n\nL\'administrador de TI pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions, les dades associades al dispositiu i la informació d\'ubicació.\n\nPer obtenir més informació, contacta amb l\'administrador de TI."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"La teva organització ha instal·lat una autoritat de certificació en aquest dispositiu. És possible que el trànsit a la xarxa segura se supervisi o es modifiqui."</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pot sonar o vibrar en funció de la configuració del telèfon"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pot sonar o vibrar en funció de la configuració del telèfon. Les converses de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g> es mostren com a bombolles de manera predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Atrau la teva atenció amb una drecera flotant a aquest contingut."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Es mostra com a bombolla flotant a la part superior de la secció de converses i mostra la foto de perfil a la pantalla de bloqueig"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Es mostra com a bombolla flotant a la part superior de la secció de converses i la foto de perfil apareix a la pantalla de bloqueig"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuració"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet les funcions de converses"</string>

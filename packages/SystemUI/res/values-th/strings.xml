@@ -479,7 +479,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้เข้าร่วมออกไหม"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"นำออก"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับท่านผู้เยี่ยมชมกลับมาอีกครั้ง!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้เข้าร่วมกลับมาอีกครั้ง"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"เริ่มต้นใหม่"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ใช่ ดำเนินการต่อ"</string>
@@ -592,7 +592,7 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"เปิดใช้"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ปิดใช้"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"เปลี่ยนอุปกรณ์เอาต์พุต"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"ตรึงแอปอยู่"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"ปักหมุดแอปอยู่"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"วิธีนี้ช่วยให้เห็นแอปบนหน้าจอตลอดจนกว่าจะเลิกตรึง เลื่อนขึ้นค้างไว้เพื่อเลิกตรึง"</string>
@@ -600,13 +600,13 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"อาจมีการเข้าถึงข้อมูลส่วนตัว (เช่น รายชื่อติดต่อและเนื้อหาในอีเมล)"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"แอปที่ตรึงไว้อาจเปิดแอปอื่นๆ"</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"หากต้องการเลิกตรึงแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"ภาพรวม\" ค้างไว้"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"หากต้องการเลิกตรึงแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"หน้าแรก\" ค้างไว้"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"หากต้องการเลิกตรึงแอปนี้ ให้เลื่อนขึ้นค้างไว้"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"หากต้องการเลิกปักหมุดแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"ภาพรวม\" ค้างไว้"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"หากต้องการเลิกปักหมุดแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"หน้าแรก\" ค้างไว้"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"หากต้องการเลิกปักหมุดแอปนี้ ให้เลื่อนขึ้นค้างไว้"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"รับทราบ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ไม่เป็นไร ขอบคุณ"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"ตรึงแอปแล้ว"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"เลิกตรึงแอปแล้ว"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ปักหมุดแอปแล้ว"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"เลิกปักหมุดแอปแล้ว"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"ซ่อน <xliff:g id="TILE_LABEL">%1$s</xliff:g> ไหม"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"จะปรากฏอีกครั้งเมื่อคุณเปิดใช้ในการตั้งค่าครั้งถัดไป"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"ซ่อน"</string>

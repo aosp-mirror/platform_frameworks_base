@@ -317,7 +317,7 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"akses data penderia tentang tanda vital anda"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Dapatkan kembali kandungan tetingkap"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Periksa kandungan tetingkap yang berinteraksi dengan anda."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Hidupkan Jelajah melalui Sentuhan"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Hidupkan Teroka melalui Sentuhan"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Item yang diketik akan dituturkan dengan lantang dan skrin boleh dijelajah menggunakan gerak isyarat."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Perhatikan teks yang anda taip"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Termasuk data peribadi seperti nombor kad kredit dan kata laluan."</string>
@@ -987,9 +987,9 @@
     <string name="searchview_description_clear" msgid="1989371719192982900">"Pertanyaan jelas"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"Serah pertanyaan"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Carian suara"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Dayakan Jelajah melalui Sentuhan?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mendayakan Jelajah melalui Sentuhan. Apabila Jelajah melalui Sentuhan didayakan, anda boleh mendengar atau melihat penerangan tentang apa di bawah jari anda atau melakukan gerak isyarat untuk berinteraksi dengan tablet."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mendayakan Jelajah melalui Sentuhan. Apabila Jelajah melalui Sentuhan didayakan, anda boleh mendengar atau melihat penerangan tentang apa di bawah jari anda atau melakukan gerak isyarat untuk berinteraksi dengan telefon."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Dayakan Teroka melalui Sentuhan?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mendayakan Teroka melalui Sentuhan. Apabila Teroka melalui Sentuhan didayakan, anda boleh mendengar atau melihat penerangan tentang apa-apa di bawah jari anda atau melakukan gerak isyarat untuk berinteraksi dengan tablet."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mendayakan Teroka melalui Sentuhan. Apabila Teroka melalui Sentuhan didayakan, anda boleh mendengar atau melihat penerangan tentang apa-apa di bawah jari anda atau melakukan gerak isyarat untuk berinteraksi dengan telefon."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 bulan yang lalu"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Sebelum 1 bulan yang lalu"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1183,7 +1183,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Sentiasa tunjukkan"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah dibina untuk versi yang tidak serasi dengan OS Android dan mungkin menunjukkan gelagat yang tidak dijangka. Versi kemas kini apl mungkin tersedia."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Sentiasa tunjukkan"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Semak kemas kini"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Semak kemaskinian"</string>
     <string name="smv_application" msgid="3775183542777792638">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="smv_process" msgid="1398801497130695446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefon sedang mengemas kini…"</string>
@@ -1892,7 +1892,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Apl tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia sekarang."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Apl ini dibina untuk versi Android yang lebih lama dan mungkin tidak berfungsi dengan betul. Cuba semak kemas kini atau hubungi pembangun."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Semak kemas kini"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Semak kemaskinian"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Anda mempunyai mesej baharu"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Buka apl SMS untuk melihat"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Sesetengah fungsi mungkin terhad"</string>

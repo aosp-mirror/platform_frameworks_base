@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.alarm;
 
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
@@ -97,7 +97,14 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocalLog;
 import com.android.internal.util.StatLogger;
+import com.android.server.AlarmManagerInternal;
+import com.android.server.AppStateTracker;
 import com.android.server.AppStateTracker.Listener;
+import com.android.server.DeviceIdleInternal;
+import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
+import com.android.server.SystemServiceManager;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
@@ -127,7 +134,7 @@ import java.util.function.Predicate;
  * Unit test:
  atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/AlarmManagerServiceTest.java
  */
-class AlarmManagerService extends SystemService {
+public class AlarmManagerService extends SystemService {
     private static final int RTC_WAKEUP_MASK = 1 << RTC_WAKEUP;
     private static final int RTC_MASK = 1 << RTC;
     private static final int ELAPSED_REALTIME_WAKEUP_MASK = 1 << ELAPSED_REALTIME_WAKEUP;
@@ -920,7 +927,7 @@ class AlarmManagerService extends SystemService {
         mInjector = injector;
     }
 
-    AlarmManagerService(Context context) {
+    public AlarmManagerService(Context context) {
         this(context, new Injector(context));
     }
 

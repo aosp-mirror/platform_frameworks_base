@@ -49,6 +49,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
+import com.android.server.pm.PackageManagerService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -254,6 +255,17 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         assertTrue(Math.abs(actualSnoozedUntilDuration - 1000) < 250);
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
+    }
+
+    @Test
+    public void testSnoozeSentToAndroid() throws Exception {
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, 1000);
+        ArgumentCaptor<PendingIntent> captor = ArgumentCaptor.forClass(PendingIntent.class);
+        verify(mAm, times(1)).setExactAndAllowWhileIdle(
+                anyInt(), anyLong(), captor.capture());
+        assertEquals(PackageManagerService.PLATFORM_PACKAGE_NAME,
+                captor.getValue().getIntent().getPackage());
     }
 
     @Test

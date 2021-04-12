@@ -679,13 +679,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Surveillez le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouillez votre appareil Android TV ou effacez toutes les données de l\'utilisateur en cas d\'un nombre trop élevé de tentatives."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Surveille le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouille le téléphone ou efface toutes les données de l\'utilisateur en cas d\'un nombre trop élevé de tentatives."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Modifier le verrouillage de l\'écran"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Modifier le verrouillage de l\'écran"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Modifier le verrouillage de l\'écran."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Verrouiller l\'écran"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Gérer le mode et les conditions de verrouillage de l\'écran"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Gérer le mode et les conditions de verrouillage de l\'écran."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Effacer toutes les données"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Effacer les données de la tablette sans avertissement, en rétablissant les paramètres par défaut"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Effacez les données de votre appareil Android TV sans avertissement en effectuant une réinitialisation des paramètres d\'usine."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Effacer les données du téléphone sans avertissement en rétablissant les paramètres par défaut"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Effacer les données du téléphone sans avertissement en rétablissant les paramètres par défaut."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Effacer les données de l\'utilisateur"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Effacer les données de l\'utilisateur sur cette tablette sans avertissement."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Effacez les données de cet utilisateur sur cet appareil Android TV sans avertissement."</string>
@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec trois doigts et maintenez-les-y."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zoom"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Changement d\'utilisateur (<xliff:g id="NAME">%1$s</xliff:g>) en cours…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g> en cours..."</string>
     <string name="owner_name" msgid="8713560351570795743">"Propriétaire"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Erreur"</string>

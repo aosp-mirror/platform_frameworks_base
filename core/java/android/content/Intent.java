@@ -1938,8 +1938,8 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Activity action: Launch UI to show information about the usage
-     * of a given permission. This action would be handled by apps that
-     * want to show details about how and why given permission is being
+     * of a given permission group. This action would be handled by apps that
+     * want to show details about how and why given permission group is being
      * used.
      * <p>
      * <strong>Important:</strong>You must protect the activity that handles
@@ -1949,7 +1949,7 @@ public class Intent implements Parcelable, Cloneable {
      * activities that are not properly protected.
      *
      * <p>
-     * Input: {@code android.intent.extra.PERMISSION_NAME} specifies the permission
+     * Input: {@link android.Manifest.permission_group} specifies the permission group
      * for which the launched UI would be targeted.
      * </p>
      * <p>

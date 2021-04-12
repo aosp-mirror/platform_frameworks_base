@@ -112,12 +112,12 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Použít pro přenos souborů"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Použít pro vstup"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Použít pro naslouchátka"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Párovat"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"PÁROVAT"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Spárovat"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SPÁROVAT"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Zrušit"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Párováním připojenému zařízení udělíte přístup ke svým kontaktům a historii volání."</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nelze párovat se zařízením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nelze párovat se zařízením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Kód PIN nebo přístupový klíč je nesprávný."</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nelze spárovat se zařízením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nelze spárovat se zařízením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Kód PIN nebo přístupový klíč je nesprávný."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Se zařízením <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nelze navázat komunikaci."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Párování odmítnuto zařízením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Počítač"</string>

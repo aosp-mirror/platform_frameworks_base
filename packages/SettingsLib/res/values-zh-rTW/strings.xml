@@ -430,9 +430,9 @@
     <skip />
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"根據你的使用情形，目前電量為 <xliff:g id="LEVEL">%2$s</xliff:g>，預估可持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"根據你的使用情形，預估可持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"目前電量 <xliff:g id="LEVEL">%2$s</xliff:g>，預估還能持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"目前電量 <xliff:g id="LEVEL">%2$s</xliff:g>，預估可用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"預估電力大約可使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"還能持續使用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"可用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"電池電力可能於<xliff:g id="TIME">%1$s</xliff:g> 前耗盡"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"電池可用時間不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"電池可用時間不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

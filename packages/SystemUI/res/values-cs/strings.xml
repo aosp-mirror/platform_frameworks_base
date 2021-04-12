@@ -509,7 +509,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Omezuje výkon a data na pozadí"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Vypnout spořič baterie"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mít přístup ke všem informacím, které jsou viditelné na obrazovce nebo které jsou přehrávány ze za řízení při nahrávání nebo odesílání. Týká se to i hesel, údajů o platbě, fotek, zpráv a přehrávaných zvuků."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Služba, která poskytuje tuto funkci, bude mít přístup ke všem informacím, které jsou viditelné na obrazovce nebo které jsou přehrávány ze zařízení při nahrávání nebo odesílání. Týká se to i hesel, údajů o platbě, fotek, zpráv a přehrávaných zvuků."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Služba, která tuto funkci poskytuje, bude mít při nahrávání nebo odesílání přístup ke všem informacím, které jsou viditelné na obrazovce nebo které jsou přehrávány ze zařízení. Týká se to i hesel, údajů o platbě, fotek, zpráv a přehrávaných zvuků."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Začít nahrávat nebo odesílat?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Začít nahrávat nebo odesílat s aplikací <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Tuto zprávu příště nezobrazovat"</string>
@@ -722,7 +722,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu. Konverzace z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> ve výchozím nastavení bublají."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Přitahuje pozornost pomocí plovoucí zkratky k tomuto obsahu."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzací a má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzací, má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>

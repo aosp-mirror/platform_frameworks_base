@@ -67,7 +67,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Memutuskan sambungan..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Menyambung..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> disambungkan"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Memasangkan..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Menggandingkan..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Disambungkan (tiada telefon)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Disambungkan (tiada media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Disambungkan (tiada akses mesej)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Gunakan untuk pemindahan fail"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Gunakan untuk input"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gunakan untuk Alat Bantu Dengar"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Jadikan pasangan"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Gandingkan"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"JADIKAN PASANGAN"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Batal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Berpasangan memberi anda akses kepada kenalan dan sejarah panggilan apabila disambungkan."</string>

@@ -259,7 +259,7 @@
     <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Qabarcıqdan imtina edilib."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Bildiriş kölgəsi."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Tez ayarlar."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Ekranı kilidləyin."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Kilid ekranı."</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"Ayarlar"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"İcmal"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Ekran kilidi"</string>

@@ -1705,7 +1705,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Щоб переключитися між функціями, проведіть по екрану знизу вгору трьома пальцями й утримуйте їх."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Збільшення"</string>
     <string name="user_switched" msgid="7249833311585228097">"Поточний користувач: <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Перехід в обліковий запис \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Перехід у режим \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Вихід з облікового запису користувача <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Власник"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Помилка"</string>
@@ -1798,7 +1798,7 @@
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Скасовано"</string>
     <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"Помилка записування вмісту"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"невідомо"</string>
-    <string name="reason_service_unavailable" msgid="5288405248063804713">"Службу друку не ввімкнено"</string>
+    <string name="reason_service_unavailable" msgid="5288405248063804713">"Сервіс друку не ввімкнено"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"Установлено службу <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"Торкніться, щоб увімкнути"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Введіть PIN-код адміністратора"</string>

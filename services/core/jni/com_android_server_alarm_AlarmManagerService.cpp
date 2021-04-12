@@ -210,7 +210,7 @@ int AlarmImpl::waitForAlarm()
     return result;
 }
 
-static jint android_server_AlarmManagerService_setKernelTime(JNIEnv*, jobject, jlong nativeData, jlong millis)
+static jint android_server_alarm_AlarmManagerService_setKernelTime(JNIEnv*, jobject, jlong nativeData, jlong millis)
 {
     AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
     struct timeval tv;
@@ -234,7 +234,7 @@ static jint android_server_AlarmManagerService_setKernelTime(JNIEnv*, jobject, j
     return ret;
 }
 
-static jint android_server_AlarmManagerService_setKernelTimezone(JNIEnv*, jobject, jlong, jint minswest)
+static jint android_server_alarm_AlarmManagerService_setKernelTimezone(JNIEnv*, jobject, jlong, jint minswest)
 {
     struct timezone tz;
 
@@ -337,7 +337,7 @@ static void log_timerfd_create_error(clockid_t id)
     ALOGE("timerfd_create(%u) failed: %s", id, strerror(errno));
 }
 
-static jlong android_server_AlarmManagerService_init(JNIEnv*, jobject)
+static jlong android_server_alarm_AlarmManagerService_init(JNIEnv*, jobject)
 {
     int epollfd;
     TimerFds fds;
@@ -392,7 +392,7 @@ static jlong android_server_AlarmManagerService_init(JNIEnv*, jobject)
     return reinterpret_cast<jlong>(ret);
 }
 
-static jlong android_server_AlarmManagerService_getNextAlarm(JNIEnv*, jobject, jlong nativeData, jint type)
+static jlong android_server_alarm_AlarmManagerService_getNextAlarm(JNIEnv*, jobject, jlong nativeData, jint type)
 {
     AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
     struct itimerspec spec;
@@ -409,13 +409,13 @@ static jlong android_server_AlarmManagerService_getNextAlarm(JNIEnv*, jobject, j
     return static_cast<jlong>(millis);
 }
 
-static void android_server_AlarmManagerService_close(JNIEnv*, jobject, jlong nativeData)
+static void android_server_alarm_AlarmManagerService_close(JNIEnv*, jobject, jlong nativeData)
 {
     AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
     delete impl;
 }
 
-static jint android_server_AlarmManagerService_set(JNIEnv*, jobject, jlong nativeData, jint type, jlong seconds, jlong nanoseconds)
+static jint android_server_alarm_AlarmManagerService_set(JNIEnv*, jobject, jlong nativeData, jint type, jlong seconds, jlong nanoseconds)
 {
     AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
     struct timespec ts;
@@ -432,7 +432,7 @@ static jint android_server_AlarmManagerService_set(JNIEnv*, jobject, jlong nativ
     return result >= 0 ? 0 : errno;
 }
 
-static jint android_server_AlarmManagerService_waitForAlarm(JNIEnv*, jobject, jlong nativeData)
+static jint android_server_alarm_AlarmManagerService_waitForAlarm(JNIEnv*, jobject, jlong nativeData)
 {
     AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
     int result = 0;
@@ -453,18 +453,18 @@ static jint android_server_AlarmManagerService_waitForAlarm(JNIEnv*, jobject, jl
 
 static const JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
-    {"init", "()J", (void*)android_server_AlarmManagerService_init},
-    {"close", "(J)V", (void*)android_server_AlarmManagerService_close},
-    {"set", "(JIJJ)I", (void*)android_server_AlarmManagerService_set},
-    {"waitForAlarm", "(J)I", (void*)android_server_AlarmManagerService_waitForAlarm},
-    {"setKernelTime", "(JJ)I", (void*)android_server_AlarmManagerService_setKernelTime},
-    {"setKernelTimezone", "(JI)I", (void*)android_server_AlarmManagerService_setKernelTimezone},
-    {"getNextAlarm", "(JI)J", (void*)android_server_AlarmManagerService_getNextAlarm},
+    {"init", "()J", (void*)android_server_alarm_AlarmManagerService_init},
+    {"close", "(J)V", (void*)android_server_alarm_AlarmManagerService_close},
+    {"set", "(JIJJ)I", (void*)android_server_alarm_AlarmManagerService_set},
+    {"waitForAlarm", "(J)I", (void*)android_server_alarm_AlarmManagerService_waitForAlarm},
+    {"setKernelTime", "(JJ)I", (void*)android_server_alarm_AlarmManagerService_setKernelTime},
+    {"setKernelTimezone", "(JI)I", (void*)android_server_alarm_AlarmManagerService_setKernelTimezone},
+    {"getNextAlarm", "(JI)J", (void*)android_server_alarm_AlarmManagerService_getNextAlarm},
 };
 
-int register_android_server_AlarmManagerService(JNIEnv* env)
+int register_android_server_alarm_AlarmManagerService(JNIEnv* env)
 {
-    return jniRegisterNativeMethods(env, "com/android/server/AlarmManagerService",
+    return jniRegisterNativeMethods(env, "com/android/server/alarm/AlarmManagerService",
                                     sMethods, NELEM(sMethods));
 }
 
