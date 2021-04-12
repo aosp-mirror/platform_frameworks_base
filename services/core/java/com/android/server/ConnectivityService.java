@@ -4229,7 +4229,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // network, we should respect the user's option and don't need to popup the
             // PARTIAL_CONNECTIVITY notification to user again.
             nai.networkAgentConfig.acceptPartialConnectivity = accept;
-            nai.updateScoreForNetworkAgentConfigUpdate();
+            nai.updateScoreForNetworkAgentUpdate();
             rematchAllNetworksAndRequests();
         }
 
@@ -4297,6 +4297,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         if (!nai.avoidUnvalidated) {
             nai.avoidUnvalidated = true;
+            nai.updateScoreForNetworkAgentUpdate();
             rematchAllNetworksAndRequests();
         }
     }
@@ -4404,7 +4405,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void updateAvoidBadWifi() {
         for (final NetworkAgentInfo nai : mNetworkAgentInfos) {
-            nai.updateScoreForNetworkAgentConfigUpdate();
+            nai.updateScoreForNetworkAgentUpdate();
         }
         rematchAllNetworksAndRequests();
     }
@@ -7170,6 +7171,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkCapabilities prevNc = nai.getAndSetNetworkCapabilities(newNc);
 
         updateUids(nai, prevNc, newNc);
+        nai.updateScoreForNetworkAgentUpdate();
 
         if (nai.getCurrentScore() == oldScore && newNc.equalRequestableCapabilities(prevNc)) {
             // If the requestable capabilities haven't changed, and the score hasn't changed, then
