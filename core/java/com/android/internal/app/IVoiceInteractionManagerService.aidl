@@ -261,4 +261,11 @@ interface IVoiceInteractionManagerService {
         in AudioFormat audioFormat,
         in PersistableBundle options,
         in IMicrophoneHotwordDetectionVoiceInteractionCallback callback);
+
+    /**
+     * Test API to simulate to trigger hardware recognition event for test.
+     */
+    void triggerHardwareRecognitionEventForTest(
+            in SoundTrigger.KeyphraseRecognitionEvent event,
+            in IHotwordRecognitionStatusCallback callback);
 }

@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -49,6 +50,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.service.voice.HotwordDetectionService.InitializationStatus;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -624,6 +626,34 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             mModelManagementService.updateState(options, sharedMemory, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Test API to simulate to trigger hardware recognition event for test.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    public void triggerHardwareRecognitionEventForTest(int status, int soundModelHandle,
+            boolean captureAvailable, int captureSession, int captureDelayMs, int capturePreambleMs,
+            boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data) {
+        Log.d(TAG, "triggerHardwareRecognitionEventForTest()");
+        synchronized (mLock) {
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException("triggerHardwareRecognitionEventForTest called on"
+                        + " an invalid detector or error state");
+            }
+            try {
+                mModelManagementService.triggerHardwareRecognitionEventForTest(
+                        new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
+                                captureSession, captureDelayMs, capturePreambleMs, triggerInData,
+                                captureFormat, data, null /* keyphraseExtras */),
+                        mInternalCallback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
