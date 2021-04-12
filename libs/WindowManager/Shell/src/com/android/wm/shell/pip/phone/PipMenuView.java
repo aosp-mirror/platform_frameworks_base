@@ -130,7 +130,11 @@ public class PipMenuView extends FrameLayout {
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         inflate(context, R.layout.pip_menu, this);
 
-        mBackgroundDrawable = new ColorDrawable(Color.BLACK);
+        final boolean enableCornerRadius = mContext.getResources()
+                .getBoolean(R.bool.config_pipEnableRoundCorner);
+        mBackgroundDrawable = enableCornerRadius
+                ? mContext.getDrawable(R.drawable.pip_menu_background)
+                : new ColorDrawable(Color.BLACK);
         mBackgroundDrawable.setAlpha(0);
         mViewRoot = findViewById(R.id.background);
         mViewRoot.setBackground(mBackgroundDrawable);
