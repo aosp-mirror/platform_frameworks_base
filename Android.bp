@@ -751,44 +751,6 @@ cc_library {
     },
 }
 
-python_defaults {
-    name: "base_default",
-    version: {
-        py2: {
-            enabled: false,
-            embedded_launcher: false,
-        },
-        py3: {
-            enabled: true,
-            embedded_launcher: true,
-        },
-    },
-}
-
-python_binary_host {
-    name: "fontchain_linter",
-    defaults: ["base_default"],
-    main: "tools/fonts/fontchain_linter.py",
-    srcs: [
-        "tools/fonts/fontchain_linter.py",
-    ],
-    libs: [
-        "fontTools",
-    ],
-}
-
-python_binary_host {
-    name: "update_font_metadata",
-    defaults: ["base_default"],
-    main: "tools/fonts/update_font_metadata.py",
-    srcs: [
-        "tools/fonts/update_font_metadata.py",
-    ],
-    libs: [
-        "fontTools",
-    ],
-}
-
 // utility classes statically linked into framework-wifi and dynamically linked
 // into wifi-service
 java_library {
