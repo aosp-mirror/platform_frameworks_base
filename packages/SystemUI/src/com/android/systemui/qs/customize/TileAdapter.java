@@ -52,6 +52,7 @@ import com.android.systemui.qs.customize.TileAdapter.Holder;
 import com.android.systemui.qs.customize.TileQueryHelper.TileInfo;
 import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.qs.dagger.QSThemedContext;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileView;
@@ -89,7 +90,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private final Handler mHandler = new Handler();
     private final List<TileInfo> mTiles = new ArrayList<>();
     private final ItemTouchHelper mItemTouchHelper;
-    private final ItemDecoration mDecoration;
+    private ItemDecoration mDecoration;
     private final MarginTileDecoration mMarginDecoration;
     private final int mMinNumTiles;
     private final QSTileHost mHost;
@@ -112,8 +113,12 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private final boolean mUseHorizontalTiles;
 
     @Inject
-    public TileAdapter(Context context, QSTileHost qsHost, UiEventLogger uiEventLogger,
-            @Named(QS_LABELS_FLAG) boolean useHorizontalTiles) {
+    public TileAdapter(
+            @QSThemedContext Context context,
+            QSTileHost qsHost,
+            UiEventLogger uiEventLogger,
+            @Named(QS_LABELS_FLAG) boolean useHorizontalTiles
+    ) {
         mContext = context;
         mHost = qsHost;
         mUiEventLogger = uiEventLogger;

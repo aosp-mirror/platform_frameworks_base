@@ -16,7 +16,7 @@
   -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android">
     <shape>
-        <solid android:color="?android:attr/colorBackground"/>
+        <solid android:color="?attr/underSurfaceColor"/>
         <corners android:radius="@dimen/notification_corner_radius" />
     </shape>
 </inset>
