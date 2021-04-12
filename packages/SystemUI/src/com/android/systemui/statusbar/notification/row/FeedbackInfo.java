@@ -147,7 +147,7 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
         int status = mFeedbackController.getFeedbackStatus(mEntry);
         if (DEBUG) {
             sb.append(String.format(
-                    "[DEBUG]: oldImportance=%d, newImportance=%d, ranking=%d\n\n",
+                    "[DEBUG]: oldImportance=%d, newImportance=%d, ranking=%f\n\n",
                     mRanking.getChannel().getImportance(), mRanking.getImportance(),
                     mRanking.getRankingScore()));
         }
