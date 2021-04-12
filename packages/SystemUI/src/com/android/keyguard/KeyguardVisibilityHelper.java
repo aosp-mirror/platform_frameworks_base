@@ -20,7 +20,7 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.view.View;
 
-import com.android.systemui.Interpolators;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;

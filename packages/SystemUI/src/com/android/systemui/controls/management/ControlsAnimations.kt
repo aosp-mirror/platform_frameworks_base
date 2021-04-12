@@ -22,21 +22,17 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.IdRes
 import android.content.Intent
-
 import android.transition.Transition
 import android.transition.TransitionValues
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-
-import com.android.systemui.Interpolators
 import com.android.systemui.R
-
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.controls.ui.ControlsUiController
 
 object ControlsAnimations {

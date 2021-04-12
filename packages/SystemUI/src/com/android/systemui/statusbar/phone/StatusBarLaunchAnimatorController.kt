@@ -1,6 +1,6 @@
 package com.android.systemui.statusbar.phone
 
-import com.android.systemui.plugins.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityLaunchAnimator
 
 /**
  * A [ActivityLaunchAnimator.Controller] that takes care of collapsing the status bar at the right

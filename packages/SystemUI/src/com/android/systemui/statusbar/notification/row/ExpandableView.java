@@ -29,8 +29,8 @@ import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;

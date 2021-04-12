@@ -2,8 +2,8 @@ package com.android.systemui.statusbar.notification
 
 import android.util.MathUtils
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.Interpolators
-import com.android.systemui.plugins.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.Interpolators
 import kotlin.math.min
 
 /** Parameters for the notifications expand animations. */
