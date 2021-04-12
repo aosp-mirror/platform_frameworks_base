@@ -462,7 +462,7 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
   // that existing projects have out-of-date references which pass compilation.
   xml::StripAndroidStudioAttributes(doc->root.get());
 
-  XmlReferenceLinker xml_linker;
+  XmlReferenceLinker xml_linker(table);
   if (!options_.do_not_fail_on_missing_resources && !xml_linker.Consume(context_, doc)) {
     return {};
   }
@@ -2112,7 +2112,7 @@ class Linker {
         std::unique_ptr<xml::XmlResource> split_manifest =
             GenerateSplitManifest(app_info_, *split_constraints_iter);
 
-        XmlReferenceLinker linker;
+        XmlReferenceLinker linker(&final_table_);
         if (!linker.Consume(context_, split_manifest.get())) {
           context_->GetDiagnostics()->Error(DiagMessage()
                                             << "failed to create Split AndroidManifest.xml");
@@ -2143,7 +2143,7 @@ class Linker {
       // So we give it a package name so it can see local resources.
       manifest_xml->file.name.package = context_->GetCompilationPackage();
 
-      XmlReferenceLinker manifest_linker;
+      XmlReferenceLinker manifest_linker(&final_table_);
       if (options_.merge_only || manifest_linker.Consume(context_, manifest_xml.get())) {
         if (options_.generate_proguard_rules_path &&
             !proguard::CollectProguardRulesForManifest(manifest_xml.get(), &proguard_keep_set)) {
