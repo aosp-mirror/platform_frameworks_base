@@ -1091,8 +1091,9 @@
          burn-in on AOD. -->
     <dimen name="burn_in_prevention_offset_y_large_clock">42dp</dimen>
 
-    <!-- Large clock maximum font size (dp is intentional, to prevent any further scaling) -->
+    <!-- Clock maximum font size (dp is intentional, to prevent any further scaling) -->
     <dimen name="large_clock_text_size">150dp</dimen>
+    <dimen name="clock_text_size">86dp</dimen>
 
     <!-- The maximum offset in either direction that icons move to prevent burn-in on AOD. -->
     <dimen name="default_burn_in_prevention_offset">15dp</dimen>
