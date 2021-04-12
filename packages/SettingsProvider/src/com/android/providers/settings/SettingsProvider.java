@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import static android.os.Process.INVALID_UID;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
@@ -362,11 +363,6 @@ public class SettingsProvider extends ContentProvider {
             mHandlerThread.start();
             mHandler = new Handler(mHandlerThread.getLooper());
             mSettingsRegistry = new SettingsRegistry();
-        }
-        SettingsState.cacheSystemPackageNamesAndSystemSignature(getContext());
-        synchronized (mLock) {
-            mSettingsRegistry.migrateAllLegacySettingsIfNeededLocked();
-            mSettingsRegistry.syncSsaidTableOnStartLocked();
         }
         mHandler.post(() -> {
             registerBroadcastReceivers();
@@ -2503,6 +2499,8 @@ public class SettingsProvider extends ContentProvider {
             mHandler = new MyHandler(getContext().getMainLooper());
             mGenerationRegistry = new GenerationRegistry(mLock);
             mBackupManager = new BackupManager(getContext());
+            migrateAllLegacySettingsIfNeeded();
+            syncSsaidTableOnStart();
         }
 
         private void generateUserKeyLocked(int userId) {
@@ -2589,36 +2587,38 @@ public class SettingsProvider extends ContentProvider {
             return getSettingLocked(SETTINGS_TYPE_SSAID, userId, uid);
         }
 
-        private void syncSsaidTableOnStartLocked() {
-            // Verify that each user's packages and ssaid's are in sync.
-            for (UserInfo user : mUserManager.getAliveUsers()) {
-                // Get all uids for the user's packages.
-                final List<PackageInfo> packages;
-                try {
-                    packages = mPackageManager.getInstalledPackages(
+        public void syncSsaidTableOnStart() {
+            synchronized (mLock) {
+                // Verify that each user's packages and ssaid's are in sync.
+                for (UserInfo user : mUserManager.getAliveUsers()) {
+                    // Get all uids for the user's packages.
+                    final List<PackageInfo> packages;
+                    try {
+                        packages = mPackageManager.getInstalledPackages(
                             PackageManager.MATCH_UNINSTALLED_PACKAGES,
                             user.id).getList();
-                } catch (RemoteException e) {
-                    throw new IllegalStateException("Package manager not available");
-                }
-                final Set<String> appUids = new HashSet<>();
-                for (PackageInfo info : packages) {
-                    appUids.add(Integer.toString(info.applicationInfo.uid));
-                }
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException("Package manager not available");
+                    }
+                    final Set<String> appUids = new HashSet<>();
+                    for (PackageInfo info : packages) {
+                        appUids.add(Integer.toString(info.applicationInfo.uid));
+                    }
 
-                // Get all uids currently stored in the user's ssaid table.
-                final Set<String> ssaidUids = new HashSet<>(
-                        getSettingsNamesLocked(SETTINGS_TYPE_SSAID, user.id));
-                ssaidUids.remove(SSAID_USER_KEY);
+                    // Get all uids currently stored in the user's ssaid table.
+                    final Set<String> ssaidUids = new HashSet<>(
+                            getSettingsNamesLocked(SETTINGS_TYPE_SSAID, user.id));
+                    ssaidUids.remove(SSAID_USER_KEY);
 
-                // Perform a set difference for the appUids and ssaidUids.
-                ssaidUids.removeAll(appUids);
+                    // Perform a set difference for the appUids and ssaidUids.
+                    ssaidUids.removeAll(appUids);
 
-                // If there are ssaidUids left over they need to be removed from the table.
-                final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID,
-                        user.id);
-                for (String uid : ssaidUids) {
-                    ssaidSettings.deleteSettingLocked(uid);
+                    // If there are ssaidUids left over they need to be removed from the table.
+                    final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID,
+                            user.id);
+                    for (String uid : ssaidUids) {
+                        ssaidSettings.deleteSettingLocked(uid);
+                    }
                 }
             }
         }
@@ -2911,7 +2911,7 @@ public class SettingsProvider extends ContentProvider {
                         boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
-                                setting.getPackageName())) {
+                                setting.getPackageName(), INVALID_UID, userId)) {
                             if (prefix != null && !setting.getName().startsWith(prefix)) {
                                 continue;
                             }
@@ -2931,7 +2931,7 @@ public class SettingsProvider extends ContentProvider {
                         boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
-                                setting.getPackageName())) {
+                                setting.getPackageName(), INVALID_UID, userId)) {
                             if (prefix != null && !setting.getName().startsWith(prefix)) {
                                 continue;
                             }
@@ -3009,38 +3009,40 @@ public class SettingsProvider extends ContentProvider {
             return mSettingsStates.get(key);
         }
 
-        private void migrateAllLegacySettingsIfNeededLocked() {
-            final int key = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
-            File globalFile = getSettingsFile(key);
-            if (SettingsState.stateFileExists(globalFile)) {
-                return;
-            }
-
-            mSettingsCreationBuildId = Build.ID;
-
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                List<UserInfo> users = mUserManager.getAliveUsers();
-
-                final int userCount = users.size();
-                for (int i = 0; i < userCount; i++) {
-                    final int userId = users.get(i).id;
-
-                    DatabaseHelper dbHelper = new DatabaseHelper(getContext(), userId);
-                    SQLiteDatabase database = dbHelper.getWritableDatabase();
-                    migrateLegacySettingsForUserLocked(dbHelper, database, userId);
-
-                    // Upgrade to the latest version.
-                    UpgradeController upgrader = new UpgradeController(userId);
-                    upgrader.upgradeIfNeededLocked();
-
-                    // Drop from memory if not a running user.
-                    if (!mUserManager.isUserRunning(new UserHandle(userId))) {
-                        removeUserStateLocked(userId, false);
-                    }
+        private void migrateAllLegacySettingsIfNeeded() {
+            synchronized (mLock) {
+                final int key = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
+                File globalFile = getSettingsFile(key);
+                if (SettingsState.stateFileExists(globalFile)) {
+                    return;
                 }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+
+                mSettingsCreationBuildId = Build.ID;
+
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    List<UserInfo> users = mUserManager.getAliveUsers();
+
+                    final int userCount = users.size();
+                    for (int i = 0; i < userCount; i++) {
+                        final int userId = users.get(i).id;
+
+                        DatabaseHelper dbHelper = new DatabaseHelper(getContext(), userId);
+                        SQLiteDatabase database = dbHelper.getWritableDatabase();
+                        migrateLegacySettingsForUserLocked(dbHelper, database, userId);
+
+                        // Upgrade to the latest version.
+                        UpgradeController upgrader = new UpgradeController(userId);
+                        upgrader.upgradeIfNeededLocked();
+
+                        // Drop from memory if not a running user.
+                        if (!mUserManager.isUserRunning(new UserHandle(userId))) {
+                            removeUserStateLocked(userId, false);
+                        }
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
 
@@ -5034,9 +5036,19 @@ public class SettingsProvider extends ContentProvider {
                 // In the upgrade case we pretend the call is made from the app
                 // that made the last change to the setting to properly determine
                 // whether the call has been made by a system component.
+                int callingUid = -1;
                 try {
-                    final boolean systemSet = SettingsState.isSystemPackage(
-                            getContext(), setting.getPackageName());
+                    callingUid = mPackageManager.getPackageUid(setting.getPackageName(), 0, userId);
+                } catch (RemoteException e) {
+                    /* ignore - handled below */
+                }
+                if (callingUid < 0) {
+                    Slog.e(LOG_TAG, "Unknown package: " + setting.getPackageName());
+                    continue;
+                }
+                try {
+                    final boolean systemSet = SettingsState.isSystemPackage(getContext(),
+                            setting.getPackageName(), callingUid, userId);
                     if (systemSet) {
                         settings.insertSettingOverrideableByRestoreLocked(name, setting.getValue(),
                                 setting.getTag(), true, setting.getPackageName());
