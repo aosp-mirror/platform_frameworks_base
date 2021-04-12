@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2020 The Android Open Source Project
+  Copyright (C) 2021 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -17,10 +17,7 @@
 
 <resources>
 
-    <color name="thumb_off">#BFFFFFFF</color>
-    <color name="track_off">@*android:color/material_grey_600</color>
-
-    <color name="switchbar_background_color">@*android:color/material_grey_600</color>
-    <color name="switchbar_switch_track_tint">#BFFFFFFF</color>
-    <color name="switchbar_switch_thumb_tint">@android:color/white</color>
+    <!-- SwitchBar sub settings margin start / end -->
+    <dimen name="switchbar_subsettings_margin_start">128dp</dimen>
+    <dimen name="switchbar_subsettings_margin_end">128dp</dimen>
 </resources>
