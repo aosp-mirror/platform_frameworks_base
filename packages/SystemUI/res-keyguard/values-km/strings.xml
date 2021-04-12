@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុងបង្កើនប្រសិទ្ធភាព​គុណភាពថ្ម"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"សូមសាក​ថ្ម​របស់​អ្នក។"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ចុចម៉ឺនុយ ​ដើម្បី​ដោះ​សោ។"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"បណ្ដាញ​ជាប់​សោ"</string>
@@ -100,7 +101,7 @@
     <string name="kg_pin_accepted" msgid="1625501841604389716">"កូដត្រូវ​បានទទួល​យក!"</string>
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"គ្មាន​សេវា​ទេ។"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ប្ដូរ​វិធី​បញ្ចូល"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"មុខងារ​ពេល​ជិះ​យន្តហោះ"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"​ពេល​ជិះ​យន្តហោះ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"តម្រូវឲ្យប្រើលំនាំ បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"តម្រូវឲ្យបញ្ចូលកូដ PIN បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់ បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
