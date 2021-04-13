@@ -5277,6 +5277,13 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
+     * @return whether this task is always on top without taking visibility into account.
+     */
+    public boolean isAlwaysOnTopWhenVisible() {
+        return super.isAlwaysOnTop();
+    }
+
+    /**
      * Returns whether this task is currently forced to be hidden for any reason.
      */
     protected boolean isForceHidden() {
