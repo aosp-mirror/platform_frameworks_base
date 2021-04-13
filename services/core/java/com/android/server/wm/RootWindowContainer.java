@@ -3372,7 +3372,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Find all visible task stacks containing {@param userId} and intercept them with an activity
+     * Find all task stacks containing {@param userId} and intercept them with an activity
      * to block out the contents and possibly start a credential-confirming intent.
      *
      * @param userId user handle for the locked managed profile.
@@ -3380,39 +3380,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void lockAllProfileTasks(@UserIdInt int userId) {
         mService.deferWindowLayout();
         try {
-            final PooledConsumer c = PooledLambda.obtainConsumer(
-                    RootWindowContainer::taskTopActivityIsUser, this, PooledLambda.__(Task.class),
-                    userId);
-            forAllLeafTasks(c, true /* traverseTopToBottom */);
-            c.recycle();
+            forAllLeafTasks(task -> {
+                if (task.getActivity(activity -> !activity.finishing && activity.mUserId == userId)
+                        != null) {
+                    mService.getTaskChangeNotificationController().notifyTaskProfileLocked(
+                            task.mTaskId, userId);
+                }
+            }, true /* traverseTopToBottom */);
         } finally {
             mService.continueWindowLayout();
-        }
-    }
-
-    /**
-     * Detects whether we should show a lock screen in front of this task for a locked user.
-     * <p>
-     * We'll do this if either of the following holds:
-     * <ul>
-     *   <li>The top activity explicitly belongs to {@param userId}.</li>
-     *   <li>The top activity returns a result to an activity belonging to {@param userId}.</li>
-     * </ul>
-     *
-     * @return {@code true} if the top activity looks like it belongs to {@param userId}.
-     */
-    private void taskTopActivityIsUser(Task task, @UserIdInt int userId) {
-        // To handle the case that work app is in the task but just is not the top one.
-        final ActivityRecord activityRecord = task.getTopNonFinishingActivity();
-        final ActivityRecord resultTo = (activityRecord != null ? activityRecord.resultTo : null);
-
-        // Check the task for a top activity belonging to userId, or returning a
-        // result to an activity belonging to userId. Example case: a document
-        // picker for personal files, opened by a work app, should still get locked.
-        if ((activityRecord != null && activityRecord.mUserId == userId)
-                || (resultTo != null && resultTo.mUserId == userId)) {
-            mService.getTaskChangeNotificationController().notifyTaskProfileLocked(
-                    task.mTaskId, userId);
         }
     }
 
