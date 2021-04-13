@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"jarduera fisikoa atzitu"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"atera argazkiak eta grabatu bideoak"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Inguruko Bluetooth bidezko gailuak"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"inguruko Bluetooth bidezko gailuak hauteman eta haietara konektatu"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Inguruko gailuak"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"inguruko gailuak hauteman eta haietara konektatu"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Deien erregistroa"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"irakurri telefonoko deien erregistroa eta idatzi bertan"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefonoa"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Inguruko Bluetooth bidezko gailuak hautemateko eta haiekin parekatzeko baimena ematen die aplikazioei"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"parekatutako Bluetooth bidezko gailuetara konektatu"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Parekatutako Bluetooth bidezko gailuetara konektatzeko baimena ematen die aplikazioei"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"inguruko Bluetooth bidezko gailuei publizitatea erakutsi"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Inguruko Bluetooth bidezko gailuei publizitatea erakusteko baimena ematen die aplikazioei"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"banda ultrazabala darabilten inguruko gailuen arteko distantzia erlatiboa zehaztu"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Banda ultrazabala darabilten inguruko gailuen arteko distantzia erlatiboa zehazteko baimena ematen die aplikazioei"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Aplikazioari baimena ematen dio NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa jasotzeko, hala nola erregistratutako laguntzaileak eta ibilbidearen helmuga."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolatu Near Field Communication komunikazioa"</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Orain, pantailaren zati bat handi dezakezu"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Aktibatu ezarpenetan"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Baztertu"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Aurrera egiteko, gailuaren mikrofonoa atzitzeko baimena behar du &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; aplikazioak."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Aurrera egiteko, gailuaren kamera atzitzeko baimena behar du &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; aplikazioak."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Aktibatu"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Desblokeatu gailuaren mikrofonoa"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Desblokeatu gailuaren kamera"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; aplikazioak eta aplikazio eta zerbitzu guztiek erabili ahal izateko"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Desblokeatu"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sentsoreen pribatutasuna"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Aplikazioaren ikonoa"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Aplikazioaren marka-irudia"</string>

@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"пристапете до вашата физичка активност"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"фотографира и снима видео"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Уреди со Bluetooth во близина"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"да открива и да се поврзува со уреди со Bluetooth во близина"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Уреди во близина"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"да открива и да се поврзува со уреди во близина"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Евиденција на повици"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"чита и пишува евиденција на повици во телефонот"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Дозволува апликацијата да открива и да се поврзува со спарени уреди со Bluetooth во близина"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"да се поврзува со спарени уреди со Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Дозволува апликацијата да се поврзува со спарени уреди со Bluetooth"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"да рекламира на уреди со Bluetooth во близина"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Дозволува апликацијата да рекламира на уреди со Bluetooth во близина"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"да ја одреди релативната положба помеѓу уредите со ултраширок појас во близина"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Дозволува апликацијата да ја одреди релативната положба помеѓу уредите со ултраширок појас во близина"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информации за претпочитаната услуга за плаќање преку NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволува апликацијата да добие информации за претпочитаната услуга за плаќање преку NFC, како регистрирани помагала и дестинација на маршрутата."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролирај комуникација на блиско поле"</string>
@@ -1280,7 +1280,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Поставено ѕвонење на тивко"</string>
     <string name="volume_call" msgid="7625321655265747433">"Јачина на звук на дојдовен повик"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Јачина на звук на дојдовен повик преку Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Јачина на звук на аларм"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Јачина на звук за аларм"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Јачина на звук на известување"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Јачина на звук"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Јачина на звук на Bluetooth"</string>
@@ -1492,7 +1492,7 @@
     <string name="vpn_text_long" msgid="278540576806169831">"Поврзани сте на <xliff:g id="SESSION">%s</xliff:g>. Допрете за да управувате со мрежата."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Поврзување со секогаш вклучена VPN..."</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Поврзани со секогаш вклучена VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Исклучено од секогаш вклучената VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Не е поврзано со секогаш вклучената VPN"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Не може да се поврзе на секогаш вклучената VPN"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Променете ја мрежата или поставките за VPN"</string>
     <string name="upload_file" msgid="8651942222301634271">"Избери датотека"</string>
@@ -1624,7 +1624,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Префрли екран на уред"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Се бараат уреди..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Поставки"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Исклучи"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Прекини врска"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Скенирање..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Се поврзува..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Достапна"</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Сега може да зголемувате дел од екранот"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Вклучи во „Поставки“"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Отфрли"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"За да продолжи, на &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ѝ е потребен пристап до микрофонот на уредот."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"За да продолжи, на &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ѝ е потребен пристап до камерата на уредот."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Вклучи"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Одблокирајте го пристапот до микрофонот на уредот"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Одблокирајте го пристапот до камерата на уредот"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"За &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; и сите апликации и услуги"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Одблокирај"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Приватност на сензорот"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Икона за апликацијата"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Слика за брендирање на апликацијата"</string>
