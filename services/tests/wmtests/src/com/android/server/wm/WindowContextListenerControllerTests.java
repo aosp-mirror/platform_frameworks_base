@@ -130,35 +130,35 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCanCallerRemoveListener_NullListener_ReturnFalse() {
-        assertFalse(mController.assertCallerCanRemoveListener(mClientToken,
+    public void testAssertCallerCanModifyListener_NullListener_ReturnFalse() {
+        assertFalse(mController.assertCallerCanModifyListener(mClientToken,
                 true /* callerCanManagerAppTokens */, TEST_UID));
     }
 
     @Test
-    public void testCanCallerRemoveListener_CanManageAppTokens_ReturnTrue() {
+    public void testAssertCallerCanModifyListener_CanManageAppTokens_ReturnTrue() {
         mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID,
                 TYPE_APPLICATION_OVERLAY, null /* options */);
 
-        assertTrue(mController.assertCallerCanRemoveListener(mClientToken,
+        assertTrue(mController.assertCallerCanModifyListener(mClientToken,
                 true /* callerCanManagerAppTokens */, ANOTHER_UID));
     }
 
     @Test
-    public void testCanCallerRemoveListener_SameUid_ReturnTrue() {
+    public void testAssertCallerCanModifyListener_SameUid_ReturnTrue() {
         mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID,
                 TYPE_APPLICATION_OVERLAY, null /* options */);
 
-        assertTrue(mController.assertCallerCanRemoveListener(mClientToken,
+        assertTrue(mController.assertCallerCanModifyListener(mClientToken,
                 false /* callerCanManagerAppTokens */, TEST_UID));
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testCanCallerRemoveListener_DifferentUid_ThrowException() {
+    public void testAssertCallerCanModifyListener_DifferentUid_ThrowException() {
         mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID,
                 TYPE_APPLICATION_OVERLAY, null /* options */);
 
-        mController.assertCallerCanRemoveListener(mClientToken,
+        mController.assertCallerCanModifyListener(mClientToken,
                 false /* callerCanManagerAppTokens */, ANOTHER_UID);
     }
 
