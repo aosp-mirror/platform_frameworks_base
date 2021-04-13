@@ -452,10 +452,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** The frames used to compute a temporal layout appearance. */
     private WindowFrames mSimulatedWindowFrames;
 
-    /**
-     * Usually empty. Set to the task's tempInsetFrame. See
-     *{@link android.app.IActivityTaskManager#resizePrimarySplitScreen}.
-     */
+    /** Usually the same as {@link #getBounds()}. */
     private final Rect mInsetFrame = new Rect();
 
     /**
