@@ -347,7 +347,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не турбувати"</string>
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"Лише пріоритетні"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"Лише будильник"</string>
-    <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"Без сигналів"</string>
+    <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"Повна тиша"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"Bluetooth (пристроїв: <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"Bluetooth вимкнено"</string>
@@ -464,7 +464,7 @@
     <string name="voice_hint" msgid="7476017460191291417">"Голосові підказки: проведіть пальцем від значка"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Камера: проведіть пальцем від значка"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Без звуку. Звук також буде вимкнено в програмах зчитування з екрана."</string>
-    <string name="interruption_level_none" msgid="219484038314193379">"Без сигналів"</string>
+    <string name="interruption_level_none" msgid="219484038314193379">"Повна тиша"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"Лише пріоритетні"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"Лише будильник"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Без\nсигналів"</string>
@@ -480,7 +480,7 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Показати профіль"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Додати користувача"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Новий користувач"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Вийти з режиму гостя?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Видалити гостя?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Усі додатки й дані з цього сеансу буде видалено."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Вийти"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"З поверненням!"</string>
@@ -719,8 +719,8 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Спливаюче сповіщення"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звуку чи вібрації"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звуку чи вібрації, з\'являється нижче в розділі розмов"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може дзвонити або вібрувати залежно від налаштувань телефона"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може дзвонити або вібрувати залежно від налаштувань телефона. Показує спливаючі розмови з додатка <xliff:g id="APP_NAME">%1$s</xliff:g> за умовчанням."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Дзвінок або вібрація залежно від налаштувань телефона"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Дзвінок або вібрація залежно від налаштувань телефона. Розмови з додатка <xliff:g id="APP_NAME">%1$s</xliff:g> за умовчанням з\'являються як спливаючий чат."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Привертає увагу до контенту плаваючим ярликом."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"З\'являється вгорі розділу розмов у спливаючому сповіщенні та показує зображення профілю на заблокованому екрані"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налаштування"</string>

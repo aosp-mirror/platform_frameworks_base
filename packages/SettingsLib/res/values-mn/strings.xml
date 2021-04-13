@@ -494,7 +494,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Их хугацаа."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Бага хугацаа."</string>
     <string name="cancel" msgid="5665114069455378395">"Цуцлах"</string>
-    <string name="okay" msgid="949938843324579502">"ТИЙМ"</string>
+    <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Асаах"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Бүү саад бол горимыг асаах"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Хэзээ ч үгүй"</string>

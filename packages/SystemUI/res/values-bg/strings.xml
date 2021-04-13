@@ -489,7 +489,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Излизане на потребителя"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Излезте от профила на текущия потребител"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ИЗЛИЗАНЕ НА ПОТРЕБИТЕЛЯ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Да се добави ли нов потреб.?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Да се добави ли нов потребител?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Достигнахте огранич. за потребители"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">

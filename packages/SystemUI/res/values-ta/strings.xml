@@ -421,7 +421,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>க்கு ஆன் செய்"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> வரை"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"டார்க் தீம்"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"பேட்டரி சேமிப்பான்"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"பேட்டரி சேமிப்பு"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"மாலையில் ஆன் செய்"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"காலை வரை"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>க்கு ஆன் செய்"</string>
@@ -477,7 +477,7 @@
     <string name="user_add_user" msgid="4336657383006913022">"பயனரைச் சேர்"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"புதியவர்"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"கெஸ்ட்டை அகற்றவா?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா பயன்பாடுகளும், தரவும் நீக்கப்படும்."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா ஆப்ஸும் தரவும் நீக்கப்படும்."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"அகற்று"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"நல்வரவு!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
@@ -490,7 +490,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"தற்போதைய பயனரிலிருந்து வெளியேறு"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"பயனரை வெளியேற்று"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"புதியவரைச் சேர்க்கவா?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"புதிய பயனரைச் சேர்க்கும்போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஎந்தவொரு பயனரும், மற்ற எல்லா பயனர்களுக்காகவும் பயன்பாடுகளைப் புதுப்பிக்கலாம்."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"புதிய பயனரைச் சேர்க்கும்போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஎந்தவொரு பயனரும், மற்ற எல்லா பயனர்களுக்காகவும் ஆப்ஸைப் புதுப்பிக்கலாம்."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"பயனர் வரம்பை அடைந்துவிட்டீர்கள்"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> பயனர்கள் வரை சேர்க்க முடியும்.</item>
@@ -713,7 +713,7 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"பபிள்"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ஒலி / அதிர்வு இல்லை"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ஒலி / அதிர்வு இல்லாமல் உரையாடல் பிரிவின் கீழ்ப் பகுதியில் தோன்றும்"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"மொபைல் அமைப்புகளின் அடிப்படையில் ஒலிக்கவோ அதிரவோ செய்யும்"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"மொபைல் அமைப்புகளின் அடிப்படையில் ஒலிக்கலாம்/அதிரலாம்"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"மொபைல் அமைப்புகளின் அடிப்படையில் ஒலிக்கவோ அதிரவோ செய்யும். <xliff:g id="APP_NAME">%1$s</xliff:g> இலிருந்து வரும் உரையாடல்கள் இயல்பாகவே குமிழாகத் தோன்றும்."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"இந்த உள்ளடக்கத்திற்கான மிதக்கும் ஷார்ட்கட் மூலம் உங்கள் கவனத்தைப் பெற்றிருக்கும்."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"உரையாடல் பிரிவின் மேற்பகுதியில் மிதக்கும் குமிழாகத் தோன்றும். பூட்டுத் திரையின் மேல் சுயவிவரப் படத்தைக் காட்டும்"</string>
@@ -750,7 +750,7 @@
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"விழிப்பூட்டுகிறது"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"குமிழைக் காட்டு"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"குமிழ்களை அகற்று"</string>
-    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"முகப்புத் திரையில் சேர்"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"முகப்புத் திரையில் சேருங்கள்"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"அறிவிப்பை உறக்கநிலையாக்கும் விருப்பங்கள்"</string>
@@ -768,7 +768,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"பேட்டரி பயன்பாடு"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"சார்ஜ் செய்யும் போது பேட்டரி சேமிப்பானைப் பயன்படுத்த முடியாது"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"பேட்டரி சேமிப்பான்"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"பேட்டரி சேமிப்பு"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"செயல்திறனையும் பின்புலத்தில் தரவு செயலாக்கப்படுவதையும் குறைக்கும்"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> பட்டன்"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"ஹோம்"</string>

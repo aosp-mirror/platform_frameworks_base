@@ -139,7 +139,7 @@
     <string name="voice_assist_label" msgid="3725967093735929020">"ਅਵਾਜ਼ੀ ਸਹਾਇਕ ਖੋਲ੍ਹੋ"</string>
     <string name="camera_label" msgid="8253821920931143699">"ਕੈਮਰਾ ਖੋਲ੍ਹੋ"</string>
     <string name="cancel" msgid="1089011503403416730">"ਰੱਦ ਕਰੋ"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ਪੁਸ਼ਟੀ ਕਰੋ"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ਤਸਦੀਕ ਕਰੋ"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ਪ੍ਰਮਾਣੀਕਰਨ ਰੱਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
@@ -481,7 +481,7 @@
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ਹਟਾਓ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ਮਹਿਮਾਨ, ਫਿਰ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ਕੀ ਤੁਸੀਂ ਆਪਣਾ ਸੈਸ਼ਨ ਜਾਰੀ ਰੱਖਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
-    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ਸ਼ੁਰੂ ਕਰੋ"</string>
+    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ਹਾਂ, ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"ਮਹਿਮਾਨ ਉਪਭੋਗਤਾ"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟਾਉਣ ਲਈ, ਮਹਿਮਾਨ ਵਰਤੋਂਕਾਰ ਹਟਾਓ"</string>
@@ -643,8 +643,8 @@
     <string name="output_service_wifi" msgid="9003667810868222134">"ਵਾਈ-ਫਾਈ"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"ਬਲੂਟੁੱਥ ਅਤੇ ਵਾਈ-ਫਾਈ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI ਟਿਊਨਰ"</string>
-    <string name="show_battery_percentage" msgid="6235377891802910455">"ਜੋਡ਼ੀ ਗਈ ਬੈਟਰੀ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
-    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ਜਦੋਂ ਚਾਰਜ ਨਾ ਹੋ ਰਹੀ ਹੋਵੇ ਤਾਂ ਸਥਿਤੀ ਪੱਟੀ ਪ੍ਰਤੀਕ ਦੇ ਅੰਦਰ ਬੈਟਰੀ ਪੱਧਰ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
+    <string name="show_battery_percentage" msgid="6235377891802910455">"ਜੋੜੀ ਗਈ ਬੈਟਰੀ ਫ਼ੀਸਦ ਦਿਖਾਓ"</string>
+    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ਜਦੋਂ ਚਾਰਜ ਨਾ ਹੋ ਰਹੀ ਹੋਵੇ ਤਾਂ ਸਥਿਤੀ ਪੱਟੀ ਪ੍ਰਤੀਕ ਦੇ ਅੰਦਰ ਬੈਟਰੀ ਪੱਧਰ ਫ਼ੀਸਦ ਦਿਖਾਓ"</string>
     <string name="quick_settings" msgid="6211774484997470203">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ"</string>
     <string name="status_bar" msgid="4357390266055077437">"ਸਥਿਤੀ ਪੱਟੀ"</string>
     <string name="overview" msgid="3522318590458536816">"ਰੂਪ-ਰੇਖਾ"</string>
@@ -709,7 +709,7 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ਸੂਚਨਾਵਾਂ ਬੰਦ ਕਰੋ"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"ਕੀ ਇਸ ਐਪ ਤੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"ਸ਼ਾਂਤ"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"ਪੂਰਵ-ਨਿਰਧਾਰਤ"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"ਬੁਲਬੁਲਾ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਵਿੱਚ ਹੇਠਲੇ ਪਾਸੇ ਦਿਸਦੀਆਂ ਹਨ"</string>
@@ -867,8 +867,8 @@
     <item msgid="6135970080453877218">"ਇਸ ਪ੍ਰਤੀਕ ਨੂੰ ਨਾ ਦਿਖਾਓ"</item>
   </string-array>
   <string-array name="battery_options">
-    <item msgid="7714004721411852551">"ਹਮੇਸ਼ਾਂ ਪ੍ਰਤੀਸ਼ਤਤਾ  ਦਿਖਾਓ"</item>
-    <item msgid="3805744470661798712">"ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਪ੍ਰਤੀਸ਼ਤਤਾ ਦਿਖਾਓ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="7714004721411852551">"ਹਮੇਸ਼ਾਂ ਫ਼ੀਸਦ  ਦਿਖਾਓ"</item>
+    <item msgid="3805744470661798712">"ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਫ਼ੀਸਦ ਦਿਖਾਓ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
     <item msgid="8619482474544321778">"ਇਸ ਪ੍ਰਤੀਕ ਨੂੰ ਨਾ ਦਿਖਾਓ"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"ਘੱਟ ਤਰਜੀਹ ਵਾਲੇ ਸੂਚਨਾ ਪ੍ਰਤੀਕਾਂ ਨੂੰ ਦਿਖਾਓ"</string>

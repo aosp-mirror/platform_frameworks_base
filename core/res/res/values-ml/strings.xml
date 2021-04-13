@@ -563,7 +563,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസറില്ല."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി."</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"കൈവിരൽ <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"ഫിംഗർ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
@@ -685,7 +685,7 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"എല്ലാ ഡാറ്റയും മായ്ക്കുക"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ഒരു ഫാക്‌ടറി ഡാറ്റ പുനഃസജ്ജീകരണം നടപ്പിലാക്കുന്നതിലൂടെ ടാബ്‌ലെറ്റിന്റെ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ഫാക്‌ടറി ഡാറ്റ റീസെറ്റ് ചെയ്‌ത് നിങ്ങളുടെ Android TV-യിലെ ഉപകരണ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ഒരു ഫാക്‌ടറി ഡാറ്റ പുനഃസജ്ജീകരണം നടപ്പിലാക്കുന്നതിലൂടെ ഫോണിന്റെ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ഒരു ഫാക്‌ടറി ഡാറ്റാ റീസെറ്റിലൂടെ ഫോണിന്റെ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ഉപയോക്തൃ ഡാറ്റ മായ്‌ക്കുക"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"മുന്നറിയിപ്പൊന്നും നൽകാതെ ഈ ടാബ്‌ലെറ്റിലെ ഈ ഉപയോക്താവിന്റെ ഡാറ്റ മായ്‌ക്കുക."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ഈ Android TV-യിലെ ഈ ഉപയോക്തൃ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
@@ -1211,9 +1211,9 @@
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> ഹീപ്പ് ഡംപ് തയ്യാറാണ്"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"ഹീപ്പ് ഡംപ് ശേഖരിച്ചു. പങ്കിടാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"ഹീപ്പ് ഡംപ് പങ്കിടണോ?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസിന്, മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. അതിന്റെ ഡവലപ്പറുമായി പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് നിങ്ങൾക്ക് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: ഈ ഹീപ്പ് ഡംപിൽ ആപ്പിന് ആക്‌സസുള്ള ഏതെങ്കിലും വ്യക്തിഗത വിവരം അടങ്ങിയിരിക്കാം."</string>
-    <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസ് അതിൻ്റെ മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. നിങ്ങൾക്ക് പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിഗത വിവരം ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"നിങ്ങൾക്ക് പങ്കിടാൻ <xliff:g id="PROC">%1$s</xliff:g> എന്നതിൻ്റെ പ്രോസസിൻ്റെ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിഗത വിവരം ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസിന്, മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. അതിന്റെ ഡവലപ്പറുമായി പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് നിങ്ങൾക്ക് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: ഈ ഹീപ്പ് ഡംപിൽ ആപ്പിന് ആക്‌സസുള്ള ഏതെങ്കിലും വ്യക്തിപരമായ വിവരങ്ങൾ അടങ്ങിയിരിക്കാം."</string>
+    <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസ് അതിൻ്റെ മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. നിങ്ങൾക്ക് പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിപരമായ വിവരങ്ങൾ ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"നിങ്ങൾക്ക് പങ്കിടാൻ <xliff:g id="PROC">%1$s</xliff:g> എന്നതിൻ്റെ പ്രോസസിൻ്റെ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിപരമായ വിവരങ്ങൾ ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
     <string name="sendText" msgid="493003724401350724">"വാചകസന്ദേശത്തിനായി ഒരു പ്രവർത്തനം തിരഞ്ഞെടുക്കുക"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"റിംഗർ വോളിയം"</string>
     <string name="volume_music" msgid="7727274216734955095">"മീഡിയ വോളിയം"</string>

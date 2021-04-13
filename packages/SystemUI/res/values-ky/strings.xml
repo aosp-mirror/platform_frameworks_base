@@ -68,7 +68,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Бул тармакта ар дайым уруксат берилсин"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Уруксат берүү"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоого уруксат берилген жок"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Учурда бул түзмөккө кирген колдонуучу мүчүлүштүктөрдү Wi-Fi аркылуу оңдоо функциясын күйгүзө албайт. Бул функцияны колдонуу үчүн, негизги колдонуучунун аккаунтуна которулуңуз."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Учурда бул түзмөккө кирген колдонуучу мүчүлүштүктөрдү Wi-Fi аркылуу оңдоо функциясын күйгүзө албайт. Бул функцияны колдонуу үчүн негизги колдонуучунун аккаунтуна которулуңуз."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB порту өчүрүлдү"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Түзмөгүңүздүн ичине суюктук же булганч нерселер кирип кетпеши үчүн USB порту өчүрүлдү. Азырынча ал аркылуу башка түзмөктөргө туташууга болбойт.\n\nUSB портун кайра колдонуу мүмкүн болгондо, билдирме аласыз."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Кубаттагычтарды жана аксессуарларды аныктоо үчүн USB оюкчасы иштетилди"</string>
@@ -317,7 +317,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1490779000057752281">"4G дайындары тындырылды"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Мобилдик Интернет кызматы тындырылды"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Дайындар тындырылды"</string>
-    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Трафик сиз койгон чекке жетти. Эми мобилдик Интернетти колдоно албайсыз.\n\nЭгер улантсаңыз, дайын-даректерди өткөрүү үчүн акы алынышы мүмкүн."</string>
+    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Трафик сиз койгон чекке жетти. Эми мобилдик Интернетти колдоно албайсыз.\n\nЭгер улантсаңыз, маалыматтарды өткөрүү үчүн акы алынышы мүмкүн."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Улантуу"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"GPS издөө"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"GPS боюнча аныкталган жайгашуу"</string>
@@ -477,9 +477,9 @@
     <string name="user_add_user" msgid="4336657383006913022">"Колдонуучу кошуу"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Жаңы колдонуучу"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Конокту алып саласызбы?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Бул сеанстагы бардык колдонмолор жана дайындар өчүрүлөт."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Бул сеанстагы бардык колдонмолор жана маалыматтар өчүрүлөт."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Алып салуу"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Кайтып келишиңиз менен, конок!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Кайтып келишиңиз менен!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Сеансыңызды улантасызбы?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Кайра баштоо"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ооба, уланта берели"</string>
@@ -500,7 +500,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Бул колдонуучунун бардык колдонмолору жана дайындары өчүрүлөт."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Алып салуу"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Батареяны үнөмдөгүч режими күйүк"</string>
-    <string name="battery_saver_notification_text" msgid="2617841636449016951">"Иштин майнаптуулугун начарлатып, фондук дайын-даректерди чектейт"</string>
+    <string name="battery_saver_notification_text" msgid="2617841636449016951">"Иштин майнаптуулугун начарлатып, фондук маалыматтарды чектейт"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Батареяны үнөмдөгүчтү өчүрүү"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Жаздырып же тышкы экранга чыгарып жатканда, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу экраныңыздагы бардык маалыматты же түзмөктө ойнолуп жаткан бардык нерселерди (сырсөздөрдү, төлөмдүн чоо-жайын, сүрөттөрдү, билдирүүлөрдү жана угуп жаткан аудиофайлдарды) көрө алат."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Жаздырып же тышкы экранга чыгарып жатканда, бул колдонмо экраныңыздагы бардык маалыматты же түзмөктө ойнолуп жаткан бардык нерселерди (сырсөздөрдү, төлөмдүн чоо-жайын, сүрөттөрдү, билдирүүлөрдү жана угуп жаткан аудиофайлдарды) көрө алат."</string>
@@ -545,8 +545,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN\'ди өчүрүү"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN\'ди ажыратуу"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Саясаттарды карап көрүү"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык.\n\nIT администраторуңуз жөндөөлөрдү, корпоративдик мүмкүнчүлүктү, колдонмолорду, түзмөгүңүзгө байланыштуу дайын-даректерди жана түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат.\n\nТолугураак маалымат алуу үчүн, IT администраторуңузга кайрылыңыз."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Бул түзмөк уюмуңузга таандык.\n\nIT администраторуңуз жөндөөлөрдү, корпоративдик мүмкүнчүлүктү, колдонмолорду, түзмөгүңүзгө байланыштуу дайын-даректерди жана түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат.\n\nТолугураак маалымат алуу үчүн, IT администраторуңузга кайрылыңыз."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык.\n\nIT администраторуңуз жөндөөлөрдү, корпоративдик мүмкүнчүлүктү, колдонмолорду, түзмөгүңүзгө байланыштуу маалыматтарды жана түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат.\n\nТолугураак маалымат алуу үчүн, IT администраторуңузга кайрылыңыз."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Бул түзмөк уюмуңузга таандык.\n\nIT администраторуңуз жөндөөлөрдү, корпоративдик мүмкүнчүлүктү, колдонмолорду, түзмөгүңүзгө байланыштуу маалыматтарды жана түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат.\n\nТолугураак маалымат алуу үчүн, IT администраторуңузга кайрылыңыз."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Ишканаңыз бул түзмөккө тастыктоочу борборду орнотту. Коопсуз тармагыңыздын трафиги көзөмөлдөнүп же өзгөртүлүшү мүмкүн."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ишканаңыз жумуш профилиңизге тастыктоочу борборду орнотту. Коопсуз тармагыңыздын трафиги көзөмөлдөнүп же өзгөртүлүшү мүмкүн."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Бул түзмөктө тастыктоочу борбор орнотулган. Коопсуз тармагыңыздын трафиги көзөмөлдөнүп же өзгөртүлүшү мүмкүн."</string>
@@ -557,7 +557,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Жеке профилиңиз электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди көзөмөлдөй турган <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турат."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Түзмөгүңүз <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> тарабынан башкарылат."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"Түзмөгүңүздү башкаруу үчүн <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюму <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> колдонмосун колдонот."</string>
-    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Администраторуңуз жөндөөлөрдү, корпоративдик кирүү мүмкүнчүлүгүн, колдонмолорду, уруксаттарды жана ушул түзмөкө байланыштуу дайын-даректерди, ошондой эле түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат."</string>
+    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Администраторуңуз жөндөөлөрдү, корпоративдик кирүү мүмкүнчүлүгүн, колдонмолорду, уруксаттарды жана ушул түзмөкө байланыштуу маалыматтарды, ошондой эле түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Кеңири маалымат"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди тескей турган <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
@@ -672,8 +672,8 @@
     <string name="remove_from_settings" msgid="633775561782209994">"Жөндөөлөрдөн алып салуу"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"System UI Tuner Жөндөөлөрдөн өчүрүлүп, анын бардык функциялары токтотулсунбу?"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"Колдонмо сиздин түзмөгүңүздө орнотулган эмес"</string>
-    <string name="clock_seconds" msgid="8709189470828542071">"Сааттын секунддары көрсөтүлсүн"</string>
-    <string name="clock_seconds_desc" msgid="2415312788902144817">"Абал тилкесинен сааттын секунддары көрсөтүлсүн. Батареянын кубаты көбүрөөк сарпталышы мүмкүн."</string>
+    <string name="clock_seconds" msgid="8709189470828542071">"Сааттын секунддары көрүнсүн"</string>
+    <string name="clock_seconds_desc" msgid="2415312788902144817">"Абал тилкесинен сааттын секунддары көрүнсүн. Батареянын кубаты көбүрөөк сарпталышы мүмкүн."</string>
     <string name="qs_rearrange" msgid="484816665478662911">"Ыкчам жөндөөлөрдү кайра коюу"</string>
     <string name="show_brightness" msgid="6700267491672470007">"Ыкчам жөндөөлөрдөн жарык деңгээлин көрсөтүү"</string>
     <string name="experimental" msgid="3549865454812314826">"Сынамык"</string>
@@ -682,7 +682,7 @@
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Күйгүзүү"</string>
     <string name="show_silently" msgid="5629369640872236299">"Үнсүз көрүнөт"</string>
     <string name="block" msgid="188483833983476566">"Бардык билдирмелерди бөгөттөө"</string>
-    <string name="do_not_silence" msgid="4982217934250511227">"Үнү менен көрсөтүлсүн"</string>
+    <string name="do_not_silence" msgid="4982217934250511227">"Үнү менен көрүнсүн"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"Үнү менен көрсөтүлүп бөгөттөлбөсүн"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Эскертмелерди башкаруу каражаттары"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Күйүк"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн. <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосундагы жазышуулар демейки жөндөө боюнча калкып чыкма билдирмелер түрүндө көрүнөт."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Калкыма ыкчам баскыч менен көңүлүңүздү бул мазмунга буруп турат."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Жазышуулар тизмесинин өйдө жагында калкып чыкма билдирме түрүндө көрүнүп, профиль сүрөтү кулпуланган экрандан чагылдырылат"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Жазышуулар тизмесинин өйдө жагында калкып чыкма билдирме түрүндө көрүнсө, профиль сүрөтү кулпуланган экранда көрүнөт"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Жөндөөлөр"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маанилүүлүгү"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> жазышуу функцияларын колдоого албайт"</string>
@@ -769,7 +769,7 @@
     <string name="battery_panel_title" msgid="5931157246673665963">"Батареяны керектөө"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Батареяны үнөмдөгүч түзмөк кубатталып жатканда иштебейт"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Батареяны үнөмдөгүч"</string>
-    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Иштин майнаптуулугун начарлатып, фондук дайын-даректерди чектейт"</string>
+    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Иштин майнаптуулугун начарлатып, фондук маалыматтарды чектейт"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> баскычы"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Башкы бет"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Артка"</string>
@@ -812,7 +812,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Музыка"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Жылнаама"</string>
-    <string name="tuner_full_zen_title" msgid="5120366354224404511">"Үн көзөмөлдөгүчтөрү менен көрсөтүлсүн"</string>
+    <string name="tuner_full_zen_title" msgid="5120366354224404511">"Үн көзөмөлдөгүчтөрү менен көрүнсүн"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Тынчымды алба"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Үндү көзөмөлдөөчү баскычтардын кыска жолдору"</string>
     <string name="volume_up_silent" msgid="1035180298885717790">"Үн катуулатылганда \"Тынчымды алба\" режиминен чыгуу"</string>
@@ -867,8 +867,8 @@
     <item msgid="6135970080453877218">"Бул сүрөтчө көрүнбөсүн"</item>
   </string-array>
   <string-array name="battery_options">
-    <item msgid="7714004721411852551">"Ар дайым пайызы көрсөтүлсүн"</item>
-    <item msgid="3805744470661798712">"Кубаттоо учурунда пайызы көрсөтүлсүн (демейки)"</item>
+    <item msgid="7714004721411852551">"Ар дайым пайызы көрүнсүн"</item>
+    <item msgid="3805744470661798712">"Кубаттоо учурунда пайызы көрүнсүн (демейки)"</item>
     <item msgid="8619482474544321778">"Бул сүрөтчө көрүнбөсүн"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Анча маанилүү эмес билдирменин сүрөтчөлөрүн көрсөтүү"</string>

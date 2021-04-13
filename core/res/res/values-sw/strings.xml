@@ -968,7 +968,7 @@
     <string name="save_password_never" msgid="6776808375903410659">"Katu"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Hauna idhini ya kufungua ukurasa huu."</string>
     <string name="text_copied" msgid="2531420577879738860">"Maandishi yamenakiliwa kwenye ubao wa kunakili."</string>
-    <string name="copied" msgid="4675902854553014676">"Imenakiliwa"</string>
+    <string name="copied" msgid="4675902854553014676">"Umenakili"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Zaidi"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menyu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
