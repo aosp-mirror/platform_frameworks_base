@@ -26,7 +26,6 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
 import dalvik.annotation.optimization.FastNative;
-import dalvik.system.CloseGuard;
 
 import java.lang.ref.WeakReference;
 
@@ -73,8 +72,6 @@ public abstract class DisplayEventReceiver {
 
     private static final String TAG = "DisplayEventReceiver";
 
-    private final CloseGuard mCloseGuard = CloseGuard.get();
-
     @UnsupportedAppUsage
     private long mReceiverPtr;
 
@@ -114,8 +111,6 @@ public abstract class DisplayEventReceiver {
         mMessageQueue = looper.getQueue();
         mReceiverPtr = nativeInit(new WeakReference<DisplayEventReceiver>(this), mMessageQueue,
                 vsyncSource, eventRegistration);
-
-        mCloseGuard.open("dispose");
     }
 
     @Override
@@ -135,13 +130,6 @@ public abstract class DisplayEventReceiver {
     }
 
     private void dispose(boolean finalized) {
-        if (mCloseGuard != null) {
-            if (finalized) {
-                mCloseGuard.warnIfOpen();
-            }
-            mCloseGuard.close();
-        }
-
         if (mReceiverPtr != 0) {
             nativeDispose(mReceiverPtr);
             mReceiverPtr = 0;
