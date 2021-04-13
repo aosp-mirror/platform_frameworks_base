@@ -1858,8 +1858,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"సరే"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ వీటిని చేస్తుంది:\n\n• ముదురు రంగు రూపాన్ని ఆన్ చేస్తుంది\n•బ్యాక్‌గ్రౌండ్ యాక్టివిటీని, కొన్ని విజువల్ ఎఫెక్ట్‌లను, అలాగే “Ok Google” వంటి ఇతర ఫీచర్‌లను ఆఫ్ చేస్తుంది లేదా పరిమితం చేస్తుంది\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ వీటిని చేస్తుంది:\n\n•ముదురు రంగు రూపాన్ని ఆన్ చేస్తుంది\n•బ్యాక్‌గ్రౌండ్ యాక్టివిటీని, కొన్ని విజువల్ ఎఫెక్ట్‌లను, అలాగే “Ok Google” వంటి ఇతర ఫీచర్‌లను ఆఫ్ చేస్తుంది లేదా పరిమితం చేస్తుంది"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు నొక్కే వరకు ఫోటోలు ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ఆన్ చేయి"</string>
@@ -2078,6 +2080,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ఈ నోటిఫికేషన్ స్థాయి నిశ్శబ్దంగా ఉండేలా తగ్గించబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ఈ నోటిఫికేషన్‌కు ఎక్కువ ర్యాంక్ ఇవ్వబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ఈ నోటిఫికేషన్‌కు తక్కువ ర్యాంక్ ఇవ్వబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"రొటీన్ మోడ్ సమాచార నోటిఫికేషన్"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"మామూలుగా ఛార్జ్ చేసేలోపు బ్యాటరీ ఖాళీ కావచ్చు"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి బ్యాటరీ సేవర్ యాక్టివేట్ చేయబడింది"</string>

@@ -1162,7 +1162,7 @@
     <string name="redo" msgid="7231448494008532233">"Buat semula"</string>
     <string name="autofill" msgid="511224882647795296">"Autolengkap"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Pemilihan teks"</string>
-    <string name="addToDictionary" msgid="8041821113480950096">"Tambah ke kamus"</string>
+    <string name="addToDictionary" msgid="8041821113480950096">"Tambahkan pada kamus"</string>
     <string name="deleteText" msgid="4200807474529938112">"Padam"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Kaedah input"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Tindakan teks"</string>
@@ -1854,8 +1854,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Dikemas kini oleh pentadbir anda"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Dipadamkan oleh pentadbir anda"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Untuk melanjutkan hayat bateri, Penjimat Bateri:\n\n• Menghidupkan Tema gelap\n• Mematikan atau mengehadkan aktiviti latar belakang, sesetengah kesan visual dan ciri lain seperti “Ok Google”\n\n"<annotation id="url">"Ketahui lebih lanjut"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Untuk melanjutkan hayat bateri, Penjimat Bateri:\n\n•Menghidupkan Tema gelap\n• Mematikan atau mengehadkan aktiviti latar belakang, sesetengah kesan visual dan ciri-ciri lain seperti “Ok Google”"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangkan penggunaan data, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Perkara ini mungkin bermaksud bahawa imej tidak dipaparkan sehingga anda mengetik pada imej itu, contohnya."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Hidupkan Penjimat Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Hidupkan"</string>
@@ -2074,6 +2076,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Pemberitahuan ini telah diturun taraf kepada Senyap. Ketik untuk memberikan maklum balas."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Pemberitahuan ini berada di kedudukan lebih tinggi. Ketik untuk memberikan maklum balas."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Pemberitahuan ini berada di kedudukan lebih rendah. Ketik untuk memberikan maklum balas."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Pemberitahuan maklumat Mod Rutin"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateri mungkin habis sebelum pengecasan biasa"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Penjimat Bateri diaktifkan untuk memanjangkan hayat bateri"</string>

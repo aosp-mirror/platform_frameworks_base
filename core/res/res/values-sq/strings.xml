@@ -1858,8 +1858,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Fshirë nga administratori"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Në rregull"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Për të rritur kohëzgjatjen e baterisë, \"Kursyesi i baterisë\":\n\n• Aktivizon \"Temën e errët\"\n• Çaktivizon ose kufizon aktivitetin në sfond, disa efekte vizuale dhe veçori të tjera si “Ok Google”\n\n"<annotation id="url">"Mëso më shumë"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Për të rritur kohëzgjatjen e baterisë, \"Kursyesi i baterisë\":\n\n• Aktivizon \"Temën e errët\"\n• Çaktivizon ose kufizon aktivitetin në sfond, disa efekte vizuale dhe veçori të tjera si “Ok Google”"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Për të ndihmuar në reduktimin e përdorimit të të dhënave, \"Kursyesi i të dhënave\" pengon që disa aplikacione të dërgojnë apo të marrin të dhëna në sfond. Një aplikacion që po përdor aktualisht mund të ketë qasje te të dhënat, por këtë mund ta bëjë më rrallë. Kjo mund të nënkuptojë, për shembull, se imazhet nuk shfaqen kur troket mbi to."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Të aktivizohet \"Kursyesi i të dhënave\"?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivizo"</string>
@@ -2078,6 +2080,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Ky njoftim është ulur në nivel si në heshtje. Trokit për të dhënë komente."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Ky njoftim është renditur më lart. Trokit për të dhënë komente."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Ky njoftim është renditur më poshtë. Trokit për të dhënë komente."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Njoftimi i informacionit të \"Modalitetit rutinë\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria mund të mbarojë përpara ngarkimit të zakonshëm"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të rritur kohëzgjatjen e baterisë"</string>
