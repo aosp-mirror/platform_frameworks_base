@@ -92,8 +92,14 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Сними повеќе"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Отфрлете ја сликата од екранот"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Преглед на слика од екранот"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Горна граница"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Долна граница"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Снимач на екран"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Се обработува снимка од екран"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
@@ -300,7 +306,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1490779000057752281">"Податоците 4G се паузирани"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Мобилниот интернет е паузиран"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Податоците се паузирани"</string>
-    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Го достигнавте ограничувањето за мобилен сообраќај што сте го поставиле. Веќе не користите мобилен интернет.\n\nДоколку продолжите, ќе ви биде наплатено за потрошениот сообраќај."</string>
+    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Го достигнавте ограничувањето за мобилен интернет што сте го поставиле. Веќе не користите мобилен интернет.\n\nДоколку продолжите, ќе ви биде наплатено за потрошениот интернет."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Продолжи"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"Се пребарува за GPS"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Локацијата е поставена со GPS"</string>
@@ -349,8 +355,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Метод на внес"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Локација"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Исклучи локација"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Блокирај камера"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Исклучи звук на микрофонот"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Пристап до камерата"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Пристап до микрофонот"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Достапен"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Блокиран"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Медиумски уред"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Само итни повици"</string>
@@ -422,8 +430,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Снимање екран"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Започни"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Сопри"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"За да продолжи, на &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ѝ е потребен пристап до микрофонот на уредот."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"За да продолжи, на &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ѝ е потребен пристап до камерата на уредот."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Да се одблокира пристапот до микрофонот на уредот?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Да се одблокира пристапот до камерата на уредот?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Да се одблокира пристапот до камерата и микрофонот на уредот?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ова ќе го одблокира пристапот за сите апликации и услуги на кои им е дозволено користење на микрофонот."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ова ќе го одблокира пристапот за сите апликации и услуги на кои им е дозволено користење на камерата."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ова ќе го одблокира пристапот за сите апликации и услуги на кои им е дозволено користење на камерата или микрофонот."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Уред"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Повлечете нагоре за да се префрлите од една на друга апликација"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Повлечете надесно за брзо префрлање меѓу апликациите"</string>
@@ -497,7 +509,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Ја намалува изведбата и податоците во заднина"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Исклучете го штедачот на батерија"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува информации како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Да почне снимање или емитување?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Да почне снимање или емитување со <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Не покажувај повторно"</string>
@@ -657,8 +669,10 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Етернет"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Аларм"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Паричник"</string>
-    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"Прикажи ги сите"</string>
-    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"Отклучете за да платите"</string>
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
+    <skip />
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
+    <skip />
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Подготвено"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Поставете плаќање"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Отклучете за да користите"</string>
@@ -968,7 +982,7 @@
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Задржи"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Замени"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Апликациите се извршуваат во заднина"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Допрете за детали за батеријата и потрошениот сообраќај"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Допрете за детали за батеријата и потрошениот интернет"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Да се исклучи мобилниот интернет?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Нема да имате пристап до податоците или интернетот преку <xliff:g id="CARRIER">%s</xliff:g>. Интернетот ќе биде достапен само преку Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"вашиот оператор"</string>

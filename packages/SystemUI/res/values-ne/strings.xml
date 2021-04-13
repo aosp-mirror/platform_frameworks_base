@@ -92,8 +92,14 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"अन्य कुराहरू खिच्नुहोस्"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रिनसट हटाउनुहोस्"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रिनसटको पूर्वावलोकन"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"सिरानको सीमा"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"फेदको सीमा"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रिन रेकर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रिन रेकर्डिङको प्रक्रिया अघि बढाइँदै"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"कुनै स्क्रिन रेकर्ड गर्ने सत्रका लागि चलिरहेको सूचना"</string>
@@ -329,7 +335,7 @@
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"थप विकल्पहरूका लागि आइकनहरूमा टच एण्ड होल्ड गर्नुहोस्"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"बाधा नपुऱ्याउनुहोस्"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"प्राथमिकता मात्र"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"प्राथमिकता दिइएको मात्र"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"अलार्महरू मात्र"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"पूरै शान्त"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ब्लुटुथ"</string>
@@ -352,8 +358,14 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"आगत विधि"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"स्थान"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"स्थान बन्द छ"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"क्यामेरा ब्लक गर्नुहोस्"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"माइक्रोफोन म्युट गर्नुहोस्"</string>
+    <!-- no translation found for quick_settings_camera_label (5612076679385269339) -->
+    <skip />
+    <!-- no translation found for quick_settings_mic_label (8392773746295266375) -->
+    <skip />
+    <!-- no translation found for quick_settings_camera_mic_available (1453719768420394314) -->
+    <skip />
+    <!-- no translation found for quick_settings_camera_mic_blocked (4710884905006788281) -->
+    <skip />
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"मिडिया उपकरण"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"आपत्‌कालीन कल मात्र"</string>
@@ -366,7 +378,7 @@
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"इन्टरनेट"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"उपलब्ध नेटवर्कहरू"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"नेटवर्क उपलब्ध छैन"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"जोडिएको छैन"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"कनेक्ट गरिएको छैन"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"नेटवर्क छैन"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi बन्द"</string>
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi सक्रिय छ"</string>
@@ -425,8 +437,18 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"स्रिनको रेकर्ड"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"सुरु गर्नुहोस्"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"रोक्नुहोस्"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"जारी राख्न &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; लाई तपाईंको डिभाइसको माइक्रोफोन प्रयोग गर्ने अनुमति दिनु पर्ने हुन्छ।"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"जारी राख्न &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; लाई तपाईंको डिभाइसको क्यामेरा प्रयोग गर्ने अनुमति दिनु पर्ने हुन्छ।"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_title (563796653825944944) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_title (8807639852654305227) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_dialog_title (4316471859905020023) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (1624701280680913717) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (4704948062372435963) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_dialog_content (3577642558418404919) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"यन्त्र"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"एपहरू बदल्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"एपहरू बदल्न द्रुत गतिमा दायाँतिर ड्र्याग गर्नुहोस्"</string>
@@ -458,7 +480,7 @@
     <string name="camera_hint" msgid="4519495795000658637">"क्यामेराको लागि आइकनबाट स्वाइप गर्नुहोस्"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"पूर्ण शान्त। यसले पनि स्क्रिन बाचकलाई शान्त गराउँछ।"</string>
     <string name="interruption_level_none" msgid="219484038314193379">"पूरै शान्त"</string>
-    <string name="interruption_level_priority" msgid="661294280016622209">"प्राथमिकता मात्र"</string>
+    <string name="interruption_level_priority" msgid="661294280016622209">"प्राथमिकता दिइएको मात्र"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"अलार्महरू मात्र"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"पूरै\nशान्त"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"प्राथमिकता \nमात्र"</string>
@@ -500,7 +522,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"प्रदर्शन र ब्याकग्राउन्ड डेटा घटाउँनुहोस्"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ब्याट्री सेभर अफ गर्नुहोस्"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले तपाईंको स्क्रिनमा देख्न सकिने सबै जानकारी अथवा रेकर्ड वा cast गर्दा तपाईंको यन्त्रबाट प्ले गरिएका कुरामाथि पहुँच राख्न सक्ने छ। यसअन्तर्गत पासवर्ड, भुक्तानीका विवरण, फोटो, सन्देश र तपाईंले प्ले गर्ने अडियो जस्ता जानकारी समावेश हुन्छन्।"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"यो कार्य प्रदान गर्ने सेवाले तपाईंको स्क्रिनमा देख्न सकिने सबै जानकारी अथवा रेकर्ड वा cast गर्दा तपाईंको यन्त्रबाट प्ले गरिएका कुरामाथि पहुँच राख्न सक्ने छ। यसअन्तर्गत पासवर्ड, भुक्तानीका विवरण, फोटो, सन्देश र तपाईंले प्ले गर्ने अडियो जस्ता जानकारी समावेश हुन्छन्।"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"यो कार्य गर्ने सेवाले तपाईंको स्क्रिनमा देख्न सकिने सबै जानकारी अथवा रेकर्ड वा कास्ट गर्दा तपाईंको डिभाइसबाट प्ले गरिएका कुरा हेर्न तथा प्रयोग गर्न सक्छ। यसले हेर्न तथा प्रयोग गर्न सक्ने कुरामा पासवर्ड, भुक्तानीका विवरण, फोटो, सन्देश र तपाईंले प्ले गर्ने अडियो कुराहरू समावेश हुन सक्छन्।"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रेकर्ड गर्न वा cast गर्न थाल्ने हो?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> मार्फत रेकर्ड गर्न वा cast गर्न थाल्ने हो?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"फेरि नदेखाउनुहोस्"</string>
@@ -660,9 +682,9 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"इथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
     <string name="wallet_title" msgid="5369767670735827105">"वालेट"</string>
-    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
     <skip />
-    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
     <skip />
     <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
     <skip />
