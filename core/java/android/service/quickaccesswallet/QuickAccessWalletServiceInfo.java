@@ -98,7 +98,10 @@ class QuickAccessWalletServiceInfo {
         intent.setPackage(packageName);
         List<ResolveInfo> resolveInfos =
                 context.getPackageManager().queryIntentServices(intent,
-                        PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA);
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                        | PackageManager.MATCH_DEFAULT_ONLY
+                        | PackageManager.GET_META_DATA);
         return resolveInfos.isEmpty() ? null : resolveInfos.get(0).serviceInfo;
     }
 
