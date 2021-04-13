@@ -501,7 +501,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"କାର୍ଯ୍ୟ ସମ୍ପାଦନ ଓ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଡାଟା କମ୍ କରନ୍ତୁ"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅଫ୍‍ କରନ୍ତୁ"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ରେ ସମସ୍ତ ସୂଚନାକୁ ଆକ୍ସେସ୍ ରହିବ ଯାହା ଆପଣଙ୍କର ସ୍କ୍ରିନ୍‌ରେ ଦେଖାଯିବ ବା ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ବେଳେ ଆପଣଙ୍କର ଡିଭାଇସ୍ ଠାରୁ ଚାଲିବ। ପାସ୍‌ୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ଫଟୋ, ମେସେଜ୍ ଏବଂ ଆପଣ ଚଲାଉଥିବା ଅଡିଓ ପରି ସୂଚନା ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ବେଳେ ଆପଣଙ୍କର ଡିଭାଇସରେ ଦେଖାଯାଉଥିବା ବା ଆପଣଙ୍କ ଡିଭାଇସରୁ ପ୍ଲେ କରାଯାଉଥିବା ସବୁ ସୂଚନାକୁ ଏହି ପ୍ରକାର୍ଯ୍ୟ ପ୍ରଦାନ କରୁଥିବା ସେବାର ଆକସେସ୍ ରହିବ। ପାସ୍‌ୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ଫଟୋ, ମେସେଜ୍ ଏବଂ ଆପଣ ଚଲାଉଥିବା ଅଡିଓ ପରି ସୂଚନା ଏଥିରେ ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ବେଳେ ଆପଣଙ୍କର ଡିଭାଇସରେ ଦେଖାଯାଉଥିବା ବା ଆପଣଙ୍କ ଡିଭାଇସରୁ ପ୍ଲେ କରାଯାଉଥିବା ସବୁ ସୂଚନାକୁ ଏହି ଫଙ୍କସନ୍ ପ୍ରଦାନ କରୁଥିବା ସେବାର ଆକ୍ସେସ୍ ରହିବ। ପାସ୍‌ୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ଫଟୋ, ମେସେଜ୍ ଏବଂ ଆପଣ ଚଲାଉଥିବା ଅଡିଓ ପରି ସୂଚନା ଏଥିରେ ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ଆରମ୍ଭ କରିବେ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ସହ ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ଆରମ୍ଭ କରିବେ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>

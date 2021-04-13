@@ -347,7 +347,7 @@
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositivos)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"Bluetooth desactivado"</string>
-    <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Non hai dispositivos sincronizados dispoñibles"</string>
+    <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Non hai dispositivos vinculados dispoñibles"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de batería"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auriculares"</string>
@@ -452,8 +452,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Toca de novo para abrir"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Pasa o dedo cara arriba para abrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Pasa o dedo cara arriba para tentalo de novo"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence á túa organización"</string>
-    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence á túa organización."</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="phone_hint" msgid="6682125338461375925">"Pasa o dedo desde a icona para acceder ao teléfono"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Pasa o dedo desde a icona para acceder ao asistente de voz"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Pasa o dedo desde a icona para acceder á cámara"</string>

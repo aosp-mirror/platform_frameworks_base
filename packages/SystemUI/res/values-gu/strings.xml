@@ -534,7 +534,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"તમારી ઑફિસની પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g>થી કનેક્ટ કરેલી છે"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"તમારી વ્યક્તિગત પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g>થી કનેક્ટ કરેલી છે"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"આ ડિવાઇસ <xliff:g id="VPN_APP">%1$s</xliff:g>થી કનેક્ટ કરેલું છે"</string>
-    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ઉપકરણનું સંચાલન"</string>
+    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ડિવાઇસ મેનેજમેન્ટ"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"પ્રોફાઇલ નિરીક્ષણ"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"નેટવર્ક મૉનિટરિંગ"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>

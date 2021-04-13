@@ -617,7 +617,7 @@
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Çift ton çoklu frekans"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Erişilebilirlik"</string>
-    <string name="ring_toggle_title" msgid="5973120187287633224">"Çağrılar"</string>
+    <string name="ring_toggle_title" msgid="5973120187287633224">"Aramalar"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Zili çaldır"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Titreşim"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Sesi kapat"</string>

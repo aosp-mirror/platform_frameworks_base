@@ -315,7 +315,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1490779000057752281">"Податоците 4G се паузирани"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Мобилниот интернет е паузиран"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Податоците се паузирани"</string>
-    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Го достигнавте ограничувањето за мобилен сообраќај што сте го поставиле. Веќе не користите мобилен интернет.\n\nДоколку продолжите, ќе ви биде наплатено за потрошениот сообраќај."</string>
+    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Го достигнавте ограничувањето за мобилен интернет што сте го поставиле. Веќе не користите мобилен интернет.\n\nДоколку продолжите, ќе ви биде наплатено за потрошениот интернет."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Продолжи"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"Се пребарува за GPS"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Локацијата е поставена со GPS"</string>
@@ -970,7 +970,7 @@
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Задржи"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Замени"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Апликациите се извршуваат во заднина"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Допрете за детали за батеријата и потрошениот сообраќај"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Допрете за детали за батеријата и потрошениот интернет"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Да се исклучи мобилниот интернет?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Нема да имате пристап до податоците или интернетот преку <xliff:g id="CARRIER">%s</xliff:g>. Интернетот ќе биде достапен само преку Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"вашиот оператор"</string>
