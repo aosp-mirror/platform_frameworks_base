@@ -99,14 +99,6 @@ public class MeasuredEnergySnapshot {
         mAttributionSnapshots = new SparseArray<>(mNumOtherOrdinals);
     }
 
-    /**
-     * Returns the number of ordinals for {@link EnergyConsumerType#OTHER}, i.e. the number of
-     * custom energy buckets supported by the device.
-     */
-    public int getNumOtherOrdinals() {
-        return mNumOtherOrdinals;
-    }
-
     /** Class for returning the relevant data calculated from the measured energy delta */
     static class MeasuredEnergyDeltaData {
         /** The chargeUC for {@link EnergyConsumerType#BLUETOOTH}. */
@@ -147,7 +139,7 @@ public class MeasuredEnergySnapshot {
      *         Fields with no interesting data (consumers not present in ecrs or with no energy
      *         difference) will generally be left as their default values.
      *         otherTotalChargeUC and otherUidChargesUC are always either both null or both of
-     *         length {@link #getNumOtherOrdinals()}.
+     *         length {@link #getOtherOrdinalNames().length}.
      *         Returns null, if ecrs is null or empty.
      */
     public @Nullable MeasuredEnergyDeltaData updateAndGetDelta(EnergyConsumerResult[] ecrs,
@@ -237,8 +229,8 @@ public class MeasuredEnergySnapshot {
 
                 case EnergyConsumerType.OTHER:
                     if (output.otherTotalChargeUC == null) {
-                        output.otherTotalChargeUC = new long[getNumOtherOrdinals()];
-                        output.otherUidChargesUC = new SparseLongArray[getNumOtherOrdinals()];
+                        output.otherTotalChargeUC = new long[mNumOtherOrdinals];
+                        output.otherUidChargesUC = new SparseLongArray[mNumOtherOrdinals];
                     }
                     output.otherTotalChargeUC[ordinal] = deltaChargeUC;
                     output.otherUidChargesUC[ordinal] = otherUidCharges;
@@ -342,6 +334,23 @@ public class MeasuredEnergySnapshot {
         pw.println();
     }
 
+    /**
+     * Returns the names of ordinals for {@link EnergyConsumerType#OTHER}, i.e. the names of
+     * custom energy buckets supported by the device.
+     */
+    public String[] getOtherOrdinalNames() {
+        final String[] names = new String[mNumOtherOrdinals];
+        int consumerIndex = 0;
+        final int size = mEnergyConsumers.size();
+        for (int idx = 0; idx < size; idx++) {
+            final EnergyConsumer consumer = mEnergyConsumers.valueAt(idx);
+            if (consumer.type == (int) EnergyConsumerType.OTHER) {
+                names[consumerIndex++] = consumer.name;
+            }
+        }
+        return names;
+    }
+
     /** Determines the number of ordinals for a given {@link EnergyConsumerType}. */
     private static int calculateNumOrdinals(@EnergyConsumerType int type,
             SparseArray<EnergyConsumer> idToConsumer) {
@@ -361,5 +370,4 @@ public class MeasuredEnergySnapshot {
         // since the last snapshot. Round off to the nearest whole long.
         return (deltaEnergyUJ * MILLIVOLTS_PER_VOLT + (avgVoltageMV / 2)) / avgVoltageMV;
     }
-
 }
