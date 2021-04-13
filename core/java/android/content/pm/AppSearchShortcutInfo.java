@@ -52,7 +52,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
 
     /** The name of the schema type for {@link ShortcutInfo} documents.*/
     public static final String SCHEMA_TYPE = "Shortcut";
-    public static final int SCHEMA_VERSION = 1;
+    public static final int SCHEMA_VERSION = 2;
 
     public static final String KEY_ACTIVITY = "activity";
     public static final String KEY_SHORT_LABEL = "shortLabel";
