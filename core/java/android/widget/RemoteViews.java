@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.AttrRes;
 import android.annotation.ColorInt;
 import android.annotation.ColorRes;
 import android.annotation.DimenRes;
@@ -228,6 +229,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int SET_ON_CHECKED_CHANGE_RESPONSE_TAG = 29;
     private static final int NIGHT_MODE_REFLECTION_ACTION_TAG = 30;
     private static final int SET_REMOTE_COLLECTION_ITEMS_ADAPTER_TAG = 31;
+    private static final int ATTRIBUTE_REFLECTION_ACTION_TAG = 32;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -252,6 +254,19 @@ public class RemoteViews implements Parcelable, Filter {
     public static final int MARGIN_START = 4;
     /** The value will apply to the marginEnd. */
     public static final int MARGIN_END = 5;
+
+    @IntDef(prefix = "VALUE_TYPE_", value = {
+            VALUE_TYPE_RAW,
+            VALUE_TYPE_COMPLEX_UNIT,
+            VALUE_TYPE_RESOURCE,
+            VALUE_TYPE_ATTRIBUTE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ValueType {}
+    static final int VALUE_TYPE_RAW = 1;
+    static final int VALUE_TYPE_COMPLEX_UNIT = 2;
+    static final int VALUE_TYPE_RESOURCE = 3;
+    static final int VALUE_TYPE_ATTRIBUTE = 4;
 
     /** @hide **/
     @IntDef(flag = true, value = {
@@ -1918,6 +1933,88 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    private final class AttributeReflectionAction extends BaseReflectionAction {
+
+        static final int DIMEN_RESOURCE = 1;
+        static final int COLOR_RESOURCE = 2;
+        static final int STRING_RESOURCE = 3;
+
+        private final int mResourceType;
+        private final int mAttrId;
+
+        AttributeReflectionAction(@IdRes int viewId, String methodName, int parameterType,
+                int resourceType, int attrId) {
+            super(viewId, methodName, parameterType);
+            this.mResourceType = resourceType;
+            this.mAttrId = attrId;
+        }
+
+        AttributeReflectionAction(Parcel in) {
+            super(in);
+            this.mResourceType = in.readInt();
+            this.mAttrId = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeInt(this.mResourceType);
+            dest.writeInt(this.mAttrId);
+        }
+
+        @Override
+        protected @NonNull Object getParameterValue(View view) throws ActionException {
+            try {
+                TypedArray typedArray = view.getContext().obtainStyledAttributes(
+                        new int[]{this.mAttrId});
+                try {
+                    if (typedArray.getType(0) == TypedValue.TYPE_NULL) {
+                        throw new ActionException("Attribute 0x" + Integer.toHexString(this.mAttrId)
+                                + " is not defined");
+                    }
+                    switch (this.mResourceType) {
+                        case DIMEN_RESOURCE:
+                            if (this.type == BaseReflectionAction.INT) {
+                                return typedArray.getDimensionPixelSize(0, 0);
+                            }
+                            return typedArray.getDimension(0, 0);
+                        case COLOR_RESOURCE:
+                            switch (this.type) {
+                                case BaseReflectionAction.INT:
+                                    return typedArray.getColor(0, 0);
+                                case BaseReflectionAction.COLOR_STATE_LIST:
+                                    return typedArray.getColorStateList(0);
+                                default:
+                                    throw new ActionException(
+                                            "Color attribute 0x" + Integer.toHexString(this.mAttrId)
+                                                    + " must be used as int or ColorStateList");
+                            }
+                        case STRING_RESOURCE:
+                            String value = typedArray.getString(0);
+                            if (value == null) {
+                                throw new ActionException("Attribute 0x"
+                                        + Integer.toHexString(this.mAttrId)
+                                        + " is not a defined or is not a string");
+                            }
+                            return value;
+                        default:
+                            // Note: This can only be an implementation error.
+                            throw new ActionException(
+                                    "Unknown resource type: " + this.mResourceType);
+                    }
+                } finally {
+                    typedArray.recycle();
+                }
+            } catch (Throwable t) {
+                throw new ActionException(t);
+            }
+        }
+
+        @Override
+        public int getActionTag() {
+            return ATTRIBUTE_REFLECTION_ACTION_TAG;
+        }
+    }
     private final class ComplexUnitDimensionReflectionAction extends BaseReflectionAction {
 
         private final float mValue;
@@ -2792,7 +2889,7 @@ public class RemoteViews implements Parcelable, Filter {
         static final int LAYOUT_HEIGHT = 9;
 
         final int mProperty;
-        final boolean mIsDimen;
+        final int mValueType;
         final int mValue;
 
         /**
@@ -2805,33 +2902,36 @@ public class RemoteViews implements Parcelable, Filter {
                 @ComplexDimensionUnit int units) {
             this.viewId = viewId;
             this.mProperty = property;
-            this.mIsDimen = false;
+            this.mValueType = VALUE_TYPE_COMPLEX_UNIT;
             this.mValue = TypedValue.createComplexDimension(value, units);
         }
 
         /**
          * @param viewId ID of the view alter
          * @param property which layout parameter to alter
-         * @param dimen new dimension with the value of the layout parameter
+         * @param value value to set.
+         * @param valueType must be one of {@link #VALUE_TYPE_COMPLEX_UNIT},
+         *   {@link #VALUE_TYPE_RESOURCE}, {@link #VALUE_TYPE_ATTRIBUTE} or
+         *   {@link #VALUE_TYPE_RAW}.
          */
-        LayoutParamAction(@IdRes int viewId, int property, @DimenRes int dimen) {
+        LayoutParamAction(@IdRes int viewId, int property, int value, @ValueType int valueType) {
             this.viewId = viewId;
             this.mProperty = property;
-            this.mIsDimen = true;
-            this.mValue = dimen;
+            this.mValueType = valueType;
+            this.mValue = value;
         }
 
         public LayoutParamAction(Parcel parcel) {
             viewId = parcel.readInt();
             mProperty = parcel.readInt();
-            mIsDimen = parcel.readBoolean();
+            mValueType = parcel.readInt();
             mValue = parcel.readInt();
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(viewId);
             dest.writeInt(mProperty);
-            dest.writeBoolean(mIsDimen);
+            dest.writeInt(mValueType);
             dest.writeInt(mValue);
         }
 
@@ -2897,25 +2997,57 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         private int getPixelOffset(View target) {
-            if (mIsDimen) {
-                if (mValue == 0) {
-                    return 0;
+            try {
+                switch (mValueType) {
+                    case VALUE_TYPE_ATTRIBUTE:
+                        TypedArray typedArray = target.getContext().obtainStyledAttributes(
+                                new int[]{this.mValue});
+                        try {
+                            return typedArray.getDimensionPixelOffset(0, 0);
+                        } finally {
+                            typedArray.recycle();
+                        }
+                    case VALUE_TYPE_RESOURCE:
+                        if (mValue == 0) {
+                            return 0;
+                        }
+                        return target.getResources().getDimensionPixelOffset(mValue);
+                    case VALUE_TYPE_COMPLEX_UNIT:
+                        return TypedValue.complexToDimensionPixelOffset(mValue,
+                                target.getResources().getDisplayMetrics());
+                    default:
+                        return mValue;
                 }
-                return target.getResources().getDimensionPixelOffset(mValue);
+            } catch (Throwable t) {
+                throw new ActionException(t);
             }
-            return TypedValue.complexToDimensionPixelOffset(mValue,
-                    target.getResources().getDisplayMetrics());
         }
 
         private int getPixelSize(View target) {
-            if (mIsDimen) {
-                if (mValue == 0) {
-                    return 0;
+            try {
+                switch (mValueType) {
+                    case VALUE_TYPE_ATTRIBUTE:
+                        TypedArray typedArray = target.getContext().obtainStyledAttributes(
+                                new int[]{this.mValue});
+                        try {
+                            return typedArray.getDimensionPixelSize(0, 0);
+                        } finally {
+                            typedArray.recycle();
+                        }
+                    case VALUE_TYPE_RESOURCE:
+                        if (mValue == 0) {
+                            return 0;
+                        }
+                        return target.getResources().getDimensionPixelSize(mValue);
+                    case VALUE_TYPE_COMPLEX_UNIT:
+                        return TypedValue.complexToDimensionPixelSize(mValue,
+                                target.getResources().getDisplayMetrics());
+                    default:
+                        return mValue;
                 }
-                return target.getResources().getDimensionPixelSize(mValue);
+            } catch (Throwable t) {
+                throw new ActionException(t);
             }
-            return TypedValue.complexToDimensionPixelSize(mValue,
-                    target.getResources().getDisplayMetrics());
         }
 
         @Override
@@ -3170,33 +3302,35 @@ public class RemoteViews implements Parcelable, Filter {
 
     private static class SetViewOutlinePreferredRadiusAction extends Action {
 
-        private final boolean mIsDimen;
+        @ValueType
+        private final int mValueType;
         private final int mValue;
 
-        SetViewOutlinePreferredRadiusAction(@IdRes int viewId, @DimenRes int dimenResId) {
+        SetViewOutlinePreferredRadiusAction(@IdRes int viewId, int value,
+                @ValueType int valueType) {
             this.viewId = viewId;
-            this.mIsDimen = true;
-            this.mValue = dimenResId;
+            this.mValueType = valueType;
+            this.mValue = value;
         }
 
         SetViewOutlinePreferredRadiusAction(
                 @IdRes int viewId, float radius, @ComplexDimensionUnit int units) {
             this.viewId = viewId;
-            this.mIsDimen = false;
+            this.mValueType = VALUE_TYPE_COMPLEX_UNIT;
             this.mValue = TypedValue.createComplexDimension(radius, units);
 
         }
 
         SetViewOutlinePreferredRadiusAction(Parcel in) {
             viewId = in.readInt();
-            mIsDimen = in.readBoolean();
+            mValueType = in.readInt();
             mValue = in.readInt();
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(viewId);
-            dest.writeBoolean(mIsDimen);
+            dest.writeInt(mValueType);
             dest.writeInt(mValue);
         }
 
@@ -3206,14 +3340,32 @@ public class RemoteViews implements Parcelable, Filter {
             final View target = root.findViewById(viewId);
             if (target == null) return;
 
-            float radius;
-            if (mIsDimen) {
-                radius = mValue == 0 ? 0 : target.getResources().getDimension(mValue);
-            } else {
-                radius = TypedValue.complexToDimensionPixelSize(mValue,
-                        target.getResources().getDisplayMetrics());
+            try {
+                float radius;
+                switch (mValueType) {
+                    case VALUE_TYPE_ATTRIBUTE:
+                        TypedArray typedArray = target.getContext().obtainStyledAttributes(
+                                new int[]{mValue});
+                        try {
+                            radius = typedArray.getDimension(0, 0);
+                        } finally {
+                            typedArray.recycle();
+                        }
+                        break;
+                    case VALUE_TYPE_RESOURCE:
+                        radius = mValue == 0 ? 0 : target.getResources().getDimension(mValue);
+                        break;
+                    case VALUE_TYPE_COMPLEX_UNIT:
+                        radius = TypedValue.complexToDimension(mValue,
+                                target.getResources().getDisplayMetrics());
+                        break;
+                    default:
+                        radius = mValue;
+                }
+                target.setOutlineProvider(new RemoteViewOutlineProvider(radius));
+            } catch (Throwable t) {
+                throw new ActionException(t);
             }
-            target.setOutlineProvider(new RemoteViewOutlineProvider(radius));
         }
 
         @Override
@@ -3613,6 +3765,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return new NightModeReflectionAction(parcel);
             case SET_REMOTE_COLLECTION_ITEMS_ADAPTER_TAG:
                 return new SetRemoteCollectionItemListAdapterAction(parcel);
+            case ATTRIBUTE_REFLECTION_ACTION_TAG:
+                return new AttributeReflectionAction(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }
@@ -4348,7 +4502,20 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setViewLayoutMarginDimen(@IdRes int viewId, @MarginType int type,
             @DimenRes int dimen) {
-        addAction(new LayoutParamAction(viewId, type, dimen));
+        addAction(new LayoutParamAction(viewId, type, dimen, VALUE_TYPE_RESOURCE));
+    }
+
+    /**
+     * Equivalent to calling {@link MarginLayoutParams#setMarginEnd}.
+     * Only works if the {@link View#getLayoutParams()} supports margins.
+     *
+     * @param viewId The id of the view to change
+     * @param type The margin being set e.g. {@link #MARGIN_END}
+     * @param attr a dimension attribute to apply to the margin.
+     */
+    public void setViewLayoutMarginAttr(@IdRes int viewId, @MarginType int type,
+            @AttrRes int attr) {
+        addAction(new LayoutParamAction(viewId, type, attr, VALUE_TYPE_ATTRIBUTE));
     }
 
     /**
@@ -4393,7 +4560,19 @@ public class RemoteViews implements Parcelable, Filter {
      * @param widthDimen the dimension resource for the view's width
      */
     public void setViewLayoutWidthDimen(@IdRes int viewId, @DimenRes int widthDimen) {
-        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_WIDTH, widthDimen));
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_WIDTH, widthDimen,
+                VALUE_TYPE_RESOURCE));
+    }
+
+    /**
+     * Equivalent to setting {@link android.view.ViewGroup.LayoutParams#width} with
+     * the value of the given attribute in the current theme.
+     *
+     * @param widthAttr the dimension attribute for the view's width
+     */
+    public void setViewLayoutWidthAttr(@IdRes int viewId, @AttrRes int widthAttr) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_WIDTH, widthAttr,
+                VALUE_TYPE_ATTRIBUTE));
     }
 
     /**
@@ -4420,7 +4599,19 @@ public class RemoteViews implements Parcelable, Filter {
      * @param heightDimen a dimen resource to read the height from.
      */
     public void setViewLayoutHeightDimen(@IdRes int viewId, @DimenRes int heightDimen) {
-        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_HEIGHT, heightDimen));
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_HEIGHT, heightDimen,
+                VALUE_TYPE_RESOURCE));
+    }
+
+    /**
+     * Equivalent to setting {@link android.view.ViewGroup.LayoutParams#height} with
+     * the value of the given attribute in the current theme.
+     *
+     * @param heightAttr a dimen attribute to read the height from.
+     */
+    public void setViewLayoutHeightAttr(@IdRes int viewId, @AttrRes int heightAttr) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_HEIGHT, heightAttr,
+                VALUE_TYPE_ATTRIBUTE));
     }
 
     /**
@@ -4441,7 +4632,15 @@ public class RemoteViews implements Parcelable, Filter {
      * {@code resId}.
      */
     public void setViewOutlinePreferredRadiusDimen(@IdRes int viewId, @DimenRes int resId) {
-        addAction(new SetViewOutlinePreferredRadiusAction(viewId, resId));
+        addAction(new SetViewOutlinePreferredRadiusAction(viewId, resId, VALUE_TYPE_RESOURCE));
+    }
+
+    /**
+     * Sets an OutlineProvider on the view whose corner radius is a dimension attribute with
+     * {@code attrId}.
+     */
+    public void setViewOutlinePreferredRadiusAttr(@IdRes int viewId, @AttrRes int attrId) {
+        addAction(new SetViewOutlinePreferredRadiusAction(viewId, attrId, VALUE_TYPE_ATTRIBUTE));
     }
 
     /**
@@ -4523,6 +4722,23 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Call a method taking one int, a size in pixels, on a view in the layout for this
+     * RemoteViews.
+     *
+     * The dimension will be resolved from the theme attribute at the time the
+     * {@link RemoteViews} is (re-)applied.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param dimenAttr The attribute to resolve and pass as argument to the method.
+     */
+    public void setIntDimenAttr(@IdRes int viewId, @NonNull String methodName,
+            @AttrRes int dimenAttr) {
+        addAction(new AttributeReflectionAction(viewId, methodName, BaseReflectionAction.INT,
+                ResourceReflectionAction.DIMEN_RESOURCE, dimenAttr));
+    }
+
+    /**
      * Call a method taking one int, a color, on a view in the layout for this RemoteViews.
      *
      * The Color will be resolved from the resources at the time the {@link RemoteViews} is (re-)
@@ -4536,6 +4752,22 @@ public class RemoteViews implements Parcelable, Filter {
             @ColorRes int colorResource) {
         addAction(new ResourceReflectionAction(viewId, methodName, BaseReflectionAction.INT,
                 ResourceReflectionAction.COLOR_RESOURCE, colorResource));
+    }
+
+    /**
+     * Call a method taking one int, a color, on a view in the layout for this RemoteViews.
+     *
+     * The Color will be resolved from the theme attribute at the time the {@link RemoteViews} is
+     * (re-)applied.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param colorAttribute The theme attribute to resolve and pass as argument to the method.
+     */
+    public void setColorAttr(@IdRes int viewId, @NonNull String methodName,
+            @AttrRes int colorAttribute) {
+        addAction(new AttributeReflectionAction(viewId, methodName, BaseReflectionAction.INT,
+                AttributeReflectionAction.COLOR_RESOURCE, colorAttribute));
     }
 
     /**
@@ -4618,6 +4850,23 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Call a method taking one ColorStateList on a view in the layout for this RemoteViews.
+     *
+     * The ColorStateList will be resolved from the theme attribute at the time the
+     * {@link RemoteViews} is (re-)applied.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param colorAttr The theme attribute to resolve and pass as argument to the method.
+     */
+    public void setColorStateListAttr(@IdRes int viewId, @NonNull String methodName,
+            @AttrRes int colorAttr) {
+        addAction(new AttributeReflectionAction(viewId, methodName,
+                BaseReflectionAction.COLOR_STATE_LIST, ResourceReflectionAction.COLOR_RESOURCE,
+                colorAttr));
+    }
+
+    /**
      * Call a method taking one long on a view in the layout for this RemoteViews.
      *
      * @param viewId The id of the view on which to call the method.
@@ -4673,6 +4922,23 @@ public class RemoteViews implements Parcelable, Filter {
         addAction(
                 new ComplexUnitDimensionReflectionAction(viewId, methodName, ReflectionAction.FLOAT,
                         value, unit));
+    }
+
+    /**
+     * Call a method taking one float, a size in pixels, on a view in the layout for this
+     * RemoteViews.
+     *
+     * The dimension will be resolved from the theme attribute at the time the {@link RemoteViews}
+     * is (re-)applied.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param dimenAttr The attribute to resolve and pass as argument to the method.
+     */
+    public void setFloatDimenAttr(@IdRes int viewId, @NonNull String methodName,
+            @AttrRes int dimenAttr) {
+        addAction(new AttributeReflectionAction(viewId, methodName, BaseReflectionAction.FLOAT,
+                ResourceReflectionAction.DIMEN_RESOURCE, dimenAttr));
     }
 
     /**
@@ -4735,6 +5001,24 @@ public class RemoteViews implements Parcelable, Filter {
         addAction(
                 new ResourceReflectionAction(viewId, methodName, BaseReflectionAction.CHAR_SEQUENCE,
                         ResourceReflectionAction.STRING_RESOURCE, stringResource));
+    }
+
+    /**
+     * Call a method taking one CharSequence on a view in the layout for this RemoteViews.
+     *
+     * The CharSequence will be resolved from the theme attribute at the time the
+     * {@link RemoteViews} is (re-)applied.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param stringAttribute The attribute to resolve and pass as argument to the method.
+     */
+    public void setCharSequenceAttr(@IdRes int viewId, @NonNull String methodName,
+            @AttrRes int stringAttribute) {
+        addAction(
+                new AttributeReflectionAction(viewId, methodName,
+                        BaseReflectionAction.CHAR_SEQUENCE,
+                        AttributeReflectionAction.STRING_RESOURCE, stringAttribute));
     }
 
     /**
