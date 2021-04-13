@@ -295,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Passer au profil pro"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accéder à vos contacts"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Localisation"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Position"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"accéder à la position de l\'appareil"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
@@ -681,7 +681,7 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"Modifier le verrouillage de l\'écran"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Modifier le verrouillage de l\'écran"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Verrouiller l\'écran"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Gérer la méthode et les conditions de verrouillage de l\'écran"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Contrôler à quel moment l\'écran se verrouille et comment"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Effacer toutes les données"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Effacer les données de la tablette sans avertissement, en rétablissant la configuration d\'usine"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Efface les données de votre appareil Android TV sans avertissement en rétablissant la configuration d\'usine."</string>
@@ -698,7 +698,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Exiger le chiffrement des données d\'application stockées"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Désactiver les appareils photo"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Empêcher l\'utilisation de tous les appareils photos"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Désactiver les options de verrouillage de l\'écran"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Désactiver des options de verrouillage de l\'écran"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Empêcher l\'utilisation de certaines fonctionnalités du verrouillage de l\'écran"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Domicile"</item>
@@ -1183,7 +1183,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Toujours afficher"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"L\'application <xliff:g id="APP_NAME">%1$s</xliff:g> a été conçue pour une version incompatible du système Android et peut présenter un comportement inattendu. Il est possible qu\'une version mise à jour de l\'application soit disponible."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Toujours afficher"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Rechercher les mises à jour"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Rechercher une mise à jour"</string>
     <string name="smv_application" msgid="3775183542777792638">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (du processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles du mode strict."</string>
     <string name="smv_process" msgid="1398801497130695446">"Le processus <xliff:g id="PROCESS">%1$s</xliff:g> a enfreint ses propres règles du mode strict."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Mise à jour du téléphone…"</string>

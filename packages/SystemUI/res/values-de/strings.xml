@@ -47,7 +47,7 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"Eingabemethoden festlegen"</string>
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Physische Tastatur"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> den Zugriff auf <xliff:g id="USB_DEVICE">%2$s</xliff:g> gewähren?"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Der App \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" Zugriff auf das Gerät \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\" geben?\nDiese App hat noch nicht die Berechtigung zum Aufnehmen erhalten, könnte jedoch Audio über dieses USB-Gerät aufnehmen."</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> den Zugriff auf <xliff:g id="USB_DEVICE">%2$s</xliff:g> gewähren?\nDiese App hat noch nicht die Berechtigung zum Aufnehmen erhalten, könnte jedoch Audio über dieses USB-Gerät aufnehmen."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> den Zugriff auf <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> gewähren?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Für <xliff:g id="USB_DEVICE">%2$s</xliff:g> <xliff:g id="APPLICATION">%1$s</xliff:g> öffnen?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> öffnen, um <xliff:g id="USB_DEVICE">%2$s</xliff:g> zu bedienen?\nDiese App hat noch keine Berechtigung zum Aufnehmen erhalten, könnte aber Audioaufnahmen über dieses USB-Gerät machen."</string>
@@ -725,7 +725,7 @@
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Diese Benachrichtigungen können nicht geändert werden."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Die Benachrichtigungsgruppe kann hier nicht konfiguriert werden"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Weitergeleitete Benachrichtigung"</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Alle <xliff:g id="APP_NAME">%1$s</xliff:g>-Benachrichtigungen"</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Alle Benachrichtigungen von <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Mehr"</string>
     <string name="appops_camera" msgid="5215967620896725715">"Diese App verwendet die Kamera."</string>
     <string name="appops_microphone" msgid="8805468338613070149">"Diese App verwendet das Mikrofon."</string>
