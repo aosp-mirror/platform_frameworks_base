@@ -1072,7 +1072,7 @@ static jobject convertDisplayModeToJavaObject(JNIEnv* env, const ui::DisplayMode
     return object;
 }
 
-jobject convertDeviceProductInfoToJavaObject(JNIEnv* env, const HdrCapabilities& capabilities) {
+jobject convertHdrCapabilitiesToJavaObject(JNIEnv* env, const HdrCapabilities& capabilities) {
     const auto& types = capabilities.getSupportedHdrTypes();
     std::vector<int32_t> intTypes;
     for (auto type : types) {
@@ -1129,7 +1129,7 @@ static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jobject to
                      static_cast<jint>(info.activeColorMode));
 
     env->SetObjectField(object, gDynamicDisplayInfoClassInfo.hdrCapabilities,
-                        convertDeviceProductInfoToJavaObject(env, info.hdrCapabilities));
+                        convertHdrCapabilitiesToJavaObject(env, info.hdrCapabilities));
 
     env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.autoLowLatencyModeSupported,
                          info.autoLowLatencyModeSupported);
