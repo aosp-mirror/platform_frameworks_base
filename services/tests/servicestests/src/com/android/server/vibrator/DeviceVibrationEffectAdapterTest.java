@@ -182,7 +182,9 @@ public class DeviceVibrationEffectAdapterTest {
     private static VibratorInfo createVibratorInfo(VibratorInfo.FrequencyMapping frequencyMapping,
             int... capabilities) {
         int cap = IntStream.of(capabilities).reduce((a, b) -> a | b).orElse(0);
-        return new VibratorInfo(/* id= */ 0, cap, null, null, null, /* qFactor= */ Float.NaN,
-                frequencyMapping);
+        return new VibratorInfo.Builder(0)
+                .setCapabilities(cap)
+                .setFrequencyMapping(frequencyMapping)
+                .build();
     }
 }

@@ -28,7 +28,6 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -50,11 +49,33 @@ public class SystemVibrator extends Vibrator {
     private final ArrayMap<OnVibratorStateChangedListener, AllVibratorsStateListener>
             mRegisteredListeners = new ArrayMap<>();
 
+    private final Object mLock = new Object();
+    private AllVibratorsInfo mVibratorInfo;
+
     @UnsupportedAppUsage
     public SystemVibrator(Context context) {
         super(context);
         mContext = context;
         mVibratorManager = mContext.getSystemService(VibratorManager.class);
+    }
+
+    @Override
+    protected VibratorInfo getInfo() {
+        synchronized (mLock) {
+            if (mVibratorInfo != null) {
+                return mVibratorInfo;
+            }
+            if (mVibratorManager == null) {
+                Log.w(TAG, "Failed to retrieve vibrator info; no vibrator manager.");
+                return VibratorInfo.EMPTY_VIBRATOR_INFO;
+            }
+            int[] vibratorIds = mVibratorManager.getVibratorIds();
+            VibratorInfo[] vibratorInfos = new VibratorInfo[vibratorIds.length];
+            for (int i = 0; i < vibratorIds.length; i++) {
+                vibratorInfos[i] = mVibratorManager.getVibrator(vibratorIds[i]).getInfo();
+            }
+            return mVibratorInfo = new AllVibratorsInfo(vibratorInfos);
+        }
     }
 
     @Override
@@ -144,20 +165,7 @@ public class SystemVibrator extends Vibrator {
 
     @Override
     public boolean hasAmplitudeControl() {
-        if (mVibratorManager == null) {
-            Log.w(TAG, "Failed to check vibrator has amplitude control; no vibrator manager.");
-            return false;
-        }
-        int[] vibratorIds = mVibratorManager.getVibratorIds();
-        if (vibratorIds.length == 0) {
-            return false;
-        }
-        for (int vibratorId : vibratorIds) {
-            if (!mVibratorManager.getVibrator(vibratorId).hasAmplitudeControl()) {
-                return false;
-            }
-        }
-        return true;
+        return getInfo().hasAmplitudeControl();
     }
 
     @Override
@@ -181,70 +189,6 @@ public class SystemVibrator extends Vibrator {
         }
         CombinedVibration combinedEffect = CombinedVibration.createParallel(effect);
         mVibratorManager.vibrate(uid, opPkg, combinedEffect, reason, attributes);
-    }
-
-    @Override
-    public int[] areEffectsSupported(@VibrationEffect.EffectType int... effectIds) {
-        int[] supported = new int[effectIds.length];
-        if (mVibratorManager == null) {
-            Log.w(TAG, "Failed to check supported effects; no vibrator manager.");
-            Arrays.fill(supported, Vibrator.VIBRATION_EFFECT_SUPPORT_NO);
-            return supported;
-        }
-        int[] vibratorIds = mVibratorManager.getVibratorIds();
-        if (vibratorIds.length == 0) {
-            Arrays.fill(supported, Vibrator.VIBRATION_EFFECT_SUPPORT_NO);
-            return supported;
-        }
-        int[][] vibratorSupportMap = new int[vibratorIds.length][effectIds.length];
-        for (int i = 0; i < vibratorIds.length; i++) {
-            vibratorSupportMap[i] = mVibratorManager.getVibrator(
-                    vibratorIds[i]).areEffectsSupported(effectIds);
-        }
-        Arrays.fill(supported, Vibrator.VIBRATION_EFFECT_SUPPORT_YES);
-        for (int effectIdx = 0; effectIdx < effectIds.length; effectIdx++) {
-            for (int vibratorIdx = 0; vibratorIdx < vibratorIds.length; vibratorIdx++) {
-                int effectSupported = vibratorSupportMap[vibratorIdx][effectIdx];
-                if (effectSupported == Vibrator.VIBRATION_EFFECT_SUPPORT_NO) {
-                    supported[effectIdx] = Vibrator.VIBRATION_EFFECT_SUPPORT_NO;
-                    break;
-                } else if (effectSupported == Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN) {
-                    supported[effectIdx] = Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN;
-                }
-            }
-        }
-        return supported;
-    }
-
-    @Override
-    public boolean[] arePrimitivesSupported(
-            @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
-        boolean[] supported = new boolean[primitiveIds.length];
-        if (mVibratorManager == null) {
-            Log.w(TAG, "Failed to check supported primitives; no vibrator manager.");
-            Arrays.fill(supported, false);
-            return supported;
-        }
-        int[] vibratorIds = mVibratorManager.getVibratorIds();
-        if (vibratorIds.length == 0) {
-            Arrays.fill(supported, false);
-            return supported;
-        }
-        boolean[][] vibratorSupportMap = new boolean[vibratorIds.length][primitiveIds.length];
-        for (int i = 0; i < vibratorIds.length; i++) {
-            vibratorSupportMap[i] = mVibratorManager.getVibrator(
-                    vibratorIds[i]).arePrimitivesSupported(primitiveIds);
-        }
-        Arrays.fill(supported, true);
-        for (int primitiveIdx = 0; primitiveIdx < primitiveIds.length; primitiveIdx++) {
-            for (int vibratorIdx = 0; vibratorIdx < vibratorIds.length; vibratorIdx++) {
-                if (!vibratorSupportMap[vibratorIdx][primitiveIdx]) {
-                    supported[primitiveIdx] = false;
-                    break;
-                }
-            }
-        }
-        return supported;
     }
 
     @Override
@@ -301,6 +245,58 @@ public class SystemVibrator extends Vibrator {
         @Override
         public void onVibratorStateChanged(boolean isVibrating) {
             mAllVibratorsListener.onVibrating(mVibratorIdx, isVibrating);
+        }
+    }
+
+    /**
+     * Represents all the vibrators information as a single {@link VibratorInfo}.
+     *
+     * <p>This uses the first vibrator on the list as the default one for all hardware spec, but
+     * uses an intersection of all vibrators to decide the capabilities and effect/primitive
+     * support.
+     */
+    private static class AllVibratorsInfo extends VibratorInfo {
+        private final VibratorInfo[] mVibratorInfos;
+
+        AllVibratorsInfo(VibratorInfo[] vibrators) {
+            super(/* id= */ -1, capabilitiesIntersection(vibrators),
+                    vibrators.length > 0 ? vibrators[0] : VibratorInfo.EMPTY_VIBRATOR_INFO);
+            mVibratorInfos = vibrators;
+        }
+
+        @Override
+        public int isEffectSupported(int effectId) {
+            int supported = Vibrator.VIBRATION_EFFECT_SUPPORT_YES;
+            for (VibratorInfo info : mVibratorInfos) {
+                int effectSupported = info.isEffectSupported(effectId);
+                if (effectSupported == Vibrator.VIBRATION_EFFECT_SUPPORT_NO) {
+                    return effectSupported;
+                } else if (effectSupported == Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN) {
+                    supported = effectSupported;
+                }
+            }
+            return supported;
+        }
+
+        @Override
+        public boolean isPrimitiveSupported(int primitiveId) {
+            for (VibratorInfo info : mVibratorInfos) {
+                if (!info.isPrimitiveSupported(primitiveId)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static int capabilitiesIntersection(VibratorInfo[] infos) {
+            if (infos.length == 0) {
+                return 0;
+            }
+            int intersection = ~0;
+            for (VibratorInfo info : infos) {
+                intersection &= info.getCapabilities();
+            }
+            return intersection;
         }
     }
 

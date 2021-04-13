@@ -194,8 +194,8 @@ public class SystemVibratorManager extends VibratorManager {
         }
 
         @Override
-        public int getId() {
-            return mVibratorInfo.getId();
+        protected VibratorInfo getInfo() {
+            return mVibratorInfo;
         }
 
         @Override
@@ -206,36 +206,6 @@ public class SystemVibratorManager extends VibratorManager {
         @Override
         public boolean hasAmplitudeControl() {
             return mVibratorInfo.hasAmplitudeControl();
-        }
-
-        @Override
-        public float getResonantFrequency() {
-            return mVibratorInfo.getResonantFrequency();
-        }
-
-        @Override
-        public float getQFactor() {
-            return mVibratorInfo.getQFactor();
-        }
-
-        @NonNull
-        @Override
-        public int[] areEffectsSupported(@NonNull int... effectIds) {
-            int[] supported = new int[effectIds.length];
-            for (int i = 0; i < effectIds.length; i++) {
-                supported[i] = mVibratorInfo.isEffectSupported(effectIds[i]);
-            }
-            return supported;
-        }
-
-        @Override
-        public boolean[] arePrimitivesSupported(
-                @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
-            boolean[] supported = new boolean[primitiveIds.length];
-            for (int i = 0; i < primitiveIds.length; i++) {
-                supported[i] = mVibratorInfo.isPrimitiveSupported(primitiveIds[i]);
-            }
-            return supported;
         }
 
         @Override
