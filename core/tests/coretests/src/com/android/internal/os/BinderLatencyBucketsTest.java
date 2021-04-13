@@ -36,6 +36,7 @@ public class BinderLatencyBucketsTest {
     public void testBucketThresholds() {
         BinderLatencyBuckets latencyBuckets = new BinderLatencyBuckets(10, 2, 1.45f);
         assertThat(latencyBuckets.getBuckets())
+            .asList()
             .containsExactly(2, 3, 4, 6, 8, 12, 18, 26, 39)
             .inOrder();
     }
@@ -58,6 +59,7 @@ public class BinderLatencyBucketsTest {
     public void testMaxIntBuckets() {
         BinderLatencyBuckets latencyBuckets = new BinderLatencyBuckets(5, Integer.MAX_VALUE / 2, 2);
         assertThat(latencyBuckets.getBuckets())
+            .asList()
             .containsExactly(Integer.MAX_VALUE / 2, Integer.MAX_VALUE - 1)
             .inOrder();
 
