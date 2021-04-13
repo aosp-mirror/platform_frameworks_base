@@ -92,8 +92,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ບັນທຶກເພີ່ມເຕີມ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ປິດຮູບໜ້າຈໍ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ຕົວຢ່າງຮູບໜ້າຈໍ"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ຂອບເຂດທາງເທິງ"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"ຂອບເຂດທາງລຸ່ມ"</string>
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ຂອບເຂດທາງເທິງ <xliff:g id="PERCENT">%1$d</xliff:g> ເປີເຊັນ"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ຂອບເຂດທາງລຸ່ມ <xliff:g id="PERCENT">%1$d</xliff:g> ເປີເຊັນ"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ຂອບເຂດທາງຊ້າຍ <xliff:g id="PERCENT">%1$d</xliff:g> ເປີເຊັນ"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ຂອບເຂດທາງຂວາ <xliff:g id="PERCENT">%1$d</xliff:g> ເປີເຊັນ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ໂປຣແກຣມບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ກຳລັງປະມວນຜົນການບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ການແຈ້ງເຕືອນສຳລັບເຊດຊັນການບັນທຶກໜ້າຈໍໃດໜຶ່ງ"</string>
@@ -349,8 +351,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"ວິທີການປ້ອນຂໍ້ມູນ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ສະຖານທີ່"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ຂໍ້ມູນສະຖານທີ່ປິດຢູ່"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"ບລັອກກ້ອງຖ່າຍຮູບ"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"ປິດສຽງໄມໂຄຣໂຟນ"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"ການເຂົ້າເຖິງກ້ອງຖ່າຍຮູບ"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"ການເຂົ້າເຖິງໄມ"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"ສາມາດໃຊ້ໄດ້"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ບລັອກແລ້ວ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ອຸປະກອນສື່"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ໂທສຸກເສີນເທົ່ານັ້ນ"</string>
@@ -422,8 +426,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ການບັນທຶກໜ້າຈໍ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ເລີ່ມ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ຢຸດ"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"ເພື່ອດຳເນີນການຕໍ່, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ຕ້ອງການສິດເຂົ້າເຖິງໄມໂຄຣໂຟນອຸປະກອນຂອງທ່ານ."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"ເພື່ອດຳເນີນການຕໍ່, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ຕ້ອງການສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງອຸປະກອນທ່ານ."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ຍົກເລີກການບລັອກໄມໂຄຣໂຟນອຸປະກອນບໍ?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ຍົກເລີກການບລັອກກ້ອງຖ່າຍຮູບອຸ​ປະ​ກອນບໍ?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ຍົກເລີກການບລັອກກ້ອງຖ່າຍຮູບ ຫຼື ໄມໂຄຣໂຟນອຸ​ປະ​ກອນບໍ?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ນີ້ຈະຍົກເລີກການບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ໄມໂຄຣໂຟນຂອງທ່ານ."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ນີ້ຈະຍົກເລີກການບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ກ້ອງຖ່າຍຮູບຂອງທ່ານ."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ນີ້ຈະຍົກເລີກການບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ກ້ອງຖ່າຍຮູບ ຫຼື ໄມໂຄຣໂຟນຂອງທ່ານ."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ອຸປະກອນ"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ປັດຂື້ນເພື່ອສະຫຼັບແອັບ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ລາກໄປຂວາເພື່ອສະຫຼັບແອັບດ່ວນ"</string>
@@ -657,8 +665,8 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ອີ​ເທ​ເນັດ"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ໂມງປຸກ"</string>
     <string name="wallet_title" msgid="5369767670735827105">"ກະເປົາ"</string>
-    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"ສະແດງທັງໝົດ"</string>
-    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"ປົດລັອກເພື່ອຈ່າຍ"</string>
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"ສະແດງທັງໝົດ"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ປົດລັອກເພື່ອຈ່າຍ"</string>
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"ພ້ອມແລ້ວ"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ຕັ້ງຄ່າການຈ່າຍເງິນ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ປົດລັອກເພື່ອໃຊ້"</string>
