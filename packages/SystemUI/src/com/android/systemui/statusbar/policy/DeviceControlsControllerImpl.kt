@@ -61,7 +61,7 @@ public class DeviceControlsControllerImpl @Inject constructor(
 
     companion object {
         private const val TAG = "DeviceControlsControllerImpl"
-        internal const val QS_PRIORITY_POSITION = 3
+        internal const val QS_PRIORITY_POSITION = 2
         internal const val QS_DEFAULT_POSITION = POSITION_AT_END
 
         internal const val PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted"
