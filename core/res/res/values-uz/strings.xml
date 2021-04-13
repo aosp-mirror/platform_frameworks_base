@@ -319,8 +319,10 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"jismoniy harakatlar axborotiga ruxsat"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"suratga olish va video yozib olish"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Yaqin-atrofdagi Bluetooth qurilmalari"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"yaqin-atrofdagi Bluetooth qurilmalarini topish va ularga ulanish"</string>
+    <!-- no translation found for permgrouplab_nearby_devices (5529147543651181991) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_nearby_devices (3213561597116913508) -->
+    <skip />
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Chaqiruvlar jurnali"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"telefon chaqiruvlari jurnalini o‘qish va unga yozish"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
@@ -538,6 +540,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Ilovaga yaqin-atrofdagi Bluetooth qurilmalarini topish va juftlashish uchun ruxsat beradi"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"juftlangan Bluetooth qurilmalariga ulanish"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Ilovaga juftlangan Bluetooth qurilmalariga ulanish uchun ruxsat beradi"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"atrofdagi Bluetooth qurilmalariga reklama berish"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Ilovaga yaqin-atrofdagi Bluetooth qurilmalariga reklama yuborish imkonini beradi"</string>
     <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
     <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
@@ -2259,9 +2263,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Ekranni qisman kattalashtirish mumkin"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Sozlamalar orqali yoqish"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Yopish"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Davom etish uchun &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; mikrofoningizdan foydalanishi kerak."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Davom etish uchun &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; qurilmangiz kamerasiga kirishi kerak."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Yoqish"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Qurilma mikrofonini blokdan chiqaring"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Qurilma kamerasini blokdan chiqaring"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; hamda barcha ilovalar va xizmatlar uchun"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Blokdan chiqarish"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorlar maxfiyligi"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ilova belgisi"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Ilova brendining rasmi"</string>

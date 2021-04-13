@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"acceder á túa actividade física"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"tirar fotos e gravar vídeos"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Dispositivos Bluetooth próximos"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"detectar dispositivos Bluetooth próximos e conectarse a eles"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Dispositivos próximos"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"detectar dispositivos próximos e conectarse a eles"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Rexistros de chamadas"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ler e editar o rexistro de chamadas do teléfono"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Teléfono"</string>
@@ -538,10 +538,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que a aplicación detecte dispositivos Bluetooth próximos e se vincule a eles"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conectarse a dispositivos Bluetooth vinculados"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que a aplicación se conecte aos dispositivos Bluetooth vinculados"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
     <skip />
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"determinar posición entre dispositivos próximos"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permite que a aplicación determine a posición relativa entre os dispositivos próximos que usen banda ultralarga"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información do servizo de pago de NFC preferido"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a aplicación obteña información do servizo de pago de NFC preferido, como as axudas rexistradas e o destino da ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Near Field Communication"</string>
@@ -1854,7 +1856,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n\n• Activa o tema escuro.\n• Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\".\n\n"<annotation id="url">"Máis información"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n\n• Activa o tema escuro\n• Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\""</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o aforro de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, é posible que as imaxes non se mostren ata que as toques."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o aforro de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, poida que as imaxes non se mostren ata que as toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Queres activar o aforro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2259,9 +2261,14 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Xa podes ampliar parte da pantalla"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activar en Configuración"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ignorar"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Para continuar, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; precisa acceder ao micrófono do dispositivo."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Para continuar, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; precisa acceder á cámara do dispositivo."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Activar"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
+    <skip />
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privacidade do sensor"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Icona de aplicación"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imaxe de marca da aplicación"</string>

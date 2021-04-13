@@ -188,6 +188,8 @@ interface INotificationManager
     List<ComponentName> getEnabledNotificationListeners(int userId);
     ComponentName getAllowedNotificationAssistantForUser(int userId);
     ComponentName getAllowedNotificationAssistant();
+    ComponentName getDefaultNotificationAssistant();
+    void resetDefaultNotificationAssistant(boolean loadFromConfig);
     boolean hasEnabledNotificationListener(String packageName, int userId);
 
     @UnsupportedAppUsage

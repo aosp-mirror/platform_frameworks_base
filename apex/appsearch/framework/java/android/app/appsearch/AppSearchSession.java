@@ -23,6 +23,7 @@ import android.app.appsearch.util.SchemaMigrationUtil;
 import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -270,8 +271,8 @@ public final class AppSearchSession implements Closeable {
             documentBundles.add(documents.get(i).getBundle());
         }
         try {
-            // TODO(b/173532925) a timestamp needs to be sent here to calculate binder latency
             mService.putDocuments(mPackageName, mDatabaseName, documentBundles, mUserId,
+                    /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
                             executor.execute(() -> callback.onResult(result));

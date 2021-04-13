@@ -4128,9 +4128,11 @@ public abstract class Context {
      * Use with {@link #getSystemService(String)} to retrieve a {@link android.os.Vibrator} for
      * interacting with the vibration hardware.
      *
+     * @deprecated Use {@link android.os.VibratorManager} to retrieve the default system vibrator.
      * @see #getSystemService(String)
      * @see android.os.Vibrator
      */
+    @Deprecated
     public static final String VIBRATOR_SERVICE = "vibrator";
 
     /**

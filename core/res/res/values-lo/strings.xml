@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ເຂົ້າເຖິງກິດຈະກຳທາງກາຍະພາບຂອງທ່ານ"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ກ້ອງ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ຖ່າຍ​ຮູບ ແລະ​ບັນ​ທຶກວິ​ດີ​ໂອ"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"ອຸປະກອນ Bluetooth ທີ່ຢູ່ໃກ້ຄຽງ"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"ຄົ້ນພົບ ແລະ ເຊື່ອມຕໍ່ຫາອຸປະກອນ Bluetooth ທີ່ຢູ່ໃກ້ຄຽງ"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"ອຸປະກອນທີ່ຢູ່ໃກ້ຄຽງ"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"ຄົ້ນພົບ ແລະ ເຊື່ອມຕໍ່ຫາອຸປະກອນທີ່ຢູ່ໃກ້ຄຽງ"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"ບັນທຶກການໂທ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ອ່ານ ແລະ ຂຽນບັນທຶກການໂທ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ໂທລະສັບ"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ອະນຸຍາດໃຫ້ແອັບຄົ້ນພົບ ແລະ ຈັບຄູ່ອຸປະກອນ Bluetooth ທີ່ຢູ່ໃກ້ຄຽງໄດ້"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ເຊື່ອມຕໍ່ຫາອຸປະກອນ Bluetooth ທີ່ຈັບຄູ່ໄວ້"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ອະນຸຍາດໃຫ້ແອັບເຊື່ອມຕໍ່ຫາອຸປະກອນ Bluetooth ທີ່ຈັບຄູ່ແລ້ວໄດ້"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"ໂຄສະນາຫາອຸປະກອນ Bluetooth ທີ່ຢູ່ໃກ້ຄຽງໄດ້"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"ອະນຸຍາດໃຫ້ແອັບໂຄສະນາຫາອຸປະກອນ Bluetooth ທີ່ຢູ່ໃກ້ຄຽງໄດ້"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"ກຳນົດຕຳແໜ່ງທີ່ສຳພັນກັນລະຫວ່າງອຸປະກອນ Ultra-Wideband ທີ່ຢູ່ໃກ້ຄຽງ"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ອະນຸຍາດໃຫ້ແອັບກຳນົດຕຳແໜ່ງທີ່ສຳພັນກັນລະຫວ່າງອຸປະກອນ Ultra-Wideband ທີ່ຢູ່ໃກ້ຄຽງ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ອະນຸຍາດໃຫ້ແອັບຮັບຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການໄດ້ ເຊັ່ນ: ການຊ່ວຍເຫຼືອແບບລົງທະບຽນ ແລະ ປາຍທາງເສັ້ນທາງ."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ຄວບຄຸມ Near Field Communication"</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ຕອນນີ້ທ່ານສາມາດຂະຫຍາຍບາງສ່ວນຂອງໜ້າຈໍໄດ້ແລ້ວ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ເປີດໃຊ້ໃນການຕັ້ງຄ່າ"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ປິດໄວ້"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ເພື່ອດຳເນີນການຕໍ່, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ຕ້ອງການສິດເຂົ້າເຖິງໄມໂຄຣໂຟນອຸປະກອນທ່ານ."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ເພື່ອດຳເນີນການຕໍ່, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ຕ້ອງການສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງອຸປະກອນທ່ານ."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ເປີດໃຊ້"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ຍົກເລີກການບລັອກໄມໂຄຣໂຟນອຸປະກອນ"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ຍົກເລີກການບລັອກອຸປະກອນກ້ອງຖ່າຍຮູບ"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"ສຳລັບ &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ແລະ ແອັບ ແລະ ບໍລິການທັງໝົດ"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"ຍົກເລີກການບລັອກ"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ຄວາມເປັນສ່ວນຕົວເຊັນເຊີ"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ໄອຄອນແອັບພລິເຄຊັນ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ຮູບແບຣນແອັບພລິເຄຊັນ"</string>

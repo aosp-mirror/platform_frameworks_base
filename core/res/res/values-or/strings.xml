@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ଆପଣଙ୍କ ଶାରୀରିକ କାର୍ଯ୍ୟକଳାପ ଆକ୍ସେସ୍ କରନ୍ତୁ"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"କ୍ୟାମେରା"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ଫଟୋ ନିଏ ଓ ଭିଡିଓ ରେକର୍ଡ କରେ"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"ଆଖପାଖର ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକ"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"ଆଖପାଖର ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକୁ ଖୋଜି ସଂଯୋଗ କରନ୍ତୁ"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକ"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକୁ ଖୋଜି ସଂଯୋଗ କରନ୍ତୁ"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"କଲ୍‌ ଲଗ୍‌"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ଫୋନ୍‌ କଲ୍‌ ଲଗ୍‌ ପଢ଼ନ୍ତୁ ଓ ଲେଖନ୍ତୁ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ଫୋନ୍‍"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ଆଖପାଖର ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକୁ ଖୋଜି ପେୟାର୍ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ପେୟାର୍ କରାଯାଇଥିବା ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକ ସହ ସଂଯୋଗ କର"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ପେୟାର୍ କରାଯାଇଥିବା ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକ ସହ ସଂଯୋଗ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"ଆଖପାଖର ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକରେ ବିଜ୍ଞାପନ ଦିଅନ୍ତୁ"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"ଆଖପାଖର ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକରେ ବିଜ୍ଞାପନ ଦେବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"ଆଖପାଖର ଅଲଟ୍ରା-ୱାଇଡବ୍ୟାଣ୍ଡ ଡିଭାଇସଗୁଡ଼ିକ ମଧ୍ୟରେ ଆପେକ୍ଷିକ ଅବସ୍ଥିତିକୁ ନିର୍ଦ୍ଧାରଣ କର"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ଆଖପାଖର ଅଲଟ୍ରା-ୱାଇଡବ୍ୟାଣ୍ଡ ଡିଭାଇସଗୁଡ଼ିକ ମଧ୍ୟରେ ଆପେକ୍ଷିକ ଅବସ୍ଥିତିକୁ ନିର୍ଦ୍ଧାରଣ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ପସନ୍ଦର NFC ପେମେଣ୍ଟ ସେବା ସୂଚନା"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ପଞ୍ଜିକୃତ ଯନ୍ତ୍ର ଏବଂ ମାର୍ଗ ଲକ୍ଷସ୍ଥଳ ପରି ପସନ୍ଦର nfc ପେମେଣ୍ଟ ସେବା ସୂଚନା ପାଇବାକୁ ଆପ୍ ଅନୁମତି କରିଥାଏ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ନିଅର୍ ଫିଲ୍ଡ କମ୍ୟୁନିକେଶନ୍ ଉପରେ ନିୟନ୍ତ୍ରଣ ରଖନ୍ତୁ"</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ଆପଣ ଏବେ ଆପଣଙ୍କ ସ୍କ୍ରିନର ଅଂଶକୁ ମ୍ୟାଗ୍ନିଫାଏ କରିପାରିବେ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ସେଟିଂସରେ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ଖାରଜ କରନ୍ତୁ"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ଜାରି ରଖିବାକୁ, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ଆପଣଙ୍କ ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଆକ୍ସେସ୍ ଆବଶ୍ୟକ କରେ।"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ଜାରି ରଖିବାକୁ, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ଆପଣଙ୍କ ଡିଭାଇସର କ୍ୟାମେରାକୁ ଆକ୍ସେସ୍ ଆବଶ୍ୟକ କରେ।"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ୍ କରନ୍ତୁ"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ଡିଭାଇସର କ୍ୟାମେରାକୁ ଅନବ୍ଲକ୍ କରନ୍ତୁ"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ଏବଂ ସମସ୍ତ ଆପ୍ ଓ ସେବା ପାଇଁ"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"ଅନବ୍ଲକ୍ କରନ୍ତୁ"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ସେନ୍ସର୍ ଗୋପନୀୟତା"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ଆପ୍ଲିକେସନ୍ ଆଇକନ୍"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ଆପ୍ଲିକେସନ୍ ବ୍ରାଣ୍ଡିଂ ଛବି"</string>

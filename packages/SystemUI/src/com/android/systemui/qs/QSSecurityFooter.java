@@ -36,7 +36,6 @@ import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -89,7 +88,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     private Drawable mPrimaryFooterIconDrawable;
 
     @Inject
-    QSSecurityFooter(@Named(QS_SECURITY_FOOTER_VIEW) View rootView, Context context,
+    QSSecurityFooter(@Named(QS_SECURITY_FOOTER_VIEW) View rootView,
             UserTracker userTracker, @Main Handler mainHandler, ActivityStarter activityStarter,
             SecurityController securityController, @Background Looper bgLooper) {
         mRootView = rootView;
@@ -98,7 +97,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         mFooterIcon = mRootView.findViewById(R.id.footer_icon);
         mPrimaryFooterIcon = mRootView.findViewById(R.id.primary_footer_icon);
         mFooterIconId = R.drawable.ic_info_outline;
-        mContext = context;
+        mContext = rootView.getContext();
         mMainHandler = mainHandler;
         mActivityStarter = activityStarter;
         mSecurityController = securityController;
@@ -308,7 +307,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     }
 
     private void createDialog() {
-        mDialog = new SystemUIDialog(mContext);
+        mDialog = new SystemUIDialog(mContext, 0); // Use mContext theme
         mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(), this);
         mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getNegativeButton(), this);
@@ -344,8 +343,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         final String vpnNameWorkProfile = mSecurityController.getWorkProfileVpnName();
 
 
-        View dialogView = LayoutInflater.from(
-                new ContextThemeWrapper(mContext, R.style.Theme_SystemUI_Dialog))
+        View dialogView = LayoutInflater.from(mContext)
                 .inflate(R.layout.quick_settings_footer_dialog, null, false);
 
         // device management section
@@ -420,8 +418,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     }
 
     private View createParentalControlsDialogView() {
-        View dialogView = LayoutInflater.from(
-                new ContextThemeWrapper(mContext, R.style.Theme_SystemUI_Dialog))
+        View dialogView = LayoutInflater.from(mContext)
                 .inflate(R.layout.quick_settings_footer_dialog_parental_controls, null, false);
 
         DeviceAdminInfo info = mSecurityController.getDeviceAdminInfo();

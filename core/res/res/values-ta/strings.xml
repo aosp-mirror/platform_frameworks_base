@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"உடல் செயல்பாட்டைக் கண்காணிக்கும்"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"கேமரா"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"படங்கள் மற்றும் வீடியோக்கள் எடுக்கலாம்"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"அருகிலுள்ள புளூடூத் சாதனங்கள்"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"அருகிலுள்ள புளூடூத் சாதனங்களைக் கண்டறிந்து அவற்றுடன் இணையும்"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"அருகிலுள்ள சாதனங்கள்"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"அருகிலுள்ள சாதனங்களைக் கண்டறிந்து அவற்றுடன் இணையும்"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"அழைப்புப் பதிவுகள்"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"மொபைல் அழைப்புப் பதிவைப் படிக்கும், எழுதும்"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ஃபோன்"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"அருகிலுள்ள புளூடூத் சாதனங்களைக் கண்டறிந்து அவற்றுடன் இணைவதற்கு ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"இணைக்கப்பட்ட புளூடூத் சாதனங்களுடன் இணைத்தல்"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"இணைக்கப்பட்ட புளூடூத் சாதனங்களுடன் இணைவதற்கு ஆப்ஸை அனுமதிக்கும்"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"அருகிலுள்ள புளூடூத் சாதனங்களுக்கு தெரியப்படுத்தல்"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"அருகிலுள்ள புளூடூத் சாதனங்களுக்குத் தெரியப்படுத்த ஆப்ஸை அனுமதிக்கும்"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"அருகிலுள்ள அல்ட்ரா-வைடுபேண்ட் சாதனங்களுக்கிடையிலான தூரத்தைத் தீர்மானித்தல்"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"அருகிலுள்ள அல்ட்ரா-வைடுபேண்ட் சாதனங்களுக்கிடையிலான தூரத்தைத் தீர்மானிக்க ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்கள்"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"குறுகிய இடைவெளி தகவல்பரிமாற்றத்தைக் கட்டுப்படுத்துதல்"</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"இப்போது உங்கள் திரையின் ஒரு பகுதியைப் பெரிதாக்கலாம்"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"அமைப்புகளில் ஆன் செய்க"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"மூடுக"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"தொடர, உங்கள் சாதனத்தின் மைக்ரோஃபோனை அணுகுவதற்கு &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ஆப்ஸுக்கு அனுமதி வேண்டும்."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"தொடர, உங்கள் சாதனத்தின் கேமராவை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ஆப்ஸுக்கு அனுமதி வேண்டும்."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ஆன் செய்"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"சாதனத்தின் மைக்ரோஃபோனுக்கான தடுப்பை நீக்குதல்"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"சாதனத்தின் கேமராவுக்கான தடுப்பை நீக்குதல்"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ஆப்ஸுக்கும் அனைத்து ஆப்ஸ் மற்றும் சேவைகளுக்கும்"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"தடுப்பை நீக்கு"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"சென்சார் தனியுரிமை"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ஆப்ஸ் ஐகான்"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ஆப்ஸ் பிராண்டிங் இமேஜ்"</string>

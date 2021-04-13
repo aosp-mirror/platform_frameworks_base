@@ -27,56 +27,61 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A CombinedVibrationEffect describes a haptic effect to be performed by one or more {@link
- * Vibrator Vibrators}.
+ * A CombinedVibration describes a combination of haptic effects to be performed by one or more
+ * {@link Vibrator Vibrators}.
  *
  * These effects may be any number of things, from single shot vibrations to complex waveforms.
+ *
  * @see VibrationEffect
  */
 @SuppressWarnings({"ParcelNotFinal", "ParcelCreator"}) // Parcel only extended here.
-public abstract class CombinedVibrationEffect implements Parcelable {
+public abstract class CombinedVibration implements Parcelable {
     private static final int PARCEL_TOKEN_MONO = 1;
     private static final int PARCEL_TOKEN_STEREO = 2;
     private static final int PARCEL_TOKEN_SEQUENTIAL = 3;
 
     /** Prevent subclassing from outside of the framework. */
-    CombinedVibrationEffect() {
+    CombinedVibration() {
     }
 
     /**
-     * Create a synced vibration effect.
+     * Create a vibration that plays a single effect in parallel on all vibrators.
      *
-     * A synced vibration effect should be performed by multiple vibrators at the same time.
+     * A parallel vibration that takes a single {@link VibrationEffect} to be performed by multiple
+     * vibrators at the same time.
      *
      * @param effect The {@link VibrationEffect} to perform.
-     * @return The synced effect.
+     * @return The combined vibration representing the single effect to be played in all vibrators.
      */
     @NonNull
-    public static CombinedVibrationEffect createSynced(@NonNull VibrationEffect effect) {
-        CombinedVibrationEffect combined = new Mono(effect);
+    public static CombinedVibration createParallel(@NonNull VibrationEffect effect) {
+        CombinedVibration combined = new Mono(effect);
         combined.validate();
         return combined;
     }
 
     /**
-     * Start creating a synced vibration effect.
+     * Start creating a vibration that plays effects in parallel on one or more vibrators.
      *
-     * A synced vibration effect should be performed by multiple vibrators at the same time.
+     * A parallel vibration takes one or more {@link VibrationEffect VibrationEffects} associated to
+     * individual vibrators to be performed at the same time.
      *
-     * @see CombinedVibrationEffect.SyncedCombination
+     * @see CombinedVibration.ParallelCombination
      */
     @NonNull
-    public static SyncedCombination startSynced() {
-        return new SyncedCombination();
+    public static ParallelCombination startParallel() {
+        return new ParallelCombination();
     }
 
     /**
-     * Start creating a sequential vibration effect.
+     * Start creating a vibration that plays effects in sequence on one or more vibrators.
      *
-     * A sequential vibration effect should be performed by multiple vibrators in order.
+     * A sequential vibration takes one or more {@link CombinedVibration CombinedVibrations} to be
+     * performed by one or more vibrators in order. Each {@link CombinedVibration} starts only after
+     * the previous one is finished.
      *
-     * @see CombinedVibrationEffect.SequentialCombination
      * @hide
+     * @see CombinedVibration.SequentialCombination
      */
     @TestApi
     @NonNull
@@ -92,7 +97,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
     /**
      * Gets the estimated duration of the combined vibration in milliseconds.
      *
-     * <p>For synced combinations this means the maximum duration of any individual {@link
+     * <p>For parallel combinations this means the maximum duration of any individual {@link
      * VibrationEffect}. For sequential combinations, this is a sum of each step and delays.
      *
      * <p>For combinations of effects without a defined end (e.g. a Waveform with a non-negative
@@ -112,15 +117,15 @@ public abstract class CombinedVibrationEffect implements Parcelable {
     public abstract boolean hasVibrator(int vibratorId);
 
     /**
-     * A combination of haptic effects that should be played in multiple vibrators in sync.
+     * A combination of haptic effects that should be played in multiple vibrators in parallel.
      *
-     * @see CombinedVibrationEffect#startSynced()
+     * @see CombinedVibration#startParallel()
      */
-    public static final class SyncedCombination {
+    public static final class ParallelCombination {
 
         private final SparseArray<VibrationEffect> mEffects = new SparseArray<>();
 
-        SyncedCombination() {
+        ParallelCombination() {
         }
 
         /**
@@ -128,33 +133,33 @@ public abstract class CombinedVibrationEffect implements Parcelable {
          *
          * @param vibratorId The id of the vibrator that should perform this effect.
          * @param effect     The effect this vibrator should play.
-         * @return The {@link CombinedVibrationEffect.SyncedCombination} object to enable adding
+         * @return The {@link ParallelCombination} object to enable adding
          * multiple effects in one chain.
          * @see VibrationEffect#createOneShot(long, int)
          */
         @NonNull
-        public SyncedCombination addVibrator(int vibratorId, @NonNull VibrationEffect effect) {
+        public ParallelCombination addVibrator(int vibratorId, @NonNull VibrationEffect effect) {
             mEffects.put(vibratorId, effect);
             return this;
         }
 
         /**
-         * Combine all of the added effects into a combined effect.
+         * Combine all of the added effects into a {@link CombinedVibration}.
          *
-         * The {@link CombinedVibrationEffect.SyncedCombination} object is still valid after this
+         * The {@link ParallelCombination} object is still valid after this
          * call, so you can continue adding more effects to it and generating more
-         * {@link CombinedVibrationEffect}s by calling this method again.
+         * {@link CombinedVibration}s by calling this method again.
          *
-         * @return The {@link CombinedVibrationEffect} resulting from combining the added effects to
-         * be played in sync.
+         * @return The {@link CombinedVibration} resulting from combining the added effects to
+         * be played in parallel.
          */
         @NonNull
-        public CombinedVibrationEffect combine() {
+        public CombinedVibration combine() {
             if (mEffects.size() == 0) {
                 throw new IllegalStateException(
                         "Combination must have at least one element to combine.");
             }
-            CombinedVibrationEffect combined = new Stereo(mEffects);
+            CombinedVibration combined = new Stereo(mEffects);
             combined.validate();
             return combined;
         }
@@ -163,13 +168,13 @@ public abstract class CombinedVibrationEffect implements Parcelable {
     /**
      * A combination of haptic effects that should be played in multiple vibrators in sequence.
      *
-     * @see CombinedVibrationEffect#startSequential()
      * @hide
+     * @see CombinedVibration#startSequential()
      */
     @TestApi
     public static final class SequentialCombination {
 
-        private final ArrayList<CombinedVibrationEffect> mEffects = new ArrayList<>();
+        private final ArrayList<CombinedVibration> mEffects = new ArrayList<>();
         private final ArrayList<Integer> mDelays = new ArrayList<>();
 
         SequentialCombination() {
@@ -178,11 +183,12 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         /**
          * Add a single vibration effect to be performed next.
          *
-         * Similar to {@link #addNext(int, VibrationEffect, int)}, but with no delay.
+         * Similar to {@link #addNext(int, VibrationEffect, int)}, but with no delay. The effect
+         * will start playing immediately after the previous vibration is finished.
          *
          * @param vibratorId The id of the vibrator that should perform this effect.
          * @param effect     The effect this vibrator should play.
-         * @return The {@link CombinedVibrationEffect.SequentialCombination} object to enable adding
+         * @return The {@link CombinedVibration.SequentialCombination} object to enable adding
          * multiple effects in one chain.
          */
         @NonNull
@@ -193,47 +199,56 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         /**
          * Add a single vibration effect to be performed next.
          *
+         * The delay is applied immediately after the previous vibration is finished. The effect
+         * will start playing after the delay.
+         *
          * @param vibratorId The id of the vibrator that should perform this effect.
          * @param effect     The effect this vibrator should play.
          * @param delay      The amount of time, in milliseconds, to wait between playing the prior
-         *                   effect and this one.
-         * @return The {@link CombinedVibrationEffect.SequentialCombination} object to enable adding
+         *                   vibration and this one, starting at the time the previous vibration in
+         *                   this sequence is finished.
+         * @return The {@link CombinedVibration.SequentialCombination} object to enable adding
          * multiple effects in one chain.
          */
         @NonNull
         public SequentialCombination addNext(int vibratorId, @NonNull VibrationEffect effect,
                 int delay) {
             return addNext(
-                    CombinedVibrationEffect.startSynced().addVibrator(vibratorId, effect).combine(),
+                    CombinedVibration.startParallel().addVibrator(vibratorId, effect).combine(),
                     delay);
         }
 
         /**
          * Add a combined vibration effect to be performed next.
          *
-         * Similar to {@link #addNext(CombinedVibrationEffect, int)}, but with no delay.
+         * Similar to {@link #addNext(CombinedVibration, int)}, but with no delay. The effect will
+         * start playing immediately after the previous vibration is finished.
          *
          * @param effect The combined effect to be performed next.
-         * @return The {@link CombinedVibrationEffect.SequentialCombination} object to enable adding
+         * @return The {@link CombinedVibration.SequentialCombination} object to enable adding
          * multiple effects in one chain.
          * @see VibrationEffect#createOneShot(long, int)
          */
         @NonNull
-        public SequentialCombination addNext(@NonNull CombinedVibrationEffect effect) {
+        public SequentialCombination addNext(@NonNull CombinedVibration effect) {
             return addNext(effect, /* delay= */ 0);
         }
 
         /**
-         * Add a one shot vibration effect to be performed by the specified vibrator.
+         * Add a combined vibration effect to be performed next.
+         *
+         * The delay is applied immediately after the previous vibration is finished. The vibration
+         * will start playing after the delay.
          *
          * @param effect The combined effect to be performed next.
          * @param delay  The amount of time, in milliseconds, to wait between playing the prior
-         *               effect and this one.
-         * @return The {@link CombinedVibrationEffect.SequentialCombination} object to enable adding
+         *               vibration and this one, starting at the time the previous vibration in this
+         *               sequence is finished.
+         * @return The {@link CombinedVibration.SequentialCombination} object to enable adding
          * multiple effects in one chain.
          */
         @NonNull
-        public SequentialCombination addNext(@NonNull CombinedVibrationEffect effect, int delay) {
+        public SequentialCombination addNext(@NonNull CombinedVibration effect, int delay) {
             if (effect instanceof Sequential) {
                 Sequential sequentialEffect = (Sequential) effect;
                 int firstEffectIndex = mDelays.size();
@@ -250,32 +265,33 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         /**
          * Combine all of the added effects in sequence.
          *
-         * The {@link CombinedVibrationEffect.SequentialCombination} object is still valid after
+         * The {@link CombinedVibration.SequentialCombination} object is still valid after
          * this call, so you can continue adding more effects to it and generating more {@link
-         * CombinedVibrationEffect}s by calling this method again.
+         * CombinedVibration}s by calling this method again.
          *
-         * @return The {@link CombinedVibrationEffect} resulting from combining the added effects to
+         * @return The {@link CombinedVibration} resulting from combining the added effects to
          * be played in sequence.
          */
         @NonNull
-        public CombinedVibrationEffect combine() {
+        public CombinedVibration combine() {
             if (mEffects.size() == 0) {
                 throw new IllegalStateException(
                         "Combination must have at least one element to combine.");
             }
-            CombinedVibrationEffect combined = new Sequential(mEffects, mDelays);
+            CombinedVibration combined = new Sequential(mEffects, mDelays);
             combined.validate();
             return combined;
         }
     }
 
     /**
-     * Represents a single {@link VibrationEffect} that should be executed in all vibrators in sync.
+     * Represents a single {@link VibrationEffect} that should be played in all vibrators at the
+     * same time.
      *
      * @hide
      */
     @TestApi
-    public static final class Mono extends CombinedVibrationEffect {
+    public static final class Mono extends CombinedVibration {
         private final VibrationEffect mEffect;
 
         Mono(Parcel in) {
@@ -357,12 +373,13 @@ public abstract class CombinedVibrationEffect implements Parcelable {
     }
 
     /**
-     * Represents a list of {@link VibrationEffect}s that should be executed in sync.
+     * Represents a set of {@link VibrationEffect VibrationEffects} associated to individual
+     * vibrators that should be played at the same time.
      *
      * @hide
      */
     @TestApi
-    public static final class Stereo extends CombinedVibrationEffect {
+    public static final class Stereo extends CombinedVibration {
 
         /** Mapping vibrator ids to effects. */
         private final SparseArray<VibrationEffect> mEffects;
@@ -383,7 +400,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             }
         }
 
-        /** Effects to be performed in sync, where each key represents the vibrator id. */
+        /** Effects to be performed in parallel, where each key represents the vibrator id. */
         @NonNull
         public SparseArray<VibrationEffect> getEffects() {
             return mEffects;
@@ -489,13 +506,14 @@ public abstract class CombinedVibrationEffect implements Parcelable {
     }
 
     /**
-     * Represents a list of {@link VibrationEffect}s that should be executed in sequence.
+     * Represents a list of {@link CombinedVibration CombinedVibrations} that should be played in
+     * sequence.
      *
      * @hide
      */
     @TestApi
-    public static final class Sequential extends CombinedVibrationEffect {
-        private final List<CombinedVibrationEffect> mEffects;
+    public static final class Sequential extends CombinedVibration {
+        private final List<CombinedVibration> mEffects;
         private final List<Integer> mDelays;
 
         Sequential(Parcel in) {
@@ -504,11 +522,11 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             mDelays = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 mDelays.add(in.readInt());
-                mEffects.add(CombinedVibrationEffect.CREATOR.createFromParcel(in));
+                mEffects.add(CombinedVibration.CREATOR.createFromParcel(in));
             }
         }
 
-        Sequential(@NonNull List<CombinedVibrationEffect> effects,
+        Sequential(@NonNull List<CombinedVibration> effects,
                 @NonNull List<Integer> delays) {
             mEffects = new ArrayList<>(effects);
             mDelays = new ArrayList<>(delays);
@@ -516,7 +534,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
 
         /** Effects to be performed in sequence. */
         @NonNull
-        public List<CombinedVibrationEffect> getEffects() {
+        public List<CombinedVibration> getEffects() {
             return mEffects;
         }
 
@@ -532,7 +550,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             long durations = 0;
             final int effectCount = mEffects.size();
             for (int i = 0; i < effectCount; i++) {
-                CombinedVibrationEffect effect = mEffects.get(i);
+                CombinedVibration effect = mEffects.get(i);
                 long duration = effect.getDuration();
                 if (duration == Long.MAX_VALUE) {
                     // If any duration is repeating, this combination duration is also repeating.
@@ -570,7 +588,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
                 }
             }
             for (int i = 0; i < effectCount; i++) {
-                CombinedVibrationEffect effect = mEffects.get(i);
+                CombinedVibration effect = mEffects.get(i);
                 if (effect instanceof Sequential) {
                     throw new IllegalArgumentException(
                             "There should be no nested sequential effects in a combined effect");
@@ -644,10 +662,10 @@ public abstract class CombinedVibrationEffect implements Parcelable {
     }
 
     @NonNull
-    public static final Parcelable.Creator<CombinedVibrationEffect> CREATOR =
-            new Parcelable.Creator<CombinedVibrationEffect>() {
+    public static final Parcelable.Creator<CombinedVibration> CREATOR =
+            new Parcelable.Creator<CombinedVibration>() {
                 @Override
-                public CombinedVibrationEffect createFromParcel(Parcel in) {
+                public CombinedVibration createFromParcel(Parcel in) {
                     int token = in.readInt();
                     if (token == PARCEL_TOKEN_MONO) {
                         return new Mono(in);
@@ -662,8 +680,8 @@ public abstract class CombinedVibrationEffect implements Parcelable {
                 }
 
                 @Override
-                public CombinedVibrationEffect[] newArray(int size) {
-                    return new CombinedVibrationEffect[size];
+                public CombinedVibration[] newArray(int size) {
+                    return new CombinedVibration[size];
                 }
             };
 }

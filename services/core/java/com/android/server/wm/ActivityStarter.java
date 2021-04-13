@@ -2633,6 +2633,12 @@ class ActivityStarter {
                 mOptions = null;
             }
         }
+
+        if (mPreferredWindowingMode != WINDOWING_MODE_UNDEFINED
+                && intentTask.getWindowingMode() != mPreferredWindowingMode) {
+            intentTask.setWindowingMode(mPreferredWindowingMode);
+        }
+
         // Need to update mTargetRootTask because if task was moved out of it, the original root
         // task may be destroyed.
         mTargetRootTask = intentActivity.getRootTask();

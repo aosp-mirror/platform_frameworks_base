@@ -15,7 +15,20 @@
   limitations under the License.
   -->
 <resources>
+    <!--DEPRECATED. It will remove after all of client team migrated to new style. -->
     <style name="PreferenceTheme" parent="@style/PreferenceThemeOverlay">
+        <item name="preferenceCategoryStyle">@style/SettingsCategoryPreference</item>
+        <item name="preferenceStyle">@style/SettingsPreference</item>
+        <item name="checkBoxPreferenceStyle">@style/SettingsCheckBoxPreference</item>
+        <item name="dialogPreferenceStyle">@style/SettingsPreference</item>
+        <item name="editTextPreferenceStyle">@style/SettingsEditTextPreference</item>
+        <item name="dropdownPreferenceStyle">@style/SettingsDropdownPreference</item>
+        <item name="switchPreferenceStyle">@style/SettingsSwitchPreference</item>
+        <item name="seekBarPreferenceStyle">@style/SettingsSeekbarPreference</item>
+        <item name="footerPreferenceStyle">@style/Preference.Material</item>
+    </style>
+
+    <style name="SettingsPreferenceTheme" parent="@style/PreferenceThemeOverlay">
         <item name="preferenceCategoryStyle">@style/SettingsCategoryPreference</item>
         <item name="preferenceStyle">@style/SettingsPreference</item>
         <item name="checkBoxPreferenceStyle">@style/SettingsCheckBoxPreference</item>

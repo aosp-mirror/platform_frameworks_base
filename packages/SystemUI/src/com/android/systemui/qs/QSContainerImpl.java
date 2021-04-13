@@ -24,6 +24,7 @@ import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
 import androidx.dynamicanimation.animation.FloatPropertyCompat;
@@ -70,6 +71,7 @@ public class QSContainerImpl extends FrameLayout {
     private boolean mBackgroundVisible;
     private int mContentPadding = -1;
     private boolean mAnimateBottomOnNextLayout;
+    private int mNavBarInset = 0;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -137,6 +139,12 @@ public class QSContainerImpl extends FrameLayout {
     }
 
     @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        mNavBarInset = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+        return super.onApplyWindowInsets(insets);
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // QSPanel will show as many rows as it can (up to TileLayout.MAX_ROWS) such that the
         // bottom and footer are inside the screen.
@@ -146,7 +154,7 @@ public class QSContainerImpl extends FrameLayout {
         // subtract its height. We do not care if the collapsed notifications fit in the screen.
         int maxQs = getDisplayHeight() - layoutParams.topMargin - layoutParams.bottomMargin
                 - getPaddingBottom();
-
+        maxQs -= mNavBarInset;
         int padding = mPaddingLeft + mPaddingRight + layoutParams.leftMargin
                 + layoutParams.rightMargin;
         final int qsPanelWidthSpec = getChildMeasureSpec(widthMeasureSpec, padding,

@@ -33,7 +33,7 @@
     <!-- The color of the text inside a notification -->
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_dark</color>
 
-    <color name="notif_pill_background">@android:color/system_neutral1_800</color>
+    <color name="notif_pill_background">@*android:color/surface_dark</color>
     <color name="notif_pill_text">@android:color/system_neutral1_50</color>
 
     <color name="notification_guts_link_icon_tint">@color/GM2_grey_500</color>
@@ -46,9 +46,6 @@
     <color name="notification_section_header_label_color">@color/GM2_grey_200</color>
     <color name="notification_section_clear_all_btn_color">@color/GM2_grey_500</color>
     <color name="notification_channel_dialog_separator">@color/GM2_grey_700</color>
-
-    <!-- The color of the background in the bottom part of QSCustomizer -->
-    <color name="qs_customize_decoration">@color/GM2_grey_900</color>
 
     <!-- The color of the background in the separated list of the Global Actions menu -->
     <color name="global_actions_separated_background">@color/GM2_grey_900</color>

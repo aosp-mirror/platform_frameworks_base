@@ -27,6 +27,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
 import java.util.Locale;
@@ -45,6 +46,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private int mLockScreenColor;
 
     private boolean mIsDozing;
+    private boolean mIsCharging;
     private float mDozeAmount;
     private Locale mLocale;
 
@@ -56,7 +58,8 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     public AnimatableClockController(
             AnimatableClockView view,
             StatusBarStateController statusBarStateController,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            BatteryController batteryController) {
         super(view);
         mStatusBarStateController = statusBarStateController;
         mIsDozing = mStatusBarStateController.isDozing();
@@ -68,6 +71,16 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
                 R.dimen.keyguard_clock_line_spacing_scale_burmese);
         mDefaultLineSpacing = getContext().getResources().getFloat(
                 R.dimen.keyguard_clock_line_spacing_scale);
+
+        batteryController.addCallback(new BatteryController.BatteryStateChangeCallback() {
+            @Override
+            public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+                if (!mIsCharging && charging) {
+                    mView.animateCharge(mIsDozing);
+                }
+                mIsCharging = charging;
+            }
+        });
     }
 
     private BroadcastReceiver mLocaleBroadcastReceiver = new BroadcastReceiver() {
