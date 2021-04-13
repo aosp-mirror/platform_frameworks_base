@@ -111,7 +111,8 @@ public class DataManager {
     private static final long RECENT_NOTIFICATIONS_MAX_AGE_MS = 10 * DateUtils.DAY_IN_MILLIS;
     private static final long QUERY_EVENTS_MAX_AGE_MS = 5L * DateUtils.MINUTE_IN_MILLIS;
     private static final long USAGE_STATS_QUERY_INTERVAL_SEC = 120L;
-    @VisibleForTesting static final int MAX_CACHED_RECENT_SHORTCUTS = 30;
+    @VisibleForTesting
+    static final int MAX_CACHED_RECENT_SHORTCUTS = 30;
 
     private final Context mContext;
     private final Injector mInjector;
@@ -256,14 +257,23 @@ public class DataManager {
     @Nullable
     private ConversationChannel getConversationChannel(String packageName, int userId,
             String shortcutId, ConversationInfo conversationInfo) {
+        ShortcutInfo shortcutInfo = getShortcut(packageName, userId, shortcutId);
+        return getConversationChannel(shortcutInfo, conversationInfo);
+    }
+
+    @Nullable
+    private ConversationChannel getConversationChannel(ShortcutInfo shortcutInfo,
+            ConversationInfo conversationInfo) {
         if (conversationInfo == null) {
             return null;
         }
-        ShortcutInfo shortcutInfo = getShortcut(packageName, userId, shortcutId);
         if (shortcutInfo == null) {
-            Slog.e(TAG, " Shortcut no longer found: " + shortcutId);
+            Slog.e(TAG, " Shortcut no longer found");
             return null;
         }
+        String packageName = shortcutInfo.getPackage();
+        String shortcutId = shortcutInfo.getId();
+        int userId = shortcutInfo.getUserId();
         int uid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
         NotificationChannel parentChannel =
                 mNotificationManagerInternal.getNotificationChannel(packageName, uid,
@@ -363,7 +373,9 @@ public class DataManager {
                     }
                 }
                 builder.setStatuses(newStatuses);
-                cs.addOrUpdate(builder.build());
+                updateConversationStoreThenNotifyListeners(cs, builder.build(),
+                        packageData.getPackageName(),
+                        packageData.getUserId());
             });
         });
     }
@@ -397,11 +409,7 @@ public class DataManager {
         ConversationInfo convToModify = getConversationInfoOrThrow(cs, conversationId);
         ConversationInfo.Builder builder = new ConversationInfo.Builder(convToModify);
         builder.addOrUpdateStatus(status);
-        ConversationInfo modifiedConv = builder.build();
-        cs.addOrUpdate(modifiedConv);
-        ConversationChannel conversation = getConversationChannel(packageName, userId,
-                conversationId, modifiedConv);
-        notifyConversationsListeners(Arrays.asList(conversation));
+        updateConversationStoreThenNotifyListeners(cs, builder.build(), packageName, userId);
 
         if (status.getEndTimeMillis() >= 0) {
             mStatusExpReceiver.scheduleExpiration(
@@ -416,7 +424,7 @@ public class DataManager {
         ConversationInfo convToModify = getConversationInfoOrThrow(cs, conversationId);
         ConversationInfo.Builder builder = new ConversationInfo.Builder(convToModify);
         builder.clearStatus(statusId);
-        cs.addOrUpdate(builder.build());
+        updateConversationStoreThenNotifyListeners(cs, builder.build(), packageName, userId);
     }
 
     public void clearStatuses(String packageName, int userId, String conversationId) {
@@ -424,7 +432,7 @@ public class DataManager {
         ConversationInfo convToModify = getConversationInfoOrThrow(cs, conversationId);
         ConversationInfo.Builder builder = new ConversationInfo.Builder(convToModify);
         builder.setStatuses(null);
-        cs.addOrUpdate(builder.build());
+        updateConversationStoreThenNotifyListeners(cs, builder.build(), packageName, userId);
     }
 
     public @NonNull List<ConversationStatus> getStatuses(String packageName, int userId,
@@ -882,7 +890,8 @@ public class DataManager {
                 }
             }
         }
-        conversationStore.addOrUpdate(builder.build());
+        updateConversationStoreThenNotifyListeners(conversationStore, builder.build(),
+                shortcutInfo);
     }
 
     @VisibleForTesting
@@ -945,6 +954,7 @@ public class DataManager {
                     conversationSelector.mConversationStore =
                             packageData.getConversationStore();
                     conversationSelector.mConversationInfo = ci;
+                    conversationSelector.mPackageName = packageData.getPackageName();
                 }
             });
             if (conversationSelector.mConversationInfo == null) {
@@ -955,13 +965,16 @@ public class DataManager {
                     new ConversationInfo.Builder(conversationSelector.mConversationInfo);
             builder.setContactStarred(helper.isStarred());
             builder.setContactPhoneNumber(helper.getPhoneNumber());
-            conversationSelector.mConversationStore.addOrUpdate(builder.build());
+            updateConversationStoreThenNotifyListeners(conversationSelector.mConversationStore,
+                    builder.build(),
+                    conversationSelector.mPackageName, userId);
             mLastUpdatedTimestamp = helper.getLastUpdatedTimestamp();
         }
 
         private class ConversationSelector {
             private ConversationStore mConversationStore = null;
             private ConversationInfo mConversationInfo = null;
+            private String mPackageName = null;
         }
     }
 
@@ -1140,6 +1153,7 @@ public class DataManager {
                         .setLastEventTimestamp(sbn.getPostTime())
                         .setParentNotificationChannelId(sbn.getNotification().getChannelId())
                         .build();
+                // Don't update listeners on notifications posted.
                 packageData.getConversationStore().addOrUpdate(updated);
 
                 EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
@@ -1215,7 +1229,8 @@ public class DataManager {
                     builder.setBubbled(false);
                     break;
             }
-            conversationStore.addOrUpdate(builder.build());
+            updateConversationStoreThenNotifyListeners(conversationStore, builder.build(), pkg,
+                    packageData.getUserId());
         }
 
         synchronized boolean hasActiveNotifications(String packageName, String shortcutId) {
@@ -1253,7 +1268,9 @@ public class DataManager {
                 ConversationInfo updated = new ConversationInfo.Builder(conversationInfo)
                         .setLastEventTimestamp(event.getTimestamp())
                         .build();
-                packageData.getConversationStore().addOrUpdate(updated);
+                updateConversationStoreThenNotifyListeners(packageData.getConversationStore(),
+                        updated,
+                        packageData.getPackageName(), packageData.getUserId());
             }
         }
     }
@@ -1266,7 +1283,27 @@ public class DataManager {
         }
     }
 
-    // TODO(b/178792356): Trigger ConversationsListener on all-related data changes.
+    private void updateConversationStoreThenNotifyListeners(ConversationStore cs,
+            ConversationInfo modifiedConv,
+            String packageName, int userId) {
+        cs.addOrUpdate(modifiedConv);
+        ConversationChannel channel = getConversationChannel(packageName, userId,
+                modifiedConv.getShortcutId(), modifiedConv);
+        if (channel != null) {
+            notifyConversationsListeners(Arrays.asList(channel));
+        }
+    }
+
+    private void updateConversationStoreThenNotifyListeners(ConversationStore cs,
+            ConversationInfo modifiedConv, ShortcutInfo shortcutInfo) {
+        cs.addOrUpdate(modifiedConv);
+        ConversationChannel channel = getConversationChannel(shortcutInfo, modifiedConv);
+        if (channel != null) {
+            notifyConversationsListeners(Arrays.asList(channel));
+        }
+    }
+
+
     @VisibleForTesting
     void notifyConversationsListeners(
             @Nullable final List<ConversationChannel> changedConversations) {
