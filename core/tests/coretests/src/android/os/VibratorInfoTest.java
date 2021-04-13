@@ -35,6 +35,7 @@ import org.junit.runners.JUnit4;
 public class VibratorInfoTest {
     private static final float TEST_TOLERANCE = 1e-5f;
 
+    private static final int TEST_VIBRATOR_ID = 1;
     private static final float TEST_MIN_FREQUENCY = 50;
     private static final float TEST_RESONANT_FREQUENCY = 150;
     private static final float TEST_FREQUENCY_RESOLUTION = 25;
@@ -50,9 +51,9 @@ public class VibratorInfoTest {
 
     @Test
     public void testHasAmplitudeControl() {
-        VibratorInfo noCapabilities = new InfoBuilder().build();
+        VibratorInfo noCapabilities = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
         assertFalse(noCapabilities.hasAmplitudeControl());
-        VibratorInfo composeAndAmplitudeControl = new InfoBuilder()
+        VibratorInfo composeAndAmplitudeControl = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS
                         | IVibrator.CAP_AMPLITUDE_CONTROL)
                 .build();
@@ -61,7 +62,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testHasCapabilities() {
-        VibratorInfo info = new InfoBuilder()
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
                 .build();
         assertTrue(info.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS));
@@ -70,8 +71,8 @@ public class VibratorInfoTest {
 
     @Test
     public void testIsEffectSupported() {
-        VibratorInfo noEffects = new InfoBuilder().build();
-        VibratorInfo canClick = new InfoBuilder()
+        VibratorInfo noEffects = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
+        VibratorInfo canClick = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
                 .build();
         assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN,
@@ -84,7 +85,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testIsPrimitiveSupported() {
-        VibratorInfo info = new InfoBuilder()
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
                 .setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .build();
@@ -92,7 +93,7 @@ public class VibratorInfoTest {
         assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_TICK));
 
         // Returns false when there is no compose capability.
-        info = new InfoBuilder()
+        info = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .build();
         assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
@@ -100,9 +101,10 @@ public class VibratorInfoTest {
 
     @Test
     public void testGetDefaultBraking_returnsFirstSupportedBraking() {
-        assertEquals(Braking.NONE, new InfoBuilder().build().getDefaultBraking());
+        assertEquals(Braking.NONE, new VibratorInfo.Builder(
+                TEST_VIBRATOR_ID).build().getDefaultBraking());
         assertEquals(Braking.CLAB,
-                new InfoBuilder()
+                new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                         .setSupportedBraking(Braking.NONE, Braking.CLAB)
                         .build()
                         .getDefaultBraking());
@@ -111,33 +113,34 @@ public class VibratorInfoTest {
     @Test
     public void testGetFrequencyRange_invalidFrequencyMappingReturnsEmptyRange() {
         // Invalid, contains NaN values or empty array.
-        assertEquals(Range.create(0f, 0f), new InfoBuilder().build().getFrequencyRange());
-        assertEquals(Range.create(0f, 0f), new InfoBuilder()
+        assertEquals(Range.create(0f, 0f), new VibratorInfo.Builder(
+                TEST_VIBRATOR_ID).build().getFrequencyRange());
+        assertEquals(Range.create(0f, 0f), new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(
                         Float.NaN, 150, 25, 50, TEST_AMPLITUDE_MAP))
                 .build().getFrequencyRange());
-        assertEquals(Range.create(0f, 0f), new InfoBuilder()
+        assertEquals(Range.create(0f, 0f), new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(
                         50, Float.NaN, 25, 50, TEST_AMPLITUDE_MAP))
                 .build().getFrequencyRange());
-        assertEquals(Range.create(0f, 0f), new InfoBuilder()
+        assertEquals(Range.create(0f, 0f), new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(
                         50, 150, Float.NaN, 50, TEST_AMPLITUDE_MAP))
                 .build().getFrequencyRange());
-        assertEquals(Range.create(0f, 0f), new InfoBuilder()
+        assertEquals(Range.create(0f, 0f), new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(
                         50, 150, 25, Float.NaN, TEST_AMPLITUDE_MAP))
                 .build().getFrequencyRange());
-        assertEquals(Range.create(0f, 0f), new InfoBuilder()
+        assertEquals(Range.create(0f, 0f), new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(50, 150, 25, 50, null))
                 .build().getFrequencyRange());
         // Invalid, minFrequency > resonantFrequency
-        assertEquals(Range.create(0f, 0f), new InfoBuilder()
+        assertEquals(Range.create(0f, 0f), new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(
                         /* minFrequencyHz= */ 250, /* resonantFrequency= */ 150, 25, 50, null))
                 .build().getFrequencyRange());
         // Invalid, maxFrequency < resonantFrequency by changing resolution.
-        assertEquals(Range.create(0f, 0f), new InfoBuilder()
+        assertEquals(Range.create(0f, 0f), new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(
                         50, 150, /* frequencyResolutionHz= */10, 50, null))
                 .build().getFrequencyRange());
@@ -145,7 +148,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testGetFrequencyRange_safeRangeLimitedByMaxFrequency() {
-        VibratorInfo info = new InfoBuilder()
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(
                         /* minFrequencyHz= */ 50, /* resonantFrequencyHz= */ 150,
                         /* frequencyResolutionHz= */ 25, /* suggestedSafeRangeHz= */ 200,
@@ -159,7 +162,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testGetFrequencyRange_safeRangeLimitedByMinFrequency() {
-        VibratorInfo info = new InfoBuilder()
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(
                         /* minFrequencyHz= */ 50, /* resonantFrequencyHz= */ 150,
                         /* frequencyResolutionHz= */ 50, /* suggestedSafeRangeHz= */ 200,
@@ -173,7 +176,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testGetFrequencyRange_validMappingReturnsFullRelativeRange() {
-        VibratorInfo info = new InfoBuilder()
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(
                         /* minFrequencyHz= */ 50, /* resonantFrequencyHz= */ 150,
                         /* frequencyResolutionHz= */ 50, /* suggestedSafeRangeHz= */ 100,
@@ -187,7 +190,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testAbsoluteFrequency_emptyMappingReturnsNaN() {
-        VibratorInfo info = new InfoBuilder().build();
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
         assertTrue(Float.isNaN(info.getAbsoluteFrequency(-1)));
         assertTrue(Float.isNaN(info.getAbsoluteFrequency(0)));
         assertTrue(Float.isNaN(info.getAbsoluteFrequency(1)));
@@ -195,7 +198,8 @@ public class VibratorInfoTest {
 
     @Test
     public void testAbsoluteFrequency_validRangeReturnsOriginalValue() {
-        VibratorInfo info = new InfoBuilder().setFrequencyMapping(TEST_FREQUENCY_MAPPING).build();
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID).setFrequencyMapping(
+                TEST_FREQUENCY_MAPPING).build();
         assertEquals(TEST_RESONANT_FREQUENCY, info.getAbsoluteFrequency(0), TEST_TOLERANCE);
 
         // Safe range [-1, 1] = [125Hz, 175Hz] defined by suggested safe range 100Hz
@@ -213,7 +217,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testGetMaxAmplitude_emptyMappingReturnsOnlyResonantFrequency() {
-        VibratorInfo info = new InfoBuilder().build();
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
         assertEquals(1f, info.getMaxAmplitude(0), TEST_TOLERANCE);
         assertEquals(0f, info.getMaxAmplitude(0.1f), TEST_TOLERANCE);
         assertEquals(0f, info.getMaxAmplitude(-1), TEST_TOLERANCE);
@@ -221,7 +225,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testGetMaxAmplitude_validMappingReturnsMappedValues() {
-        VibratorInfo info = new InfoBuilder()
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(/* minFrequencyHz= */ 50,
                         /* resonantFrequencyHz= */ 150, /* frequencyResolutionHz= */ 25,
                         /* suggestedSafeRangeHz= */ 50, TEST_AMPLITUDE_MAP))
@@ -243,8 +247,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testEquals() {
-        InfoBuilder completeBuilder = new InfoBuilder()
-                .setId(1)
+        VibratorInfo.Builder completeBuilder = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
                 .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
                 .setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK)
@@ -298,9 +301,8 @@ public class VibratorInfoTest {
                 .build();
         assertNotEquals(complete, completeWithDifferentQFactor);
 
-        VibratorInfo empty = new InfoBuilder().setId(1).build();
-        VibratorInfo emptyWithKnownSupport = new InfoBuilder()
-                .setId(1)
+        VibratorInfo empty = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
+        VibratorInfo emptyWithKnownSupport = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setSupportedEffects()
                 .setSupportedPrimitives()
                 .build();
@@ -309,8 +311,7 @@ public class VibratorInfoTest {
 
     @Test
     public void testParceling() {
-        VibratorInfo original = new InfoBuilder()
-                .setId(1)
+        VibratorInfo original = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
                 .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
                 .setSupportedPrimitives(null)
@@ -323,55 +324,5 @@ public class VibratorInfoTest {
         parcel.setDataPosition(0);
         VibratorInfo restored = VibratorInfo.CREATOR.createFromParcel(parcel);
         assertEquals(original, restored);
-    }
-
-    private static class InfoBuilder {
-        private int mId = 0;
-        private int mCapabilities = 0;
-        private int[] mSupportedEffects = null;
-        private int[] mSupportedBraking = null;
-        private int[] mSupportedPrimitives = null;
-        private float mQFactor = Float.NaN;
-        private VibratorInfo.FrequencyMapping mFrequencyMapping = EMPTY_FREQUENCY_MAPPING;
-
-        public InfoBuilder setId(int id) {
-            mId = id;
-            return this;
-        }
-
-        public InfoBuilder setCapabilities(int capabilities) {
-            mCapabilities = capabilities;
-            return this;
-        }
-
-        public InfoBuilder setSupportedEffects(int... supportedEffects) {
-            mSupportedEffects = supportedEffects;
-            return this;
-        }
-
-        public InfoBuilder setSupportedBraking(int... supportedBraking) {
-            mSupportedBraking = supportedBraking;
-            return this;
-        }
-
-        public InfoBuilder setSupportedPrimitives(int... supportedPrimitives) {
-            mSupportedPrimitives = supportedPrimitives;
-            return this;
-        }
-
-        public InfoBuilder setQFactor(float qFactor) {
-            mQFactor = qFactor;
-            return this;
-        }
-
-        public InfoBuilder setFrequencyMapping(VibratorInfo.FrequencyMapping frequencyMapping) {
-            mFrequencyMapping = frequencyMapping;
-            return this;
-        }
-
-        public VibratorInfo build() {
-            return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
-                    mSupportedPrimitives, mQFactor, mFrequencyMapping);
-        }
     }
 }
