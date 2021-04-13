@@ -1398,6 +1398,7 @@
     <dimen name="max_people_avatar_size_for_large_content">64dp</dimen>
     <dimen name="max_people_avatar_size">108dp</dimen>
     <dimen name="name_text_size_for_small">14sp</dimen>
+    <dimen name="name_text_size_for_medium">14sp</dimen>
     <dimen name="name_text_size_for_large">24sp</dimen>
     <dimen name="content_text_size_for_medium">12sp</dimen>
     <dimen name="content_text_size_for_large">14sp</dimen>
