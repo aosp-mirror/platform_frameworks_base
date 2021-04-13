@@ -34,6 +34,8 @@ import com.android.internal.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 
 /**
@@ -346,17 +348,22 @@ public final class DomainVerificationManager {
      * an Intent with that domain. That will be decided by the set of apps which
      * are the highest priority level, ignoring all lower priority levels.
      *
-     * By default the list will be returned ordered from lowest to highest
-     * priority.
+     * The set will be ordered from lowest to highest priority.
      *
      * @hide
      */
     @SystemApi
     @NonNull
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
-    public List<DomainOwner> getOwnersForDomain(@NonNull String domain) {
+    public SortedSet<DomainOwner> getOwnersForDomain(@NonNull String domain) {
         try {
-            return mDomainVerificationManager.getOwnersForDomain(domain, mContext.getUserId());
+            final List<DomainOwner> orderedList = mDomainVerificationManager.getOwnersForDomain(
+                    domain, mContext.getUserId());
+            SortedSet<DomainOwner> set = new TreeSet<>(
+                    (first, second) -> Integer.compare(orderedList.indexOf(first),
+                            orderedList.indexOf(second)));
+            set.addAll(orderedList);
+            return set;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
