@@ -8094,20 +8094,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     + " as device owner for user " + userId);
             return false;
         }
-        if (admin == null
-                || !isPackageInstalledForUser(admin.getPackageName(), userId)) {
-            throw new IllegalArgumentException("Invalid component " + admin
-                    + " for device owner");
-        }
+        Preconditions.checkArgument(admin != null);
 
         final CallerIdentity caller = getCallerIdentity();
         synchronized (getLockObject()) {
             enforceCanSetDeviceOwnerLocked(caller, admin, userId);
+            Preconditions.checkArgument(isPackageInstalledForUser(admin.getPackageName(), userId),
+                    "Invalid component " + admin + " for device owner");
             final ActiveAdmin activeAdmin = getActiveAdminUncheckedLocked(admin, userId);
-            if (activeAdmin == null
-                    || getUserData(userId).mRemovingAdmins.contains(admin)) {
-                throw new IllegalArgumentException("Not active admin: " + admin);
-            }
+            Preconditions.checkArgument(activeAdmin != null && !getUserData(
+                    userId).mRemovingAdmins.contains(admin), "Not active admin: " + admin);
 
             // Shutting down backup manager service permanently.
             toggleBackupServiceActive(UserHandle.USER_SYSTEM, /* makeActive= */ false);
