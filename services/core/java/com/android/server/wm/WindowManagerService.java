@@ -730,7 +730,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final TaskSnapshotController mTaskSnapshotController;
 
-    final BlurController mBlurController = new BlurController();
+    final BlurController mBlurController;
 
     boolean mIsTouchDevice;
     boolean mIsFakeTouchDevice;
@@ -1413,6 +1413,8 @@ public class WindowManagerService extends IWindowManager.Stub
         setGlobalShadowSettings();
         mAnrController = new AnrController(this);
         mStartingSurfaceController = new StartingSurfaceController(this);
+
+        mBlurController = new BlurController(mContext, mPowerManager);
     }
 
     DisplayAreaPolicy.Provider getDisplayAreaPolicyProvider() {
