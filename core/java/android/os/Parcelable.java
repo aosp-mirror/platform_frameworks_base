@@ -27,10 +27,39 @@ import java.lang.annotation.RetentionPolicy;
  * and restored from a {@link Parcel}.  Classes implementing the Parcelable
  * interface must also have a non-null static field called <code>CREATOR</code>
  * of a type that implements the {@link Parcelable.Creator} interface.
- * 
+ *
  * <p>A typical implementation of Parcelable is:</p>
- * 
- * <pre>
+ *
+ * <div>
+ * <div class="ds-selector-tabs"><section><h3 id="kotlin">Kotlin</h3>
+ * <pre class="prettyprint lang-kotlin">
+ * class MyParcelable private constructor(`in`: Parcel) : Parcelable {
+ *     private val mData: Int = `in`.readInt()
+ *
+ *     override fun describeContents(): Int {
+ *         return 0
+ *     }
+ *
+ *     override fun writeToParcel(out: Parcel, flags: Int) {
+ *         out.writeInt(mData)
+ *     }
+ *
+ *     companion object {
+ *         val CREATOR: Parcelable.Creator&lt;MyParcelable?&gt;
+ *                 = object : Parcelable.Creator&lt;MyParcelable?&gt; {
+ *             override fun createFromParcel(`in`: Parcel): MyParcelable? {
+ *                 return MyParcelable(`in`)
+ *             }
+ *
+ *             override fun newArray(size: Int): Array&lt;MyParcelable?&gt; {
+ *                 return arrayOfNulls(size)
+ *             }
+ *         }
+ *     }
+ * }
+ * </pre>
+ * </section><section><h3 id="java">Java</h3>
+ * <pre class="prettyprint lang-java">
  * public class MyParcelable implements Parcelable {
  *     private int mData;
  *
@@ -52,11 +81,11 @@ import java.lang.annotation.RetentionPolicy;
  *             return new MyParcelable[size];
  *         }
  *     };
- *     
+ *
  *     private MyParcelable(Parcel in) {
  *         mData = in.readInt();
  *     }
- * }</pre>
+ * }</pre></section></div></div>
  */
 public interface Parcelable {
     /** @hide */
