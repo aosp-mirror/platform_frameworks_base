@@ -11089,7 +11089,6 @@ package android.content {
     field public static final String ACTION_PACKAGE_CHANGED = "android.intent.action.PACKAGE_CHANGED";
     field public static final String ACTION_PACKAGE_DATA_CLEARED = "android.intent.action.PACKAGE_DATA_CLEARED";
     field public static final String ACTION_PACKAGE_FIRST_LAUNCH = "android.intent.action.PACKAGE_FIRST_LAUNCH";
-    field public static final String ACTION_PACKAGE_FULLY_LOADED = "android.intent.action.PACKAGE_FULLY_LOADED";
     field public static final String ACTION_PACKAGE_FULLY_REMOVED = "android.intent.action.PACKAGE_FULLY_REMOVED";
     field @Deprecated public static final String ACTION_PACKAGE_INSTALL = "android.intent.action.PACKAGE_INSTALL";
     field public static final String ACTION_PACKAGE_NEEDS_VERIFICATION = "android.intent.action.PACKAGE_NEEDS_VERIFICATION";
