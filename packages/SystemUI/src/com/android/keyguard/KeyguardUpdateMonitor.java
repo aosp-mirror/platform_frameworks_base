@@ -353,18 +353,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     };
 
-    private SparseBooleanArray mFaceSettingEnabledForUser = new SparseBooleanArray();
+    private SparseBooleanArray mBiometricEnabledForUser = new SparseBooleanArray();
     private BiometricManager mBiometricManager;
     private IBiometricEnabledOnKeyguardCallback mBiometricEnabledCallback =
             new IBiometricEnabledOnKeyguardCallback.Stub() {
                 @Override
-                public void onChanged(BiometricSourceType type, boolean enabled, int userId)
-                        throws RemoteException {
+                public void onChanged(boolean enabled, int userId) throws RemoteException {
                     mHandler.post(() -> {
-                        if (type == BiometricSourceType.FACE) {
-                            mFaceSettingEnabledForUser.put(userId, enabled);
-                            updateFaceListeningState();
-                        }
+                        mBiometricEnabledForUser.put(userId, enabled);
+                        updateBiometricListeningState();
                     });
                 }
             };
@@ -1119,6 +1116,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
                         || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
         final boolean isEncrypted = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT);
+
         return isEncrypted || isLockDown;
     }
 
@@ -1631,6 +1629,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
     }
 
+    @VisibleForTesting
+    void resetBiometricListeningState() {
+        mFingerprintRunningState = BIOMETRIC_STATE_STOPPED;
+        mFaceRunningState = BIOMETRIC_STATE_STOPPED;
+    }
+
     private void registerRingerTracker() {
         mRingerModeTracker.getRingerMode().observeForever(mRingerModeObserver);
     }
@@ -1951,7 +1955,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mIsFaceEnrolled = whitelistIpcs(
                 () -> mFaceManager != null && mFaceManager.isHardwareDetected()
                         && mFaceManager.hasEnrolledTemplates(userId)
-                        && mFaceSettingEnabledForUser.get(userId));
+                        && mBiometricEnabledForUser.get(userId));
     }
 
     /**
@@ -2099,7 +2103,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
                 && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser
-                && allowedOnBouncer;
+                && allowedOnBouncer && mBiometricEnabledForUser.get(getCurrentUser());
         return shouldListen;
     }
 
@@ -2158,7 +2162,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 (mBouncer || mAuthInterruptActive || awakeKeyguard
                         || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !isFaceDisabled(user) && becauseCannotSkipBouncer
-                && !mKeyguardGoingAway && mFaceSettingEnabledForUser.get(user) && !mLockIconPressed
+                && !mKeyguardGoingAway && mBiometricEnabledForUser.get(user) && !mLockIconPressed
                 && strongAuthAllowsScanning && mIsPrimaryUser
                 && !mSecureCameraLaunched;
 
@@ -2176,7 +2180,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     isFaceDisabled(user),
                     becauseCannotSkipBouncer,
                     mKeyguardGoingAway,
-                    mFaceSettingEnabledForUser.get(user),
+                    mBiometricEnabledForUser.get(user),
                     mLockIconPressed,
                     strongAuthAllowsScanning,
                     mIsPrimaryUser,
@@ -3235,6 +3239,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
             pw.println("    udfpsEnrolled=" + isUdfpsEnrolled());
+            pw.println("    enabledByUser=" + mBiometricEnabledForUser.get(userId));
             if (isUdfpsEnrolled()) {
                 pw.println("        shouldListenForUdfps=" + shouldListenForUdfps());
                 pw.println("        bouncerVisible=" + mBouncer);
@@ -3257,7 +3262,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    possible=" + isUnlockWithFacePossible(userId));
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
-            pw.println("    enabledByUser=" + mFaceSettingEnabledForUser.get(userId));
+            pw.println("    enabledByUser=" + mBiometricEnabledForUser.get(userId));
             pw.println("    mSecureCameraLaunched=" + mSecureCameraLaunched);
         }
         if (mFaceListenModels != null && !mFaceListenModels.isEmpty()) {

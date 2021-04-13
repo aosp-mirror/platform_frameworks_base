@@ -35,7 +35,6 @@ import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
-import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -51,6 +50,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
@@ -338,18 +338,31 @@ public class BiometricService extends SystemService {
         private static final boolean DEFAULT_APP_ENABLED = true;
         private static final boolean DEFAULT_ALWAYS_REQUIRE_CONFIRMATION = false;
 
+        // Some devices that shipped before S already have face-specific settings. Instead of
+        // migrating, which is complicated, let's just keep using the existing settings.
+        private final boolean mUseLegacyFaceOnlySettings;
+
+        // Only used for legacy face-only devices
         private final Uri FACE_UNLOCK_KEYGUARD_ENABLED =
                 Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED);
         private final Uri FACE_UNLOCK_APP_ENABLED =
                 Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_APP_ENABLED);
+
+        // Continues to be used, even though it's face-specific.
         private final Uri FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION =
                 Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION);
+
+        // Used for all devices other than legacy face-only devices
+        private final Uri BIOMETRIC_KEYGUARD_ENABLED =
+                Settings.Secure.getUriFor(Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED);
+        private final Uri BIOMETRIC_APP_ENABLED =
+                Settings.Secure.getUriFor(Settings.Secure.BIOMETRIC_APP_ENABLED);
 
         private final ContentResolver mContentResolver;
         private final List<BiometricService.EnabledOnKeyguardCallback> mCallbacks;
 
-        private final Map<Integer, Boolean> mFaceEnabledOnKeyguard = new HashMap<>();
-        private final Map<Integer, Boolean> mFaceEnabledForApps = new HashMap<>();
+        private final Map<Integer, Boolean> mBiometricEnabledOnKeyguard = new HashMap<>();
+        private final Map<Integer, Boolean> mBiometricEnabledForApps = new HashMap<>();
         private final Map<Integer, Boolean> mFaceAlwaysRequireConfirmation = new HashMap<>();
 
         /**
@@ -362,21 +375,44 @@ public class BiometricService extends SystemService {
             super(handler);
             mContentResolver = context.getContentResolver();
             mCallbacks = callbacks;
+
+            final boolean hasFingerprint = context.getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
+            final boolean hasFace = context.getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_FACE);
+
+            // Use the legacy setting on face-only devices that shipped on or before Q
+            mUseLegacyFaceOnlySettings =
+                    Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.Q
+                    && hasFace && !hasFingerprint;
+
             updateContentObserver();
         }
 
         public void updateContentObserver() {
             mContentResolver.unregisterContentObserver(this);
-            mContentResolver.registerContentObserver(FACE_UNLOCK_KEYGUARD_ENABLED,
-                    false /* notifyForDescendents */,
-                    this /* observer */,
-                    UserHandle.USER_ALL);
-            mContentResolver.registerContentObserver(FACE_UNLOCK_APP_ENABLED,
-                    false /* notifyForDescendents */,
-                    this /* observer */,
-                    UserHandle.USER_ALL);
+
+            if (mUseLegacyFaceOnlySettings) {
+                mContentResolver.registerContentObserver(FACE_UNLOCK_KEYGUARD_ENABLED,
+                        false /* notifyForDescendants */,
+                        this /* observer */,
+                        UserHandle.USER_ALL);
+                mContentResolver.registerContentObserver(FACE_UNLOCK_APP_ENABLED,
+                        false /* notifyForDescendants */,
+                        this /* observer */,
+                        UserHandle.USER_ALL);
+            } else {
+                mContentResolver.registerContentObserver(BIOMETRIC_KEYGUARD_ENABLED,
+                        false /* notifyForDescendants */,
+                        this /* observer */,
+                        UserHandle.USER_ALL);
+                mContentResolver.registerContentObserver(BIOMETRIC_APP_ENABLED,
+                        false /* notifyForDescendants */,
+                        this /* observer */,
+                        UserHandle.USER_ALL);
+            }
             mContentResolver.registerContentObserver(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
-                    false /* notifyForDescendents */,
+                    false /* notifyForDescendants */,
                     this /* observer */,
                     UserHandle.USER_ALL);
         }
@@ -384,7 +420,7 @@ public class BiometricService extends SystemService {
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
             if (FACE_UNLOCK_KEYGUARD_ENABLED.equals(uri)) {
-                mFaceEnabledOnKeyguard.put(userId, Settings.Secure.getIntForUser(
+                mBiometricEnabledOnKeyguard.put(userId, Settings.Secure.getIntForUser(
                                 mContentResolver,
                                 Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED,
                                 DEFAULT_KEYGUARD_ENABLED ? 1 : 0 /* default */,
@@ -394,7 +430,7 @@ public class BiometricService extends SystemService {
                     notifyEnabledOnKeyguardCallbacks(userId);
                 }
             } else if (FACE_UNLOCK_APP_ENABLED.equals(uri)) {
-                mFaceEnabledForApps.put(userId, Settings.Secure.getIntForUser(
+                mBiometricEnabledForApps.put(userId, Settings.Secure.getIntForUser(
                                 mContentResolver,
                                 Settings.Secure.FACE_UNLOCK_APP_ENABLED,
                                 DEFAULT_APP_ENABLED ? 1 : 0 /* default */,
@@ -405,22 +441,45 @@ public class BiometricService extends SystemService {
                                 Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
                                 DEFAULT_ALWAYS_REQUIRE_CONFIRMATION ? 1 : 0 /* default */,
                                 userId) != 0);
+            } else if (BIOMETRIC_KEYGUARD_ENABLED.equals(uri)) {
+                mBiometricEnabledOnKeyguard.put(userId, Settings.Secure.getIntForUser(
+                        mContentResolver,
+                        Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED,
+                        DEFAULT_KEYGUARD_ENABLED ? 1 : 0 /* default */,
+                        userId) != 0);
+
+                if (userId == ActivityManager.getCurrentUser() && !selfChange) {
+                    notifyEnabledOnKeyguardCallbacks(userId);
+                }
+            } else if (BIOMETRIC_APP_ENABLED.equals(uri)) {
+                mBiometricEnabledForApps.put(userId, Settings.Secure.getIntForUser(
+                        mContentResolver,
+                        Settings.Secure.BIOMETRIC_APP_ENABLED,
+                        DEFAULT_APP_ENABLED ? 1 : 0 /* default */,
+                        userId) != 0);
             }
         }
 
-        public boolean getFaceEnabledOnKeyguard() {
-            final int user = ActivityManager.getCurrentUser();
-            if (!mFaceEnabledOnKeyguard.containsKey(user)) {
-                onChange(true /* selfChange */, FACE_UNLOCK_KEYGUARD_ENABLED, user);
+        public boolean getEnabledOnKeyguard(int userId) {
+            if (!mBiometricEnabledOnKeyguard.containsKey(userId)) {
+                if (mUseLegacyFaceOnlySettings) {
+                    onChange(true /* selfChange */, FACE_UNLOCK_KEYGUARD_ENABLED, userId);
+                } else {
+                    onChange(true /* selfChange */, BIOMETRIC_KEYGUARD_ENABLED, userId);
+                }
             }
-            return mFaceEnabledOnKeyguard.get(user);
+            return mBiometricEnabledOnKeyguard.get(userId);
         }
 
-        public boolean getFaceEnabledForApps(int userId) {
-            if (!mFaceEnabledForApps.containsKey(userId)) {
-                onChange(true /* selfChange */, FACE_UNLOCK_APP_ENABLED, userId);
+        public boolean getEnabledForApps(int userId) {
+            if (!mBiometricEnabledForApps.containsKey(userId)) {
+                if (mUseLegacyFaceOnlySettings) {
+                    onChange(true /* selfChange */, FACE_UNLOCK_APP_ENABLED, userId);
+                } else {
+                    onChange(true /* selfChange */, BIOMETRIC_APP_ENABLED, userId);
+                }
             }
-            return mFaceEnabledForApps.getOrDefault(userId, DEFAULT_APP_ENABLED);
+            return mBiometricEnabledForApps.getOrDefault(userId, DEFAULT_APP_ENABLED);
         }
 
         public boolean getConfirmationAlwaysRequired(@BiometricAuthenticator.Modality int modality,
@@ -442,8 +501,8 @@ public class BiometricService extends SystemService {
         void notifyEnabledOnKeyguardCallbacks(int userId) {
             List<EnabledOnKeyguardCallback> callbacks = mCallbacks;
             for (int i = 0; i < callbacks.size(); i++) {
-                callbacks.get(i).notify(BiometricSourceType.FACE,
-                        mFaceEnabledOnKeyguard.getOrDefault(userId, DEFAULT_KEYGUARD_ENABLED),
+                callbacks.get(i).notify(
+                        mBiometricEnabledOnKeyguard.getOrDefault(userId, DEFAULT_KEYGUARD_ENABLED),
                         userId);
             }
         }
@@ -462,9 +521,9 @@ public class BiometricService extends SystemService {
             }
         }
 
-        void notify(BiometricSourceType sourceType, boolean enabled, int userId) {
+        void notify(boolean enabled, int userId) {
             try {
-                mCallback.onChanged(sourceType, enabled, userId);
+                mCallback.onChanged(enabled, userId);
             } catch (DeadObjectException e) {
                 Slog.w(TAG, "Death while invoking notify", e);
                 mEnabledOnKeyguardCallbacks.remove(this);
@@ -747,8 +806,8 @@ public class BiometricService extends SystemService {
 
             mEnabledOnKeyguardCallbacks.add(new EnabledOnKeyguardCallback(callback));
             try {
-                callback.onChanged(BiometricSourceType.FACE,
-                        mSettingObserver.getFaceEnabledOnKeyguard(), callingUserId);
+                callback.onChanged(mSettingObserver.getEnabledOnKeyguard(callingUserId),
+                        callingUserId);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
             }
@@ -1347,6 +1406,9 @@ public class BiometricService extends SystemService {
     }
 
     private void dumpInternal(PrintWriter pw) {
+        pw.println("Legacy Settings: " + mSettingObserver.mUseLegacyFaceOnlySettings);
+        pw.println();
+
         pw.println("Sensors:");
         for (BiometricSensor sensor : mSensors) {
             pw.println(" " + sensor);
