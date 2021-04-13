@@ -6870,7 +6870,6 @@ public class AudioManager {
      *
      * @return true if successful, otherwise false
      */
-    @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS)
     public @EncodedSurroundOutputMode int getEncodedSurroundMode() {
         try {
             return getService().getEncodedSurroundMode();
@@ -6926,7 +6925,6 @@ public class AudioManager {
      *
      * @return whether the required surround format is enabled
      */
-    @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS)
     public boolean isSurroundFormatEnabled(@AudioFormat.SurroundSoundEncoding int audioFormat) {
         try {
             return getService().isSurroundFormatEnabled(audioFormat);
