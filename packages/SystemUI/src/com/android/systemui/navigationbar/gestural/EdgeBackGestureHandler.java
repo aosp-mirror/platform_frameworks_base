@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -50,6 +51,7 @@ import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowMetrics;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
@@ -86,8 +88,8 @@ import java.util.concurrent.Executor;
 /**
  * Utility class to handle edge swipes for back gesture
  */
-public class EdgeBackGestureHandler extends CurrentUserTracker implements DisplayListener,
-        PluginListener<NavigationEdgeBackPlugin>, ProtoTraceable<SystemUiTraceProto> {
+public class EdgeBackGestureHandler extends CurrentUserTracker
+        implements PluginListener<NavigationEdgeBackPlugin>, ProtoTraceable<SystemUiTraceProto> {
 
     private static final String TAG = "EdgeBackGestureHandler";
     private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
@@ -123,7 +125,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 @Override
                 public void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {
                     mStartingQuickstepRotation = rotation;
-                    updateDisabledForQuickstep();
+                    updateDisabledForQuickstep(mContext.getResources().getConfiguration());
                 }
             };
 
@@ -414,7 +416,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
 
         if (!mIsEnabled) {
             mGestureNavigationSettingsObserver.unregister();
-            mContext.getSystemService(DisplayManager.class).unregisterDisplayListener(this);
             if (DEBUG_MISSING_GESTURE) {
                 Log.d(DEBUG_MISSING_GESTURE_TAG, "Unregister display listener");
             }
@@ -433,8 +434,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         } else {
             mGestureNavigationSettingsObserver.register();
             updateDisplaySize();
-            mContext.getSystemService(DisplayManager.class).registerDisplayListener(this,
-                    mContext.getMainThreadHandler());
             if (DEBUG_MISSING_GESTURE) {
                 Log.d(DEBUG_MISSING_GESTURE_TAG, "Register display listener");
             }
@@ -805,35 +804,28 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         Dependency.get(ProtoTracer.class).scheduleFrameUpdate();
     }
 
-    private void updateDisabledForQuickstep() {
-        int rotation = mContext.getResources().getConfiguration().windowConfiguration.getRotation();
+    private void updateDisabledForQuickstep(Configuration newConfig) {
+        int rotation = newConfig.windowConfiguration.getRotation();
         mDisabledForQuickstep = mStartingQuickstepRotation > -1 &&
                 mStartingQuickstepRotation != rotation;
     }
 
-    @Override
-    public void onDisplayAdded(int displayId) { }
-
-    @Override
-    public void onDisplayRemoved(int displayId) { }
-
-    @Override
-    public void onDisplayChanged(int displayId) {
+    public void onConfigurationChanged(Configuration newConfig) {
         if (mStartingQuickstepRotation > -1) {
-            updateDisabledForQuickstep();
+            updateDisabledForQuickstep(newConfig);
         }
 
         if (DEBUG_MISSING_GESTURE) {
-            Log.d(DEBUG_MISSING_GESTURE_TAG, "Display changed: mDisplayId=" + mDisplayId
-                    + " displayId=" + displayId);
+            Log.d(DEBUG_MISSING_GESTURE_TAG, "Config changed: config=" + newConfig);
         }
-        if (displayId == mDisplayId) {
-            updateDisplaySize();
-        }
+        updateDisplaySize();
     }
 
     private void updateDisplaySize() {
-        mContext.getDisplay().getRealSize(mDisplaySize);
+        WindowMetrics metrics = mContext.getSystemService(WindowManager.class)
+                .getMaximumWindowMetrics();
+        Rect bounds = metrics.getBounds();
+        mDisplaySize.set(bounds.width(), bounds.height());
         if (DEBUG_MISSING_GESTURE) {
             Log.d(DEBUG_MISSING_GESTURE_TAG, "Update display size: mDisplaySize=" + mDisplaySize);
         }
