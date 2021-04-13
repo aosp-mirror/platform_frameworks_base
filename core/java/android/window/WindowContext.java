@@ -57,6 +57,8 @@ public class WindowContext extends ContextWrapper {
      *
      * @param base Base {@link Context} for this new instance.
      * @param type Window type to be used with this context.
+     * @param options A bundle used to pass window-related options.
+     *
      * @hide
      */
     public WindowContext(@NonNull Context base, int type, @Nullable Bundle options) {
@@ -72,11 +74,12 @@ public class WindowContext extends ContextWrapper {
     }
 
     /**
-     * Registers this {@link WindowContext} with {@link com.android.server.wm.WindowManagerService}
-     * to receive configuration changes of the associated {@link WindowManager} node.
+     * Attaches this {@link WindowContext} to the {@link com.android.server.wm.DisplayArea}
+     * specified by {@code mType}, {@link #getDisplayId() display ID} and {@code mOptions}
+     * to receive configuration changes.
      */
-    public void registerWithServer() {
-        mController.registerListener(mType, getDisplayId(), mOptions);
+    public void attachToDisplayArea() {
+        mController.attachToDisplayArea(mType, getDisplayId(), mOptions);
     }
 
     @Override
@@ -96,7 +99,7 @@ public class WindowContext extends ContextWrapper {
     /** Used for test to invoke because we can't invoke finalize directly. */
     @VisibleForTesting
     public void release() {
-        mController.unregisterListenerIfNeeded();
+        mController.detachIfNeeded();
         destroy();
     }
 
