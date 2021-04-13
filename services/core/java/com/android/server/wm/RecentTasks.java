@@ -58,8 +58,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -1345,6 +1343,7 @@ class RecentTasks {
                     + " inactiveDuration=" + task.getInactiveDuration()
                     + " activityType=" + task.getActivityType()
                     + " windowingMode=" + task.getWindowingMode()
+                    + " isAlwaysOnTopWhenVisible=" + task.isAlwaysOnTopWhenVisible()
                     + " intentFlags=" + task.getBaseIntent().getFlags());
         }
 
@@ -1380,7 +1379,7 @@ class RecentTasks {
                 break;
             case WINDOWING_MODE_MULTI_WINDOW:
                 // Ignore tasks that are always on top
-                if (task.isAlwaysOnTop()) {
+                if (task.isAlwaysOnTopWhenVisible()) {
                     return false;
                 }
                 break;
