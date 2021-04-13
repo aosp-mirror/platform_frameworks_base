@@ -538,10 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Huruhusu programu itambue na kuoanisha kwenye vifaa vyenye Bluetooth vilivyo karibu"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"kuunganisha kwenye vifaa vyenye Bluetooth vilivyooanishwa"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Huruhusu programu iunganishe kwenye vifaa vyenye Bluetooth vilivyooanishwa"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"kutangaza kwenye vifaa vyenye Bluetooth vilivyo karibu"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Huruhusu programu itangaze kwenye vifaa vyenye Bluetooth vilivyo karibu"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"kubainisha nafasi kati ya vifaa vyenye Bendi Pana Zaidi vilivyo karibu"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Ruhusu programu ibainishe nafasi kati ya vifaa vyenye Bendi Pana Zaidi vilivyo karibu"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maelezo ya Huduma Inayopendelewa ya Malipo ya NFC"</string>
@@ -1854,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Imesasishwa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Imefutwa na msimamizi wako"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Sawa"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Ili kuongeza muda wa matumizi ya betri, Kiokoa Betri:\n\n• Huwasha Mandhari meusi\n• Huzima au kuzuia shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vingine kama vile \"Ok Google\"\n\n"<annotation id="url">"Pata maelezo zaidi"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Ili kuongeza muda wa matumizi ya betri, Kiokoa Betri:\n\n• Huwasha Mandhari meusi\n• Huzima au kudhibiti shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vingine kama vile \"Ok Google\""</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Washa"</string>
@@ -2074,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Arifa hii ilishushwa hadhi kuwa Kimya. Gusa ili utoe maoni."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Arifa hii imeorodheshwa katika nafasi ya juu. Gusa ili utoe maoni."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Arifa hii imeorodheshwa katika nafasi ya chini. Gusa ili utoe maoni."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Arifa ya maelezo ya Hali ya Kawaida"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Huenda betri itakwisha chaji mapema"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Imewasha Kiokoa Betri ili kurefusha muda wa matumizi ya betri"</string>
@@ -2261,14 +2273,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Sasa unaweza kukuza sehemu ya skrini yako"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Washa katika Mipangilio"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ondoa"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Ondoa kizuizi kwenye maikrofoni ya kifaa"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Ondoa kizuizi kwenye kamera ya kifaa"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Kwa ajili ya &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; na programu na huduma zote"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Ondoa kizuizi"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Faragha ya Kitambuzi"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Aikoni ya programu"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Picha ya kuweka chapa kwenye programu"</string>

@@ -1858,8 +1858,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"آپ کے منتظم کے ذریعے اپ ڈیٹ کیا گیا"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"آپ کے منتظم کے ذریعے حذف کیا گیا"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ٹھیک ہے"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"‏بیٹری لائف کو بڑھانے کے لیے، بیٹری سیور:\n\n• گہری تھیم کو آن کرتی ہے\n• پس منظر کی سرگرمی، کچھ بصری اثرات اور دیگر خصوصیات جیسے کہ \"Ok Google\" کو آف یا محدود کرتی ہے\n\n"<annotation id="url">"مزید جانیں"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"‏بیٹری لائف کو بڑھانے کے لیے، بیٹری سیور: \n\n• گہری تھیم کو آن کرتی ہے\n• پس منظر کی سرگرمی، کچھ ویژوئل اثرات اور دیگر خصوصیات جیسے کہ \"Ok Google\" کو آف یا محدود کرتی ہے"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتی ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا تک رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا اکثر نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ڈیٹا سیور آن کریں؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"آن کریں"</string>
@@ -2078,6 +2080,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"اس اطلاع کو خاموش پر ڈیموٹ کیا گيا۔ تاثرات فراہم کرنے کے ليے تھپتھپائیں۔"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"اس اطلاع کو اعلی درجہ دیا گیا۔ تاثرات فراہم کرنے کے ليے تھپتھپائیں۔"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"اس اطلاع کو کم درجہ دیا گیا۔ تاثرات فراہم کرنے کے ليے تھپتھپائیں۔"</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"روٹین موڈ معلومات کی اطلاع"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"معمول چارج سے پہلے بیٹری ختم ہو سکتی ہے"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"بیٹری لائف کو بڑھانے کے لیے بیٹری سیور کو فعال کر دیا گیا ہے"</string>
