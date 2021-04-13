@@ -29,7 +29,6 @@ import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
-import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Outline;
@@ -60,7 +59,6 @@ public class PeopleSpaceActivity extends Activity {
     private IPeopleManager mPeopleManager;
     private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
     private INotificationManager mNotificationManager;
-    private PackageManager mPackageManager;
     private LauncherApps mLauncherApps;
     private Context mContext;
     private NotificationEntryManager mNotificationEntryManager;
@@ -81,7 +79,6 @@ public class PeopleSpaceActivity extends Activity {
         mContext = getApplicationContext();
         mNotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-        mPackageManager = getPackageManager();
         mPeopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
         mLauncherApps = mContext.getSystemService(LauncherApps.class);
@@ -112,7 +109,7 @@ public class PeopleSpaceActivity extends Activity {
             LinearLayout item = findViewById(R.id.item);
             GradientDrawable shape = (GradientDrawable) item.getBackground();
             final TypedArray ta = mContext.obtainStyledAttributes(
-                    new int[] {android.R.attr.colorBackgroundFloating});
+                    new int[]{android.R.attr.colorBackgroundFloating});
             shape.setColor(ta.getColor(0, Color.WHITE));
             return;
         }
