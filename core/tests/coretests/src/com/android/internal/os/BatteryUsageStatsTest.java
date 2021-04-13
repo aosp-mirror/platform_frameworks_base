@@ -66,10 +66,11 @@ public class BatteryUsageStatsTest {
         final MockBatteryStatsImpl batteryStats = new MockBatteryStatsImpl(clocks);
         final BatteryStatsImpl.Uid batteryStatsUid = batteryStats.getUidStatsLocked(2000);
 
-        final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(1, 1)
-                .setDischargePercentage(20)
-                .setDischargedPowerRange(1000, 2000)
-                .setStatsStartTimestamp(1000);
+        final BatteryUsageStats.Builder builder =
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, 1)
+                        .setDischargePercentage(20)
+                        .setDischargedPowerRange(1000, 2000)
+                        .setStatsStartTimestamp(1000);
 
         builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid)
                 .setPackageWithHighestDrain("foo")
@@ -134,6 +135,9 @@ public class BatteryUsageStatsTest {
                 assertThat(uidBatteryConsumer.getUsageDurationForCustomComponentMillis(
                         BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID)).isEqualTo(800);
                 assertThat(uidBatteryConsumer.getConsumedPower()).isEqualTo(1200);
+                assertThat(uidBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);
+                assertThat(uidBatteryConsumer.getCustomPowerComponentName(
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo("FOO");
             } else {
                 fail("Unexpected UID " + uidBatteryConsumer.getUid());
             }
@@ -153,6 +157,9 @@ public class BatteryUsageStatsTest {
                         BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID)).isEqualTo(10400);
                 assertThat(systemBatteryConsumer.getConsumedPower()).isEqualTo(20300);
                 assertThat(systemBatteryConsumer.getPowerConsumedByApps()).isEqualTo(20000);
+                assertThat(systemBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);
+                assertThat(systemBatteryConsumer.getCustomPowerComponentName(
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo("FOO");
             } else {
                 fail("Unexpected drain type " + systemBatteryConsumer.getDrainType());
             }
