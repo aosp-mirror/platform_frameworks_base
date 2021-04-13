@@ -175,4 +175,9 @@ final class InputDeviceVibrator extends Vibrator {
     public void cancel() {
         mInputManager.cancelVibrate(mDeviceId, mToken);
     }
+
+    @Override
+    public void cancel(int usageFilter) {
+        cancel();
+    }
 }

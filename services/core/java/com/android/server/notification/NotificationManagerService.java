@@ -212,6 +212,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.DeviceConfig;
@@ -1076,23 +1077,8 @@ public class NotificationManagerService extends SystemService {
                         (status & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
                 if (disableNotificationEffects(null) != null) {
                     // cancel whatever's going on
-                    final long identity = Binder.clearCallingIdentity();
-                    try {
-                        final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
-                        if (player != null) {
-                            player.stopAsync();
-                        }
-                    } catch (RemoteException e) {
-                    } finally {
-                        Binder.restoreCallingIdentity(identity);
-                    }
-
-                    final long identity2 = Binder.clearCallingIdentity();
-                    try {
-                        mVibrator.cancel();
-                    } finally {
-                        Binder.restoreCallingIdentity(identity2);
-                    }
+                    clearSoundLocked();
+                    clearVibrateLocked();
                 }
             }
         }
@@ -1582,7 +1568,10 @@ public class NotificationManagerService extends SystemService {
         mVibrateNotificationKey = null;
         final long identity = Binder.clearCallingIdentity();
         try {
-            mVibrator.cancel();
+            // Stop all vibrations with usage of class alarm (ringtone, alarm, notification usages).
+            int usageFilter =
+                    VibrationAttributes.USAGE_CLASS_ALARM | ~VibrationAttributes.USAGE_CLASS_MASK;
+            mVibrator.cancel(usageFilter);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -8303,29 +8292,12 @@ public class NotificationManagerService extends SystemService {
 
             // sound
             if (canceledKey.equals(mSoundNotificationKey)) {
-                mSoundNotificationKey = null;
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
-                    if (player != null) {
-                        player.stopAsync();
-                    }
-                } catch (RemoteException e) {
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
+                clearSoundLocked();
             }
 
             // vibrate
             if (canceledKey.equals(mVibrateNotificationKey)) {
-                mVibrateNotificationKey = null;
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    mVibrator.cancel();
-                }
-                finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
+                clearVibrateLocked();
             }
 
             // light
