@@ -479,11 +479,15 @@ public final class ConnectivityController extends RestrictingController implemen
     @GuardedBy("mLock")
     @Override
     public void onAppRemovedLocked(String pkgName, int uid) {
-        mTrackedJobs.delete(uid);
-        UidStats uidStats = mUidStats.removeReturnOld(uid);
-        unregisterDefaultNetworkCallbackLocked(uid, sElapsedRealtimeClock.millis());
-        mSortedStats.remove(uidStats);
-        registerPendingUidCallbacksLocked();
+        if (mService.getPackagesForUidLocked(uid) == null) {
+            // All packages in the UID have been removed. It's safe to remove things based on
+            // UID alone.
+            mTrackedJobs.delete(uid);
+            UidStats uidStats = mUidStats.removeReturnOld(uid);
+            unregisterDefaultNetworkCallbackLocked(uid, sElapsedRealtimeClock.millis());
+            mSortedStats.remove(uidStats);
+            registerPendingUidCallbacksLocked();
+        }
     }
 
     @GuardedBy("mLock")
