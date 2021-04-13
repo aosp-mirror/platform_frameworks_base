@@ -49,6 +49,7 @@ import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkProvider;
+import android.net.NetworkScore;
 import android.net.RouteInfo;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.Uri;
@@ -2203,7 +2204,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull String tag,
                 @NonNull NetworkCapabilities caps,
                 @NonNull LinkProperties lp,
-                @NonNull int score,
+                @NonNull NetworkScore score,
                 @NonNull NetworkAgentConfig nac,
                 @NonNull NetworkProvider provider,
                 @NonNull Consumer<VcnNetworkAgent> networkUnwantedCallback,
@@ -2344,7 +2345,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull String tag,
                 @NonNull NetworkCapabilities caps,
                 @NonNull LinkProperties lp,
-                @NonNull int score,
+                @NonNull NetworkScore score,
                 @NonNull NetworkAgentConfig nac,
                 @NonNull NetworkProvider provider,
                 @NonNull Consumer<VcnNetworkAgent> networkUnwantedCallback,
