@@ -261,15 +261,15 @@ final class UpdatableFontDir {
             // Write config file.
             mLastModifiedMillis = mCurrentTimeSupplier.get();
 
-            curConfig.lastModifiedMillis = mLastModifiedMillis;
+            PersistentSystemFontConfig.Config newConfig = new PersistentSystemFontConfig.Config();
+            newConfig.lastModifiedMillis = mLastModifiedMillis;
             for (FontFileInfo info : mFontFileInfoMap.values()) {
-                curConfig.updatedFontDirs.add(info.getRandomizedFontDir().getName());
+                newConfig.updatedFontDirs.add(info.getRandomizedFontDir().getName());
             }
-            curConfig.fontFamilies.clear();
-            curConfig.fontFamilies.addAll(familyMap.values());
+            newConfig.fontFamilies.addAll(familyMap.values());
 
             try (FileOutputStream fos = new FileOutputStream(mTmpConfigFile)) {
-                PersistentSystemFontConfig.writeToXml(fos, curConfig);
+                PersistentSystemFontConfig.writeToXml(fos, newConfig);
             } catch (Exception e) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_FAILED_UPDATE_CONFIG,
