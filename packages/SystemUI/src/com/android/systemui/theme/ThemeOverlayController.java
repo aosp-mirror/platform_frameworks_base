@@ -138,19 +138,25 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
             mAcceptColorEvents = false;
         }
 
+        final boolean hadWallpaperColors = mSystemColors != null;
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
             mSystemColors = wallpaperColors;
-            if (DEBUG) {
-                Log.d(TAG, "got new lock colors: " + wallpaperColors + " where: " + which);
-            }
+            if (DEBUG) Log.d(TAG, "got new colors: " + wallpaperColors + " where: " + which);
         }
 
         if (mDeviceProvisionedController != null
                 && !mDeviceProvisionedController.isCurrentUserSetup()) {
-            Log.i(TAG, "Wallpaper color event deferred until setup is finished: "
-                    + wallpaperColors);
-            mDeferredThemeEvaluation = true;
-            return;
+            if (hadWallpaperColors) {
+                Log.i(TAG, "Wallpaper color event deferred until setup is finished: "
+                        + wallpaperColors);
+                mDeferredThemeEvaluation = true;
+                return;
+            } else {
+                if (DEBUG) {
+                    Log.i(TAG, "During user setup, but allowing first color event: had? "
+                            + hadWallpaperColors + " has? " + (mSystemColors != null));
+                }
+            }
         }
         reevaluateSystemTheme(false /* forceReload */);
     };
@@ -221,17 +227,31 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                     }
                 },
                 UserHandle.USER_ALL);
+
+        if (!mIsMonetEnabled) {
+            return;
+        }
+
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
 
         // Upon boot, make sure we have the most up to date colors
-        mBgExecutor.execute(() -> {
+        Runnable updateColors = () -> {
             WallpaperColors systemColor = mWallpaperManager.getWallpaperColors(
                     WallpaperManager.FLAG_SYSTEM);
             mMainExecutor.execute(() -> {
+                if (DEBUG) Log.d(TAG, "Boot colors: " + systemColor);
                 mSystemColors = systemColor;
                 reevaluateSystemTheme(false /* forceReload */);
             });
-        });
+        };
+
+        // Whenever we're going directly to setup wizard, we need to process colors synchronously,
+        // otherwise we'll see some jank when the activity is recreated.
+        if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+            mMainExecutor.execute(updateColors);
+        } else {
+            mBgExecutor.execute(updateColors);
+        }
         mWallpaperManager.addOnColorsChangedListener(mOnColorsChangedListener, null,
                 UserHandle.USER_ALL);
     }
