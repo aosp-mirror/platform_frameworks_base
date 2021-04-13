@@ -65,6 +65,7 @@ java_library {
         "stable.core.platform.api.stubs",
         "android_system_server_stubs_current",
         "framework-annotations-lib",
+        "framework-connectivity-annotations",
         "framework-connectivity.impl",
         "framework-tethering.stubs.module_lib",
         "framework-wifi.stubs.module_lib",
