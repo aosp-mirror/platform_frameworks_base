@@ -149,6 +149,7 @@ public abstract class BatteryConsumer {
     public static final int POWER_MODEL_MEASURED_ENERGY = 1;
 
     private final PowerComponents mPowerComponents;
+    private String[] mCustomPowerComponentNames;
 
     protected BatteryConsumer(@NonNull PowerComponents powerComponents) {
         mPowerComponents = powerComponents;
@@ -192,6 +193,23 @@ public abstract class BatteryConsumer {
         return mPowerComponents.getConsumedPowerForCustomComponent(componentId);
     }
 
+    public int getCustomPowerComponentCount() {
+        return mPowerComponents.getCustomPowerComponentCount();
+    }
+
+    void setCustomPowerComponentNames(String[] customPowerComponentNames) {
+        mPowerComponents.setCustomPowerComponentNames(customPowerComponentNames);
+    }
+
+    /**
+     * Returns the name of the specified power component.
+     *
+     * @param componentId The ID of the custom power component.
+     */
+    public String getCustomPowerComponentName(int componentId) {
+        return mPowerComponents.getCustomPowerComponentName(componentId);
+    }
+
     /**
      * Returns the amount of time since BatteryStats reset used by the specified component, e.g.
      * CPU, WiFi etc.
@@ -222,9 +240,9 @@ public abstract class BatteryConsumer {
     protected abstract static class BaseBuilder<T extends BaseBuilder<?>> {
         final PowerComponents.Builder mPowerComponentsBuilder;
 
-        public BaseBuilder(int customPowerComponentCount, int customTimeComponentCount,
-                boolean includePowerModels) {
-            mPowerComponentsBuilder = new PowerComponents.Builder(customPowerComponentCount,
+        public BaseBuilder(@NonNull String[] customPowerComponentNames,
+                int customTimeComponentCount, boolean includePowerModels) {
+            mPowerComponentsBuilder = new PowerComponents.Builder(customPowerComponentNames,
                     customTimeComponentCount, includePowerModels);
         }
 
