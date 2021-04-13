@@ -714,7 +714,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Es posible que suene o vibre según los ajustes del teléfono"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Es posible que suene o vibre según los ajustes del teléfono. Las conversaciones de <xliff:g id="APP_NAME">%1$s</xliff:g> aparecen como burbujas de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Llama tu atención con un acceso directo flotante a este contenido."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones, como burbuja flotante, y la imagen de perfil aparece en la pantalla de bloqueo"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones, aparece como burbuja flotante y la imagen de perfil se incluye en la pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ajustes"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"No se pueden usar funciones de conversación con <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

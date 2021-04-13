@@ -809,7 +809,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Хөгжим"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Хуанли"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Календарь"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"Түвшний хяналттай харуулах"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Бүү саад бол"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Дууны түвшний товчлуурын товчлол"</string>

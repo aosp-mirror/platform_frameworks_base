@@ -230,7 +230,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"行動數據已開啟"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"行動數據已關閉"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"並未設為使用行動數據"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"已關閉"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"關閉"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"藍牙網路共用"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"飛行模式。"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN 已開啟。"</string>
@@ -714,7 +714,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"根據手機的設定響鈴或震動"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機的設定響鈴或震動。根據預設，來自「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會以對話框形式顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"利用浮動式捷徑快速存取這項內容。"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以浮動對話框的形式顯示在對話部分的頂端。如果裝置處於鎖定狀態，則在螢幕鎖定畫面上顯示個人資料相片"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以浮動對話框的形式顯示在對話區的頂端。如果裝置處於鎖定狀態，則在螢幕鎖定畫面上顯示個人資料相片"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話功能"</string>
@@ -1024,7 +1024,7 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"對話已設為優先"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"優先對話會："</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"顯示在對話部分的頂端"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"顯示在對話區的頂端"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"在螢幕鎖定畫面上顯示個人資料相片"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"以浮動對話框形式顯示在應用程式最上層"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"中斷零打擾模式"</string>
@@ -1035,7 +1035,7 @@
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大視窗控制項"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"裝置控制"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"新增已連結裝置的控制項"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"設定裝置控制"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"設定裝置控制項"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"按住電源按鈕即可存取控制項"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"選擇應用程式以新增控制項"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1058,7 +1058,7 @@
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"無法載入控制項。請查看「<xliff:g id="APP">%s</xliff:g>」應用程式，確認應用程式設定沒有任何異動。"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"找不到相容的控制項"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"新增至裝置控制"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"新增至裝置控制項"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"新增"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"來自「<xliff:g id="APP">%s</xliff:g>」的建議"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"已更新控制項"</string>
