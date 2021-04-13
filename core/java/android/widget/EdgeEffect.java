@@ -626,20 +626,14 @@ public class EdgeEffect {
             // assume rotations of increments of 90 degrees
             float x = mTmpPoints[10] - mTmpPoints[8];
             float width = right - left;
-            float vecX = 0f;
-            if (width > 0) {
-                vecX = dampStretchVector(Math.max(-1f, Math.min(1f, x / width)));
-            }
+            float vecX = dampStretchVector(Math.max(-1f, Math.min(1f, x / width)));
 
             float y = mTmpPoints[11] - mTmpPoints[9];
             float height = bottom - top;
-            float vecY = 0f;
-            if (height > 0) {
-                vecY = dampStretchVector(Math.max(-1f, Math.min(1f, y / height)));
-            }
+            float vecY = dampStretchVector(Math.max(-1f, Math.min(1f, y / height)));
 
-            boolean hasStretchVectors = Float.compare(vecX, 0) != 0 || Float.compare(vecY, 0) != 0;
-            if (right > left && bottom > top && mWidth > 0 && mHeight > 0 && hasStretchVectors) {
+            boolean hasValidVectors = Float.isFinite(vecX) && Float.isFinite(vecY);
+            if (right > left && bottom > top && mWidth > 0 && mHeight > 0 && hasValidVectors) {
                 renderNode.stretch(
                         left,
                         top,
