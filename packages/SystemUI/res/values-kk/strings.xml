@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Жүйе интерфейсі"</string>
-    <string name="status_bar_clear_all_button" msgid="2491321682873657397">"Тазалау"</string>
+    <string name="status_bar_clear_all_button" msgid="2491321682873657397">"Өшіру"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"Хабарлар жоқ"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"Ағымдағы"</string>
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"Хабарлар"</string>
@@ -36,7 +36,7 @@
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Батареяны үнемдеу режимін қосу керек пе?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Батареяны үнемдеу режимі туралы ақпарат"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Қосу"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Battery saver функциясын қосу"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Батареяны үнемдеу режимін қосу"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Параметрлер"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Авто айналатын экран"</string>
@@ -364,7 +364,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Портрет"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Пейзаж"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Енгізу әдісі"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"Орналасу"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"Локация"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Орын өшірулі"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Meдиа құрылғысы"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI (алынған сигнал қуатының көрсеткіші)"</string>
@@ -444,7 +444,7 @@
     <string name="description_target_search" msgid="3875069993128855865">"Іздеу"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін жоғары сырғыту."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін солға сырғыту."</string>
-    <string name="zen_priority_introduction" msgid="3159291973383796646">"Дабылдар, еске салғыштар, оқиғалар мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндарды ести алатын боласыз."</string>
+    <string name="zen_priority_introduction" msgid="3159291973383796646">"Оятқыш, еске салғыш, іс-шара мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойын сияқты медиафайлдарды қоссаңыз, оларды естисіз."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Дабылдардан басқа ешқандай дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндарды ести алатын боласыз."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Реттеу"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Дабыл, музыка, бейнелер мен ойындарды қоса алғанда, барлық дыбыстар мен дірілдер бөгелетін болады. Қоңырау шала беруіңізге болады."</string>
@@ -501,7 +501,7 @@
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Жою"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Батареяны үнемдеу режимі қосулы"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Өнімділікті және фондық деректерді азайтады"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Battery saver функциясын өшіру"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Батареяны үнемдеу режимін өшіру"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> жазу не трансляциялау кезінде экранда көрсетілетін немесе дыбысталатын барлық ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және аудиоматериалдар кіреді."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Осы функцияны ұсынатын қызмет жазу не трансляциялау кезінде экранда көрсетілетін немесе құрылғыда дыбысталатын ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және аудиоматериалдар кіреді."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Жазу немесе трансляциялау басталсын ба?"</string>
@@ -514,7 +514,7 @@
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Үнсіз"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Хабарландырулар"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Әңгімелер"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Барлық дыбыссыз хабарландыруларды өшіру"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Барлық үнсіз хабарландыруларды өшіру"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Хабарландырулар Мазаламау режимінде кідіртілді"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Қазір бастау"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Хабарландырулар жоқ"</string>
@@ -691,7 +691,7 @@
     <string name="notification_header_default_channel" msgid="225454696914642444">"Хабарландырулар"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Хабарландырулар бұдан былай көрсетілмейді"</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"Хабарландырулар жасырылады"</string>
-    <string name="notification_channel_silenced" msgid="1995937493874511359">"Бұл хабарландырулар дыбыссыз көрсетіледі"</string>
+    <string name="notification_channel_silenced" msgid="1995937493874511359">"Бұл хабарландырулар үнсіз көрсетіледі"</string>
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Бұл хабарландырулар сізді ескертеді"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"Әдетте хабарландыруларды көрмейсіз. \nОлар көрсетілсін бе?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Дайын"</string>
@@ -702,13 +702,13 @@
     <string name="inline_block_button" msgid="479892866568378793">"Бөгеу"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Көрсету"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Жасыру"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Дыбыссыз"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Үнсіз"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Хабарландырулар алғым келмейді"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Ескерту"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Хабарландырулар келе берсін"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Хабарландыруларды өшіру"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Осы қолданбаның хабарландырулары көрсетілсін бе?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Дыбыссыз"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Үнсіз"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Әдепкі"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Көпіршік"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Дыбыс не діріл қолданылмайды"</string>
@@ -983,8 +983,8 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"Түймені түртіп, Батареяны үнемдеу режимін реттеңіз"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Батареяның заряды бітуге жақындағанда қосыңыз."</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Жоқ, рақмет"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Battery Saver кестесі қосылды"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Батарея заряды <xliff:g id="PERCENTAGE">%d</xliff:g>%% деңгейінен төмендегенде, Battery Saver автоматты түрде қосылады."</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Батареяны үнемдеу кестесі қосылды"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Батарея заряды <xliff:g id="PERCENTAGE">%d</xliff:g>%% деңгейінен төмендегенде, Батареяны үнемдеу режимі автоматты түрде қосылады."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Параметрлер"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Түсінікті"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>

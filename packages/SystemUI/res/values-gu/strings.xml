@@ -204,7 +204,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="2097190491174968655">"ઇથરનેટ ડિસ્કનેક્ટ થયું."</string>
     <string name="accessibility_ethernet_connected" msgid="3988347636883115213">"ઇથરનેટ કનેક્ટ થયું."</string>
     <string name="accessibility_no_signal" msgid="1115622734914921920">"કોઈ સિગ્નલ નથી."</string>
-    <string name="accessibility_not_connected" msgid="4061305616351042142">"કનેક્ટ થયેલ નથી."</string>
+    <string name="accessibility_not_connected" msgid="4061305616351042142">"કનેક્ટ થયેલું નથી."</string>
     <string name="accessibility_zero_bars" msgid="1364823964848784827">"શૂન્ય બાર."</string>
     <string name="accessibility_one_bar" msgid="6312250030039240665">"એક બાર."</string>
     <string name="accessibility_two_bars" msgid="1335676987274417121">"બે બાર."</string>
@@ -375,7 +375,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"વપરાશકર્તા"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"નવો વપરાશકર્તા"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"વાઇ-ફાઇ"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"કનેક્ટ થયેલ નથી"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"કનેક્ટ થયેલું નથી"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"કોઈ નેટવર્ક નથી"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"વાઇ-ફાઇ બંધ"</string>
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"વાઇ-ફાઇ ચાલુ"</string>
@@ -500,7 +500,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"આ વપરાશકર્તાની તમામ ઍપ્લિકેશનો અને ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"દૂર કરો"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"બૅટરી સેવર ચાલુ છે"</string>
-    <string name="battery_saver_notification_text" msgid="2617841636449016951">"પ્રદર્શન અને બૅકગ્રાઉન્ડ ડેટા ઘટાડે છે"</string>
+    <string name="battery_saver_notification_text" msgid="2617841636449016951">"કાર્યપ્રદર્શન અને બૅકગ્રાઉન્ડ ડેટા ઘટાડે છે"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"બૅટરી સેવર બંધ કરો"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"રેકૉર્ડ અથવા કાસ્ટ કરતી વખતે, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, સંદેશા અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"રેકૉર્ડ અથવા કાસ્ટ કરતી વખતે, આ સુવિધા આપતી સેવાને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, સંદેશા અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
@@ -516,7 +516,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"વાતચીત"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"બધા સાઇલન્ટ નોટિફિકેશન સાફ કરો"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ખલેલ પાડશો નહીં દ્વારા થોભાવેલ નોટિફિકેશન"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"હવે પ્રારંભ કરો"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"હવે શરૂ કરો"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"કોઈ નોટિફિકેશન નથી"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"પ્રોફાઇલ મૉનિટર કરી શકાય છે"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"નેટવર્ક મૉનિટર કરી શકાય છે"</string>
@@ -769,7 +769,7 @@
     <string name="battery_panel_title" msgid="5931157246673665963">"બૅટરી વપરાશ"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"ચાર્જિંગ દરમિયાન બૅટરી સેવર ઉપલબ્ધ નથી"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"બૅટરી સેવર"</string>
-    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"પ્રદર્શન અને બૅકગ્રાઉન્ડ ડેટા ઘટાડે છે"</string>
+    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"કાર્યપ્રદર્શન અને બૅકગ્રાઉન્ડ ડેટા ઘટાડે છે"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"બટન <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Back"</string>
@@ -887,7 +887,7 @@
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"સ્થિતિ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. સંપાદિત કરવા માટે બે વાર ટૅપ કરો."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. ઉમેરવા માટે બે વાર ટૅપ કરો."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ખસેડો"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> દૂર કરો"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> કાઢી નાખો"</string>
     <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="POSITION">%2$d</xliff:g> જગ્યા પર <xliff:g id="TILE_NAME">%1$s</xliff:g>ને ઉમેરો"</string>
     <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="POSITION">%2$d</xliff:g> જગ્યા પર <xliff:g id="TILE_NAME">%1$s</xliff:g>ને ખસેડો"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ઝડપી સેટિંગ્સ સંપાદક."</string>

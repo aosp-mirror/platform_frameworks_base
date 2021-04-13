@@ -295,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Жұмыс профиліне ауысу"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контактілер"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"контактілерге кіру"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Орналасу"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Геодерек"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"бұл құрылғының орналасқан жерін көру"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Күнтізбе"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"күнтізбеге кіру"</string>
@@ -422,9 +422,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"қосымша аймақ жабдықтаушы пәрмендеріне қол жетімділік"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Қолданбаға орын жеткізушісінің қосымша пәрмендеріне қатынасуға рұқсат береді. Бұл қолданбаға GPS немесе басқа орын көздерінің жұмысына кедергі келтіруге рұқсат беруі мүмкін."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"нақты орналасқан жер туралы ақпаратқа тек ашық экранда кіру"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Қолданба пайдаланылып жатқанда, ол орынды анықтау қызметтерінен дәл геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған орынды анықтау қызметтері қосулы тұруы керек. Бұл батарея шығынын арттыруы мүмкін."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Қолданба пайдаланылып жатқанда, ол Локация қызметтерінен дәл геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған Локация қызметтері қосулы тұруы керек. Бұл батарея шығынын арттыруы мүмкін."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"болжалды орналасқан жер туралы ақпаратқа тек ашық экранда кіру"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Бұл қолданба пайдаланылып жатқанда, ол орынды анықтау қызметтерінен болжалды геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған орынды анықтау қызметтері қосулы тұруы керек."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Бұл қолданба пайдаланылып жатқанда, ол Локация қызметтерінен болжалды геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған Локация қызметтері қосулы тұруы керек."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"геодеректерді фондық режимде пайдалану"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Бұл қолданба пайдаланылмайтын кезде де, ол геодеректі кез келген уақытта пайдалана алады."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"аудио параметрлерін өзгерту"</string>
@@ -563,7 +563,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Саусақ іздері тіркелмеген."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Бұл құрылғыда саусақ ізін оқу сканері жоқ."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчик уақытша өшірулі."</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> саусағы"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>-саусақ"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Саусақ ізі белгішесі"</string>
@@ -679,17 +679,17 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Экранның құлпын ашу кезінде қате енгізілген құпия сөздердің санын бақылау, құпия сөз тым көп қате енгізілген жағдайда, Android TV құрылғысын құлыптау және барлық пайдаланушы деректерінен тазарту."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, телефонды бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Экран құлпын өзгерту"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Экран құлпын өзгерту."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Экран құлпын өзгерте алады."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Экранды құлыптау"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Экранның қашан және қалай құлыптанатынын басқару."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Экранның қашан және қалай құлыпталатынын басқара алады."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Барлық деректерді өшіру"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Планшет дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Зауыттық деректерді қалпына келтіру арқылы Android TV құрылғыңыздың деректерін ескертусіз тазартыңыз."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Зауыттық деректерге қайтару арқылы телефон деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Зауыттық деректерге қайтару арқылы телефон деректерін ескертусіз өшіре алады."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Пайдаланушы деректерін өшіру"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Осы пайдаланушының осы планшеттегі деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Осы пайдаланушының осы планшеттегі деректерін ескертусіз өшіре алады."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Android TV құрылғысын осы пайдаланушы деректерінен ескертусіз тазартыңыз."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Осы пайдаланушының осы телефондағы деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Осы пайдаланушының осы телефондағы деректерін ескертусіз өшіре алады."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Құрылғы жаһандық прокси қызметін орнату"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Саясат қосулы болғанда пайдаланылатын құрылғының ғаламдық прокси-серверін орнатыңыз. Ғаламдық прокси-серверді тек құрылғы иесі орната алады."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"Экран бекітпесі құпия сөзінің мерзімін орнату"</string>
@@ -699,7 +699,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Камераларды өшіру"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Құрылғыдағы барлық камералар қолданысын бөгеу."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Экран құлпы функцияларын өшіру"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Кейбір экранды құлыптау мүмкіндіктерін пайдалануға тыйым салу."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Кейбір экранды құлыптау функцияларын пайдалануға тыйым сала алады."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Үй"</item>
     <item msgid="7740243458912727194">"Ұялы тел."</item>
@@ -1231,7 +1231,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Хабар дыбысының қаттылығы"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Әдепкі рингтон"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Әдепкі (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Ешқандай"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Жоқ"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Қоңырау әуендері"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Дабыл сигналдары"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Хабарландыру сигналдары"</string>
@@ -1794,7 +1794,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Жарайды"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Батарея жұмысының ұзақтығын арттыру үшін Батареяны үнемдеу режимі:\n\n•қараңғы тақырыпты іске қосады;\n•фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді немесе шектейді.\n\n"<annotation id="url">"Толығырақ"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"Батарея жұмысының ұзақтығын арттыру үшін Батареяны үнемдеу режимі:\n\n•қараңғы тақырыпты іске қосады;\n•фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді немесе шектейді."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге және алуға жол бермейді. Ашық тұрған қолданба деректерді пайдаланады, бірақ шектеулі шамада (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу функциясын қосу керек пе?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1875,7 +1875,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Арнаулы хабар хабарландыруы"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы бар жаңа пайдаланушы (мұндай есептік жазбаға ие пайдаланушы бұрыннан бар) жасауға рұқсат етілсін бе?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы бар жаңа пайдаланушы жасауға рұқсат етілсін бе?"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"Тілді қосу"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"Тіл қосу"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Аймақ параметрі"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Тіл атауын теріңіз"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Ұсынылған"</string>
@@ -1999,9 +1999,9 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"экранда басқа қолданбалардың үстінен көрсету"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режим туралы хабарландыру"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея заряды азаюы мүмкін"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарея ұзаққа жетуі үшін, Battery Saver іске қосылды"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарея ұзаққа жетуі үшін, Батареяны үнемдеу режимі іске қосылды"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Батареяны үнемдеу режимі"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Battery Saver өшірілді"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батареяны үнемдеу режимі өшірілді"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефонның заряды жеткілікті. Функцияларға енді шектеу қойылмайды."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Планшеттің заряды жеткілікті. Функцияларға енді шектеу қойылмайды."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Құрылғының заряды жеткілікті. Функцияларға енді шектеу қойылмайды."</string>
