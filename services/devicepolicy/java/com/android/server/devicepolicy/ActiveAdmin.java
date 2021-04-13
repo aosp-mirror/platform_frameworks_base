@@ -144,13 +144,13 @@ class ActiveAdmin {
     private static final String TAG_ENROLLMENT_SPECIFIC_ID = "enrollment-specific-id";
     private static final String TAG_ADMIN_CAN_GRANT_SENSORS_PERMISSIONS =
             "admin-can-grant-sensors-permissions";
-    private static final String TAG_ENTERPRISE_NETWORK_PREFERENCE_ENABLED =
-            "enterprise-network-preference-enabled";
+    private static final String TAG_PREFERENTIAL_NETWORK_SERVICE_ENABLED =
+            "preferential-network-service-enabled";
     private static final String TAG_USB_DATA_SIGNALING = "usb-data-signaling";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
-    private static final boolean ENTERPRISE_NETWORK_PREFERENCE_ENABLED_DEFAULT = true;
+    private static final boolean PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT = true;
 
     DeviceAdminInfo info;
 
@@ -296,8 +296,8 @@ class ActiveAdmin {
     public String mOrganizationId;
     public String mEnrollmentSpecificId;
     public boolean mAdminCanGrantSensorsPermissions;
-    public boolean mEnterpriseNetworkPreferenceEnabled =
-            ENTERPRISE_NETWORK_PREFERENCE_ENABLED_DEFAULT;
+    public boolean mPreferentialNetworkServiceEnabled =
+            PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT;
 
     private static final boolean USB_DATA_SIGNALING_ENABLED_DEFAULT = true;
     boolean mUsbDataSignalingEnabled = USB_DATA_SIGNALING_ENABLED_DEFAULT;
@@ -576,9 +576,9 @@ class ActiveAdmin {
         }
         writeAttributeValueToXml(out, TAG_ADMIN_CAN_GRANT_SENSORS_PERMISSIONS,
                 mAdminCanGrantSensorsPermissions);
-        if (mEnterpriseNetworkPreferenceEnabled != ENTERPRISE_NETWORK_PREFERENCE_ENABLED_DEFAULT) {
-            writeAttributeValueToXml(out, TAG_ENTERPRISE_NETWORK_PREFERENCE_ENABLED,
-                    mEnterpriseNetworkPreferenceEnabled);
+        if (mPreferentialNetworkServiceEnabled != PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT) {
+            writeAttributeValueToXml(out, TAG_PREFERENTIAL_NETWORK_SERVICE_ENABLED,
+                    mPreferentialNetworkServiceEnabled);
         }
         if (mUsbDataSignalingEnabled != USB_DATA_SIGNALING_ENABLED_DEFAULT) {
             writeAttributeValueToXml(out, TAG_USB_DATA_SIGNALING, mUsbDataSignalingEnabled);
@@ -806,9 +806,9 @@ class ActiveAdmin {
                 mAlwaysOnVpnPackage = parser.getAttributeValue(null, ATTR_VALUE);
             } else if (TAG_ALWAYS_ON_VPN_LOCKDOWN.equals(tag)) {
                 mAlwaysOnVpnLockdown = parser.getAttributeBoolean(null, ATTR_VALUE, false);
-            } else if (TAG_ENTERPRISE_NETWORK_PREFERENCE_ENABLED.equals(tag)) {
-                mEnterpriseNetworkPreferenceEnabled = parser.getAttributeBoolean(
-                        null, ATTR_VALUE, ENTERPRISE_NETWORK_PREFERENCE_ENABLED_DEFAULT);
+            } else if (TAG_PREFERENTIAL_NETWORK_SERVICE_ENABLED.equals(tag)) {
+                mPreferentialNetworkServiceEnabled = parser.getAttributeBoolean(
+                        null, ATTR_VALUE, PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT);
             } else if (TAG_COMMON_CRITERIA_MODE.equals(tag)) {
                 mCommonCriteriaMode = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_PASSWORD_COMPLEXITY.equals(tag)) {
@@ -1168,8 +1168,8 @@ class ActiveAdmin {
         pw.print("mAlwaysOnVpnLockdown=");
         pw.println(mAlwaysOnVpnLockdown);
 
-        pw.print("mEnterpriseNetworkPreferenceEnabled=");
-        pw.println(mEnterpriseNetworkPreferenceEnabled);
+        pw.print("mPreferentialNetworkServiceEnabled=");
+        pw.println(mPreferentialNetworkServiceEnabled);
 
         pw.print("mCommonCriteriaMode=");
         pw.println(mCommonCriteriaMode);

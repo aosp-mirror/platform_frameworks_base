@@ -311,26 +311,28 @@ public final class NetworkAgentConfig implements Parcelable {
         }
 
         /**
-         * Disables active detection of NAT64 (e.g., via RFC 7050 DNS lookups). Used to save power
-         * and reduce idle traffic on networks that are known to be IPv6-only without a NAT64.
+         * Enables or disables active detection of NAT64 (e.g., via RFC 7050 DNS lookups). Used to
+         * save power and reduce idle traffic on networks that are known to be IPv6-only without a
+         * NAT64. By default, NAT64 detection is enabled.
          *
          * @return this builder, to facilitate chaining.
          */
         @NonNull
-        public Builder disableNat64Detection() {
-            mConfig.skip464xlat = true;
+        public Builder setNat64DetectionEnabled(boolean enabled) {
+            mConfig.skip464xlat = !enabled;
             return this;
         }
 
         /**
-         * Disables the "Sign in to network" notification. Used if the network transport will
-         * perform its own carrier-specific provisioning procedure.
+         * Enables or disables the "Sign in to network" notification. Used if the network transport
+         * will perform its own carrier-specific provisioning procedure. By default, the
+         * notification is enabled.
          *
          * @return this builder, to facilitate chaining.
          */
         @NonNull
-        public Builder disableProvisioningNotification() {
-            mConfig.provisioningNotificationDisabled = true;
+        public Builder setProvisioningNotificationEnabled(boolean enabled) {
+            mConfig.provisioningNotificationDisabled = !enabled;
             return this;
         }
 

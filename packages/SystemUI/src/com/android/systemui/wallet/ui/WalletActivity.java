@@ -94,17 +94,15 @@ public class WalletActivity extends LifecycleActivity {
                 mHandler,
                 mUserTracker,
                 mKeyguardStateController);
-        // Clicking the wallet button will open the wallet app if the device is unlocked; bring up
-        // the security bouncer otherwise.
-        walletView.getWalletButton().setOnClickListener(
-                v -> {
-                    if (mKeyguardStateController.isUnlocked()) {
-                        mActivityStarter.startActivity(
-                                mQuickAccessWalletClient.createWalletIntent(), true);
-                    } else {
-                        mKeyguardDismissUtil.executeWhenUnlocked(() -> false, false);
-                    }
-                });
+
+        walletView.getAppButton().setOnClickListener(
+                v -> mActivityStarter.startActivity(
+                        mQuickAccessWalletClient.createWalletIntent(), true));
+        // Click the action button to re-render the screen when the device is unlocked.
+        if (!mKeyguardStateController.isUnlocked()) {
+            walletView.getActionButton().setOnClickListener(
+                    v -> mKeyguardDismissUtil.executeWhenUnlocked(() -> false, false));
+        }
     }
 
     @Override

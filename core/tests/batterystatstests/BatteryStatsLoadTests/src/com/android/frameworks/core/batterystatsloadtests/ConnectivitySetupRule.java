@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
@@ -128,8 +127,7 @@ public class ConnectivitySetupRule implements TestRule {
         }
 
         @Override
-        public void onAvailable(Network network, NetworkCapabilities networkCapabilities,
-                LinkProperties linkProperties, boolean blocked) {
+        public void onAvailable(Network network) {
             checkActiveNetwork();
         }
 

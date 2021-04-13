@@ -23,6 +23,7 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.view.WindowManager.transitTypeToString;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -205,7 +206,7 @@ public final class TransitionInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{t=" + mType + " f=" + Integer.toHexString(mFlags)
+        sb.append("{t=" + transitTypeToString(mType) + " f=" + Integer.toHexString(mFlags)
                 + " ro=" + mRootOffset + " c=[");
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {

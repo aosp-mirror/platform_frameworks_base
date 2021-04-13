@@ -16,6 +16,7 @@
   -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:theme="@style/Theme.SystemUI.QuickSettings"
     android:id="@+id/brightness_mirror"
     android:layout_width="@dimen/qs_panel_width"
     android:layout_height="@dimen/brightness_mirror_height"

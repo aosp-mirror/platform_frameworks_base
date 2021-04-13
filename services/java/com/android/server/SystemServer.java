@@ -2528,10 +2528,12 @@ public final class SystemServer implements Dumpable {
         }
 
         // Translation manager service
-        if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_TRANSLATION)) {
+        if (deviceHasConfigString(context, R.string.config_defaultTranslationService)) {
             t.traceBegin("StartTranslationManagerService");
             mSystemServiceManager.startService(TRANSLATION_MANAGER_SERVICE_CLASS);
             t.traceEnd();
+        } else {
+            Slog.d(TAG, "TranslationService not defined by OEM");
         }
 
         // NOTE: ClipboardService depends on ContentCapture and Autofill

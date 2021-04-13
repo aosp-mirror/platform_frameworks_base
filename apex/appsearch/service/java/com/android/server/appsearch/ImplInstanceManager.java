@@ -106,7 +106,6 @@ public final class ImplInstanceManager {
      *
      * @param userId The multi-user userId of the user that need to be removed.
      */
-    @NonNull
     public void removeAppSearchImplForUser(@UserIdInt int userId) {
         synchronized (mInstancesLocked) {
             mInstancesLocked.remove(userId);

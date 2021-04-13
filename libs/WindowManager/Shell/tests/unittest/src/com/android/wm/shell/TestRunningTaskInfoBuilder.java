@@ -17,18 +17,32 @@
 package com.android.wm.shell;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
+import android.app.WindowConfiguration;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
 
 public final class TestRunningTaskInfoBuilder {
     static int sNextTaskId = 500;
     private Rect mBounds = new Rect(0, 0, 100, 100);
-    private WindowContainerToken mToken =
-            new WindowContainerToken(new IWindowContainerToken.Default());
+
+    private WindowContainerToken mToken = createMockWCToken();
     private int mParentTaskId = INVALID_TASK_ID;
+    private @WindowConfiguration.ActivityType int mActivityType = ACTIVITY_TYPE_STANDARD;
+
+    public static WindowContainerToken createMockWCToken() {
+        final IWindowContainerToken itoken = mock(IWindowContainerToken.class);
+        final IBinder asBinder = mock(IBinder.class);
+        doReturn(asBinder).when(itoken).asBinder();
+        return new WindowContainerToken(itoken);
+    }
 
     public TestRunningTaskInfoBuilder setBounds(Rect bounds) {
         mBounds.set(bounds);
@@ -40,12 +54,19 @@ public final class TestRunningTaskInfoBuilder {
         return this;
     }
 
+    public TestRunningTaskInfoBuilder setActivityType(
+            @WindowConfiguration.ActivityType int activityType) {
+        mActivityType = activityType;
+        return this;
+    }
+
     public ActivityManager.RunningTaskInfo build() {
         final ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
         info.parentTaskId = INVALID_TASK_ID;
         info.taskId = sNextTaskId++;
         info.parentTaskId = mParentTaskId;
         info.configuration.windowConfiguration.setBounds(mBounds);
+        info.configuration.windowConfiguration.setActivityType(mActivityType);
         info.token = mToken;
         info.isResizeable = true;
         return info;

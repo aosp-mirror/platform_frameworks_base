@@ -17,7 +17,6 @@
 package com.android.wm.shell.splitscreen;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
 
@@ -27,11 +26,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
-import android.content.Context;
 import android.graphics.Rect;
-import android.window.DisplayAreaInfo;
-import android.window.IWindowContainerToken;
-import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -43,6 +38,8 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,13 +57,16 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock private MainStage mMainStage;
     @Mock private SideStage mSideStage;
     @Mock private DisplayImeController mDisplayImeController;
+    @Mock private Transitions mTransitions;
+    @Mock private TransactionPool mTransactionPool;
     private StageCoordinator mStageCoordinator;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mStageCoordinator = new TestStageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
-                mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage, mDisplayImeController);
+        mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
+                mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
+                mDisplayImeController, null /* splitLayout */, mTransitions, mTransactionPool);
     }
 
     @Test
@@ -89,23 +89,5 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         verify(mSideStage).removeTask(
                 eq(task.taskId), any(), any(WindowContainerTransaction.class));
-    }
-
-    private static class TestStageCoordinator extends StageCoordinator {
-        final DisplayAreaInfo mDisplayAreaInfo;
-
-        TestStageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
-                RootTaskDisplayAreaOrganizer rootTDAOrganizer, ShellTaskOrganizer taskOrganizer,
-                MainStage mainStage, SideStage sideStage, DisplayImeController imeController) {
-            super(context, displayId, syncQueue, rootTDAOrganizer, taskOrganizer, mainStage,
-                    sideStage, imeController);
-
-            // Prepare default TaskDisplayArea for testing.
-            mDisplayAreaInfo = new DisplayAreaInfo(
-                    new WindowContainerToken(new IWindowContainerToken.Default()),
-                    DEFAULT_DISPLAY,
-                    FEATURE_DEFAULT_TASK_CONTAINER);
-            this.onDisplayAreaAppeared(mDisplayAreaInfo);
-        }
     }
 }

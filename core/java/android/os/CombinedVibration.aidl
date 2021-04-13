@@ -16,4 +16,4 @@
 
 package android.os;
 
-parcelable CombinedVibrationEffect;
+parcelable CombinedVibration;

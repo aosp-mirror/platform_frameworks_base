@@ -600,11 +600,10 @@ abstract public class ManagedServices {
             throws XmlPullParserException, IOException {
         // read grants
         int type;
-        String version = "";
+        String version = XmlUtils.readStringAttribute(parser, ATT_VERSION);
         readDefaults(parser);
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             String tag = parser.getName();
-            version = XmlUtils.readStringAttribute(parser, ATT_VERSION);
             if (type == XmlPullParser.END_TAG
                     && getConfig().xmlTag.equals(tag)) {
                 break;
@@ -642,7 +641,7 @@ abstract public class ManagedServices {
         rebindServices(false, USER_ALL);
     }
 
-    private void upgradeDefaultsXmlVersion() {
+    void upgradeDefaultsXmlVersion() {
         // check if any defaults are loaded
         int defaultsSize = mDefaultComponents.size() + mDefaultPackages.size();
         if (defaultsSize == 0) {

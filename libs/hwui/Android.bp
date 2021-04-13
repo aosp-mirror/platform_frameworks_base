@@ -503,6 +503,7 @@ cc_defaults {
         "RenderProperties.cpp",
         "RootRenderNode.cpp",
         "SkiaCanvas.cpp",
+        "SkiaInterpolator.cpp",
         "VectorDrawable.cpp",
     ],
 

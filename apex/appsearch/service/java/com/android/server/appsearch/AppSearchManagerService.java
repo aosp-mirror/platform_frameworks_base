@@ -18,6 +18,7 @@ package com.android.server.appsearch;
 import static android.app.appsearch.AppSearchResult.throwableToFailedResult;
 import static android.os.UserHandle.USER_NULL;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -45,6 +46,7 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
@@ -57,6 +59,9 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
+import com.android.server.appsearch.external.localstorage.stats.CallStats;
+import com.android.server.appsearch.stats.LoggerInstanceManager;
+import com.android.server.appsearch.stats.PlatformLogger;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -80,6 +85,7 @@ public class AppSearchManagerService extends SystemService {
     private PackageManagerInternal mPackageManagerInternal;
     private ImplInstanceManager mImplInstanceManager;
     private UserManager mUserManager;
+    private LoggerInstanceManager mLoggerInstanceManager;
 
     // Never call shutdownNow(). It will cancel the futures it's returned. And since
     // Executor#execute won't return anything, we will hang forever waiting for the execution.
@@ -106,6 +112,7 @@ public class AppSearchManagerService extends SystemService {
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mImplInstanceManager = ImplInstanceManager.getInstance(mContext);
         mUserManager = mContext.getSystemService(UserManager.class);
+        mLoggerInstanceManager = LoggerInstanceManager.getInstance();
         registerReceivers();
     }
 
@@ -147,6 +154,7 @@ public class AppSearchManagerService extends SystemService {
     private void handleUserRemoved(@UserIdInt int userId) {
         try {
             mImplInstanceManager.removeAppSearchImplForUser(userId);
+            mLoggerInstanceManager.removePlatformLoggerForUser(userId);
             Slog.i(TAG, "Removed AppSearchImpl instance for user: " + userId);
         } catch (Throwable t) {
             Slog.e(TAG, "Unable to remove data for user: " + userId, t);
@@ -274,6 +282,7 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @NonNull List<Bundle> documentBundles,
                 @UserIdInt int userId,
+                @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchBatchResultCallback callback) {
             Preconditions.checkNotNull(packageName);
             Preconditions.checkNotNull(databaseName);
@@ -282,6 +291,11 @@ public class AppSearchManagerService extends SystemService {
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
+                long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
+                @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
+                PlatformLogger logger = null;
+                int operationSuccessCount = 0;
+                int operationFailureCount = 0;
                 try {
                     verifyUserUnlocked(callingUserId);
                     verifyCallingPackage(callingUid, packageName);
@@ -289,20 +303,46 @@ public class AppSearchManagerService extends SystemService {
                             new AppSearchBatchResult.Builder<>();
                     AppSearchImpl impl =
                             mImplInstanceManager.getAppSearchImpl(callingUserId);
+                    logger = mLoggerInstanceManager.getPlatformLogger(callingUserId);
                     for (int i = 0; i < documentBundles.size(); i++) {
                         GenericDocument document = new GenericDocument(documentBundles.get(i));
                         try {
-                            impl.putDocument(packageName, databaseName, document,
-                                    /*logger=*/ null);
+                            impl.putDocument(packageName, databaseName, document, logger);
                             resultBuilder.setSuccess(document.getUri(), /*result=*/ null);
+                            ++operationSuccessCount;
                         } catch (Throwable t) {
                             resultBuilder.setResult(document.getUri(),
                                     throwableToFailedResult(t));
+                            AppSearchResult<Void> result = throwableToFailedResult(t);
+                            resultBuilder.setResult(document.getUri(), result);
+                            // for failures, we would just log the one for last failure
+                            statusCode = result.getResultCode();
+                            ++operationFailureCount;
                         }
                     }
                     invokeCallbackOnResult(callback, resultBuilder.build());
                 } catch (Throwable t) {
                     invokeCallbackOnError(callback, t);
+                } finally {
+                    if (logger != null) {
+                        CallStats.Builder cBuilder = new CallStats.Builder(packageName,
+                                databaseName)
+                                .setCallType(CallStats.CALL_TYPE_PUT_DOCUMENTS)
+                                // TODO(b/173532925) check the existing binder call latency chart
+                                // is good enough for us:
+                                // http://dashboards/view/_72c98f9a_91d9_41d4_ab9a_bc14f79742b4
+                                .setEstimatedBinderLatencyMillis(
+                                        2 * (int) (totalLatencyStartTimeMillis
+                                                - binderCallStartTimeMillis))
+                                .setNumOperationsSucceeded(operationSuccessCount)
+                                .setNumOperationsFailed(operationFailureCount);
+                        cBuilder.getGeneralStatsBuilder()
+                                .setStatusCode(statusCode)
+                                .setTotalLatencyMillis(
+                                        (int) (SystemClock.elapsedRealtime()
+                                                - totalLatencyStartTimeMillis));
+                        logger.logStats(cBuilder.build());
+                    }
                 }
             });
         }
@@ -717,6 +757,7 @@ public class AppSearchManagerService extends SystemService {
                 try {
                     verifyUserUnlocked(callingUserId);
                     mImplInstanceManager.getOrCreateAppSearchImpl(mContext, callingUserId);
+                    mLoggerInstanceManager.getOrCreatePlatformLogger(getContext(), callingUserId);
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
                 } catch (Throwable t) {
                     invokeCallbackOnError(callback, t);

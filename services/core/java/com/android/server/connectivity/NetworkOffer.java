@@ -76,7 +76,7 @@ public class NetworkOffer implements NetworkRanker.Scoreable {
     /**
      * Get the capabilities filter of this offer
      */
-    @Override @NonNull public NetworkCapabilities getCaps() {
+    @Override @NonNull public NetworkCapabilities getCapsNoCopy() {
         return caps;
     }
 

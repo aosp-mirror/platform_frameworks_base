@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -277,6 +278,19 @@ public class SafeActivityOptions {
                     + ", uid=" + callingUid + ") with remoteAnimationAdapter";
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
+        }
+
+        // If launched from bubble is specified, then ensure that the caller is system or sysui.
+        if (options.getLaunchedFromBubble() && callingUid != Process.SYSTEM_UID) {
+            final int statusBarPerm = ActivityTaskManagerService.checkPermission(
+                    STATUS_BAR_SERVICE, callingPid, callingUid);
+            if (statusBarPerm == PERMISSION_DENIED) {
+                final String msg = "Permission Denial: starting " + getIntentString(intent)
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ") with launchedFromBubble=true";
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
         }
     }
 
