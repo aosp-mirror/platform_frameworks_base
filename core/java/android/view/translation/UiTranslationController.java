@@ -388,7 +388,7 @@ public class UiTranslationController {
     private void sendTranslationRequest(Translator translator,
             List<ViewTranslationRequest> requests) {
         if (requests.size() == 0) {
-            Log.wtf(TAG, "No ViewTranslationRequest was collected.");
+            Log.w(TAG, "No ViewTranslationRequest was collected.");
             return;
         }
         final TranslationRequest request = new TranslationRequest.Builder()
