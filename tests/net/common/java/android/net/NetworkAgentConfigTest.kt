@@ -63,8 +63,10 @@ class NetworkAgentConfigTest {
             setPartialConnectivityAcceptable(false)
             setUnvalidatedConnectivityAcceptable(true)
             setLegacyTypeName("TEST_NETWORK")
-            setNat64DetectionEnabled(false)
-            setProvisioningNotificationEnabled(false)
+            if (isAtLeastS()) {
+                setNat64DetectionEnabled(false)
+                setProvisioningNotificationEnabled(false)
+            }
         }.build()
 
         assertTrue(config.isExplicitlySelected())
@@ -73,7 +75,12 @@ class NetworkAgentConfigTest {
         assertFalse(config.isPartialConnectivityAcceptable())
         assertTrue(config.isUnvalidatedConnectivityAcceptable())
         assertEquals("TEST_NETWORK", config.getLegacyTypeName())
-        assertFalse(config.isNat64DetectionEnabled())
-        assertFalse(config.isProvisioningNotificationEnabled())
+        if (isAtLeastS()) {
+            assertFalse(config.isNat64DetectionEnabled())
+            assertFalse(config.isProvisioningNotificationEnabled())
+        } else {
+            assertTrue(config.isNat64DetectionEnabled())
+            assertTrue(config.isProvisioningNotificationEnabled())
+        }
     }
 }
