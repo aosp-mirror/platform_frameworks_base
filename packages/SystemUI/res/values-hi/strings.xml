@@ -92,8 +92,14 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ज़्यादा कॉन्टेंट कैप्चर करें"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रीनशॉट को खारिज करें"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉट की झलक"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"स्क्रीनशॉट को ऊपर से काटने की सीमा"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"स्क्रीनशॉट को नीचे से काटने की सीमा"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रिकॉर्डिंग को प्रोसेस किया जा रहा है"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
@@ -349,8 +355,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"इनपुट विधि"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"जगह"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"जगह की जानकारी बंद है"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"कैमरा ब्लॉक करें"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"माइक्रोफ़ोन म्यूट करें"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"कैमरे का ऐक्सेस"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"माइक्रोफ़ोन का ऐक्सेस"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"उपलब्ध"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ब्लॉक किया गया है"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"मीडिया डिवाइस"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"सिर्फ़ आपातकालीन कॉल"</string>
@@ -422,8 +430,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"स्क्रीन रिकॉर्ड"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"शुरू करें"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"रोकें"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"जारी रखने के लिए, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; को आपके डिवाइस का माइक्रोफ़ोन ऐक्सेस करने की ज़रूरत है."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"जारी रखने के लिए, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; को आपके डिवाइस का कैमरा ऐक्सेस करने की ज़रूरत है."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"क्या आप डिवाइस के माइक्रोफ़ोन को अनब्लॉक करना चाहते हैं?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"क्या आप डिवाइस के कैमरे को अनब्लॉक करना चाहते हैं?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"क्या आप डिवाइस के कैमरे और माइक्रोफ़ोन को अनब्लॉक करना चाहते हैं?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ऐसा करने से, माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें माइक्रोफ़ोन का इस्तेमाल करने की अनुमति दी गई है."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ऐसा करने से, कैमरे का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें कैमरे का इस्तेमाल करने की अनुमति दी गई है."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ऐसा करने से, कैमरे या माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें कैमरे या माइक्रोफ़ोन का इस्तेमाल करने की अनुमति दी गई है."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"डिवाइस"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ऐप्लिकेशन बदलने के लिए ऊपर स्वाइप करें"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ऐप्लिकेशन को झटपट स्विच करने के लिए उसे दाईं ओर खींचें और छोड़ें"</string>
@@ -657,8 +669,10 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ईथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
     <string name="wallet_title" msgid="5369767670735827105">"वॉलेट"</string>
-    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"सभी दिखाएं"</string>
-    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"पेमेंट करने के लिए, डिवाइस अनलॉक करें"</string>
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
+    <skip />
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
+    <skip />
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"तैयार है"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"पेमेंट करने का तरीका सेट अप करें"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"इस्तेमाल करने के लिए, डिवाइस अनलॉक करें"</string>
@@ -1008,7 +1022,7 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"बातचीत को \'अहम बातचीत\' के तौर पर सेट किया गया है"</string>
     <string name="priority_onboarding_behavior" msgid="636826237468953117">"अहम बातचीत"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"ये बातचीत आपकी सूची में सबसे ऊपर दिखती हैं और प्राथमिकता मोड चालू होने पर, हमेशा आप तक पहुंच सकती हैं"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"ये बातचीत आपकी सूची में सबसे ऊपर दिखती हैं. साथ ही, अगर आपने प्राथमिकता मोड चालू किया है, तो ये आपको हमेशा दिखेंगी"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"प्रोफ़ाइल फ़ोटो, लॉक स्क्रीन पर दिखती हैं"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"आप इन बातचीत को अपनी होम स्क्रीन पर मौजूद बबल्स में, आसानी से देख सकते हैं"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'परेशान न करें\' मोड में रुकावट"</string>
@@ -1114,7 +1128,7 @@
     <string name="birthday_status" msgid="2596961629465396761">"जन्मदिन"</string>
     <string name="birthday_status_content_description" msgid="7677415209545817153">"आज <xliff:g id="NAME">%1$s</xliff:g> का जन्मदिन है"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"जन्मदिन आने वाला है"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"<xliff:g id="NAME">%1$s</xliff:g> का जन्मदिन जल्द आ रहा है"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"<xliff:g id="NAME">%1$s</xliff:g> का जन्मदिन आने वाला है"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"सालगिरह"</string>
     <string name="anniversary_status_content_description" msgid="6214503393960662875">"<xliff:g id="NAME">%1$s</xliff:g> की सालगिरह है"</string>
     <string name="location_status" msgid="1294990572202541812">"जगह की जानकारी शेयर की जा रही है"</string>

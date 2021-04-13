@@ -66,7 +66,7 @@
     <string name="wifi_debugging_title" msgid="7300007687492186076">"اشکال‌زدایی بی‌سیم در این شبکه مجاز شود؟"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"‏نام شبکه (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nنشانی Wi‑Fi (BSSID)‎\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"همیشه در این شبکه مجاز شود"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"مجاز"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"مجاز بودن"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"اشکال‌زدایی بی‌سیم مجاز نیست"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"کاربری که درحال‌حاضر در این دستگاه به سیستم وارد شده است نمی‌تواند اشکال‌زدایی بی‌سیم را روشن کند. برای استفاده از این ویژگی، به کاربر اصلی بروید."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏درگاه USB غیرفعال شده است"</string>
@@ -92,8 +92,14 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ضبط محتوای بیشتر"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"رد کردن نماگرفت"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"پیش‌نمایش نماگرفت"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"مرز بالایی"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"مرز پایینی"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"ضبط‌کننده صفحه‌نمایش"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"درحال پردازش ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اعلان درحال انجام برای جلسه ضبط صفحه‌نمایش"</string>
@@ -349,8 +355,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"روش ورودی"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"مکان"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"مکان خاموش"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"مسدود کردن دوربین"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"بی‌صدا کردن میکروفون"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"دسترسی به دوربین"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"دسترسی به میکروفون"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"دردسترس"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"مسدود"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"دستگاه رسانه"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"فقط تماس‌های اضطراری"</string>
@@ -422,8 +430,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ضبط کردن صفحه‌نمایش"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"توقف"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"‏برای ادامه دادن، &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; باید به میکروفون دستگاه دسترسی داشته باشد."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"‏برای ادامه دادن، &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; باید به دوربین دستگاه دسترسی داشته باشد."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"میکروفون دستگاه لغو انسداد شود؟"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"دوربین دستگاه لغو انسداد شود؟"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"دوربین و میکروفون دستگاه لغو انسداد شود؟"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"با این کار دسترسی برای همه برنامه‌ها و سرویس‌هایی که مجاز هستند از میکروفونتان استفاده کنند لغو انسداد می‌شود."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"با این کار دسترسی برای همه برنامه‌ها و سرویس‌هایی که مجاز هستند از دوربینتان استفاده کنند لغو انسداد می‌شود."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"با این کار دسترسی برای همه برنامه‌ها و دستگاه‌هایی که مجاز هستند از دوربین یا میکروفونتان استفاده کنند لغو انسداد می‌شود."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"دستگاه"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"برای تغییر برنامه‌ها،‌ تند به‌بالا بکشید"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"برای جابه‌جایی سریع میان برنامه‌ها، به چپ بکشید"</string>
@@ -657,8 +669,10 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"اترنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"زنگ"</string>
     <string name="wallet_title" msgid="5369767670735827105">"کیف‌پول"</string>
-    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"نمایش همه"</string>
-    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"برای پرداخت قفل را باز کنید"</string>
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
+    <skip />
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
+    <skip />
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"آماده"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"راه‌اندازی پرداخت"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"برای استفاده، قفل را باز کنید"</string>
@@ -758,7 +772,7 @@
     <string name="feedback_ok" msgid="6481426753298857144">"تأیید"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> باز شد"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> بسته شد"</string>
-    <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"مجاز کردن اعلان‌های این کانال"</string>
+    <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"مجاز بودن اعلان‌های این کانال"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"تنظیمات بیشتر"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"سفارشی کردن"</string>
     <string name="notification_done" msgid="6215117625922713976">"تمام"</string>
