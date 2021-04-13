@@ -177,8 +177,14 @@ public final class Choreographer {
     private boolean mCallbacksRunning;
     @UnsupportedAppUsage
     private long mLastFrameTimeNanos;
-    @UnsupportedAppUsage
+
+    /** DO NOT USE since this will not updated when screen refresh changes. */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
+            publicAlternatives = "Use {@link android.view.Display#getRefreshRate} instead")
+    @Deprecated
     private long mFrameIntervalNanos;
+    private long mLastFrameIntervalNanos;
+
     private boolean mDebugPrintNextFrameTimeDelta;
     private int mFPSDivisor = 1;
     private DisplayEventReceiver.VsyncEventData mLastVsyncEventData =
@@ -392,7 +398,9 @@ public final class Choreographer {
      * @hide
      */
     public long getFrameIntervalNanos() {
-        return mFrameIntervalNanos;
+        synchronized (mLock) {
+            return mLastFrameIntervalNanos;
+        }
     }
 
     void dump(String prefix, PrintWriter writer) {
@@ -688,6 +696,7 @@ public final class Choreographer {
     void doFrame(long frameTimeNanos, int frame,
             DisplayEventReceiver.VsyncEventData vsyncEventData) {
         final long startNanos;
+        final long frameIntervalNanos = vsyncEventData.frameInterval;
         synchronized (mLock) {
             if (!mFrameScheduled) {
                 return; // no work to do
@@ -702,17 +711,17 @@ public final class Choreographer {
             long intendedFrameTimeNanos = frameTimeNanos;
             startNanos = System.nanoTime();
             final long jitterNanos = startNanos - frameTimeNanos;
-            if (jitterNanos >= mFrameIntervalNanos) {
-                final long skippedFrames = jitterNanos / mFrameIntervalNanos;
+            if (jitterNanos >= frameIntervalNanos) {
+                final long skippedFrames = jitterNanos / frameIntervalNanos;
                 if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
                     Log.i(TAG, "Skipped " + skippedFrames + " frames!  "
                             + "The application may be doing too much work on its main thread.");
                 }
-                final long lastFrameOffset = jitterNanos % mFrameIntervalNanos;
+                final long lastFrameOffset = jitterNanos % frameIntervalNanos;
                 if (DEBUG_JANK) {
                     Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
                             + "which is more than the frame interval of "
-                            + (mFrameIntervalNanos * 0.000001f) + " ms!  "
+                            + (frameIntervalNanos * 0.000001f) + " ms!  "
                             + "Skipping " + skippedFrames + " frames and setting frame "
                             + "time to " + (lastFrameOffset * 0.000001f) + " ms in the past.");
                 }
@@ -730,16 +739,17 @@ public final class Choreographer {
 
             if (mFPSDivisor > 1) {
                 long timeSinceVsync = frameTimeNanos - mLastFrameTimeNanos;
-                if (timeSinceVsync < (mFrameIntervalNanos * mFPSDivisor) && timeSinceVsync > 0) {
+                if (timeSinceVsync < (frameIntervalNanos * mFPSDivisor) && timeSinceVsync > 0) {
                     scheduleVsyncLocked();
                     return;
                 }
             }
 
             mFrameInfo.setVsync(intendedFrameTimeNanos, frameTimeNanos, vsyncEventData.id,
-                    vsyncEventData.frameDeadline, startNanos);
+                    vsyncEventData.frameDeadline, startNanos, vsyncEventData.frameInterval);
             mFrameScheduled = false;
             mLastFrameTimeNanos = frameTimeNanos;
+            mLastFrameIntervalNanos = frameIntervalNanos;
             mLastVsyncEventData = vsyncEventData;
         }
 
@@ -751,16 +761,17 @@ public final class Choreographer {
             AnimationUtils.lockAnimationClock(frameTimeNanos / TimeUtils.NANOS_PER_MS);
 
             mFrameInfo.markInputHandlingStart();
-            doCallbacks(Choreographer.CALLBACK_INPUT, frameTimeNanos);
+            doCallbacks(Choreographer.CALLBACK_INPUT, frameTimeNanos, frameIntervalNanos);
 
             mFrameInfo.markAnimationsStart();
-            doCallbacks(Choreographer.CALLBACK_ANIMATION, frameTimeNanos);
-            doCallbacks(Choreographer.CALLBACK_INSETS_ANIMATION, frameTimeNanos);
+            doCallbacks(Choreographer.CALLBACK_ANIMATION, frameTimeNanos, frameIntervalNanos);
+            doCallbacks(Choreographer.CALLBACK_INSETS_ANIMATION, frameTimeNanos,
+                    frameIntervalNanos);
 
             mFrameInfo.markPerformTraversalsStart();
-            doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos);
+            doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos, frameIntervalNanos);
 
-            doCallbacks(Choreographer.CALLBACK_COMMIT, frameTimeNanos);
+            doCallbacks(Choreographer.CALLBACK_COMMIT, frameTimeNanos, frameIntervalNanos);
         } finally {
             AnimationUtils.unlockAnimationClock();
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
@@ -774,7 +785,7 @@ public final class Choreographer {
         }
     }
 
-    void doCallbacks(int callbackType, long frameTimeNanos) {
+    void doCallbacks(int callbackType, long frameTimeNanos, long frameIntervalNanos) {
         CallbackRecord callbacks;
         synchronized (mLock) {
             // We use "now" to determine when callbacks become due because it's possible
@@ -799,13 +810,13 @@ public final class Choreographer {
             if (callbackType == Choreographer.CALLBACK_COMMIT) {
                 final long jitterNanos = now - frameTimeNanos;
                 Trace.traceCounter(Trace.TRACE_TAG_VIEW, "jitterNanos", (int) jitterNanos);
-                if (jitterNanos >= 2 * mFrameIntervalNanos) {
-                    final long lastFrameOffset = jitterNanos % mFrameIntervalNanos
-                            + mFrameIntervalNanos;
+                if (jitterNanos >= 2 * frameIntervalNanos) {
+                    final long lastFrameOffset = jitterNanos % frameIntervalNanos
+                            + frameIntervalNanos;
                     if (DEBUG_JANK) {
                         Log.d(TAG, "Commit callback delayed by " + (jitterNanos * 0.000001f)
                                 + " ms which is more than twice the frame interval of "
-                                + (mFrameIntervalNanos * 0.000001f) + " ms!  "
+                                + (frameIntervalNanos * 0.000001f) + " ms!  "
                                 + "Setting frame time to " + (lastFrameOffset * 0.000001f)
                                 + " ms in the past.");
                         mDebugPrintNextFrameTimeDelta = true;

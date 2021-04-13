@@ -33,7 +33,7 @@ public:
 
     // returns true if the vsync is newer, false if it was rejected for staleness
     bool vsyncReceived(nsecs_t vsync, nsecs_t indendedVsync, int64_t vsyncId,
-                       int64_t frameDeadline);
+                       int64_t frameDeadline, nsecs_t frameInterval);
     nsecs_t latestVsync() { return mFrameTimeNanos; }
     nsecs_t computeFrameTimeNanos();
     int64_t lastVsyncId() const { return mFrameVsyncId; }

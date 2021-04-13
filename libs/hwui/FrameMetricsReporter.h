@@ -26,6 +26,7 @@
 #include "FrameMetricsObserver.h"
 
 #include <string.h>
+#include <mutex>
 
 namespace android {
 namespace uirenderer {
