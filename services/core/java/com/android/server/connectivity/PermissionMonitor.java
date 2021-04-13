@@ -133,7 +133,7 @@ public class PermissionMonitor {
          * Get device first sdk version.
          */
         public int getDeviceFirstSdkInt() {
-            return Build.VERSION.FIRST_SDK_INT;
+            return Build.VERSION.DEVICE_INITIAL_SDK_INT;
         }
     }
 
