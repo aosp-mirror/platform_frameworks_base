@@ -1852,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"சரி"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n\n• டார்க் தீமினை ஆன் செய்யும்\n• பின்னணி செயல்பாடு, சில விஷுவல் எஃபெக்ட்கள், “Ok Google” போன்ற பிற அம்சங்களை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்\n\n"<annotation id="url">"மேலும் அறிக"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n\n• டார்க் தீமினை ஆன் செய்யும்\n• பின்னணிச் செயல்பாடு, சில விஷுவல் எஃபெக்ட்கள், “Ok Google” போன்ற பிற அம்சங்களை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில ஆப்ஸை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் ஆப்ஸானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"இயக்கு"</string>
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"இந்த அறிவிப்பின் முக்கியத்துவம் நிசப்த நிலைக்குக் குறைத்து அமைக்கப்பட்டது. கருத்து தெரிவிக்க தட்டவும்."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"இந்த அறிவிப்பின் முக்கியத்துவம் உயர்த்தப்பட்டது. கருத்து தெரிவிக்க தட்டவும்."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"இந்த அறிவிப்பின் முக்கியத்துவம் குறைக்கப்பட்டது. கருத்து தெரிவிக்க தட்டவும்."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>

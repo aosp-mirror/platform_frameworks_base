@@ -1663,7 +1663,7 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Сістэма"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth-аўдыё"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Бесправадны дысплей"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"Перадача"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"Трансляцыя"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Падключыцца да прылады"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Трансліраваць экран на прыладу"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Пошук прылад..."</string>
@@ -1900,8 +1900,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Абноўлены вашым адміністратарам"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Выдалены вашым адміністратарам"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду:\n\n•·уключае цёмную тэму;\n• выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі, напрыклад \"Ok Google\"\n\n"<annotation id="url">"Даведацца больш"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду:\n\n• уключае цёмную тэму;\n• выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі, напрыклад \"Ok Google\""</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"У рэжыме \"Эканомія трафіка\" фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Уключыць"</string>
@@ -2140,6 +2142,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Гэта апавяшчэнне пераведзена ў рэжым \"Без гуку\". Націсніце тут і дайце водгук."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Гэта апавяшчэнне ацэнена як важнае. Націсніце тут і дайце водгук."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Гэта апавяшчэнне ацэнена як няважнае. Націсніце тут і дайце водгук."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Апавяшчэнне з інфармацыяй пра ўсталяваны рэжым"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятар можа разрадзіцца хутчэй, чым прыйдзе час звычайнай зарадкі"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Каб павялічыць тэрмін работы акумулятара, уключаны рэжым эканоміі зараду"</string>

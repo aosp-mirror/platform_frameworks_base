@@ -1852,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Изтрито от администратора ви"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n\n•·включва тъмната тема;\n•·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“.\n\n"<annotation id="url">"Научете повече"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n\n• включва тъмната тема;\n• изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ще вкл. ли „Икономия на данни“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включване"</string>
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Това известие бе понижено до беззвучно. Докоснете, за да изпратите отзиви."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Това известие бе класирано по-високо. Докоснете, за да изпратите отзиви."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Това известие бе класирано по-ниско. Докоснете, за да изпратите отзиви."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известие с информация за режима на поредица"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерията може да се изтощи преди обичайното зареждане"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режимът за запазване на батерията е активиран с цел удължаване на живота на батерията"</string>

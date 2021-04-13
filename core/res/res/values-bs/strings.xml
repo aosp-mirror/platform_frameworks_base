@@ -542,7 +542,7 @@
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"povezivanje s uparenim Bluetooth uređajima"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Dozvoljava aplikaciji da se poveže s uparenim Bluetooth uređajima"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"oglašavanje na Bluetooth uređajima u blizini"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Aplikaciji omogućuje oglašavanje na Bluetooth uređajima u blizini"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Dozvoljava aplikaciji da vrši oglašavanje na Bluetooth uređajima u blizini"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"određivanje rel. položaja uređaja ultra širokog opsega u blizini"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Dozvolite aplikaciji da odredi relativni položaj između uređaja ultra širokog opsega u blizini"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacije o preferiranoj usluzi plaćanja putem NFC-a"</string>
@@ -1875,8 +1875,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ažurirao je vaš administrator"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao je vaš administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Uredu"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Radi produženja vijeka trajanja baterije, Ušteda baterije:\n\n• Uključuje Tamnu temu\n• Isključuje ili ograničava aktivnosti u pozadini, određene vizuelne efekte i druge funkcije kao što je \"Ok Google\"\n\n"<annotation id="url">"Saznajte više"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Radi produženja vijeka trajanja baterije, Ušteda baterije:\n\n• Uključuje Tamnu temu\n• Isključuje ili ograničava aktivnost u pozadini, određene vizuelne efekte i druge funkcije kao što je \"Ok Google\""</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Radi smanjenja prijenosa podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali će to činiti rjeđe. Naprimjer, to može značiti da se slike ne prikazuju dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
@@ -2105,6 +2107,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Značaj ovog obavještenja je umanjen na Nečujno. Dodirnite da pošaljete povratne informacije."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Značaj ovog obavještenja je povećan. Dodirnite da pošaljete povratne informacije."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Značaj ovog obavještenja je umanjen. Dodirnite da pošaljete povratne informacije."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Obavještenje za informacije Rutinskog načina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Moguće je da će se baterija isprazniti prije uobičajenog punjenja"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Ušteda baterije je aktivirana da bi se produžio vijek trajanja baterije"</string>
@@ -2293,9 +2307,9 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Sada možete uvećati dio ekrana"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Uključite u Postavkama"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Odbaci"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Deblokiraj mikrofon uređaja"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Deblokiraj fotoaparat uređaja"</string>
-    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Za &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; i sve aplikacije i usluge"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Deblokirajte mikrofon uređaja"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Deblokirajte kameru uređaja"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Za aplikaciju &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; te sve aplikacije i usluge"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Deblokiraj"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privatnost senzora"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikona aplikacije"</string>

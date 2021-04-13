@@ -1877,8 +1877,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizat de administratorul dvs."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Șters de administratorul dvs."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Pentru a mări autonomia bateriei, Economisirea bateriei:\n\n•·activează tema întunecată;\n•·dezactivează sau restricționează activitatea în fundal, unele efecte vizuale și alte funcții, cum ar fi „Ok Google”.\n\n"<annotation id="url">"Aflați mai multe"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Pentru a mări autonomia bateriei, Economisirea bateriei:\n\n• activează tema întunecată;\n• dezactivează sau restricționează activitatea în fundal, unele efecte vizuale și alte funcții, cum ar fi „Ok Google”."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți poate accesa datele, însă mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activați Economizorul de date?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activați"</string>
@@ -2107,6 +2109,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Notificarea a fost mutată în jos la Silențioasă. Atingeți pentru a oferi feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Notificarea a fost mutată la un nivel superior. Atingeți pentru a oferi feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Notificarea a fost mutată la un nivel inferior. Atingeți pentru a oferi feedback."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificare pentru informații despre modul Rutină"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria se poate descărca înainte de încărcarea obișnuită"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Economisirea bateriei este activată pentru a prelungi durata de funcționare a bateriei"</string>

@@ -1852,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Таны админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Таны админ устгасан"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгч:\n\n•Бараан загварыг асаадаг\n•Арын үйл ажиллагаа, зарим визуал эффект болон “Hey Google” зэрэг бусад онцлогийг унтрааж эсвэл хязгаарладаг\n\n"<annotation id="url">"Нэмэлт мэдээлэл авах"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Батарей хэмнэгч нь батарейн ажиллах хугацааг уртасгахын тулд:\n\n• Бараан загварыг асаадаг\n• Арын үйл ажиллагаа, зарим визуал эффект болон “Hey Google” зэрэг бусад онцлогийг унтрааж эсвэл хязгаарладаг"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь ар талд ажиллаж буй зарим апп-н өгөгдлийг илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Энэ нь жишээлбэл зургийг товших хүртэл харагдахгүй гэсэн үг юм."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Дата хэмнэгчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Асаах"</string>
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Энэ мэдэгдлийг Чимээгүй болгож зэргийг нь бууруулсан байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Энэ мэдэгдлийг дээгүүр зэрэглэсэн байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Энэ мэдэгдлийг доогуур зэрэглэсэн байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Хэвшлийн горимын мэдээллийн мэдэгдэл"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарей ихэвчлэн цэнэглэдэг хугацаанаас өмнө дуусаж болзошгүй"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгчийг идэвхжүүллээ"</string>
