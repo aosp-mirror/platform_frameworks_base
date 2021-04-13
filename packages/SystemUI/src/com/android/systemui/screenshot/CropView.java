@@ -28,20 +28,25 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Range;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.SeekBar;
 
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+import androidx.customview.widget.ExploreByTouchHelper;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
-import com.android.internal.widget.ExploreByTouchHelper;
 import com.android.systemui.R;
+
+import java.util.List;
 
 /**
  * CropView has top and bottom draggable crop handles, with a scrim to darken the areas being
@@ -66,6 +71,7 @@ public class CropView extends View {
     private int mImageWidth;
 
     private CropBoundary mCurrentDraggingBoundary = CropBoundary.NONE;
+    private int mActivePointerId;
     // The starting value of mCurrentDraggingBoundary's crop, used to compute touch deltas.
     private float mMovementStartValue;
     private float mStartingY;  // y coordinate of ACTION_DOWN
@@ -74,6 +80,7 @@ public class CropView extends View {
     private Range<Float> mMotionRange;
 
     private CropInteractionListener mCropInteractionListener;
+    private final ExploreByTouchHelper mExploreByTouchHelper;
 
     public CropView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
@@ -94,7 +101,8 @@ public class CropView extends View {
         // 48 dp touchable region around each handle.
         mCropTouchMargin = 24 * getResources().getDisplayMetrics().density;
 
-        setAccessibilityDelegate(new AccessibilityHelper());
+        mExploreByTouchHelper = new AccessibilityHelper();
+        ViewCompat.setAccessibilityDelegate(this, mExploreByTouchHelper);
     }
 
     @Override
@@ -131,64 +139,88 @@ public class CropView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         int topPx = fractionToVerticalPixels(mCrop.top);
         int bottomPx = fractionToVerticalPixels(mCrop.bottom);
-        switch (event.getAction()) {
+        switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mCurrentDraggingBoundary = nearestBoundary(event, topPx, bottomPx,
                         fractionToHorizontalPixels(mCrop.left),
                         fractionToHorizontalPixels(mCrop.right));
                 if (mCurrentDraggingBoundary != CropBoundary.NONE) {
+                    mActivePointerId = event.getPointerId(0);
                     mStartingY = event.getY();
                     mStartingX = event.getX();
                     mMovementStartValue = getBoundaryPosition(mCurrentDraggingBoundary);
-                    updateListener(event);
-                    switch (mCurrentDraggingBoundary) {
-                        case TOP:
-                            mMotionRange = new Range<>(0f,
-                                    mCrop.bottom - pixelDistanceToFraction(mCropTouchMargin,
-                                            CropBoundary.BOTTOM));
-                            break;
-                        case BOTTOM:
-                            mMotionRange = new Range<>(
-                                    mCrop.top + pixelDistanceToFraction(mCropTouchMargin,
-                                            CropBoundary.TOP), 1f);
-                            break;
-                        case LEFT:
-                            mMotionRange = new Range<>(0f,
-                                    mCrop.right - pixelDistanceToFraction(mCropTouchMargin,
-                                            CropBoundary.RIGHT));
-                            break;
-                        case RIGHT:
-                            mMotionRange = new Range<>(
-                                    mCrop.left + pixelDistanceToFraction(mCropTouchMargin,
-                                            CropBoundary.LEFT), 1f);
-                            break;
-                    }
+                    updateListener(MotionEvent.ACTION_DOWN, event.getX());
+                    mMotionRange = getAllowedValues(mCurrentDraggingBoundary);
                 }
                 return true;
             case MotionEvent.ACTION_MOVE:
                 if (mCurrentDraggingBoundary != CropBoundary.NONE) {
-                    float deltaPx = isVertical(mCurrentDraggingBoundary) ? event.getY() - mStartingY
-                            : event.getX() - mStartingX;
-                    float delta = pixelDistanceToFraction((int) deltaPx, mCurrentDraggingBoundary);
-                    setBoundaryPosition(mCurrentDraggingBoundary,
-                            mMotionRange.clamp(mMovementStartValue + delta));
-                    updateListener(event);
-                    invalidate();
+                    int pointerIndex = event.findPointerIndex(mActivePointerId);
+                    if (pointerIndex >= 0) {
+                        // Original pointer still active, do the move.
+                        float deltaPx = isVertical(mCurrentDraggingBoundary)
+                                ? event.getY(pointerIndex) - mStartingY
+                                : event.getX(pointerIndex) - mStartingX;
+                        float delta = pixelDistanceToFraction((int) deltaPx,
+                                mCurrentDraggingBoundary);
+                        setBoundaryPosition(mCurrentDraggingBoundary,
+                                mMotionRange.clamp(mMovementStartValue + delta));
+                        updateListener(MotionEvent.ACTION_MOVE, event.getX(pointerIndex));
+                        invalidate();
+                    }
                     return true;
                 }
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if (mActivePointerId == event.getPointerId(event.getActionIndex())
+                        && mCurrentDraggingBoundary != CropBoundary.NONE) {
+                    updateListener(MotionEvent.ACTION_DOWN, event.getX(event.getActionIndex()));
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                if (mActivePointerId == event.getPointerId(event.getActionIndex())
+                        && mCurrentDraggingBoundary != CropBoundary.NONE) {
+                    updateListener(MotionEvent.ACTION_UP, event.getX(event.getActionIndex()));
+                    return true;
+                }
+                break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                if (mCurrentDraggingBoundary != CropBoundary.NONE) {
-                    updateListener(event);
+                if (mCurrentDraggingBoundary != CropBoundary.NONE
+                        && mActivePointerId == event.getPointerId(mActivePointerId)) {
+                    updateListener(MotionEvent.ACTION_UP, event.getX(0));
+                    return true;
                 }
+                break;
         }
         return super.onTouchEvent(event);
+    }
+
+    @Override
+    public boolean dispatchHoverEvent(MotionEvent event) {
+        return mExploreByTouchHelper.dispatchHoverEvent(event)
+                || super.dispatchHoverEvent(event);
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        return mExploreByTouchHelper.dispatchKeyEvent(event)
+                || super.dispatchKeyEvent(event);
+    }
+
+    @Override
+    public void onFocusChanged(boolean gainFocus, int direction,
+            Rect previouslyFocusedRect) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        mExploreByTouchHelper.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
     }
 
     /**
      * Set the given boundary to the given value without animation.
      */
     public void setBoundaryPosition(CropBoundary boundary, float position) {
+        position = (float) getAllowedValues(boundary).clamp(position);
         switch (boundary) {
             case TOP:
                 mCrop.top = position;
@@ -280,12 +312,51 @@ public class CropView extends View {
         mCropInteractionListener = listener;
     }
 
-    private void updateListener(MotionEvent event) {
-        if (mCropInteractionListener != null && (isVertical(mCurrentDraggingBoundary))) {
+    private Range getAllowedValues(CropBoundary boundary) {
+        switch (boundary) {
+            case TOP:
+                return new Range<>(0f,
+                        mCrop.bottom - pixelDistanceToFraction(mCropTouchMargin,
+                                CropBoundary.BOTTOM));
+            case BOTTOM:
+                return new Range<>(
+                        mCrop.top + pixelDistanceToFraction(mCropTouchMargin,
+                                CropBoundary.TOP), 1f);
+            case LEFT:
+                return new Range<>(0f,
+                        mCrop.right - pixelDistanceToFraction(mCropTouchMargin,
+                                CropBoundary.RIGHT));
+            case RIGHT:
+                return new Range<>(
+                        mCrop.left + pixelDistanceToFraction(mCropTouchMargin,
+                                CropBoundary.LEFT), 1f);
+        }
+        return null;
+    }
+
+    /**
+     * @param action either ACTION_DOWN, ACTION_UP or ACTION_MOVE.
+     * @param x coordinate of the relevant pointer.
+     */
+    private void updateListener(int action, float x) {
+        if (mCropInteractionListener != null && isVertical(mCurrentDraggingBoundary)) {
             float boundaryPosition = getBoundaryPosition(mCurrentDraggingBoundary);
-            mCropInteractionListener.onCropMotionEvent(event, mCurrentDraggingBoundary,
-                    boundaryPosition, fractionToVerticalPixels(boundaryPosition),
-                    (mCrop.left + mCrop.right) / 2);
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    mCropInteractionListener.onCropDragStarted(mCurrentDraggingBoundary,
+                            boundaryPosition, fractionToVerticalPixels(boundaryPosition),
+                            (mCrop.left + mCrop.right) / 2, x);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    mCropInteractionListener.onCropDragMoved(mCurrentDraggingBoundary,
+                            boundaryPosition, fractionToVerticalPixels(boundaryPosition),
+                            (mCrop.left + mCrop.right) / 2, x);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mCropInteractionListener.onCropDragComplete();
+                    break;
+
+            }
         }
     }
 
@@ -371,6 +442,8 @@ public class CropView extends View {
 
         private static final int TOP_HANDLE_ID = 1;
         private static final int BOTTOM_HANDLE_ID = 2;
+        private static final int LEFT_HANDLE_ID = 3;
+        private static final int RIGHT_HANDLE_ID = 4;
 
         AccessibilityHelper() {
             super(CropView.this);
@@ -384,62 +457,125 @@ public class CropView extends View {
             if (Math.abs(y - fractionToVerticalPixels(mCrop.bottom)) < mCropTouchMargin) {
                 return BOTTOM_HANDLE_ID;
             }
-            return ExploreByTouchHelper.INVALID_ID;
+            if (y > fractionToVerticalPixels(mCrop.top)
+                    && y < fractionToVerticalPixels(mCrop.bottom)) {
+                if (Math.abs(x - fractionToHorizontalPixels(mCrop.left)) < mCropTouchMargin) {
+                    return LEFT_HANDLE_ID;
+                }
+                if (Math.abs(x - fractionToHorizontalPixels(mCrop.right)) < mCropTouchMargin) {
+                    return RIGHT_HANDLE_ID;
+                }
+            }
+
+            return ExploreByTouchHelper.HOST_ID;
         }
 
         @Override
-        protected void getVisibleVirtualViews(IntArray virtualViewIds) {
+        protected void getVisibleVirtualViews(List<Integer> virtualViewIds) {
+            // Add views in traversal order
             virtualViewIds.add(TOP_HANDLE_ID);
+            virtualViewIds.add(LEFT_HANDLE_ID);
+            virtualViewIds.add(RIGHT_HANDLE_ID);
             virtualViewIds.add(BOTTOM_HANDLE_ID);
         }
 
         @Override
         protected void onPopulateEventForVirtualView(int virtualViewId, AccessibilityEvent event) {
-            switch (virtualViewId) {
-                case TOP_HANDLE_ID:
-                    event.setContentDescription(
-                            getResources().getString(R.string.screenshot_top_boundary));
-                    break;
-                case BOTTOM_HANDLE_ID:
-                    event.setContentDescription(
-                            getResources().getString(R.string.screenshot_bottom_boundary));
-                    break;
-            }
+            CropBoundary boundary = viewIdToBoundary(virtualViewId);
+            event.setContentDescription(getBoundaryContentDescription(boundary));
         }
 
         @Override
         protected void onPopulateNodeForVirtualView(int virtualViewId,
-                AccessibilityNodeInfo node) {
-            switch (virtualViewId) {
-                case TOP_HANDLE_ID:
-                    node.setContentDescription(
-                            getResources().getString(R.string.screenshot_top_boundary));
-                    setNodePositions(mCrop.top, node);
-                    break;
-                case BOTTOM_HANDLE_ID:
-                    node.setContentDescription(
-                            getResources().getString(R.string.screenshot_bottom_boundary));
-                    setNodePositions(mCrop.bottom, node);
-                    break;
-            }
+                AccessibilityNodeInfoCompat node) {
+            CropBoundary boundary = viewIdToBoundary(virtualViewId);
+            node.setContentDescription(getBoundaryContentDescription(boundary));
+            setNodePosition(getNodeRect(boundary), node);
 
-            // TODO: need to figure out the full set of actions to support here.
-            node.addAction(
-                    AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
-            node.setClickable(true);
-            node.setFocusable(true);
+            // Intentionally set the class name to SeekBar so that TalkBack uses volume control to
+            // scroll.
+            node.setClassName(SeekBar.class.getName());
+            node.addAction(AccessibilityNodeInfoCompat.ACTION_SCROLL_FORWARD);
+            node.addAction(AccessibilityNodeInfoCompat.ACTION_SCROLL_BACKWARD);
         }
 
         @Override
         protected boolean onPerformActionForVirtualView(
                 int virtualViewId, int action, Bundle arguments) {
-            return false;
+            if (action != AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+                    && action != AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
+                return false;
+            }
+            CropBoundary boundary = viewIdToBoundary(virtualViewId);
+            float delta = pixelDistanceToFraction(mCropTouchMargin, boundary);
+            if (action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) {
+                delta = -delta;
+            }
+            setBoundaryPosition(boundary, delta + getBoundaryPosition(boundary));
+            invalidateVirtualView(virtualViewId);
+            sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_SELECTED);
+            return true;
         }
 
-        private void setNodePositions(float fraction, AccessibilityNodeInfo node) {
-            int pixels = fractionToVerticalPixels(fraction);
-            Rect rect = new Rect(0, (int) (pixels - mCropTouchMargin),
-                    getWidth(), (int) (pixels + mCropTouchMargin));
+        private CharSequence getBoundaryContentDescription(CropBoundary boundary) {
+            int template;
+            switch (boundary) {
+                case TOP:
+                    template = R.string.screenshot_top_boundary_pct;
+                    break;
+                case BOTTOM:
+                    template = R.string.screenshot_bottom_boundary_pct;
+                    break;
+                case LEFT:
+                    template = R.string.screenshot_left_boundary_pct;
+                    break;
+                case RIGHT:
+                    template = R.string.screenshot_right_boundary_pct;
+                    break;
+                default:
+                    return "";
+            }
+
+            return getResources().getString(template,
+                    Math.round(getBoundaryPosition(boundary) * 100));
+        }
+
+        private CropBoundary viewIdToBoundary(int viewId) {
+            switch (viewId) {
+                case TOP_HANDLE_ID:
+                    return CropBoundary.TOP;
+                case BOTTOM_HANDLE_ID:
+                    return CropBoundary.BOTTOM;
+                case LEFT_HANDLE_ID:
+                    return CropBoundary.LEFT;
+                case RIGHT_HANDLE_ID:
+                    return CropBoundary.RIGHT;
+            }
+            return CropBoundary.NONE;
+        }
+
+        private Rect getNodeRect(CropBoundary boundary) {
+            Rect rect;
+            if (isVertical(boundary)) {
+                int pixels = fractionToVerticalPixels(getBoundaryPosition(boundary));
+                rect = new Rect(0, (int) (pixels - mCropTouchMargin),
+                        getWidth(), (int) (pixels + mCropTouchMargin));
+                // Top boundary can sometimes go beyond the view, shift it down to compensate so
+                // the area is big enough.
+                if (rect.top < 0) {
+                    rect.offset(0, -rect.top);
+                }
+            } else {
+                int pixels = fractionToHorizontalPixels(getBoundaryPosition(boundary));
+                rect = new Rect((int) (pixels - mCropTouchMargin),
+                        (int) (fractionToVerticalPixels(mCrop.top) + mCropTouchMargin),
+                        (int) (pixels + mCropTouchMargin),
+                        (int) (fractionToVerticalPixels(mCrop.bottom) - mCropTouchMargin));
+            }
+            return rect;
+        }
+
+        private void setNodePosition(Rect rect, AccessibilityNodeInfoCompat node) {
             node.setBoundsInParent(rect);
             int[] pos = new int[2];
             getLocationOnScreen(pos);
@@ -452,12 +588,11 @@ public class CropView extends View {
      * Listen for crop motion events and state.
      */
     public interface CropInteractionListener {
-        /**
-         * Called whenever CropView has a MotionEvent that can impact the position of the crop
-         * boundaries.
-         */
-        void onCropMotionEvent(MotionEvent event, CropBoundary boundary, float boundaryPosition,
-                int boundaryPositionPx, float horizontalCenter);
+        void onCropDragStarted(CropBoundary boundary, float boundaryPosition,
+                int boundaryPositionPx, float horizontalCenter, float x);
+        void onCropDragMoved(CropBoundary boundary, float boundaryPosition,
+                int boundaryPositionPx, float horizontalCenter, float x);
+        void onCropDragComplete();
     }
 
     static class SavedState extends BaseSavedState {

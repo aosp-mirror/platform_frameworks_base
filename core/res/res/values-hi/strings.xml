@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"शारीरिक गतिविधि की जानकारी पा सकता है"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"कैमरा"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"चित्र लेने और वीडियो रिकॉर्ड करने"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"आस-पास मौजूद ब्लूटूथ डिवाइस"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"आस-पास मौजूद ब्लूटूथ डिवाइसों को खोजें और उनसे कनेक्ट करें"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"आस-पास मौजूद डिवाइस"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"आस-पास मौजूद डिवाइस खोजें और उनसे कनेक्ट करें"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"कॉल लॉग"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"कॉल लॉग की जानकारी देखना और उसमें बदलाव करना"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"फ़ोन"</string>
@@ -538,10 +538,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"अनुमति देने पर, ऐप्लिकेशन, आस-पास मौजूद ब्लूटूथ डिवाइसों को खोज पाएगा और उनसे जुड़ पाएगा"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"जोड़े गए ब्लूटूथ डिवाइसों से कनेक्ट करें"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"अनुमति देने पर, ऐप्लिकेशन, जोड़े गए ब्लूटूथ डिवाइसों से कनेक्ट कर पाएगा"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
     <skip />
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"आस-पास मौजूद Ultra-Wideband डिवाइसों के बीच की दूरी का पता लगाएं"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ऐप्लिकेशन को आस-पास मौजूद Ultra-Wideband डिवाइसों के बीच की दूरी का पता लगाने की अनुमति दें"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC का इस्तेमाल करने वाली पैसे चुकाने की पसंदीदा सेवा की जानकारी"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"अगर ऐप्लिकेशन को अनुमति दी जाती है, तो वह पैसे चुकाने की आपकी उस पसंदीदा सेवा के बारे में जानकारी पा सकता है जो NFC का इस्तेमाल करती है. इसमें रजिस्टर किए गए डिवाइस और उनके आउटपुट के रूट जैसी जानकारी शामिल होती है."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नियर फ़ील्‍ड कम्‍यूनिकेशन नियंत्रित करें"</string>
@@ -2259,9 +2261,14 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"अब आप अपनी स्क्रीन के किसी हिस्से को ज़ूम करके देख सकते हैं"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"सेटिंग में जाकर, इस सुविधा को चालू करें"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"खारिज करें"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"जारी रखने के लिए, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; को आपके डिवाइस का माइक्रोफ़ोन ऐक्सेस करने की ज़रूरत है."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"जारी रखने के लिए, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; को आपके डिवाइस का कैमरा ऐक्सेस करने की ज़रूरत है."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"चालू करें"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
+    <skip />
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"सेंसर से जुड़ी निजता के बारे में सूचना"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ऐप्लिकेशन का आइकॉन"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ऐप्लिकेशन की ब्रैंड इमेज"</string>

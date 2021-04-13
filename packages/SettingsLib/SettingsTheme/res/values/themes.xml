@@ -21,7 +21,7 @@
         <item name="android:textAppearanceListItem">@style/TextAppearance.PreferenceTitle</item>
         <item name="android:listPreferredItemPaddingStart">@dimen/preference_padding_start</item>
         <item name="android:listPreferredItemPaddingEnd">@dimen/preference_padding_end</item>
-        <item name="preferenceTheme">@style/PreferenceTheme</item>
+        <item name="preferenceTheme">@style/SettingsPreferenceTheme</item>
     </style>
 
     <!-- Using in SubSettings page including injected settings page -->

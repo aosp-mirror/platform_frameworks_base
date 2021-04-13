@@ -38,7 +38,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -85,16 +84,13 @@ import com.android.wm.shell.bubbles.Bubbles;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
-import java.util.function.Supplier;
 
 /**
  * The SysUi side bubbles manager which communicate with other SysUi components.
@@ -251,6 +247,13 @@ public class BubblesManager implements Dumpable {
                 });
 
         mSysuiProxy = new Bubbles.SysuiProxy() {
+            @Override
+            public void isNotificationShadeExpand(Consumer<Boolean> callback) {
+                sysuiMainExecutor.execute(() -> {
+                    callback.accept(mNotificationShadeWindowController.getPanelExpanded());
+                });
+            }
+
             @Override
             public void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback) {
                 sysuiMainExecutor.execute(() -> {

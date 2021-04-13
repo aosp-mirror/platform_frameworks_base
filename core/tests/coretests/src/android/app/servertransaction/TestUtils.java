@@ -111,6 +111,7 @@ class TestUtils {
         private IBinder mAssistToken;
         private IBinder mShareableActivityToken;
         private FixedRotationAdjustments mFixedRotationAdjustments;
+        private boolean mLaunchedFromBubble;
 
         LaunchActivityItemBuilder setIntent(Intent intent) {
             mIntent = intent;
@@ -207,13 +208,18 @@ class TestUtils {
             return this;
         }
 
+        LaunchActivityItemBuilder setLaunchedFromBubble(boolean launchedFromBubble) {
+            mLaunchedFromBubble = launchedFromBubble;
+            return this;
+        }
+
         LaunchActivityItem build() {
             return LaunchActivityItem.obtain(mIntent, mIdent, mInfo,
                     mCurConfig, mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor,
                     mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
                     mActivityOptions, mIsForward, mProfilerInfo, mAssistToken,
                     null /* activityClientController */, mFixedRotationAdjustments,
-                    mShareableActivityToken);
+                    mShareableActivityToken, mLaunchedFromBubble);
         }
     }
 }

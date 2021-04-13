@@ -24,10 +24,12 @@ import android.view.MotionEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
 import com.android.systemui.util.time.SystemClock;
@@ -50,6 +52,7 @@ class FalsingCollectorImpl implements FalsingCollector {
     private final ProximitySensor mProximitySensor;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
+    private final DelayableExecutor mMainExecutor;
     private final SystemClock mSystemClock;
 
     private int mState;
@@ -89,7 +92,8 @@ class FalsingCollectorImpl implements FalsingCollector {
     FalsingCollectorImpl(FalsingDataProvider falsingDataProvider, FalsingManager falsingManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor, HistoryTracker historyTracker,
             ProximitySensor proximitySensor, StatusBarStateController statusBarStateController,
-            KeyguardStateController keyguardStateController, SystemClock systemClock) {
+            KeyguardStateController keyguardStateController,
+            @Main DelayableExecutor mainExecutor, SystemClock systemClock) {
         mFalsingDataProvider = falsingDataProvider;
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -97,6 +101,7 @@ class FalsingCollectorImpl implements FalsingCollector {
         mProximitySensor = proximitySensor;
         mStatusBarStateController = statusBarStateController;
         mKeyguardStateController = keyguardStateController;
+        mMainExecutor = mainExecutor;
         mSystemClock = systemClock;
 
 
@@ -276,7 +281,7 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onMotionEventComplete() {
-        mFalsingDataProvider.onMotionEventComplete();
+        mMainExecutor.executeDelayed(mFalsingDataProvider::onMotionEventComplete , 50);
     }
 
     @Override

@@ -319,8 +319,10 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"તમારી શારીરિક પ્રવૃત્તિને ઍક્સેસ કરવી"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"કૅમેરા"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ચિત્રો લેવાની અને વીડિઓ રેકોર્ડ કરવાની"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"આસપાસના બ્લૂટૂથ ડિવાઇસ"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"આસપાસના બ્લૂટૂથ ડિવાઇસ શોધો અને તેમની સાથે કનેક્ટ કરો"</string>
+    <!-- no translation found for permgrouplab_nearby_devices (5529147543651181991) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_nearby_devices (3213561597116913508) -->
+    <skip />
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"કૉલ લૉગ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ફોન કૉલ લૉગ વાંચો અને લખો"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ફોન"</string>
@@ -538,6 +540,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ઍપને આસપાસના બ્લૂટૂથ ડિવાઇસ શોધવાની અને તેની સાથે જોડી કરવાની મંજૂરી આપે છે"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"જોડી કરેલા બ્લૂટૂથ ડિવાઇસ સાથે કનેક્ટ કરો"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ઍપને જોડી કરેલા બ્લૂટૂથ ડિવાઇસ સાથે કનેક્ટ કરવાની મંજૂરી આપે છે"</string>
+    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
+    <skip />
+    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
+    <skip />
     <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
     <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
@@ -1606,7 +1612,7 @@
     <string name="sending" msgid="206925243621664438">"મોકલી રહ્યાં છે…"</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"બ્રાઉઝર લોન્ચ કરીએ?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"કૉલ સ્વીકારીએ?"</string>
-    <string name="activity_resolver_use_always" msgid="5575222334666843269">"હંમેશા"</string>
+    <string name="activity_resolver_use_always" msgid="5575222334666843269">"હંમેશાં"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"ફક્ત એક વાર"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s કાર્ય પ્રોફાઇલનું સમર્થન કરતું નથી"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ટેબ્લેટ"</string>
@@ -2259,9 +2265,14 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"હવે તમે તમારી સ્ક્રીનનો અમુક ભાગ મોટો કરી શકો છો"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"સેટિંગમાં ચાલુ કરો"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"છોડી દો"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ચાલુ રાખવા માટે, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;ને તમારા ડિવાઇસના માઇક્રોફોનના ઍક્સેસની જરૂર છે."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ચાલુ રાખવા માટે, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;ને તમારા ડિવાઇસના કૅમેરાના ઍક્સેસની જરૂર છે."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ચાલુ કરો"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
+    <skip />
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"સેન્સર પ્રાઇવસી સંબંધિત નોટિફિકેશન"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ઍપ્લિકેશનનું આઇકન"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ઍપ્લિકેશનની બ્રાંડિંગ છબી"</string>

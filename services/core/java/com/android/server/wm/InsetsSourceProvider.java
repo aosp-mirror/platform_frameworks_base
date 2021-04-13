@@ -84,6 +84,7 @@ class InsetsSourceProvider {
     private TriConsumer<DisplayFrames, WindowState, Rect> mImeFrameProvider;
     private final Rect mImeOverrideFrame = new Rect();
     private boolean mIsLeashReadyForDispatching;
+    private final Rect mLastSourceFrame = new Rect();
 
     private final Consumer<Transaction> mSetLeashPositionConsumer = t -> {
         if (mControl != null) {
@@ -268,11 +269,14 @@ class InsetsSourceProvider {
                     mSetLeashPositionConsumer.accept(mWin.getPendingTransaction());
                 }
             }
-            final Insets insetsHint = mSource.calculateInsets(
-                    mWin.getBounds(), true /* ignoreVisibility */);
-            if (!insetsHint.equals(mControl.getInsetsHint())) {
-                changed = true;
-                mControl.setInsetsHint(insetsHint);
+            if (mServerVisible && !mLastSourceFrame.equals(mSource.getFrame())) {
+                final Insets insetsHint = mSource.calculateInsets(
+                        mWin.getBounds(), true /* ignoreVisibility */);
+                if (!insetsHint.equals(mControl.getInsetsHint())) {
+                    changed = true;
+                    mControl.setInsetsHint(insetsHint);
+                }
+                mLastSourceFrame.set(mSource.getFrame());
             }
             if (changed) {
                 mStateController.notifyControlChanged(mControlTarget);

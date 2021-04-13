@@ -319,8 +319,10 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ನಿಮ್ಮ ದೈಹಿಕ ಚಟುವಟಿಕೆಯನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ಕ್ಯಾಮರಾ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ಚಿತ್ರಗಳನ್ನು ತೆಗೆಯಲು, ವೀಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಲು"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"ಸಮೀಪದಲ್ಲಿರುವ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳು"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"ಸಮೀಪದಲ್ಲಿರುವ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ಅನ್ವೇಷಿಸಿ ಮತ್ತು ಅವುಗಳಿಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
+    <!-- no translation found for permgrouplab_nearby_devices (5529147543651181991) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_nearby_devices (3213561597116913508) -->
+    <skip />
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"ಕರೆಯ ಲಾಗ್‌"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ಪೋನ್‌ ಕರೆಯ ಲಾಗ್‌ ಅನ್ನು ಓದಿ ಮತ್ತು ಬರೆಯಿರಿ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ಫೋನ್"</string>
@@ -538,6 +540,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ಸಮೀಪದಲ್ಲಿರುವ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ಅನ್ವೇಷಿಸಲು ಮತ್ತು ಅವುಗಳಿಗೆ ಜೋಡಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸಿ"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ಜೋಡಿಸಿರುವ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳಿಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ಜೋಡಿಸಲಾಗಿರುವ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳಿಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
+    <skip />
+    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
+    <skip />
     <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
     <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
@@ -2259,9 +2265,14 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ನೀವು ಇದೀಗ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಭಾಗವನ್ನು ಹಿಗ್ಗಿಸಬಹುದು"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಆನ್ ಮಾಡಿ"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ವಜಾಗೊಳಿಸಿ"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ಮುಂದುವರಿಯಲು, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ಗೆ ನಿಮ್ಮ ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್‌ನ ಪ್ರವೇಶದ ಅಗತ್ಯವಿದೆ."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ಮುಂದುವರಿಯಲು, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ಗೆ ನಿಮ್ಮ ಸಾಧನದ ಕ್ಯಾಮರಾದ ಪ್ರವೇಶದ ಅಗತ್ಯವಿದೆ."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ಆನ್ ಮಾಡಿ"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
+    <skip />
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ಸೆನ್ಸರ್ ಗೌಪ್ಯತೆ"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ಅಪ್ಲಿಕೇಶನ್‌ ಐಕಾನ್‌"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ಅಪ್ಲಿಕೇಶನ್ ಬ್ರ್ಯಾಂಡಿಂಗ್ ಚಿತ್ರ"</string>

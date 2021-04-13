@@ -691,7 +691,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         public void putDocuments(String packageName, String databaseName,
-                List<Bundle> documentBundles, int userId, IAppSearchBatchResultCallback callback)
+                List<Bundle> documentBundles, int userId, long binderCallStartTimeMillis,
+                IAppSearchBatchResultCallback callback)
                 throws RemoteException {
             final List<GenericDocument> docs = new ArrayList<>(documentBundles.size());
             for (Bundle bundle : documentBundles) {

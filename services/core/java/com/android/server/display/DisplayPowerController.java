@@ -140,6 +140,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int RAMP_STATE_SKIP_INITIAL = 1;
     private static final int RAMP_STATE_SKIP_AUTOBRIGHT = 2;
 
+    private static final int REPORTED_TO_POLICY_UNREPORTED = -1;
     private static final int REPORTED_TO_POLICY_SCREEN_OFF = 0;
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_ON = 1;
     private static final int REPORTED_TO_POLICY_SCREEN_ON = 2;
@@ -311,8 +312,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private long mScreenOnBlockStartRealTime;
     private long mScreenOffBlockStartRealTime;
 
-    // Screen state we reported to policy. Must be one of REPORTED_TO_POLICY_SCREEN_* fields.
-    private int mReportedScreenStateToPolicy;
+    // Screen state we reported to policy. Must be one of REPORTED_TO_POLICY_* fields.
+    private int mReportedScreenStateToPolicy = REPORTED_TO_POLICY_UNREPORTED;
 
     // If the last recorded screen state was dozing or not.
     private boolean mDozing;
@@ -1440,12 +1441,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private boolean setScreenState(int state, boolean reportOnly) {
         final boolean isOff = (state == Display.STATE_OFF);
-        if (mPowerState.getScreenState() != state) {
 
+        if (mPowerState.getScreenState() != state
+                || mReportedScreenStateToPolicy == REPORTED_TO_POLICY_UNREPORTED) {
             // If we are trying to turn screen off, give policy a chance to do something before we
             // actually turn the screen off.
             if (isOff && !mScreenOffBecauseOfProximity) {
-                if (mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_ON) {
+                if (mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_ON
+                        || mReportedScreenStateToPolicy == REPORTED_TO_POLICY_UNREPORTED) {
                     setReportedScreenState(REPORTED_TO_POLICY_SCREEN_TURNING_OFF);
                     blockScreenOff();
                     mWindowManagerPolicy.screenTurningOff(mDisplayId, mPendingScreenOffUnblocker);
@@ -1456,7 +1459,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 }
             }
 
-            if (!reportOnly) {
+            if (!reportOnly && mPowerState.getScreenState() != state) {
                 Trace.traceCounter(Trace.TRACE_TAG_POWER, "ScreenState", state);
                 // TODO(b/153319140) remove when we can get this from the above trace invocation
                 SystemProperties.set("debug.tracing.screen_state", String.valueOf(state));
@@ -1486,7 +1489,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mWindowManagerPolicy.screenTurnedOff(mDisplayId);
             setReportedScreenState(REPORTED_TO_POLICY_SCREEN_OFF);
         }
-        if (!isOff && mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_OFF) {
+        if (!isOff
+                && (mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_OFF
+                        || mReportedScreenStateToPolicy == REPORTED_TO_POLICY_UNREPORTED)) {
             setReportedScreenState(REPORTED_TO_POLICY_SCREEN_TURNING_ON);
             if (mPowerState.getColorFadeLevel() == 0.0f) {
                 blockScreenOn();

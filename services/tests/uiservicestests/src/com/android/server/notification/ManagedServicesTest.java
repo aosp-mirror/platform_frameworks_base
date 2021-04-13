@@ -1416,6 +1416,18 @@ public class ManagedServicesTest extends UiServiceTestCase {
                 new ArraySet(Arrays.asList(new ComponentName("xml", "class"))));
     }
 
+    @Test
+    public void loadDefaults_versionLatest_NoLoadDefaults() throws Exception {
+        resetComponentsAndPackages();
+        mDefaults.add(new ComponentName("default", "class"));
+        mDefaultsString = "xml/class";
+        mVersionString = String.valueOf(mService.DB_VERSION);
+        loadXml(mService);
+        assertEquals(mService.getDefaultComponents(),
+                new ArraySet(Arrays.asList(new ComponentName("xml", "class"))));
+    }
+
+
     private void resetComponentsAndPackages() {
         ArrayMap<Integer, ArrayMap<Integer, String>> empty = new ArrayMap(1);
         ArrayMap<Integer, String> emptyPkgs = new ArrayMap(0);
