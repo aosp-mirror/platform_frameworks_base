@@ -28,6 +28,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.PropertyInvalidatedCache;
+import android.bluetooth.BluetoothDevice.Transport;
 import android.bluetooth.BluetoothProfile.ConnectionPolicy;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -3011,6 +3012,168 @@ public final class BluetoothAdapter {
             Log.e(TAG, "", e);
         }
         return false;
+    }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "OOB_ERROR_" }, value = {
+        OOB_ERROR_UNKNOWN,
+        OOB_ERROR_ANOTHER_ACTIVE_REQUEST,
+        OOB_ERROR_ADAPTER_DISABLED
+    })
+    public @interface OobError {}
+
+    /**
+     * An unknown error has occurred in the controller, stack, or callback pipeline.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int OOB_ERROR_UNKNOWN = 0;
+
+    /**
+     * If another application has already requested {@link OobData} then another fetch will be
+     * disallowed until the callback is removed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int OOB_ERROR_ANOTHER_ACTIVE_REQUEST = 1;
+
+    /**
+     * The adapter is currently disabled, please enable it.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int OOB_ERROR_ADAPTER_DISABLED = 2;
+
+    /**
+     * Provides callback methods for receiving {@link OobData} from the host stack, as well as an
+     * error interface in order to allow the caller to determine next steps based on the {@link
+     * ErrorCode}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface OobDataCallback {
+        /**
+         * Handles the {@link OobData} received from the host stack.
+         *
+         * @param transport - whether the {@link OobData} is generated for LE or Classic.
+         * @param oobData - data generated in the host stack(LE) or controller (Classic)
+         *
+         * @hide
+         */
+        void onOobData(@Transport int transport, @Nullable OobData oobData);
+
+        /**
+         * Provides feedback when things don't go as expected.
+         *
+         * @param errorCode - the code descibing the type of error that occurred.
+         *
+         * @hide
+         */
+        void onError(@OobError int errorCode);
+    }
+
+    /**
+     * Wraps an AIDL interface around an {@link OobDataCallback} interface.
+     *
+     * @see {@link IBluetoothOobDataCallback} for interface definition.
+     *
+     * @hide
+     */
+    public class WrappedOobDataCallback extends IBluetoothOobDataCallback.Stub {
+        private final OobDataCallback mCallback;
+        private final Executor mExecutor;
+
+        /**
+         * @param callback - object to receive {@link OobData} must be a non null argument
+         *
+         * @throws NullPointerException if the callback is null.
+         */
+        WrappedOobDataCallback(@NonNull OobDataCallback callback,
+                @NonNull @CallbackExecutor Executor executor) {
+            Preconditions.checkNotNull(callback);
+            Preconditions.checkNotNull(executor);
+            mCallback = callback;
+            mExecutor = executor;
+        }
+        /**
+         * Wrapper function to relay to the {@link OobDataCallback#onOobData}
+         *
+         * @param transport - whether the {@link OobData} is generated for LE or Classic.
+         * @param oobData - data generated in the host stack(LE) or controller (Classic)
+         *
+         * @hide
+         */
+        public void onOobData(@Transport int transport, OobData oobData) {
+            mExecutor.execute(new Runnable() {
+                public void run() {
+                    mCallback.onOobData(transport, oobData);
+                }
+            });
+        }
+        /**
+         * Wrapper function to relay to the {@link OobDataCallback#onError}
+         *
+         * @param errorCode - the code descibing the type of error that occurred.
+         *
+         * @hide
+         */
+        public void onError(@OobError int errorCode) {
+            mExecutor.execute(new Runnable() {
+                public void run() {
+                    mCallback.onError(errorCode);
+                }
+            });
+        }
+    }
+
+    /**
+     * Fetches a secret data value that can be used for a secure and simple pairing experience.
+     *
+     * <p>This is the Local Out of Band data the comes from the
+     *
+     * <p>This secret is the local Out of Band data.  This data is used to securely and quickly
+     * pair two devices with minimal user interaction.
+     *
+     * <p>For example, this secret can be transferred to a remote device out of band (meaning any
+     * other way besides using bluetooth).  Once the remote device finds this device using the
+     * information given in the data, such as the PUBLIC ADDRESS, the remote device could then
+     * connect to this device using this secret when the pairing sequenece asks for the secret.
+     * This device will respond by automatically accepting the pairing due to the secret being so
+     * trustworthy.
+     *
+     * @param transport - provide type of transport (e.g. LE or Classic).
+     * @param callback - target object to receive the {@link OobData} value.
+     *
+     * @throws NullPointerException if callback is null.
+     * @throws IllegalArgumentException if the transport is not valid.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public void generateLocalOobData(@Transport int transport,
+            @NonNull @CallbackExecutor Executor executor, @NonNull OobDataCallback callback) {
+        if (transport != BluetoothDevice.TRANSPORT_BREDR && transport
+                != BluetoothDevice.TRANSPORT_LE) {
+            throw new IllegalArgumentException("Invalid transport '" + transport + "'!");
+        }
+        Preconditions.checkNotNull(callback);
+        if (!isEnabled()) {
+            Log.w(TAG, "generateLocalOobData(): Adapter isn't enabled!");
+            callback.onError(OOB_ERROR_ADAPTER_DISABLED);
+        } else {
+            try {
+                mService.generateLocalOobData(transport, new WrappedOobDataCallback(callback,
+                        executor));
+            } catch (RemoteException e) {
+                Log.e(TAG, "", e);
+            }
+        }
     }
 
     /**
