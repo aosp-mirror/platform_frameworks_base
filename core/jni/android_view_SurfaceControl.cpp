@@ -1443,14 +1443,6 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
     return JNI_TRUE;
 }
 
-static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject, jlong barrierObject, jlong frameNumber) {
-    sp<SurfaceControl> ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
-    sp<SurfaceControl> barrier = reinterpret_cast<SurfaceControl*>(barrierObject);
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->deferTransactionUntil_legacy(ctrl, barrier, frameNumber);
-}
-
 static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject,
         jlong newParentObject) {
@@ -1856,8 +1848,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayPowerMode },
     {"nativeGetProtectedContentSupport", "()Z",
             (void*)nativeGetProtectedContentSupport },
-    {"nativeDeferTransactionUntil", "(JJJJ)V",
-            (void*)nativeDeferTransactionUntil },
     {"nativeReparent", "(JJJ)V",
             (void*)nativeReparent },
     {"nativeCaptureDisplay",
