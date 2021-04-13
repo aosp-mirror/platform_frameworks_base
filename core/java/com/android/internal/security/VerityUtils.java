@@ -60,7 +60,7 @@ public abstract class VerityUtils {
     private static final boolean DEBUG = false;
 
     public static boolean isFsVeritySupported() {
-        return Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.R
+        return Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.R
                 || SystemProperties.getInt("ro.apk_verity.mode", 0) == 2;
     }
 
