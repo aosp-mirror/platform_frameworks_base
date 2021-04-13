@@ -117,6 +117,7 @@ import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationPersistence;
 import com.android.server.utils.Snappable;
+import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
@@ -165,11 +166,6 @@ public final class Settings implements Watchable, Snappable {
     private static final String TAG = "PackageSettings";
 
     /**
-     * Cached snapshot
-     */
-    private volatile Settings mSnapshot = null;
-
-    /**
      * Watchable machinery
      */
     private final WatchableImpl mWatchable = new WatchableImpl();
@@ -212,7 +208,6 @@ public final class Settings implements Watchable, Snappable {
      * @param what The {@link Watchable} that generated the event.
      */
     public void dispatchChange(@Nullable Watchable what) {
-        mSnapshot = null;
         mWatchable.dispatchChange(what);
     }
     /**
@@ -523,6 +518,19 @@ public final class Settings implements Watchable, Snappable {
             }
         };
 
+    private final SnapshotCache<Settings> mSnapshot;
+
+    // Create a snapshot cache
+    private SnapshotCache<Settings> makeCache() {
+        return new SnapshotCache<Settings>(this, this) {
+            @Override
+            public Settings createSnapshot() {
+                Settings s = new Settings(mSource);
+                s.mWatchable.seal();
+                return s;
+            }};
+    }
+
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public Settings(Map<String, PackageSetting> pkgSettings) {
         mLock = new PackageManagerTracedLock();
@@ -557,6 +565,8 @@ public final class Settings implements Watchable, Snappable {
         mDefaultBrowserApp.registerObserver(mObserver);
 
         Watchable.verifyWatchedAttributes(this, mObserver);
+
+        mSnapshot = makeCache();
     }
 
     Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
@@ -608,6 +618,8 @@ public final class Settings implements Watchable, Snappable {
         mDefaultBrowserApp.registerObserver(mObserver);
 
         Watchable.verifyWatchedAttributes(this, mObserver);
+
+        mSnapshot = makeCache();
     }
 
     /**
@@ -661,22 +673,15 @@ public final class Settings implements Watchable, Snappable {
         mPermissions = r.mPermissions;
         mPermissionDataProvider = r.mPermissionDataProvider;
 
-        // Do not register any Watchables
+        // Do not register any Watchables and do not create a snapshot cache.
+        mSnapshot = null;
     }
 
     /**
-     * Return a snapshot.  If the cached snapshot is null, build a new one.  The logic in
-     * the function ensures that this function returns a valid snapshot even if a race
-     * condition causes the cached snapshot to be cleared asynchronously to this method.
+     * Return a snapshot.
      */
     public Settings snapshot() {
-        Settings s = mSnapshot;
-        if (s == null) {
-            s = new Settings(this);
-            s.mWatchable.seal();
-            mSnapshot = s;
-        }
-        return s;
+        return mSnapshot.snapshot();
     }
 
     private void invalidatePackageCache() {
