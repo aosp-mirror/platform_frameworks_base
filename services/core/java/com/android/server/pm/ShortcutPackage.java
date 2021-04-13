@@ -264,7 +264,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     public ShortcutInfo findShortcutById(@Nullable final String id) {
         if (id == null) return null;
         final List<ShortcutInfo> ret = getShortcutById(Collections.singleton(id));
-        return ret.isEmpty() ? null : ret.get(0);
+        return (ret == null || ret.isEmpty()) ? null : ret.get(0);
     }
 
     public boolean isShortcutExistsAndInvisibleToPublisher(String id) {
@@ -2361,7 +2361,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         });
     }
 
-    @NonNull
+    @Nullable
     private List<ShortcutInfo> getShortcutById(@NonNull final Collection<String> ids) {
         final List<String> shortcutIds = new ArrayList<>(1);
         for (String id : ids) {
@@ -2525,7 +2525,8 @@ class ShortcutPackage extends ShortcutPackageItem {
     private AndroidFuture<AppSearchSession> setupSchema(
             @NonNull final AppSearchSession session) {
         SetSchemaRequest.Builder schemaBuilder = new SetSchemaRequest.Builder()
-                .addSchemas(AppSearchPerson.SCHEMA, AppSearchShortcutInfo.SCHEMA);
+                .addSchemas(AppSearchPerson.SCHEMA, AppSearchShortcutInfo.SCHEMA)
+                .setForceOverride(true);
         for (PackageIdentifier pi : mPackageIdentifiers.values()) {
             schemaBuilder = schemaBuilder
                     .setSchemaTypeVisibilityForPackage(
