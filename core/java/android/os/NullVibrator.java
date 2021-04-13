@@ -54,4 +54,8 @@ public class NullVibrator extends Vibrator {
     @Override
     public void cancel() {
     }
+
+    @Override
+    public void cancel(int usageFilter) {
+    }
 }

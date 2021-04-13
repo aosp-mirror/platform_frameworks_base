@@ -146,12 +146,21 @@ public class SystemVibratorManager extends VibratorManager {
 
     @Override
     public void cancel() {
+        cancelVibration(/* usageFilter= */ -1);
+    }
+
+    @Override
+    public void cancel(int usageFilter) {
+        cancelVibration(usageFilter);
+    }
+
+    private void cancelVibration(int usageFilter) {
         if (mService == null) {
             Log.w(TAG, "Failed to cancel vibration; no vibrator manager service.");
             return;
         }
         try {
-            mService.cancelVibrate(mToken);
+            mService.cancelVibrate(usageFilter, mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to cancel vibration.", e);
         }
@@ -232,54 +241,32 @@ public class SystemVibratorManager extends VibratorManager {
         @Override
         public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
                 @Nullable VibrationEffect effect, @Nullable AudioAttributes attributes) {
-            if (mService == null) {
-                Log.w(TAG, "Failed to set always-on effect on vibrator " + mVibratorInfo.getId()
-                        + "; no vibrator manager service.");
-                return false;
-            }
-            try {
-                VibrationAttributes attr = new VibrationAttributes.Builder(
-                        attributes, effect).build();
-                CombinedVibration combined = CombinedVibration.startParallel()
-                        .addVibrator(mVibratorInfo.getId(), effect)
-                        .combine();
-                return mService.setAlwaysOnEffect(uid, opPkg, alwaysOnId, combined, attr);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to set always-on effect on vibrator " + mVibratorInfo.getId());
-            }
-            return false;
+            VibrationAttributes attr = new VibrationAttributes.Builder(
+                    attributes, effect).build();
+            CombinedVibration combined = CombinedVibration.startParallel()
+                    .addVibrator(mVibratorInfo.getId(), effect)
+                    .combine();
+            return SystemVibratorManager.this.setAlwaysOnEffect(uid, opPkg, alwaysOnId, combined,
+                    attr);
         }
 
         @Override
         public void vibrate(int uid, String opPkg, @NonNull VibrationEffect vibe, String reason,
                 @NonNull VibrationAttributes attributes) {
-            if (mService == null) {
-                Log.w(TAG, "Failed to vibrate on vibrator " + mVibratorInfo.getId()
-                        + "; no vibrator manager service.");
-                return;
-            }
-            try {
-                CombinedVibration combined = CombinedVibration.startParallel()
-                        .addVibrator(mVibratorInfo.getId(), vibe)
-                        .combine();
-                mService.vibrate(uid, opPkg, combined, attributes, reason, mToken);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to vibrate.", e);
-            }
+            CombinedVibration combined = CombinedVibration.startParallel()
+                    .addVibrator(mVibratorInfo.getId(), vibe)
+                    .combine();
+            SystemVibratorManager.this.vibrate(uid, opPkg, combined, reason, attributes);
         }
 
         @Override
         public void cancel() {
-            if (mService == null) {
-                Log.w(TAG, "Failed to cancel vibration on vibrator " + mVibratorInfo.getId()
-                        + "; no vibrator manager service.");
-                return;
-            }
-            try {
-                mService.cancelVibrate(mToken);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to cancel vibration on vibrator " + mVibratorInfo.getId(), e);
-            }
+            SystemVibratorManager.this.cancel();
+        }
+
+        @Override
+        public void cancel(int usageFilter) {
+            SystemVibratorManager.this.cancel(usageFilter);
         }
 
         @Override
