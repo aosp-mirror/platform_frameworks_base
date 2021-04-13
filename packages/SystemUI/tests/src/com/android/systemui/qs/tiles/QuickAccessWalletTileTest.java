@@ -141,6 +141,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         when(mHost.getUiEventLogger()).thenReturn(mUiEventLogger);
         when(mFeatureFlags.isQuickAccessWalletEnabled()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
+        when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(true);
 
         mTile = new QuickAccessWalletTile(
                 mHost,
@@ -171,13 +172,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIsAvailable_qawServiceNotAvailable() {
-        when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(false);
-        assertFalse(mTile.isAvailable());
-    }
-
-    @Test
-    public void testIsAvailable_qawServiceAvailable() {
+    public void testIsAvailable_qawFeatureAvailable() {
         when(mPackageManager.hasSystemFeature(FEATURE_NFC_HOST_CARD_EMULATION)).thenReturn(true);
         when(mPackageManager.hasSystemFeature("org.chromium.arc")).thenReturn(false);
         when(mSecureSettings.getString(NFC_PAYMENT_DEFAULT_COMPONENT)).thenReturn("Component");
@@ -229,11 +224,10 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     public void testHandleUpdateState_updateLabelAndIcon() {
         QSTile.State state = new QSTile.State();
         QSTile.Icon icon = QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_wallet);
-        when(mQuickAccessWalletClient.getServiceLabel()).thenReturn("QuickAccessWallet");
 
         mTile.handleUpdateState(state, null);
 
-        assertEquals("QuickAccessWallet", state.label.toString());
+        assertEquals(mContext.getString(R.string.wallet_title), state.label.toString());
         assertTrue(state.label.toString().contentEquals(state.contentDescription));
         assertEquals(icon, state.icon);
     }
@@ -288,7 +282,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
 
     @Test
     public void testHandleUpdateState_qawFeatureUnavailable_tileUnavailable() {
-        when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(false);
+        when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(false);
         QSTile.State state = new QSTile.State();
 
         mTile.handleUpdateState(state, null);
