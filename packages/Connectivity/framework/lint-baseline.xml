@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="5" by="lint 4.1.0" client="cli" variant="all" version="4.1.0">
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 31 (current min is 30): `new android.net.ParseException`"
+        errorLine1="                ParseException pe = new ParseException(e.reason, e.getCause());"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/Connectivity/framework/src/android/net/DnsResolver.java"
+            line="301"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback`"
+        errorLine1="    protected class ActiveDataSubscriptionIdListener extends TelephonyCallback"
+        errorLine2="                                                             ~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/Connectivity/framework/src/android/net/util/MultinetworkPolicyTracker.java"
+            line="96"
+            column="62"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level 31 (current min is 30): `android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener`"
+        errorLine1="            implements TelephonyCallback.ActiveDataSubscriptionIdListener {"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/Connectivity/framework/src/android/net/util/MultinetworkPolicyTracker.java"
+            line="97"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 31 (current min is 30): `android.telephony.TelephonyManager#registerTelephonyCallback`"
+        errorLine1="        ctx.getSystemService(TelephonyManager.class).registerTelephonyCallback("
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/Connectivity/framework/src/android/net/util/MultinetworkPolicyTracker.java"
+            line="126"
+            column="54"/>
+    </issue>
+
+</issues>
