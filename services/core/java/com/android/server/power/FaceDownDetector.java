@@ -324,7 +324,9 @@ public class FaceDownDetector implements SensorEventListener {
 
     private boolean isEnabled() {
         return DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE, KEY_FEATURE_ENABLED,
-                DEFAULT_FEATURE_ENABLED);
+                DEFAULT_FEATURE_ENABLED)
+                && mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_flipToScreenOffEnabled);
     }
 
     private float getAccelerationThreshold() {
