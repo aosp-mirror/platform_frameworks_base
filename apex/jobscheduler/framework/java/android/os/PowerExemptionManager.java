@@ -176,8 +176,6 @@ public class PowerExemptionManager {
     /** @hide */
     public static final int REASON_DEVICE_DEMO_MODE = 63;
     /** @hide */
-    public static final int REASON_EXEMPTED_PACKAGE = 64;
-    /** @hide */
     public static final int REASON_ALLOWLISTED_PACKAGE = 65;
     /** @hide */
     public static final int REASON_APPOP = 66;
@@ -344,7 +342,6 @@ public class PowerExemptionManager {
             REASON_INSTR_BACKGROUND_FGS_PERMISSION,
             REASON_SYSTEM_ALERT_WINDOW_PERMISSION,
             REASON_DEVICE_DEMO_MODE,
-            REASON_EXEMPTED_PACKAGE,
             REASON_ALLOWLISTED_PACKAGE,
             REASON_APPOP,
             REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD,
@@ -601,8 +598,6 @@ public class PowerExemptionManager {
                 return "SYSTEM_ALERT_WINDOW_PERMISSION";
             case REASON_DEVICE_DEMO_MODE:
                 return "DEVICE_DEMO_MODE";
-            case REASON_EXEMPTED_PACKAGE:
-                return "EXEMPTED_PACKAGE";
             case REASON_ALLOWLISTED_PACKAGE:
                 return "ALLOWLISTED_PACKAGE";
             case REASON_APPOP:
