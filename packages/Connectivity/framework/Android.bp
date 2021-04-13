@@ -105,6 +105,7 @@ java_sdk_library {
         "//frameworks/libs/net/common/testutils",
         "//frameworks/libs/net/common/tests:__subpackages__",
         "//frameworks/opt/telephony/tests/telephonytests",
+        "//packages/modules/CaptivePortalLogin/tests",
         "//packages/modules/Connectivity/Tethering/tests:__subpackages__",
         "//packages/modules/Connectivity/tests:__subpackages__",
         "//packages/modules/NetworkStack/tests:__subpackages__",
