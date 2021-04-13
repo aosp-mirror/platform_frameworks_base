@@ -725,7 +725,7 @@ public class BiometricService extends SystemService {
                 }
             }
 
-            mSensors.add(new BiometricSensor(id, modality, strength, authenticator) {
+            mSensors.add(new BiometricSensor(getContext(), id, modality, strength, authenticator) {
                 @Override
                 boolean confirmationAlwaysRequired(int userId) {
                     return mSettingObserver.getConfirmationAlwaysRequired(modality, userId);
@@ -1351,13 +1351,8 @@ public class BiometricService extends SystemService {
         for (BiometricSensor sensor : mSensors) {
             pw.println(" " + sensor);
         }
+        pw.println();
         pw.println("CurrentSession: " + mCurrentAuthSession);
-
-        final List<FingerprintSensorPropertiesInternal> fpProps =
-                mInjector.getFingerprintSensorProperties(getContext());
-        pw.println("FingerprintSensorProperties: " + fpProps.size());
-        for (FingerprintSensorPropertiesInternal prop : fpProps) {
-            pw.println(" " + prop);
-        }
+        pw.println();
     }
 }
