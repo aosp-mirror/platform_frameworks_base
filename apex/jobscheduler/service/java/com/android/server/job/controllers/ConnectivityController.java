@@ -729,17 +729,23 @@ public final class ConnectivityController extends RestrictingController implemen
 
                 for (int j = 0; j < jobs.size(); ++j) {
                     JobStatus job = jobs.valueAt(j);
-                    us.earliestEnqueueTime = Math.min(us.earliestEnqueueTime, job.enqueueTime);
                     if (wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_CONNECTIVITY)) {
                         us.numReadyWithConnectivity++;
                         if (isNetworkAvailable(job)) {
                             us.numRequestedNetworkAvailable++;
                         }
+                        // Only use the enqueue time of jobs that would be ready to prevent apps
+                        // from gaming the system (eg. by scheduling a job that requires all
+                        // constraints and has a minimum latency of 6 months to always have the
+                        // earliest enqueue time).
+                        us.earliestEnqueueTime = Math.min(us.earliestEnqueueTime, job.enqueueTime);
+                        if (job.shouldTreatAsExpeditedJob() || job.startedAsExpeditedJob) {
+                            us.earliestEJEnqueueTime =
+                                    Math.min(us.earliestEJEnqueueTime, job.enqueueTime);
+                        }
                     }
                     if (job.shouldTreatAsExpeditedJob() || job.startedAsExpeditedJob) {
                         us.numEJs++;
-                        us.earliestEJEnqueueTime =
-                                Math.min(us.earliestEJEnqueueTime, job.enqueueTime);
                     } else {
                         us.numRegular++;
                     }
