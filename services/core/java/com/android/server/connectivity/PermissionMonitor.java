@@ -286,7 +286,7 @@ public class PermissionMonitor {
             for (UserHandle user : users) {
                 if (user == null) continue;
 
-                list.add(UserHandle.getUid(user, app.getKey()));
+                list.add(user.getUid(app.getKey()));
             }
         }
         try {
@@ -555,7 +555,7 @@ public class PermissionMonitor {
                     final UserHandle handle = UserHandle.of(userId);
                     if (handle == null) continue;
 
-                    final int uid = UserHandle.getUid(handle, appId);
+                    final int uid = handle.getUid(appId);
                     if (range.contains(uid)) {
                         result.add(uid);
                     }
