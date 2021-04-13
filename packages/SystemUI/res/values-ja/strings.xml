@@ -92,8 +92,14 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"キャプチャ範囲を拡大"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"スクリーンショットを閉じます"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"スクリーンショットのプレビュー"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"上部境界"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"下部境界"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"スクリーン レコーダー"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"画面の録画を処理しています"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
@@ -349,8 +355,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"入力方法"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置情報"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"現在地OFF"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"カメラをブロック"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"マイクをミュート"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"カメラへのアクセス"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"マイクへのアクセス"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"使用可能"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ブロック中"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"メディアデバイス"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"緊急通報のみ"</string>
@@ -422,8 +430,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"スクリーン レコード"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"開始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"続行するには、&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; にデバイスのマイクへのアクセスを許可する必要があります。"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"続行するには、&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; にデバイスのカメラへのアクセスを許可する必要があります。"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"デバイスのマイクのブロックを解除しますか？"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"デバイスのカメラのブロックを解除しますか？"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"デバイスのカメラとマイクのブロックを解除しますか？"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"マイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"カメラの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"カメラやマイクの使用が許可されているすべてのアプリとサービスでアクセスのブロックが解除されます。"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"デバイス"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"アプリを切り替えるには上にスワイプ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"右にドラッグするとアプリを素早く切り替えることができます"</string>
@@ -657,18 +669,14 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"イーサネット"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"アラーム"</string>
     <string name="wallet_title" msgid="5369767670735827105">"ウォレット"</string>
-    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
     <skip />
-    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
     <skip />
-    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
-    <skip />
-    <!-- no translation found for wallet_error_generic (257704570182963611) -->
-    <skip />
+    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"準備完了"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"お支払いの設定"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ロックを解除して使用"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"カードの取得中に問題が発生しました。しばらくしてからもう一度お試しください"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"仕事用プロファイル"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"機内モード"</string>
     <string name="add_tile" msgid="6239678623873086686">"タイルを追加"</string>
@@ -737,11 +745,9 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ステータス:&lt;/b&gt; ランクがサイレントに下がりました"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ステータス:&lt;/b&gt; ランクが上がりました"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ステータス:&lt;/b&gt; ランクが下がりました"</string>
-    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"優先モードが ON の場合でも、常に通知の一番上に表示されます"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
-    <!-- no translation found for notification_priority_title (5256226572739882190) -->
-    <skip />
+    <string name="notification_priority_title" msgid="5256226572739882190">"優先度の高い会話"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> は会話機能に対応していません"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"このグループの通知はここでは設定できません"</string>
@@ -1015,14 +1021,10 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"システム ナビゲーションを更新するには [設定] に移動してください"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"スタンバイ"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"優先度を高く設定された会話"</string>
-    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
-    <skip />
+    <string name="priority_onboarding_behavior" msgid="636826237468953117">"優先度の高い会話"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"優先モードが ON の場合、これらの会話はリストの一番上に表示されるのでいつでも確認できます"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"プロフィール写真がロック画面に表示されます"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"これらの会話はホーム画面のバブル内で簡単に確認できます"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"サイレント モードが ON でも表示"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"設定"</string>
@@ -1040,18 +1042,12 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"スイッチ"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ユーザー補助ジェスチャーに代わって、ユーザー補助機能ボタンが導入されました\n\n"<annotation id="link">"設定を表示"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ボタンを一時的に非表示にするには端に移動させてください"</string>
-    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
-    <skip />
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"左上に移動"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"右上に移動"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"左下に移動"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"右下に移動"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"端に移動して非表示"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"端から移動して表示"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"デバイス コントロール"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"接続済みデバイスのコントロールを追加します"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"デバイス コントロールの設定"</string>
@@ -1130,35 +1126,27 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>前まで"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>以上前"</string>
     <string name="birthday_status" msgid="2596961629465396761">"誕生日"</string>
-    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
-    <skip />
+    <string name="birthday_status_content_description" msgid="7677415209545817153">"今日は <xliff:g id="NAME">%1$s</xliff:g> さんのお誕生日です"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"もうすぐ誕生日"</string>
-    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
-    <skip />
+    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"まもなく <xliff:g id="NAME">%1$s</xliff:g> さんのお誕生日です"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"記念日"</string>
-    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
-    <skip />
+    <string name="anniversary_status_content_description" msgid="6214503393960662875">"今日は <xliff:g id="NAME">%1$s</xliff:g> さんの記念日です"</string>
     <string name="location_status" msgid="1294990572202541812">"現在地を共有中"</string>
-    <!-- no translation found for location_status_content_description (2982386178160071305) -->
-    <skip />
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> さんが位置情報を共有しています"</string>
     <string name="new_story_status" msgid="9012195158584846525">"新しいストーリー"</string>
-    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
-    <skip />
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> さんが新しいストーリーを共有しました"</string>
     <string name="video_status" msgid="4548544654316843225">"視聴中"</string>
     <string name="audio_status" msgid="4237055636967709208">"再生中"</string>
     <string name="game_status" msgid="1340694320630973259">"プレイ中"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"友だち"</string>
     <string name="empty_status" msgid="5938893404951307749">"今夜、チャットしよう"</string>
-    <!-- no translation found for status_before_loading (1500477307859631381) -->
-    <skip />
+    <string name="status_before_loading" msgid="1500477307859631381">"まもなく会話の内容が表示されます"</string>
     <string name="missed_call" msgid="4228016077700161689">"不在着信"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g> 件以上"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"最近のメッセージ、不在着信、最新のステータスが表示されます"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"会話"</string>
-    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
-    <skip />
-    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
-    <skip />
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> さんからメッセージが届きました"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> さんが画像を送信しました"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"電池残量の読み込み中に問題が発生しました"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"タップすると詳細が表示されます"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"アラーム未設定"</string>
