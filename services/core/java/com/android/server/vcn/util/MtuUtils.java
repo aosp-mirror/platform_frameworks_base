@@ -113,7 +113,6 @@ public class MtuUtils {
             return IPV6_MIN_MTU;
         }
 
-        boolean hasUnknownAlgorithm = false;
         int maxAuthOverhead = 0;
         int maxCryptOverhead = 0;
         int maxAuthCryptOverhead = 0;
