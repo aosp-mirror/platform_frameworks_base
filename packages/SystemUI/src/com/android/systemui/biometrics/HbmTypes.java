@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import android.annotation.IntDef;
+import android.hardware.fingerprint.IUdfpsHbmListener;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,10 +27,10 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class HbmTypes {
     /** HBM that applies to the whole screen. */
-    public static final int GLOBAL_HBM = 0;
+    public static final int GLOBAL_HBM = IUdfpsHbmListener.GLOBAL_HBM;
 
     /** HBM that only applies to a portion of the screen. */
-    public static final int LOCAL_HBM = 1;
+    public static final int LOCAL_HBM = IUdfpsHbmListener.LOCAL_HBM;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({GLOBAL_HBM, LOCAL_HBM})
