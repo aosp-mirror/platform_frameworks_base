@@ -1186,6 +1186,7 @@ public class NavigationBarView extends FrameLayout implements
         boolean uiCarModeChanged = updateCarMode();
         updateIcons(mTmpLastConfiguration);
         updateRecentsIcon();
+        mEdgeBackGestureHandler.onConfigurationChanged(mConfiguration);
         mRecentsOnboarding.onConfigurationChanged(mConfiguration);
         if (uiCarModeChanged || mTmpLastConfiguration.densityDpi != mConfiguration.densityDpi
                 || mTmpLastConfiguration.getLayoutDirection() != mConfiguration.getLayoutDirection()) {
