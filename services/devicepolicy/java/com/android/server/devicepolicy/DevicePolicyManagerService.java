@@ -11698,9 +11698,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isLockTaskPermitted(String pkg) {
-        final int userHandle = mInjector.userHandleGetCallingUserId();
+        // Check policy-exempt apps first, as it doesn't require the lock
+        if (listPolicyExemptAppsUnchecked().contains(pkg)) {
+            if (VERBOSE_LOG) {
+                Slogf.v(LOG_TAG, "isLockTaskPermitted(%s): returning true for policy-exempt app",
+                            pkg);
+            }
+            return true;
+        }
+
+        final int userId = mInjector.userHandleGetCallingUserId();
         synchronized (getLockObject()) {
-            return getUserData(userHandle).mLockTaskPackages.contains(pkg);
+            return getUserData(userId).mLockTaskPackages.contains(pkg);
         }
     }
 
