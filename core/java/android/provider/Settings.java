@@ -8539,13 +8539,16 @@ public final class Settings {
                 "one_handed_tutorial_show_count";
 
         /**
-         * Indicates whether transform is enabled.
+         * Indicates whether ui translation is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)
          *
          * @hide
          */
-        public static final String TRANSFORM_ENABLED = "transform_enabled";
+        @SystemApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String UI_TRANSLATION_ENABLED = "ui_translation_enabled";
 
         /**
          * The current night mode that has been selected by the user.  Owned
