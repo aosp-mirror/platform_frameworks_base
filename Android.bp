@@ -14,41 +14,6 @@
 
 // Build the master framework library.
 
-// Defaults for platform code that runs inside system_server
-java_defaults {
-    name: "platform_service_defaults",
-    plugins: [
-        "error_prone_android_framework",
-    ],
-    errorprone: {
-        javacflags: [
-            // "-Xep:AndroidFrameworkBinderIdentity:ERROR",
-            "-Xep:AndroidFrameworkCompatChange:ERROR",
-            // "-Xep:AndroidFrameworkUid:ERROR",
-            // NOTE: only enable to generate local patchfiles
-            // "-XepPatchChecks:refaster:frameworks/base/errorprone/refaster/EfficientXml.java.refaster",
-            // "-XepPatchLocation:/tmp/refaster/",
-        ],
-    },
-}
-
-// Defaults for platform apps
-java_defaults {
-    name: "platform_app_defaults",
-    plugins: [
-        "error_prone_android_framework",
-    ],
-    errorprone: {
-        javacflags: [
-            // We're less worried about performance in app code
-            "-Xep:AndroidFrameworkEfficientCollections:OFF",
-            "-Xep:AndroidFrameworkEfficientParcelable:OFF",
-            "-Xep:AndroidFrameworkEfficientStrings:OFF",
-            "-Xep:AndroidFrameworkEfficientXml:OFF",
-        ],
-    },
-}
-
 // READ ME: ########################################################
 //
 // When updating this list of aidl files, consider if that aidl is
@@ -306,11 +271,6 @@ java_library {
     installable: false,
 }
 
-filegroup {
-    name: "framework-jarjar-rules",
-    srcs: ["framework-jarjar-rules.txt"],
-}
-
 java_defaults {
     name: "framework-minus-apex-defaults",
     defaults: ["framework-aidl-export-defaults"],
@@ -331,7 +291,7 @@ java_defaults {
         "--core-library",
         "--multi-dex",
     ],
-    jarjar_rules: ":framework-jarjar-rules",
+    jarjar_rules: "framework-jarjar-rules.txt",
     javac_shard_size: 150,
     plugins: [
         "view-inspector-annotation-processor",
@@ -428,66 +388,6 @@ platform_compat_config {
     src: ":framework-minus-apex",
 }
 
-gensrcs {
-    name: "framework-javastream-protos",
-    depfile: true,
-
-    tools: [
-        "aprotoc",
-        "protoc-gen-javastream",
-        "soong_zip",
-    ],
-
-    cmd: "mkdir -p $(genDir)/$(in) " +
-        "&& $(location aprotoc) " +
-        "  --plugin=$(location protoc-gen-javastream) " +
-        "  --dependency_out=$(depfile) " +
-        "  --javastream_out=$(genDir)/$(in) " +
-        "  -Iexternal/protobuf/src " +
-        "  -I . " +
-        "  $(in) " +
-        "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
-
-    srcs: [
-        ":ipconnectivity-proto-src",
-        ":libstats_atom_enum_protos",
-        ":libtombstone_proto-src",
-        "core/proto/**/*.proto",
-        "libs/incident/**/*.proto",
-        ":service-permission-protos",
-    ],
-    output_extension: "srcjar",
-}
-
-gensrcs {
-    name: "framework-cppstream-protos",
-    depfile: true,
-
-    tools: [
-        "aprotoc",
-        "protoc-gen-cppstream",
-    ],
-
-    cmd: "mkdir -p $(genDir) " +
-        "&& $(location aprotoc) " +
-        "  --plugin=$(location protoc-gen-cppstream) " +
-        "  --dependency_out=$(depfile) " +
-        "  --cppstream_out=$(genDir) " +
-        "  -Iexternal/protobuf/src " +
-        "  -I . " +
-        "  $(in)",
-
-    srcs: [
-        ":ipconnectivity-proto-src",
-        ":libstats_atom_enum_protos",
-        "core/proto/**/*.proto",
-        "libs/incident/**/*.proto",
-        ":service-permission-protos",
-    ],
-
-    output_extension: "proto.h",
-}
-
 filegroup {
     name: "framework-annotations",
     srcs: [
@@ -577,218 +477,6 @@ java_library {
     dxflags: ["--core-library"],
 }
 
-// ====  java proto host library  ==============================
-java_library_host {
-    name: "platformprotos",
-    srcs: [
-        ":ipconnectivity-proto-src",
-        ":libstats_atom_enum_protos",
-        ":libstats_internal_protos",
-        ":statsd_internal_protos",
-        "cmds/am/proto/instrumentation_data.proto",
-        "cmds/statsd/src/**/*.proto",
-        "core/proto/**/*.proto",
-        "libs/incident/proto/**/*.proto",
-        ":service-permission-protos",
-    ],
-    proto: {
-        include_dirs: [
-            "external/protobuf/src",
-            "frameworks/proto_logging/stats",
-        ],
-        type: "full",
-    },
-    // Protos have lots of MissingOverride and similar.
-    errorprone: {
-        javacflags: ["-XepDisableAllChecks"],
-    },
-}
-
-// ====  java proto device library (for test only)  ==============================
-java_library {
-    name: "platformprotosnano",
-    proto: {
-        type: "nano",
-        output_params: ["store_unknown_fields=true"],
-        include_dirs: ["external/protobuf/src"],
-    },
-    exclude_srcs: [
-        "core/proto/android/privacy.proto",
-        "core/proto/android/section.proto",
-        "core/proto/android/typedef.proto",
-    ],
-    sdk_version: "9",
-    srcs: [
-        ":ipconnectivity-proto-src",
-        ":libstats_atom_enum_protos",
-        "core/proto/**/*.proto",
-        "libs/incident/proto/android/os/**/*.proto",
-        ":service-permission-protos",
-    ],
-}
-
-// ====  java proto device library (for test only)  ==============================
-java_library {
-    name: "platformprotoslite",
-    proto: {
-        type: "lite",
-        include_dirs: ["external/protobuf/src"],
-    },
-
-    srcs: [
-        ":ipconnectivity-proto-src",
-        ":libstats_atom_enum_protos",
-        "core/proto/**/*.proto",
-        "libs/incident/proto/android/os/**/*.proto",
-        ":service-permission-protos",
-    ],
-    exclude_srcs: [
-        "core/proto/android/privacy.proto",
-        "core/proto/android/section.proto",
-        "core/proto/android/typedef.proto",
-    ],
-    sdk_version: "core_current",
-    // Protos have lots of MissingOverride and similar.
-    errorprone: {
-        javacflags: ["-XepDisableAllChecks"],
-    },
-}
-
-// ====  c++ proto device library  ==============================
-cc_defaults {
-    name: "libplatformprotos-defaults",
-
-    proto: {
-        export_proto_headers: true,
-        include_dirs: [
-            "external/protobuf/src",
-        ],
-    },
-
-    cflags: [
-        "-Wall",
-        "-Werror",
-        "-Wno-unused-parameter",
-    ],
-
-    srcs: [
-        ":ipconnectivity-proto-src",
-        ":libstats_atom_enum_protos",
-        "core/proto/**/*.proto",
-        ":service-permission-protos",
-    ],
-}
-
-cc_library {
-    name: "libplatformprotos",
-    defaults: ["libplatformprotos-defaults"],
-    host_supported: true,
-
-    target: {
-        host: {
-            proto: {
-                type: "full",
-            },
-        },
-        android: {
-            proto: {
-                type: "lite",
-            },
-            shared_libs: [
-                "libprotobuf-cpp-lite",
-            ],
-            shared: {
-                enabled: false,
-            },
-        },
-    },
-}
-
-// This library is meant for vendor code that needs to output protobuf. It links
-// against the static version of libprotobuf-cpp-lite, for which we can not guarantee
-// binary compatibility.
-cc_library {
-    name: "libplatformprotos-static",
-    defaults: ["libplatformprotos-defaults"],
-    host_supported: false,
-
-    // This is okay because this library is only built as a static library.  The C++
-    // API is not guaranteed. The proto API is guaranteed to be stable via Metrics Council,
-    // but is not authorized to be used outside of debugging.
-    vendor_available: true,
-
-    target: {
-        android: {
-            proto: {
-                type: "lite",
-            },
-            static_libs: [
-                "libprotobuf-cpp-lite",
-            ],
-            shared: {
-                enabled: false,
-            },
-        },
-    },
-}
-
-// This is the full proto version of libplatformprotos. It may only
-// be used by test code that is not shipped on the device.
-cc_library {
-    name: "libplatformprotos-test",
-    defaults: ["libplatformprotos-defaults"],
-    host_supported: false,
-
-    target: {
-        android: {
-            proto: {
-                type: "full",
-            },
-            shared: {
-                enabled: false,
-            },
-        },
-    },
-}
-
-python_defaults {
-    name: "base_default",
-    version: {
-        py2: {
-            enabled: false,
-            embedded_launcher: false,
-        },
-        py3: {
-            enabled: true,
-            embedded_launcher: true,
-        },
-    },
-}
-
-python_binary_host {
-    name: "fontchain_linter",
-    defaults: ["base_default"],
-    main: "tools/fonts/fontchain_linter.py",
-    srcs: [
-        "tools/fonts/fontchain_linter.py",
-    ],
-    libs: [
-        "fontTools",
-    ],
-}
-
-python_binary_host {
-    name: "update_font_metadata",
-    defaults: ["base_default"],
-    main: "tools/fonts/update_font_metadata.py",
-    srcs: [
-        "tools/fonts/update_font_metadata.py",
-    ],
-    libs: [
-        "fontTools",
-    ],
-}
-
 // utility classes statically linked into framework-wifi and dynamically linked
 // into wifi-service
 java_library {
@@ -849,4 +537,5 @@ filegroup {
 build = [
     "StubLibraries.bp",
     "ApiDocs.bp",
+    "ProtoLibraries.bp",
 ]
