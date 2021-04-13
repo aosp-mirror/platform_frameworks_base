@@ -669,21 +669,33 @@ public class RecentsAnimationController implements DeathRecipient {
         }
         navWindow.setSurfaceTranslationY(0);
 
-        if (navWindow.mToken == null) {
+        final WindowToken navToken = navWindow.mToken;
+        if (navToken == null) {
             return;
         }
         final SurfaceControl.Transaction t = mDisplayContent.getPendingTransaction();
-        final WindowContainer parent = navWindow.mToken.getParent();
-        // Reparent the SurfaceControl of nav bar token back.
-        t.reparent(navWindow.mToken.getSurfaceControl(), parent.getSurfaceControl());
-
+        final WindowContainer parent = navToken.getParent();
         if (animate) {
-            // Run fade-in animation to show navigation bar back to bottom of the display.
-            final NavBarFadeAnimationController controller =
+            final NavBarFadeAnimationController navBarFadeAnimationController =
                     mDisplayContent.getDisplayPolicy().getNavBarFadeAnimationController();
-            if (controller != null) {
-                controller.fadeWindowToken(true);
+            final Runnable fadeInAnim = () -> {
+                // Reparent the SurfaceControl of nav bar token back.
+                t.reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
+                // Run fade-in animation to show navigation bar back to bottom of the display.
+                if (navBarFadeAnimationController != null) {
+                    navBarFadeAnimationController.fadeWindowToken(true);
+                }
+            };
+            final FadeRotationAnimationController fadeRotationAnimationController =
+                    mDisplayContent.getFadeRotationAnimationController();
+            if (fadeRotationAnimationController != null) {
+                fadeRotationAnimationController.setOnShowRunnable(fadeInAnim);
+            } else {
+                fadeInAnim.run();
             }
+        } else {
+            // Reparent the SurfaceControl of nav bar token back.
+            t.reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
         }
     }
 
