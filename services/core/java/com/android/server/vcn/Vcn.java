@@ -32,6 +32,7 @@ import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
 import android.net.Uri;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnGatewayConnectionConfig;
@@ -70,6 +71,8 @@ import java.util.Set;
  */
 public class Vcn extends Handler {
     private static final String TAG = Vcn.class.getSimpleName();
+
+    private static final int VCN_LEGACY_SCORE_INT = 52;
 
     private static final List<Integer> CAPS_REQUIRING_MOBILE_DATA =
             Arrays.asList(NET_CAPABILITY_INTERNET, NET_CAPABILITY_DUN);
@@ -527,11 +530,9 @@ public class Vcn extends Handler {
     }
 
     /** Retrieves the network score for a VCN Network */
-    // Package visibility for use in VcnGatewayConnection
-    static int getNetworkScore() {
-        // TODO: STOPSHIP (b/173549607): Make this use new NetworkSelection, or some magic "max in
-        //                               subGrp" value
-        return 52;
+    // Package visibility for use in VcnGatewayConnection and VcnNetworkProvider
+    static NetworkScore getNetworkScore() {
+        return new NetworkScore.Builder().setLegacyInt(VCN_LEGACY_SCORE_INT).build();
     }
 
     /** Callback used for passing status signals from a VcnGatewayConnection to its managing Vcn. */
