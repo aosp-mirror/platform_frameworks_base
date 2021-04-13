@@ -1570,6 +1570,13 @@ static void nativeWriteTransactionToParcel(JNIEnv* env, jclass clazz, jlong nati
             reinterpret_cast<SurfaceComposerClient::Transaction *>(nativeObject);
     if (self != nullptr) {
         self->writeToParcel(parcel);
+    }
+}
+
+static void nativeClearTransaction(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    SurfaceComposerClient::Transaction* const self =
+            reinterpret_cast<SurfaceComposerClient::Transaction*>(nativeObject);
+    if (self != nullptr) {
         self->clear();
     }
 }
@@ -1890,6 +1897,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeReadTransactionFromParcel },
     {"nativeWriteTransactionToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteTransactionToParcel },
+    {"nativeClearTransaction", "(J)V",
+            (void*)nativeClearTransaction },
     {"nativeMirrorSurface", "(J)J",
             (void*)nativeMirrorSurface },
     {"nativeSetGlobalShadowSettings", "([F[FFFF)V",
