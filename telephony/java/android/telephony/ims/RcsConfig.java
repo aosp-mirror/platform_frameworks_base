@@ -48,8 +48,12 @@ public final class RcsConfig implements Parcelable {
     private static final String LOG_TAG = "RcsConfig";
     private static final boolean DBG = Build.IS_ENG;
 
-    // Tag for Rcs Volte single registration defined in RCC.07 A.1.6.2
-    private static final String TAG_SINGLE_REGISTRATION = "rcsVolteSingleRegistration";
+    // Tag and attribute defined in RCC.07 A.2
+    private static final String TAG_PARM = "parm";
+    private static final String ATTRIBUTE_NAME = "name";
+    private static final String ATTRIBUTE_VALUE = "value";
+    // Keyword for Rcs Volte single registration defined in RCC.07 A.1.6.2
+    private static final String PARM_SINGLE_REGISTRATION = "rcsVolteSingleRegistration";
 
     private final HashMap<String, String> mValues = new HashMap<>();
 
@@ -71,7 +75,27 @@ public final class RcsConfig implements Parcelable {
             String tag = null;
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 if (eventType == XmlPullParser.START_TAG) {
-                    tag = xpp.getName().trim();
+                    tag = xpp.getName().trim().toLowerCase();
+                    if (tag.equals(TAG_PARM)) {
+                        int count = xpp.getAttributeCount();
+                        String key = null;
+                        String value = null;
+                        if (count > 1) {
+                            for (int i = 0; i < count; i++) {
+                                String name = xpp.getAttributeName(i).trim().toLowerCase();
+                                if (name.equals(ATTRIBUTE_NAME)) {
+                                    key = xpp.getAttributeValue(xpp.getAttributeNamespace(i),
+                                            name).trim().toLowerCase();
+                                } else if (name.equals(ATTRIBUTE_VALUE)) {
+                                    value = xpp.getAttributeValue(xpp.getAttributeNamespace(i),
+                                            name).trim();
+                                }
+                            }
+                        }
+                        if (key != null && value != null) {
+                            mValues.put(key, value);
+                        }
+                    }
                 } else if (eventType == XmlPullParser.END_TAG) {
                     tag = null;
                 } else if (eventType == XmlPullParser.TEXT) {
@@ -102,6 +126,7 @@ public final class RcsConfig implements Parcelable {
      * @return Returns the config value if it exists, or defaultVal.
      */
     public @Nullable String getString(@NonNull String tag, @Nullable String defaultVal) {
+        tag = tag.trim().toLowerCase();
         return mValues.containsKey(tag) ? mValues.get(tag) : defaultVal;
     }
 
@@ -114,6 +139,7 @@ public final class RcsConfig implements Parcelable {
      * @return Returns the config value if it exists and is a valid int, or defaultVal.
      */
     public int getInteger(@NonNull String tag, int defaultVal) {
+        tag = tag.trim().toLowerCase();
         try {
             return Integer.parseInt(mValues.get(tag));
         } catch (NumberFormatException e) {
@@ -131,6 +157,7 @@ public final class RcsConfig implements Parcelable {
      * @return Returns the config value if it exists, or defaultVal.
      */
     public boolean getBoolean(@NonNull String tag, boolean defaultVal) {
+        tag = tag.trim().toLowerCase();
         if (!mValues.containsKey(tag)) {
             return defaultVal;
         }
@@ -145,15 +172,15 @@ public final class RcsConfig implements Parcelable {
      * @return Returns true if it exists, or false.
      */
     public boolean hasConfig(@NonNull String tag) {
-        return mValues.containsKey(tag);
+        return mValues.containsKey(tag.trim().toLowerCase());
     }
 
     /**
      * Check whether Rcs Volte single registration is supported by the config.
      */
     public boolean isRcsVolteSingleRegistrationSupported() {
-        return getBoolean(TAG_SINGLE_REGISTRATION, false)
-                || getInteger(TAG_SINGLE_REGISTRATION, 0) != 0;
+        return getBoolean(PARM_SINGLE_REGISTRATION, false)
+                || getInteger(PARM_SINGLE_REGISTRATION, 0) != 0;
     }
 
     @Override
