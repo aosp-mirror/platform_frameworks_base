@@ -35,7 +35,6 @@ import android.view.animation.Interpolator;
 import androidx.collection.ArrayMap;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -151,7 +150,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private float mActualPaddingStart = NO_VALUE;
     private boolean mDozing;
     private boolean mOnLockScreen;
-    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
     private boolean mInNotificationIconShelf;
     private boolean mChangingViewPositions;
     private int mAddAnimationStartIndex = -1;
@@ -464,33 +462,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             mFirstVisibleIconState = mIconStates.get(getChildAt(0));
         }
 
-        boolean center = mOnLockScreen
-                && mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
-        if (center && translationX < getLayoutEnd()) {
-            float initialTranslation =
-                    mFirstVisibleIconState == null ? 0 : mFirstVisibleIconState.xTranslation;
-
-            float contentWidth = 0;
-            if (mLastVisibleIconState != null) {
-                contentWidth = mLastVisibleIconState.xTranslation + mIconSize;
-                contentWidth = Math.min(getWidth(), contentWidth) - initialTranslation;
-            }
-            float availableSpace = getLayoutEnd() - getActualPaddingStart();
-            float delta = (availableSpace - contentWidth) / 2;
-
-            if (firstOverflowIndex != -1) {
-                // If we have an overflow, only count those half for centering because the dots
-                // don't have a lot of visual weight.
-                float deltaIgnoringOverflow = (getLayoutEnd() - mVisualOverflowStart) / 2;
-                delta = (deltaIgnoringOverflow + delta) / 2;
-            }
-            for (int i = 0; i < childCount; i++) {
-                View view = getChildAt(i);
-                IconState iconState = mIconStates.get(view);
-                iconState.xTranslation += delta;
-            }
-        }
-
         if (isLayoutRtl()) {
             for (int i = 0; i < childCount; i++) {
                 View view = getChildAt(i);
@@ -698,9 +669,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
      * Set whether the device is on the lockscreen and which lockscreen mode the device is
      * configured to. Depending on these values, the layout of the AOD icons change.
      */
-    public void setOnLockScreen(boolean onLockScreen, int lockScreenMode) {
+    public void setOnLockScreen(boolean onLockScreen) {
         mOnLockScreen = onLockScreen;
-        mLockScreenMode = lockScreenMode;
     }
 
     public void setInNotificationIconShelf(boolean inShelf) {

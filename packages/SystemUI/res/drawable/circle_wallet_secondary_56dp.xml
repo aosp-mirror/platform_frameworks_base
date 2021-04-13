@@ -16,8 +16,8 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
     <size
-        android:height="50dp"
-        android:width="50dp" />
+        android:height="56dp"
+        android:width="56dp" />
     <solid android:color="@android:color/transparent" />
-    <stroke android:width="2dp" android:color="#AECBFA" />
+    <stroke android:width="2dp" android:color="@color/GM2_grey_300" />
 </shape>

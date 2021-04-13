@@ -5982,6 +5982,12 @@
                   android:exported="false">
         </activity>
 
+        <activity android:name="com.android.server.notification.NASLearnMoreActivity"
+                  android:theme="@style/Theme.Dialog.Confirmation"
+                  android:excludeFromRecents="true"
+                  android:exported="false">
+        </activity>
+
         <receiver android:name="com.android.server.BootReceiver"
                 android:exported="true"
                 android:systemUserOnly="true">

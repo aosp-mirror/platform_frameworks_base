@@ -31,8 +31,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.android.internal.colorextraction.ColorExtractor;
@@ -49,6 +47,7 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
+import com.android.systemui.statusbar.policy.BatteryController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -94,6 +93,12 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlags;
     @Mock
     private Executor mExecutor;
+    @Mock
+    private AnimatableClockView mClockView;
+    @Mock
+    private AnimatableClockView mLargeClockView;
+    @Mock
+    BatteryController mBatteryController;
 
     private KeyguardClockSwitchController mController;
 
@@ -101,9 +106,15 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mView.findViewById(com.android.systemui.R.id.left_aligned_notification_icon_container))
+        when(mView.findViewById(R.id.left_aligned_notification_icon_container))
                 .thenReturn(mNotificationIcons);
         when(mView.getContext()).thenReturn(getContext());
+
+        when(mView.findViewById(R.id.animatable_clock_view)).thenReturn(mClockView);
+        when(mView.findViewById(R.id.animatable_clock_view_large)).thenReturn(mLargeClockView);
+        when(mClockView.getContext()).thenReturn(getContext());
+        when(mLargeClockView.getContext()).thenReturn(getContext());
+
         when(mFeatureFlags.isSmartspaceEnabled()).thenReturn(true);
         when(mView.isAttachedToWindow()).thenReturn(true);
         when(mResources.getString(anyInt())).thenReturn("h:mm");
@@ -119,7 +130,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 mPluginManager,
                 mFeatureFlags,
-                mExecutor);
+                mExecutor,
+                mBatteryController);
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mColorExtractor.getColors(anyInt())).thenReturn(mGradientColors);
@@ -165,30 +177,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         listenerArgumentCaptor.getValue().onViewDetachedFromWindow(mView);
 
-        verify(mStatusBarStateController).removeCallback(
-                any(StatusBarStateController.StateListener.class));
         verify(mColorExtractor).removeOnColorsChangedListener(
                 any(ColorExtractor.OnColorsChangedListener.class));
-    }
-
-    @Test
-    public void testBigClockPassesStatusBarState() {
-        ViewGroup testView = new FrameLayout(mContext);
-
-        mController.init();
-        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
-        mController.setBigClockContainer(testView);
-        verify(mView).setBigClockContainer(testView, StatusBarState.SHADE);
-
-
-        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
-        mController.setBigClockContainer(testView);
-        verify(mView).setBigClockContainer(testView, StatusBarState.KEYGUARD);
-
-
-        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
-        mController.setBigClockContainer(testView);
-        verify(mView).setBigClockContainer(testView, StatusBarState.SHADE_LOCKED);
     }
 
     @Test
@@ -245,8 +235,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private void verifyAttachment(VerificationMode times) {
         verify(mClockManager, times).addOnClockChangedListener(
                 any(ClockManager.ClockChangedListener.class));
-        verify(mStatusBarStateController, times).addCallback(
-                any(StatusBarStateController.StateListener.class));
         verify(mColorExtractor, times).addOnColorsChangedListener(
                 any(ColorExtractor.OnColorsChangedListener.class));
         verify(mView, times).updateColors(mGradientColors);

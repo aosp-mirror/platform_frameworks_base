@@ -561,6 +561,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // The locusId associated with this activity, if set.
     private LocusId mLocusId;
 
+    // Whether the activity was launched from a bubble.
+    private boolean mLaunchedFromBubble;
+
     private SizeConfigurationBuckets mSizeConfigurations;
 
     /**
@@ -4218,7 +4221,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    boolean getLaunchedFromBubble() {
+        return mLaunchedFromBubble;
+    }
+
     private void setOptions(@NonNull ActivityOptions options) {
+        mLaunchedFromBubble = options.getLaunchedFromBubble();
         mPendingOptions = options;
         if (options.getAnimationType() == ANIM_REMOTE_ANIMATION) {
             mPendingRemoteAnimation = options.getRemoteAnimationAdapter();

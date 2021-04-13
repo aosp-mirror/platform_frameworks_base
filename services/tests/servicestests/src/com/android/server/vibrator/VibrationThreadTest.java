@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.IVibratorManager;
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
@@ -109,7 +109,7 @@ public class VibrationThreadTest {
     public void vibrate_noVibrator_ignoresVibration() {
         mVibratorProviders.clear();
         long vibrationId = 1;
-        CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(
+        CombinedVibration effect = CombinedVibration.createParallel(
                 VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
@@ -122,7 +122,7 @@ public class VibrationThreadTest {
     @Test
     public void vibrate_missingVibrators_ignoresVibration() {
         long vibrationId = 1;
-        CombinedVibrationEffect effect = CombinedVibrationEffect.startSequential()
+        CombinedVibration effect = CombinedVibration.startSequential()
                 .addNext(2, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .addNext(3, VibrationEffect.get(VibrationEffect.EFFECT_TICK))
                 .combine();
@@ -311,7 +311,7 @@ public class VibrationThreadTest {
 
         long vibrationId = 1;
         VibrationEffect fallback = VibrationEffect.createOneShot(10, 100);
-        Vibration vibration = createVibration(vibrationId, CombinedVibrationEffect.createSynced(
+        Vibration vibration = createVibration(vibrationId, CombinedVibration.createParallel(
                 VibrationEffect.get(VibrationEffect.EFFECT_CLICK)));
         vibration.addFallback(VibrationEffect.EFFECT_CLICK, fallback);
         VibrationThread thread = startThreadAndDispatcher(vibration);
@@ -498,7 +498,7 @@ public class VibrationThreadTest {
         mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_TICK);
 
         long vibrationId = 1;
-        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+        CombinedVibration effect = CombinedVibration.startParallel()
                 .addVibrator(VIBRATOR_ID, VibrationEffect.get(VibrationEffect.EFFECT_TICK))
                 .addVibrator(2, VibrationEffect.get(VibrationEffect.EFFECT_TICK))
                 .combine();
@@ -524,7 +524,7 @@ public class VibrationThreadTest {
         mVibratorProviders.get(3).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
 
         long vibrationId = 1;
-        CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(
+        CombinedVibration effect = CombinedVibration.createParallel(
                 VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
@@ -557,7 +557,7 @@ public class VibrationThreadTest {
         VibrationEffect composed = VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .compose();
-        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+        CombinedVibration effect = CombinedVibration.startParallel()
                 .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .addVibrator(2, VibrationEffect.createOneShot(10, 100))
                 .addVibrator(3, VibrationEffect.createWaveform(
@@ -603,7 +603,7 @@ public class VibrationThreadTest {
         VibrationEffect composed = VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .compose();
-        CombinedVibrationEffect effect = CombinedVibrationEffect.startSequential()
+        CombinedVibration effect = CombinedVibration.startSequential()
                 .addNext(3, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), /* delay= */ 50)
                 .addNext(1, VibrationEffect.createOneShot(10, 100), /* delay= */ 50)
                 .addNext(2, composed, /* delay= */ 50)
@@ -652,7 +652,7 @@ public class VibrationThreadTest {
         VibrationEffect composed = VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 100)
                 .compose();
-        CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(composed);
+        CombinedVibration effect = CombinedVibration.createParallel(composed);
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
 
         assertTrue(waitUntil(t -> !mVibratorProviders.get(1).getEffectSegments().isEmpty()
@@ -686,7 +686,7 @@ public class VibrationThreadTest {
         VibrationEffect composed = VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .compose();
-        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+        CombinedVibration effect = CombinedVibration.startParallel()
                 .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .addVibrator(2, VibrationEffect.createOneShot(10, 100))
                 .addVibrator(3, VibrationEffect.createWaveform(new long[]{10}, new int[]{100}, -1))
@@ -717,7 +717,7 @@ public class VibrationThreadTest {
         when(mThreadCallbacks.prepareSyncedVibration(anyLong(), any())).thenReturn(false);
 
         long vibrationId = 1;
-        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+        CombinedVibration effect = CombinedVibration.startParallel()
                 .addVibrator(1, VibrationEffect.createOneShot(10, 100))
                 .addVibrator(2, VibrationEffect.createWaveform(new long[]{5}, new int[]{200}, -1))
                 .combine();
@@ -746,7 +746,7 @@ public class VibrationThreadTest {
         when(mThreadCallbacks.triggerSyncedVibration(anyLong())).thenReturn(false);
 
         long vibrationId = 1;
-        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+        CombinedVibration effect = CombinedVibration.startParallel()
                 .addVibrator(1, VibrationEffect.createOneShot(10, 100))
                 .addVibrator(2, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .combine();
@@ -772,7 +772,7 @@ public class VibrationThreadTest {
         mVibratorProviders.get(3).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
         long vibrationId = 1;
-        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+        CombinedVibration effect = CombinedVibration.startParallel()
                 .addVibrator(1, VibrationEffect.createWaveform(
                         new long[]{5, 10, 10}, new int[]{1, 2, 3}, -1))
                 .addVibrator(2, VibrationEffect.createWaveform(
@@ -851,7 +851,7 @@ public class VibrationThreadTest {
         mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
 
         long vibrationId = 1;
-        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+        CombinedVibration effect = CombinedVibration.startParallel()
                 .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .addVibrator(2, VibrationEffect.startComposition()
                         .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 100)
@@ -885,7 +885,7 @@ public class VibrationThreadTest {
         mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
         long vibrationId = 1;
-        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+        CombinedVibration effect = CombinedVibration.startParallel()
                 .addVibrator(1, VibrationEffect.createWaveform(
                         new long[]{100, 100}, new int[]{1, 2}, 0))
                 .addVibrator(2, VibrationEffect.createOneShot(100, 100))
@@ -938,11 +938,11 @@ public class VibrationThreadTest {
     }
 
     private VibrationThread startThreadAndDispatcher(long vibrationId, VibrationEffect effect) {
-        return startThreadAndDispatcher(vibrationId, CombinedVibrationEffect.createSynced(effect));
+        return startThreadAndDispatcher(vibrationId, CombinedVibration.createParallel(effect));
     }
 
     private VibrationThread startThreadAndDispatcher(long vibrationId,
-            CombinedVibrationEffect effect) {
+            CombinedVibration effect) {
         return startThreadAndDispatcher(createVibration(vibrationId, effect));
     }
 
@@ -982,7 +982,7 @@ public class VibrationThreadTest {
         mTestLooper.dispatchAll();
     }
 
-    private Vibration createVibration(long id, CombinedVibrationEffect effect) {
+    private Vibration createVibration(long id, CombinedVibration effect) {
         return new Vibration(mVibrationToken, (int) id, effect, ATTRS, UID, PACKAGE_NAME, "reason");
     }
 

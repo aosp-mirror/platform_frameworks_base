@@ -54,7 +54,10 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     private final WalletCardCarousel mCardCarousel;
     private final ImageView mIcon;
     private final TextView mCardLabel;
-    private final Button mWalletButton;
+    // Displays at the bottom of the screen, allow user to enter the default wallet app.
+    private final Button mAppButton;
+    // Displays underneath the carousel, allow user to unlock device, verify card, etc.
+    private final Button mActionButton;
     private final Interpolator mInInterpolator;
     private final Interpolator mOutInterpolator;
     private final float mAnimationTranslationX;
@@ -75,7 +78,8 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mCardCarousel.setCardScrollListener(this);
         mIcon = requireViewById(R.id.icon);
         mCardLabel = requireViewById(R.id.label);
-        mWalletButton = requireViewById(R.id.wallet_button);
+        mAppButton = requireViewById(R.id.wallet_app_button);
+        mActionButton = requireViewById(R.id.wallet_action_button);
         mErrorView = requireViewById(R.id.error_view);
         mEmptyStateView = requireViewById(R.id.wallet_empty_state);
         mInInterpolator =
@@ -101,15 +105,6 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     public void onCardScroll(WalletCardViewInfo centerCard, WalletCardViewInfo nextCard,
             float percentDistanceFromCenter) {
         CharSequence centerCardText = centerCard.getLabel();
-        Drawable icon = centerCard.getIcon();
-        if (icon != null) {
-            Drawable drawable = resizeDrawable(getResources(), icon);
-            drawable.setTint(mContext.getColor(R.color.GM2_blue_600));
-            mIcon.setImageDrawable(drawable);
-            mIcon.setVisibility(VISIBLE);
-        } else {
-            mIcon.setVisibility(INVISIBLE);
-        }
         if (!TextUtils.equals(mCenterCardText, centerCardText)) {
             mCenterCardText = centerCardText;
             mCardLabel.setText(centerCardText);
@@ -122,16 +117,21 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         }
     }
 
+    /**
+     * Render and show card carousel view.
+     *
+     * <p>This is called only when {@param data} is not empty.</p>
+     *
+     * @param data a list of wallet cards information.
+     * @param selectedIndex index of the current selected card
+     * @param isDeviceLocked indicates whether the device is locked.
+     */
     void showCardCarousel(
             List<WalletCardViewInfo> data, int selectedIndex, boolean isDeviceLocked) {
         boolean shouldAnimate = mCardCarousel.setData(data, selectedIndex);
         mCardCarouselContainer.setVisibility(VISIBLE);
         mErrorView.setVisibility(GONE);
-        if (isDeviceLocked) {
-            mWalletButton.setText(R.string.wallet_button_label_device_locked);
-        } else {
-            mWalletButton.setText(R.string.wallet_button_label_device_unlocked);
-        }
+        renderHeaderIconAndActionButton(data.get(0), isDeviceLocked);
         if (shouldAnimate) {
             // If the empty state is visible, animate it away and delay the card carousel animation
             int emptyStateAnimDelay = 0;
@@ -216,8 +216,12 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         return mCardCarousel;
     }
 
-    Button getWalletButton() {
-        return mWalletButton;
+    Button getAppButton() {
+        return mAppButton;
+    }
+
+    Button getActionButton() {
+        return mActionButton;
     }
 
     @VisibleForTesting
@@ -235,7 +239,37 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         return mCardCarouselContainer;
     }
 
-    private static Drawable resizeDrawable(Resources resources, Drawable drawable) {
+    private void renderHeaderIconAndActionButton(WalletCardViewInfo walletCard, boolean isLocked) {
+        Drawable icon = resizeDrawable(getResources(), walletCard.getIcon());
+        renderHeaderIcon(icon, isLocked);
+        if (isLocked) {
+            mActionButton.setVisibility(VISIBLE);
+            mActionButton.setText(R.string.wallet_action_button_label_unlock);
+        } else {
+            mActionButton.setVisibility(GONE);
+        }
+    }
+
+    private void renderHeaderIcon(@Nullable Drawable icon, boolean isLocked) {
+        if (icon == null) {
+            mIcon.setVisibility(INVISIBLE);
+            return;
+        }
+        icon.setTint(mContext.getColor(isLocked ? R.color.GM2_grey_800 : R.color.GM2_blue_600));
+        mIcon.setImageDrawable(icon);
+        mIcon.setVisibility(VISIBLE);
+        mIcon.setBackground(
+                mContext.getDrawable(
+                        isLocked
+                                ? R.drawable.circle_wallet_secondary_56dp
+                                : R.drawable.circle_wallet_primary_56dp));
+    }
+
+    @Nullable
+    private static Drawable resizeDrawable(Resources resources, @Nullable Drawable drawable) {
+        if (drawable == null) {
+            return null;
+        }
         Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
         return new BitmapDrawable(resources, Bitmap.createScaledBitmap(
                 bitmap, CONTACTLESS_ICON_SIZE, CONTACTLESS_ICON_SIZE, true));

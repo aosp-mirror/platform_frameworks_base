@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2020 The Android Open Source Project
+  Copyright (C) 2021 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,58 +18,40 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
-    android:layout_width="match_parent"
-    android:background="?android:attr/colorBackground"
-    android:orientation="vertical">
+    android:layout_width="match_parent">
 
-    <LinearLayout
-        android:id="@+id/frame"
-        android:minHeight="@dimen/min_switch_bar_height"
+    <TextView
+        android:id="@+id/switch_text"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:background="?android:attr/selectableItemBackground"
-        android:paddingLeft="@dimen/switchbar_margin_start"
-        android:paddingRight="@dimen/switchbar_margin_end">
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title"
+        android:textSize="16sp"
+        android:textColor="?android:attr/textColorPrimaryInverse"
+        android:layout_marginStart="@dimen/switchbar_subsettings_margin_start"
+        android:textAlignment="viewStart"/>
 
-        <TextView
-            android:id="@+id/switch_text"
-            android:layout_height="wrap_content"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_marginRight="16dp"
-            android:layout_gravity="center_vertical"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:textAppearance="?android:attr/textAppearanceListItem"
-            android:textAlignment="viewStart"
-            style="@style/MainSwitchText" />
+    <ImageView
+        android:id="@+id/restricted_icon"
+        android:layout_width="@dimen/restricted_icon_size"
+        android:layout_height="@dimen/restricted_icon_size"
+        android:tint="?android:attr/colorAccent"
+        android:theme="@android:style/Theme.Material"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/restricted_icon_margin_end"
+        android:src="@*android:drawable/ic_info"
+        android:visibility="gone"/>
 
-        <ImageView
-            android:id="@+id/restricted_icon"
-            android:layout_width="@dimen/restricted_icon_size"
-            android:layout_height="@dimen/restricted_icon_size"
-            android:tint="?android:attr/colorAccent"
-            android:theme="@android:style/Theme.Material"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/restricted_icon_margin_end"
-            android:src="@*android:drawable/ic_info"
-            android:visibility="gone" />
-
-        <Switch
-            android:id="@android:id/switch_widget"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:track="@drawable/track_selector"
-            android:thumb="@drawable/thumb_selector"
-            android:theme="@style/Settings.MainSwitch"/>
-    </LinearLayout>
-
-    <View
-        android:id="@+id/below_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
+    <Switch
+        android:id="@android:id/switch_widget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/switchbar_subsettings_margin_end"
+        android:theme="@style/Widget.SwitchBar.Switch"/>
 </LinearLayout>
 
 

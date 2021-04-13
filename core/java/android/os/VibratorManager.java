@@ -69,7 +69,7 @@ public abstract class VibratorManager {
     public abstract Vibrator getVibrator(int vibratorId);
 
     /**
-     * Returns the system default Vibrator service.
+     * Returns the default Vibrator for the device.
      */
     @NonNull
     public abstract Vibrator getDefaultVibrator();
@@ -81,7 +81,7 @@ public abstract class VibratorManager {
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)
     public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
-            @Nullable CombinedVibrationEffect effect, @Nullable VibrationAttributes attributes) {
+            @Nullable CombinedVibration effect, @Nullable VibrationAttributes attributes) {
         Log.w(TAG, "Always-on effects aren't supported");
         return false;
     }
@@ -90,14 +90,14 @@ public abstract class VibratorManager {
      * Vibrate with a given combination of effects.
      *
      * <p>
-     * Pass in a {@link CombinedVibrationEffect} representing a combination of {@link
+     * Pass in a {@link CombinedVibration} representing a combination of {@link
      * VibrationEffect VibrationEffects} to be played on one or more vibrators.
      * </p>
      *
      * @param effect a combination of effects to be performed by one or more vibrators.
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
-    public final void vibrate(@NonNull CombinedVibrationEffect effect) {
+    public final void vibrate(@NonNull CombinedVibration effect) {
         vibrate(effect, null);
     }
 
@@ -105,7 +105,7 @@ public abstract class VibratorManager {
      * Vibrate with a given combination of effects.
      *
      * <p>
-     * Pass in a {@link CombinedVibrationEffect} representing a combination of {@link
+     * Pass in a {@link CombinedVibration} representing a combination of {@link
      * VibrationEffect} to be played on one or more vibrators.
      * </p>
      *
@@ -116,19 +116,19 @@ public abstract class VibratorManager {
      *                   incoming calls.
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
-    public final void vibrate(@NonNull CombinedVibrationEffect effect,
+    public final void vibrate(@NonNull CombinedVibration effect,
             @Nullable VibrationAttributes attributes) {
         vibrate(Process.myUid(), mPackageName, effect, null, attributes);
     }
 
     /**
-     * Like {@link #vibrate(CombinedVibrationEffect, VibrationAttributes)}, but allows the
+     * Like {@link #vibrate(CombinedVibration, VibrationAttributes)}, but allows the
      * caller to specify the vibration is owned by someone else and set reason for vibration.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
-    public abstract void vibrate(int uid, String opPkg, @NonNull CombinedVibrationEffect effect,
+    public abstract void vibrate(int uid, String opPkg, @NonNull CombinedVibration effect,
             String reason, @Nullable VibrationAttributes attributes);
 
     /**

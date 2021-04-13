@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.bubbles;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
@@ -78,6 +79,8 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.TaskStackListenerCallback;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 
 import java.io.FileDescriptor;
@@ -124,6 +127,7 @@ public class BubbleController {
     private final LauncherApps mLauncherApps;
     private final IStatusBarService mBarService;
     private final WindowManager mWindowManager;
+    private final TaskStackListenerImpl mTaskStackListener;
     private final ShellTaskOrganizer mTaskOrganizer;
 
     // Used to post to main UI thread
@@ -194,6 +198,7 @@ public class BubbleController {
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps,
+            TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
             ShellExecutor mainExecutor,
@@ -204,7 +209,7 @@ public class BubbleController {
         return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                logger, organizer, positioner, mainExecutor, mainHandler);
+                logger, taskStackListener, organizer, positioner, mainExecutor, mainHandler);
     }
 
     /**
@@ -221,6 +226,7 @@ public class BubbleController {
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps,
             BubbleLogger bubbleLogger,
+            TaskStackListenerImpl taskStackListener,
             ShellTaskOrganizer organizer,
             BubblePositioner positioner,
             ShellExecutor mainExecutor,
@@ -238,6 +244,7 @@ public class BubbleController {
         mLogger = bubbleLogger;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mTaskStackListener = taskStackListener;
         mTaskOrganizer = organizer;
         mSurfaceSynchronizer = synchronizer;
         mCurrentUserId = ActivityManager.getCurrentUser();
@@ -319,6 +326,42 @@ public class BubbleController {
                         packageName, validShortcuts, DISMISS_SHORTCUT_REMOVED);
             }
         }, mMainHandler);
+
+        mTaskStackListener.addListener(new TaskStackListenerCallback() {
+            @Override
+            public void onTaskMovedToFront(int taskId) {
+                if (mSysuiProxy == null) {
+                    return;
+                }
+
+                mSysuiProxy.isNotificationShadeExpand((expand) -> {
+                    mMainExecutor.execute(() -> {
+                        int expandedId = INVALID_TASK_ID;
+                        if (mStackView != null && mStackView.getExpandedBubble() != null
+                                && isStackExpanded() && !mStackView.isExpansionAnimating()
+                                && !expand) {
+                            expandedId = mStackView.getExpandedBubble().getTaskId();
+                        }
+
+                        if (expandedId != INVALID_TASK_ID && expandedId != taskId) {
+                            mBubbleData.setExpanded(false);
+                        }
+                    });
+                });
+            }
+
+            @Override
+            public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                    boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
+                for (Bubble b : mBubbleData.getBubbles()) {
+                    if (task.taskId == b.getTaskId()) {
+                        mBubbleData.setSelectedBubble(b);
+                        mBubbleData.setExpanded(true);
+                        return;
+                    }
+                }
+            }
+        });
     }
 
     @VisibleForTesting

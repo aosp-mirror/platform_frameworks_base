@@ -45,5 +45,6 @@
     <declare-styleable name="AnimatableClockView">
         <attr name="dozeWeight" format="integer" />
         <attr name="lockScreenWeight" format="integer" />
+        <attr name="chargeAnimationDelay" format="integer" />
     </declare-styleable>
 </resources>

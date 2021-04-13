@@ -234,6 +234,27 @@ class PrivacyDialogTest : SysuiTestCase() {
     }
 
     @Test
+    fun testPhoneCallNotClickable() {
+        val element = PrivacyDialog.PrivacyElement(
+                PrivacyType.TYPE_MICROPHONE,
+                TEST_PACKAGE_NAME,
+                TEST_USER_ID,
+                "App",
+                null,
+                0L,
+                false,
+                false,
+                true
+        )
+
+        val list = listOf(element)
+        dialog = PrivacyDialog(context, list, starter)
+        dialog.show()
+        assertThat(dialog.requireViewById<View>(R.id.privacy_item).isClickable).isFalse()
+        assertThat(dialog.requireViewById<View>(R.id.chevron).visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
     fun testAttribution() {
         val element = PrivacyDialog.PrivacyElement(
                 PrivacyType.TYPE_MICROPHONE,

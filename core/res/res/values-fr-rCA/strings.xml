@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder à vos activités physiques"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et filmer des vidéos"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Appareils Bluetooth à proximité"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"découvrir les appareils Bluetooth à proximité et s\'y connecter"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Appareils à proximité"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"découvrir les appareils à proximité et s\'y connecter"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Journaux d\'appels"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"lire et écrire le journal des appels téléphoniques"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Téléphone"</string>
@@ -538,10 +538,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permet à l\'application de découvrir les appareils Bluetooth à proximité et de s\'y connecter"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"se connecter aux appareils Bluetooth associés"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permet à l\'application de se connecter aux appareils Bluetooth associés"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
     <skip />
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"déterminer la position relative entre des appareils à bande ultralarge à proximité"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Autorisez l\'application à déterminer la position relative entre des appareils à bande ultralarge à proximité"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Information sur le service préféré de paiement NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'application d\'obtenir de l\'information sur le service préféré de paiement NFC comme les aides enregistrées et la route de destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"gérer la communication en champ proche"</string>
@@ -2259,9 +2261,14 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Vous pouvez agrandir une partie votre écran."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activer dans les paramètres"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Fermer"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Pour continuer, vous devez accorder l\'accès au microphone de votre appareil à l\'application &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Pour continuer, vous devez accorder l\'accès à l\'appareil photo de votre appareil à l\'application &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Activer"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
+    <skip />
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Confidentialité des capteurs"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Icône de l\'application"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Image de marque de l\'application"</string>

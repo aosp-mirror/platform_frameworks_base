@@ -3960,6 +3960,7 @@ package android.app {
     method public boolean isImmersive();
     method public boolean isInMultiWindowMode();
     method public boolean isInPictureInPictureMode();
+    method public boolean isLaunchedFromBubble();
     method public boolean isLocalVoiceInteractionSupported();
     method public boolean isTaskRoot();
     method public boolean isVoiceInteraction();
@@ -7202,7 +7203,6 @@ package android.app.admin {
     method public boolean isComplianceAcknowledgementRequired();
     method public boolean isDeviceIdAttestationSupported();
     method public boolean isDeviceOwnerApp(String);
-    method public boolean isEnterpriseNetworkPreferenceEnabled();
     method public boolean isEphemeralUser(@NonNull android.content.ComponentName);
     method public boolean isKeyPairGrantedToWifiAuth(@NonNull String);
     method public boolean isLockTaskPermitted(String);
@@ -7213,6 +7213,7 @@ package android.app.admin {
     method public boolean isOrganizationOwnedDeviceWithManagedProfile();
     method public boolean isOverrideApnEnabled(@NonNull android.content.ComponentName);
     method public boolean isPackageSuspended(@NonNull android.content.ComponentName, String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public boolean isPreferentialNetworkServiceEnabled();
     method public boolean isProfileOwnerApp(String);
     method public boolean isProvisioningAllowed(@NonNull String);
     method public boolean isResetPasswordTokenActive(android.content.ComponentName);
@@ -7264,7 +7265,6 @@ package android.app.admin {
     method public void setDelegatedScopes(@NonNull android.content.ComponentName, @NonNull String, @NonNull java.util.List<java.lang.String>);
     method public void setDeviceOwnerLockScreenInfo(@NonNull android.content.ComponentName, CharSequence);
     method public void setEndUserSessionMessage(@NonNull android.content.ComponentName, @Nullable CharSequence);
-    method public void setEnterpriseNetworkPreferenceEnabled(boolean);
     method public void setFactoryResetProtectionPolicy(@NonNull android.content.ComponentName, @Nullable android.app.admin.FactoryResetProtectionPolicy);
     method public int setGlobalPrivateDnsModeOpportunistic(@NonNull android.content.ComponentName);
     method @WorkerThread public int setGlobalPrivateDnsModeSpecifiedHost(@NonNull android.content.ComponentName, @NonNull String);
@@ -7307,6 +7307,7 @@ package android.app.admin {
     method public boolean setPermittedCrossProfileNotificationListeners(@NonNull android.content.ComponentName, @Nullable java.util.List<java.lang.String>);
     method public boolean setPermittedInputMethods(@NonNull android.content.ComponentName, java.util.List<java.lang.String>);
     method public void setPersonalAppsSuspended(@NonNull android.content.ComponentName, boolean);
+    method public void setPreferentialNetworkServiceEnabled(boolean);
     method public void setProfileEnabled(@NonNull android.content.ComponentName);
     method public void setProfileName(@NonNull android.content.ComponentName, String);
     method public void setRecommendedGlobalProxy(@NonNull android.content.ComponentName, @Nullable android.net.ProxyInfo);
@@ -10668,7 +10669,7 @@ package android.content {
     field public static final String USB_SERVICE = "usb";
     field public static final String USER_SERVICE = "user";
     field public static final String VIBRATOR_MANAGER_SERVICE = "vibrator_manager";
-    field public static final String VIBRATOR_SERVICE = "vibrator";
+    field @Deprecated public static final String VIBRATOR_SERVICE = "vibrator";
     field public static final String VPN_MANAGEMENT_SERVICE = "vpn_management";
     field @UiContext public static final String WALLPAPER_SERVICE = "wallpaper";
     field public static final String WIFI_AWARE_SERVICE = "wifiaware";
@@ -11222,7 +11223,6 @@ package android.content {
     field public static final String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
     field public static final String EXTRA_INSTALLER_PACKAGE_NAME = "android.intent.extra.INSTALLER_PACKAGE_NAME";
     field public static final String EXTRA_INTENT = "android.intent.extra.INTENT";
-    field public static final String EXTRA_IS_BUBBLED = "android.intent.extra.IS_BUBBLED";
     field public static final String EXTRA_KEY_EVENT = "android.intent.extra.KEY_EVENT";
     field public static final String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
     field public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
@@ -12733,7 +12733,6 @@ package android.content.pm {
     field public static final String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
     field public static final String FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT = "android.hardware.touchscreen.multitouch.distinct";
     field public static final String FEATURE_TOUCHSCREEN_MULTITOUCH_JAZZHAND = "android.hardware.touchscreen.multitouch.jazzhand";
-    field public static final String FEATURE_TRANSLATION = "android.software.translation";
     field public static final String FEATURE_USB_ACCESSORY = "android.hardware.usb.accessory";
     field public static final String FEATURE_USB_HOST = "android.hardware.usb.host";
     field public static final String FEATURE_VERIFIED_BOOT = "android.software.verified_boot";
@@ -30836,16 +30835,16 @@ package android.os {
     method public void onCancel();
   }
 
-  public abstract class CombinedVibrationEffect implements android.os.Parcelable {
-    method @NonNull public static android.os.CombinedVibrationEffect createSynced(@NonNull android.os.VibrationEffect);
+  public abstract class CombinedVibration implements android.os.Parcelable {
+    method @NonNull public static android.os.CombinedVibration createParallel(@NonNull android.os.VibrationEffect);
     method public int describeContents();
-    method @NonNull public static android.os.CombinedVibrationEffect.SyncedCombination startSynced();
-    field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibrationEffect> CREATOR;
+    method @NonNull public static android.os.CombinedVibration.ParallelCombination startParallel();
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibration> CREATOR;
   }
 
-  public static final class CombinedVibrationEffect.SyncedCombination {
-    method @NonNull public android.os.CombinedVibrationEffect.SyncedCombination addVibrator(int, @NonNull android.os.VibrationEffect);
-    method @NonNull public android.os.CombinedVibrationEffect combine();
+  public static final class CombinedVibration.ParallelCombination {
+    method @NonNull public android.os.CombinedVibration.ParallelCombination addVibrator(int, @NonNull android.os.VibrationEffect);
+    method @NonNull public android.os.CombinedVibration combine();
   }
 
   public class ConditionVariable {
@@ -32098,8 +32097,8 @@ package android.os {
     method @NonNull public abstract android.os.Vibrator getDefaultVibrator();
     method @NonNull public abstract android.os.Vibrator getVibrator(int);
     method @NonNull public abstract int[] getVibratorIds();
-    method @RequiresPermission(android.Manifest.permission.VIBRATE) public final void vibrate(@NonNull android.os.CombinedVibrationEffect);
-    method @RequiresPermission(android.Manifest.permission.VIBRATE) public final void vibrate(@NonNull android.os.CombinedVibrationEffect, @Nullable android.os.VibrationAttributes);
+    method @RequiresPermission(android.Manifest.permission.VIBRATE) public final void vibrate(@NonNull android.os.CombinedVibration);
+    method @RequiresPermission(android.Manifest.permission.VIBRATE) public final void vibrate(@NonNull android.os.CombinedVibration, @Nullable android.os.VibrationAttributes);
   }
 
   public class WorkSource implements android.os.Parcelable {
@@ -47139,7 +47138,7 @@ package android.view {
     method @NonNull public android.hardware.SensorManager getSensorManager();
     method public int getSources();
     method public int getVendorId();
-    method public android.os.Vibrator getVibrator();
+    method @Deprecated public android.os.Vibrator getVibrator();
     method @NonNull public android.os.VibratorManager getVibratorManager();
     method public boolean[] hasKeys(int...);
     method public boolean hasMicrophone();

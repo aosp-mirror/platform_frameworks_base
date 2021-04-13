@@ -5534,7 +5534,7 @@ class Task extends WindowContainer<WindowContainer> {
         mCurrentUser = userId;
 
         super.switchUser(userId);
-        if (isLeafTask() && showToCurrentUser()) {
+        if (!isRootTask() && showToCurrentUser()) {
             getParent().positionChildAt(POSITION_TOP, this, false /*includeParents*/);
         }
     }

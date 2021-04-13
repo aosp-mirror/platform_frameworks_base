@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"የእርስዎን አካላዊ እንቅስቃሴ ይድረሱበት"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ካሜራ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ስዕሎች ያንሱ እና ቪዲዮ ይቅረጹ"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"በአቅራቢያ ያሉ የብሉቱዝ መሣሪያዎች"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"በአቅራቢያ ያሉ የብሉቱዝ መሣሪያዎችን ያግኙ እና ያገናኙ"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"በአቅራቢያ ያሉ መሣሪያዎች"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"በአቅራቢያ ያሉ መሣሪያዎችን ያሉበትን ያግኙ እና ያገናኙ"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"የጥሪ ምዝገባ ማስታወሻዎች"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"የስልክ ጥሪ ምዝግባ ማስታወሻን ያንብቡ እና ይጻፉ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ስልክ"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"መተግበሪያው በአቅራቢያ ያሉ የብሉቱዝ መሣሪያዎችን እንዲያገኝ እና እንዲጣመር ይፈቅድለታል"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ከተጣመሩ የብሉቱዝ መሣሪያዎች ጋር ያገናኙ"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"መተግበሪያው ከተጣመሩ የብሉቱዝ መሣሪያዎች ጋር እንዲገናኝ ይፈቅድለታል"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"በአቅራቢያ ላሉ የብሉቱዝ መሣሪያዎችን ያስተዋውቁ"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"በአቅራቢያ ላሉ የብሉቱዝ መሣሪያዎችን እንዲያስተዋውቅ መተግበሪያው ያስችለዋል"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"በአቅራቢያ ባሉ ልዕለ ሰፊ ባንድ መሣሪያዎች መካከል ተዛማጅ የሆነውን ቦታ ይወቁ"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"በአቅራቢያ ባሉ ልዕለ-ሰፊ ባንድ መሣሪያዎች መካከል ያለውን አንጻራዊ አቀማመጣቸውን ለማወቅ ንዲችል ለመተግበሪያው ይፍቀዱ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ተመራጭ NFC የክፍያ አገልግሎት መረጃ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"እንደ የተመዘገቡ እርዳታዎች እና የጉዞ መሥመር መዳረሻ የመሳሰለ ተመራጭ nfc የክፍያ አገልግሎት መረጃን ለማግኘት ለመተግበሪያው ያፈቅድለታል።"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ቅርብ የግኑኙነትመስክ (NFC) ተቆጣጠር"</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"አሁን የማያ ገጽዎን ክፍል ማጉላት ይችላሉ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"በቅንብሮች ውስጥ ያብሩ"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"አሰናብት"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ለመቀጠል፣ &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ወደ መሳሪያዎ ማይክሮፎን መድረስ ይፈልጋል።"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ለመቀጠል፣ &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; የመሣሪያዎን ካሜራ መድረስ ይፈልጋል።"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"አብራ"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"የመሣሪያ ማይክሮፎን እገዳን አንሳ"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"የመሣሪያ ካሜራ እገዳን አንሳ"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"ለ&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; እና ሁሉም መተግበሪያዎች እና አገልግሎቶች"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"እገዳውን አንሳ"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ዳሳሽ ግላዊነት"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"የመተግበሪያ አዶ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"የመተግበሪያ የምርት ስም ምስል"</string>
