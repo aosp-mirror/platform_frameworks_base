@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageUserState
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationUserState
@@ -33,6 +34,7 @@ import android.util.ArraySet
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
+import com.android.server.pm.verify.domain.DomainVerificationManagerStub
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
@@ -108,7 +110,7 @@ class DomainVerificationManagerApiTest {
         assertThat(infoOne.packageName).isEqualTo(pkgWithDomains.getName())
         assertThat(infoOne.hostToStateMap).containsExactlyEntriesIn(mapOf(
                 DOMAIN_1 to DomainVerificationInfo.STATE_NO_RESPONSE,
-                DOMAIN_2 to DomainVerificationInfo.STATE_NO_RESPONSE,
+                DOMAIN_2 to DomainVerificationInfo.STATE_NO_RESPONSE
         ))
 
         assertThat(service.getDomainVerificationInfo(pkgWithoutDomains.getName())).isNull()
@@ -155,7 +157,7 @@ class DomainVerificationManagerApiTest {
         }
 
         map.clear()
-        assertFailsWith(PackageManager.NameNotFoundException::class){
+        assertFailsWith(PackageManager.NameNotFoundException::class) {
             service.setStatus(UUID_ONE, setOf(DOMAIN_1), 1100)
         }
     }
@@ -168,7 +170,7 @@ class DomainVerificationManagerApiTest {
         val map = mutableMapOf(pkg1.getName() to pkg1, pkg2.getName() to pkg2)
         val service = makeService(map::get).apply { addPackages(pkg1, pkg2) }
 
-        service.setDomainVerificationLinkHandlingAllowed(PKG_ONE, false, 0);
+        service.setDomainVerificationLinkHandlingAllowed(PKG_ONE, false, 0)
 
         // Should edit same package, same user
         assertThat(service.getDomainVerificationUserState(PKG_ONE, 0)
@@ -182,8 +184,8 @@ class DomainVerificationManagerApiTest {
         assertThat(service.getDomainVerificationUserState(PKG_TWO, 0)
                 ?.isLinkHandlingAllowed).isEqualTo(true)
 
-        assertFailsWith(PackageManager.NameNotFoundException::class){
-            service.setDomainVerificationLinkHandlingAllowed("invalid.pkg.name", false, 0);
+        assertFailsWith(PackageManager.NameNotFoundException::class) {
+            service.setDomainVerificationLinkHandlingAllowed("invalid.pkg.name", false, 0)
         }
     }
 
@@ -232,7 +234,7 @@ class DomainVerificationManagerApiTest {
             .isEqualTo(DomainVerificationManager.ERROR_UNABLE_TO_APPROVE)
 
         map.clear()
-        assertFailsWith(PackageManager.NameNotFoundException::class){
+        assertFailsWith(PackageManager.NameNotFoundException::class) {
             service.setUserSelection(UUID_ONE, setOf(DOMAIN_1), true, 0)
         }
     }
@@ -253,7 +255,7 @@ class DomainVerificationManagerApiTest {
         assertThat(infoOne.isLinkHandlingAllowed).isTrue()
         assertThat(infoOne.hostToStateMap).containsExactlyEntriesIn(mapOf(
                 DOMAIN_1 to DomainVerificationUserState.DOMAIN_STATE_NONE,
-                DOMAIN_2 to DomainVerificationUserState.DOMAIN_STATE_NONE,
+                DOMAIN_2 to DomainVerificationUserState.DOMAIN_STATE_NONE
         ))
 
         val infoTwo = service.getDomainVerificationUserState(pkgWithoutDomains.getName(), 0)
@@ -286,7 +288,12 @@ class DomainVerificationManagerApiTest {
             addPackages(pkg1, pkg2)
         }
 
+        // DomainVerificationManager converts the owner list to a SortedSet, so test that, too
+        val manager0 = makeManager(service, 0)
+        val manager1 = makeManager(service, 1)
+
         assertThat(service.getOwnersForDomain(DOMAIN_1, 0)).isEmpty()
+        assertThat(manager0.getOwnersForDomain(DOMAIN_1)).isEmpty()
 
         assertThat(
             service.setStatus(
@@ -306,25 +313,33 @@ class DomainVerificationManagerApiTest {
         service.setUserSelection(pkg1.domainSetId, setOf(DOMAIN_2), true, 0)
 
         service.getOwnersForDomain(DOMAIN_1, 0).let {
-            assertThat(it).hasSize(2)
-            assertThat(it[0].packageName).isEqualTo(pkg1.getName())
-            assertThat(it[0].isOverrideable).isEqualTo(false)
-            assertThat(it[1].packageName).isEqualTo(pkg2.getName())
-            assertThat(it[1].isOverrideable).isEqualTo(false)
+            assertThat(it).containsExactly(
+                DomainOwner(pkg1.getName(), false),
+                DomainOwner(pkg2.getName(), false)
+            ).inOrder()
+        }
+        manager0.getOwnersForDomain(DOMAIN_1).let {
+            assertThat(it).containsExactly(
+                DomainOwner(pkg1.getName(), false),
+                DomainOwner(pkg2.getName(), false)
+            ).inOrder()
         }
 
         service.getOwnersForDomain(DOMAIN_2, 0).let {
-            assertThat(it).hasSize(1)
-            assertThat(it.single().packageName).isEqualTo(pkg1.getName())
-            assertThat(it.single().isOverrideable).isEqualTo(true)
+            assertThat(it).containsExactly(DomainOwner(pkg1.getName(), true))
+        }
+        manager0.getOwnersForDomain(DOMAIN_2).let {
+            assertThat(it).containsExactly(DomainOwner(pkg1.getName(), true))
         }
 
         assertThat(service.getOwnersForDomain(DOMAIN_2, 1)).isEmpty()
+        assertThat(manager1.getOwnersForDomain(DOMAIN_2)).isEmpty()
         service.setUserSelection(pkg1.domainSetId, setOf(DOMAIN_2), true, 1)
         service.getOwnersForDomain(DOMAIN_2, 1).let {
-            assertThat(it).hasSize(1)
-            assertThat(it.single().packageName).isEqualTo(pkg1.getName())
-            assertThat(it.single().isOverrideable).isEqualTo(true)
+            assertThat(it).containsExactly(DomainOwner(pkg1.getName(), true))
+        }
+        manager1.getOwnersForDomain(DOMAIN_2).let {
+            assertThat(it).containsExactly(DomainOwner(pkg1.getName(), true))
         }
 
         // "Uninstall" the package from user 0 and ensure it's stripped from the results
@@ -332,9 +347,10 @@ class DomainVerificationManagerApiTest {
         service.clearPackageForUser(pkg1.getName(), 0)
 
         service.getOwnersForDomain(DOMAIN_1, 0).let {
-            assertThat(it).hasSize(1)
-            assertThat(it.single().packageName).isEqualTo(pkg2.getName())
-            assertThat(it.single().isOverrideable).isEqualTo(false)
+            assertThat(it).containsExactly(DomainOwner(pkg2.getName(), false))
+        }
+        manager0.getOwnersForDomain(DOMAIN_1).let {
+            assertThat(it).containsExactly(DomainOwner(pkg2.getName(), false))
         }
 
         // Domain 2 user selection gone for user 0
@@ -342,26 +358,33 @@ class DomainVerificationManagerApiTest {
 
         // Domain 2 user selection still around for user 1
         service.getOwnersForDomain(DOMAIN_2, 1).let {
-            assertThat(it).hasSize(1)
-            assertThat(it.single().packageName).isEqualTo(pkg1.getName())
-            assertThat(it.single().isOverrideable).isEqualTo(true)
+            assertThat(it).containsExactly(DomainOwner(pkg1.getName(), true))
+        }
+        manager1.getOwnersForDomain(DOMAIN_2).let {
+            assertThat(it).containsExactly(DomainOwner(pkg1.getName(), true))
         }
 
         // Now assert for user 1 that it was unaffected by the change to user 0
         service.getOwnersForDomain(DOMAIN_1, 1).let {
-            assertThat(it).hasSize(2)
-            assertThat(it[0].packageName).isEqualTo(pkg1.getName())
-            assertThat(it[0].isOverrideable).isEqualTo(false)
-            assertThat(it[1].packageName).isEqualTo(pkg2.getName())
-            assertThat(it[1].isOverrideable).isEqualTo(false)
+            assertThat(it).containsExactly(
+                DomainOwner(pkg1.getName(), false),
+                DomainOwner(pkg2.getName(), false)
+            ).inOrder()
+        }
+        manager1.getOwnersForDomain(DOMAIN_1).let {
+            assertThat(it).containsExactly(
+                DomainOwner(pkg1.getName(), false),
+                DomainOwner(pkg2.getName(), false)
+            ).inOrder()
         }
 
         service.setUserSelection(pkg1.domainSetId, setOf(DOMAIN_2), true, 0)
 
         service.getOwnersForDomain(DOMAIN_2, 1).let {
-            assertThat(it).hasSize(1)
-            assertThat(it.single().packageName).isEqualTo(pkg1.getName())
-            assertThat(it.single().isOverrideable).isEqualTo(true)
+            assertThat(it).containsExactly(DomainOwner(pkg1.getName(), true))
+        }
+        manager1.getOwnersForDomain(DOMAIN_2).let {
+            assertThat(it).containsExactly(DomainOwner(pkg1.getName(), true))
         }
 
         // "Reinstall" the package to user 0
@@ -369,13 +392,15 @@ class DomainVerificationManagerApiTest {
 
         // This state should have been cleared when the package was uninstalled
         assertThat(service.getOwnersForDomain(DOMAIN_2, 0)).isEmpty()
+        assertThat(manager0.getOwnersForDomain(DOMAIN_2)).isEmpty()
 
         // Other package unaffected
         service.setUserSelection(pkg2.domainSetId, setOf(DOMAIN_2), true, 0)
         service.getOwnersForDomain(DOMAIN_2, 0).let {
-            assertThat(it).hasSize(1)
-            assertThat(it.single().packageName).isEqualTo(pkg2.getName())
-            assertThat(it.single().isOverrideable).isEqualTo(true)
+            assertThat(it).containsExactly(DomainOwner(pkg2.getName(), true))
+        }
+        manager0.getOwnersForDomain(DOMAIN_2).let {
+            assertThat(it).containsExactly(DomainOwner(pkg2.getName(), true))
         }
     }
 
@@ -480,7 +505,7 @@ class DomainVerificationManagerApiTest {
                                     }
                             )
                         }
-                    },
+                    }
             )
 
             whenever(activities) { activityList }
@@ -495,6 +520,10 @@ class DomainVerificationManagerApiTest {
         whenever(readUserState(1)) { pkgUserState1() }
     }
 
-    fun DomainVerificationService.addPackages(vararg pkgSettings: PackageSetting) =
+    private fun DomainVerificationService.addPackages(vararg pkgSettings: PackageSetting) =
             pkgSettings.forEach(::addPackage)
+
+    private fun makeManager(service: DomainVerificationService, userId: Int) =
+        DomainVerificationManager(mockThrowOnUnmocked { whenever(this.userId) { userId } },
+            DomainVerificationManagerStub(service))
 }
