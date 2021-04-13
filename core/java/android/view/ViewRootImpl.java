@@ -723,6 +723,13 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mNextDrawUseBlastSync = false;
 
     /**
+     * Wait for the blast sync transaction complete callback before drawing and queuing up more
+     * frames. This will prevent out of order buffers submissions when WM has requested to
+     * synchronize with the client.
+     */
+    private boolean mWaitForBlastSyncComplete = false;
+
+    /**
      * Keeps track of whether a traverse was triggered while the UI thread was paused. This can
      * occur when the client is waiting on another process to submit the transaction that
      * contains the buffer. The UI thread needs to wait on the callback before it can submit
@@ -2463,7 +2470,7 @@ public final class ViewRootImpl implements ViewParent,
         //
         // When the callback is invoked, it will trigger a traversal request if
         // mRequestedTraverseWhilePaused is set so there's no need to attempt a retry here.
-        if (mNextDrawUseBlastSync) {
+        if (mWaitForBlastSyncComplete) {
             if (DEBUG_BLAST) {
                 Log.w(mTag, "Can't perform draw while waiting for a transaction complete");
             }
@@ -3244,10 +3251,6 @@ public final class ViewRootImpl implements ViewParent,
                     pendingDrawFinished();
                 }
             }
-
-            // We were unable to draw this traversal. Unset this flag since we'll block without
-            // ever being able to draw again
-            mNextDrawUseBlastSync = false;
         }
 
         if (mAttachInfo.mContentCaptureEvents != null) {
@@ -3990,7 +3993,7 @@ public final class ViewRootImpl implements ViewParent,
                     + " reportNextDraw=" + reportNextDraw
                     + " hasBlurUpdates=" + hasBlurUpdates);
         }
-
+        mWaitForBlastSyncComplete = nextDrawUseBlastSync;
         final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
                 needsCallbackForBlur ?  mBlurRegionAggregator.getBlurRegionsCopyForRT() : null;
 
@@ -4025,6 +4028,7 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     mHandler.postAtFrontOfQueue(() -> {
                         mNextDrawUseBlastSync = false;
+                        mWaitForBlastSyncComplete = false;
                         if (DEBUG_BLAST) {
                             Log.d(mTag, "Scheduling a traversal=" + mRequestedTraverseWhilePaused
                                     + " due to a previous skipped traversal.");
