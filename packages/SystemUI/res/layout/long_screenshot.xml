@@ -71,6 +71,7 @@
         android:layout_height="0px"
         android:paddingTop="8dp"
         android:paddingBottom="42dp"
+        android:visibility="gone"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
         app:layout_constraintTop_toTopOf="@id/preview"
