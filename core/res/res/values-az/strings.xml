@@ -1570,7 +1570,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Ekranı cihaza yayımla"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Cihazlar axtarılır..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Ayarlar"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Bağlantını kəs"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Əlaqəni kəsin"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Skan edilir..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Qoşulur..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Əlçatımlı"</string>
@@ -1845,7 +1845,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Həftəiçi gecəsi"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Həftə sonu"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Tədbir"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Yuxu"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Yuxu vaxtı"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> bəzi səsləri səssiz rejimə salır"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Cihazınızın daxili problemi var və istehsalçı sıfırlanması olmayana qədər qeyri-stabil ola bilər."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Cihazınızın daxili problemi var. Əlavə məlumat üçün istehsalçı ilə əlaqə saxlayın."</string>
