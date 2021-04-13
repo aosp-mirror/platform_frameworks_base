@@ -265,10 +265,10 @@ public class Vcn extends Handler {
 
     private class VcnNetworkRequestListener implements VcnNetworkProvider.NetworkRequestListener {
         @Override
-        public void onNetworkRequested(@NonNull NetworkRequest request, int score, int providerId) {
+        public void onNetworkRequested(@NonNull NetworkRequest request) {
             Objects.requireNonNull(request, "Missing request");
 
-            sendMessage(obtainMessage(MSG_EVENT_NETWORK_REQUESTED, score, providerId, request));
+            sendMessage(obtainMessage(MSG_EVENT_NETWORK_REQUESTED, request));
         }
     }
 
@@ -284,7 +284,7 @@ public class Vcn extends Handler {
                 handleConfigUpdated((VcnConfig) msg.obj);
                 break;
             case MSG_EVENT_NETWORK_REQUESTED:
-                handleNetworkRequested((NetworkRequest) msg.obj, msg.arg1, msg.arg2);
+                handleNetworkRequested((NetworkRequest) msg.obj);
                 break;
             case MSG_EVENT_SUBSCRIPTIONS_CHANGED:
                 handleSubscriptionsChanged((TelephonySubscriptionSnapshot) msg.obj);
@@ -365,24 +365,8 @@ public class Vcn extends Handler {
         }
     }
 
-    private void handleNetworkRequested(
-            @NonNull NetworkRequest request, int score, int providerId) {
+    private void handleNetworkRequested(@NonNull NetworkRequest request) {
         Slog.v(getLogTag(), "Received request " + request);
-
-        if (score > getNetworkScore()) {
-            if (VDBG) {
-                Slog.v(
-                        getLogTag(),
-                        "Request already satisfied by higher-scoring ("
-                                + score
-                                + ") network from "
-                                + "provider "
-                                + providerId
-                                + ": "
-                                + request);
-            }
-            return;
-        }
 
         // If preexisting VcnGatewayConnection(s) satisfy request, return
         for (VcnGatewayConnectionConfig gatewayConnectionConfig : mVcnGatewayConnections.keySet()) {
