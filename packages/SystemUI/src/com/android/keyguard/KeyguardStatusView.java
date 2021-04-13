@@ -44,7 +44,6 @@ import java.io.PrintWriter;
  * - keyguard clock
  * - logout button (on certain managed devices)
  * - owner information (if set)
- * - notification icons (shown on AOD)
  */
 public class KeyguardStatusView extends GridLayout {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -59,7 +58,6 @@ public class KeyguardStatusView extends GridLayout {
     private TextView mOwnerInfo;
     private boolean mCanShowOwnerInfo = true; // by default, try to show the owner information here
     private KeyguardSliceView mKeyguardSlice;
-    private View mNotificationIcons;
     private Runnable mPendingMarqueeStart;
     private Handler mHandler;
 
@@ -132,13 +130,11 @@ public class KeyguardStatusView extends GridLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mLogoutView = findViewById(R.id.logout);
-        mNotificationIcons = findViewById(R.id.clock_notification_icon_container);
         if (mLogoutView != null) {
             mLogoutView.setOnClickListener(this::onLogoutClicked);
         }
 
         mClockView = findViewById(R.id.keyguard_clock_container);
-        mClockView.setShowCurrentUserTime(true);
         if (KeyguardClockAccessibilityDelegate.isNeeded(mContext)) {
             mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
         }
@@ -161,22 +157,10 @@ public class KeyguardStatusView extends GridLayout {
      */
     private void onSliceContentChanged() {
         final boolean hasHeader = mKeyguardSlice.hasHeader();
-        mClockView.setKeyguardShowingHeader(hasHeader);
         if (mShowingHeader == hasHeader) {
             return;
         }
         mShowingHeader = hasHeader;
-        if (mNotificationIcons != null) {
-            // Update top margin since header has appeared/disappeared.
-            MarginLayoutParams params = (MarginLayoutParams) mNotificationIcons.getLayoutParams();
-            params.setMargins(params.leftMargin,
-                    hasHeader ? mIconTopMarginWithHeader : mIconTopMargin,
-                    params.rightMargin,
-                    params.bottomMargin);
-            mNotificationIcons.setLayoutParams(params);
-        }
-
-        mClockView.setKeyguardHidingBigClock(hasHeader);
     }
 
     @Override
@@ -293,13 +277,6 @@ public class KeyguardStatusView extends GridLayout {
             int expanded = mOwnerInfo.getBottom() + mOwnerInfo.getPaddingBottom();
             int toRemove = (int) ((expanded - collapsed) * ratio);
             setBottom(getMeasuredHeight() - toRemove);
-            if (mNotificationIcons != null) {
-                // We're using scrolling in order not to overload the translation which is used
-                // when appearing the icons
-                mNotificationIcons.setScrollY(toRemove);
-            }
-        } else if (mNotificationIcons != null){
-            mNotificationIcons.setScrollY(0);
         }
     }
 

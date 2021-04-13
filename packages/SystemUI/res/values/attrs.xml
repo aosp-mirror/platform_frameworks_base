@@ -126,6 +126,8 @@
     <attr name="wallpaperTextColorSecondary" format="reference|color" />
     <attr name="wallpaperTextColorAccent" format="reference|color" />
     <attr name="backgroundProtectedStyle" format="reference" />
+    <attr name="offStateColor" format="reference|color" />
+    <attr name="underSurfaceColor" format="reference|color" />
 
     <declare-styleable name="SmartReplyView">
         <attr name="spacing" format="dimension" />

@@ -154,6 +154,7 @@ public class BubbleExpandedView extends LinearLayout {
                 }
                 try {
                     options.setTaskAlwaysOnTop(true);
+                    options.setLaunchedFromBubble(true);
                     if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
@@ -163,7 +164,6 @@ public class BubbleExpandedView extends LinearLayout {
                         // Apply flags to make behaviour match documentLaunchMode=always.
                         fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
                         fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
-                        fillInIntent.putExtra(Intent.EXTRA_IS_BUBBLED, true);
                         if (mBubble != null) {
                             mBubble.setIntentActive();
                         }

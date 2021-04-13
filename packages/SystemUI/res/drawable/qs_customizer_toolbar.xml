@@ -15,6 +15,6 @@
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android">
     <shape>
-        <solid android:color="?android:attr/colorBackgroundFloating"/>
+        <solid android:color="?attr/underSurfaceColor"/>
     </shape>
 </inset>

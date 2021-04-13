@@ -322,8 +322,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"piekļūt jūsu fiziskajām aktivitātēm"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"uzņemt attēlus un ierakstīt videoklipus"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Tuvumā esošas Bluetooth ierīces"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"atrast tuvumā esošas Bluetooth ierīces un izveidot savienojumu ar tām"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Tuvumā esošās ierīces"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"tuvumā esošu ierīču meklēšana un savienojuma izveide ar tām"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Zvanu žurnāli"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"lasīt un rakstīt tālruņa zvanu žurnālu"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Tālrunis"</string>
@@ -541,10 +541,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Ļauj lietotnei atrast un savienot pārī tuvumā esošas Bluetooth ierīces."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"piekļūt pārī savienotām Bluetooth ierīcēm"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Ļauj lietotnei piekļūt pārī savienotām Bluetooth ierīcēm."</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"reklamēšana tuvumā esošās Bluetooth ierīcēs"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Atļauj lietotnei veikt reklamēšanu tuvumā esošās Bluetooth ierīcēs"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"novietojuma noteikšana starp tuvu esošām ultraplatjoslas ierīcēm"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Atļaut lietotnei noteikt relatīvo atrašanās vietu starp tuvumā esošām ultraplatjoslas ierīcēm"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informācija par vēlamo NFC maksājumu pakalpojumu"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ļauj lietotnei iegūt informāciju par vēlamo NFC maksājumu pakalpojumu, piemēram, par reģistrētajiem lietojumprogrammu ID un maršruta galamērķi."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolē tuvlauka saziņu"</string>
@@ -2293,9 +2293,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Tagad varat palielināt ekrāna daļu."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Ieslēgt sadaļā Iestatījumi"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Nerādīt"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Lai turpinātu, lietotnei &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; nepieciešama piekļuve jūsu ierīces mikrofonam."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Lai turpinātu, lietotnei &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; nepieciešama piekļuve jūsu ierīces kamerai."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Ieslēgt"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Atbloķējiet ierīces mikrofonu"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Atbloķējiet ierīces kameru"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Lietotnei &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; un visām lietotnēm un pakalpojumiem"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Atbloķēt"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensoru konfidencialitāte"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Lietojumprogrammas ikona"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Lietojumprogrammas zīmola attēls"</string>

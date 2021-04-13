@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"သင့်ကိုယ်လက်လှုပ်ရှားမှုကို ဝင်ကြည့်ရန်"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ကင်မရာ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များ"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များကို ရှာဖွေပြီးချိတ်ဆက်မည်"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"အနီးတစ်ဝိုက်ရှိ စက်များ"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"အနီးတစ်ဝိုက်ရှိ စက်များကို ရှာဖွေပြီးချိတ်ဆက်မည်"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"ခေါ်ဆိုမှတ်တမ်း"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ဖုန်းခေါ်ဆိုထားသော မှတ်တမ်း ဖတ်ပြီး ရေးရန်"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ဖုန်း"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များကို ရှာဖွေပြီးတွဲချိတ်ရန် အက်ပ်ကိုခွင့်ပြုမည်"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"တွဲချိတ်ထားသော ဘလူးတုသ်စက်များနှင့် ချိတ်ဆက်ခြင်း"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"တွဲချိတ်ထားသော ဘလူးတုသ်သုံးစက်များနှင့် ချိတ်ဆက်ရန် အက်ပ်ကိုခွင့်ပြုမည်"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များတွင် ကြော်ငြာခြင်း"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များတွင် ကြော်ငြာရန် အက်ပ်အား ခွင့်ပြုမည်"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ခြင်း"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ဦးစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"အက်ပ်အား ဦစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များဖြစ်သည့် မှတ်ပုံတင်ထားသော အကူအညီများနှင့် သွားလာရာ လမ်းကြောင်းတို့ကို ရယူရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communicationအား ထိန်းချုပ်ရန်"</string>
@@ -1285,12 +1285,12 @@
     <string name="volume_unknown" msgid="4041914008166576293">"အသံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ဘလူးတုသ်သံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ဖုန်းမြည်သံအတိုးအကျယ်"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"ခေါ်ဆိုနေခြင်းအသံအတိုးအကျယ်"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"ဖုန်းခေါ်သံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"မီဒီယာအသံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"အကြောင်းကြားသံအတိုးအကျယ်"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"မူရင်းမြည်သံ"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"မူရင်း (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"တစ်ခုမျှမဟုတ်"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"မရှိ"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"မြည်သံများ"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"နှိုးစက်သံ"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"အကြောင်းကြားချက်အသံ"</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ဖန်သားပြင်တစ်စိတ်တစ်ပိုင်းကို ယခုချဲ့နိုင်ပါပြီ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"\'ဆက်တင်များ\' တွင် ဖွင့်ရန်"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ပယ်ရန်"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ဆက်လက်လုပ်ဆောင်ရန် &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; က သင့်စက်၏ မိုက်ခရိုဖုန်းကို အသုံးပြုခွင့်ရရန် လိုအပ်သည်။"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ဆက်လက်လုပ်ဆောင်ရန် &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; က သင့်စက်၏ ကင်မရာကို အသုံးပြုခွင့်ရရန် လိုအပ်သည်။"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ဖွင့်ရန်"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"စက်၏မိုက်ခရိုဖုန်းကို ပြန်ဖွင့်ရန်"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"စက်၏ကင်မရာကို ပြန်ဖွင့်ရန်"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;၊ အက်ပ်နှင့် ဝန်ဆောင်မှုအားလုံးအတွက်"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"ပြန်ဖွင့်ရန်"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"အာရုံခံကိရိယာ လုံခြုံရေး"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"အပလီကေးရှင်း သင်္ကေတ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"အပလီကေးရှင်း ကုန်အမှတ်တံဆိပ်ပုံ"</string>

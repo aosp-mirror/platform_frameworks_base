@@ -37,7 +37,7 @@ import android.hardware.lights.LightsManager;
 import android.hardware.lights.LightsRequest;
 import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
@@ -1470,7 +1470,7 @@ public final class InputManager {
     /*
      * Perform combined vibration effect
      */
-    void vibrate(int deviceId, CombinedVibrationEffect effect, IBinder token) {
+    void vibrate(int deviceId, CombinedVibration effect, IBinder token) {
         try {
             mIm.vibrateCombined(deviceId, effect, token);
         } catch (RemoteException ex) {

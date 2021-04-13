@@ -812,7 +812,9 @@ public final class InputDevice implements Parcelable {
      * {@link Context#getSystemService} with {@link Context#VIBRATOR_SERVICE} as argument.
      *
      * @return The vibrator service associated with the device, never null.
+     * @deprecated Use {@link #getVibratorManager()} to retrieve the default device vibrator.
      */
+    @Deprecated
     public Vibrator getVibrator() {
         synchronized (mMotionRanges) {
             if (mVibrator == null) {

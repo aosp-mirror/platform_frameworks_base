@@ -978,7 +978,6 @@ public class LauncherAppsService extends SystemService {
                 // Flag for bubble to make behaviour match documentLaunchMode=always.
                 intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
                 intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
-                intents[0].putExtra(Intent.EXTRA_IS_BUBBLED, true);
             }
 
             intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

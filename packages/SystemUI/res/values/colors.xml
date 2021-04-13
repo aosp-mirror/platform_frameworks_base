@@ -35,7 +35,6 @@
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="qs_user_detail_icon_muted">#FFFFFFFF</color> <!-- not so muted after all -->
     <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->
-    <color name="qs_customize_decoration">@color/GM2_grey_300</color>
     <color name="qs_footer_action_border">#2E312C</color>
 
     <!-- The color of the background in the separated list of the Global Actions menu -->
@@ -158,7 +157,7 @@
     <color name="minimize_dock_shadow_end">#00000000</color>
 
     <color name="default_remote_input_background">@*android:color/notification_default_color</color>
-    <color name="notif_pill_background">@android:color/system_neutral2_100</color>
+    <color name="notif_pill_background">@*android:color/surface_light</color>
     <color name="notif_pill_text">@android:color/system_neutral1_900</color>
     <color name="remote_input_accent">?android:attr/colorAccent</color>
 

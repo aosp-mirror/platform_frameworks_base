@@ -63,8 +63,8 @@ class NetworkAgentConfigTest {
             setPartialConnectivityAcceptable(false)
             setUnvalidatedConnectivityAcceptable(true)
             setLegacyTypeName("TEST_NETWORK")
-            disableNat64Detection()
-            disableProvisioningNotification()
+            setNat64DetectionEnabled(false)
+            setProvisioningNotificationEnabled(false)
         }.build()
 
         assertTrue(config.isExplicitlySelected())

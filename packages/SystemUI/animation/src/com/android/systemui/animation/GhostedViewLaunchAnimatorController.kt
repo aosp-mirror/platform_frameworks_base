@@ -2,6 +2,7 @@ package com.android.systemui.animation
 
 import android.graphics.Canvas
 import android.graphics.ColorFilter
+import android.graphics.Matrix
 import android.graphics.PixelFormat
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -13,6 +14,7 @@ import android.view.GhostView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import kotlin.math.min
 
 /**
  * A base implementation of [ActivityLaunchAnimator.Controller] which creates a [ghost][GhostView]
@@ -34,7 +36,9 @@ open class GhostedViewLaunchAnimatorController(
     private val rootViewOverlay = rootView.overlay
 
     /** The ghost view that is drawn and animated instead of the ghosted view. */
-    private var ghostView: View? = null
+    private var ghostView: GhostView? = null
+    private val initialGhostViewMatrixValues = FloatArray(9) { 0f }
+    private val ghostViewMatrix = Matrix()
 
     /**
      * The expanding background view that will be added to [rootView] (below [ghostView]) and
@@ -125,6 +129,9 @@ open class GhostedViewLaunchAnimatorController(
         ghostView = GhostView.addGhost(ghostedView, rootView).apply {
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
         }
+
+        val matrix = ghostView?.animationMatrix ?: Matrix.IDENTITY_MATRIX
+        matrix.getValues(initialGhostViewMatrixValues)
     }
 
     override fun onLaunchAnimationProgress(
@@ -133,9 +140,16 @@ open class GhostedViewLaunchAnimatorController(
         linearProgress: Float
     ) {
         val ghostView = this.ghostView!!
-        ghostView.translationX = (state.leftChange + state.rightChange) / 2.toFloat()
-        ghostView.translationY = state.topChange.toFloat()
         ghostView.alpha = state.contentAlpha
+
+        val scale = min(state.widthRatio, state.heightRatio)
+        ghostViewMatrix.setValues(initialGhostViewMatrixValues)
+        ghostViewMatrix.postScale(scale, scale, state.startCenterX, state.startCenterY)
+        ghostViewMatrix.postTranslate(
+                (state.leftChange + state.rightChange) / 2f,
+                (state.topChange + state.bottomChange) / 2f
+        )
+        ghostView.animationMatrix = ghostViewMatrix
 
         val backgroundView = this.backgroundView!!
         backgroundView.top = state.top

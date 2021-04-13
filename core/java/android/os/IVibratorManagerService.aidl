@@ -16,7 +16,7 @@
 
 package android.os;
 
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.IVibratorStateListener;
 import android.os.VibrationAttributes;
 import android.os.VibratorInfo;
@@ -29,8 +29,8 @@ interface IVibratorManagerService {
     boolean registerVibratorStateListener(int vibratorId, in IVibratorStateListener listener);
     boolean unregisterVibratorStateListener(int vibratorId, in IVibratorStateListener listener);
     boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
-            in CombinedVibrationEffect effect, in VibrationAttributes attributes);
-    void vibrate(int uid, String opPkg, in CombinedVibrationEffect effect,
+            in CombinedVibration vibration, in VibrationAttributes attributes);
+    void vibrate(int uid, String opPkg, in CombinedVibration vibration,
             in VibrationAttributes attributes, String reason, IBinder token);
     void cancelVibrate(IBinder token);
 }

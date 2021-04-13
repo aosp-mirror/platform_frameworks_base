@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"достъп до физическата ви активност"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"да прави снимки и записва видео"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Устройства с Bluetooth в близост"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"откриване на устройства с Bluetooth в близост и свързване с тях"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Устройства в близост"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"откриване на устройства в близост и свързване с тях"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Списъци с обажданията"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"четене и запис на списъка с телефонните обаждания"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Дава възможност на приложението да открива устройства с Bluetooth в близост и да се сдвоява с тях"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"свързване със сдвоените устройства с Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Дава възможност на приложението да се свързва със сдвоените устройства с Bluetooth"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"рекламиране на устройства с Bluetooth в близост"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Разрешава на приложението да рекламира на устройства с Bluetooth в близост"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"опред. на относителната позиция м/у у-вата с ултрашироколентови сигнали в близост"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Разрешаване на приложението да определя относителната позиция между устройствата с ултрашироколентови сигнали в близост"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информация за предпочитаната услуга за плащане чрез NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дава възможност на приложението да получава информация за предпочитаната услуга за плащане чрез NFC, като например регистрирани помощни средства и местоназначение."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролиране на комуникацията в близкото поле"</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Вече можете да увеличите част от екрана"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Включете от настройките"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Отхвърляне"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"За да продължите, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; се нуждае от достъп до микрофона на устройството ви."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"За да продължите, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; се нуждае от достъп до камерата на устройството ви."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Включване"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Отблокиране на микрофона на устройството"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Отблокиране на камерата на устройството"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"За &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; и всички приложения и услуги"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Отблокиране"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Поверителност на сензорните данни"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Икона на приложението"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Изображение на търговската марка на приложението"</string>

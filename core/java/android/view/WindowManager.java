@@ -921,6 +921,30 @@ public interface WindowManager extends ViewManager {
     default void setForceCrossWindowBlurDisabled(boolean disable) {
     }
 
+    /**
+     * @hide
+     */
+    static String transitTypeToString(@TransitionType int type) {
+        switch (type) {
+            case TRANSIT_NONE: return "NONE";
+            case TRANSIT_OPEN: return "OPEN";
+            case TRANSIT_CLOSE: return "CLOSE";
+            case TRANSIT_TO_FRONT: return "TO_FRONT";
+            case TRANSIT_TO_BACK: return "TO_BACK";
+            case TRANSIT_RELAUNCH: return "RELAUNCH";
+            case TRANSIT_CHANGE: return "CHANGE";
+            case TRANSIT_KEYGUARD_GOING_AWAY: return "KEYGUARD_GOING_AWAY";
+            case TRANSIT_KEYGUARD_OCCLUDE: return "KEYGUARD_OCCLUDE";
+            case TRANSIT_KEYGUARD_UNOCCLUDE: return "KEYGUARD_UNOCCLUDE";
+            case TRANSIT_FIRST_CUSTOM: return "FIRST_CUSTOM";
+            default:
+                if (type > TRANSIT_FIRST_CUSTOM) {
+                    return "FIRST_CUSTOM+" + (type - TRANSIT_FIRST_CUSTOM);
+                }
+                return "UNKNOWN(" + type + ")";
+        }
+    }
+
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
         /**
          * X position for this window.  With the default gravity it is ignored.

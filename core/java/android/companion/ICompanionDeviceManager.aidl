@@ -52,5 +52,5 @@ interface ICompanionDeviceManager {
 
     boolean canPairWithoutPrompt(in String packageName, in String deviceMacAddress, int userId);
 
-    boolean createAssociation(in String packageName, in String macAddress, int userId);
+    void createAssociation(in String packageName, in String macAddress, int userId);
 }

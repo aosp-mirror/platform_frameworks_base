@@ -245,10 +245,14 @@
     <string name="screenshot_dismiss_description">Dismiss screenshot</string>
     <!-- Content description indicating that the view is a preview of the screenshot that was just taken [CHAR LIMIT=NONE] -->
     <string name="screenshot_preview_description">Screenshot preview</string>
-    <!-- Content description for the top boundary of the screenshot being cropped [CHAR LIMIT=NONE] -->
-    <string name="screenshot_top_boundary">Top boundary</string>
-    <!-- Content description for the bottom boundary of the screenshot being cropped [CHAR LIMIT=NONE] -->
-    <string name="screenshot_bottom_boundary">Bottom boundary</string>
+    <!-- Content description for the top boundary of the screenshot being cropped, with the current position as a percentage. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_top_boundary_pct">Top boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
+    <!-- Content description for the bottom boundary of the screenshot being cropped, with the current position as a percentage. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_bottom_boundary_pct">Bottom boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
+    <!-- Content description for the left boundary of the screenshot being cropped, with the current position as a percentage. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_left_boundary_pct">Left boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
+    <!-- Content description for the right boundary of the screenshot being cropped, with the current position as a percentage. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_right_boundary_pct">Right boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_name">Screen Recorder</string>
@@ -1646,10 +1650,10 @@
     <!-- Wallet strings -->
     <!-- Wallet empty state, title [CHAR LIMIT=32] -->
     <string name="wallet_title">Wallet</string>
-    <!-- Label of the button underneath the card carousel when device is unlocked. [CHAR LIMIT=NONE] -->
-    <string name="wallet_button_label_device_unlocked">Show all</string>
-    <!-- Label of the button underneath the card carousel when device is locked. [CHAR LIMIT=NONE] -->
-    <string name="wallet_button_label_device_locked">Unlock to pay</string>
+    <!-- Label of the button at the bottom prompting user enter wallet app. [CHAR LIMIT=NONE] -->
+    <string name="wallet_app_button_label">Show all</string>
+    <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
+    <string name="wallet_action_button_label_unlock">Unlock to pay</string>
     <!-- Secondary label of the quick access wallet tile if active. [CHAR LIMIT=32] -->
     <string name="wallet_secondary_label_active">Ready</string>
     <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->

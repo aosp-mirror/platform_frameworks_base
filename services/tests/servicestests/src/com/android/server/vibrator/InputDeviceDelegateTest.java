@@ -34,7 +34,7 @@ import android.content.ContextWrapper;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.Process;
 import android.os.VibrationAttributes;
@@ -67,8 +67,8 @@ public class InputDeviceDelegateTest {
     private static final String REASON = "some reason";
     private static final VibrationAttributes VIBRATION_ATTRIBUTES =
             new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_ALARM).build();
-    private static final CombinedVibrationEffect SYNCED_EFFECT =
-            CombinedVibrationEffect.createSynced(VibrationEffect.createOneShot(100, 255));
+    private static final CombinedVibration SYNCED_EFFECT =
+            CombinedVibration.createParallel(VibrationEffect.createOneShot(100, 255));
 
     @Rule public MockitoRule rule = MockitoJUnit.rule();
 

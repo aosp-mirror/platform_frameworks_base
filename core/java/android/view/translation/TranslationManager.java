@@ -18,12 +18,10 @@ package android.view.translation;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresFeature;
 import android.annotation.SystemService;
 import android.annotation.WorkerThread;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -53,7 +51,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * the server {@link android.service.translation.TranslationService} </p>
  */
 @SystemService(Context.TRANSLATION_MANAGER_SERVICE)
-@RequiresFeature(PackageManager.FEATURE_TRANSLATION)
 public final class TranslationManager {
 
     private static final String TAG = "TranslationManager";
