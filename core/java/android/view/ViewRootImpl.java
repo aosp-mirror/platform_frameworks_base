@@ -1193,7 +1193,8 @@ public final class ViewRootImpl implements ViewParent,
                             Looper.myLooper());
 
                     if (mAttachInfo.mThreadedRenderer != null) {
-                        InputMetricsListener listener = new InputMetricsListener();
+                        InputMetricsListener listener =
+                                new InputMetricsListener(mInputEventReceiver);
                         mHardwareRendererObserver = new HardwareRendererObserver(
                                 listener, listener.data, mHandler, true /*waitForPresentTime*/);
                         mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
@@ -1389,9 +1390,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (mAttachInfo.mThreadedRenderer != null) {
                     mAttachInfo.mHardwareAccelerated =
                             mAttachInfo.mHardwareAccelerationRequested = true;
-                    if (mHardwareRendererObserver != null) {
-                        mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
-                    }
                 }
             }
         }
@@ -8077,9 +8075,6 @@ public final class ViewRootImpl implements ViewParent,
         ThreadedRenderer hardwareRenderer = mAttachInfo.mThreadedRenderer;
 
         if (hardwareRenderer != null) {
-            if (mHardwareRendererObserver != null) {
-                hardwareRenderer.removeObserver(mHardwareRendererObserver);
-            }
             if (mView != null) {
                 hardwareRenderer.destroyHardwareResources(mView);
             }
@@ -8581,11 +8576,17 @@ public final class ViewRootImpl implements ViewParent,
             super.dispose();
         }
     }
-    private WindowInputEventReceiver mInputEventReceiver;
+    WindowInputEventReceiver mInputEventReceiver;
 
     final class InputMetricsListener
             implements HardwareRendererObserver.OnFrameMetricsAvailableListener {
         public long[] data = new long[FrameMetrics.Index.FRAME_STATS_COUNT];
+
+        private InputEventReceiver mReceiver;
+
+        InputMetricsListener(InputEventReceiver receiver) {
+            mReceiver = receiver;
+        }
 
         @Override
         public void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
@@ -8599,11 +8600,6 @@ public final class ViewRootImpl implements ViewParent,
                 // available, we cannot compute end-to-end input latency metrics.
                 return;
             }
-            final long gpuCompletedTime = data[FrameMetrics.Index.GPU_COMPLETED];
-            if (mInputEventReceiver == null) {
-                return;
-            }
-            mInputEventReceiver.reportTimeline(inputEventId, gpuCompletedTime, presentTime);
         }
     }
     HardwareRendererObserver mHardwareRendererObserver;
