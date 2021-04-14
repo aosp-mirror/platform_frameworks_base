@@ -829,13 +829,6 @@ android_media_AudioSystem_getMasterBalance(JNIEnv *env, jobject thiz)
 }
 
 static jint
-android_media_AudioSystem_getDevicesForStream(JNIEnv *env, jobject thiz, jint stream)
-{
-    return (jint)deviceTypesToBitMask(
-            AudioSystem::getDevicesForStream(static_cast<audio_stream_type_t>(stream)));
-}
-
-static jint
 android_media_AudioSystem_getPrimaryOutputSamplingRate(JNIEnv *env, jobject clazz)
 {
     return (jint) AudioSystem::getPrimaryOutputSamplingRate();
@@ -2959,7 +2952,6 @@ static const JNINativeMethod gMethods[] =
          {"getMasterMono", "()Z", (void *)android_media_AudioSystem_getMasterMono},
          {"setMasterBalance", "(F)I", (void *)android_media_AudioSystem_setMasterBalance},
          {"getMasterBalance", "()F", (void *)android_media_AudioSystem_getMasterBalance},
-         {"getDevicesForStream", "(I)I", (void *)android_media_AudioSystem_getDevicesForStream},
          {"getPrimaryOutputSamplingRate", "()I",
           (void *)android_media_AudioSystem_getPrimaryOutputSamplingRate},
          {"getPrimaryOutputFrameCount", "()I",

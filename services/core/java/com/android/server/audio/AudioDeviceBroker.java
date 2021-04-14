@@ -1565,6 +1565,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     private AtomicBoolean mMusicMuted = new AtomicBoolean(false);
 
+    private static <T> boolean hasIntersection(Set<T> a, Set<T> b) {
+        for (T e : a) {
+            if (b.contains(e)) return true;
+        }
+        return false;
+    }
+
     boolean messageMutesMusic(int message) {
         if (message == 0) {
             return false;
@@ -1574,8 +1581,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 || message == MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT
                 || message == MSG_L_A2DP_DEVICE_CONFIG_CHANGE)
                 && AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)
-                && mDeviceInventory.DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(
-                        mAudioService.getDevicesForStream(AudioSystem.STREAM_MUSIC))) {
+                && hasIntersection(mDeviceInventory.DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET,
+                        mAudioService.getDeviceSetForStream(AudioSystem.STREAM_MUSIC))) {
             return false;
         }
         return true;
