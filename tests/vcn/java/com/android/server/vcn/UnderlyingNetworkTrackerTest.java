@@ -191,7 +191,7 @@ public class UnderlyingNetworkTrackerTest {
     private NetworkRequest getWifiRequest(Set<Integer> netCapsSubIds) {
         return getExpectedRequestBase()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                .setSubIds(netCapsSubIds)
+                .setSubscriptionIds(netCapsSubIds)
                 .build();
     }
 
@@ -203,7 +203,7 @@ public class UnderlyingNetworkTrackerTest {
     }
 
     private NetworkRequest getRouteSelectionRequest(Set<Integer> netCapsSubIds) {
-        return getExpectedRequestBase().setSubIds(netCapsSubIds).build();
+        return getExpectedRequestBase().setSubscriptionIds(netCapsSubIds).build();
     }
 
     private NetworkRequest.Builder getExpectedRequestBase() {
