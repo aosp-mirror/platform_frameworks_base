@@ -119,6 +119,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -6460,12 +6461,14 @@ public class DevicePolicyManager {
      * to a given KeyChain key.
      *
      * Key are granted on a per-UID basis, so if several apps share the same UID, granting access to
-     * one of them automatically grants it to others. This method returns a set of sets of package
-     * names, where each internal set contains all packages sharing the same UID. Grantee packages
-     * that don't share UID with other packages are represented by singleton sets.
+     * one of them automatically grants it to others. This method returns a map containing one entry
+     * per grantee UID. Entries have UIDs as keys and sets of corresponding package names as values.
+     * In particular, grantee packages that don't share UID with other packages are represented by
+     * entries having singleton sets as values.
      *
      * @param alias The alias of the key to grant access to.
-     * @return package names of apps that have access to a given key, grouped by UIDs
+     * @return apps that have access to a given key, arranged in a map from UID to sets of
+     *       package names.
      *
      * @throws SecurityException if the caller is not a device owner, a profile owner or
      *         delegated certificate chooser.
@@ -6473,26 +6476,11 @@ public class DevicePolicyManager {
      *
      * @see #grantKeyPairToApp(ComponentName, String, String)
      */
-    public @NonNull Set<Set<String>> getKeyPairGrants(@NonNull String alias) {
+    public @NonNull Map<Integer, Set<String>> getKeyPairGrants(@NonNull String alias) {
         throwIfParentInstance("getKeyPairGrants");
         try {
-            // Set of sets is flattened into a null-separated list.
-            final List<String> flattened =
-                    mService.getKeyPairGrants(mContext.getPackageName(), alias);
-            final Set<Set<String>> result = new HashSet<>();
-            Set<String> pkgsForOneUid = new HashSet<>();
-            for (final String pkg : flattened) {
-                if (pkg == null) {
-                    result.add(pkgsForOneUid);
-                    pkgsForOneUid = new HashSet<>();
-                } else {
-                    pkgsForOneUid.add(pkg);
-                }
-            }
-            if (!pkgsForOneUid.isEmpty()) {
-                result.add(pkgsForOneUid);
-            }
-            return result;
+            // The result is wrapped into intermediate parcelable representation.
+            return mService.getKeyPairGrants(mContext.getPackageName(), alias).getPackagesByUid();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
