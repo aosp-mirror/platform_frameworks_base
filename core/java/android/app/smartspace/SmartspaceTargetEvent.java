@@ -41,11 +41,11 @@ public final class SmartspaceTargetEvent implements Parcelable {
     /**
      * Smartspace target was brought into view.
      */
-    public static final int EVENT_TARGET_IN_VIEW = 2;
+    public static final int EVENT_TARGET_SHOWN = 2;
     /**
      * Smartspace target went out of view.
      */
-    public static final int EVENT_TARGET_OUT_OF_VIEW = 3;
+    public static final int EVENT_TARGET_HIDDEN = 3;
     /**
      * A dismiss action was issued by the user.
      */
@@ -57,11 +57,11 @@ public final class SmartspaceTargetEvent implements Parcelable {
     /**
      * The Ui surface came into view.
      */
-    public static final int EVENT_UI_SURFACE_IN_VIEW = 6;
+    public static final int EVENT_UI_SURFACE_SHOWN = 6;
     /**
      * The Ui surface went out of view.
      */
-    public static final int EVENT_UI_SURFACE_OUT_OF_VIEW = 7;
+    public static final int EVENT_UI_SURFACE_HIDDEN = 7;
 
     /**
      * @see Parcelable.Creator
@@ -152,12 +152,12 @@ public final class SmartspaceTargetEvent implements Parcelable {
      */
     @IntDef(prefix = {"EVENT_"}, value = {
             EVENT_TARGET_INTERACTION,
-            EVENT_TARGET_IN_VIEW,
-            EVENT_TARGET_OUT_OF_VIEW,
+            EVENT_TARGET_SHOWN,
+            EVENT_TARGET_HIDDEN,
             EVENT_TARGET_DISMISS,
             EVENT_TARGET_BLOCK,
-            EVENT_UI_SURFACE_IN_VIEW,
-            EVENT_UI_SURFACE_OUT_OF_VIEW
+            EVENT_UI_SURFACE_SHOWN,
+            EVENT_UI_SURFACE_HIDDEN
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {
