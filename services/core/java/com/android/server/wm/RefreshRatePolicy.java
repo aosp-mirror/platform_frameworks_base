@@ -20,6 +20,7 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
 import android.util.ArraySet;
+import android.view.Display;
 import android.view.Display.Mode;
 import android.view.DisplayInfo;
 
@@ -137,6 +138,19 @@ class RefreshRatePolicy {
         if (mHighRefreshRateDenylist.isDenylisted(packageName)) {
             return mLowRefreshRateMode.getRefreshRate();
         }
+
+        final int preferredModeId = getPreferredModeId(w);
+        if (preferredModeId > 0) {
+            DisplayInfo info = w.getDisplayInfo();
+            if (info != null) {
+                for (Display.Mode mode : info.supportedModes) {
+                    if (preferredModeId == mode.getModeId()) {
+                        return mode.getRefreshRate();
+                    }
+                }
+            }
+        }
+
         return 0;
     }
 
@@ -147,7 +161,7 @@ class RefreshRatePolicy {
             return 0;
         }
 
-        // If the app set a preferredDisplayModeId, we ignore the max preferred refresh rate
+        // If app requests a certain refresh rate or mode, don't override it.
         if (w.mAttrs.preferredDisplayModeId != 0) {
             return 0;
         }
