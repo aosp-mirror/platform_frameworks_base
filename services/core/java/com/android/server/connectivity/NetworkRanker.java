@@ -24,6 +24,7 @@ import static android.net.NetworkScore.POLICY_EXITING;
 import static android.net.NetworkScore.POLICY_TRANSPORT_PRIMARY;
 import static android.net.NetworkScore.POLICY_YIELD_TO_BAD_WIFI;
 
+import static com.android.net.module.util.CollectionUtils.filter;
 import static com.android.server.connectivity.FullScore.POLICY_ACCEPT_UNVALIDATED;
 import static com.android.server.connectivity.FullScore.POLICY_EVER_USER_SELECTED;
 import static com.android.server.connectivity.FullScore.POLICY_EVER_VALIDATED_NOT_AVOIDED_WHEN_BAD;
@@ -65,18 +66,6 @@ public class NetworkRanker {
     private static final boolean USE_POLICY_RANKING = false;
 
     public NetworkRanker() { }
-
-    // TODO : move to module utils CollectionUtils.
-    @NonNull private static <T> ArrayList<T> filter(@NonNull final Collection<T> source,
-            @NonNull final Predicate<T> test) {
-        final ArrayList<T> matches = new ArrayList<>();
-        for (final T e : source) {
-            if (test.test(e)) {
-                matches.add(e);
-            }
-        }
-        return matches;
-    }
 
     /**
      * Find the best network satisfying this request among the list of passed networks.
