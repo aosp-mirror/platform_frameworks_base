@@ -121,6 +121,7 @@ public class WirelessChargingAnimation {
             params.setFitInsetsTypes(0 /* ignore all system bar insets */);
             params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+            params.setTrustedOverlay();
 
             if (looper == null) {
                 // Use Looper.myLooper() if looper is not specified.
