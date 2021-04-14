@@ -187,9 +187,8 @@ public interface AppSearchSessionShim extends Closeable {
      * <p>Removed documents will no longer be surfaced by {@link #search} or {@link #getByUri}
      * calls.
      *
-     * <p><b>NOTE:</b>By default, documents are removed via a soft delete operation. Once the
-     * document crosses the count threshold or byte usage threshold, the documents will be removed
-     * from disk.
+     * <p>Once the database crosses the document count or byte usage threshold, removed documents
+     * will be deleted from disk.
      *
      * @param request {@link RemoveByUriRequest} with URIs and namespace to remove from the index.
      * @return a {@link ListenableFuture} which resolves to an {@link AppSearchBatchResult}. The
