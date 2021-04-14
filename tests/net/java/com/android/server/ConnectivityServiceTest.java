@@ -4262,7 +4262,7 @@ public class ConnectivityServiceTest {
         final TestNetworkCallback cellBgCallback = new TestNetworkCallback();
         mCm.requestBackgroundNetwork(new NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_CELLULAR).build(),
-                mCsHandlerThread.getThreadHandler(), cellBgCallback);
+                cellBgCallback, mCsHandlerThread.getThreadHandler());
 
         // Make callbacks for monitoring.
         final NetworkRequest request = new NetworkRequest.Builder().build();

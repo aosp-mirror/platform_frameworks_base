@@ -118,18 +118,18 @@ public class UnderlyingNetworkTracker {
         if (!mIsQuitting) {
             mRouteSelectionCallback = new RouteSelectionCallback();
             mConnectivityManager.requestBackgroundNetwork(
-                    getRouteSelectionRequest(), mHandler, mRouteSelectionCallback);
+                    getRouteSelectionRequest(), mRouteSelectionCallback, mHandler);
 
             mWifiBringupCallback = new NetworkBringupCallback();
             mConnectivityManager.requestBackgroundNetwork(
-                    getWifiNetworkRequest(), mHandler, mWifiBringupCallback);
+                    getWifiNetworkRequest(), mWifiBringupCallback, mHandler);
 
             for (final int subId : mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup)) {
                 final NetworkBringupCallback cb = new NetworkBringupCallback();
                 mCellBringupCallbacks.add(cb);
 
                 mConnectivityManager.requestBackgroundNetwork(
-                        getCellNetworkRequestForSubId(subId), mHandler, cb);
+                        getCellNetworkRequestForSubId(subId), cb, mHandler);
             }
         } else {
             mRouteSelectionCallback = null;
