@@ -5257,6 +5257,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         long[] pattern;
         switch (effectId) {
             case HapticFeedbackConstants.CONTEXT_CLICK:
+            case HapticFeedbackConstants.GESTURE_END:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
             case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
                 if (!mHapticTextHandleEnabled) {
@@ -5269,7 +5270,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
             case HapticFeedbackConstants.ENTRY_BUMP:
             case HapticFeedbackConstants.DRAG_CROSSING:
-            case HapticFeedbackConstants.GESTURE_END:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK, false);
             case HapticFeedbackConstants.KEYBOARD_TAP: // == KEYBOARD_PRESS
             case HapticFeedbackConstants.VIRTUAL_KEY:
