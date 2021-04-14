@@ -803,8 +803,8 @@
     <!-- The padding of the conversation header when expanded. This is calculated from the expand button size + notification_content_margin_end -->
     <dimen name="conversation_header_expanded_padding_end">38dp</dimen>
 
-    <!-- margin at the end of messaging group icons when not conversations -->
-    <dimen name="messaging_layout_margin_end">12dp</dimen>
+    <!-- extra padding at the start of the icons when not conversations to keep them horizontally aligned with the notification icon -->
+    <dimen name="messaging_layout_icon_padding_start">4dp</dimen>
 
     <!-- Padding between text and sender when singleline -->
     <dimen name="messaging_group_singleline_sender_padding_end">4dp</dimen>
