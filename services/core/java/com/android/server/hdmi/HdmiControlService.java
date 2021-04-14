@@ -422,6 +422,9 @@ public class HdmiControlService extends SystemService {
     // Set to true if the logical address allocation is completed.
     private boolean mAddressAllocated = false;
 
+    // Whether a CEC-enabled sink is connected to the playback device
+    private boolean mIsCecAvailable = false;
+
     // Object that handles logging statsd atoms.
     // Use getAtomWriter() instead of accessing directly, to allow dependency injection for testing.
     private HdmiCecAtomWriter mAtomWriter = new HdmiCecAtomWriter();
@@ -2229,6 +2232,7 @@ public class HdmiControlService extends SystemService {
 
             pw.println("mProhibitMode: " + mProhibitMode);
             pw.println("mPowerStatus: " + mPowerStatusController.getPowerStatus());
+            pw.println("mIsCecAvailable: " + mIsCecAvailable);
             pw.println("mCecVersion: " + mCecVersion);
 
             // System settings
@@ -2450,7 +2454,7 @@ public class HdmiControlService extends SystemService {
         if (hdmiCecEnabled != HdmiControlManager.HDMI_CEC_CONTROL_ENABLED) {
             return false;
         }
-        return true;
+        return mIsCecAvailable;
     }
 
     @ServiceThreadOnly
@@ -2835,24 +2839,24 @@ public class HdmiControlService extends SystemService {
     private void invokeHdmiControlStatusChangeListenerLocked(
             Collection<IHdmiControlStatusChangeListener> listeners,
             @HdmiControlManager.HdmiCecControl int isEnabled) {
-        if (listeners.isEmpty()) {
-            return;
-        }
         if (isEnabled == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED) {
             queryDisplayStatus(new IHdmiControlCallback.Stub() {
                 public void onComplete(int status) {
-                    boolean isAvailable = true;
                     if (status == HdmiControlManager.POWER_STATUS_UNKNOWN
                             || status == HdmiControlManager.RESULT_EXCEPTION
                             || status == HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE) {
-                        isAvailable = false;
+                        mIsCecAvailable = false;
+                    } else {
+                        mIsCecAvailable = true;
                     }
-                    invokeHdmiControlStatusChangeListenerLocked(listeners, isEnabled, isAvailable);
                 }
             });
-            return;
+        } else {
+            mIsCecAvailable = false;
         }
-        invokeHdmiControlStatusChangeListenerLocked(listeners, isEnabled, false);
+        if (!listeners.isEmpty()) {
+            invokeHdmiControlStatusChangeListenerLocked(listeners, isEnabled, mIsCecAvailable);
+        }
     }
 
     private void invokeHdmiControlStatusChangeListenerLocked(
