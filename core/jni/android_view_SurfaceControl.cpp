@@ -1072,7 +1072,7 @@ static jobject convertDisplayModeToJavaObject(JNIEnv* env, const ui::DisplayMode
     return object;
 }
 
-jobject convertDeviceProductInfoToJavaObject(JNIEnv* env, const HdrCapabilities& capabilities) {
+jobject convertHdrCapabilitiesToJavaObject(JNIEnv* env, const HdrCapabilities& capabilities) {
     const auto& types = capabilities.getSupportedHdrTypes();
     std::vector<int32_t> intTypes;
     for (auto type : types) {
@@ -1129,7 +1129,7 @@ static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jobject to
                      static_cast<jint>(info.activeColorMode));
 
     env->SetObjectField(object, gDynamicDisplayInfoClassInfo.hdrCapabilities,
-                        convertDeviceProductInfoToJavaObject(env, info.hdrCapabilities));
+                        convertHdrCapabilitiesToJavaObject(env, info.hdrCapabilities));
 
     env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.autoLowLatencyModeSupported,
                          info.autoLowLatencyModeSupported);
@@ -1441,14 +1441,6 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
     }
 
     return JNI_TRUE;
-}
-
-static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject, jlong barrierObject, jlong frameNumber) {
-    sp<SurfaceControl> ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
-    sp<SurfaceControl> barrier = reinterpret_cast<SurfaceControl*>(barrierObject);
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->deferTransactionUntil_legacy(ctrl, barrier, frameNumber);
 }
 
 static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1856,8 +1848,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayPowerMode },
     {"nativeGetProtectedContentSupport", "()Z",
             (void*)nativeGetProtectedContentSupport },
-    {"nativeDeferTransactionUntil", "(JJJJ)V",
-            (void*)nativeDeferTransactionUntil },
     {"nativeReparent", "(JJJ)V",
             (void*)nativeReparent },
     {"nativeCaptureDisplay",

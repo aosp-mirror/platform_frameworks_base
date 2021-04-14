@@ -91,7 +91,7 @@ public class AppTimeLimitControllerTests {
 
     private HandlerThread mThread;
 
-    private long mUptimeMillis;
+    private long mElapsedTime;
 
     AppTimeLimitController.TimeLimitCallbackListener mListener =
             new AppTimeLimitController.TimeLimitCallbackListener() {
@@ -116,8 +116,8 @@ public class AppTimeLimitControllerTests {
         }
 
         @Override
-        protected long getUptimeMillis() {
-            return mUptimeMillis;
+        protected long getElapsedRealtime() {
+            return mElapsedTime;
         }
 
         @Override
@@ -1108,6 +1108,6 @@ public class AppTimeLimitControllerTests {
     }
 
     private void setTime(long time) {
-        mUptimeMillis = time;
+        mElapsedTime = time;
     }
 }

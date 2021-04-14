@@ -133,7 +133,7 @@ public class NetworkOffer implements NetworkRanker.Scoreable {
      * @param previousOffer the previous offer
      */
     public void migrateFrom(@NonNull final NetworkOffer previousOffer) {
-        if (!callback.equals(previousOffer.callback)) {
+        if (!callback.asBinder().equals(previousOffer.callback.asBinder())) {
             throw new IllegalArgumentException("Can only migrate from a previous version of"
                     + " the same offer");
         }

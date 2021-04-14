@@ -92,8 +92,14 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ಇನ್ನಷ್ಟು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ವಜಾಗೊಳಿಸಿ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ಸ್ಕ್ರೀನ್‍ಶಾಟ್‍ನ ಪೂರ್ವವೀಕ್ಷಣೆ"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ಮೇಲಿನ ಗಡಿರೇಖೆ"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"ಕೆಳಗಿನ ಗಡಿರೇಖೆ"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡರ್"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಅಧಿಸೂಚನೆ"</string>
@@ -349,8 +355,14 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ಸ್ಥಳ"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ಸ್ಥಳ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"ಕ್ಯಾಮರಾವನ್ನು ನಿರ್ಬಂಧಿಸಿ"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"ಮೈಕ್ರೋಫೋನ್ ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
+    <!-- no translation found for quick_settings_camera_label (5612076679385269339) -->
+    <skip />
+    <!-- no translation found for quick_settings_mic_label (8392773746295266375) -->
+    <skip />
+    <!-- no translation found for quick_settings_camera_mic_available (1453719768420394314) -->
+    <skip />
+    <!-- no translation found for quick_settings_camera_mic_blocked (4710884905006788281) -->
+    <skip />
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ಮಾಧ್ಯಮ ಸಾಧನ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ತುರ್ತು ಕರೆಗಳು ಮಾತ್ರ"</string>
@@ -422,8 +434,18 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡ್"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ನಿಲ್ಲಿಸಿ"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"ಮುಂದುವರಿಯಲು, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ಗೆ ನಿಮ್ಮ ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್‌ನ ಪ್ರವೇಶದ ಅಗತ್ಯವಿದೆ."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"ಮುಂದುವರಿಯಲು, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ಗೆ ನಿಮ್ಮ ಸಾಧನದ ಕ್ಯಾಮರಾದ ಪ್ರವೇಶದ ಅಗತ್ಯವಿದೆ."</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_title (563796653825944944) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_title (8807639852654305227) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_dialog_title (4316471859905020023) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (1624701280680913717) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (4704948062372435963) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_mic_camera_dialog_content (3577642558418404919) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ಸಾಧನ"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಿಸಲು ತ್ವರಿತವಾಗಿ ಬಲಕ್ಕೆ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
@@ -657,18 +679,14 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ಇಥರ್ನೆಟ್"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ಅಲಾರಮ್"</string>
     <string name="wallet_title" msgid="5369767670735827105">"ವಾಲೆಟ್"</string>
-    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
     <skip />
-    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
     <skip />
-    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
-    <skip />
-    <!-- no translation found for wallet_error_generic (257704570182963611) -->
-    <skip />
+    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"ಸಿದ್ಧವಾಗಿದೆ"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ಪಾವತಿಯನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"ನಿಮ್ಮ ಕಾರ್ಡ್‌ಗಳನ್ನು ಪಡೆಯುವಾಗ ಸಮಸ್ಯೆ ಉಂಟಾಗಿದೆ, ನಂತರ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್"</string>
     <string name="add_tile" msgid="6239678623873086686">"ಟೈಲ್ ಸೇರಿಸಿ"</string>
@@ -737,11 +755,9 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ಸ್ಥಿತಿ:&lt;/b&gt; ಸೈಲೆಂಟ್‌ಗೆ ಕೆಳದರ್ಜೆಗೆ ಇಳಿದಿದೆ"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ಸ್ಥಿತಿ:&lt;/b&gt; ಉನ್ನತ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ಸ್ಥಿತಿ:&lt;/b&gt; ಕಡಿಮೆ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ"</string>
-    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"ಆದ್ಯತಾ ಮೋಡ್ ಆನ್ ಆಗಿದ್ದರೂ ಸಹ, ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಯಾವಾಗಲೂ ತೋರಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <!-- no translation found for notification_priority_title (5256226572739882190) -->
-    <skip />
+    <string name="notification_priority_title" msgid="5256226572739882190">"ಆದ್ಯತೆಯ ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"ಸಂವಾದ ಫೀಚರ್‌ಗಳನ್ನು <xliff:g id="APP_NAME">%1$s</xliff:g> ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ಈ ಗುಂಪಿನ ಅಧಿಸೂಚನೆಗಳನ್ನು ಇಲ್ಲಿ ಕಾನ್ಫಿಗರ್‌ ಮಾಡಲಾಗಿರುವುದಿಲ್ಲ"</string>
@@ -1015,14 +1031,10 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಲು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ಸ್ಟ್ಯಾಂಡ್‌ಬೈ"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"ಸಂವಾದವನ್ನು ಆದ್ಯತೆಯಾಗಿ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
-    <skip />
+    <string name="priority_onboarding_behavior" msgid="636826237468953117">"ಆದ್ಯತೆಯ ಸಂಭಾಷಣೆಗಳು"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"ಈ ಸಂಭಾಷಣೆಗಳನ್ನು ನಿಮ್ಮ ಪಟ್ಟಿಯ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೋರಿಸಲಾಗಿದೆ ಮತ್ತು ಆದ್ಯತಾ ಮೋಡ್ ಆನ್ ಆಗಿರುವಾಗ ಯಾವಾಗಲೂ ನಿಮ್ಮನ್ನು ತಲುಪಬಹುದು"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"ಪ್ರೊಫೈಲ್ ಚಿತ್ರಗಳನ್ನು ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ತೋರಿಸಲಾಗಿದೆ"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"ನಿಮ್ಮ ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ನ ಬಬಲ್ಸ್‌ನಲ್ಲಿ ಈ ಸಂಭಾಷಣೆಗಳನ್ನು ನೀವು ಸುಲಭವಾಗಿ ಕಾಣಬಹುದು"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ಅಡಚಣೆ ಮಾಡಬೇಡ ಅನ್ನು ಅಡ್ಡಿಪಡಿಸಿ"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ಅರ್ಥವಾಯಿತು"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
@@ -1040,18 +1052,12 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ಸ್ವಿಚ್"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ಪ್ರವೇಶಿಸುವಿಕೆ ಬಟನ್ ಅಕ್ಸೆಸಿಬಿಲಿಟಿ ಗೆಸ್ಚರ್ ಅನ್ನು ಬದಲಾಯಿಸಿದೆ\n\n"<annotation id="link">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ಅದನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ಮರೆಮಾಡಲು ಅಂಚಿಗೆ ಬಟನ್ ಸರಿಸಿ"</string>
-    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
-    <skip />
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ಎಡ ಮೇಲ್ಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ಬಲ ಮೇಲ್ಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"ಸ್ಕ್ರೀನ್‌ನ ಎಡ ಕೆಳಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ಕೆಳಗಿನ ಬಲಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ಅಂಚಿಗೆ ಸರಿಸಿ ಮತ್ತು ಮರೆಮಾಡಿ"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ಅಂಚನ್ನು ಸರಿಸಿ ಮತ್ತು ತೋರಿಸಿ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ನಿಮ್ಮ ಸಂಪರ್ಕಿತ ಸಾಧನಗಳಿಗೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
@@ -1130,35 +1136,27 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> ಗಿಂತ ಕಡಿಮೆ ಅವಧಿಯ ಹಿಂದೆ"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> ಗಿಂತ ಹೆಚ್ಚಿನ ಅವಧಿಯ ಹಿಂದೆ"</string>
     <string name="birthday_status" msgid="2596961629465396761">"ಜನ್ಮದಿನ"</string>
-    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
-    <skip />
+    <string name="birthday_status_content_description" msgid="7677415209545817153">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರ ಜನ್ಮದಿನ"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"ಶೀಘ್ರದಲ್ಲಿ ಜನ್ಮದಿನವಿದೆ"</string>
-    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
-    <skip />
+    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರ ಜನ್ಮದಿನ ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"ವಾರ್ಷಿಕೋತ್ಸವ"</string>
-    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
-    <skip />
+    <string name="anniversary_status_content_description" msgid="6214503393960662875">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರ ವಾರ್ಷಿಕೋತ್ಸವ"</string>
     <string name="location_status" msgid="1294990572202541812">"ಸ್ಥಳ ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"</string>
-    <!-- no translation found for location_status_content_description (2982386178160071305) -->
-    <skip />
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಸ್ಥಳವನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದಾರೆ"</string>
     <string name="new_story_status" msgid="9012195158584846525">"ಹೊಸ ಸುದ್ದಿ"</string>
-    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
-    <skip />
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಹೊಸ ಸ್ಟೋರಿಯನ್ನು ಹಂಚಿಕೊಂಡಿದ್ದಾರೆ"</string>
     <string name="video_status" msgid="4548544654316843225">"ವೀಕ್ಷಿಸುತ್ತಿರುವವರು"</string>
     <string name="audio_status" msgid="4237055636967709208">"ಆಲಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="game_status" msgid="1340694320630973259">"ಪ್ಲೇ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"ಸ್ನೇಹಿತರು"</string>
     <string name="empty_status" msgid="5938893404951307749">"ಈ ರಾತ್ರಿ ಚಾಟ್ ಮಾಡೋಣ!"</string>
-    <!-- no translation found for status_before_loading (1500477307859631381) -->
-    <skip />
+    <string name="status_before_loading" msgid="1500477307859631381">"ವಿಷಯ ಶೀಘ್ರದಲ್ಲೇ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ"</string>
     <string name="missed_call" msgid="4228016077700161689">"ಮಿಸ್ಡ್ ಕಾಲ್"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ಇತ್ತೀಚಿನ ಸಂದೇಶಗಳು, ಮಿಸ್ಡ್ ಕಾಲ್‌ಗಳು ಮತ್ತು ಸ್ಥಿತಿ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"ಸಂಭಾಷಣೆ"</string>
-    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
-    <skip />
-    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
-    <skip />
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಿದ್ದಾರೆ"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಚಿತ್ರವನ್ನು ಕಳುಹಿಸಿದ್ದಾರೆ"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ನಿಮ್ಮ ಬ್ಯಾಟರಿ ಮೀಟರ್ ಓದುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ಅಲಾರಾಂ ಸೆಟ್ ಆಗಿಲ್ಲ"</string>

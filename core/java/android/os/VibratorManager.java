@@ -136,4 +136,14 @@ public abstract class VibratorManager {
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public abstract void cancel();
+
+    /**
+     * Cancel specific types of ongoing vibrations.
+     *
+     * @param usageFilter The type of vibration to be cancelled, represented as a bitwise
+     *                    combination of {@link VibrationAttributes.Usage} values.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public abstract void cancel(int usageFilter);
 }

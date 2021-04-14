@@ -567,6 +567,37 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testFadeRotationAfterAttachAndBeforeRestore_notRestoreNavImmediately() {
+        setupForShouldAttachNavBarDuringTransition();
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay);
+        final ActivityRecord homeActivity = createHomeActivity();
+        initializeRecentsAnimationController(mController, homeActivity);
+
+        final WindowToken navToken = mDefaultDisplay.getDisplayPolicy().getNavigationBar().mToken;
+        final SurfaceControl.Transaction transaction = navToken.getPendingTransaction();
+
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                mDefaultDisplay.mDisplayId, false);
+        verify(transaction).reparent(navToken.getSurfaceControl(), activity.getSurfaceControl());
+
+        final WindowContainer parent = navToken.getParent();
+        final NavBarFadeAnimationController navBarFadeAnimationController =
+                mDefaultDisplay.getDisplayPolicy().getNavBarFadeAnimationController();
+
+        FadeRotationAnimationController mockController =
+                mock(FadeRotationAnimationController.class);
+        doReturn(mockController).when(mDefaultDisplay).getFadeRotationAnimationController();
+
+        mController.cleanupAnimation(REORDER_MOVE_TO_TOP);
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                mDefaultDisplay.mDisplayId, true);
+        verify(mockController).setOnShowRunnable(any());
+        verify(transaction, times(0)).reparent(navToken.getSurfaceControl(),
+                parent.getSurfaceControl());
+        verify(navBarFadeAnimationController, times(0)).fadeWindowToken(true);
+    }
+
+    @Test
     public void testAttachNavBarInSplitScreenMode() {
         setupForShouldAttachNavBarDuringTransition();
         final ActivityRecord primary = createActivityRecordWithParentTask(mDefaultDisplay,

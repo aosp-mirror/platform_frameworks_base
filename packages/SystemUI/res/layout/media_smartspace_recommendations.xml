@@ -15,6 +15,7 @@
   ~ limitations under the License
   -->
 
+<!-- Layout for media recommendations inside QSPanel carousel -->
 <com.android.systemui.util.animation.TransitionLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/media_recommendations"

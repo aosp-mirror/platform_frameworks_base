@@ -960,6 +960,13 @@
     -->
     <integer name="config_veryLongPressOnPowerBehavior">0</integer>
 
+    <!-- Control the behavior when the user presses the power and volume up buttons together.
+            0 - Nothing
+            1 - Mute toggle
+            2 - Global actions menu
+    -->
+    <integer name="config_keyChordPowerVolumeUp">1</integer>
+
     <!-- Control the behavior when the user long presses the back button.  Non-zero values are only
          valid for watches as part of CDD/CTS.
             0 - Nothing
@@ -1941,7 +1948,7 @@
     <string name="config_systemActivityRecognizer" translatable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
-    <string name="config_overrideComponentUiPackage" translatable="false"></string>
+    <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
 
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
@@ -4759,7 +4766,7 @@
     <bool name="config_cecHdmiCecVersion20_allowed">true</bool>
     <bool name="config_cecHdmiCecVersion20_default">false</bool>
 
-    <bool name="config_cecSendStandbyOnSleep_userConfigurable">true</bool>
+    <bool name="config_cecPowerControlMode_userConfigurable">true</bool>
     <bool name="config_cecPowerControlModeTv_allowed">true</bool>
     <bool name="config_cecPowerControlModeTv_default">true</bool>
     <bool name="config_cecPowerControlModeBroadcast_allowed">true</bool>

@@ -87,8 +87,6 @@ import java.util.List;
 // surface exposed.
 // TODO(b/174041603): Create a builder interface for things like startActivityXXX(...) to reduce
 // interface duplication.
-// TODO(b/174040691): Clean-up/remove all obsolete or unused interfaces like things that should be
-// going through task organizer now.
 interface IActivityTaskManager {
     int startActivity(in IApplicationThread caller, in String callingPackage,
             in String callingFeatureId, in Intent intent, in String resolvedType,
@@ -206,15 +204,6 @@ interface IActivityTaskManager {
     boolean resizeTask(int taskId, in Rect bounds, int resizeMode);
     void moveRootTaskToDisplay(int taskId, int displayId);
 
-    /**
-     * Sets the windowing mode for a specific task. Only works on tasks of type
-     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}
-     * @param taskId The id of the task to set the windowing mode for.
-     * @param windowingMode The windowing mode to set for the task.
-     * @param toTop If the task should be moved to the top once the windowing mode changes.
-     * @return Whether the task was successfully put into the specified windowing mode.
-     */
-    boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop);
     void moveTaskToRootTask(int taskId, int rootTaskId, boolean toTop);
 
     /**
@@ -257,29 +246,6 @@ interface IActivityTaskManager {
     void keyguardGoingAway(int flags);
 
     void suppressResizeConfigChanges(boolean suppress);
-
-    /**
-     * Resizes the docked stack, and all other stacks as the result of the dock stack bounds change.
-     *
-     * @param dockedBounds The bounds for the docked stack.
-     * @param tempDockedTaskBounds The temporary bounds for the tasks in the docked stack, which
-     *                             might be different from the stack bounds to allow more
-     *                             flexibility while resizing, or {@code null} if they should be the
-     *                             same as the stack bounds.
-     * @param tempDockedTaskInsetBounds The temporary bounds for the tasks to calculate the insets.
-     *                                  When resizing, we usually "freeze" the layout of a task. To
-     *                                  achieve that, we also need to "freeze" the insets, which
-     *                                  gets achieved by changing task bounds but not bounds used
-     *                                  to calculate the insets in this transient state
-     * @param tempOtherTaskBounds The temporary bounds for the tasks in all other stacks, or
-     *                            {@code null} if they should be the same as the stack bounds.
-     * @param tempOtherTaskInsetBounds Like {@code tempDockedTaskInsetBounds}, but for the other
-     *                                 stacks.
-     * @throws RemoteException
-     */
-    void resizePrimarySplitScreen(in Rect dockedBounds, in Rect tempDockedTaskBounds,
-            in Rect tempDockedTaskInsetBounds,
-            in Rect tempOtherTaskBounds, in Rect tempOtherTaskInsetBounds);
 
     /** Returns an interface enabling the management of window organizers. */
     IWindowOrganizerController getWindowOrganizerController();
