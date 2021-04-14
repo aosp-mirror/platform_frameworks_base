@@ -58,6 +58,7 @@ class WiredChargingRippleController @Inject constructor(
         title = "Wired Charging Animation"
         flags = (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        setTrustedOverlay()
     }
 
     @VisibleForTesting
