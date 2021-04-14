@@ -117,12 +117,18 @@ public class EdgeEffect {
     /**
      * The natural frequency of the stretch spring.
      */
-    private static final double NATURAL_FREQUENCY = 17.55;
+    private static final double NATURAL_FREQUENCY = 24.657;
 
     /**
      * The damping ratio of the stretch spring.
      */
-    private static final double DAMPING_RATIO = 0.92;
+    private static final double DAMPING_RATIO = 0.98;
+
+    /**
+     * The variation of the velocity for the stretch effect when it meets the bound.
+     * if value is > 1, it will accentuate the absorption of the movement.
+     */
+    private static final float ON_ABSORB_VELOCITY_ADJUSTMENT = 13f;
 
     /** @hide */
     @IntDef({TYPE_GLOW, TYPE_STRETCH})
@@ -460,7 +466,7 @@ public class EdgeEffect {
     public void onAbsorb(int velocity) {
         if (mEdgeEffectType == TYPE_STRETCH) {
             mState = STATE_RECEDE;
-            mVelocity = velocity;
+            mVelocity = velocity * ON_ABSORB_VELOCITY_ADJUSTMENT;
             mDistance = 0;
             mStartTime = AnimationUtils.currentAnimationTimeMillis();
         } else {
