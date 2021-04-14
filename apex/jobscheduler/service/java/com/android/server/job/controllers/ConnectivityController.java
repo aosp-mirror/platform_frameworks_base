@@ -83,6 +83,7 @@ public final class ConnectivityController extends RestrictingController implemen
      * instance.
      */
     private static final long MIN_STATS_UPDATE_INTERVAL_MS = 30_000L;
+    private static final long MIN_ADJUST_CALLBACK_INTERVAL_MS = 1_000L;
 
     private static final int UNBYPASSABLE_BG_BLOCKED_REASONS =
             ~ConnectivityManager.BLOCKED_REASON_NONE;
@@ -210,6 +211,7 @@ public final class ConnectivityController extends RestrictingController implemen
      * is only done in {@link #maybeAdjustRegisteredCallbacksLocked()} and may sometimes be stale.
      */
     private final List<UidStats> mSortedStats = new ArrayList<>();
+    private long mLastCallbackAdjustmentTimeElapsed;
 
     private static final int MSG_ADJUST_CALLBACKS = 0;
 
@@ -693,7 +695,11 @@ public final class ConnectivityController extends RestrictingController implemen
     }
 
     private void postAdjustCallbacks() {
-        mHandler.obtainMessage(MSG_ADJUST_CALLBACKS).sendToTarget();
+        postAdjustCallbacks(0);
+    }
+
+    private void postAdjustCallbacks(long delayMs) {
+        mHandler.sendEmptyMessageDelayed(MSG_ADJUST_CALLBACKS, delayMs);
     }
 
     @GuardedBy("mLock")
@@ -708,6 +714,12 @@ public final class ConnectivityController extends RestrictingController implemen
         }
 
         final long nowElapsed = sElapsedRealtimeClock.millis();
+        if (nowElapsed - mLastCallbackAdjustmentTimeElapsed < MIN_ADJUST_CALLBACK_INTERVAL_MS) {
+            postAdjustCallbacks(MIN_ADJUST_CALLBACK_INTERVAL_MS);
+            return;
+        }
+
+        mLastCallbackAdjustmentTimeElapsed = nowElapsed;
         mSortedStats.clear();
 
         for (int u = 0; u < mUidStats.size(); ++u) {
@@ -926,7 +938,10 @@ public final class ConnectivityController extends RestrictingController implemen
         UidDefaultNetworkCallback defaultNetworkCallback =
                 mCurrentDefaultNetworkCallbacks.get(jobs.valueAt(0).getSourceUid());
         if (defaultNetworkCallback == null) {
-            maybeRegisterDefaultNetworkCallbackLocked(jobs.valueAt(0));
+            // This method is only called via a network callback object. That means something
+            // changed about a general network characteristic (since we wouldn't be in this
+            // situation if called from a UID_specific callback). The general network callback
+            // will handle adjusting the per-UID callbacks, so nothing left to do here.
             return false;
         }
 
@@ -1106,8 +1121,13 @@ public final class ConnectivityController extends RestrictingController implemen
             synchronized (mLock) {
                 if (Objects.equals(mDefaultNetwork, network)) {
                     mDefaultNetwork = null;
+                    updateTrackedJobsLocked(mUid, network);
+                    // Add a delay in case onAvailable()+onBlockedStatusChanged is called for a
+                    // new network. If this onLost was called because the network is completely
+                    // gone, the delay will hel make sure we don't have a short burst of adjusting
+                    // callback calls.
+                    postAdjustCallbacks(1000);
                 }
-                updateTrackedJobsLocked(mUid, network);
             }
         }
 
