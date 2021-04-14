@@ -8968,7 +8968,7 @@ package android.printservice.recommendation {
 package android.provider {
 
   public class CallLog {
-    method @RequiresPermission(allOf={android.Manifest.permission.WRITE_CALL_LOG, android.Manifest.permission.INTERACT_ACROSS_USERS}) public static void storeCallComposerPictureAsUser(@NonNull android.content.Context, @Nullable android.os.UserHandle, @NonNull java.io.InputStream, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.net.Uri,android.provider.CallLog.CallComposerLoggingException>);
+    method @RequiresPermission(allOf={android.Manifest.permission.WRITE_CALL_LOG, android.Manifest.permission.INTERACT_ACROSS_USERS}) public static void storeCallComposerPicture(@NonNull android.content.Context, @NonNull java.io.InputStream, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.net.Uri,android.provider.CallLog.CallComposerLoggingException>);
   }
 
   public static class CallLog.CallComposerLoggingException extends java.lang.Throwable {
