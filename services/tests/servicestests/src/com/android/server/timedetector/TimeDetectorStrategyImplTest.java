@@ -37,6 +37,7 @@ import android.os.TimestampedValue;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.timedetector.TimeDetectorStrategy.Origin;
+import com.android.server.timezonedetector.ConfigurationChangeListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +47,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Objects;
 
 @RunWith(AndroidJUnit4.class)
 public class TimeDetectorStrategyImplTest {
@@ -1133,9 +1135,15 @@ public class TimeDetectorStrategyImplTest {
         private long mSystemClockMillis;
         private int mSystemClockUpdateThresholdMillis = 2000;
         private int[] mAutoOriginPriorities = PROVIDERS_PRIORITY;
+        private ConfigurationChangeListener mConfigChangeListener;
 
         // Tracking operations.
         private boolean mSystemClockWasSet;
+
+        @Override
+        public void setConfigChangeListener(ConfigurationChangeListener listener) {
+            mConfigChangeListener = Objects.requireNonNull(listener);
+        }
 
         @Override
         public int systemClockUpdateThresholdMillis() {
@@ -1230,6 +1238,7 @@ public class TimeDetectorStrategyImplTest {
 
         void simulateAutoTimeZoneDetectionToggle() {
             mAutoTimeDetectionEnabled = !mAutoTimeDetectionEnabled;
+            mConfigChangeListener.onChange();
         }
 
         void verifySystemClockNotSet() {
@@ -1330,7 +1339,6 @@ public class TimeDetectorStrategyImplTest {
 
         Script simulateAutoTimeDetectionToggle() {
             mFakeEnvironment.simulateAutoTimeZoneDetectionToggle();
-            mTimeDetectorStrategy.handleAutoTimeConfigChanged();
             return this;
         }
 
