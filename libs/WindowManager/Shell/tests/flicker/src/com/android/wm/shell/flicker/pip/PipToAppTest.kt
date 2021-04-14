@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -59,7 +58,7 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
             }
         }
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun appReplacesPipWindow() {
         testSpec.assertWm {
@@ -69,7 +68,7 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
         }
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun appReplacesPipLayer() {
         testSpec.assertLayers {

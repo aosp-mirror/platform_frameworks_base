@@ -18,10 +18,11 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.helpers.IAppHelper
 import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.LAUNCHER_TITLE
 
 fun FlickerTestParameter.appWindowReplacesLauncherAsTopWindow(testApp: IAppHelper) {
     assertWm {
-        this.showsAppWindowOnTop("Launcher")
+        this.showsAppWindowOnTop(*LAUNCHER_TITLE)
             .then()
             .showsAppWindowOnTop("Snapshot", testApp.getPackage())
     }

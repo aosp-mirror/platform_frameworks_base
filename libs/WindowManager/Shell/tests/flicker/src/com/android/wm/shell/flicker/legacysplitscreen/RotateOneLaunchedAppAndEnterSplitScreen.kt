@@ -92,7 +92,7 @@ class RotateOneLaunchedAppAndEnterSplitScreen(
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun appWindowBecomesVisible() =
         testSpec.appWindowBecomesVisible(splitScreenApp.defaultWindowName)
