@@ -25,6 +25,7 @@ package {
 
 android_test {
     name: "FrameworksNetIntegrationTests",
+    defaults: ["framework-connectivity-test-defaults"],
     platform_apis: true,
     certificate: "platform",
     srcs: [
