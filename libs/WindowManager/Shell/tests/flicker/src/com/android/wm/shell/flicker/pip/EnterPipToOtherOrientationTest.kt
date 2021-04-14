@@ -88,6 +88,12 @@ class EnterPipToOtherOrientationTest(
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
+    @FlakyTest
+    @Test
+    override fun noUncoveredRegions() {
+        super.noUncoveredRegions()
+    }
+
     @Presubmit
     @Test
     fun pipAppWindowIsAlwaysOnTop() {
