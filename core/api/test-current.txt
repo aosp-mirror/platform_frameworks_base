@@ -263,10 +263,12 @@ package android.app {
 
   public class BroadcastOptions {
     ctor public BroadcastOptions(@NonNull android.os.Bundle);
+    method public int getMaxManifestReceiverApiLevel();
     method public long getTemporaryAppAllowlistDuration();
     method @Nullable public String getTemporaryAppAllowlistReason();
     method public int getTemporaryAppAllowlistReasonCode();
     method public int getTemporaryAppAllowlistType();
+    method public void setMaxManifestReceiverApiLevel(int);
   }
 
   public class DownloadManager {
