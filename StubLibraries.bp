@@ -458,17 +458,6 @@ java_library_static {
     dist: {
         dir: "apistubs/android/test",
     },
-    dists: [
-        {
-            // Legacy dist path
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
-            tag: ".jar",
-            dest: "android_test.jar",
-        },
-    ],
 }
 
 java_library_static {
