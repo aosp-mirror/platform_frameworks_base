@@ -1388,6 +1388,12 @@ public class Notification implements Parcelable
     public static final String EXTRA_CALL_TYPE = "android.callType";
 
     /**
+     * {@link #extras} key: whether the  {@link android.app.Notification.CallStyle} notification
+     * is for a call that will activate video when answered. This extra is a boolean.
+     */
+    public static final String EXTRA_CALL_IS_VIDEO = "android.callIsVideo";
+
+    /**
      * {@link #extras} key: the person to be displayed as calling for the
      * {@link android.app.Notification.CallStyle} notification. This extra is a {@link Person}.
      */
@@ -9146,6 +9152,7 @@ public class Notification implements Parcelable
         private PendingIntent mAnswerIntent;
         private PendingIntent mDeclineIntent;
         private PendingIntent mHangUpIntent;
+        private boolean mIsVideo;
         private Integer mAnswerButtonColor;
         private Integer mDeclineButtonColor;
         private Icon mVerificationIcon;
@@ -9235,6 +9242,16 @@ public class Notification implements Parcelable
             mAnswerIntent = answerIntent;
             mDeclineIntent = declineIntent;
             mHangUpIntent = hangUpIntent;
+        }
+
+        /**
+         * Sets whether the call is a video call, which may affect the icons or text used on the
+         * required action buttons.
+         */
+        @NonNull
+        public CallStyle setIsVideo(boolean isVideo) {
+            mIsVideo = isVideo;
+            return this;
         }
 
         /**
@@ -9365,8 +9382,10 @@ public class Notification implements Parcelable
 
         @Nullable
         private Action makeAnswerAction() {
-            return mAnswerIntent == null ? null : makeAction(R.drawable.ic_call_answer,
-                    R.string.call_notification_answer_action,
+            return mAnswerIntent == null ? null : makeAction(
+                    mIsVideo ? R.drawable.ic_call_answer_video : R.drawable.ic_call_answer,
+                    mIsVideo ? R.string.call_notification_answer_video_action
+                            : R.string.call_notification_answer_action,
                     mAnswerButtonColor, R.color.call_notification_answer_color,
                     mAnswerIntent);
         }
@@ -9545,6 +9564,7 @@ public class Notification implements Parcelable
         public void addExtras(Bundle extras) {
             super.addExtras(extras);
             extras.putInt(EXTRA_CALL_TYPE, mCallType);
+            extras.putBoolean(EXTRA_CALL_IS_VIDEO, mIsVideo);
             extras.putParcelable(EXTRA_CALL_PERSON, mPerson);
             if (mVerificationIcon != null) {
                 extras.putParcelable(EXTRA_VERIFICATION_ICON, mVerificationIcon);
@@ -9587,6 +9607,7 @@ public class Notification implements Parcelable
         protected void restoreFromExtras(Bundle extras) {
             super.restoreFromExtras(extras);
             mCallType = extras.getInt(EXTRA_CALL_TYPE);
+            mIsVideo = extras.getBoolean(EXTRA_CALL_IS_VIDEO);
             mPerson = extras.getParcelable(EXTRA_CALL_PERSON);
             mVerificationIcon = extras.getParcelable(EXTRA_VERIFICATION_ICON);
             mVerificationText = extras.getCharSequence(EXTRA_VERIFICATION_TEXT);
