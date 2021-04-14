@@ -2230,9 +2230,7 @@ public final class InputMethodManager {
     public void removeImeSurface(IBinder windowToken) {
         synchronized (mH) {
             try {
-                final Completable.Void value = Completable.createVoid();
-                mService.removeImeSurfaceFromWindow(windowToken, ResultCallbacks.of(value));
-                Completable.getResult(value);
+                mService.removeImeSurfaceFromWindowAsync(windowToken);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
