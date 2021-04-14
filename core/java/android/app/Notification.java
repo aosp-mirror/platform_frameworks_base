@@ -6308,7 +6308,7 @@ public class Notification implements Parcelable
          * Gets the theme's background color
          */
         private @ColorInt int getDefaultBackgroundColor() {
-            return obtainThemeColor(R.attr.colorBackground,
+            return obtainThemeColor(R.attr.colorSurface,
                     mInNightMode ? Color.BLACK : Color.WHITE);
         }
 
