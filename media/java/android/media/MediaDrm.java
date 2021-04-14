@@ -2495,7 +2495,10 @@ public final class MediaDrm implements AutoCloseable {
      * The default security level is defined as the highest security level
      * supported on the device.
      *
-     * @param mime The mime type of the media data
+     * @param mime The mime type of the media data. Please use {@link
+     *             #isCryptoSchemeSupported(UUID, String)} to query mime type support separately;
+     *             for unsupported mime types the return value of {@link
+     *             #requiresSecureDecoder(String)} is crypto scheme dependent.
      */
     public boolean requiresSecureDecoder(@NonNull String mime) {
         return requiresSecureDecoder(mime, getMaxSecurityLevel());
@@ -2505,7 +2508,10 @@ public final class MediaDrm implements AutoCloseable {
      * Query if the crypto scheme requires the use of a secure decoder
      * to decode data of the given mime type at the given security level.
      *
-     * @param mime The mime type of the media data
+     * @param mime The mime type of the media data. Please use {@link
+     *             #isCryptoSchemeSupported(UUID, String, int)} to query mime type support
+     *             separately; for unsupported mime types the return value of {@link
+     *             #requiresSecureDecoder(String, int)} is crypto scheme dependent.
      * @param level a security level between {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO}
      *              and {@link #SECURITY_LEVEL_HW_SECURE_ALL}. Otherwise the special value
      *              {@link #getMaxSecurityLevel()} is also permitted;
