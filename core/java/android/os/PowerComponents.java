@@ -192,6 +192,19 @@ class PowerComponents {
     }
 
     /**
+     * Returns the largest usage duration among all time components.
+     */
+    public long getMaxComponentUsageDurationMillis() {
+        long max = 0;
+        for (int i = mTimeComponentsMs.length - 1; i >= 0; i--) {
+            if (mTimeComponentsMs[i] > max) {
+                max = mTimeComponentsMs[i];
+            }
+        }
+        return max;
+    }
+
+    /**
      * Builder for PowerComponents.
      */
     static final class Builder {
@@ -312,10 +325,10 @@ class PowerComponents {
         }
 
         public void addPowerAndDuration(Builder other) {
-            for (int i = 0; i < mPowerComponentsMah.length; i++) {
+            for (int i = mPowerComponentsMah.length - 1; i >= 0; i--) {
                 mPowerComponentsMah[i] += other.mPowerComponentsMah[i];
             }
-            for (int i = 0; i < mTimeComponentsMs.length; i++) {
+            for (int i = mTimeComponentsMs.length - 1; i >= 0; i--) {
                 mTimeComponentsMs[i] += other.mTimeComponentsMs[i];
             }
         }
