@@ -1183,7 +1183,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean showBootMsgs, final boolean onlyCore, WindowManagerPolicy policy,
             ActivityTaskManagerService atm) {
         return main(context, im, showBootMsgs, onlyCore, policy, atm,
-                SurfaceControl.Transaction::new, Surface::new, SurfaceControl.Builder::new);
+                new DisplayWindowSettingsProvider(), SurfaceControl.Transaction::new, Surface::new,
+                SurfaceControl.Builder::new);
     }
 
     /**
@@ -1193,12 +1194,14 @@ public class WindowManagerService extends IWindowManager.Stub
     @VisibleForTesting
     public static WindowManagerService main(final Context context, final InputManagerService im,
             final boolean showBootMsgs, final boolean onlyCore, WindowManagerPolicy policy,
-            ActivityTaskManagerService atm, Supplier<SurfaceControl.Transaction> transactionFactory,
+            ActivityTaskManagerService atm, DisplayWindowSettingsProvider
+            displayWindowSettingsProvider, Supplier<SurfaceControl.Transaction> transactionFactory,
             Supplier<Surface> surfaceFactory,
             Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory) {
         DisplayThread.getHandler().runWithScissors(() ->
                 sInstance = new WindowManagerService(context, im, showBootMsgs, onlyCore, policy,
-                        atm, transactionFactory, surfaceFactory, surfaceControlFactory), 0);
+                        atm, displayWindowSettingsProvider, transactionFactory, surfaceFactory,
+                        surfaceControlFactory), 0);
         return sInstance;
     }
 
@@ -1220,7 +1223,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowManagerService(Context context, InputManagerService inputManager,
             boolean showBootMsgs, boolean onlyCore, WindowManagerPolicy policy,
-            ActivityTaskManagerService atm, Supplier<SurfaceControl.Transaction> transactionFactory,
+            ActivityTaskManagerService atm, DisplayWindowSettingsProvider
+            displayWindowSettingsProvider, Supplier<SurfaceControl.Transaction> transactionFactory,
             Supplier<Surface> surfaceFactory,
             Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory) {
         installLock(this, INDEX_WINDOW);
@@ -1370,7 +1374,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final String displaySettingsPath = Settings.Global.getString(resolver,
                 DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH);
-        mDisplayWindowSettingsProvider = new DisplayWindowSettingsProvider();
+        mDisplayWindowSettingsProvider = displayWindowSettingsProvider;
         if (displaySettingsPath != null) {
             mDisplayWindowSettingsProvider.setBaseSettingsFilePath(displaySettingsPath);
         }
