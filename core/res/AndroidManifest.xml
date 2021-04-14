@@ -42,8 +42,6 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_REMOVED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_CHANGED" />
-    <protected-broadcast android:name="android.intent.action.PACKAGE_STARTABLE" />
-    <protected-broadcast android:name="android.intent.action.PACKAGE_UNSTARTABLE" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_FULLY_LOADED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_ENABLE_ROLLBACK" />
     <protected-broadcast android:name="android.intent.action.CANCEL_ENABLE_ROLLBACK" />

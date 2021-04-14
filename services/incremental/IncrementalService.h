@@ -189,10 +189,7 @@ public:
     bool registerLoadingProgressListener(StorageId storage,
                                          StorageLoadingProgressListener progressListener);
     bool unregisterLoadingProgressListener(StorageId storage);
-    bool registerStorageHealthListener(StorageId storage,
-                                       const StorageHealthCheckParams& healthCheckParams,
-                                       StorageHealthListener healthListener);
-    void unregisterStorageHealthListener(StorageId storage);
+
     RawMetadata getMetadata(StorageId storage, std::string_view path) const;
     RawMetadata getMetadata(StorageId storage, FileId node) const;
 
@@ -256,7 +253,6 @@ private:
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
-        binder::Status reportStreamHealth(MountId mount, int newStatus) final;
 
         void setCurrentStatus(int newStatus);
 
@@ -319,7 +315,6 @@ private:
             BootClockTsUs kernelTsUs;
         } mHealthBase = {TimePoint::max(), kMaxBootClockTsUs};
         StorageHealthCheckParams mHealthCheckParams;
-        int mStreamStatus = content::pm::IDataLoaderStatusListener::STREAM_HEALTHY;
         std::vector<incfs::ReadInfoWithUid> mLastPendingReads;
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;

@@ -11262,7 +11262,6 @@ package android.content {
     field public static final String EXTRA_TIMEZONE = "time-zone";
     field public static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     field public static final String EXTRA_UID = "android.intent.extra.UID";
-    field public static final String EXTRA_UNSTARTABLE_REASON = "android.intent.extra.UNSTARTABLE_REASON";
     field public static final String EXTRA_USER = "android.intent.extra.USER";
     field public static final String EXTRA_USER_INITIATED = "android.intent.extra.USER_INITIATED";
     field public static final int FILL_IN_ACTION = 1; // 0x1

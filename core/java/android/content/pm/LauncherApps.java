@@ -225,7 +225,6 @@ public class LauncherApps {
          * Indicates that a package was modified in the specified profile.
          * This can happen, for example, when the package is updated or when
          * one or more components are enabled or disabled.
-         * It can also happen if package state has changed, i.e., package becomes unstartable.
          *
          * @param packageName The name of the package that has changed.
          * @param user The UserHandle of the profile that generated the change.

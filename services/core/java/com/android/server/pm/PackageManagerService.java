@@ -287,11 +287,9 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.incremental.IStorageHealthListener;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
 import android.os.incremental.PerUidReadTimeouts;
-import android.os.incremental.StorageHealthCheckParams;
 import android.os.storage.DiskInfo;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageEventListener;
@@ -817,14 +815,6 @@ public class PackageManagerService extends IPackageManager.Stub
             new String[] { android.Manifest.permission.ACCESS_INSTANT_APPS };
 
     private static final String RANDOM_DIR_PREFIX = "~~";
-
-    /**
-     * Timeout configurations for incremental storage health monitor.
-     * See {@link IStorageHealthListener}
-     */
-    private static final int INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS = 2000;
-    private static final int INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS = 7000;
-    private static final int INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS = 60000;
 
     final Handler mHandler;
 
@@ -11721,15 +11711,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (mIncrementalManager != null && isIncrementalPath(parsedPackage.getPath())) {
             if (pkgSetting != null && pkgSetting.isPackageLoading()) {
-                final StorageHealthCheckParams healthCheckParams = new StorageHealthCheckParams();
-                healthCheckParams.blockedTimeoutMs = INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS;
-                healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
-                healthCheckParams.unhealthyMonitoringMs =
-                        INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
-                // Continue monitoring health and loading progress of active incremental packages
-                mIncrementalManager.registerHealthListener(parsedPackage.getPath(),
-                        healthCheckParams,
-                        new IncrementalHealthListener(parsedPackage.getPackageName()));
+                // Continue monitoring loading progress of active incremental packages
                 final IncrementalStatesCallback incrementalStatesCallback =
                         new IncrementalStatesCallback(parsedPackage.getPackageName(),
                                 UserHandle.getUid(UserHandle.USER_ALL, pkgSetting.appId),
@@ -18554,16 +18536,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     ps.setIncrementalStatesCallback(incrementalStatesCallback);
                     mIncrementalManager.registerLoadingProgressCallback(codePath,
                             new IncrementalProgressListener(ps.name));
-                    final IncrementalHealthListener incrementalHealthListener =
-                            new IncrementalHealthListener(ps.name);
-                    final StorageHealthCheckParams healthCheckParams =
-                            new StorageHealthCheckParams();
-                    healthCheckParams.blockedTimeoutMs = INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS;
-                    healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
-                    healthCheckParams.unhealthyMonitoringMs =
-                            INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
-                    mIncrementalManager.registerHealthListener(codePath, healthCheckParams,
-                            incrementalHealthListener);
                 }
 
                 // Ensure that the uninstall reason is UNKNOWN for users with the package installed.
@@ -19555,64 +19527,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         ps, mInstalledUserIds, mSettings.getPackagesLocked());
                 codePath = ps.getPathString();
             }
-            Bundle extras = new Bundle();
-            extras.putInt(Intent.EXTRA_UID, mUid);
-            extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
-            sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_LOADED, mPackageName,
-                    extras, 0 /*flags*/,
-                    null /*targetPackage*/, null /*finishedReceiver*/,
-                    mInstalledUserIds, null /* instantUserIds */, newBroadcastAllowList, null);
             // Unregister progress listener
             mIncrementalManager.unregisterLoadingProgressCallbacks(codePath);
-            // Unregister health listener as it will always be healthy from now
-            mIncrementalManager.unregisterHealthListener(codePath);
             // Make sure the information is preserved
             scheduleWriteSettingsLocked();
-        }
-
-        @Override
-        public void onPackageUnstartable(int reason) {
-            final SparseArray<int[]> newBroadcastAllowList;
-            synchronized (mLock) {
-                final PackageSetting ps = mSettings.getPackageLPr(mPackageName);
-                if (ps == null) {
-                    return;
-                }
-                newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        ps, mInstalledUserIds, mSettings.getPackagesLocked());
-            }
-            Bundle extras = new Bundle();
-            extras.putInt(Intent.EXTRA_UID, mUid);
-            extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
-            extras.putInt(Intent.EXTRA_UNSTARTABLE_REASON, reason);
-            // send broadcast to users with this app installed
-            sendPackageBroadcast(Intent.ACTION_PACKAGE_UNSTARTABLE, mPackageName,
-                    extras, 0 /*flags*/,
-                    null /*targetPackage*/, null /*finishedReceiver*/,
-                    mInstalledUserIds, null /* instantUserIds */,
-                    newBroadcastAllowList, null);
-        }
-
-        @Override
-        public void onPackageStartable() {
-            final SparseArray<int[]> newBroadcastAllowList;
-            synchronized (mLock) {
-                final PackageSetting ps = mSettings.getPackageLPr(mPackageName);
-                if (ps == null) {
-                    return;
-                }
-                newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        ps, mInstalledUserIds, mSettings.getPackagesLocked());
-            }
-            Bundle extras = new Bundle();
-            extras.putInt(Intent.EXTRA_UID, mUid);
-            extras.putString(Intent.EXTRA_PACKAGE_NAME, mPackageName);
-            // send broadcast to users with this app installed
-            sendPackageBroadcast(Intent.ACTION_PACKAGE_STARTABLE, mPackageName,
-                    extras, 0 /*flags*/,
-                    null /*targetPackage*/, null /*finishedReceiver*/,
-                    mInstalledUserIds, null /* instantUserIds */,
-                    newBroadcastAllowList, null);
         }
     }
 
@@ -19635,29 +19553,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 ps.setLoadingProgress(progress);
             }
-        }
-    }
-
-    /**
-     * Incremental storage health status callback, used to listen for monitoring changes and update
-     * package setting.
-     */
-    private class IncrementalHealthListener extends IStorageHealthListener.Stub {
-        private final String mPackageName;
-        IncrementalHealthListener(String packageName) {
-            mPackageName = packageName;
-        }
-
-        @Override
-        public void onHealthStatus(int storageId, int status) throws RemoteException {
-            final PackageSetting ps;
-            synchronized (mLock) {
-                ps = mSettings.getPackageLPr(mPackageName);
-            }
-            if (ps == null) {
-                return;
-            }
-            ps.setStorageHealthStatus(status);
         }
     }
 
@@ -27347,20 +27242,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 return null;
             }
             return ps.getIncrementalStates();
-        }
-
-        @Override
-        public void notifyPackageCrashOrAnr(@NonNull String packageName) {
-            final PackageSetting ps;
-            synchronized (mLock) {
-                ps = mSettings.getPackageLPr(packageName);
-                if (ps == null) {
-                    Slog.w(TAG, "Failed notifyPackageCrash. Package " + packageName
-                            + " is not installed");
-                    return;
-                }
-            }
-            ps.setStatesOnCrashOrAnr();
         }
 
         @Override

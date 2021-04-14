@@ -7678,7 +7678,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Notify package manager service to possibly update package state
         if (r != null && r.info != null && r.info.packageName != null) {
             final String codePath = r.info.getCodePath();
-            mPackageManagerInt.notifyPackageCrashOrAnr(r.info.packageName);
             IncrementalStatesInfo incrementalStatesInfo =
                     mPackageManagerInt.getIncrementalStatesInfo(r.info.packageName, r.uid,
                             r.userId);
@@ -12976,11 +12975,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return ActivityManager.BROADCAST_SUCCESS;
                 case Intent.ACTION_PRE_BOOT_COMPLETED:
                     timeoutExempt = true;
-                    break;
-                case Intent.ACTION_PACKAGE_UNSTARTABLE:
-                    final String packageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
-                    forceStopPackageLocked(packageName, -1, false, true, true,
-                            false, false, userId, "package unstartable");
                     break;
                 case Intent.ACTION_CLOSE_SYSTEM_DIALOGS:
                     if (!mAtmInternal.checkCanCloseSystemDialogs(callingPid, callingUid,

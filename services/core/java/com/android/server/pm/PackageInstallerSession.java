@@ -3835,13 +3835,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     sendPendingStreaming(mContext, statusReceiver, sessionId, e.getMessage());
                 }
             }
-            @Override
-            public void reportStreamHealth(int dataLoaderId, int streamStatus) {
-                // Currently the stream status is not used during package installation. It is
-                // technically possible for the data loader to report stream status via this
-                // callback, but if something is wrong with the streaming, it is more likely that
-                // prepareDataLoaderLocked will return false and the installation will be aborted.
-            }
         };
 
         if (!manualStartAndDestroy) {

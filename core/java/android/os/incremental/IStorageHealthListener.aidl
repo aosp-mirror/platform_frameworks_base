@@ -29,12 +29,6 @@ oneway interface IStorageHealthListener {
     /** There are reads pending for params.unhealthyTimeoutMs,
     *   marking storage as unhealthy due to unknown issues. */
     const int HEALTH_STATUS_UNHEALTHY = 3;
-    /** There are reads pending for params.unhealthyTimeoutMs,
-     *  due to data transportation issues. */
-    const int HEALTH_STATUS_UNHEALTHY_TRANSPORT = 4;
-    /** There are reads pending for params.unhealthyTimeoutMs,
-     *  due to limited storage space. */
-    const int HEALTH_STATUS_UNHEALTHY_STORAGE = 5;
 
     /** Health status callback. */
     void onHealthStatus(in int storageId, in int status);

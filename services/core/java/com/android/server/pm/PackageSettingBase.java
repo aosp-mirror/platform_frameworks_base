@@ -723,13 +723,6 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     /**
-     * @return True if package is startable, false otherwise.
-     */
-    public boolean isPackageStartable() {
-        return getIncrementalStates().isStartable();
-    }
-
-    /**
      * @return True if package is still being loaded, false if the package is fully loaded.
      */
     public boolean isPackageLoading() {
@@ -745,8 +738,8 @@ public abstract class PackageSettingBase extends SettingBase {
 
     /**
      * Called to indicate that the package installation has been committed. This will create a
-     * new startable state and a new loading state with default values. By default, the package is
-     * startable after commit. For a package installed on Incremental, the loading state is true.
+     * new loading state with default values.
+     * For a package installed on Incremental, the loading state is true.
      * For non-Incremental packages, the loading state is false.
      */
     public void setStatesOnCommit() {
@@ -754,15 +747,7 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     /**
-     * Called to indicate that the running app has crashed or ANR'd. This might change the startable
-     * state of the package, depending on whether the package is fully loaded.
-     */
-    public void setStatesOnCrashOrAnr() {
-        incrementalStates.onCrashOrAnr();
-    }
-
-    /**
-     * Called to set the callback to listen for startable state changes.
+     * Called to set the callback to listen for loading state changes.
      */
     public void setIncrementalStatesCallback(IncrementalStates.Callback callback) {
         incrementalStates.setCallback(callback);
@@ -774,13 +759,6 @@ public abstract class PackageSettingBase extends SettingBase {
      */
     public void setLoadingProgress(float progress) {
         incrementalStates.setProgress(progress);
-    }
-
-    /**
-     * @see IncrementalStates#onStorageHealthStatusChanged(int)
-     */
-    public void setStorageHealthStatus(int status) {
-        incrementalStates.onStorageHealthStatusChanged(status);
     }
 
     public long getFirstInstallTime() {

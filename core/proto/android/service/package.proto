@@ -125,7 +125,7 @@ message PackageProto {
     }
 
     message StatesProto {
-        optional bool is_startable = 1;
+        reserved 1;
         optional bool is_loading = 2;
     }
 
@@ -160,7 +160,7 @@ message PackageProto {
     repeated UserInfoProto users = 9;
     // Where the request to install this package came from,
     optional InstallSourceProto install_source = 10;
-    // Whether the package is startable or is still loading
+    // Whether the package is still loading
     optional StatesProto states = 11;
     // Granted runtime permissions for users.
     repeated UserPermissionsProto user_permissions = 12;

@@ -1114,11 +1114,6 @@ public abstract class PackageManagerInternal {
             int filterCallingUid, int userId);
 
     /**
-     * Notifies that a package has crashed or ANR'd.
-     */
-    public abstract void notifyPackageCrashOrAnr(String packageName);
-
-    /**
      * Requesting the checksums for APKs within a package.
      * See {@link PackageManager#requestChecksums} for details.
      *

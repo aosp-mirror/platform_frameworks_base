@@ -335,20 +335,6 @@ binder::Status BinderIncrementalService::unregisterLoadingProgressListener(int32
     return ok();
 }
 
-binder::Status BinderIncrementalService::registerStorageHealthListener(
-        int32_t storageId,
-        const ::android::os::incremental::StorageHealthCheckParams& healthCheckParams,
-        const ::android::sp<IStorageHealthListener>& healthListener, bool* _aidl_return) {
-    *_aidl_return =
-            mImpl.registerStorageHealthListener(storageId, healthCheckParams, healthListener);
-    return ok();
-}
-
-binder::Status BinderIncrementalService::unregisterStorageHealthListener(int32_t storageId) {
-    mImpl.unregisterStorageHealthListener(storageId);
-    return ok();
-}
-
 binder::Status BinderIncrementalService::getMetrics(int32_t storageId,
                                                     android::os::PersistableBundle* _aidl_return) {
     mImpl.getMetrics(storageId, _aidl_return);
