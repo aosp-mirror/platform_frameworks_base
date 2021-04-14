@@ -698,7 +698,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"এই সঞ্চিত অ্যাপ্লিকেশন ডেটা এনক্রিপ্ট করা দরকার৷"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"ক্যামেরাগুলি অক্ষম করে"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"সমস্ত ডিভাইসের ক্যামেরার ব্যবহার আটকায়৷"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"কিছু স্ক্রিন লক বৈশিষ্ট্য বন্ধ করুন"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"কিছু স্ক্রিন লক বৈশিষ্ট্য বন্ধ করে"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"কিছু স্ক্রিন লক বৈশিষ্ট্যের ব্যবহার আটকান।"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"বাড়ি"</item>

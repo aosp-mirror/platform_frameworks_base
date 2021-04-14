@@ -139,7 +139,7 @@
     <string name="voice_assist_label" msgid="3725967093735929020">"ਅਵਾਜ਼ੀ ਸਹਾਇਕ ਖੋਲ੍ਹੋ"</string>
     <string name="camera_label" msgid="8253821920931143699">"ਕੈਮਰਾ ਖੋਲ੍ਹੋ"</string>
     <string name="cancel" msgid="1089011503403416730">"ਰੱਦ ਕਰੋ"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ਪੁਸ਼ਟੀ ਕਰੋ"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ਤਸਦੀਕ ਕਰੋ"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ਪ੍ਰਮਾਣੀਕਰਨ ਰੱਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
@@ -643,8 +643,8 @@
     <string name="output_service_wifi" msgid="9003667810868222134">"ਵਾਈ-ਫਾਈ"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"ਬਲੂਟੁੱਥ ਅਤੇ ਵਾਈ-ਫਾਈ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI ਟਿਊਨਰ"</string>
-    <string name="show_battery_percentage" msgid="6235377891802910455">"ਜੋਡ਼ੀ ਗਈ ਬੈਟਰੀ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
-    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ਜਦੋਂ ਚਾਰਜ ਨਾ ਹੋ ਰਹੀ ਹੋਵੇ ਤਾਂ ਸਥਿਤੀ ਪੱਟੀ ਪ੍ਰਤੀਕ ਦੇ ਅੰਦਰ ਬੈਟਰੀ ਪੱਧਰ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
+    <string name="show_battery_percentage" msgid="6235377891802910455">"ਜੋੜੀ ਗਈ ਬੈਟਰੀ ਫ਼ੀਸਦ ਦਿਖਾਓ"</string>
+    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ਜਦੋਂ ਚਾਰਜ ਨਾ ਹੋ ਰਹੀ ਹੋਵੇ ਤਾਂ ਸਥਿਤੀ ਪੱਟੀ ਪ੍ਰਤੀਕ ਦੇ ਅੰਦਰ ਬੈਟਰੀ ਪੱਧਰ ਫ਼ੀਸਦ ਦਿਖਾਓ"</string>
     <string name="quick_settings" msgid="6211774484997470203">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ"</string>
     <string name="status_bar" msgid="4357390266055077437">"ਸਥਿਤੀ ਪੱਟੀ"</string>
     <string name="overview" msgid="3522318590458536816">"ਰੂਪ-ਰੇਖਾ"</string>
@@ -867,8 +867,8 @@
     <item msgid="6135970080453877218">"ਇਸ ਪ੍ਰਤੀਕ ਨੂੰ ਨਾ ਦਿਖਾਓ"</item>
   </string-array>
   <string-array name="battery_options">
-    <item msgid="7714004721411852551">"ਹਮੇਸ਼ਾਂ ਪ੍ਰਤੀਸ਼ਤਤਾ  ਦਿਖਾਓ"</item>
-    <item msgid="3805744470661798712">"ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਪ੍ਰਤੀਸ਼ਤਤਾ ਦਿਖਾਓ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="7714004721411852551">"ਹਮੇਸ਼ਾਂ ਫ਼ੀਸਦ  ਦਿਖਾਓ"</item>
+    <item msgid="3805744470661798712">"ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਫ਼ੀਸਦ ਦਿਖਾਓ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
     <item msgid="8619482474544321778">"ਇਸ ਪ੍ਰਤੀਕ ਨੂੰ ਨਾ ਦਿਖਾਓ"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"ਘੱਟ ਤਰਜੀਹ ਵਾਲੇ ਸੂਚਨਾ ਪ੍ਰਤੀਕਾਂ ਨੂੰ ਦਿਖਾਓ"</string>

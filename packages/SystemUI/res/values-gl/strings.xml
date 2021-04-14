@@ -600,9 +600,9 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Inicio."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Pódese acceder aos datos persoais (por exemplo, os contactos e o contido dos correos electrónicos)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"As aplicacións fixadas poden abrir outras aplicacións."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Para soltar esta aplicación, mantén premidos os botóns Atrás e Visión xeral"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para soltar esta aplicación, mantén premidos os botóns Atrás e Inicio"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para soltar esta aplicación, pasa o dedo cara arriba e mantena premida"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Para deixar de fixar esta aplicación, mantén premidos os botóns Atrás e Visión xeral"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para deixar de fixar esta aplicación, mantén premidos os botóns Atrás e Inicio"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para deixar de fixar esta aplicación, pasa o dedo cara arriba e mantena premida"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"De acordo"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Non, grazas"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Fixouse a aplicación"</string>
@@ -767,7 +767,7 @@
       <item quantity="one">%d minuto</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Uso de batería"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"A función de aforro da batería non está dispoñible durante a carga"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"A función de aforro de batería non está dispoñible durante a carga"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Aforro de batería"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Reduce o rendemento e os datos en segundo plano"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -953,7 +953,7 @@
     <string name="instant_apps" msgid="8337185853050247304">"Aplicacións Instantáneas"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Estase executando <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Abriuse a aplicación sen ter que instalala."</string>
-    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Abriuse a aplicación sen ter que instalala. Tocar para obter máis información."</string>
+    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Abriuse a aplicación sen ter que instalala. Toca para obter máis información."</string>
     <string name="app_info" msgid="5153758994129963243">"Información da aplicación"</string>
     <string name="go_to_web" msgid="636673528981366511">"Ir ao navegador"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Datos móbiles"</string>

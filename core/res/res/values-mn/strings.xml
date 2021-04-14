@@ -293,7 +293,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Андройд систем"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Хувийн профайл руу сэлгэх"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Ажлын профайл руу сэлгэх"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Харилцагчдын хаяг"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Харилцагчид"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"харилцагч руугаа хандах"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
@@ -428,7 +428,7 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"байршилд ард хандах"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Энэ апп нь дурын үед, түүнийг ашиглаагүй байх үед ч байршилд хандах боломжтой."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"Аудио тохиргоо солих"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Апп нь дууны хэмжээ, спикерын гаралтад ашиглагдах глобал аудио тохиргоог өөрчлөх боломжтой."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Апп нь дууны түвшин, спикерын гаралтад ашиглагдах глобал аудио тохиргоог өөрчлөх боломжтой."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"аудио бичих"</string>
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"Энэ апп ямар ч үед микрофон ашиглан аудио бичих боломжтой."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM картад тушаал илгээх"</string>
@@ -1215,20 +1215,20 @@
     <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g>-н боловсруулалт санах ойн багтаамжийнхаа хязгаар болох <xliff:g id="SIZE">%2$s</xliff:g>-с хэтэрсэн байна. Та санах ойн агшин зургийг (heap dump) хуваалцах боломжтой. Сануулга: энэ санах ойн агшин зураг таны бичсэн зүйл зэрэг тухайн боловсруулалтын хандах эрхтэй аливаа мэдрэг хувийн мэдээллийг агуулж болно."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Та <xliff:g id="PROC">%1$s</xliff:g>-н боловсруулалтын санах ойн агшин зургийг хуваалцах боломжтой. Сануулга: энэ санах ойн агшин зураг таны бичсэн зүйл зэрэг тухайн боловсруулалтын хандах эрхтэй аливаа мэдрэг хувийн мэдээллийг агуулж болзошгүй."</string>
     <string name="sendText" msgid="493003724401350724">"Текст илгээх үйлдлийг сонгох"</string>
-    <string name="volume_ringtone" msgid="134784084629229029">"Хонхны аяны хэмжээ"</string>
+    <string name="volume_ringtone" msgid="134784084629229029">"Хонхны аяны түвшин"</string>
     <string name="volume_music" msgid="7727274216734955095">"Медиа дууны түвшин"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Блютүүтээр тоглож байна"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Хонхны дууг чимээгүй болгов"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Ирсэн дуудлагын дууны хэмжээ"</string>
-    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth ирсэн дуудлагын дууны хэмжээ"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Ирсэн дуудлагын дууны түвшин"</string>
+    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth ирсэн дуудлагын дууны түвшин"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Сэрүүлгийн дууны түвшин"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Мэдэгдлийн дууны хэмжээ"</string>
-    <string name="volume_unknown" msgid="4041914008166576293">"Дууны хэмжээ"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Мэдэгдлийн дууны түвшин"</string>
+    <string name="volume_unknown" msgid="4041914008166576293">"Дууны түвшин"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Блютүүтын хэмжээ"</string>
-    <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Хонхны дууны хэмжээ"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Дуудлагын дууны хэмжээ"</string>
+    <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Хонхны дууны түвшин"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Дуудлагын дууны түвшин"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Медиа дууны түвшин"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Мэдэгдлийн дууны хэмжээ"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Мэдэгдлийн дууны түвшин"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Үндсэн хонхны ая"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Үндсэн (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Алийг нь ч биш"</string>
@@ -1786,7 +1786,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2 дахь ажил <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3 дахь ажил <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Бэхэлснийг болиулахаасаа өмнө PIN асуух"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Тогтоосныг суллахаас өмнө түгжээ тайлах хээ асуух"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Бэхэлснийг болиулахаас өмнө түгжээ тайлах хээ асуух"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Тогтоосныг суллахаас өмнө нууц үг асуух"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Таны админ суулгасан"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Таны админ шинэчилсэн"</string>
