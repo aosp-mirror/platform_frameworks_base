@@ -22,10 +22,10 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.UserHandleAware;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -129,7 +129,7 @@ public class CallLog {
         public static final int ERROR_STORAGE_FULL = 2;
 
         /**
-         * Indicates that the {@link InputStream} passed to {@link #storeCallComposerPictureAsUser}
+         * Indicates that the {@link InputStream} passed to {@link #storeCallComposerPicture}
          * was closed.
          *
          * The caller should retry if this error is encountered, and be sure to not close the stream
@@ -195,9 +195,8 @@ public class CallLog {
      * The caller is responsible for closing the {@link InputStream} after the callback indicating
      * success or failure.
      *
-     * @param context An instance of {@link Context}.
-     * @param user The user for whom the picture is stored. If {@code null}, the picture will be
-     *             stored for all users.
+     * @param context An instance of {@link Context}. The picture will be stored to the user
+     *                corresponding to {@link Context#getUser()}.
      * @param input An input stream from which the picture to store should be read. The input data
      *              must be decodeable as either a JPEG, PNG, or GIF image.
      * @param executor The {@link Executor} on which to perform the file transfer operation and
@@ -207,12 +206,12 @@ public class CallLog {
      * @hide
      */
     @SystemApi
+    @UserHandleAware
     @RequiresPermission(allOf = {
             Manifest.permission.WRITE_CALL_LOG,
             Manifest.permission.INTERACT_ACROSS_USERS
     })
-    public static void storeCallComposerPictureAsUser(@NonNull Context context,
-            @Nullable UserHandle user,
+    public static void storeCallComposerPicture(@NonNull Context context,
             @NonNull InputStream input,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<Uri, CallComposerLoggingException> callback) {
@@ -246,12 +245,13 @@ public class CallLog {
             byte[] picData = tmpOut.toByteArray();
 
             UserManager userManager = context.getSystemService(UserManager.class);
+            UserHandle user = context.getUser();
             // Nasty casework for the shadow calllog begins...
             // First see if we're just inserting for one user. If so, insert into the shadow
             // based on whether that user is unlocked.
             UserHandle realUser = UserHandle.CURRENT.equals(user)
                     ? android.os.Process.myUserHandle() : user;
-            if (realUser != null) {
+            if (realUser != UserHandle.ALL) {
                 Uri baseUri = userManager.isUserUnlocked(realUser) ? CALL_COMPOSER_PICTURE_URI
                         : SHADOW_CALL_COMPOSER_PICTURE_URI;
                 Uri pictureInsertionUri = ContentProvider.maybeAddUserId(baseUri,
@@ -625,7 +625,7 @@ public class CallLog {
             }
 
             /**
-             * @param pictureUri {@link Uri} returned from {@link #storeCallComposerPictureAsUser}.
+             * @param pictureUri {@link Uri} returned from {@link #storeCallComposerPicture}.
              *                   Associates that stored picture with this call in the log.
              */
             public @NonNull AddCallParametersBuilder setPictureUri(@NonNull Uri pictureUri) {
