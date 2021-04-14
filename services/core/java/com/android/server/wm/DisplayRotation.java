@@ -731,7 +731,7 @@ public class DisplayRotation {
     private RotationAnimationPair selectRotationAnimation() {
         // If the screen is off or non-interactive, force a jumpcut.
         final boolean forceJumpcut = !mDisplayPolicy.isScreenOnFully()
-                || !mService.mPolicy.okToAnimate();
+                || !mService.mPolicy.okToAnimate(false /* ignoreScreenOn */);
         final WindowState topFullscreen = mDisplayPolicy.getTopFullscreenOpaqueWindow();
         if (DEBUG_ANIM) Slog.i(TAG, "selectRotationAnimation topFullscreen="
                 + topFullscreen + " rotationAnimation="
