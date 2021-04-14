@@ -1854,8 +1854,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由您的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"好"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"為延長電池壽命，「省電模式」會：\n\n• 開啟深色主題背景\n• 關閉或限制背景活動、某些視覺效果和其他功能 (例如「Hey Google」)\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"為延長電池壽命，「省電模式」會：\n\n• 開啟深色主題背景\n• 停用或限制背景活動、部分視覺效果和其他功能 (例如「Hey Google」)"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟「數據節省模式」嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
@@ -2074,6 +2076,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"此通知的重要性已降低為「靜音」。輕按即可提供意見。"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"此通知的重要性已提升。輕按即可提供意見。"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"此通知的重要性已降級。輕按即可提供意見。"</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"「日常安排模式」資料通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電量可能會在日常充電前耗盡"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"「省電模式」已啟用，以便延長電池壽命"</string>

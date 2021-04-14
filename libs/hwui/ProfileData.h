@@ -35,6 +35,7 @@ enum JankType {
     kSlowSync,
     kSlowRT,
     kMissedDeadline,
+    kMissedDeadlineLegacy,
 
     // must be last
     NUM_BUCKETS,
@@ -60,10 +61,12 @@ public:
     void reportFrame(int64_t duration);
     void reportGPUFrame(int64_t duration);
     void reportJank() { mJankFrameCount++; }
+    void reportJankLegacy() { mJankLegacyFrameCount++; }
     void reportJankType(JankType type) { mJankTypeCounts[static_cast<int>(type)]++; }
 
     uint32_t totalFrameCount() const { return mTotalFrameCount; }
     uint32_t jankFrameCount() const { return mJankFrameCount; }
+    uint32_t jankLegacyFrameCount() const { return mJankLegacyFrameCount; }
     nsecs_t statsStartTime() const { return mStatStartTime; }
     uint32_t jankTypeCount(JankType type) const { return mJankTypeCounts[static_cast<int>(type)]; }
     RenderPipelineType pipelineType() const { return mPipelineType; }
@@ -104,6 +107,7 @@ private:
 
     uint32_t mTotalFrameCount;
     uint32_t mJankFrameCount;
+    uint32_t mJankLegacyFrameCount;
     nsecs_t mStatStartTime;
 
     // true if HWUI renders with Vulkan pipeline

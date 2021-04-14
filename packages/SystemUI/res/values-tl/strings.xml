@@ -92,8 +92,14 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Mag-capture pa"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"I-dismiss ang screenshot"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Preview ng screenshot"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Pinakamataas na limitasyon"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Pinakamababang limitasyon"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Recorder ng Screen"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pinoproseso screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Kasalukuyang notification para sa session ng pag-record ng screen"</string>
@@ -349,8 +355,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Pamamaraan ng Pag-input"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Lokasyon"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Naka-off ang Lokasyon"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"I-block ang Camera"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"I-mute ang Mikropono"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Access sa camera"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Access sa mikropono"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Available"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Naka-block"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Device ng media"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Mga Pang-emergency na Tawag Lamang"</string>
@@ -422,8 +430,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Pag-record ng Screen"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Magsimula"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ihinto"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"Para magpatuloy, kailangan ng &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ng access sa mikropono ng iyong device."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"Para magpatuloy, kailangan ng &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ng access sa camera ng iyong device."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"I-unblock ang mikropono ng device?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"I-unblock ang camera ng device?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"I-unblock ang camera at mikropono ng device?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong mikropono."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera o mikropono."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Device"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Mag-swipe pataas upang lumipat ng app"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"I-drag pakanan para mabilisang magpalipat-lipat ng app"</string>
@@ -657,8 +669,10 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"Ipakita lahat"</string>
-    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"I-unlock para magbayad"</string>
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
+    <skip />
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
+    <skip />
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Handa na"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Mag-set up ng pagbabayad"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"I-unlock para magamit"</string>

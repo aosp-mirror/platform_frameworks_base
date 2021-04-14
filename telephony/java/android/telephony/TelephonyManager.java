@@ -4883,11 +4883,10 @@ public class TelephonyManager {
 
     /**
      * Return the set of IMSIs that should be considered "merged together" for data usage
-     * purposes. Unlike {@link #getMergedSubscriberIds()} this API merge IMSIs based on
-     * subscription grouping: IMSI of those in the same group will all be returned.
-     * Return the current IMSI if there is no subscription group.
-     *
-     * <p>Requires the calling app to have READ_PRIVILEGED_PHONE_STATE permission.
+     * purposes. This API merges IMSIs based on subscription grouping: IMSI of those in the same
+     * group will all be returned.
+     * Return the current IMSI if there is no subscription group. See
+     * {@link SubscriptionManager#createSubscriptionGroup(List)} for the definition of a group.
      *
      * @hide
      */
@@ -4900,7 +4899,6 @@ public class TelephonyManager {
                 return telephony.getMergedImsisFromGroup(getSubId(), getOpPackageName());
             }
         } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
         }
         return new String[0];
     }

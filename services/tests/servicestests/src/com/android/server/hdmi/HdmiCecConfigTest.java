@@ -403,7 +403,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void setStringValue_NotConfigurable() {
-        setBooleanResource(R.bool.config_cecSendStandbyOnSleep_userConfigurable, false);
+        setBooleanResource(R.bool.config_cecPowerControlMode_userConfigurable, false);
         HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThrows(IllegalArgumentException.class,
                 () -> hdmiCecConfig.setStringValue(

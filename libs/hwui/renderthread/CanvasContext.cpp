@@ -473,6 +473,9 @@ void CanvasContext::draw() {
         return;
     }
 
+    mCurrentFrameInfo->set(FrameInfoIndex::FrameInterval) =
+            mRenderThread.timeLord().frameIntervalNanos();
+
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
     Frame frame = mRenderPipeline->getFrame();
@@ -591,23 +594,11 @@ void CanvasContext::draw() {
             mCurrentFrameInfo->markFrameCompleted();
             mCurrentFrameInfo->set(FrameInfoIndex::GpuCompleted)
                     = mCurrentFrameInfo->get(FrameInfoIndex::FrameCompleted);
-            finishFrame(mCurrentFrameInfo);
+            mJankTracker.finishFrame(*mCurrentFrameInfo, mFrameMetricsReporter);
         }
     }
 
     mRenderThread.cacheManager().onFrameCompleted();
-}
-
-void CanvasContext::finishFrame(FrameInfo* frameInfo) {
-    // TODO (b/169858044): Consolidate this into a single call.
-    mJankTracker.finishFrame(*frameInfo);
-    mJankTracker.finishGpuDraw(*frameInfo);
-
-    // TODO (b/169858044): Move this into JankTracker to adjust deadline when queue is
-    // double-stuffed.
-    if (CC_UNLIKELY(mFrameMetricsReporter.get() != nullptr)) {
-        mFrameMetricsReporter->reportFrameMetrics(frameInfo->data(), false /*hasPresentTime*/);
-    }
 }
 
 void CanvasContext::reportMetricsWithPresentTime() {
@@ -675,7 +666,7 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* cont
         }
         frameInfo->set(FrameInfoIndex::FrameCompleted) = gpuCompleteTime;
         frameInfo->set(FrameInfoIndex::GpuCompleted) = gpuCompleteTime;
-        instance->finishFrame(frameInfo);
+        instance->mJankTracker.finishFrame(*frameInfo, instance->mFrameMetricsReporter);
     }
 }
 
@@ -704,10 +695,11 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
     nsecs_t vsync = mRenderThread.timeLord().computeFrameTimeNanos();
     int64_t vsyncId = mRenderThread.timeLord().lastVsyncId();
     int64_t frameDeadline = mRenderThread.timeLord().lastFrameDeadline();
+    int64_t frameInterval = mRenderThread.timeLord().frameIntervalNanos();
     int64_t frameInfo[UI_THREAD_FRAME_INFO_SIZE];
     UiFrameInfoBuilder(frameInfo)
         .addFlag(FrameInfoFlags::RTAnimation)
-        .setVsync(vsync, vsync, vsyncId, frameDeadline);
+        .setVsync(vsync, vsync, vsyncId, frameDeadline, frameInterval);
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *this);
     prepareTree(info, frameInfo, systemTime(SYSTEM_TIME_MONOTONIC), node);

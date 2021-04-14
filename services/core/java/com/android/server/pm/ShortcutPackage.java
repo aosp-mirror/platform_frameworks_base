@@ -19,18 +19,33 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Person;
+import android.app.appsearch.AppSearchManager;
+import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
+import android.app.appsearch.GenericDocument;
+import android.app.appsearch.GetByUriRequest;
 import android.app.appsearch.PackageIdentifier;
+import android.app.appsearch.PutDocumentsRequest;
+import android.app.appsearch.RemoveByUriRequest;
+import android.app.appsearch.ReportUsageRequest;
+import android.app.appsearch.SearchResult;
+import android.app.appsearch.SearchResults;
+import android.app.appsearch.SearchSpec;
+import android.app.appsearch.SetSchemaRequest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.LocusId;
+import android.content.pm.AppSearchPerson;
+import android.content.pm.AppSearchShortcutInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
+import android.os.Binder;
 import android.os.PersistableBundle;
+import android.os.StrictMode;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -41,10 +56,11 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.ShortcutService.DumpFilter;
@@ -64,13 +80,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -95,6 +115,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_NAME = "name";
     private static final String ATTR_CALL_COUNT = "call-count";
     private static final String ATTR_LAST_RESET = "last-reset";
+    private static final String ATTR_SCHEMA_VERSON = "schema-version";
     private static final String ATTR_ID = "id";
     private static final String ATTR_ACTIVITY = "activity";
     private static final String ATTR_TITLE = "title";
@@ -137,9 +158,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String KEY_BITMAP_BYTES = "bitmapBytes";
 
     /**
-     * All the shortcuts from the package, keyed on IDs.
+     * An temp in-memory copy of shortcuts for this package that was loaded from xml, keyed on IDs.
      */
-    private final ArrayMap<String, ShortcutInfo> mShortcuts = new ArrayMap<>();
+    final ArrayMap<String, ShortcutInfo> mShortcuts = new ArrayMap<>();
 
     /**
      * All the share targets from the package
@@ -167,8 +188,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     private final Map<String, PackageIdentifier> mPackageIdentifiers = new ArrayMap<>(0);
 
-    @GuardedBy("mLock")
-    private AppSearchSession mAppSearchSession;
+    private boolean mIsInitilized;
 
     private ShortcutPackage(ShortcutUser shortcutUser,
             int packageUserId, String packageName, ShortcutPackageInfo spi) {
@@ -199,7 +219,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     public int getShortcutCount() {
-        return mShortcuts.size();
+        final int[] count = new int[1];
+        forEachShortcut(si -> count[0]++);
+        return count[0];
     }
 
     @Override
@@ -213,17 +235,23 @@ class ShortcutPackage extends ShortcutPackageItem {
         // - Unshadow all shortcuts.
         // - Set disabled reason.
         // - Disable if needed.
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            ShortcutInfo si = mShortcuts.valueAt(i);
-            mutateShortcut(si.getId(), si, shortcut -> {
-                shortcut.clearFlags(ShortcutInfo.FLAG_SHADOW);
+        final String query = String.format("%s:-%s AND %s:%s",
+                AppSearchShortcutInfo.KEY_FLAGS, ShortcutInfo.FLAG_SHADOW,
+                AppSearchShortcutInfo.KEY_DISABLED_REASON, restoreBlockReason);
+        forEachShortcutMutateIf(query, si -> {
+            if (restoreBlockReason == ShortcutInfo.DISABLED_REASON_NOT_DISABLED
+                    && !si.hasFlags(ShortcutInfo.FLAG_SHADOW)
+                    && si.getDisabledReason() == restoreBlockReason) {
+                return false;
+            }
+            si.clearFlags(ShortcutInfo.FLAG_SHADOW);
 
-                shortcut.setDisabledReason(restoreBlockReason);
-                if (restoreBlockReason != ShortcutInfo.DISABLED_REASON_NOT_DISABLED) {
-                    shortcut.addFlags(ShortcutInfo.FLAG_DISABLED);
-                }
-            });
-        }
+            si.setDisabledReason(restoreBlockReason);
+            if (restoreBlockReason != ShortcutInfo.DISABLED_REASON_NOT_DISABLED) {
+                si.addFlags(ShortcutInfo.FLAG_DISABLED);
+            }
+            return true;
+        });
         // Because some launchers may not have been restored (e.g. allowBackup=false),
         // we need to re-calculate the pinned shortcuts.
         refreshPinnedFlags();
@@ -233,8 +261,10 @@ class ShortcutPackage extends ShortcutPackageItem {
      * Note this does *not* provide a correct view to the calling launcher.
      */
     @Nullable
-    public ShortcutInfo findShortcutById(String id) {
-        return mShortcuts.get(id);
+    public ShortcutInfo findShortcutById(@Nullable final String id) {
+        if (id == null) return null;
+        final List<ShortcutInfo> ret = getShortcutById(Collections.singleton(id));
+        return ret.isEmpty() ? null : ret.get(0);
     }
 
     public boolean isShortcutExistsAndInvisibleToPublisher(String id) {
@@ -300,8 +330,9 @@ class ShortcutPackage extends ShortcutPackageItem {
      * Delete a shortcut by ID. This will *always* remove it even if it's immutable or invisible.
      */
     private ShortcutInfo forceDeleteShortcutInner(@NonNull String id) {
-        final ShortcutInfo shortcut = mShortcuts.remove(id);
+        final ShortcutInfo shortcut = findShortcutById(id);
         if (shortcut != null) {
+            removeShortcut(id);
             mShortcutUser.mService.removeIconLocked(shortcut);
             shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED
                     | ShortcutInfo.FLAG_MANIFEST | ShortcutInfo.FLAG_CACHED_ALL);
@@ -321,7 +352,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         // Extract Icon and update the icon res ID and the bitmap path.
         s.saveIconAndFixUpShortcutLocked(newShortcut);
         s.fixUpShortcutResourceNamesAndValues(newShortcut);
-        mShortcuts.put(newShortcut.getId(), newShortcut);
+        saveShortcut(newShortcut);
     }
 
     /**
@@ -410,6 +441,15 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         forceReplaceShortcutInner(newShortcut);
+        mShortcutUser.mService.injectPostToHandler(() -> awaitInAppSearch("reportUsage",
+                session -> {
+                    final AndroidFuture<Boolean> future = new AndroidFuture<>();
+                    session.reportUsage(
+                            new ReportUsageRequest.Builder(getPackageName())
+                                    .setUri(newShortcut.getId()).build(),
+                            mShortcutUser.mExecutor, result -> future.complete(result.isSuccess()));
+                    return future;
+                }));
         return deleted;
     }
 
@@ -419,19 +459,17 @@ class ShortcutPackage extends ShortcutPackageItem {
      * @return List of removed shortcuts.
      */
     private List<ShortcutInfo> removeOrphans() {
-        List<ShortcutInfo> removeList = null;
-
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
-
-            if (si.isAlive()) continue;
-
-            if (removeList == null) {
-                removeList = new ArrayList<>();
-            }
+        final List<ShortcutInfo> removeList = new ArrayList<>(1);
+        final String query = String.format("%s OR %s OR %s OR %s",
+                AppSearchShortcutInfo.QUERY_IS_PINNED,
+                AppSearchShortcutInfo.QUERY_IS_DYNAMIC,
+                AppSearchShortcutInfo.QUERY_IS_MANIFEST,
+                AppSearchShortcutInfo.QUERY_IS_CACHED);
+        forEachShortcut(query, si -> {
+            if (si.isAlive()) return;
             removeList.add(si);
-        }
-        if (removeList != null) {
+        });
+        if (!removeList.isEmpty()) {
             for (int i = removeList.size() - 1; i >= 0; i--) {
                 forceDeleteShortcutInner(removeList.get(i).getId());
             }
@@ -447,21 +485,27 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public List<ShortcutInfo> deleteAllDynamicShortcuts(boolean ignoreInvisible) {
         final long now = mShortcutUser.mService.injectCurrentTimeMillis();
-
-        boolean changed = false;
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
-            if (si.isDynamic() && (!ignoreInvisible || si.isVisibleToPublisher())) {
-                changed = true;
-
-                mutateShortcut(si.getId(), si, shortcut -> {
-                    shortcut.setTimestamp(now);
-                    shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
-                    shortcut.setRank(0); // It may still be pinned, so clear the rank.
-                });
-            }
+        final String query;
+        if (!ignoreInvisible) {
+            query = AppSearchShortcutInfo.QUERY_IS_DYNAMIC;
+        } else {
+            query = String.format("%s %s",
+                    AppSearchShortcutInfo.QUERY_IS_DYNAMIC,
+                    AppSearchShortcutInfo.QUERY_IS_VISIBLE_TO_PUBLISHER);
         }
-        if (changed) {
+        final boolean[] changed = new boolean[1];
+        forEachShortcutMutateIf(query, si -> {
+            if (si.isDynamic() && (!ignoreInvisible || si.isVisibleToPublisher())) {
+                changed[0] = true;
+
+                si.setTimestamp(now);
+                si.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
+                si.setRank(0); // It may still be pinned, so clear the rank.
+                return true;
+            }
+            return false;
+        });
+        if (changed[0]) {
             return removeOrphans();
         }
         return null;
@@ -606,45 +650,32 @@ class ShortcutPackage extends ShortcutPackageItem {
      * <p>Then remove all shortcuts that are not dynamic and no longer pinned either.
      */
     public void refreshPinnedFlags() {
-        final List<ShortcutInfo> shortcuts = new ArrayList<>(mShortcuts.values());
-        final Map<String, ShortcutInfo> shortcutMap = new ArrayMap<>(shortcuts.size());
-        for (ShortcutInfo si : shortcuts) {
-            shortcutMap.put(si.getId(), si);
-        }
         final Set<String> pinnedShortcuts = new ArraySet<>();
 
-        // First, for the pinned set for each launcher, keep track of their id one by one.
+        // First, gather the pinned set from each launcher.
         mShortcutUser.forAllLaunchers(launcherShortcuts -> {
             final ArraySet<String> pinned = launcherShortcuts.getPinnedShortcutIds(
                     getPackageName(), getPackageUserId());
             if (pinned == null || pinned.size() == 0) {
                 return;
             }
-            for (int i = pinned.size() - 1; i >= 0; i--) {
-                final String id = pinned.valueAt(i);
-                final ShortcutInfo si = shortcutMap.get(id);
-                if (si == null) {
-                    // This happens if a launcher pinned shortcuts from this package, then backup&
-                    // restored, but this package doesn't allow backing up.
-                    // In that case the launcher ends up having a dangling pinned shortcuts.
-                    // That's fine, when the launcher is restored, we'll fix it.
-                    continue;
-                }
-                pinnedShortcuts.add(si.getId());
+            pinnedShortcuts.addAll(pinned);
+        });
+        // Then, update the pinned state if necessary.
+        final List<ShortcutInfo> pinned = getShortcutById(pinnedShortcuts);
+        pinned.forEach(si -> {
+            if (!si.isPinned()) {
+                si.addFlags(ShortcutInfo.FLAG_PINNED);
             }
         });
-        // Then, update the pinned state if necessary
-        for (int i = shortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = shortcuts.get(i);
-            if (pinnedShortcuts.contains(si.getId()) && !si.isPinned()) {
-                mutateShortcut(si.getId(), si,
-                        shortcut -> shortcut.addFlags(ShortcutInfo.FLAG_PINNED));
-            }
+        saveShortcut(pinned);
+        forEachShortcutMutateIf(AppSearchShortcutInfo.QUERY_IS_PINNED, si -> {
             if (!pinnedShortcuts.contains(si.getId()) && si.isPinned()) {
-                mutateShortcut(si.getId(), si, shortcut ->
-                        shortcut.clearFlags(ShortcutInfo.FLAG_PINNED));
+                si.clearFlags(ShortcutInfo.FLAG_PINNED);
+                return true;
             }
-        }
+            return false;
+        });
 
         // Lastly, remove the ones that are no longer pinned, cached nor dynamic.
         removeOrphans();
@@ -734,9 +765,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * Find all shortcuts that match {@code query}.
      */
-    public void findAll(@NonNull List<ShortcutInfo> result,
-            @Nullable Predicate<ShortcutInfo> query, int cloneFlag) {
-        findAll(result, query, cloneFlag, null, 0, /*getPinnedByAnyLauncher=*/ false);
+    public void findAll(@NonNull List<ShortcutInfo> result, @Nullable String query,
+            @Nullable Predicate<ShortcutInfo> filter, int cloneFlag) {
+        findAll(result, query, filter, cloneFlag, null, 0, /*getPinnedByAnyLauncher=*/ false);
     }
 
     /**
@@ -747,6 +778,64 @@ class ShortcutPackage extends ShortcutPackageItem {
      * adjusted for the caller too.
      */
     public void findAll(@NonNull List<ShortcutInfo> result,
+            @Nullable String query, @Nullable Predicate<ShortcutInfo> filter, int cloneFlag,
+            @Nullable String callingLauncher, int launcherUserId, boolean getPinnedByAnyLauncher) {
+        if (getPackageInfo().isShadow()) {
+            // Restored and the app not installed yet, so don't return any.
+            return;
+        }
+        final ShortcutService s = mShortcutUser.mService;
+
+        // Set of pinned shortcuts by the calling launcher.
+        final ArraySet<String> pinnedByCallerSet = (callingLauncher == null) ? null
+                : s.getLauncherShortcutsLocked(callingLauncher, getPackageUserId(), launcherUserId)
+                        .getPinnedShortcutIds(getPackageName(), getPackageUserId());
+        forEachShortcut(query == null ? "" : query, si ->
+                filter(result, filter, cloneFlag, callingLauncher, pinnedByCallerSet,
+                        getPinnedByAnyLauncher, si));
+    }
+
+    /**
+     * Find all shortcuts that has id matching {@code ids}.
+     */
+    public void findAllByIds(@NonNull final List<ShortcutInfo> result,
+            @NonNull final Collection<String> ids, @Nullable final Predicate<ShortcutInfo> filter,
+            final int cloneFlag) {
+        findAllByIds(result, ids, filter, cloneFlag, null, 0, /*getPinnedByAnyLauncher=*/ false);
+    }
+
+    /**
+     * Find all shortcuts that has id matching {@code ids}.
+     *
+     * This will also provide a "view" for each launcher -- a non-dynamic shortcut that's not pinned
+     * by the calling launcher will not be included in the result, and also "isPinned" will be
+     * adjusted for the caller too.
+     */
+    public void findAllByIds(@NonNull List<ShortcutInfo> result,
+            @NonNull final Collection<String> ids, @Nullable final Predicate<ShortcutInfo> query,
+            int cloneFlag, @Nullable String callingLauncher, int launcherUserId,
+            boolean getPinnedByAnyLauncher) {
+        if (getPackageInfo().isShadow()) {
+            // Restored and the app not installed yet, so don't return any.
+            return;
+        }
+        final ShortcutService s = mShortcutUser.mService;
+
+        // Set of pinned shortcuts by the calling launcher.
+        final ArraySet<String> pinnedByCallerSet = (callingLauncher == null) ? null
+                : s.getLauncherShortcutsLocked(callingLauncher, getPackageUserId(), launcherUserId)
+                        .getPinnedShortcutIds(getPackageName(), getPackageUserId());
+        final List<ShortcutInfo> shortcuts = getShortcutById(ids);
+        for (ShortcutInfo si : shortcuts) {
+            filter(result, query, cloneFlag, callingLauncher, pinnedByCallerSet,
+                    getPinnedByAnyLauncher, si);
+        }
+    }
+
+    /**
+     * Find all pinned shortcuts that match {@code query}.
+     */
+    public void findAllPinned(@NonNull List<ShortcutInfo> result,
             @Nullable Predicate<ShortcutInfo> query, int cloneFlag,
             @Nullable String callingLauncher, int launcherUserId, boolean getPinnedByAnyLauncher) {
         if (getPackageInfo().isShadow()) {
@@ -759,38 +848,43 @@ class ShortcutPackage extends ShortcutPackageItem {
         final ArraySet<String> pinnedByCallerSet = (callingLauncher == null) ? null
                 : s.getLauncherShortcutsLocked(callingLauncher, getPackageUserId(), launcherUserId)
                         .getPinnedShortcutIds(getPackageName(), getPackageUserId());
+        mShortcuts.values().forEach(si -> filter(result, query, cloneFlag, callingLauncher,
+                pinnedByCallerSet, getPinnedByAnyLauncher, si));
+    }
 
-        for (int i = 0; i < mShortcuts.size(); i++) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
-            // Need to adjust PINNED flag depending on the caller.
-            // Basically if the caller is a launcher (callingLauncher != null) and the launcher
-            // isn't pinning it, then we need to clear PINNED for this caller.
-            final boolean isPinnedByCaller = (callingLauncher == null)
-                    || ((pinnedByCallerSet != null) && pinnedByCallerSet.contains(si.getId()));
+    private void filter(@NonNull final List<ShortcutInfo> result,
+            @Nullable final Predicate<ShortcutInfo> query, final int cloneFlag,
+            @Nullable final String callingLauncher,
+            @NonNull final ArraySet<String> pinnedByCallerSet,
+            final boolean getPinnedByAnyLauncher, @NonNull final ShortcutInfo si) {
+        // Need to adjust PINNED flag depending on the caller.
+        // Basically if the caller is a launcher (callingLauncher != null) and the launcher
+        // isn't pinning it, then we need to clear PINNED for this caller.
+        final boolean isPinnedByCaller = (callingLauncher == null)
+                || ((pinnedByCallerSet != null) && pinnedByCallerSet.contains(si.getId()));
 
-            if (!getPinnedByAnyLauncher) {
-                if (si.isFloating() && !si.isCached()) {
-                    if (!isPinnedByCaller) {
-                        continue;
-                    }
-                }
-            }
-            final ShortcutInfo clone = si.clone(cloneFlag);
-
-            // Fix up isPinned for the caller.  Note we need to do it before the "test" callback,
-            // since it may check isPinned.
-            // However, if getPinnedByAnyLauncher is set, we do it after the test.
-            if (!getPinnedByAnyLauncher) {
+        if (!getPinnedByAnyLauncher) {
+            if (si.isFloating() && !si.isCached()) {
                 if (!isPinnedByCaller) {
-                    clone.clearFlags(ShortcutInfo.FLAG_PINNED);
+                    return;
                 }
             }
-            if (query == null || query.test(clone)) {
-                if (!isPinnedByCaller) {
-                    clone.clearFlags(ShortcutInfo.FLAG_PINNED);
-                }
-                result.add(clone);
+        }
+        final ShortcutInfo clone = si.clone(cloneFlag);
+
+        // Fix up isPinned for the caller.  Note we need to do it before the "test" callback,
+        // since it may check isPinned.
+        // However, if getPinnedByAnyLauncher is set, we do it after the test.
+        if (!getPinnedByAnyLauncher) {
+            if (!isPinnedByCaller) {
+                clone.clearFlags(ShortcutInfo.FLAG_PINNED);
             }
+        }
+        if (query == null || query.test(clone)) {
+            if (!isPinnedByCaller) {
+                clone.clearFlags(ShortcutInfo.FLAG_PINNED);
+            }
+            result.add(clone);
         }
     }
 
@@ -822,8 +916,8 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // Get the list of all dynamic shortcuts in this package.
         final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
-        findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
-                ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION);
+        findAll(shortcuts, AppSearchShortcutInfo.QUERY_IS_NON_MANIFEST_VISIBLE,
+                ShortcutInfo::isNonManifestVisible, ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION);
 
         final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
         for (int i = 0; i < shortcuts.size(); i++) {
@@ -861,14 +955,14 @@ class ShortcutPackage extends ShortcutPackageItem {
      * the app's Xml resource.
      */
     int getSharingShortcutCount() {
-        if (mShortcuts.isEmpty() || mShareTargets.isEmpty()) {
+        if (getShortcutCount() == 0 || mShareTargets.isEmpty()) {
             return 0;
         }
 
         // Get the list of all dynamic shortcuts in this package
         final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
-        findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
-                ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
+        findAll(shortcuts, AppSearchShortcutInfo.QUERY_IS_NON_MANIFEST_VISIBLE,
+                ShortcutInfo::isNonManifestVisible, ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
 
         int sharingShortcutCount = 0;
         for (int i = 0; i < shortcuts.size(); i++) {
@@ -899,14 +993,12 @@ class ShortcutPackage extends ShortcutPackageItem {
      * Return the filenames (excluding path names) of icon bitmap files from this package.
      */
     public ArraySet<String> getUsedBitmapFiles() {
-        final ArraySet<String> usedFiles = new ArraySet<>(mShortcuts.size());
-
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
+        final ArraySet<String> usedFiles = new ArraySet<>(1);
+        forEachShortcut(AppSearchShortcutInfo.QUERY_HAS_BITMAP_PATH, si -> {
             if (si.getBitmapPath() != null) {
                 usedFiles.add(getFileName(si.getBitmapPath()));
             }
-        }
+        });
         return usedFiles;
     }
 
@@ -923,30 +1015,29 @@ class ShortcutPackage extends ShortcutPackageItem {
      * @return false if any of the target activities are no longer enabled.
      */
     private boolean areAllActivitiesStillEnabled() {
-        if (mShortcuts.size() == 0) {
-            return true;
-        }
         final ShortcutService s = mShortcutUser.mService;
 
         // Normally the number of target activities is 1 or so, so no need to use a complex
         // structure like a set.
         final ArrayList<ComponentName> checked = new ArrayList<>(4);
+        final boolean[] reject = new boolean[1];
 
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
+        forEachShortcutStopWhen(si -> {
             final ComponentName activity = si.getActivity();
 
             if (checked.contains(activity)) {
-                continue; // Already checked.
+                return false; // Already checked.
             }
             checked.add(activity);
 
             if ((activity != null)
                     && !s.injectIsActivityEnabledAndExported(activity, getOwnerUserId())) {
-                return false;
+                reject[0] = true;
+                return true; // Found at least 1 activity is disabled, so skip the rest.
             }
-        }
-        return true;
+            return false;
+        });
+        return !reject[0];
     }
 
     /**
@@ -1029,32 +1120,34 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // See if there are any shortcuts that were prevented restoring because the app was of a
         // lower version, and re-enable them.
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
-            if (si.getDisabledReason() != ShortcutInfo.DISABLED_REASON_VERSION_LOWER) {
-                continue;
-            }
-            if (getPackageInfo().getBackupSourceVersionCode() > newVersionCode) {
-                if (ShortcutService.DEBUG) {
-                    Slog.d(TAG, String.format("Shortcut %s require version %s, still not restored.",
-                            si.getId(), getPackageInfo().getBackupSourceVersionCode()));
-                }
-                continue;
-            }
-            Slog.i(TAG, String.format("Restoring shortcut: %s", si.getId()));
-            mutateShortcut(si.getId(), si, shortcut -> {
-                shortcut.clearFlags(ShortcutInfo.FLAG_DISABLED);
-                shortcut.setDisabledReason(ShortcutInfo.DISABLED_REASON_NOT_DISABLED);
-            });
+        {
+            forEachShortcutMutateIf(
+                    AppSearchShortcutInfo.QUERY_DISABLED_REASON_VERSION_LOWER, si -> {
+                    if (si.getDisabledReason() != ShortcutInfo.DISABLED_REASON_VERSION_LOWER) {
+                        return false;
+                    }
+                    if (getPackageInfo().getBackupSourceVersionCode() > newVersionCode) {
+                        if (ShortcutService.DEBUG) {
+                            Slog.d(TAG,
+                                    String.format(
+                                            "Shortcut %s require version %s, still not restored.",
+                                            si.getId(),
+                                            getPackageInfo().getBackupSourceVersionCode()));
+                        }
+                        return false;
+                    }
+                    Slog.i(TAG, String.format("Restoring shortcut: %s", si.getId()));
+                    si.clearFlags(ShortcutInfo.FLAG_DISABLED);
+                    si.setDisabledReason(ShortcutInfo.DISABLED_REASON_NOT_DISABLED);
+                    return true;
+                });
         }
 
         // For existing shortcuts, update timestamps if they have any resources.
         // Also check if shortcuts' activities are still main activities.  Otherwise, disable them.
         if (!isNewApp) {
-            Resources publisherRes = null;
-
-            for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-                final ShortcutInfo si = mShortcuts.valueAt(i);
+            final Resources publisherRes = getPackageResources();
+            forEachShortcutMutateIf(si -> {
                 // Disable dynamic shortcuts whose target activity is gone.
                 if (si.isDynamic()) {
                     if (si.getActivity() == null) {
@@ -1067,33 +1160,26 @@ class ShortcutPackage extends ShortcutPackageItem {
                                 getPackageName(), si.getId()));
                         if (disableDynamicWithId(si.getId(), /*ignoreInvisible*/ false,
                                 ShortcutInfo.DISABLED_REASON_APP_CHANGED) != null) {
-                            continue; // Actually removed.
+                            return false; // Actually removed.
                         }
                         // Still pinned, so fall-through and possibly update the resources.
                     }
                 }
 
-                if (si.hasAnyResources()) {
-                    if (publisherRes == null) {
-                        publisherRes = getPackageResources();
-                        if (publisherRes == null) {
-                            break; // Resources couldn't be loaded.
-                        }
-                    }
-
-                    final Resources res = publisherRes;
-                    mutateShortcut(si.getId(), si, shortcut -> {
-                        if (!shortcut.isOriginallyFromManifest()) {
-                            shortcut.lookupAndFillInResourceIds(res);
-                        }
-
-                        // If this shortcut is not from a manifest, then update all resource IDs
-                        // from resource names.  (We don't allow resource strings for
-                        // non-manifest at the moment, but icons can still be resources.)
-                        shortcut.setTimestamp(s.injectCurrentTimeMillis());
-                    });
+                if (!si.hasAnyResources() || publisherRes == null) {
+                    return false;
                 }
-            }
+
+                if (!si.isOriginallyFromManifest()) {
+                    si.lookupAndFillInResourceIds(publisherRes);
+                }
+
+                // If this shortcut is not from a manifest, then update all resource IDs
+                // from resource names.  (We don't allow resource strings for
+                // non-manifest at the moment, but icons can still be resources.)
+                si.setTimestamp(s.injectCurrentTimeMillis());
+                return true;
+            });
         }
 
         // (Re-)publish manifest shortcut.
@@ -1119,17 +1205,12 @@ class ShortcutPackage extends ShortcutPackageItem {
         boolean changed = false;
 
         // Keep the previous IDs.
-        ArraySet<String> toDisableList = null;
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
-
+        final ArraySet<String> toDisableList = new ArraySet<>(1);
+        forEachShortcut(AppSearchShortcutInfo.QUERY_IS_MANIFEST, si -> {
             if (si.isManifestShortcut()) {
-                if (toDisableList == null) {
-                    toDisableList = new ArraySet<>();
-                }
                 toDisableList.add(si.getId());
             }
-        }
+        });
 
         // Publish new ones.
         if (newManifestShortcutList != null) {
@@ -1169,7 +1250,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 // regardless.
                 forceReplaceShortcutInner(newShortcut); // This will clean up the old one too.
 
-                if (!newDisabled && toDisableList != null) {
+                if (!newDisabled && !toDisableList.isEmpty()) {
                     // Still alive, don't remove.
                     toDisableList.remove(id);
                 }
@@ -1177,7 +1258,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         // Disable the previous manifest shortcuts that are no longer in the manifest.
-        if (toDisableList != null) {
+        if (!toDisableList.isEmpty()) {
             if (ShortcutService.DEBUG) {
                 Slog.d(TAG, String.format(
                         "Package %s: disabling %d stale shortcuts", getPackageName(),
@@ -1266,25 +1347,21 @@ class ShortcutPackage extends ShortcutPackageItem {
     private ArrayMap<ComponentName, ArrayList<ShortcutInfo>> sortShortcutsToActivities() {
         final ArrayMap<ComponentName, ArrayList<ShortcutInfo>> activitiesToShortcuts
                 = new ArrayMap<>();
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
+        forEachShortcut(AppSearchShortcutInfo.QUERY_IS_NOT_FLOATING, si -> {
             if (si.isFloating()) {
-                continue; // Ignore floating shortcuts, which are not tied to any activities.
+                return; // Ignore floating shortcuts, which are not tied to any activities.
             }
 
             final ComponentName activity = si.getActivity();
             if (activity == null) {
                 mShortcutUser.mService.wtf("null activity detected.");
-                continue;
+                return;
             }
 
-            ArrayList<ShortcutInfo> list = activitiesToShortcuts.get(activity);
-            if (list == null) {
-                list = new ArrayList<>();
-                activitiesToShortcuts.put(activity, list);
-            }
+            ArrayList<ShortcutInfo> list = activitiesToShortcuts.computeIfAbsent(activity,
+                    k -> new ArrayList<>());
             list.add(si);
-        }
+        });
         return activitiesToShortcuts;
     }
 
@@ -1320,14 +1397,20 @@ class ShortcutPackage extends ShortcutPackageItem {
         // (If it's for update, then don't count dynamic shortcuts, since they'll be replaced
         // anyway.)
         final ArrayMap<ComponentName, Integer> counts = new ArrayMap<>(4);
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo shortcut = mShortcuts.valueAt(i);
+        final String query;
+        if (operation != ShortcutService.OPERATION_SET) {
+            query = AppSearchShortcutInfo.QUERY_IS_MANIFEST + " OR "
+                    + AppSearchShortcutInfo.QUERY_IS_DYNAMIC;
+        } else {
+            query = AppSearchShortcutInfo.QUERY_IS_MANIFEST;
+        }
+        forEachShortcut(query, shortcut -> {
             if (shortcut.isManifestShortcut()) {
                 incrementCountForActivity(counts, shortcut.getActivity(), 1);
             } else if (shortcut.isDynamic() && (operation != ShortcutService.OPERATION_SET)) {
                 incrementCountForActivity(counts, shortcut.getActivity(), 1);
             }
-        }
+        });
 
         for (int i = newList.size() - 1; i >= 0; i--) {
             final ShortcutInfo newShortcut = newList.get(i);
@@ -1340,7 +1423,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 continue; // Activity can be null for update.
             }
 
-            final ShortcutInfo original = mShortcuts.get(newShortcut.getId());
+            final ShortcutInfo original = findShortcutById(newShortcut.getId());
             if (original == null) {
                 if (operation == ShortcutService.OPERATION_UPDATE) {
                     continue; // When updating, ignore if there's no target.
@@ -1379,31 +1462,17 @@ class ShortcutPackage extends ShortcutPackageItem {
     public void resolveResourceStrings() {
         final ShortcutService s = mShortcutUser.mService;
 
-        List<ShortcutInfo> changedShortcuts = null;
+        final Resources publisherRes = getPackageResources();
+        final List<ShortcutInfo> changedShortcuts = new ArrayList<>(1);
 
-        Resources publisherRes = null;
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
-
-            if (si.hasStringResources()) {
-                if (publisherRes == null) {
-                    publisherRes = getPackageResources();
-                    if (publisherRes == null) {
-                        break; // Resources couldn't be loaded.
-                    }
-                }
-
-                final Resources res = publisherRes;
-                mutateShortcut(si.getId(), si, shortcut -> {
-                    shortcut.resolveResourceStrings(res);
-                    shortcut.setTimestamp(s.injectCurrentTimeMillis());
-                });
-
-                if (changedShortcuts == null) {
-                    changedShortcuts = new ArrayList<>(1);
-                }
+        if (publisherRes != null) {
+            forEachShortcutMutateIf(AppSearchShortcutInfo.QUERY_HAS_STRING_RESOURCE, si -> {
+                if (!si.hasStringResources()) return false;
+                si.resolveResourceStrings(publisherRes);
+                si.setTimestamp(s.injectCurrentTimeMillis());
                 changedShortcuts.add(si);
-            }
+                return true;
+            });
         }
         if (!CollectionUtils.isEmpty(changedShortcuts)) {
             s.packageShortcutsChanged(getPackageName(), getPackageUserId(), changedShortcuts, null);
@@ -1412,10 +1481,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     /** Clears the implicit ranks for all shortcuts. */
     public void clearAllImplicitRanks() {
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
-            mutateShortcut(si.getId(), si, ShortcutInfo::clearImplicitRankAndRankChangedFlag);
-        }
+        forEachShortcutMutate(ShortcutInfo::clearImplicitRankAndRankChangedFlag);
     }
 
     /**
@@ -1455,17 +1521,14 @@ class ShortcutPackage extends ShortcutPackageItem {
         final long now = s.injectCurrentTimeMillis();
 
         // First, clear ranks for floating shortcuts.
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
-            if (si.isFloating()) {
-                if (si.getRank() != 0) {
-                    mutateShortcut(si.getId(), si, shortcut -> {
-                        shortcut.setTimestamp(now);
-                        shortcut.setRank(0);
-                    });
-                }
+        forEachShortcutMutateIf(AppSearchShortcutInfo.QUERY_IS_FLOATING_AND_HAS_RANK, si -> {
+            if (si.isFloating() && si.getRank() != 0) {
+                si.setTimestamp(now);
+                si.setRank(0);
+                return true;
             }
-        }
+            return false;
+        });
 
         // Then adjust ranks.  Ranks are unique for each activity, so we first need to sort
         // shortcuts to each activity.
@@ -1507,13 +1570,14 @@ class ShortcutPackage extends ShortcutPackageItem {
     /** @return true if there's any shortcuts that are not manifest shortcuts. */
     public boolean hasNonManifestShortcuts() {
         final boolean[] condition = new boolean[1];
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
+        forEachShortcutStopWhen(AppSearchShortcutInfo.QUERY_IS_NOT_MANIFEST, si -> {
             if (!si.isDeclaredInManifest()) {
+                condition[0] = true;
                 return true;
             }
-        }
-        return false;
+            return false;
+        });
+        return condition[0];
     }
 
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix, DumpFilter filter) {
@@ -1553,11 +1617,8 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         pw.print(prefix);
         pw.println("  Shortcuts:");
-        long totalBitmapSize = 0;
-        final ArrayMap<String, ShortcutInfo> shortcuts = mShortcuts;
-        final int size = shortcuts.size();
-        for (int i = 0; i < size; i++) {
-            final ShortcutInfo si = shortcuts.valueAt(i);
+        final long[] totalBitmapSize = new long[1];
+        forEachShortcut(si -> {
             pw.println(si.toDumpString(prefix + "    "));
             if (si.getBitmapPath() != null) {
                 final long len = new File(si.getBitmapPath()).length();
@@ -1566,15 +1627,15 @@ class ShortcutPackage extends ShortcutPackageItem {
                 pw.print("bitmap size=");
                 pw.println(len);
 
-                totalBitmapSize += len;
+                totalBitmapSize[0] += len;
             }
-        }
+        });
         pw.print(prefix);
         pw.print("  ");
         pw.print("Total bitmap size: ");
-        pw.print(totalBitmapSize);
+        pw.print(totalBitmapSize[0]);
         pw.print(" (");
-        pw.print(Formatter.formatFileSize(mShortcutUser.mService.mContext, totalBitmapSize));
+        pw.print(Formatter.formatFileSize(mShortcutUser.mService.mContext, totalBitmapSize[0]));
         pw.println(")");
     }
 
@@ -1589,46 +1650,39 @@ class ShortcutPackage extends ShortcutPackageItem {
                 | (matchManifest ? ShortcutInfo.FLAG_MANIFEST : 0)
                 | (matchCached ? ShortcutInfo.FLAG_CACHED_ALL : 0);
 
-        final ArrayMap<String, ShortcutInfo> shortcuts = mShortcuts;
-        final int size = shortcuts.size();
-        for (int i = 0; i < size; i++) {
-            final ShortcutInfo si = shortcuts.valueAt(i);
+        forEachShortcut(si -> {
             if ((si.getFlags() & shortcutFlags) != 0) {
                 pw.println(si.toDumpString(""));
             }
-        }
+        });
     }
 
     @Override
     public JSONObject dumpCheckin(boolean clear) throws JSONException {
         final JSONObject result = super.dumpCheckin(clear);
 
-        int numDynamic = 0;
-        int numPinned = 0;
-        int numManifest = 0;
-        int numBitmaps = 0;
-        long totalBitmapSize = 0;
+        final int[] numDynamic = new int[1];
+        final int[] numPinned = new int[1];
+        final int[] numManifest = new int[1];
+        final int[] numBitmaps = new int[1];
+        final long[] totalBitmapSize = new long[1];
 
-        final ArrayMap<String, ShortcutInfo> shortcuts = mShortcuts;
-        final int size = shortcuts.size();
-        for (int i = 0; i < size; i++) {
-            final ShortcutInfo si = shortcuts.valueAt(i);
-
-            if (si.isDynamic()) numDynamic++;
-            if (si.isDeclaredInManifest()) numManifest++;
-            if (si.isPinned()) numPinned++;
+        forEachShortcut(si -> {
+            if (si.isDynamic()) numDynamic[0]++;
+            if (si.isDeclaredInManifest()) numManifest[0]++;
+            if (si.isPinned()) numPinned[0]++;
 
             if (si.getBitmapPath() != null) {
-                numBitmaps++;
-                totalBitmapSize += new File(si.getBitmapPath()).length();
+                numBitmaps[0]++;
+                totalBitmapSize[0] += new File(si.getBitmapPath()).length();
             }
-        }
+        });
 
-        result.put(KEY_DYNAMIC, numDynamic);
-        result.put(KEY_MANIFEST, numManifest);
-        result.put(KEY_PINNED, numPinned);
-        result.put(KEY_BITMAPS, numBitmaps);
-        result.put(KEY_BITMAP_BYTES, totalBitmapSize);
+        result.put(KEY_DYNAMIC, numDynamic[0]);
+        result.put(KEY_MANIFEST, numManifest[0]);
+        result.put(KEY_PINNED, numPinned[0]);
+        result.put(KEY_BITMAPS, numBitmaps[0]);
+        result.put(KEY_BITMAP_BYTES, totalBitmapSize[0]);
 
         // TODO Log update frequency too.
 
@@ -1638,10 +1692,10 @@ class ShortcutPackage extends ShortcutPackageItem {
     @Override
     public void saveToXml(@NonNull TypedXmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
-        final int size = getShortcutCount();
+        final int size = mShortcuts.size();
         final int shareTargetSize = mShareTargets.size();
 
-        if (size == 0 && shareTargetSize == 0 && mApiCallCount == 0) {
+        if (size == 0 && shareTargetSize == 0 && mApiCallCount == 0 && getShortcutCount() == 0) {
             return; // nothing to write.
         }
 
@@ -1650,11 +1704,19 @@ class ShortcutPackage extends ShortcutPackageItem {
         ShortcutService.writeAttr(out, ATTR_NAME, getPackageName());
         ShortcutService.writeAttr(out, ATTR_CALL_COUNT, mApiCallCount);
         ShortcutService.writeAttr(out, ATTR_LAST_RESET, mLastResetTime);
+        if (!forBackup) {
+            /**
+             * Schema version should not be included in the backup because:
+             * 1. Schemas in AppSearch are created from scratch on new device
+             * 2. Shortcuts are restored from xml file (as opposed to from AppSearch) on new device
+             */
+            ShortcutService.writeAttr(out, ATTR_SCHEMA_VERSON, (mIsInitilized)
+                    ? AppSearchShortcutInfo.SCHEMA_VERSION : 0);
+        }
         getPackageInfo().saveToXml(mShortcutUser.mService, out, forBackup);
 
         for (int j = 0; j < size; j++) {
-            saveShortcut(out, mShortcuts.valueAt(j), forBackup,
-                    getPackageInfo().isBackupAllowed());
+            saveShortcut(out, mShortcuts.valueAt(j), forBackup, getPackageInfo().isBackupAllowed());
         }
 
         if (!forBackup) {
@@ -1771,12 +1833,14 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             final Intent[] intentsNoExtras = si.getIntentsNoExtras();
             final PersistableBundle[] intentsExtras = si.getIntentPersistableExtrases();
-            final int numIntents = intentsNoExtras.length;
-            for (int i = 0; i < numIntents; i++) {
-                out.startTag(null, TAG_INTENT);
-                ShortcutService.writeAttr(out, ATTR_INTENT_NO_EXTRA, intentsNoExtras[i]);
-                ShortcutService.writeTagExtra(out, TAG_EXTRAS, intentsExtras[i]);
-                out.endTag(null, TAG_INTENT);
+            if (intentsNoExtras != null && intentsExtras != null) {
+                final int numIntents = intentsNoExtras.length;
+                for (int i = 0; i < numIntents; i++) {
+                    out.startTag(null, TAG_INTENT);
+                    ShortcutService.writeAttr(out, ATTR_INTENT_NO_EXTRA, intentsNoExtras[i]);
+                    ShortcutService.writeTagExtra(out, TAG_EXTRAS, intentsExtras[i]);
+                    out.endTag(null, TAG_INTENT);
+                }
             }
 
             ShortcutService.writeTagExtra(out, TAG_EXTRAS, si.getExtras());
@@ -1839,6 +1903,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         final ShortcutPackage ret = new ShortcutPackage(shortcutUser,
                 shortcutUser.getUserId(), packageName);
 
+        ret.mIsInitilized = ShortcutService.parseIntAttribute(parser, ATTR_SCHEMA_VERSON, 0) > 0;
         ret.mApiCallCount =
                 ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
         ret.mLastResetTime =
@@ -2060,7 +2125,9 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     @VisibleForTesting
     List<ShortcutInfo> getAllShortcutsForTest() {
-        return new ArrayList<>(mShortcuts.values());
+        final List<ShortcutInfo> ret = new ArrayList<>(1);
+        forEachShortcut(ret::add);
+        return ret;
     }
 
     @VisibleForTesting
@@ -2072,7 +2139,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     public void verifyStates() {
         super.verifyStates();
 
-        boolean failed = false;
+        final boolean[] failed = new boolean[1];
 
         final ShortcutService s = mShortcutUser.mService;
 
@@ -2083,7 +2150,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         for (int outer = all.size() - 1; outer >= 0; outer--) {
             final ArrayList<ShortcutInfo> list = all.valueAt(outer);
             if (list.size() > mShortcutUser.mService.getMaxActivityShortcuts()) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": activity " + all.keyAt(outer)
                         + " has " + all.valueAt(outer).size() + " shortcuts.");
             }
@@ -2103,61 +2170,60 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         // Verify each shortcut's status.
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
+        forEachShortcut(si -> {
             if (!(si.isDeclaredInManifest() || si.isDynamic() || si.isPinned() || si.isCached())) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is not manifest, dynamic or pinned.");
             }
             if (si.isDeclaredInManifest() && si.isDynamic()) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is both dynamic and manifest at the same time.");
             }
             if (si.getActivity() == null && !si.isFloating()) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has null activity, but not floating.");
             }
             if ((si.isDynamic() || si.isManifestShortcut()) && !si.isEnabled()) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is not floating, but is disabled.");
             }
             if (si.isFloating() && si.getRank() != 0) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is floating, but has rank=" + si.getRank());
             }
             if (si.getIcon() != null) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " still has an icon");
             }
             if (si.hasAdaptiveBitmap() && !(si.hasIconFile() || si.hasIconUri())) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has adaptive bitmap but was not saved to a file nor has icon uri.");
             }
             if (si.hasIconFile() && si.hasIconResource()) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has both resource and bitmap icons");
             }
             if (si.hasIconFile() && si.hasIconUri()) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has both url and bitmap icons");
             }
             if (si.hasIconUri() && si.hasIconResource()) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has both url and resource icons");
             }
             if (si.isEnabled()
                     != (si.getDisabledReason() == ShortcutInfo.DISABLED_REASON_NOT_DISABLED)) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " isEnabled() and getDisabledReason() disagree: "
                         + si.isEnabled() + " vs " + si.getDisabledReason());
@@ -2165,18 +2231,18 @@ class ShortcutPackage extends ShortcutPackageItem {
             if ((si.getDisabledReason() == ShortcutInfo.DISABLED_REASON_VERSION_LOWER)
                     && (getPackageInfo().getBackupSourceVersionCode()
                     == ShortcutInfo.VERSION_CODE_UNKNOWN)) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " RESTORED_VERSION_LOWER with no backup source version code.");
             }
             if (s.isDummyMainActivity(si.getActivity())) {
-                failed = true;
+                failed[0] = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has a dummy target activity");
             }
-        }
+        });
 
-        if (failed) {
+        if (failed[0]) {
             throw new IllegalStateException("See logcat for errors");
         }
     }
@@ -2187,6 +2253,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         } else {
             mPackageIdentifiers.remove(packageName);
         }
+        awaitInAppSearch(true, "Update visibility",
+                session -> AndroidFuture.completedFuture(true));
     }
 
     void mutateShortcut(@NonNull final String id, @Nullable final ShortcutInfo shortcut,
@@ -2196,23 +2264,309 @@ class ShortcutPackage extends ShortcutPackageItem {
         synchronized (mLock) {
             if (shortcut != null) {
                 transform.accept(shortcut);
-            } else {
-                transform.accept(findShortcutById(id));
             }
-            // TODO: Load ShortcutInfo from AppSearch, apply transformation logic and save
+            final ShortcutInfo si = findShortcutById(id);
+            if (si == null) {
+                return;
+            }
+            transform.accept(si);
+            saveShortcut(si);
         }
+    }
+
+    private void saveShortcut(@NonNull final ShortcutInfo... shortcuts) {
+        Objects.requireNonNull(shortcuts);
+        saveShortcut(Arrays.asList(shortcuts));
+    }
+
+    private void saveShortcut(@NonNull final Collection<ShortcutInfo> shortcuts) {
+        Objects.requireNonNull(shortcuts);
+        shortcuts.forEach(si -> {
+            if (si.isPinned()) {
+                mShortcuts.put(si.getId(), si);
+            } else {
+                mShortcuts.remove(si.getId());
+            }
+        });
+        saveToAppSearch(shortcuts);
+    }
+
+    private void saveToAppSearch(@NonNull final Collection<ShortcutInfo> shortcuts) {
+        Objects.requireNonNull(shortcuts);
+        if (shortcuts.isEmpty()) {
+            // No need to invoke AppSearch when there's nothing to save.
+            return;
+        }
+        awaitInAppSearch("Saving shortcuts", session -> {
+            final AndroidFuture<Boolean> future = new AndroidFuture<>();
+            session.put(new PutDocumentsRequest.Builder()
+                            .addGenericDocuments(
+                                    AppSearchShortcutInfo.toGenericDocuments(shortcuts))
+                            .build(),
+                    mShortcutUser.mExecutor,
+                    result -> {
+                        if (!result.isSuccess()) {
+                            for (AppSearchResult<Void> k : result.getFailures().values()) {
+                                Slog.e(TAG, k.getErrorMessage());
+                            }
+                            future.completeExceptionally(new RuntimeException(
+                                    "Failed to save shortcuts"));
+                            return;
+                        }
+                        future.complete(true);
+                    });
+            return future;
+        });
     }
 
     /**
      * Removes shortcuts from AppSearch.
      */
     void removeShortcuts() {
+        awaitInAppSearch("Removing all shortcuts from " + getPackageName(), session -> {
+            final AndroidFuture<Boolean> future = new AndroidFuture<>();
+            session.remove("", getSearchSpec(), mShortcutUser.mExecutor, result -> {
+                if (!result.isSuccess()) {
+                    future.completeExceptionally(
+                            new RuntimeException(result.getErrorMessage()));
+                    return;
+                }
+                future.complete(true);
+            });
+            return future;
+        });
+    }
+
+    private void removeShortcut(@NonNull final String id) {
+        Objects.requireNonNull(id);
+        mShortcuts.remove(id);
+        awaitInAppSearch("Removing shortcut with id=" + id, session -> {
+            final AndroidFuture<Boolean> future = new AndroidFuture<>();
+            session.remove(new RemoveByUriRequest.Builder(getPackageName()).addUris(id).build(),
+                    mShortcutUser.mExecutor, result -> {
+                        if (!result.isSuccess()) {
+                            final Map<String, AppSearchResult<Void>> failures =
+                                    result.getFailures();
+                            for (String key : failures.keySet()) {
+                                Slog.e(TAG, "Failed deleting " + key + ", error message:"
+                                        + failures.get(key).getErrorMessage());
+                            }
+                            future.completeExceptionally(new RuntimeException(
+                                    "Failed to delete shortcut: " + id));
+                            return;
+                        }
+                        future.complete(true);
+                    });
+            return future;
+        });
+    }
+
+    @NonNull
+    private List<ShortcutInfo> getShortcutById(@NonNull final Collection<String> ids) {
+        final List<String> shortcutIds = new ArrayList<>(1);
+        for (String id : ids) {
+            if (id != null) {
+                shortcutIds.add(id);
+            }
+        }
+        return awaitInAppSearch("Getting shortcut by id", session -> {
+            final AndroidFuture<List<ShortcutInfo>> future = new AndroidFuture<>();
+            session.getByUri(
+                    new GetByUriRequest.Builder(getPackageName()).addUris(shortcutIds).build(),
+                    mShortcutUser.mExecutor,
+                    results -> {
+                        final List<ShortcutInfo> ret = new ArrayList<>(1);
+                        Map<String, GenericDocument> documents = results.getSuccesses();
+                        for (GenericDocument doc : documents.values()) {
+                            final ShortcutInfo info = new AppSearchShortcutInfo(doc)
+                                    .toShortcutInfo(mShortcutUser.getUserId());
+                            ret.add(info);
+                        }
+                        future.complete(ret);
+                    });
+            return future;
+        });
+    }
+
+    private void forEachShortcut(@NonNull final Consumer<ShortcutInfo> cb) {
+        forEachShortcut("", cb);
+    }
+
+    private void forEachShortcut(
+            @NonNull final String query, @NonNull final Consumer<ShortcutInfo> cb) {
+        forEachShortcutStopWhen(query, si -> {
+            cb.accept(si);
+            return false;
+        });
+    }
+
+    private void forEachShortcutMutate(@NonNull final Consumer<ShortcutInfo> cb) {
+        forEachShortcutMutateIf(si -> {
+            cb.accept(si);
+            return true;
+        });
+    }
+
+    private void forEachShortcutMutateIf(@NonNull final Function<ShortcutInfo, Boolean> cb) {
+        forEachShortcutMutateIf("", cb);
+    }
+
+    private void forEachShortcutMutateIf(@NonNull final String query,
+            @NonNull final Function<ShortcutInfo, Boolean> cb) {
+        final SearchResults res = awaitInAppSearch("Mutating shortcuts", session ->
+                AndroidFuture.completedFuture(session.search(query, getSearchSpec())));
+        if (res == null) return;
+        List<ShortcutInfo> shortcuts = getNextPage(res);
+        while (!shortcuts.isEmpty()) {
+            final List<ShortcutInfo> changed = new ArrayList<>(1);
+            for (ShortcutInfo si : shortcuts) {
+                if (cb.apply(si)) changed.add(si);
+            }
+            saveShortcut(changed);
+            shortcuts = getNextPage(res);
+        }
+    }
+
+    private void forEachShortcutStopWhen(
+            @NonNull final Function<ShortcutInfo, Boolean> cb) {
+        forEachShortcutStopWhen("", cb);
+    }
+
+    private void forEachShortcutStopWhen(
+            @NonNull final String query, @NonNull final Function<ShortcutInfo, Boolean> cb) {
+        final SearchResults res = awaitInAppSearch("Iterating shortcuts", session ->
+                AndroidFuture.completedFuture(session.search(query, getSearchSpec())));
+        if (res == null) return;
+        List<ShortcutInfo> shortcuts = getNextPage(res);
+        while (!shortcuts.isEmpty()) {
+            for (ShortcutInfo si : shortcuts) {
+                if (cb.apply(si)) return;
+            }
+            shortcuts = getNextPage(res);
+        }
+    }
+
+    private List<ShortcutInfo> getNextPage(@NonNull final SearchResults res) {
+        final AndroidFuture<List<ShortcutInfo>> future = new AndroidFuture<>();
+        final List<ShortcutInfo> ret = new ArrayList<>();
+        final long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            res.getNextPage(mShortcutUser.mExecutor, nextPage -> {
+                if (!nextPage.isSuccess()) {
+                    future.complete(ret);
+                    return;
+                }
+                final List<SearchResult> results = nextPage.getResultValue();
+                if (results.isEmpty()) {
+                    future.complete(ret);
+                    return;
+                }
+                final List<ShortcutInfo> page = new ArrayList<>(results.size());
+                for (SearchResult result : results) {
+                    final ShortcutInfo si = new AppSearchShortcutInfo(result.getGenericDocument())
+                            .toShortcutInfo(mShortcutUser.getUserId());
+                    page.add(si);
+                }
+                ret.addAll(page);
+                future.complete(ret);
+            });
+            return ConcurrentUtils.waitForFutureNoInterrupt(future,
+                    "Getting next batch of shortcuts");
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
+    }
+
+    @Nullable
+    private <T> T awaitInAppSearch(
+            @NonNull final String description,
+            @NonNull final Function<AppSearchSession, CompletableFuture<T>> cb) {
+        return awaitInAppSearch(false, description, cb);
+    }
+
+    @Nullable
+    private <T> T awaitInAppSearch(
+            final boolean forceReset,
+            @NonNull final String description,
+            @NonNull final Function<AppSearchSession, CompletableFuture<T>> cb) {
+        synchronized (mLock) {
+            final StrictMode.ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
+            final long callingIdentity = Binder.clearCallingIdentity();
+            final AppSearchManager.SearchContext searchContext =
+                    new AppSearchManager.SearchContext.Builder(getPackageName()).build();
+            try (AppSearchSession session = ConcurrentUtils.waitForFutureNoInterrupt(
+                    mShortcutUser.getAppSearch(searchContext), "Resetting app search")) {
+                StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                        .detectAll()
+                        .penaltyLog() // TODO: change this to penaltyDeath to fix the call-site
+                        .build());
+                final boolean wasInitialized = mIsInitilized;
+                if (!wasInitialized || forceReset) {
+                    ConcurrentUtils.waitForFutureNoInterrupt(
+                            setupSchema(session), "Setting up schema");
+                }
+                mIsInitilized = true;
+                if (!wasInitialized) {
+                    restoreParsedShortcuts(false);
+                }
+                return ConcurrentUtils.waitForFutureNoInterrupt(cb.apply(session), description);
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to initiate app search for shortcut package "
+                        + getPackageName() + " user " + mShortcutUser.getUserId(), e);
+                return null;
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+                StrictMode.setThreadPolicy(oldPolicy);
+            }
+        }
+    }
+
+    @NonNull
+    private AndroidFuture<AppSearchSession> setupSchema(
+            @NonNull final AppSearchSession session) {
+        SetSchemaRequest.Builder schemaBuilder = new SetSchemaRequest.Builder()
+                .addSchemas(AppSearchPerson.SCHEMA, AppSearchShortcutInfo.SCHEMA);
+        for (PackageIdentifier pi : mPackageIdentifiers.values()) {
+            schemaBuilder = schemaBuilder
+                    .setSchemaTypeVisibilityForPackage(
+                            AppSearchPerson.SCHEMA_TYPE, true, pi)
+                    .setSchemaTypeVisibilityForPackage(
+                            AppSearchShortcutInfo.SCHEMA_TYPE, true, pi);
+        }
+        final AndroidFuture<AppSearchSession> future = new AndroidFuture<>();
+        session.setSchema(
+                schemaBuilder.build(), mShortcutUser.mExecutor, mShortcutUser.mExecutor, result -> {
+            if (!result.isSuccess()) {
+                future.completeExceptionally(
+                        new IllegalArgumentException(result.getErrorMessage()));
+                return;
+            }
+            future.complete(session);
+        });
+        return future;
+    }
+
+    @NonNull
+    private SearchSpec getSearchSpec() {
+        return new SearchSpec.Builder()
+                .addFilterSchemas(AppSearchShortcutInfo.SCHEMA_TYPE)
+                .addFilterNamespaces(getPackageName())
+                .setTermMatch(SearchSpec.TERM_MATCH_EXACT_ONLY)
+                .build();
     }
 
     /**
-     * Merge/replace shortcuts parsed from xml file.
+     * Replace shortcuts parsed from xml file.
      */
-    void restoreParsedShortcuts(final boolean replace) {
+    void restoreParsedShortcuts() {
+        restoreParsedShortcuts(true);
+    }
+
+    private void restoreParsedShortcuts(final boolean replace) {
+        if (replace) {
+            removeShortcuts();
+        }
+        saveToAppSearch(mShortcuts.values());
     }
 
     private boolean verifyRanksSequential(List<ShortcutInfo> list) {

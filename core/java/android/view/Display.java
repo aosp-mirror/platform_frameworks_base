@@ -1070,6 +1070,11 @@ public final class Display {
             if (mDisplayInfo.userDisabledHdrTypes.length == 0) {
                 return mDisplayInfo.hdrCapabilities;
             }
+
+            if (mDisplayInfo.hdrCapabilities == null) {
+                return null;
+            }
+
             ArraySet<Integer> enabledTypesSet = new ArraySet<>();
             for (int supportedType : mDisplayInfo.hdrCapabilities.getSupportedHdrTypes()) {
                 boolean typeDisabled = false;
@@ -1083,6 +1088,7 @@ public final class Display {
                     enabledTypesSet.add(supportedType);
                 }
             }
+
             int[] enabledTypes = new int[enabledTypesSet.size()];
             int index = 0;
             for (int enabledType : enabledTypesSet) {
@@ -1107,6 +1113,9 @@ public final class Display {
     public int[] getReportedHdrTypes() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
+            if (mDisplayInfo.hdrCapabilities == null) {
+                return new int[0];
+            }
             return mDisplayInfo.hdrCapabilities.getSupportedHdrTypes();
         }
     }
@@ -1120,7 +1129,11 @@ public final class Display {
     public boolean isHdr() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            return !(getHdrCapabilities().getSupportedHdrTypes().length == 0);
+            HdrCapabilities hdrCapabilities = getHdrCapabilities();
+            if (hdrCapabilities == null) {
+                return false;
+            }
+            return !(hdrCapabilities.getSupportedHdrTypes().length == 0);
         }
     }
 

@@ -234,7 +234,7 @@ public class VibratorManagerServiceTest {
         CombinedVibration effect = CombinedVibration.createParallel(
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
         vibrate(service, effect, HAPTIC_FEEDBACK_ATTRS);
-        service.cancelVibrate(service);
+        service.cancelVibrate(/* usageFilter= */ -1, service);
 
         assertTrue(service.setAlwaysOnEffect(UID, PACKAGE_NAME, 1, effect, ALARM_ATTRS));
 
@@ -880,17 +880,42 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void cancelVibrate_stopsVibrating() throws Exception {
+    public void cancelVibrate_withoutUsageFilter_stopsVibrating() throws Exception {
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
 
-        service.cancelVibrate(service);
+        service.cancelVibrate(/* usageFilter= */ -1, service);
         assertFalse(service.isVibrating(1));
 
-        vibrate(service, VibrationEffect.createOneShot(10_000, 100), ALARM_ATTRS);
+        vibrate(service, VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100), ALARM_ATTRS);
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
-        service.cancelVibrate(service);
+        service.cancelVibrate(/* usageFilter= */ -1, service);
+        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+    }
+
+    @Test
+    public void cancelVibrate_withFilter_onlyCancelsVibrationWithFilteredUsage() throws Exception {
+        mockVibrators(1);
+        VibratorManagerService service = createSystemReadyService();
+
+        vibrate(service, VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100), ALARM_ATTRS);
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        // Vibration is not cancelled with a different usage.
+        service.cancelVibrate(VibrationAttributes.USAGE_RINGTONE, service);
+        assertFalse(waitUntil(s -> !s.isVibrating(1), service, /* timeout= */ 50));
+
+        // Vibration is not cancelled with a different usage class used as filter.
+        service.cancelVibrate(
+                VibrationAttributes.USAGE_CLASS_FEEDBACK | ~VibrationAttributes.USAGE_CLASS_MASK,
+                service);
+        assertFalse(waitUntil(s -> !s.isVibrating(1), service, /* timeout= */ 50));
+
+        // Vibration is cancelled with usage class as filter.
+        service.cancelVibrate(
+                VibrationAttributes.USAGE_CLASS_ALARM | ~VibrationAttributes.USAGE_CLASS_MASK,
+                service);
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
     }
 

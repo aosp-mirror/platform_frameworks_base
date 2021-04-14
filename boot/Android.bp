@@ -71,4 +71,21 @@ platform_bootclasspath {
             "hiddenapi/hiddenapi-unsupported-packages.txt",
         ],
     },
+
+    dists: [
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-flags.csv",
+        },
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-index.csv",
+        },
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-metadata.csv",
+            // Legacy name
+            dest: "hiddenapi-unsupported.csv",
+        },
+    ],
 }
