@@ -173,6 +173,7 @@ import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.NetworkEvent;
+import android.app.admin.ParcelableGranteeMap;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
 import android.app.admin.SecurityLog;
@@ -278,6 +279,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
@@ -5649,41 +5651,33 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List<String> getKeyPairGrants(String callerPackage, String alias) {
+    public ParcelableGranteeMap getKeyPairGrants(String callerPackage, String alias) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
         Preconditions.checkCallAuthorization(canManageCertificates(caller));
 
-        return mInjector.binderWithCleanCallingIdentity(() -> {
+        final ArrayMap<Integer, Set<String>> result = new ArrayMap<>();
+        mInjector.binderWithCleanCallingIdentity(() -> {
             try (KeyChainConnection keyChainConnection =
                          KeyChain.bindAsUser(mContext, caller.getUserHandle())) {
-                final List<String> result = new ArrayList<>();
                 final int[] granteeUids = keyChainConnection.getService().getGrants(alias);
                 final PackageManager pm = mInjector.getPackageManager(caller.getUserId());
 
-                // TODO: Return Set<Set<String>> when AIDL supports it: b/136048684
-                // Public API returns a set of sets, where each internal set contains all package
-                // names corresponding to the same UID. For now a set of sets is marshalled as a
-                // null-separated list.
                 for (final int uid : granteeUids) {
                     final String[] packages = pm.getPackagesForUid(uid);
                     if (packages == null) {
                         Slogf.wtf(LOG_TAG, "No packages found for uid " + uid);
                         continue;
                     }
-                    if (!result.isEmpty()) {
-                        result.add(null);
-                    }
-                    result.addAll(Arrays.asList(packages));
+                    result.put(uid, new ArraySet<String>(packages));
                 }
-                return result;
             } catch (RemoteException e) {
                 Slogf.e(LOG_TAG, "Querying keypair grants", e);
             } catch (InterruptedException e) {
                 Slogf.w(LOG_TAG, "Interrupted while querying keypair grants", e);
                 Thread.currentThread().interrupt();
             }
-            return Collections.emptyList();
         });
+        return new ParcelableGranteeMap(result);
     }
 
     /**
