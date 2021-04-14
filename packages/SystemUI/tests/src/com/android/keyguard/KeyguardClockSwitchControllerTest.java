@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +50,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -102,8 +104,11 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private FrameLayout mLargeClockFrame;
     @Mock
     BatteryController mBatteryController;
+    @Mock
+    ConfigurationController mConfigurationController;
 
     private KeyguardClockSwitchController mController;
+    private View mStatusArea;
 
     @Before
     public void setup() {
@@ -111,6 +116,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         when(mView.findViewById(R.id.left_aligned_notification_icon_container))
                 .thenReturn(mNotificationIcons);
+        when(mNotificationIcons.getLayoutParams()).thenReturn(
+                mock(RelativeLayout.LayoutParams.class));
         when(mView.getContext()).thenReturn(getContext());
 
         when(mView.findViewById(R.id.animatable_clock_view)).thenReturn(mClockView);
@@ -135,10 +142,15 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mPluginManager,
                 mFeatureFlags,
                 mExecutor,
-                mBatteryController);
+                mBatteryController,
+                mConfigurationController);
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mColorExtractor.getColors(anyInt())).thenReturn(mGradientColors);
+
+        mStatusArea = mock(View.class);
+        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(mStatusArea);
+
     }
 
     @Test
@@ -201,31 +213,17 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     public void testSmartspacePluginConnectedRemovesKeyguardStatusArea() {
         mController.init();
 
-        View statusArea = mock(View.class);
-        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(statusArea);
-
-        View nic = mock(View.class);
-        when(mView.findViewById(R.id.left_aligned_notification_icon_container)).thenReturn(nic);
-        when(nic.getLayoutParams()).thenReturn(mock(RelativeLayout.LayoutParams.class));
-
         BcSmartspaceDataPlugin plugin = mock(BcSmartspaceDataPlugin.class);
         TestView view = mock(TestView.class);
         when(plugin.getView(any())).thenReturn(view);
 
         mController.mPluginListener.onPluginConnected(plugin, mContext);
-        verify(statusArea).setVisibility(View.GONE);
+        verify(mStatusArea).setVisibility(View.GONE);
     }
 
     @Test
     public void testSmartspacePluginDisconnectedShowsKeyguardStatusArea() {
         mController.init();
-
-        View statusArea = mock(View.class);
-        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(statusArea);
-
-        View nic = mock(View.class);
-        when(mView.findViewById(R.id.left_aligned_notification_icon_container)).thenReturn(nic);
-        when(nic.getLayoutParams()).thenReturn(mock(RelativeLayout.LayoutParams.class));
 
         BcSmartspaceDataPlugin plugin = mock(BcSmartspaceDataPlugin.class);
         TestView view = mock(TestView.class);
@@ -233,7 +231,22 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         mController.mPluginListener.onPluginConnected(plugin, mContext);
         mController.mPluginListener.onPluginDisconnected(plugin);
-        verify(statusArea).setVisibility(View.VISIBLE);
+        verify(mStatusArea).setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    public void testThemeChangeNotifiesSmartspace() {
+        mController.init();
+
+        BcSmartspaceDataPlugin plugin = mock(BcSmartspaceDataPlugin.class);
+        TestView view = mock(TestView.class);
+        when(plugin.getView(any())).thenReturn(view);
+
+        mController.mPluginListener.onPluginConnected(plugin, mContext);
+
+        reset(view);
+        mController.getConfigurationListener().onThemeChanged();
+        verify(view).setPrimaryTextColor(anyInt());
     }
 
     private void verifyAttachment(VerificationMode times) {
@@ -250,5 +263,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         }
 
         public void registerDataProvider(BcSmartspaceDataPlugin plugin) { }
+
+        public void setPrimaryTextColor(int color) { }
     }
 }
