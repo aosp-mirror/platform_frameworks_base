@@ -2796,6 +2796,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return dc != null && dc.okToAnimate(ignoreFrozen);
     }
 
+    boolean okToAnimate(boolean ignoreFrozen, boolean ignoreScreenOn) {
+        final DisplayContent dc = getDisplayContent();
+        return dc != null && dc.okToAnimate(ignoreFrozen, ignoreScreenOn);
+    }
+
     @Override
     public void commitPendingTransaction() {
         scheduleAnimation();
