@@ -136,6 +136,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
 
     @Override
     public boolean updateConfiguration(TimeConfiguration timeConfiguration) {
+        enforceManageTimeDetectorPermission();
         // TODO(b/172891783) Add actual logic
         return false;
     }
