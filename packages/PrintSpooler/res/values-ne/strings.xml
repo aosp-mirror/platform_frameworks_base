@@ -65,7 +65,7 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"कार्यहरूलाई छाप्न सकिएन"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"फाइल सिर्जना गर्न सकिएन"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"केही प्रिन्टिङ सम्बन्धी सेवाहरूलाई असक्षम गरिएको छ"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"प्रिन्टरहरू खोज्दै"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"प्रिन्टरहरू खोजिँदै छ"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"कुनै पनि प्रिन्टिङ सेवाहरू सक्रिय छैनन्"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"कुनै प्रिन्टरहरू भेटाइएन"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"प्रिन्टरहरू थप्न सक्दैन"</string>

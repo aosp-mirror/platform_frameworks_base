@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"toegang tot jou fisieke aktiwiteit"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"foto\'s en video te neem"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Bluetooth-toestelle in die omtrek"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"ontdek en koppel aan Bluetooth-toestelle in die omtrek"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Toestelle in die omtrek"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"ontdek en koppel aan toestelle in die omtrek"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Oproeprekords"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"lees en skryf foonoproeprekord"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Foon"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Laat die program toe om Bluetooth-toestelle in die omtrek te ontdek en saam te bind"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"koppel aan saamgebinde Bluetooth-toestelle"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Laat die program toe om aan saamgebinde Bluetooth-toestelle te koppel"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"adverteer op Bluetooth-toestelle in die omtrek"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Laat die program toe om op Bluetooth-toestelle in die omtrek te adverteer"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"bepaal relatiewe posisie tussen ultrabreëbandtoestelle in die omtrek"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Laat die program toe om relatiewe posisie tussen ultrabreëbandtoestelle in die omtrek te bepaal"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Voorkeur-NFC-betalingdiensinligting"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Laat die program toe om voorkeur-NFC-betalingdiensinligting soos geregistreerde hulpmiddels en roetebestemming te kry."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"beheer kortveldkommunikasie"</string>
@@ -1852,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Uitgevee deur jou administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n\n• Skakel Donkertema aan\n• Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Ok Google\", af of beperk dit\n\n"<annotation id="url">"Kom meer te wete"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Batterybespaarder doen die volgende om batterylewe te verleng:\n\n• Skakel Donkertema aan\n• Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Ok Google\", af of beperk dit"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys totdat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Skakel Databespaarder aan?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Skakel aan"</string>
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Hierdie kennisgewing is gedegradeer na Stil. Tik om terugvoer te gee."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Hierdie kennisgewing is hoër gegradeer. Tik om terugvoer te gee."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Hierdie kennisgewing is laer gegradeer. Tik om terugvoer te gee."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Roetinemodus-inligtingkennisgewing"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Battery kan afloop voordat dit normaalweg gelaai word"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterybespaarder is geaktiveer om batterylewe te verleng"</string>
@@ -2259,9 +2273,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Jy kan nou \'n deel van jou skerm vergroot"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Skakel aan in Instellings"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Maak toe"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Om voort te gaan, moet &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; toegang tot jou toestel se mikrofoon hê."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Om voort te gaan, moet &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; toegang tot jou toestel se kamera hê."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Skakel aan"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Deblokkeer toestelmikrofoon"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Deblokkeer toestelkamera"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Vir &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; en alle programme en dienste"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Deblokkeer"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorprivaatheid"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Programikoon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Programhandelsmerkprent"</string>

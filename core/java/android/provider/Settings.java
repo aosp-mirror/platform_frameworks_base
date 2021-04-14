@@ -8539,13 +8539,16 @@ public final class Settings {
                 "one_handed_tutorial_show_count";
 
         /**
-         * Indicates whether transform is enabled.
+         * Indicates whether ui translation is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)
          *
          * @hide
          */
-        public static final String TRANSFORM_ENABLED = "transform_enabled";
+        @SystemApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String UI_TRANSLATION_ENABLED = "ui_translation_enabled";
 
         /**
          * The current night mode that has been selected by the user.  Owned
@@ -14724,6 +14727,15 @@ public final class Settings {
         public static final String POWER_BUTTON_VERY_LONG_PRESS =
                 "power_button_very_long_press";
 
+        /**
+         * Overrides internal R.integer.config_keyChordPowerVolumeUp.
+         * Allowable values detailed in frameworks/base/core/res/res/values/config.xml.
+         * Used by PhoneWindowManager.
+         * @hide
+         */
+        @Readable
+        public static final String KEY_CHORD_POWER_VOLUME_UP =
+                "key_chord_power_volume_up";
 
         /**
          * Keyguard should be on the left hand side of the screen, for wide screen layouts.

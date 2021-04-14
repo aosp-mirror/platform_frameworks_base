@@ -30,6 +30,7 @@ import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_STOP;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -277,13 +278,15 @@ public final class UsageStats implements Parcelable {
 
     /**
      * Get the last time this package's component was used by a client package, measured in
-     * milliseconds since the epoch. Note that component usage is only reported in certain cases
-     * (e.g. broadcast receiver, service, content provider).
+     * milliseconds since the epoch. Note that component usage is only reported for component
+     * bindings (e.g. broadcast receiver, service, content provider) and only when such a binding
+     * would cause an app to leave the stopped state.
      * See {@link UsageEvents.Event#APP_COMPONENT_USED}
      * @hide
      */
     @SystemApi
-    public long getLastTimeComponentUsed() {
+    @CurrentTimeMillisLong
+    public long getLastTimeAnyComponentUsed() {
         return mLastTimeComponentUsed;
     }
 

@@ -53,6 +53,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserManager;
+import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.DisplayCutout;
@@ -154,6 +155,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -517,6 +519,9 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mOldLayoutDirection;
     private NotificationShelfController mNotificationShelfController;
 
+    private final QuickAccessWalletClient mQuickAccessWalletClient;
+    private final Executor mUiExecutor;
+
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
@@ -578,7 +583,9 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationShadeDepthController notificationShadeDepthController,
             AmbientState ambientState,
             LockIconViewController lockIconViewController,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            QuickAccessWalletClient quickAccessWalletClient,
+            @Main Executor uiExecutor) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
@@ -624,6 +631,8 @@ public class NotificationPanelViewController extends PanelViewController {
         mScrimController = scrimController;
         mUserManager = userManager;
         mMediaDataManager = mediaDataManager;
+        mQuickAccessWalletClient = quickAccessWalletClient;
+        mUiExecutor = uiExecutor;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();
@@ -975,6 +984,9 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setAffordanceHelper(mAffordanceHelper);
         mKeyguardBottomArea.setStatusBar(mStatusBar);
         mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);
+        mKeyguardBottomArea.setFalsingManager(mFalsingManager);
+        mKeyguardBottomArea.initWallet(mQuickAccessWalletClient, mUiExecutor,
+                mFeatureFlags.isQuickAccessWalletEnabled());
     }
 
     private void updateMaxDisplayedNotifications(boolean recompute) {

@@ -44,7 +44,7 @@ public class BluetoothPowerCalculatorTest {
             .setAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_IDLE, 10.0)
             .setAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_RX, 50.0)
             .setAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_TX, 100.0)
-            .initMeasuredEnergyStatsLocked(0);
+            .initMeasuredEnergyStatsLocked();
 
     @Test
     public void testTimerBasedModel() {

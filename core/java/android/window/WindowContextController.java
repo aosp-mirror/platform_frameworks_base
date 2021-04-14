@@ -29,22 +29,29 @@ import android.view.WindowManagerGlobal;
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
- * The controller to manage {@link WindowContext} listener, such as registering and unregistering
- * the listener.
+ * The controller to manage {@link WindowContext}, such as attaching to a window manager node or
+ * detaching from the current attached node. The user must call
+ * {@link #attachToDisplayArea(int, int, Bundle)}, call {@link #attachToWindowToken(IBinder)}
+ * after that if necessary, and then call {@link #detachIfNeeded()} for release.
  *
  * @hide
  */
 public class WindowContextController {
     private final IWindowManager mWms;
+    /**
+     * {@code true} to indicate that the {@code mToken} is associated with a
+     * {@link com.android.server.wm.DisplayArea}. Note that {@code mToken} is able to attach a
+     * WindowToken after this flag sets to {@code true}.
+     */
     @VisibleForTesting
-    public boolean mListenerRegistered;
+    public boolean mAttachedToDisplayArea;
     @NonNull
     private final IBinder mToken;
 
     /**
      * Window Context Controller constructor
      *
-     * @param token The token to register to the window context listener. It is usually from
+     * @param token The token used to attach to a window manager node. It is usually from
      *              {@link Context#getWindowContextToken()}.
      */
     public WindowContextController(@NonNull IBinder token) {
@@ -60,19 +67,21 @@ public class WindowContextController {
     }
 
     /**
-     * Registers the {@code mToken} to the window context listener.
+     * Attaches the {@code mToken} to a {@link com.android.server.wm.DisplayArea}.
      *
      * @param type The window type of the {@link WindowContext}
      * @param displayId The {@link Context#getDisplayId() ID of display} to associate with
      * @param options The window context launched option
+     * @throws IllegalStateException if the {@code mToken} has already been attached to a
+     * DisplayArea.
      */
-    public void registerListener(@WindowType int type, int displayId,  @Nullable Bundle options) {
-        if (mListenerRegistered) {
-            throw new UnsupportedOperationException("A Window Context can only register a listener"
-                    + " once.");
+    public void attachToDisplayArea(@WindowType int type, int displayId, @Nullable Bundle options) {
+        if (mAttachedToDisplayArea) {
+            throw new IllegalStateException("A Window Context can be only attached to "
+                    + "a DisplayArea once.");
         }
         try {
-            mListenerRegistered = mWms.registerWindowContextListener(mToken, type, displayId,
+            mAttachedToDisplayArea = mWms.attachWindowContextToDisplayArea(mToken, type, displayId,
                     options);
         }  catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -80,14 +89,42 @@ public class WindowContextController {
     }
 
     /**
-     * Unregisters the window context listener associated with the {@code mToken} if it has been
-     * registered.
+     * Switches to attach the window context to a window token.
+     * <p>
+     * Note that the context should have been attached to a
+     * {@link com.android.server.wm.DisplayArea} by {@link #attachToDisplayArea(int, int, Bundle)}
+     * before attaching to a window token, and the window token's type must match the window
+     * context's type.
+     * </p><p>
+     * A {@link WindowContext} can only attach to a specific window manager node, which is either a
+     * {@link com.android.server.wm.DisplayArea} by calling
+     * {@link #attachToDisplayArea(int, int, Bundle)} or the latest attached {@code windowToken}
+     * although this API is allowed to be called multiple times.
+     * </p>
+     * @throws IllegalStateException if the {@code mClientToken} has not yet attached to
+     * a {@link com.android.server.wm.DisplayArea} by
+     * {@link #attachToDisplayArea(int, int, Bundle)}.
+     *
+     * @see IWindowManager#attachWindowContextToWindowToken(IBinder, IBinder)
      */
-    public void unregisterListenerIfNeeded() {
-        if (mListenerRegistered) {
+    public void attachToWindowToken(IBinder windowToken) {
+        if (!mAttachedToDisplayArea) {
+            throw new IllegalStateException("The Window Context should have been attached"
+                    + " to a DisplayArea.");
+        }
+        try {
+            mWms.attachWindowContextToWindowToken(mToken, windowToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Detaches the window context from the node it's currently associated with. */
+    public void detachIfNeeded() {
+        if (mAttachedToDisplayArea) {
             try {
-                mWms.unregisterWindowContextListener(mToken);
-                mListenerRegistered = false;
+                mWms.detachWindowContextFromWindowContainer(mToken);
+                mAttachedToDisplayArea = false;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accedir a la teva activitat física"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Càmera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fer fotos i gravar vídeos"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Dispositius Bluetooth propers"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"detectar i connectar-se a dispositius Bluetooth propers"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Dispositius propers"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"detectar dispositius propers i connectar-s\'hi"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registres de trucades"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"llegir i editar el registre de trucades del telèfon"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telèfon"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permet que l\'aplicació detecti i vinculi dispositius Bluetooth propers"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"connectar-se a dispositius Bluetooth vinculats"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permet que l\'aplicació es connecti a dispositius Bluetooth vinculats"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"anunciar-se als dispositius Bluetooth propers"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permet que l\'aplicació s\'anunciï als dispositius Bluetooth propers"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"determinar posició entre dispositius de banda ultraampla propers"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permet que l\'aplicació determini la posició relativa entre els dispositius de banda ultraampla propers"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informació preferent sobre el servei de pagament per NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet que l\'aplicació obtingui informació preferent sobre el servei de pagament per NFC, com ara complements registrats i destinacions de rutes."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Comunicació de camp proper (NFC)"</string>
@@ -1852,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Per allargar la durada de la bateria, la funció Estalvi de bateria:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\".\n\n"<annotation id="url">"Més informació"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Per allargar la durada de la bateria, la funció Estalvi de bateria:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar l\'Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"El nivell d\'aquesta notificació s\'ha disminuït a Silenci. Toca per proporcionar suggeriments."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Aquesta notificació s\'ha classificat amb un nivell superior. Toca per proporcionar suggeriments."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Aquesta notificació s\'ha classificat amb un nivell inferior. Toca per proporcionar suggeriments."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificació d\'informació del mode de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"És possible que la bateria s\'esgoti abans de la càrrega habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"S\'ha activat l\'estalvi de bateria per prolongar-ne la durada"</string>
@@ -2259,9 +2273,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Ara pots ampliar una part de la pantalla"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activa a Configuració"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ignora"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Per continuar, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; necessita accedir al micròfon del dispositiu."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Per continuar, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; necessita accedir a la càmera del dispositiu."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Activa"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Desbloqueja el micròfon del dispositiu"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Desbloqueja la càmera del dispositiu"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Per a &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; i tots els serveis i aplicacions"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Desbloqueja"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privadesa dels sensors"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Icona d\'aplicació"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imatge de brànding de l\'aplicació"</string>

@@ -77,7 +77,7 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
                     dc.getImeContainer(), 1000 /* ownerUid */, TYPE_INPUT_METHOD_DIALOG,
                     null /* options */);
             return true;
-        }).when(wms).registerWindowContextListener(any(), eq(TYPE_INPUT_METHOD_DIALOG),
+        }).when(wms).attachWindowContextToDisplayArea(any(), eq(TYPE_INPUT_METHOD_DIALOG),
                 anyInt(), any());
 
         mSecondaryDisplay = new TestDisplayContent.Builder(mAtm, 1000, 1000).build();

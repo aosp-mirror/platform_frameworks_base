@@ -2639,8 +2639,12 @@ public abstract class PackageManager {
     public static final String FEATURE_SE_OMAPI_SD = "android.hardware.se.omapi.sd";
 
     /**
-     * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device is compatible with Android’s security model.
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device is
+     * compatible with Android’s security model.
+     *
+     * <p>See sections 2 and 9 in the
+     * <a href="https://source.android.com/compatibility/android-cdd">Android CDD</a> for more
+     * details.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_SECURITY_MODEL_COMPATIBLE =

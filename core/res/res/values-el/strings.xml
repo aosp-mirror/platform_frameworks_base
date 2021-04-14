@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"πρόσβαση στη σωματική σας δραστηριότητα"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Κάμερα"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"γίνεται λήψη φωτογραφιών και εγγραφή βίντεο"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Κοντινές συσκευές Bluetooth"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"ανακάλυψη και σύνδεση σε κοντινές συσκευές Bluetooth"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Συσκευές σε κοντινή απόσταση"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"ανακάλυψη και σύνδεση σε κοντινές συσκευές"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Αρχεία καταγρ. κλήσ."</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ανάγνωση και εγγραφή αρχείου καταγραφής τηλεφωνικών κλήσεων"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Τηλέφωνο"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Επιτρέπει στην εφαρμογή την ανακάλυψη και τη σύζευξη κοντινών συσκευών Bluetooth"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"σύνδεση σε συζευγμένες συσκευές Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Επιτρέπει στην εφαρμογή τη σύνδεση σε συζευγμένες συσκευές Bluetooth"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"προβολή διαφημίσεων σε κοντινές συσκευές Bluetooth"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Επιτρέπει στην εφαρμογή να προβάλλει διαφημίσεις σε κοντινές συσκευές Bluetooth"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"προσδιορισμός σχετ. θέσης μεταξύ κοντινών συσκευών Ultra-Wideband"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Επιτρέψτε στην εφαρμογή να προσδιορίζει τη σχετική θέση μεταξύ κοντινών συσκευών Ultra-Wideband"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Πληροφορίες προτιμώμενης υπηρεσίας πληρωμών NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Επιτρέπει στην εφαρμογή να λαμβάνει πληροφορίες προτιμώμενης υπηρεσίας πληρωμής NFC, όπως καταχωρημένα βοηθήματα και προορισμό διαδρομής."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ελέγχει την Επικοινωνία κοντινού πεδίου (FNC)"</string>
@@ -1852,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ενημερώθηκε από τον διαχειριστή σας"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Διαγράφηκε από τον διαχειριστή σας"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Για την επέκταση της διάρκειας ζωής της μπαταρίας σας, η Εξοικονόμηση μπαταρίας:\n\n• Ενεργοποιεί το Σκούρο θέμα\n• Απενεργοποιεί ή περιορίζει τη δραστηριότητα παρασκηνίου, ορισμένα οπτικά εφέ και άλλες λειτουργίες όπως την εντολή Hey Google\n\n"<annotation id="url">"Μάθετε περισσότερα"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Για την επέκταση της διάρκειας ζωής της μπαταρίας σας, η Εξοικονόμηση μπαταρίας:\n\n• Ενεργοποιεί το Σκούρο θέμα\n• Απενεργοποιεί ή περιορίζει τη δραστηριότητα στο παρασκήνιο, ορισμένα οπτικά εφέ και άλλες λειτουργίες, όπως την εντολή Hey Google"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτήν τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ενεργ.Εξοικονόμησης δεδομένων;"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ενεργοποίηση"</string>
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Αυτή η ειδοποίηση υποβιβάστηκε στις Αθόρυβες. Πατήστε για να υποβάλετε σχόλια."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Αυτή η ειδοποίηση κατατάχθηκε ψηλότερα. Πατήστε για να υποβάλετε σχόλια."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Αυτή η ειδοποίηση κατατάχθηκε χαμηλότερα. Πατήστε για να υποβάλετε σχόλια."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ειδοποίηση πληροφοριών λειτουργίας Ρουτίνας"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Η μπαταρία μπορεί να εξαντληθεί πριν από τη συνηθισμένη φόρτιση"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Η Εξοικονόμηση μπαταρίας ενεργοποιήθηκε για την επέκταση της διάρκειας ζωής της μπαταρίας"</string>
@@ -2259,9 +2273,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Μπορείτε πλέον να μεγεθύνετε μέρος της οθόνης σας"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Ενεργοποίηση στις Ρυθμίσεις"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Παράβλεψη"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Για να συνεχίσετε, η εφαρμογή &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; χρειάζεται πρόσβαση στο μικρόφωνο της συσκευής σας."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Για να συνεχίσετε, η εφαρμογή &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; χρειάζεται πρόσβαση στην κάμερα της συσκευής σας."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Ενεργοποίηση"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Κατάργηση αποκλεισμού μικροφώνου συσκευής"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Κατάργηση αποκλεισμού κάμερας συσκευής"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Για την εφαρμογή &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; και όλες τις εφαρμογές και υπηρεσίες"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Κατάργηση αποκλεισμού"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Απόρρητο αισθητήρα"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Εικονίδιο εφαρμογής"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Εικόνα επωνυμίας εφαρμογής"</string>

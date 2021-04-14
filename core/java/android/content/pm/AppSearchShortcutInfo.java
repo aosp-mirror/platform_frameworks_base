@@ -52,6 +52,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
 
     /** The name of the schema type for {@link ShortcutInfo} documents.*/
     public static final String SCHEMA_TYPE = "Shortcut";
+    public static final int SCHEMA_VERSION = 2;
 
     public static final String KEY_ACTIVITY = "activity";
     public static final String KEY_SHORT_LABEL = "shortLabel";
@@ -163,8 +164,10 @@ public class AppSearchShortcutInfo extends GenericDocument {
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS)
                     .build()
 
-            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_RANK)
+            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_RANK)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
+                    .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
+                    .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS)
                     .build()
 
             ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_IMPLICIT_RANK)
@@ -175,8 +178,10 @@ public class AppSearchShortcutInfo extends GenericDocument {
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .build()
 
-            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_FLAGS)
+            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_FLAGS)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_REPEATED)
+                    .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
+                    .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS)
                     .build()
 
             ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_ICON_RES_ID)
@@ -201,11 +206,110 @@ public class AppSearchShortcutInfo extends GenericDocument {
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE)
                     .build()
 
-            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_DISABLED_REASON)
+            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_DISABLED_REASON)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_REQUIRED)
+                    .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
+                    .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS)
                     .build()
 
             ).build();
+
+    /**
+     * The string representation of every flag within {@link ShortcutInfo}. Note that its value
+     * needs to be camelCase since AppSearch's tokenizer will break the word when it sees
+     * underscore.
+     */
+    private static final String IS_DYNAMIC = "Dyn";
+    private static final String NOT_DYNAMIC = "nDyn";
+    private static final String IS_PINNED = "Pin";
+    private static final String NOT_PINNED = "nPin";
+    private static final String HAS_ICON_RES = "IcR";
+    private static final String NO_ICON_RES = "nIcR";
+    private static final String HAS_ICON_FILE = "IcF";
+    private static final String NO_ICON_FILE = "nIcF";
+    private static final String IS_KEY_FIELD_ONLY = "Key";
+    private static final String NOT_KEY_FIELD_ONLY = "nKey";
+    private static final String IS_MANIFEST = "Man";
+    private static final String NOT_MANIFEST = "nMan";
+    private static final String IS_DISABLED = "Dis";
+    private static final String NOT_DISABLED = "nDis";
+    private static final String ARE_STRINGS_RESOLVED = "Str";
+    private static final String NOT_STRINGS_RESOLVED = "nStr";
+    private static final String IS_IMMUTABLE = "Im";
+    private static final String NOT_IMMUTABLE = "nIm";
+    private static final String HAS_ADAPTIVE_BITMAP = "IcA";
+    private static final String NO_ADAPTIVE_BITMAP = "nIcA";
+    private static final String IS_RETURNED_BY_SERVICE = "Rets";
+    private static final String NOT_RETURNED_BY_SERVICE = "nRets";
+    private static final String HAS_ICON_FILE_PENDING_SAVE = "Pens";
+    private static final String NO_ICON_FILE_PENDING_SAVE = "nPens";
+    private static final String IS_SHADOW = "Sdw";
+    private static final String NOT_SHADOW = "nSdw";
+    private static final String IS_LONG_LIVED = "Liv";
+    private static final String NOT_LONG_LIVED = "nLiv";
+    private static final String HAS_ICON_URI = "IcU";
+    private static final String NO_ICON_URI = "nIcU";
+    private static final String IS_CACHED_NOTIFICATION = "CaN";
+    private static final String NOT_CACHED_NOTIFICATION = "nCaN";
+    private static final String IS_CACHED_BUBBLE = "CaB";
+    private static final String NOT_CACHED_BUBBLE = "nCaB";
+    private static final String IS_CACHED_PEOPLE_TITLE = "CaPT";
+    private static final String NOT_CACHED_PEOPLE_TITLE = "nCaPT";
+
+    /**
+     * Following flags are not store within ShortcutInfo, but book-keeping states to reduce search
+     * space when performing queries against AppSearch.
+     */
+    private static final String HAS_BITMAP_PATH = "hBiP";
+    private static final String HAS_STRING_RESOURCE = "hStr";
+    private static final String HAS_NON_ZERO_RANK = "hRan";
+
+    public static final String QUERY_IS_DYNAMIC = KEY_FLAGS + ":" + IS_DYNAMIC;
+    public static final String QUERY_IS_NOT_DYNAMIC = KEY_FLAGS + ":" + NOT_DYNAMIC;
+    public static final String QUERY_IS_PINNED = KEY_FLAGS + ":" + IS_PINNED;
+    public static final String QUERY_IS_NOT_PINNED = KEY_FLAGS + ":" + NOT_PINNED;
+    public static final String QUERY_IS_MANIFEST = KEY_FLAGS + ":" + IS_MANIFEST;
+    public static final String QUERY_IS_NOT_MANIFEST = KEY_FLAGS + ":" + NOT_MANIFEST;
+    public static final String QUERY_IS_PINNED_AND_ENABLED =
+            "(" + KEY_FLAGS + ":" + IS_PINNED + " " + KEY_FLAGS + ":" + NOT_DISABLED + ")";
+    public static final String QUERY_IS_CACHED =
+            "(" + KEY_FLAGS + ":" + IS_CACHED_NOTIFICATION + " OR "
+            + KEY_FLAGS + ":" + IS_CACHED_BUBBLE + " OR "
+            + KEY_FLAGS + ":" + IS_CACHED_PEOPLE_TITLE + ")";
+    public static final String QUERY_IS_NOT_CACHED =
+            "(" + KEY_FLAGS + ":" + NOT_CACHED_NOTIFICATION + " "
+                    + KEY_FLAGS + ":" + NOT_CACHED_BUBBLE + " "
+                    + KEY_FLAGS + ":" + NOT_CACHED_PEOPLE_TITLE + ")";
+    public static final String QUERY_IS_FLOATING =
+            "((" + IS_PINNED + " OR " + QUERY_IS_CACHED + ") "
+                    + QUERY_IS_NOT_DYNAMIC + " " + QUERY_IS_NOT_MANIFEST + ")";
+    public static final String QUERY_IS_NOT_FLOATING =
+            "((" + QUERY_IS_NOT_PINNED + " " + QUERY_IS_NOT_CACHED + ") OR "
+                    + QUERY_IS_DYNAMIC + " OR " + QUERY_IS_MANIFEST + ")";
+    public static final String QUERY_IS_VISIBLE_TO_PUBLISHER =
+            "(" + KEY_DISABLED_REASON + ":" + ShortcutInfo.DISABLED_REASON_NOT_DISABLED
+                    + " OR " + KEY_DISABLED_REASON + ":"
+                    + ShortcutInfo.DISABLED_REASON_BY_APP
+                    + " OR " + KEY_DISABLED_REASON + ":"
+                    + ShortcutInfo.DISABLED_REASON_APP_CHANGED
+                    + " OR " + KEY_DISABLED_REASON + ":"
+                    + ShortcutInfo.DISABLED_REASON_UNKNOWN + ")";
+    public static final String QUERY_DISABLED_REASON_VERSION_LOWER =
+            KEY_DISABLED_REASON + ":" + ShortcutInfo.DISABLED_REASON_VERSION_LOWER;
+    public static final String QUERY_IS_NON_MANIFEST_VISIBLE =
+            "(" + QUERY_IS_NOT_MANIFEST + " " + QUERY_IS_VISIBLE_TO_PUBLISHER + " ("
+                    + QUERY_IS_PINNED + " OR " + QUERY_IS_CACHED + " OR " + QUERY_IS_DYNAMIC + "))";
+    public static final String QUERY_IS_VISIBLE_CACHED_OR_PINNED =
+            "(" + QUERY_IS_VISIBLE_TO_PUBLISHER + " " + QUERY_IS_DYNAMIC
+                    + " (" + QUERY_IS_CACHED + " OR " + QUERY_IS_PINNED + "))";
+    public static final String QUERY_IS_VISIBLE_PINNED_ONLY =
+            "(" + QUERY_IS_VISIBLE_TO_PUBLISHER + " " + QUERY_IS_PINNED + " " + QUERY_IS_NOT_CACHED
+            + " " + QUERY_IS_NOT_DYNAMIC + " " + QUERY_IS_NOT_MANIFEST + ")";
+    public static final String QUERY_HAS_BITMAP_PATH = KEY_FLAGS + ":" + HAS_BITMAP_PATH;
+    public static final String QUERY_HAS_STRING_RESOURCE = KEY_FLAGS + ":" + HAS_STRING_RESOURCE;
+    public static final String QUERY_HAS_NON_ZERO_RANK = KEY_FLAGS + ":" + HAS_NON_ZERO_RANK;
+    public static final String QUERY_IS_FLOATING_AND_HAS_RANK =
+            "(" + QUERY_IS_FLOATING + " " + QUERY_HAS_NON_ZERO_RANK + ")";
 
     public AppSearchShortcutInfo(@NonNull GenericDocument document) {
         super(document);
@@ -304,16 +408,16 @@ public class AppSearchShortcutInfo extends GenericDocument {
         final Person[] persons = parsePerson(getPropertyDocumentArray(KEY_PERSON));
         final String locusIdString = getPropertyString(KEY_LOCUS_ID);
         final LocusId locusId = locusIdString == null ? null : new LocusId(locusIdString);
-        final int rank = (int) getPropertyLong(KEY_RANK);
+        final int rank = Integer.parseInt(getPropertyString(KEY_RANK));
         final int implicitRank = (int) getPropertyLong(KEY_IMPLICIT_RANK);
         final byte[] extrasByte = getPropertyBytes(KEY_EXTRAS);
         final PersistableBundle extras = transformToPersistableBundle(extrasByte);
-        final int flags = parseFlags(getPropertyLongArray(KEY_FLAGS));
+        final int flags = parseFlags(getPropertyStringArray(KEY_FLAGS));
         final int iconResId = (int) getPropertyLong(KEY_ICON_RES_ID);
         final String iconResName = getPropertyString(KEY_ICON_RES_NAME);
         final String iconUri = getPropertyString(KEY_ICON_URI);
         final String bitmapPath = getPropertyString(KEY_BITMAP_PATH);
-        final int disabledReason = (int) getPropertyLong(KEY_DISABLED_REASON);
+        final int disabledReason = Integer.parseInt(getPropertyString(KEY_DISABLED_REASON));
         final ShortcutInfo si = new ShortcutInfo(
                 userId, getUri(), packageName, activity, icon, shortLabel, shortLabelResId,
                 shortLabelResName, longLabel, longLabelResId, longLabelResName, disabledMessage,
@@ -343,6 +447,9 @@ public class AppSearchShortcutInfo extends GenericDocument {
     /** @hide */
     @VisibleForTesting
     public static class Builder extends GenericDocument.Builder<Builder> {
+
+        private List<String> mFlags = new ArrayList<>(1);
+        private boolean mHasStringResource = false;
 
         public Builder(String packageName, String id) {
             super(/*namespace=*/ packageName, id, SCHEMA_TYPE);
@@ -386,8 +493,11 @@ public class AppSearchShortcutInfo extends GenericDocument {
          * @hide
          */
         @NonNull
-        public Builder setShortLabelResId(@Nullable final int shortLabelResId) {
+        public Builder setShortLabelResId(final int shortLabelResId) {
             setPropertyLong(KEY_SHORT_LABEL_RES_ID, shortLabelResId);
+            if (shortLabelResId != 0) {
+                mHasStringResource = true;
+            }
             return this;
         }
 
@@ -417,8 +527,11 @@ public class AppSearchShortcutInfo extends GenericDocument {
          * @hide
          */
         @NonNull
-        public Builder setLongLabelResId(@Nullable final int longLabelResId) {
+        public Builder setLongLabelResId(final int longLabelResId) {
             setPropertyLong(KEY_LONG_LABEL_RES_ID, longLabelResId);
+            if (longLabelResId != 0) {
+                mHasStringResource = true;
+            }
             return this;
         }
 
@@ -448,8 +561,11 @@ public class AppSearchShortcutInfo extends GenericDocument {
          * @hide
          */
         @NonNull
-        public Builder setDisabledMessageResId(@Nullable final int disabledMessageResId) {
+        public Builder setDisabledMessageResId(final int disabledMessageResId) {
             setPropertyLong(KEY_DISABLED_MESSAGE_RES_ID, disabledMessageResId);
+            if (disabledMessageResId != 0) {
+                mHasStringResource = true;
+            }
             return this;
         }
 
@@ -546,7 +662,10 @@ public class AppSearchShortcutInfo extends GenericDocument {
         @NonNull
         public Builder setRank(final int rank) {
             Preconditions.checkArgument((0 <= rank), "Rank cannot be negative");
-            setPropertyLong(KEY_RANK, rank);
+            setPropertyString(KEY_RANK, String.valueOf(rank));
+            if (rank != 0) {
+                mFlags.add(HAS_NON_ZERO_RANK);
+            }
             return this;
         }
 
@@ -574,7 +693,10 @@ public class AppSearchShortcutInfo extends GenericDocument {
          * @hide
          */
         public Builder setFlags(@ShortcutInfo.ShortcutFlags final int flags) {
-            setPropertyLong(KEY_FLAGS, flattenFlags(flags));
+            final String[] flagArray = flattenFlags(flags);
+            if (flagArray != null && flagArray.length > 0) {
+                mFlags.addAll(Arrays.asList(flagArray));
+            }
             return this;
         }
 
@@ -603,6 +725,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
         public Builder setBitmapPath(@Nullable final String bitmapPath) {
             if (!TextUtils.isEmpty(bitmapPath)) {
                 setPropertyString(KEY_BITMAP_PATH, bitmapPath);
+                mFlags.add(HAS_BITMAP_PATH);
             }
             return this;
         }
@@ -621,7 +744,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
          * @hide
          */
         public Builder setDisabledReason(@ShortcutInfo.DisabledReason final int disabledReason) {
-            setPropertyLong(KEY_DISABLED_REASON, disabledReason);
+            setPropertyString(KEY_DISABLED_REASON, String.valueOf(disabledReason));
             return this;
         }
 
@@ -631,6 +754,10 @@ public class AppSearchShortcutInfo extends GenericDocument {
         @NonNull
         @Override
         public AppSearchShortcutInfo build() {
+            if (mHasStringResource) {
+                mFlags.add(HAS_STRING_RESOURCE);
+            }
+            setPropertyString(KEY_FLAGS, mFlags.toArray(new String[0]));
             return new AppSearchShortcutInfo(super.build());
         }
     }
@@ -682,20 +809,115 @@ public class AppSearchShortcutInfo extends GenericDocument {
         }
     }
 
-    private static long[] flattenFlags(@ShortcutInfo.ShortcutFlags final int flags) {
-        final List<Integer> flattenedFlags = new ArrayList<>();
-        flattenedFlags.add(0);
+    private static String[] flattenFlags(@ShortcutInfo.ShortcutFlags final int flags) {
+        final List<String> flattenedFlags = new ArrayList<>();
         for (int i = 0; i < 31; i++) {
             final int mask = 1 << i;
-            if ((flags & mask) != 0) {
-                flattenedFlags.add(mask);
+            final String value = flagToString(flags, mask);
+            if (value != null) {
+                flattenedFlags.add(value);
             }
         }
-        return flattenedFlags.stream().mapToLong(i -> i).toArray();
+        return flattenedFlags.toArray(new String[0]);
     }
 
-    private static int parseFlags(final long[] flags) {
-        return (int) Arrays.stream(flags).reduce((p, v) -> p | v).getAsLong();
+    @Nullable
+    private static String flagToString(
+            @ShortcutInfo.ShortcutFlags final int flags, final int mask) {
+        switch (mask) {
+            case ShortcutInfo.FLAG_DYNAMIC:
+                return (flags & mask) != 0 ? IS_DYNAMIC : NOT_DYNAMIC;
+            case ShortcutInfo.FLAG_PINNED:
+                return (flags & mask) != 0 ? IS_PINNED : NOT_PINNED;
+            case ShortcutInfo.FLAG_HAS_ICON_RES:
+                return (flags & mask) != 0 ? HAS_ICON_RES : NO_ICON_RES;
+            case ShortcutInfo.FLAG_HAS_ICON_FILE:
+                return (flags & mask) != 0 ? HAS_ICON_FILE : NO_ICON_FILE;
+            case ShortcutInfo.FLAG_KEY_FIELDS_ONLY:
+                return (flags & mask) != 0 ? IS_KEY_FIELD_ONLY : NOT_KEY_FIELD_ONLY;
+            case ShortcutInfo.FLAG_MANIFEST:
+                return (flags & mask) != 0 ? IS_MANIFEST : NOT_MANIFEST;
+            case ShortcutInfo.FLAG_DISABLED:
+                return (flags & mask) != 0 ? IS_DISABLED : NOT_DISABLED;
+            case ShortcutInfo.FLAG_STRINGS_RESOLVED:
+                return (flags & mask) != 0 ? ARE_STRINGS_RESOLVED : NOT_STRINGS_RESOLVED;
+            case ShortcutInfo.FLAG_IMMUTABLE:
+                return (flags & mask) != 0 ? IS_IMMUTABLE : NOT_IMMUTABLE;
+            case ShortcutInfo.FLAG_ADAPTIVE_BITMAP:
+                return (flags & mask) != 0 ? HAS_ADAPTIVE_BITMAP : NO_ADAPTIVE_BITMAP;
+            case ShortcutInfo.FLAG_RETURNED_BY_SERVICE:
+                return (flags & mask) != 0 ? IS_RETURNED_BY_SERVICE : NOT_RETURNED_BY_SERVICE;
+            case ShortcutInfo.FLAG_ICON_FILE_PENDING_SAVE:
+                return (flags & mask) != 0 ? HAS_ICON_FILE_PENDING_SAVE : NO_ICON_FILE_PENDING_SAVE;
+            case ShortcutInfo.FLAG_SHADOW:
+                return (flags & mask) != 0 ? IS_SHADOW : NOT_SHADOW;
+            case ShortcutInfo.FLAG_LONG_LIVED:
+                return (flags & mask) != 0 ? IS_LONG_LIVED : NOT_LONG_LIVED;
+            case ShortcutInfo.FLAG_HAS_ICON_URI:
+                return (flags & mask) != 0 ? HAS_ICON_URI : NO_ICON_URI;
+            case ShortcutInfo.FLAG_CACHED_NOTIFICATIONS:
+                return (flags & mask) != 0 ? IS_CACHED_NOTIFICATION : NOT_CACHED_NOTIFICATION;
+            case ShortcutInfo.FLAG_CACHED_BUBBLES:
+                return (flags & mask) != 0 ? IS_CACHED_BUBBLE : NOT_CACHED_BUBBLE;
+            case ShortcutInfo.FLAG_CACHED_PEOPLE_TILE:
+                return (flags & mask) != 0 ? IS_CACHED_PEOPLE_TITLE : NOT_CACHED_PEOPLE_TITLE;
+            default:
+                return null;
+        }
+    }
+
+    private static int parseFlags(@Nullable final String[] flags) {
+        if (flags == null) {
+            return 0;
+        }
+        int ret = 0;
+        for (int i = 0; i < flags.length; i++) {
+            ret = ret | parseFlag(flags[i]);
+        }
+        return ret;
+    }
+
+    private static int parseFlag(final String value) {
+        switch (value) {
+            case IS_DYNAMIC:
+                return ShortcutInfo.FLAG_DYNAMIC;
+            case IS_PINNED:
+                return ShortcutInfo.FLAG_PINNED;
+            case HAS_ICON_RES:
+                return ShortcutInfo.FLAG_HAS_ICON_RES;
+            case HAS_ICON_FILE:
+                return ShortcutInfo.FLAG_HAS_ICON_FILE;
+            case IS_KEY_FIELD_ONLY:
+                return ShortcutInfo.FLAG_KEY_FIELDS_ONLY;
+            case IS_MANIFEST:
+                return ShortcutInfo.FLAG_MANIFEST;
+            case IS_DISABLED:
+                return ShortcutInfo.FLAG_DISABLED;
+            case ARE_STRINGS_RESOLVED:
+                return ShortcutInfo.FLAG_STRINGS_RESOLVED;
+            case IS_IMMUTABLE:
+                return ShortcutInfo.FLAG_IMMUTABLE;
+            case HAS_ADAPTIVE_BITMAP:
+                return ShortcutInfo.FLAG_ADAPTIVE_BITMAP;
+            case IS_RETURNED_BY_SERVICE:
+                return ShortcutInfo.FLAG_RETURNED_BY_SERVICE;
+            case HAS_ICON_FILE_PENDING_SAVE:
+                return ShortcutInfo.FLAG_ICON_FILE_PENDING_SAVE;
+            case IS_SHADOW:
+                return ShortcutInfo.FLAG_SHADOW;
+            case IS_LONG_LIVED:
+                return ShortcutInfo.FLAG_LONG_LIVED;
+            case HAS_ICON_URI:
+                return ShortcutInfo.FLAG_HAS_ICON_URI;
+            case IS_CACHED_NOTIFICATION:
+                return ShortcutInfo.FLAG_CACHED_NOTIFICATIONS;
+            case IS_CACHED_BUBBLE:
+                return ShortcutInfo.FLAG_CACHED_BUBBLES;
+            case IS_CACHED_PEOPLE_TITLE:
+                return ShortcutInfo.FLAG_CACHED_PEOPLE_TILE;
+            default:
+                return 0;
+        }
     }
 
     @NonNull

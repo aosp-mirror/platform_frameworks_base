@@ -15,12 +15,13 @@
   -->
 
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="120dp"
-    android:minHeight="50dp"
+    android:minWidth="136dp"
+    android:minHeight="55dp"
     android:minResizeWidth="60dp"
     android:minResizeHeight="50dp"
     android:maxResizeHeight="207dp"
     android:updatePeriodMillis="60000"
+    android:widgetFeatures="reconfigurable"
     android:description="@string/people_tile_description"
     android:previewLayout="@layout/people_space_placeholder_layout"
     android:resizeMode="horizontal|vertical"

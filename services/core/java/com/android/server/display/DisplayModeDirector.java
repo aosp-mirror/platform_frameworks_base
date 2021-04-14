@@ -27,6 +27,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
+import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -40,14 +41,17 @@ import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.LocalServices;
 import com.android.server.display.utils.AmbientFilter;
 import com.android.server.display.utils.AmbientFilterFactory;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
@@ -93,6 +97,7 @@ public class DisplayModeDirector {
     private final AppRequestObserver mAppRequestObserver;
     private final SettingsObserver mSettingsObserver;
     private final DisplayObserver mDisplayObserver;
+    private final UdfpsObserver mUdfpsObserver;
     private final DeviceConfigInterface mDeviceConfig;
     private final DeviceConfigDisplaySettings mDeviceConfigDisplaySettings;
 
@@ -133,6 +138,7 @@ public class DisplayModeDirector {
         mSettingsObserver = new SettingsObserver(context, handler);
         mDisplayObserver = new DisplayObserver(context, handler);
         mBrightnessObserver = new BrightnessObserver(context, handler);
+        mUdfpsObserver = new UdfpsObserver();
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mDeviceConfig = injector.getDeviceConfig();
         mAlwaysRespectAppRequest = false;
@@ -149,6 +155,7 @@ public class DisplayModeDirector {
         mSettingsObserver.observe();
         mDisplayObserver.observe();
         mBrightnessObserver.observe(sensorManager);
+        mUdfpsObserver.observe();
         synchronized (mLock) {
             // We may have a listener already registered before the call to start, so go ahead and
             // notify them to pick up our newly initialized state.
@@ -545,6 +552,7 @@ public class DisplayModeDirector {
             mSettingsObserver.dumpLocked(pw);
             mAppRequestObserver.dumpLocked(pw);
             mBrightnessObserver.dumpLocked(pw);
+            mUdfpsObserver.dumpLocked(pw);
         }
     }
 
@@ -566,7 +574,6 @@ public class DisplayModeDirector {
         }
         final SparseArray<Vote> votes = getOrCreateVotesByDisplay(displayId);
 
-        Vote currentVote = votes.get(priority);
         if (vote != null) {
             votes.put(priority, vote);
         } else {
@@ -647,6 +654,11 @@ public class DisplayModeDirector {
     @VisibleForTesting
     SettingsObserver getSettingsObserver() {
         return mSettingsObserver;
+    }
+
+    @VisibleForTesting
+    UdfpsObserver getUdpfsObserver() {
+        return mUdfpsObserver;
     }
 
 
@@ -928,11 +940,15 @@ public class DisplayModeDirector {
         // LOW_POWER_MODE force display to [0, 60HZ] if Settings.Global.LOW_POWER_MODE is on.
         public static final int PRIORITY_LOW_POWER_MODE = 6;
 
+        // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
+        // to function, so this needs to be the highest priority of all votes.
+        public static final int PRIORITY_UDFPS = 7;
+
         // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
         // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
 
         public static final int MIN_PRIORITY = PRIORITY_DEFAULT_REFRESH_RATE;
-        public static final int MAX_PRIORITY = PRIORITY_LOW_POWER_MODE;
+        public static final int MAX_PRIORITY = PRIORITY_UDFPS;
 
         // The cutoff for the app request refresh rate range. Votes with priorities lower than this
         // value will not be considered when constructing the app request refresh rate range.
@@ -989,6 +1005,9 @@ public class DisplayModeDirector {
                     return "PRIORITY_USER_SETTING_PEAK_REFRESH_RATE";
                 case PRIORITY_LOW_POWER_MODE:
                     return "PRIORITY_LOW_POWER_MODE";
+                case PRIORITY_UDFPS:
+                    return "PRIORITY_UDFPS";
+
                 default:
                     return Integer.toString(priority);
             }
@@ -1162,7 +1181,7 @@ public class DisplayModeDirector {
     }
 
     final class AppRequestObserver {
-        private SparseArray<Display.Mode> mAppRequestedModeByDisplay;
+        private final SparseArray<Display.Mode> mAppRequestedModeByDisplay;
 
         AppRequestObserver() {
             mAppRequestedModeByDisplay = new SparseArray<>();
@@ -1196,7 +1215,6 @@ public class DisplayModeDirector {
 
             updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE, refreshRateVote);
             updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_SIZE, sizeVote);
-            return;
         }
 
         private Display.Mode findModeByIdLocked(int displayId, int modeId) {
@@ -1328,7 +1346,8 @@ public class DisplayModeDirector {
 
         private SensorManager mSensorManager;
         private Sensor mLightSensor;
-        private LightSensorEventListener mLightSensorListener = new LightSensorEventListener();
+        private final LightSensorEventListener mLightSensorListener =
+                new LightSensorEventListener();
         // Take it as low brightness before valid sensor data comes
         private float mAmbientLux = -1.0f;
         private AmbientFilter mAmbientFilter;
@@ -1559,8 +1578,7 @@ public class DisplayModeDirector {
             mLightSensorListener.dumpLocked(pw);
 
             if (mAmbientFilter != null) {
-                IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
-                ipw.setIndent("    ");
+                IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
                 mAmbientFilter.dump(ipw);
             }
         }
@@ -1907,7 +1925,7 @@ public class DisplayModeDirector {
                 return false;
             }
 
-            private Runnable mInjectSensorEventRunnable = new Runnable() {
+            private final Runnable mInjectSensorEventRunnable = new Runnable() {
                 @Override
                 public void run() {
                     long now = SystemClock.uptimeMillis();
@@ -1923,6 +1941,83 @@ public class DisplayModeDirector {
                     }
                 }
             };
+        }
+    }
+
+    private class UdfpsObserver extends IUdfpsHbmListener.Stub {
+        private final SparseBooleanArray mLocalHbmEnabled = new SparseBooleanArray();
+        private final SparseBooleanArray mGlobalHbmEnabled = new SparseBooleanArray();
+
+        public void observe() {
+            StatusBarManagerInternal statusBar =
+                    LocalServices.getService(StatusBarManagerInternal.class);
+            statusBar.setUdfpsHbmListener(this);
+        }
+
+        @Override
+        public void onHbmEnabled(int hbmType, int displayId) {
+            synchronized (mLock) {
+                updateHbmStateLocked(hbmType, displayId, true /*enabled*/);
+            }
+        }
+
+        @Override
+        public void onHbmDisabled(int hbmType, int displayId) {
+            synchronized (mLock) {
+                updateHbmStateLocked(hbmType, displayId, false /*enabled*/);
+            }
+        }
+
+        private void updateHbmStateLocked(int hbmType, int displayId, boolean enabled) {
+            switch (hbmType) {
+                case UdfpsObserver.LOCAL_HBM:
+                    mLocalHbmEnabled.put(displayId, enabled);
+                    break;
+                case UdfpsObserver.GLOBAL_HBM:
+                    mGlobalHbmEnabled.put(displayId, enabled);
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown HBM type reported. Ignoring.");
+                    return;
+            }
+            updateVoteLocked(displayId);
+        }
+
+        private void updateVoteLocked(int displayId) {
+            final Vote vote;
+            if (mGlobalHbmEnabled.get(displayId)) {
+                vote = Vote.forRefreshRates(60f, 60f);
+            } else if (mLocalHbmEnabled.get(displayId)) {
+                Display.Mode[] modes = mSupportedModesByDisplay.get(displayId);
+                float maxRefreshRate = 0f;
+                for (Display.Mode mode : modes) {
+                    if (mode.getRefreshRate() > maxRefreshRate) {
+                        maxRefreshRate = mode.getRefreshRate();
+                    }
+                }
+                vote = Vote.forRefreshRates(maxRefreshRate, maxRefreshRate);
+            } else {
+                vote = null;
+            }
+
+            DisplayModeDirector.this.updateVoteLocked(displayId, Vote.PRIORITY_UDFPS, vote);
+        }
+
+        void dumpLocked(PrintWriter pw) {
+            pw.println("  UdfpsObserver");
+            pw.println("    mLocalHbmEnabled: ");
+            for (int i = 0; i < mLocalHbmEnabled.size(); i++) {
+                final int displayId = mLocalHbmEnabled.keyAt(i);
+                final String enabled = mLocalHbmEnabled.valueAt(i) ? "enabled" : "disabled";
+                pw.println("      Display " + displayId + ": " + enabled);
+            }
+            pw.println("    mGlobalHbmEnabled: ");
+            for (int i = 0; i < mGlobalHbmEnabled.size(); i++) {
+                final int displayId = mGlobalHbmEnabled.keyAt(i);
+                final String enabled = mGlobalHbmEnabled.valueAt(i) ? "enabled" : "disabled";
+                pw.println("      Display " + displayId + ": " + enabled);
+            }
+
         }
     }
 

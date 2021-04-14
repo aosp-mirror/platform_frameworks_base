@@ -90,19 +90,23 @@ public final class FrameInfo {
     // When frame actually started.
     public static final int FRAME_START_TIME = 10;
 
+    // Interval between two consecutive frames
+    public static final int FRAME_INTERVAL = 11;
+
     // Must be the last one
     // This value must be in sync with `UI_THREAD_FRAME_INFO_SIZE` in FrameInfo.h
-    private static final int FRAME_INFO_SIZE = FRAME_START_TIME + 1;
+    private static final int FRAME_INFO_SIZE = FRAME_INTERVAL + 1;
 
     /** checkstyle */
     public void setVsync(long intendedVsync, long usedVsync, long frameTimelineVsyncId,
-            long frameDeadline, long frameStartTime) {
+            long frameDeadline, long frameStartTime, long frameInterval) {
         frameInfo[FRAME_TIMELINE_VSYNC_ID] = frameTimelineVsyncId;
         frameInfo[INTENDED_VSYNC] = intendedVsync;
         frameInfo[VSYNC] = usedVsync;
         frameInfo[FLAGS] = 0;
         frameInfo[FRAME_DEADLINE] = frameDeadline;
         frameInfo[FRAME_START_TIME] = frameStartTime;
+        frameInfo[FRAME_INTERVAL] = frameInterval;
     }
 
     /** checkstyle */

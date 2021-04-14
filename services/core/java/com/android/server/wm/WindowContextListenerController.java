@@ -103,7 +103,11 @@ class WindowContextListenerController {
         listener.unregister();
     }
 
-    boolean assertCallerCanRemoveListener(IBinder clientToken, boolean callerCanManageAppTokens,
+    /**
+     * Verifies if the caller is allowed to do the operation to the listener specified by
+     * {@code clientToken}.
+     */
+    boolean assertCallerCanModifyListener(IBinder clientToken, boolean callerCanManageAppTokens,
             int callingUid) {
         final WindowContextListenerImpl listener = mListeners.get(clientToken);
         if (listener == null) {

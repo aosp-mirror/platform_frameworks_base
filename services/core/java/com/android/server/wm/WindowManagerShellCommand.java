@@ -143,6 +143,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runSetLetterboxBackgroundWallpaperDarkScrimAlpha(pw);
                 case "get-letterbox-background-wallpaper-dark-scrim-alpha":
                     return runGetLetterboxBackgroundWallpaperDarkScrimAlpha(pw);
+                case "set-sandbox-display-apis":
+                    return runSandboxDisplayApis(pw);
                 case "reset":
                     return runReset(pw);
                 case "disable-blur":
@@ -350,6 +352,37 @@ public class WindowManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: scaling must be 'auto' or 'off'");
             return -1;
         }
+        return 0;
+    }
+
+    /**
+     * Override display size and metrics to reflect the DisplayArea of the calling activity.
+     */
+    private int runSandboxDisplayApis(PrintWriter pw) throws RemoteException {
+        int displayId = Display.DEFAULT_DISPLAY;
+        String arg = getNextArgRequired();
+        if ("-d".equals(arg)) {
+            displayId = Integer.parseInt(getNextArgRequired());
+            arg = getNextArgRequired();
+        }
+
+        final boolean sandboxDisplayApis;
+        switch (arg) {
+            case "true":
+            case "1":
+                sandboxDisplayApis = true;
+                break;
+            case "false":
+            case "0":
+                sandboxDisplayApis = false;
+                break;
+            default:
+                getErrPrintWriter().println("Error: expecting true, 1, false, 0, but we "
+                        + "get " + arg);
+                return -1;
+        }
+
+        mInternal.setSandboxDisplayApis(displayId, sandboxDisplayApis);
         return 0;
     }
 
@@ -855,6 +888,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         // set-letterbox-background-wallpaper-dark-scrim-alpha
         mInternal.resetLetterboxBackgroundWallpaperDarkScrimAlpha();
 
+        // set-sandbox-display-apis
+        mInternal.setSandboxDisplayApis(displayId, /* sandboxDisplayApis= */ true);
+
         pw.println("Reset all settings for displayId=" + displayId);
         return 0;
     }
@@ -918,6 +954,10 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    letterbox background. If alpha < 0 or >= 1 both it and");
         pw.println("    R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha are ignored and ");
         pw.println("    0.0 (transparent) is used instead.");
+        pw.println("  set-sandbox-display-apis [true|1|false|0]");
+        pw.println("    Sets override of Display APIs getRealSize / getRealMetrics to reflect ");
+        pw.println("    DisplayArea of the activity, or the window bounds if in letterbox or");
+        pw.println("    Size Compat Mode.");
         pw.println("  reset [-d DISPLAY_ID]");
         pw.println("    Reset all override settings.");
         if (!IS_USER) {

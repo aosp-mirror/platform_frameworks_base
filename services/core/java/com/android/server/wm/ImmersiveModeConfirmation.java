@@ -390,7 +390,7 @@ public class ImmersiveModeConfirmation {
         final Bundle options = getOptionsForWindowContext(rootDisplayAreaId);
         final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
         try {
-            wms.registerWindowContextListener(mWindowContext.getWindowContextToken(),
+            wms.attachWindowContextToDisplayArea(mWindowContext.getWindowContextToken(),
                     IMMERSIVE_MODE_CONFIRMATION_WINDOW_TYPE, mContext.getDisplayId(), options);
         }  catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();

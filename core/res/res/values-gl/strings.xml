@@ -174,7 +174,7 @@
     <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"Estanse a procesar demasiadas solicitudes. Téntao de novo máis tarde."</string>
     <string name="notification_title" msgid="5783748077084481121">"Erro de inicio de sesión en <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"Sincronizar"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"Non se puido realizar a sincronización"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"Non se puido realizar a vinculación"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"Tentáronse eliminar demasiados elementos de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"O almacenamento da tableta está cheo. Elimina algúns ficheiros para liberar espazo."</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"O almacenamento do reloxo está cheo. Elimina algúns ficheiros para liberar espazo."</string>
@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"acceder á túa actividade física"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"tirar fotos e gravar vídeos"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Dispositivos Bluetooth próximos"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"detectar dispositivos Bluetooth próximos e conectarse a eles"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Dispositivos próximos"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"detectar dispositivos próximos e conectarse a eles"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Rexistros de chamadas"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ler e editar o rexistro de chamadas do teléfono"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Teléfono"</string>
@@ -368,7 +368,7 @@
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"ler mensaxes de difusión móbil"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permite á aplicación ler mensaxes de difusión móbil recibidas polo teu dispositivo. As alertas de difusión móbil envíanse nalgunhas localizacións para avisar de situacións de emerxencia. É posible que aplicacións maliciosas afecten ao rendemento ou funcionamento do teu dispositivo cando se recibe unha difusión móbil de emerxencia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"ler feeds subscritos"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"Permite á aplicación obter detalles acerca dos feeds sincronizados actualmente."</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"Permite á aplicación obter detalles acerca dos feeds vinculados actualmente."</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"enviar e consultar mensaxes de SMS"</string>
     <string name="permdesc_sendSms" msgid="6757089798435130769">"Permite á aplicación enviar mensaxes SMS. É posible que esta acción implique custos inesperados. É posible que as aplicacións maliciosas che custen diñeiro debido ao envío de mensaxes sen a túa confirmación."</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"ler as túas mensaxes de texto (SMS ou MMS)"</string>
@@ -521,27 +521,27 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Permite que a aplicación reciba paquetes enviados a todos os dispositivos a través dunha rede wifi utilizando enderezos de emisión múltiple, non só o teu dispositivo Android TV. Utiliza máis enerxía que o modo que non inclúe a emisión múltiple."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Permite á aplicación recibir paquetes enviados a todos os dispositivos a través dunha rede wifi utilizando enderezos de multidifusión, non só o teu teléfono. Utiliza máis enerxía que o modo que non inclúe a multidifusión."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"acceder á configuración de Bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Permite á aplicación configurar a tableta Bluetooth local e descubrir e sincronizar con dispositivos remotos."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Permite á aplicación configurar a tableta Bluetooth local e descubrir e vincular con dispositivos remotos."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Permite que a aplicación configure o Bluetooth no dispositivo Android TV, descubra dispositivos remotos e se vincule con eles."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Permite á aplicación configurar o teléfono Bluetooth local e descubrir e sincronizar con dispositivos remotos."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Permite á aplicación configurar o teléfono Bluetooth local e descubrir e vincular con dispositivos remotos."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"conectar e desconectar de WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Permite á aplicación determinar se WiMAX está activado e obter información acerca das redes WiMAX que están conectadas."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"cambiar estado de WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Permite á aplicación conectar e desconectar a tableta de redes WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Permite que a aplicación conecte e desconecte o dispositivo Android TV de redes WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Permite á aplicación conectar e desconectar o teléfono de redes WiMAX."</string>
-    <string name="permlab_bluetooth" msgid="586333280736937209">"sincronizar con dispositivos Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite á aplicación ver a configuración do Bluetooth na tableta e efectuar e aceptar conexións con dispositivos sincronizados."</string>
+    <string name="permlab_bluetooth" msgid="586333280736937209">"vincular con dispositivos Bluetooth"</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite á aplicación ver a configuración do Bluetooth na tableta e efectuar e aceptar conexións con dispositivos vinculados."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite que a aplicación consulte a configuración do Bluetooth no dispositivo Android TV, e efectúe e acepte conexións con dispositivos vinculados."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite á aplicación ver a configuración do Bluetooth no teléfono e efectuar e aceptar conexións con dispositivos sincronizados."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite á aplicación ver a configuración do Bluetooth no teléfono e efectuar e aceptar conexións con dispositivos vinculados."</string>
     <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"detectar e vincular dispositivos Bluetooth"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que a aplicación detecte dispositivos Bluetooth próximos e se vincule a eles"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conectarse a dispositivos Bluetooth vinculados"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que a aplicación se conecte aos dispositivos Bluetooth vinculados"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"enviar anuncios a dispositivos Bluetooth próximos"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permite que a aplicación envíe anuncios a dispositivos Bluetooth próximos"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"determinar posición entre dispositivos próximos"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permite que a aplicación determine a posición relativa entre os dispositivos próximos que usen banda ultralarga"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información do servizo de pago de NFC preferido"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a aplicación obteña información do servizo de pago de NFC preferido, como as axudas rexistradas e o destino da ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Near Field Communication"</string>
@@ -661,12 +661,12 @@
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Icona cara"</string>
-    <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ler a configuración de sincronización"</string>
-    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Permite á aplicación ler a configuración de sincronización dunha conta. Por exemplo, esta acción pode determinar se a aplicación Contactos se sincroniza cunha conta."</string>
-    <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"activar e desactivar a sincronización"</string>
-    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Permite a unha aplicación modificar a configuración de sincronización dunha conta. Por exemplo, esta acción pode utilizarse para activar a sincronización da aplicación Contactos cunha conta."</string>
-    <string name="permlab_readSyncStats" msgid="3747407238320105332">"ler as estatísticas de sincronización"</string>
-    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Permite a unha aplicación ler as estatísticas de sincronización dunha conta, incluído o historial de eventos de sincronización e a cantidade de datos sincronizados."</string>
+    <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ler a configuración de vinculación"</string>
+    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Permite á aplicación ler a configuración de vinculación dunha conta. Por exemplo, esta acción pode determinar se a aplicación Contactos se vincula cunha conta."</string>
+    <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"activar e desactivar a vinculación"</string>
+    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Permite a unha aplicación modificar a configuración de vinculación dunha conta. Por exemplo, esta acción pode utilizarse para activar a vinculación da aplicación Contactos cunha conta."</string>
+    <string name="permlab_readSyncStats" msgid="3747407238320105332">"ler as estatísticas de vinculación"</string>
+    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Permite a unha aplicación ler as estatísticas de vinculación dunha conta, incluído o historial de eventos de vinculación e a cantidade de datos vinculados."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"ler o almacenamento compartido"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Permite á aplicación ler o almacenamento compartido."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"modificar ou eliminar o almacenamento compartido"</string>
@@ -1852,9 +1852,11 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado polo teu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado polo teu administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n\n• Activa o tema escuro.\n• Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\".\n\n"<annotation id="url">"Máis información"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n\n• Activa o tema escuro\n• Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\""</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o aforro de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, é posible que as imaxes non se mostren ata que as toques."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
+    <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o aforro de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, poida que as imaxes non se mostren ata que as toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Queres activar o aforro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"O nivel desta notificación diminuíu a Silenciosa. Toca para compartir a túa opinión."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificación clasificouse nun nivel superior. Toca para compartir a túa opinión."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificación clasificouse nun nivel inferior. Toca para compartir a túa opinión."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación da información do modo de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A batería pode esgotarse antes do habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Para ampliar a duración da batería activouse a función Aforro de batería"</string>
@@ -2259,9 +2273,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Xa podes ampliar parte da pantalla"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activar en Configuración"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ignorar"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Para continuar, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; precisa acceder ao micrófono do dispositivo."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Para continuar, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; precisa acceder á cámara do dispositivo."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Activar"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Desbloquea o micrófono do dispositivo"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Desbloquea a cámara do dispositivo"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Para &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; e todas as aplicacións e servizos"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Desbloquear"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privacidade do sensor"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Icona de aplicación"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imaxe de marca da aplicación"</string>

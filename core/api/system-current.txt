@@ -371,6 +371,7 @@ package android {
     field public static final int config_systemAudioIntelligence;
     field public static final int config_systemAutomotiveCluster;
     field public static final int config_systemAutomotiveProjection;
+    field public static final int config_systemCompanionDeviceProvider;
     field public static final int config_systemContacts;
     field public static final int config_systemGallery = 17039399; // 0x1040027
     field public static final int config_systemNotificationIntelligence;
@@ -1850,7 +1851,7 @@ package android.app.usage {
 
   public final class UsageStats implements android.os.Parcelable {
     method public int getAppLaunchCount();
-    method public long getLastTimeComponentUsed();
+    method public long getLastTimeAnyComponentUsed();
   }
 
   public final class UsageStatsManager {
@@ -2523,6 +2524,10 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES) public void startActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
   }
 
+  public class DataLoaderParams {
+    method @NonNull public static final android.content.pm.DataLoaderParams forIncremental(@NonNull android.content.ComponentName, @NonNull String);
+  }
+
   public final class InstantAppInfo implements android.os.Parcelable {
     ctor public InstantAppInfo(android.content.pm.ApplicationInfo, String[], String[]);
     ctor public InstantAppInfo(String, CharSequence, String[], String[]);
@@ -2613,6 +2618,7 @@ package android.content.pm {
 
   public class PackageInstaller {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
+    field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
   }
 
   public static class PackageInstaller.Session implements java.io.Closeable {
@@ -2929,7 +2935,7 @@ package android.content.pm.verify.domain {
 
   public final class DomainVerificationManager {
     method @Nullable @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public android.content.pm.verify.domain.DomainVerificationInfo getDomainVerificationInfo(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public java.util.List<android.content.pm.verify.domain.DomainOwner> getOwnersForDomain(@NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public java.util.SortedSet<android.content.pm.verify.domain.DomainOwner> getOwnersForDomain(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public java.util.List<java.lang.String> queryValidVerificationPackageNames();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public void setDomainVerificationLinkHandlingAllowed(@NonNull String, boolean) throws android.content.pm.PackageManager.NameNotFoundException;
     method @CheckResult @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public int setDomainVerificationStatus(@NonNull java.util.UUID, @NonNull java.util.Set<java.lang.String>, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -8558,7 +8564,7 @@ package android.os {
     method @NonNull public static String formatUid(int);
     method public static int getAppId(int);
     method public int getIdentifier();
-    method public static int getUid(@NonNull android.os.UserHandle, int);
+    method public int getUid(int);
     method @Deprecated public boolean isOwner();
     method public boolean isSystem();
     method public static int myUserId();
@@ -9297,6 +9303,7 @@ package android.provider {
     field public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
     field public static final String ODI_CAPTIONS_ENABLED = "odi_captions_enabled";
     field public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES = "theme_customization_overlay_packages";
+    field public static final String UI_TRANSLATION_ENABLED = "ui_translation_enabled";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
     field public static final int USER_SETUP_PERSONALIZATION_NOT_STARTED = 0; // 0x0
@@ -9817,7 +9824,6 @@ package android.service.displayhash {
   public final class DisplayHashParams implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.util.Size getBufferSize();
-    method public boolean isBufferScaleWithFiltering();
     method public boolean isGrayscaleBuffer();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.displayhash.DisplayHashParams> CREATOR;
@@ -9826,7 +9832,6 @@ package android.service.displayhash {
   public static final class DisplayHashParams.Builder {
     ctor public DisplayHashParams.Builder();
     method @NonNull public android.service.displayhash.DisplayHashParams build();
-    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setBufferScaleWithFiltering(boolean);
     method @NonNull public android.service.displayhash.DisplayHashParams.Builder setBufferSize(int, int);
     method @NonNull public android.service.displayhash.DisplayHashParams.Builder setGrayscaleBuffer(boolean);
   }

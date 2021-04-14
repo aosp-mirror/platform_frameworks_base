@@ -16,8 +16,6 @@
 
 package android.app;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -167,35 +165,6 @@ public class ActivityTaskManager {
                     return IActivityTaskManager.Stub.asInterface(b);
                 }
             };
-
-    /**
-     * Sets the windowing mode for a specific task. Only works on tasks of type
-     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}
-     * @param taskId The id of the task to set the windowing mode for.
-     * @param windowingMode The windowing mode to set for the task.
-     * @param toTop If the task should be moved to the top once the windowing mode changes.
-     * @return Whether the task was successfully put into the specified windowing mode.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop)
-            throws SecurityException {
-        try {
-            return getService().setTaskWindowingMode(taskId, windowingMode, toTop);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Moves the input task to the primary-split-screen stack.
-     * @param taskId Id of task to move.
-     * @param toTop If the task and stack should be moved to the top.
-     * @return Whether the task was successfully put into splitscreen.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, boolean toTop) {
-        return setTaskWindowingMode(taskId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, toTop);
-    }
 
     /**
      * Removes root tasks in the windowing modes from the system if they are of activity type
@@ -361,20 +330,6 @@ public class ActivityTaskManager {
     public void resizeTask(int taskId, Rect bounds) {
         try {
             getService().resizeTask(taskId, bounds, RESIZE_MODE_SYSTEM);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Resize docked stack & its task to given stack & task bounds.
-     * @param rootTaskBounds Bounds to resize stack.
-     * @param taskBounds Bounds to resize task.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void resizePrimarySplitScreen(@NonNull Rect rootTaskBounds, @NonNull Rect taskBounds) {
-        try {
-            getService().resizePrimarySplitScreen(rootTaskBounds, taskBounds, null, null, null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

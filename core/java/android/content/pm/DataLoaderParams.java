@@ -17,20 +17,24 @@
 package android.content.pm;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 
 /**
- * This class represents the parameters used to configure a Data Loader.
+ * This class represents the parameters used to configure a DataLoader.
+ *
+ * {@see android.service.dataloader.DataLoaderService.DataLoader}
  */
 public class DataLoaderParams {
     @NonNull
     private final DataLoaderParamsParcel mData;
 
     /**
-     * Creates and populates set of Data Loader parameters for Streaming installation.
+     * Creates and populates set of DataLoader parameters for Streaming installation.
      *
-     * @param componentName Data Loader component supporting Streaming installation.
-     * @param arguments free form installation arguments
+     * @param componentName the component implementing a DataLoaderService that is responsible
+     *                      for providing data blocks while streaming.
+     * @param arguments free form installation arguments.
      */
     public static final @NonNull DataLoaderParams forStreaming(@NonNull ComponentName componentName,
             @NonNull String arguments) {
@@ -40,9 +44,12 @@ public class DataLoaderParams {
     /**
      * Creates and populates set of Data Loader parameters for Incremental installation.
      *
-     * @param componentName Data Loader component supporting Incremental installation.
+     * @param componentName DataLoaderService component supporting Incremental installation.
      * @param arguments free form installation arguments
+     *
+     * @hide
      */
+    @SystemApi
     public static final @NonNull DataLoaderParams forIncremental(
             @NonNull ComponentName componentName, @NonNull String arguments) {
         return new DataLoaderParams(DataLoaderType.INCREMENTAL, componentName, arguments);

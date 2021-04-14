@@ -185,8 +185,6 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetGameContentType(IBinder displayToken, boolean on);
     private static native void nativeSetDisplayPowerMode(
             IBinder displayToken, int mode);
-    private static native void nativeDeferTransactionUntil(long transactionObj, long nativeObject,
-            long barrierObject, long frame);
     private static native void nativeReparent(long transactionObj, long nativeObject,
             long newParentNativeObject);
 
@@ -3024,21 +3022,6 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setLayerStack(SurfaceControl sc, int layerStack) {
             checkPreconditions(sc);
             nativeSetLayerStack(mNativeObject, sc.mNativeObject, layerStack);
-            return this;
-        }
-
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public Transaction deferTransactionUntil(SurfaceControl sc, SurfaceControl barrier,
-                long frameNumber) {
-            if (frameNumber < 0) {
-                return this;
-            }
-            checkPreconditions(sc);
-            nativeDeferTransactionUntil(mNativeObject, sc.mNativeObject, barrier.mNativeObject,
-                    frameNumber);
             return this;
         }
 

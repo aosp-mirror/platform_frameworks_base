@@ -325,8 +325,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"dostęp do aktywności fizycznej"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Aparat"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"robienie zdjęć i nagrywanie filmów"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Urządzenia Bluetooth w pobliżu"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"wykrywanie urządzeń Bluetooth w pobliżu i łączenie się z nimi"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Urządzenia w pobliżu"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"wykrywanie urządzeń w pobliżu i łączenie się z nimi"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Rejestry połączeń"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"odczytywanie i zapisywanie rejestru połączeń telefonicznych"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
@@ -544,10 +544,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Zezwala na wykrywanie i parowanie przez aplikację urządzeń Bluetooth w pobliżu"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"łączenie ze sparowanymi urządzeniami Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Zezwala na łączenie aplikacji ze sparowanymi urządzeniami Bluetooth"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
     <skip />
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"określanie względnego położenia urządzeń ultraszerokopasmowych w pobliżu"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Zezwól na określanie przez aplikację względnego położenia urządzeń ultraszerokopasmowych w pobliżu"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacje o preferowanych usługach płatniczych NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Pozwala aplikacji uzyskiwać informacje o preferowanych usługach płatniczych NFC, np. zarejestrowanych pomocach i miejscach docelowych tras."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolowanie łączności Near Field Communication"</string>
@@ -1395,14 +1397,14 @@
     <string name="perm_costs_money" msgid="749054595022779685">"to może generować dodatkowe koszty"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
     <string name="usb_charging_notification_title" msgid="1674124518282666955">"Ładowanie urządzenia przez USB"</string>
-    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Ładowanie podłączonego urządzenia przez USB"</string>
+    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Ładowanie połączonego urządzenia przez USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Przesyłanie plików przez USB włączone"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Tryb PTP przez USB włączony"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Tethering USB włączony"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Tryb MIDI przez USB włączony"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Podłączono akcesorium USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Kliknij, by wyświetlić więcej opcji."</string>
-    <string name="usb_power_notification_message" msgid="7284765627437897702">"Ładowanie podłączonego urządzenia. Kliknij, by wyświetlić więcej opcji."</string>
+    <string name="usb_power_notification_message" msgid="7284765627437897702">"Ładowanie połączonego urządzenia. Kliknij, by wyświetlić więcej opcji."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Wykryto analogowe urządzenie audio"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Podłączone urządzenie nie jest zgodne z tym telefonem. Kliknij, by dowiedzieć się więcej."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Podłączono moduł debugowania USB"</string>
@@ -1898,8 +1900,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Aby wydłużyć czas pracy na baterii, funkcja Oszczędzanie baterii:\n\n• włącza ciemny motyw,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n\n• włącza ciemny motyw,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Włącz"</string>
@@ -2138,6 +2142,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"To powiadomienie zostało zmienione na Ciche. Kliknij, by przesłać opinię."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Podniesiono ważność tego powiadomienia. Kliknij, by przesłać opinię."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Obniżono ważność tego powiadomienia. Kliknij, by przesłać opinię."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>
@@ -2327,9 +2343,14 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Możesz teraz powiększyć część ekranu"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Włącz w Ustawieniach"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Odrzuć"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Aby kontynuować, musisz przyznać aplikacji „<xliff:g id="APP">%s</xliff:g>” dostęp do mikrofonu urządzenia."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Aby kontynuować, musisz przyznać aplikacji „<xliff:g id="APP">%s</xliff:g>” dostęp do aparatu urządzenia."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Włącz"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
+    <skip />
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Poufność danych z czujników"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikona aplikacji"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Wizerunek marki aplikacji"</string>

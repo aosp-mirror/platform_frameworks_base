@@ -56,7 +56,7 @@ package android.app.usage {
 package android.content {
 
   public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
-    method @NonNull public static android.net.Uri createContentUriAsUser(@NonNull android.net.Uri, @NonNull android.os.UserHandle);
+    method @NonNull public static android.net.Uri createContentUriForUser(@NonNull android.net.Uri, @NonNull android.os.UserHandle);
   }
 
   public abstract class Context {
@@ -260,7 +260,7 @@ package android.os {
   }
 
   public static class Build.VERSION {
-    field public static final int FIRST_SDK_INT;
+    field public static final int DEVICE_INITIAL_SDK_INT;
   }
 
   public interface Parcelable {

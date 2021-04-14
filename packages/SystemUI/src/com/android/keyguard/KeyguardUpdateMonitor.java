@@ -2116,6 +2116,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * If face auth is allows to scan on this exact moment.
      */
     public boolean shouldListenForFace() {
+        if (mFaceManager == null) {
+            // Device does not have face auth
+            return false;
+        }
+
         final boolean statusBarShadeLocked = mStatusBarState == StatusBarState.SHADE_LOCKED;
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep
                 && !statusBarShadeLocked;
@@ -2137,8 +2142,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         // Scan even when encrypted or timeout to show a preemptive bouncer when bypassing.
         // Lock-down mode shouldn't scan, since it is more explicit.
-        boolean strongAuthAllowsScanning = (!isEncryptedOrTimedOut || canBypass && !mBouncer)
-                && !isLockDown;
+        boolean strongAuthAllowsScanning = (!isEncryptedOrTimedOut || canBypass && !mBouncer);
+
+        // If the device supports face detection (without authentication), allow it to happen
+        // if the device is in lockdown mode. Otherwise, prevent scanning.
+        boolean supportsDetectOnly = !mFaceSensorProperties.isEmpty()
+                && mFaceSensorProperties.get(0).supportsFaceDetection;
+        if (isLockDown && !supportsDetectOnly) {
+            strongAuthAllowsScanning = false;
+        }
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.

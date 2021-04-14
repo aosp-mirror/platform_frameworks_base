@@ -322,8 +322,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"piekļūt jūsu fiziskajām aktivitātēm"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"uzņemt attēlus un ierakstīt videoklipus"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Tuvumā esošas Bluetooth ierīces"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"atrast tuvumā esošas Bluetooth ierīces un izveidot savienojumu ar tām"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Tuvumā esošās ierīces"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"tuvumā esošu ierīču meklēšana un savienojuma izveide ar tām"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Zvanu žurnāli"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"lasīt un rakstīt tālruņa zvanu žurnālu"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Tālrunis"</string>
@@ -541,10 +541,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Ļauj lietotnei atrast un savienot pārī tuvumā esošas Bluetooth ierīces."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"piekļūt pārī savienotām Bluetooth ierīcēm"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Ļauj lietotnei piekļūt pārī savienotām Bluetooth ierīcēm."</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"reklamēšana tuvumā esošās Bluetooth ierīcēs"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Atļauj lietotnei veikt reklamēšanu tuvumā esošās Bluetooth ierīcēs"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"novietojuma noteikšana starp tuvu esošām ultraplatjoslas ierīcēm"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Atļaut lietotnei noteikt relatīvo atrašanās vietu starp tuvumā esošām ultraplatjoslas ierīcēm"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informācija par vēlamo NFC maksājumu pakalpojumu"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ļauj lietotnei iegūt informāciju par vēlamo NFC maksājumu pakalpojumu, piemēram, par reģistrētajiem lietojumprogrammu ID un maršruta galamērķi."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolē tuvlauka saziņu"</string>
@@ -1875,8 +1875,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atjaunināja administrators"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Dzēsa administrators"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Labi"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Lai paildzinātu akumulatora darbības laiku, ieslēdzot akumulatora enerģijas taupīšanas režīmu, tiek veiktas tālāk norādītās darbības.\n\n• Tiek ieslēgts tumšais motīvs.\n• Tiek izslēgtas vai ierobežotas fonā veiktās darbības, daži vizuālie efekti un citas funkcijas, piemēram, “Ok Google”.\n\n"<annotation id="url">"Uzzināt vairāk"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Lai paildzinātu akumulatora darbības laiku, ieslēdzot akumulatora enerģijas taupīšanas režīmu, tiek veiktas tālāk norādītās darbības.\n\n• Tiek ieslēgts tumšais motīvs.\n• Tiek izslēgtas vai ierobežotas fonā veiktās darbības, daži vizuālie efekti un citas funkcijas, piemēram, “Ok Google”."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Lai samazinātu datu lietojumu, datu lietojuma samazinātājs neļauj dažām lietotnēm fonā nosūtīt vai saņemt datus. Lietotne, kuru pašlaik izmantojat, var piekļūt datiem, bet, iespējams, piekļūs tiem retāk (piemēram, attēli tiks parādīti tikai tad, kad tiem pieskarsieties)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vai ieslēgt datu lietojuma samazinātāju?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ieslēgt"</string>
@@ -2105,6 +2107,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Šī paziņojuma svarīgums tika pazemināts, un paziņojums tiks rādīts bez skaņas. Lai sniegtu atsauksmes, pieskarieties."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Šī paziņojuma rangs tika paaugstināts. Lai sniegtu atsauksmes, pieskarieties."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Šī paziņojuma rangs tika pazemināts. Lai sniegtu atsauksmes, pieskarieties."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatīvs paziņojums par akumulatoru"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulators var izlādēties pirms parastā uzlādes laika"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Aktivizēts akumulatora enerģijas taupīšanas režīms, lai palielinātu akumulatora darbības ilgumu"</string>
@@ -2293,9 +2307,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Tagad varat palielināt ekrāna daļu."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Ieslēgt sadaļā Iestatījumi"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Nerādīt"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Lai turpinātu, lietotnei &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; nepieciešama piekļuve jūsu ierīces mikrofonam."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Lai turpinātu, lietotnei &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; nepieciešama piekļuve jūsu ierīces kamerai."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Ieslēgt"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Atbloķējiet ierīces mikrofonu"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Atbloķējiet ierīces kameru"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Lietotnei &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; un visām lietotnēm un pakalpojumiem"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Atbloķēt"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensoru konfidencialitāte"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Lietojumprogrammas ikona"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Lietojumprogrammas zīmola attēls"</string>

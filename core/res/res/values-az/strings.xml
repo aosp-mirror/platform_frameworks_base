@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"fiziki fəaliyyətə daxil olun"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"şəkil çəkin və video yazın"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"yaxınlıqdakı Bluetooth cihazları"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"yaxınlıqdakı Bluetooth cihazlarını aşkarlamaq və onlara qoşulmaq"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Yaxınlıqdakı cihazlar"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"yaxınlıqdakı cihazları tapmaq və qoşulmaq"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Zəng qeydləri"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"telefonun zəng qeydini oxuyun və yazın"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
@@ -538,10 +538,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Tətbiqə yaxınlıqdakı Bluetooth cihazlarını aşkarlamaq və birləşdirməyə icazə verir"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"birləşdirilmiş Bluetooth cihazlarına qoşulmaq"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Tətbiqə birləşdirilmiş Bluetooth cihazlarına qoşulmağa icazə verir"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
     <skip />
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"yaxınlıqdakı Ultra Genişzolaqlı cihazları arasında nisbi mövqeyi təyin etmək"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Tətbiqə yaxınlıqdakı Ultra Genişzolaqlı cihazları arasında nisbi mövqeyi təyin etməyə icazə verin"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Tərcih edilən NFC ödəniş xidməti məlumatı"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tətbiqə qeydiyyatdan keçmiş yardım və marşrut təyinatı kimi tərcih edilən nfc ödəniş xidməti məlumatını əldə etmək icazəsi verir."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication\'ı kontrol et"</string>
@@ -1016,7 +1018,7 @@
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"Tətbiqə Brauzerin geolokasiya icazələrini dəyişməyə imkan verir. Zərərli tətbiqlər bundan istifadə edərək məkan məlumatlarını təsadüfi saytlara göndərə bilər."</string>
     <string name="save_password_message" msgid="2146409467245462965">"Brauzerin bu şifrəni yadda saxlamasını istəyirsiz?"</string>
     <string name="save_password_notnow" msgid="2878327088951240061">"İndi yox"</string>
-    <string name="save_password_remember" msgid="6490888932657708341">"Yadda saxla"</string>
+    <string name="save_password_remember" msgid="6490888932657708341">"Yadda saxlayın"</string>
     <string name="save_password_never" msgid="6776808375903410659">"Heç vaxt"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Bu səhifəni açmaq üçün icazəniz yoxdur."</string>
     <string name="text_copied" msgid="2531420577879738860">"Mətn panoya kopyalandı."</string>
@@ -1358,7 +1360,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB vasitəsilə qoşulmuş cihaza enerji doldurulur"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB fayl transferi aktiv edildi"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB vasitəsilə PTP aktiv edildi"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB birləşmə aktiv edildi"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-modem aktivdir"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB vasitəsilə MIDI aktiv edildi"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB aksesuarı qoşulub"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Əlavə seçimlər üçün tıklayın."</string>
@@ -1624,7 +1626,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Ekranı cihaza yayımla"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Cihazlar axtarılır..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Ayarlar"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Bağlantını kəs"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Əlaqəni kəsin"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Skan edilir..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Qoşulur..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Əlçatımlı"</string>
@@ -1852,10 +1854,12 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Admin tərəfindən yeniləndi"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Admin tərəfindən silindi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət funksiyası:\n\n• Qaranlıq temanı aktiv edir\n• Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər funksiyaları deaktiv edir və ya məhdudlaşdırır\n\n"<annotation id="url">"Ətraflı məlumat"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət funksiyası:\n\n• Qaranlıq temanı aktiv edir\n• Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər funksiyaları deaktiv edir və ya məhdudlaşdırır"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsinin və qəbulunun qarşısını alır. Hazırda işlətdiyiniz tətbiq dataya daxil ola bilər, ancaq bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Data Qənaəti aktiv edilsin?"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
+    <string name="data_saver_description" msgid="4995164271550590517">"Mobil interneti qənaətlə işlətmək məqsədilə Data Qanaəti bəzi tətbiqlərin fonda data göndərməsinin və qəbulunun qarşısını alır. Hazırda işlətdiyiniz tətbiq nisbətən az müntəzəmliklə data istifadə edə bilər. Örnək olaraq bu, o deməkdir ki, şəkil fayllarına toxunmadıqca onlar açılmayacaq."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafikə qənaət edilsin?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivləşdirin"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other"> %1$d dəqiqəlik (saat <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> radəsinə qədər)</item>
@@ -1892,7 +1896,7 @@
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Bu vaxtadək: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Saat <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> qədər"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> radəsinə qədər (növbəti siqnal)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Deaktiv edənə qədər"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Deaktiv edilənə qədər"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"\"Narahat etməyin\" seçiminini deaktiv edənə kimi"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Dağıt"</string>
@@ -1901,7 +1905,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Həftəiçi gecəsi"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Həftə sonu"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Tədbir"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Yuxu"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Yuxu vaxtı"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> bəzi səsləri səssiz rejimə salır"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Cihazınızın daxili problemi var və istehsalçı sıfırlanması olmayana qədər qeyri-stabil ola bilər."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Cihazınızın daxili problemi var. Əlavə məlumat üçün istehsalçı ilə əlaqə saxlayın."</string>
@@ -2072,6 +2076,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Bu bildiriş Səssiz rejimə keçirilib. Rəy bildirmək üçün toxunun."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildiriş yuxarı sıraya keçirilib. Rəy bildirmək üçün toxunun."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildiriş aşağı sıraya keçirilib. Rəy bildirmək üçün toxunun."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rejim üçün məlumat bildirişi"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya həmişəki vaxtdan əvvəl bitə bilər"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Enerjiyə Qənaət rejimi batareya istifadəsinin müddətini artırmaq üçün aktiv edilir"</string>
@@ -2259,9 +2275,14 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"İndi ekranınızın bir hissəsini böyüdə bilərsiniz"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Ayarlarda aktiv edin"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Qapadın"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Davam etmək üçün &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; tətbiqi cihazın mikrofonuna giriş tələb edir."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Davam etmək üçün &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; tətbiqi cihazın kamerasına giriş tələb edir."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Aktiv edin"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
+    <skip />
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensor Məxfiliyi"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Tətbiq ikonası"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Tətbiqin brend şəkli"</string>

@@ -56,6 +56,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
@@ -2474,29 +2475,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mResizedWhileGone = false;
             }
 
-            // We must always send the latest {@link MergedConfiguration}, regardless of whether we
-            // have already reported it. The client might not have processed the previous value yet
-            // and needs process it before handling the corresponding window frame. the variable
-            // {@code mergedConfiguration} is an out parameter that will be passed back to the
-            // client over IPC and checked there.
-            // Note: in the cases where the window is tied to an activity, we should not send a
-            // configuration update when the window has requested to be hidden. Doing so can lead
-            // to the client erroneously accepting a configuration that would have otherwise caused
-            // an activity restart. We instead hand back the last reported
-            // {@link MergedConfiguration}.
-            if (shouldRelayout && (!win.shouldCheckTokenVisibleRequested()
-                    || win.mToken.isVisibleRequested())) {
-                win.getMergedConfiguration(mergedConfiguration);
-            } else {
-                win.getLastReportedMergedConfiguration(mergedConfiguration);
-            }
-
-            win.setLastReportedMergedConfiguration(mergedConfiguration);
+            win.fillClientWindowFramesAndConfiguration(outFrames, mergedConfiguration,
+                    false /* useLatestConfig */, shouldRelayout);
 
             // Set resize-handled here because the values are sent back to the client.
             win.onResizeHandled();
 
-            win.fillClientWindowFrames(outFrames);
             outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
@@ -2717,30 +2701,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Registers a listener for a {@link android.window.WindowContext} to subscribe to configuration
-     * changes of a {@link DisplayArea}.
-     *
-     * @param clientToken the window context's token
-     * @param type Window type of the window context
-     * @param displayId The display associated with the window context
-     * @param options A bundle used to pass window-related options and choose the right DisplayArea
-     *
-     * @return {@code true} if the listener was registered successfully.
-     */
     @Override
-    public boolean registerWindowContextListener(IBinder clientToken, int type, int displayId,
+    public boolean attachWindowContextToDisplayArea(IBinder clientToken, int type, int displayId,
             Bundle options) {
         final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
-                "registerWindowContextListener", false /* printLog */);
+                "attachWindowContextToDisplayArea", false /* printLog */);
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
                 if (dc == null) {
-                    ProtoLog.w(WM_ERROR, "registerWindowContextListener: trying to add listener to"
-                            + " a non-existing display:%d", displayId);
+                    ProtoLog.w(WM_ERROR, "attachWindowContextToDisplayArea: trying to attach"
+                            + " to a non-existing display:%d", displayId);
                     return false;
                 }
                 // TODO(b/155340867): Investigate if we still need roundedCornerOverlay after
@@ -2757,14 +2730,50 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void unregisterWindowContextListener(IBinder clientToken) {
+    public void attachWindowContextToWindowToken(IBinder clientToken, IBinder token) {
         final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
-                "unregisterWindowContextListener", false /* printLog */);
+                "attachWindowContextToWindowToken", false /* printLog */);
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                if (!mWindowContextListenerController.assertCallerCanRemoveListener(clientToken,
+                final WindowToken windowToken = mRoot.getWindowToken(token);
+                if (windowToken == null) {
+                    ProtoLog.w(WM_ERROR, "Then token:%s is invalid. It might be "
+                            + "removed", token);
+                    return;
+                }
+                final int type = mWindowContextListenerController.getWindowType(clientToken);
+                if (type == INVALID_WINDOW_TYPE) {
+                    throw new IllegalArgumentException("The clientToken:" + clientToken
+                            + " should have been attached.");
+                }
+                if (type != windowToken.windowType) {
+                    throw new IllegalArgumentException("The WindowToken's type should match"
+                            + " the created WindowContext's type. WindowToken's type is "
+                            + windowToken.windowType + ", while WindowContext's is " + type);
+                }
+                if (!mWindowContextListenerController.assertCallerCanModifyListener(clientToken,
+                        callerCanManageAppTokens, callingUid)) {
+                    return;
+                }
+                mWindowContextListenerController.registerWindowContainerListener(clientToken,
+                        windowToken, callingUid, windowToken.windowType, windowToken.mOptions);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void detachWindowContextFromWindowContainer(IBinder clientToken) {
+        final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
+                "detachWindowContextFromWindowContainer", false /* printLog */);
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                if (!mWindowContextListenerController.assertCallerCanModifyListener(clientToken,
                         callerCanManageAppTokens, callingUid)) {
                     return;
                 }
@@ -5564,6 +5573,25 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
                 if (displayContent != null) {
                     displayContent.setForcedScalingMode(mode);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    void setSandboxDisplayApis(int displayId, boolean sandboxDisplayApis) {
+        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                if (displayContent != null) {
+                    displayContent.setSandboxDisplayApis(sandboxDisplayApis);
                 }
             }
         } finally {

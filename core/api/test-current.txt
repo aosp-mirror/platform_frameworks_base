@@ -75,6 +75,10 @@ package android.accessibilityservice {
     field public static final int ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS = 1000; // 0x3e8
   }
 
+  public class AccessibilityServiceInfo implements android.os.Parcelable {
+    method @NonNull public android.content.ComponentName getComponentName();
+  }
+
 }
 
 package android.animation {
@@ -157,10 +161,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void moveTaskToRootTask(int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void removeRootTasksInWindowingModes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void removeRootTasksWithActivityTypes(@NonNull int[]);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void resizePrimarySplitScreen(@NonNull android.graphics.Rect, @NonNull android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void resizeTask(int, android.graphics.Rect);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean setTaskWindowingModeSplitScreenPrimary(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void startSystemLockTaskMode(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void stopSystemLockTaskMode();
     method public static boolean supportsMultiWindow(android.content.Context);
@@ -1379,6 +1380,11 @@ package android.media {
     method public static int xsdStringToUsage(@NonNull String);
   }
 
+  public final class AudioDeviceInfo {
+    method public static void enforceValidAudioDeviceTypeIn(int);
+    method public static void enforceValidAudioDeviceTypeOut(int);
+  }
+
   public final class AudioFocusRequest {
     method @Nullable public android.media.AudioManager.OnAudioFocusChangeListener getOnAudioFocusChangeListener();
   }
@@ -1598,7 +1604,7 @@ package android.os {
 
   public static class Build.VERSION {
     field public static final String[] ACTIVE_CODENAMES;
-    field public static final int FIRST_SDK_INT;
+    field public static final int DEVICE_INITIAL_SDK_INT;
     field public static final int RESOURCES_SDK_INT;
   }
 

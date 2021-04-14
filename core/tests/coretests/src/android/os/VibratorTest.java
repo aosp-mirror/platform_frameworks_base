@@ -55,6 +55,11 @@ public class VibratorTest {
     }
 
     @Test
+    public void getId_returnsDefaultId() {
+        assertEquals(-1, mVibratorSpy.getId());
+    }
+
+    @Test
     public void areEffectsSupported_returnsArrayOfSameSize() {
         assertEquals(0, mVibratorSpy.areEffectsSupported(new int[0]).length);
         assertEquals(1,

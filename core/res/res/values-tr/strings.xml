@@ -209,7 +209,7 @@
     <string name="factory_reset_message" msgid="2657049595153992213">"Yönetim uygulaması kullanılamıyor. Cihazınız şimdi silinecek.\n\nSorularınız varsa kuruluşunuzun yöneticisine başvurun."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Yazdırma işlemi <xliff:g id="OWNER_APP">%s</xliff:g> tarafından devre dışı bırakıldı."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"İş profilinizi açın"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"İş profilinizi açana kadar kişisel uygulamalarınız engellendi"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"İş profilinizi açana kadar kişisel uygulamalarınız engelleniyor"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Kişisel uygulamalar <xliff:g id="DATE">%1$s</xliff:g> tarihinde saat <xliff:g id="TIME">%2$s</xliff:g> itibarıyla engellenecektir. BT yöneticiniz, iş profilinizin <xliff:g id="NUMBER">%3$d</xliff:g> günden fazla kapalı kalmasına izin vermiyor."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aç"</string>
     <string name="me" msgid="6207584824693813140">"Ben"</string>
@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"fiziksel aktivitenize erişin"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotoğraf çekme ve video kaydetme"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Yakındaki Bluetooth Cihazlar"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"yakındaki Bluetooth cihazları keşfedip bağlan"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Yakındaki cihazlar"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"yakındaki cihazları keşfetme ve bağlanma"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Arama kayıtları"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"telefon arama kaydını okuma ve yazma"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Uygulamaya, yakındaki Bluetooth cihazları keşfedip eşleme izni verir"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"eşlenen Bluetooth cihazlara bağlan"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Uygulamaya, eşlenen Bluetooth cihazlara bağlanma izni verir"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"yakındaki Bluetooth cihazlara reklam yayınla"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Uygulamaya, yakındaki Bluetooth cihazlara reklam yayınlama izni verir"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"yakındaki Ultra Geniş Bant cihazların birbirine göre konumunu bul"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Uygulamanın, yakındaki Ultra Geniş Bant cihazların birbirine göre konumunu belirlemesine izin verin"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Tercih Edilen NFC Ödeme Hizmeti Bilgileri"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Uygulamaya, kayıtlı yardımlar ve rota hedefi gibi tercih edilen NFC ödeme hizmeti bilgilerini alma izni verir."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Yakın Alan İletişimini denetle"</string>
@@ -1852,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Yöneticiniz tarafından güncellendi"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Yöneticiniz tarafından silindi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Tamam"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Pil ömrünü uzatmak için Pil Tasarrufu:\n\n• Koyu temayı açar\n• Arka plan etkinliğini, bazı görsel efektleri ve \"Ok Google\" gibi diğer özellikleri kapatır veya kısıtlar\n\n"<annotation id="url">"Daha fazla bilgi"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Pil ömrünü uzatmak için Pil Tasarrufu:\n\n• Koyu temayı açar\n• Arka plan etkinliğini, bazı görsel efektleri ve \"Ok Google\" gibi diğer özellikleri kapatır veya kısıtlar"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Veri kullanımını azaltmaya yardımcı olması için Veri Tasarrufu, bazı uygulamaların arka planda veri göndermesini veya almasını engeller. Şu anda kullandığınız bir uygulama veri bağlantısına erişebilir, ancak bunu daha seyrek yapabilir. Bu durumda örneğin, siz resimlere dokunmadan resimler görüntülenmez."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Veri Tasarrufu açılsın mı?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aç"</string>
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Bu bildirimin önem derecesi, \"Sessiz\" seviyesine düşürüldü. Geri bildirimde bulunmak için dokunun."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildirimin önem derecesi yükseltildi. Geri bildirimde bulunmak için dokunun."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildirimin önem derecesi düşürüldü. Geri bildirimde bulunmak için dokunun."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutin Modu bilgi bildirimi"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pil normal şarjdan önce bitebilir"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Pilin ömrünü uzatmak için Pil Tasarrufu etkinleştirildi"</string>
@@ -2259,9 +2273,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Artık ekranınızın bir bölümünü büyütebilirsiniz"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Ayarlar\'da aç"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Kapat"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Devam etmek için &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; uygulamasının cihazınızın mikrofonuna erişmesi gerekiyor."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Devam etmek için &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; uygulamasının cihazınızın kamerasına erişmesi gerekiyor."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Aç"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Cihaz mikrofonunun engellemesini kaldır"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Cihaz kamerasının engellemesini kaldır"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ve tüm uygulamalar ile hizmetler için"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Engellemeyi kaldır"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensör Gizliliği"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Uygulama simgesi"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Uygulama marka imajı"</string>

@@ -92,8 +92,14 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Meer opnemen"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Screenshot sluiten"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Voorbeeld van screenshot"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Bovengrens"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Ondergrens"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Schermopname"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Schermopname verwerken"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Doorlopende melding voor een schermopname-sessie"</string>
@@ -349,8 +355,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Invoermethode"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Locatie"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Locatie uit"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Camera blokkeren"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Microfoon uitzetten"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Cameratoegang"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Microfoontoegang"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Beschikbaar"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Geblokkeerd"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Media-apparaat"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Alleen noodoproepen"</string>
@@ -422,8 +430,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Schermopname"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starten"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stoppen"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; heeft toegang tot de microfoon van je apparaat nodig om door te gaan."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; heeft toegang tot de camera van je apparaat nodig om door te gaan."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Blokkeren van apparaatmicrofoon opheffen?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Blokkeren van apparaatcamera opheffen?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Blokkeren van apparaatcamera en -microfoon opheffen?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Hiermee hef je de toegangsblokkering op voor alle apps en services die rechten hebben om je microfoon te gebruiken."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Hiermee hef je de toegangsblokkering op voor alle apps en services die rechten hebben om je camera te gebruiken."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Hiermee hef je de toegangsblokkering op voor alle apps en services die rechten hebben om je camera of microfoon te gebruiken."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Apparaat"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Swipe omhoog om te schakelen tussen apps"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Sleep naar rechts om snel tussen apps te schakelen"</string>
@@ -551,7 +563,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Je organisatie heeft een certificeringsinstantie geïnstalleerd in je werkprofiel. Je beveiligde netwerkverkeer kan worden bijgehouden of aangepast."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Er is een certificeringsinstantie geïnstalleerd op dit apparaat. Je beveiligde netwerkverkeer kan worden bijgehouden of aangepast."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Je beheerder heeft de netwerkregistratie aangezet, waarmee het verkeer op je apparaat wordt gecontroleerd."</string>
-    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Je beheerder heeft logboekregistratie voor het netwerk aangezet. Hiermee wordt verkeer in je werkprofiel bijgehouden, maar niet in je persoonlijke profiel."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Je beheerder heeft netwerkregistratie aangezet. Hiermee wordt verkeer in je werkprofiel bijgehouden, maar niet in je persoonlijke profiel."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Je bent verbonden met <xliff:g id="VPN_APP">%1$s</xliff:g>, waarmee je netwerkactiviteit (waaronder e-mails, apps en websites) kan worden gecontroleerd."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Je bent verbonden met <xliff:g id="VPN_APP_0">%1$s</xliff:g> en <xliff:g id="VPN_APP_1">%2$s</xliff:g>, waarmee je netwerkactiviteit (waaronder e-mails, apps en websites) kan worden bijgehouden."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Je werkprofiel is verbonden met <xliff:g id="VPN_APP">%1$s</xliff:g>, waarmee je netwerkactiviteit (waaronder e-mails, apps en websites) kan worden bijgehouden."</string>
@@ -657,8 +669,10 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Wekker"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"Alles tonen"</string>
-    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"Ontgrendelen om te betalen"</string>
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
+    <skip />
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
+    <skip />
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Klaar"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Betaling instellen"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ontgrendelen om te gebruiken"</string>

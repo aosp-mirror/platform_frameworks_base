@@ -39,6 +39,9 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     private final Runnable mFrozenTimeoutRunnable;
     private final WindowToken mNavBarToken;
 
+    /** A runnable which gets called when the {@link #show()} is called. */
+    private Runnable mOnShowRunnable;
+
     public FadeRotationAnimationController(DisplayContent displayContent) {
         super(displayContent);
         mService = displayContent.mWmService;
@@ -81,6 +84,10 @@ public class FadeRotationAnimationController extends FadeAnimationController {
         if (mFrozenTimeoutRunnable != null) {
             mService.mH.removeCallbacks(mFrozenTimeoutRunnable);
         }
+        if (mOnShowRunnable != null) {
+            mOnShowRunnable.run();
+            mOnShowRunnable = null;
+        }
     }
 
     /**
@@ -113,6 +120,10 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     /** Returns {@code true} if the window is handled by this controller. */
     boolean isTargetToken(WindowToken token) {
         return token == mNavBarToken || mTargetWindowTokens.contains(token);
+    }
+
+    void setOnShowRunnable(Runnable onShowRunnable) {
+        mOnShowRunnable = onShowRunnable;
     }
 
     @Override

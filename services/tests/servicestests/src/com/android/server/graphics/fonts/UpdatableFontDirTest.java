@@ -44,8 +44,10 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -413,6 +415,10 @@ public final class UpdatableFontDirTest {
         assertThat(mapBeforeUpgrade).containsKey("test.ttf");
         assertWithMessage("Older fonts should not be deleted until next loadFontFileMap")
                 .that(parser.getRevision(mapBeforeUpgrade.get("test.ttf"))).isEqualTo(1);
+        // Check that updatedFontDirs is pruned.
+        assertWithMessage("config.updatedFontDirs should only list latest active dirs")
+                .that(readConfig(mConfigFile).updatedFontDirs)
+                .containsExactly(dir.getFontFileMap().get("test.ttf").getParentFile().getName());
     }
 
     @Test
@@ -450,6 +456,10 @@ public final class UpdatableFontDirTest {
         assertThat(dir.getFontFileMap()).containsKey("test.ttf");
         assertWithMessage("Font should not be downgraded to an older revision")
                 .that(parser.getRevision(dir.getFontFileMap().get("test.ttf"))).isEqualTo(2);
+        // Check that updatedFontDirs is not updated.
+        assertWithMessage("config.updatedFontDirs should only list latest active dirs")
+                .that(readConfig(mConfigFile).updatedFontDirs)
+                .containsExactly(dir.getFontFileMap().get("test.ttf").getParentFile().getName());
     }
 
     @Test
@@ -875,7 +885,15 @@ public final class UpdatableFontDirTest {
         return new FontUpdateRequest(family);
     }
 
-    private void writeConfig(PersistentSystemFontConfig.Config config,
+    private static PersistentSystemFontConfig.Config readConfig(File file) throws Exception {
+        PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
+        try (InputStream is = new FileInputStream(file)) {
+            PersistentSystemFontConfig.loadFromXml(is, config);
+        }
+        return config;
+    }
+
+    private static void writeConfig(PersistentSystemFontConfig.Config config,
             File file) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             PersistentSystemFontConfig.writeToXml(fos, config);

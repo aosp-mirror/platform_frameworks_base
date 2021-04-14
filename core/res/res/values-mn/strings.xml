@@ -303,7 +303,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Андройд систем"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Хувийн профайл руу сэлгэх"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Ажлын профайл руу сэлгэх"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Харилцагчдын хаяг"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Харилцагчид"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"харилцагч руугаа хандах"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"таны биеийн дасгал хөдөлгөөнд хандах"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камер"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"зураг авах, бичлэг хийх"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Ойролцоох Bluetooth төхөөрөмжүүд"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"ойролцоох Bluetooth төхөөрөмжүүдийг илрүүлж, холбогдох"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Ойролцоох төхөөрөмжүүд"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"ойролцоох төхөөрөмжүүдийг илрүүлж, холбогдох"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Дуудлагын жагсаалт"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"утасны дуудлагын жагсаалтыг унших болон бичих"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Утас"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Aппыг ойролцоох Bluetooth төхөөрөмжүүдийг илрүүлж, хослуулахыг зөвшөөрдөг"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"хослуулсан Bluetooth төхөөрөмжүүдэд холбогдох"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Аппыг хослуулсан Bluetooth төхөөрөмжүүдэд холбогдохыг зөвшөөрдөг"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Ойролцоох Bluetooth төхөөрөмжүүдэд сурталчлах"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Аппад ойролцоох Bluetooth төхөөрөмжүүдэд сурталчлахыг зөвшөөрнө"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"ойролцоох ультра өргөн зурвасын төхөөрөмжүүдийн хоорондох холбоотой байрлалыг тодорхойлох"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Аппад ойролцоох ультра өргөн зурвасын төхөөрөмжүүдийн хоорондох холбоотой байрлалыг тодорхойлохыг зөвшөөрөх"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Сонгосон NFC төлбөрийн үйлчилгээний мэдээлэл"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Бүртгүүлсэн төхөөрөмж болон маршрутын хүрэх цэг зэрэг сонгосон nfc төлбөрийн үйлчилгээний мэдээллийг авахыг аппад зөвшөөрдөг."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ойролцоо талбарын холбоог удирдах"</string>
@@ -1852,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Таны админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Таны админ устгасан"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгч:\n\n•Бараан загварыг асаадаг\n•Арын үйл ажиллагаа, зарим визуал эффект болон “Hey Google” зэрэг бусад онцлогийг унтрааж эсвэл хязгаарладаг\n\n"<annotation id="url">"Нэмэлт мэдээлэл авах"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Батарей хэмнэгч нь батарейн ажиллах хугацааг уртасгахын тулд:\n\n• Бараан загварыг асаадаг\n• Арын үйл ажиллагаа, зарим визуал эффект болон “Hey Google” зэрэг бусад онцлогийг унтрааж эсвэл хязгаарладаг"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь ар талд ажиллаж буй зарим апп-н өгөгдлийг илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Энэ нь жишээлбэл зургийг товших хүртэл харагдахгүй гэсэн үг юм."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Дата хэмнэгчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Асаах"</string>
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Энэ мэдэгдлийг Чимээгүй болгож зэргийг нь бууруулсан байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Энэ мэдэгдлийг дээгүүр зэрэглэсэн байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Энэ мэдэгдлийг доогуур зэрэглэсэн байна. Санал хүсэлт өгөхийн тулд товшино уу."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Хэвшлийн горимын мэдээллийн мэдэгдэл"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарей ихэвчлэн цэнэглэдэг хугацаанаас өмнө дуусаж болзошгүй"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгчийг идэвхжүүллээ"</string>
@@ -2259,9 +2273,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Та одоо дэлгэцийнхээ хэсгийг томруулах боломжтой"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Тохиргоонд асаана уу"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Үл хэрэгсэх"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Үргэлжлүүлэхийн тулд, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; таны төхөөрөмжийн микрофонд хандах шаардлагатай."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Үргэлжлүүлэхийн тулд &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; таны төхөөрөмжийн камерт хандах шаардлагатай."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Асаах"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Төхөөрөмжийн микрофоныг блокоос гаргах"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Төхөөрөмжийн камерыг блокоос гаргах"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; болон бүх апп, үйлчилгээнд"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Блокоос гаргах"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Мэдрэгчийн нууцлал"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Аппын дүрс тэмдэг"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Аппын брэнд зураг"</string>
