@@ -4100,13 +4100,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void removeImeSurfaceFromWindow(IBinder windowToken,
-            IVoidResultCallback resultCallback) {
-        CallbackUtils.onResult(resultCallback, () -> {
-            // No permission check, because we'll only execute the request if the calling window is
-            // also the current IME client.
-            mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE_FROM_WINDOW, windowToken).sendToTarget();
-        });
+    public void removeImeSurfaceFromWindowAsync(IBinder windowToken) {
+        // No permission check, because we'll only execute the request if the calling window is
+        // also the current IME client.
+        mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE_FROM_WINDOW, windowToken).sendToTarget();
     }
 
     /**
