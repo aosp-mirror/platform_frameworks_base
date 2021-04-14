@@ -384,6 +384,7 @@ public final class SystemServer implements Dumpable {
     private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
     private static final String GAME_MANAGER_SERVICE_CLASS =
             "com.android.server.app.GameManagerService$Lifecycle";
+    private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -2656,6 +2657,12 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("ArtManagerLocal");
         LocalManagerRegistry.addManager(ArtManagerLocal.class, new ArtManagerLocal());
         t.traceEnd();
+
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)) {
+            t.traceBegin("UwbService");
+            mSystemServiceManager.startService(UWB_SERVICE_CLASS);
+            t.traceEnd();
+        }
 
         t.traceBegin("StartBootPhaseDeviceSpecificServicesReady");
         mSystemServiceManager.startBootPhase(t, SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY);

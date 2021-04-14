@@ -24,9 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.content.AttributionSource;
 import android.content.Context;
-import android.content.ContextParams;
 import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.PersistableBundle;
@@ -49,7 +47,7 @@ import java.util.concurrent.Executor;
 @SystemApi
 @SystemService(Context.UWB_SERVICE)
 public final class UwbManager {
-    private static final String SERVICE_NAME = "uwb";
+    private static final String SERVICE_NAME = Context.UWB_SERVICE;
 
     private final Context mContext;
     private final IUwbAdapter mUwbAdapter;
