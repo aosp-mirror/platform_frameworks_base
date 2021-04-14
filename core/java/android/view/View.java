@@ -3514,6 +3514,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                     11           PFLAG4_SCROLL_CAPTURE_HINT_MASK
      *                    1             PFLAG4_ALLOW_CLICK_WHEN_DISABLED
      *                   1              PFLAG4_DETACHED
+     *                  1               PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE
      * |-------|-------|-------|-------|
      */
 
@@ -3579,6 +3580,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Indicates if the view is just detached.
      */
     private static final int PFLAG4_DETACHED = 0x000002000;
+
+    /**
+     * Indicates that the view has transient state because the system is translating it.
+     */
+    private static final int PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE = 0x000004000;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -12263,6 +12269,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         }
+    }
+
+    /**
+     * Set the view is tracking translation transient state. This flag is used to check if the view
+     * need to call setHasTransientState(false) to reset transient state that set when starting
+     * translation.
+     *
+     * @param hasTranslationTransientState true if this view has translation transient state
+     * @hide
+     */
+    public void setHasTranslationTransientState(boolean hasTranslationTransientState) {
+        if (hasTranslationTransientState) {
+            mPrivateFlags4 |= PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE;
+        } else {
+            mPrivateFlags4 &= ~PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasTranslationTransientState() {
+        return (mPrivateFlags4 & PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE)
+                == PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE;
     }
 
     /**
@@ -30834,6 +30864,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns a {@link ViewTranslationCallback} that is used to display the translated information
+     * or {@code null} if this View doesn't support translation.
+     *
      * @hide
      */
     @Nullable
@@ -30920,7 +30953,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * view or calls {@link View#onVirtualViewTranslationResponses} for view contains virtual
      * children to build {@link ViewTranslationRequest} if the view should be translated.
      * The view is marked as having {@link #setHasTransientState(boolean) transient state} so that
-     * recycling of views doesn't prevent the system from attaching the response to it.</p>
+     * recycling of views doesn't prevent the system from attaching the response to it. Therefore,
+     * if overriding this method, you should set or reset the transient state. </p>
      *
      * @param viewIds a map for the view's {@link AutofillId} and its virtual child ids or
      * {@code null} if the view doesn't have virtual child that should be translated. The virtual
@@ -30970,10 +31004,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     Log.v(CONTENT_CAPTURE_LOG_TAG, "Calling setHasTransientState(true) for "
                             + getAutofillId());
                 }
-                // TODO: Add a default ViewTranslationCallback for View that resets this in
-                // onClearTranslation(). Also update the javadoc for this method to mention
-                // that.
                 setHasTransientState(true);
+                setHasTranslationTransientState(true);
             }
         }
     }
