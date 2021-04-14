@@ -2208,6 +2208,17 @@ public abstract class Context {
     }
 
     /**
+     * Like {@link #sendBroadcastMultiplePermissions(Intent, String[])}, but also allows
+     * specification of a list of excluded permissions. This allows sending a broadcast to an
+     * app that has the permissions in `receiverPermissions` but not `excludedPermissions`.
+     * @hide
+     */
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Broadcast the given intent to all interested BroadcastReceivers, allowing
      * an array of required permissions to be enforced.  This call is asynchronous; it returns
      * immediately, and you will continue executing while the receivers are run.  No results are

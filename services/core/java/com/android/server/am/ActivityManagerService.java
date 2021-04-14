@@ -2500,7 +2500,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void batterySendBroadcast(Intent intent) {
         synchronized (this) {
-            broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
+            broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null, null,
                     OP_NONE, null, false, false, -1, SYSTEM_UID, Binder.getCallingUid(),
                     Binder.getCallingPid(), UserHandle.USER_ALL);
         }
@@ -3940,7 +3940,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         intent.putExtra(Intent.EXTRA_UID, uid);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(uid));
         broadcastIntentLocked(null, null, null, intent,
-                null, null, 0, null, null, null, OP_NONE,
+                null, null, 0, null, null, null, null, OP_NONE,
                 null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
                 Binder.getCallingPid(), UserHandle.getUserId(uid));
     }
@@ -7531,7 +7531,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             | Intent.FLAG_RECEIVER_FOREGROUND);
                     intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
                     broadcastIntentLocked(null, null, null, intent,
-                            null, null, 0, null, null, null, OP_NONE,
+                            null, null, 0, null, null, null, null, OP_NONE,
                             null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
                             currentUserId);
                     intent = new Intent(Intent.ACTION_USER_STARTING);
@@ -7543,8 +7543,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 public void performReceive(Intent intent, int resultCode,
                                         String data, Bundle extras, boolean ordered, boolean sticky,
                                         int sendingUser) {}
-                            }, 0, null, null, new String[] {INTERACT_ACROSS_USERS}, OP_NONE, null,
-                            true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            }, 0, null, null, new String[] {INTERACT_ACROSS_USERS}, null, OP_NONE,
+                            null, true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
                             UserHandle.USER_ALL);
                 } catch (Throwable e) {
                     Slog.wtf(TAG, "Failed sending first user broadcasts", e);
@@ -12302,7 +12302,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Intent intent = allSticky.get(i);
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
-                            null, null, -1, -1, false, null, null, OP_NONE, null, receivers,
+                            null, null, -1, -1, false, null, null, null, OP_NONE, null, receivers,
                             null, 0, null, null, false, true, true, -1, false, null,
                             false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */);
                     queue.enqueueParallelBroadcastLocked(r);
@@ -12544,13 +12544,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, String callerFeatureId, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData,
-            Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle bOptions,
-            boolean ordered, boolean sticky, int callingPid, int callingUid, int realCallingUid,
-            int realCallingPid, int userId) {
+            Bundle resultExtras, String[] requiredPermissions, String[] excludedPermissions,
+            int appOp, Bundle bOptions, boolean ordered, boolean sticky, int callingPid,
+            int callingUid, int realCallingUid, int realCallingPid, int userId) {
         return broadcastIntentLocked(callerApp, callerPackage, callerFeatureId, intent,
                 resolvedType, resultTo, resultCode, resultData, resultExtras, requiredPermissions,
-                appOp, bOptions, ordered, sticky, callingPid, callingUid, realCallingUid,
-                realCallingPid, userId, false /* allowBackgroundActivityStarts */,
+                excludedPermissions, appOp, bOptions, ordered, sticky, callingPid, callingUid,
+                realCallingUid, realCallingPid, userId, false /* allowBackgroundActivityStarts */,
                 null /* tokenNeededForBackgroundActivityStarts */, null /* broadcastAllowList */);
     }
 
@@ -12558,9 +12558,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     final int broadcastIntentLocked(ProcessRecord callerApp, String callerPackage,
             @Nullable String callerFeatureId, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData,
-            Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle bOptions,
-            boolean ordered, boolean sticky, int callingPid, int callingUid, int realCallingUid,
-            int realCallingPid, int userId, boolean allowBackgroundActivityStarts,
+            Bundle resultExtras, String[] requiredPermissions,
+            String[] excludedPermissions, int appOp, Bundle bOptions,
+            boolean ordered, boolean sticky, int callingPid, int callingUid,
+            int realCallingUid, int realCallingPid, int userId,
+            boolean allowBackgroundActivityStarts,
             @Nullable IBinder backgroundActivityStartsToken,
             @Nullable int[] broadcastAllowList) {
         intent = new Intent(intent);
@@ -13139,8 +13141,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             final BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
-                    requiredPermissions, appOp, brOptions, registeredReceivers, resultTo,
-                    resultCode, resultData, resultExtras, ordered, sticky, false, userId,
+                    requiredPermissions, excludedPermissions, appOp, brOptions, registeredReceivers,
+                    resultTo, resultCode, resultData, resultExtras, ordered, sticky, false, userId,
                     allowBackgroundActivityStarts, backgroundActivityStartsToken,
                     timeoutExempt);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
@@ -13237,10 +13239,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
-                    requiredPermissions, appOp, brOptions, receivers, resultTo, resultCode,
-                    resultData, resultExtras, ordered, sticky, false, userId,
-                    allowBackgroundActivityStarts, backgroundActivityStartsToken,
-                    timeoutExempt);
+                    requiredPermissions, excludedPermissions, appOp, brOptions,
+                    receivers, resultTo, resultCode, resultData, resultExtras,
+                    ordered, sticky, false, userId, allowBackgroundActivityStarts,
+                    backgroundActivityStartsToken, timeoutExempt);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
 
@@ -13366,14 +13368,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             String[] requiredPermissions, int appOp, Bundle bOptions,
             boolean serialized, boolean sticky, int userId) {
         return broadcastIntentWithFeature(caller, null, intent, resolvedType, resultTo, resultCode,
-                resultData, resultExtras, requiredPermissions, appOp, bOptions, serialized, sticky,
-                userId);
+                resultData, resultExtras, requiredPermissions, null, appOp, bOptions, serialized,
+                sticky, userId);
     }
 
     public final int broadcastIntentWithFeature(IApplicationThread caller, String callingFeatureId,
             Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle resultExtras,
-            String[] requiredPermissions, int appOp, Bundle bOptions,
+            String[] requiredPermissions, String[] excludedPermissions, int appOp, Bundle bOptions,
             boolean serialized, boolean sticky, int userId) {
         enforceNotIsolatedCaller("broadcastIntent");
         synchronized(this) {
@@ -13388,8 +13390,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return broadcastIntentLocked(callerApp,
                         callerApp != null ? callerApp.info.packageName : null, callingFeatureId,
                         intent, resolvedType, resultTo, resultCode, resultData, resultExtras,
-                        requiredPermissions, appOp, bOptions, serialized, sticky,
-                        callingPid, callingUid, callingUid, callingPid, userId);
+                        requiredPermissions, excludedPermissions, appOp, bOptions, serialized,
+                        sticky, callingPid, callingUid, callingUid, callingPid, userId);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -13410,7 +13412,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     : new String[] {requiredPermission};
             try {
                 return broadcastIntentLocked(null, packageName, featureId, intent, resolvedType,
-                        resultTo, resultCode, resultData, resultExtras, requiredPermissions,
+                        resultTo, resultCode, resultData, resultExtras, requiredPermissions, null,
                         OP_NONE, bOptions, serialized, sticky, -1, uid, realCallingUid,
                         realCallingPid, userId, allowBackgroundActivityStarts,
                         backgroundActivityStartsToken,
@@ -15615,7 +15617,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return ActivityManagerService.this.broadcastIntentLocked(null /*callerApp*/,
                             null /*callerPackage*/, null /*callingFeatureId*/, intent,
                             null /*resolvedType*/, resultTo, 0 /*resultCode*/, null /*resultData*/,
-                            null /*resultExtras*/, requiredPermissions, AppOpsManager.OP_NONE,
+                            null /*resultExtras*/, requiredPermissions, null, AppOpsManager.OP_NONE,
                             bOptions /*options*/, serialized, false /*sticky*/, callingPid,
                             callingUid, callingUid, callingPid, userId,
                             false /*allowBackgroundStarts*/,
@@ -15740,8 +15742,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         | Intent.FLAG_RECEIVER_FOREGROUND
                         | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
                 broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
-                        OP_NONE, null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
-                        Binder.getCallingPid(), UserHandle.USER_ALL);
+                        null, OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                        Binder.getCallingUid(), Binder.getCallingPid(), UserHandle.USER_ALL);
                 if ((changes & ActivityInfo.CONFIG_LOCALE) != 0) {
                     intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
@@ -15751,8 +15753,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     }
                     broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
-                            OP_NONE, null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
-                            Binder.getCallingPid(), UserHandle.USER_ALL);
+                            null, OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                            Binder.getCallingUid(), Binder.getCallingPid(),
+                            UserHandle.USER_ALL);
                 }
 
                 // Send a broadcast to PackageInstallers if the configuration change is interesting
@@ -15766,7 +15769,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     String[] permissions =
                             new String[] { android.Manifest.permission.INSTALL_PACKAGES };
                     broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null,
-                            permissions, OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                            permissions, null, OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
                             Binder.getCallingUid(), Binder.getCallingPid(), UserHandle.USER_ALL);
                 }
             }
@@ -15791,7 +15794,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
-                        OP_NONE, null, false, false, -1, SYSTEM_UID, Binder.getCallingUid(),
+                        null, OP_NONE, null, false, false, -1, SYSTEM_UID, Binder.getCallingUid(),
                         Binder.getCallingPid(), UserHandle.USER_ALL);
             }
         }
