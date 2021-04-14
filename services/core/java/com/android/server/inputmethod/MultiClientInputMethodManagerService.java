@@ -1842,7 +1842,7 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void reportPerceptible(IBinder windowClient, boolean perceptible) {
+        public void reportPerceptibleAsync(IBinder windowClient, boolean perceptible) {
             reportNotSupported();
         }
 
