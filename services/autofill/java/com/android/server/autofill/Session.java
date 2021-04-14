@@ -456,6 +456,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             } : null;
         }
 
+        void newAutofillRequestLocked(@Nullable InlineSuggestionsRequest inlineRequest) {
+            mPendingFillRequest = null;
+            mWaitForInlineRequest = inlineRequest != null;
+            mPendingInlineSuggestionsRequest = inlineRequest;
+        }
+
         void maybeRequestFillLocked() {
             if (mPendingFillRequest == null) {
                 return;
@@ -886,6 +892,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         // Now request the assist structure data.
+        requestAssistStructureLocked(requestId, flags);
+    }
+
+    @GuardedBy("mLock")
+    private void requestAssistStructureLocked(int requestId, int flags) {
         try {
             final Bundle receiverExtras = new Bundle();
             receiverExtras.putInt(EXTRA_REQUEST_ID, requestId);
@@ -1052,12 +1063,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (requestLog != null) {
                     requestLog.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS, -1);
                 }
-                processNullResponseLocked(requestId, requestFlags);
+                processNullResponseOrFallbackLocked(requestId, requestFlags);
                 return;
             }
 
             fieldClassificationIds = response.getFieldClassificationIds();
-            if (fieldClassificationIds != null && !mService.isFieldClassificationEnabledLocked()) {
+            if (!mSessionFlags.mClientSuggestionsEnabled && fieldClassificationIds != null
+                    && !mService.isFieldClassificationEnabledLocked()) {
                 Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
                 processNullResponseLocked(requestId, requestFlags);
                 return;
@@ -1134,6 +1146,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         synchronized (mLock) {
             processResponseLocked(response, null, requestFlags);
         }
+    }
+
+    @GuardedBy("mLock")
+    private void processNullResponseOrFallbackLocked(int requestId, int flags) {
+        if (!mSessionFlags.mClientSuggestionsEnabled) {
+            processNullResponseLocked(requestId, flags);
+            return;
+        }
+
+        // fallback to the default platform password manager
+        mSessionFlags.mClientSuggestionsEnabled = false;
+
+        final InlineSuggestionsRequest inlineRequest =
+                (mLastInlineSuggestionsRequest != null
+                        && mLastInlineSuggestionsRequest.first == requestId)
+                        ? mLastInlineSuggestionsRequest.second : null;
+        mAssistReceiver.newAutofillRequestLocked(inlineRequest);
+        requestAssistStructureLocked(requestId,
+                flags & ~FLAG_ENABLED_CLIENT_SUGGESTIONS);
+        return;
     }
 
     // FillServiceCallbacks
