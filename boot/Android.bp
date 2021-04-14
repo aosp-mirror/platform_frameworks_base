@@ -51,6 +51,10 @@ platform_bootclasspath {
             apex: "com.android.art",
             module: "art-bootclasspath-fragment",
         },
+        {
+            apex: "com.android.i18n",
+            module: "i18n-bootclasspath-fragment",
+        },
     ],
 
     // Additional information needed by hidden api processing.
