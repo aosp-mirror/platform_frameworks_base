@@ -962,6 +962,9 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_SUPPORT_URL = "android.app.extra.PROVISIONING_SUPPORT_URL";
     field public static final String EXTRA_PROVISIONING_TRIGGER = "android.app.extra.PROVISIONING_TRIGGER";
     field public static final String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
+    field public static final int FLAG_SUPPORTED_MODES_DEVICE_OWNER = 4; // 0x4
+    field public static final int FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED = 1; // 0x1
+    field public static final int FLAG_SUPPORTED_MODES_PERSONALLY_OWNED = 2; // 0x2
     field public static final int PROVISIONING_TRIGGER_CLOUD_ENROLLMENT = 1; // 0x1
     field public static final int PROVISIONING_TRIGGER_MANAGED_ACCOUNT = 4; // 0x4
     field @Deprecated public static final int PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER = 3; // 0x3
@@ -976,10 +979,6 @@ package android.app.admin {
     field public static final int STATE_USER_SETUP_FINALIZED = 3; // 0x3
     field public static final int STATE_USER_SETUP_INCOMPLETE = 1; // 0x1
     field public static final int STATE_USER_UNMANAGED = 0; // 0x0
-    field public static final int SUPPORTED_MODES_DEVICE_OWNER = 4; // 0x4
-    field public static final int SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED = 3; // 0x3
-    field public static final int SUPPORTED_MODES_ORGANIZATION_OWNED = 1; // 0x1
-    field public static final int SUPPORTED_MODES_PERSONALLY_OWNED = 2; // 0x2
   }
 
   public final class SystemUpdatePolicy implements android.os.Parcelable {
