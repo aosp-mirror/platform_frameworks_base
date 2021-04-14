@@ -31,6 +31,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.android.internal.colorextraction.ColorExtractor;
@@ -98,6 +99,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Mock
     private AnimatableClockView mLargeClockView;
     @Mock
+    private FrameLayout mLargeClockFrame;
+    @Mock
     BatteryController mBatteryController;
 
     private KeyguardClockSwitchController mController;
@@ -112,6 +115,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         when(mView.findViewById(R.id.animatable_clock_view)).thenReturn(mClockView);
         when(mView.findViewById(R.id.animatable_clock_view_large)).thenReturn(mLargeClockView);
+        when(mView.findViewById(R.id.lockscreen_clock_view_large)).thenReturn(mLargeClockFrame);
         when(mClockView.getContext()).thenReturn(getContext());
         when(mLargeClockView.getContext()).thenReturn(getContext());
 
