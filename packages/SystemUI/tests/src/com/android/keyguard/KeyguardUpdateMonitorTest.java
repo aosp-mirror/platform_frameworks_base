@@ -537,7 +537,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         authCallback.onAuthenticationFailed();
 
         // THEN aod interrupt is cancelled
-        verify(mAuthController).onCancelAodInterrupt();
+        verify(mAuthController).onCancelUdfps();
     }
 
     @Test
@@ -557,7 +557,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         authCallback.onAuthenticationError(0, "");
 
         // THEN aod interrupt is cancelled
-        verify(mAuthController).onCancelAodInterrupt();
+        verify(mAuthController).onCancelUdfps();
     }
 
     @Test
