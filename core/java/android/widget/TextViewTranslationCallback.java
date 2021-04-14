@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.NonNull;
+import android.os.Build;
 import android.text.method.TranslationTransformationMethod;
 import android.util.Log;
 import android.view.View;
@@ -34,7 +35,10 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
 
     private static final String TAG = "TextViewTranslationCallback";
 
-    private static final boolean DEBUG = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG);
+    // TODO(b/182433547): remove Build.IS_DEBUGGABLE before ship. Enable the logging in debug build
+    //  to help the debug during the development phase
+    private static final boolean DEBUG = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG)
+            || Build.IS_DEBUGGABLE;
 
     private TranslationTransformationMethod mTranslationTransformation;
 
