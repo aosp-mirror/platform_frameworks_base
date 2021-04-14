@@ -66,9 +66,9 @@ import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSEvent;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.SideLabelTileLayout;
 import com.android.systemui.qs.logging.QSLogger;
 
 import java.io.FileDescriptor;
@@ -497,7 +497,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     private void updateIsFullQs() {
         for (Object listener : mListeners) {
-            if (TilePage.class.equals(listener.getClass())) {
+            if (SideLabelTileLayout.class.equals(listener.getClass())) {
                 mIsFullQs = 1;
                 return;
             }

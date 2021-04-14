@@ -141,19 +141,6 @@ public class QSCustomizer extends LinearLayout {
         }
     }
 
-    /**
-     * Sets the padding for the RecyclerView. Also, updates the margin between the tiles in the
-     * {@link TileAdapter}.
-     */
-    public void setContentPaddings(int paddingStart, int paddingEnd) {
-        mRecyclerView.setPaddingRelative(
-                paddingStart,
-                mRecyclerView.getPaddingTop(),
-                paddingEnd,
-                mRecyclerView.getPaddingBottom()
-        );
-    }
-
     /** Hide the customizer. */
     public void hide(boolean animate) {
         if (isShown) {
