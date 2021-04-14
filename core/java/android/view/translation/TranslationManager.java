@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SynchronousResultReceiver;
 import android.util.ArrayMap;
@@ -200,8 +201,14 @@ public final class TranslationManager {
             if (result.resultCode != STATUS_SYNC_CALL_SUCCESS) {
                 return Collections.emptySet();
             }
-            return new ArraySet<>(
-                    (TranslationCapability[]) result.bundle.getParcelableArray(EXTRA_CAPABILITIES));
+            Parcelable[] parcelables = result.bundle.getParcelableArray(EXTRA_CAPABILITIES);
+            ArraySet<TranslationCapability> capabilities = new ArraySet();
+            for (Parcelable obj : parcelables) {
+                if (obj instanceof TranslationCapability) {
+                    capabilities.add((TranslationCapability) obj);
+                }
+            }
+            return capabilities;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (TimeoutException e) {
