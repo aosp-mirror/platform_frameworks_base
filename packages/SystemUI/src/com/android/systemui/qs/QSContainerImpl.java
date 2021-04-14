@@ -206,6 +206,12 @@ public class QSContainerImpl extends FrameLayout {
         layoutParams.topMargin = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
         mQSPanelContainer.setLayoutParams(layoutParams);
+        mQSPanelContainer.setPaddingRelative(
+                mQSPanelContainer.getPaddingStart(),
+                mQSPanelContainer.getPaddingTop(),
+                mQSPanelContainer.getPaddingEnd(),
+                mContext.getResources().getDimensionPixelSize(R.dimen.qs_container_bottom_padding)
+        );
 
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
         int padding = getResources().getDimensionPixelSize(
@@ -237,6 +243,8 @@ public class QSContainerImpl extends FrameLayout {
         int scrollBottom = calculateContainerBottom();
         setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + scrollBottom);
+        int qsDetailBottomMargin = ((MarginLayoutParams) mQSDetail.getLayoutParams()).bottomMargin;
+        mQSDetail.setBottom(getTop() + scrollBottom - qsDetailBottomMargin);
         mBackground.setTop(mQSPanelContainer.getTop());
         updateBackgroundBottom(scrollBottom, animate);
     }
