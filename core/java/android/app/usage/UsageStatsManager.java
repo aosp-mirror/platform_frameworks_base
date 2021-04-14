@@ -982,6 +982,20 @@ public final class UsageStatsManager {
     }
 
     /**
+     * Reports user interaction with a given package in the given user.
+     *
+     * <p><em>This method is only for use by the system</em>
+     * @hide
+     */
+    public void reportUserInteraction(@NonNull String packageName, int userId) {
+        try {
+            mService.reportUserInteraction(packageName, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Report usage associated with a particular {@code token} has started. Tokens are app defined
      * strings used to represent usage of in-app features. Apps with the {@link
      * android.Manifest.permission#OBSERVE_APP_USAGE} permission can register time limit observers
