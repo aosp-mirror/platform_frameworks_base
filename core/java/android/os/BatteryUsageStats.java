@@ -24,7 +24,6 @@ import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -233,8 +232,6 @@ public final class BatteryUsageStats implements Parcelable {
             mHistoryBuffer = null;
             mHistoryTagPool = null;
         }
-        System.out.println("From Parcel = " + Arrays.toString(
-                mCustomPowerComponentNames));
     }
 
     @Override
@@ -293,6 +290,7 @@ public final class BatteryUsageStats implements Parcelable {
      * Builder for BatteryUsageStats.
      */
     public static final class Builder {
+        @NonNull
         private final String[] mCustomPowerComponentNames;
         private final int mCustomTimeComponentCount;
         private final boolean mIncludePowerModels;
@@ -311,11 +309,11 @@ public final class BatteryUsageStats implements Parcelable {
         private Parcel mHistoryBuffer;
         private List<BatteryStats.HistoryTag> mHistoryTagPool;
 
-        public Builder(String[] customPowerComponentNames, int customTimeComponentCount) {
+        public Builder(@NonNull String[] customPowerComponentNames, int customTimeComponentCount) {
             this(customPowerComponentNames, customTimeComponentCount, false);
         }
 
-        public Builder(String[] customPowerComponentNames, int customTimeComponentCount,
+        public Builder(@NonNull String[] customPowerComponentNames, int customTimeComponentCount,
                 boolean includePowerModels) {
             mCustomPowerComponentNames = customPowerComponentNames;
             mCustomTimeComponentCount = customTimeComponentCount;
