@@ -147,7 +147,8 @@ public final class ConnectivityController extends RestrictingController implemen
             //   9. Enqueue time
             // TODO: maybe consider number of jobs
             // TODO: consider IMPORTANT_WHILE_FOREGROUND bit
-            final int runningPriority = prioritizeExistenceOver(0, us1.numRunning, us2.numRunning);
+            final int runningPriority = prioritizeExistenceOver(0,
+                    us1.runningJobs.size(), us2.runningJobs.size());
             if (runningPriority != 0) {
                 return runningPriority;
             }
@@ -254,7 +255,18 @@ public final class ConnectivityController extends RestrictingController implemen
         if (jobStatus.hasConnectivityConstraint()) {
             final UidStats uidStats =
                     getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
-            uidStats.numRunning++;
+            uidStats.runningJobs.add(jobStatus);
+        }
+    }
+
+    @GuardedBy("mLock")
+    @Override
+    public void unprepareFromExecutionLocked(JobStatus jobStatus) {
+        if (jobStatus.hasConnectivityConstraint()) {
+            final UidStats uidStats =
+                    getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
+            uidStats.runningJobs.remove(jobStatus);
+            postAdjustCallbacks();
         }
     }
 
@@ -270,12 +282,7 @@ public final class ConnectivityController extends RestrictingController implemen
             final UidStats uidStats =
                     getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
             uidStats.numReadyWithConnectivity--;
-            if (jobStatus.madeActive != 0) {
-                // numRunning would be 0 if the UidStats object didn't exist before this method
-                // was called. getUidStats() handles logging, so just make sure we don't save a
-                // negative value.
-                uidStats.numRunning = Math.max(0, uidStats.numRunning - 1);
-            }
+            uidStats.runningJobs.remove(jobStatus);
             maybeRevokeStandbyExceptionLocked(jobStatus);
             postAdjustCallbacks();
         }
@@ -1131,7 +1138,7 @@ public final class ConnectivityController extends RestrictingController implemen
     private static class UidStats {
         public final int uid;
         public int basePriority;
-        public int numRunning;
+        public final ArraySet<JobStatus> runningJobs = new ArraySet<>();
         public int numReadyWithConnectivity;
         public int numRequestedNetworkAvailable;
         public int numEJs;
@@ -1148,7 +1155,7 @@ public final class ConnectivityController extends RestrictingController implemen
             pw.print("UidStats{");
             pw.print("uid", uid);
             pw.print("pri", basePriority);
-            pw.print("#run", numRunning);
+            pw.print("#run", runningJobs.size());
             pw.print("#readyWithConn", numReadyWithConnectivity);
             pw.print("#netAvail", numRequestedNetworkAvailable);
             pw.print("#EJs", numEJs);

@@ -34,7 +34,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
@@ -677,27 +676,30 @@ public final class QuotaController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
-        if (jobStatus.clearTrackingController(JobStatus.TRACKING_QUOTA)) {
-            Timer timer = mPkgTimers.get(jobStatus.getSourceUserId(),
-                    jobStatus.getSourcePackageName());
+    public void unprepareFromExecutionLocked(JobStatus jobStatus) {
+        Timer timer = mPkgTimers.get(jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
+        if (timer != null) {
+            timer.stopTrackingJob(jobStatus);
+        }
+        if (jobStatus.isRequestedExpeditedJob()) {
+            timer = mEJPkgTimers.get(jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
             if (timer != null) {
                 timer.stopTrackingJob(jobStatus);
             }
-            if (jobStatus.isRequestedExpeditedJob()) {
-                timer = mEJPkgTimers.get(jobStatus.getSourceUserId(),
-                        jobStatus.getSourcePackageName());
-                if (timer != null) {
-                    timer.stopTrackingJob(jobStatus);
-                }
-            }
+        }
+        mTopStartedJobs.remove(jobStatus);
+    }
+
+    @Override
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
+            boolean forUpdate) {
+        if (jobStatus.clearTrackingController(JobStatus.TRACKING_QUOTA)) {
+            unprepareFromExecutionLocked(jobStatus);
             ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUserId(),
                     jobStatus.getSourcePackageName());
             if (jobs != null) {
                 jobs.remove(jobStatus);
             }
-            mTopStartedJobs.remove(jobStatus);
         }
     }
 

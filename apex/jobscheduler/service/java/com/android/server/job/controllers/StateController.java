@@ -76,6 +76,12 @@ public abstract class StateController {
     }
 
     /**
+     * Optionally implement logic here for when a job that was about to be executed failed to start.
+     */
+    public void unprepareFromExecutionLocked(JobStatus jobStatus) {
+    }
+
+    /**
      * Remove task - this will happen if the task is cancelled, completed, etc.
      */
     public abstract void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
