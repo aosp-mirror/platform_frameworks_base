@@ -387,6 +387,9 @@
     <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
     <uses-permission android:name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
 
+    <!-- Permission required for CTS test - CtsUwbTestCases -->
+    <uses-permission android:name="android.permission.UWB_PRIVILEGED" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
