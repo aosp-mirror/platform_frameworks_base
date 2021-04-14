@@ -16,6 +16,8 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
@@ -26,14 +28,21 @@ import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ContentResolver;
+import android.database.ContentObserver;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
+import android.net.Uri;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnManager.VcnErrorCode;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelUuid;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -42,9 +51,11 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.VcnManagementService.VcnCallback;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -60,6 +71,11 @@ import java.util.Set;
  */
 public class Vcn extends Handler {
     private static final String TAG = Vcn.class.getSimpleName();
+
+    private static final int VCN_LEGACY_SCORE_INT = 52;
+
+    private static final List<Integer> CAPS_REQUIRING_MOBILE_DATA =
+            Arrays.asList(NET_CAPABILITY_INTERNET, NET_CAPABILITY_DUN);
 
     private static final int MSG_EVENT_BASE = 0;
     private static final int MSG_CMD_BASE = 100;
@@ -110,6 +126,15 @@ public class Vcn extends Handler {
      */
     private static final int MSG_EVENT_SAFE_MODE_STATE_CHANGED = MSG_EVENT_BASE + 4;
 
+    /**
+     * Triggers reevaluation of mobile data enabled conditions.
+     *
+     * <p>Upon this notification, the VCN will check if any of the underlying subIds have mobile
+     * data enabled. If not, the VCN will restart any GatewayConnections providing INTERNET or DUN
+     * with the current mobile data toggle status.
+     */
+    private static final int MSG_EVENT_MOBILE_DATA_TOGGLED = MSG_EVENT_BASE + 5;
+
     /** Triggers an immediate teardown of the entire Vcn, including GatewayConnections. */
     private static final int MSG_CMD_TEARDOWN = MSG_CMD_BASE;
 
@@ -118,6 +143,8 @@ public class Vcn extends Handler {
     @NonNull private final Dependencies mDeps;
     @NonNull private final VcnNetworkRequestListener mRequestListener;
     @NonNull private final VcnCallback mVcnCallback;
+    @NonNull private final VcnContentResolver mContentResolver;
+    @NonNull private final ContentObserver mMobileDataSettingsObserver;
 
     /**
      * Map containing all VcnGatewayConnections and their VcnGatewayConnectionConfigs.
@@ -154,6 +181,8 @@ public class Vcn extends Handler {
     // Accessed from different threads, but always under lock in VcnManagementService
     private volatile int mCurrentStatus = VCN_STATUS_CODE_ACTIVE;
 
+    private boolean mIsMobileDataEnabled = false;
+
     public Vcn(
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
@@ -177,9 +206,18 @@ public class Vcn extends Handler {
         mVcnCallback = Objects.requireNonNull(vcnCallback, "Missing vcnCallback");
         mDeps = Objects.requireNonNull(deps, "Missing deps");
         mRequestListener = new VcnNetworkRequestListener();
+        mContentResolver = mDeps.newVcnContentResolver(mVcnContext);
+        mMobileDataSettingsObserver = new VcnMobileDataContentObserver(this /* handler */);
+
+        final Uri uri = Settings.Global.getUriFor(Settings.Global.MOBILE_DATA);
+        mContentResolver.registerContentObserver(
+                uri, true /* notifyForDescendants */, mMobileDataSettingsObserver);
 
         mConfig = Objects.requireNonNull(config, "Missing config");
         mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
+
+        // Update mIsMobileDataEnabled before starting handling of NetworkRequests.
+        mIsMobileDataEnabled = getMobileDataStatus();
 
         // Register to receive cached and future NetworkRequests
         mVcnContext.getVcnNetworkProvider().registerListener(mRequestListener);
@@ -230,10 +268,10 @@ public class Vcn extends Handler {
 
     private class VcnNetworkRequestListener implements VcnNetworkProvider.NetworkRequestListener {
         @Override
-        public void onNetworkRequested(@NonNull NetworkRequest request, int score, int providerId) {
+        public void onNetworkRequested(@NonNull NetworkRequest request) {
             Objects.requireNonNull(request, "Missing request");
 
-            sendMessage(obtainMessage(MSG_EVENT_NETWORK_REQUESTED, score, providerId, request));
+            sendMessage(obtainMessage(MSG_EVENT_NETWORK_REQUESTED, request));
         }
     }
 
@@ -249,7 +287,7 @@ public class Vcn extends Handler {
                 handleConfigUpdated((VcnConfig) msg.obj);
                 break;
             case MSG_EVENT_NETWORK_REQUESTED:
-                handleNetworkRequested((NetworkRequest) msg.obj, msg.arg1, msg.arg2);
+                handleNetworkRequested((NetworkRequest) msg.obj);
                 break;
             case MSG_EVENT_SUBSCRIPTIONS_CHANGED:
                 handleSubscriptionsChanged((TelephonySubscriptionSnapshot) msg.obj);
@@ -259,6 +297,9 @@ public class Vcn extends Handler {
                 break;
             case MSG_EVENT_SAFE_MODE_STATE_CHANGED:
                 handleSafeModeStatusChanged();
+                break;
+            case MSG_EVENT_MOBILE_DATA_TOGGLED:
+                handleMobileDataToggled();
                 break;
             case MSG_CMD_TEARDOWN:
                 handleTeardown();
@@ -327,24 +368,8 @@ public class Vcn extends Handler {
         }
     }
 
-    private void handleNetworkRequested(
-            @NonNull NetworkRequest request, int score, int providerId) {
+    private void handleNetworkRequested(@NonNull NetworkRequest request) {
         Slog.v(getLogTag(), "Received request " + request);
-
-        if (score > getNetworkScore()) {
-            if (VDBG) {
-                Slog.v(
-                        getLogTag(),
-                        "Request already satisfied by higher-scoring ("
-                                + score
-                                + ") network from "
-                                + "provider "
-                                + providerId
-                                + ": "
-                                + request);
-            }
-            return;
-        }
 
         // If preexisting VcnGatewayConnection(s) satisfy request, return
         for (VcnGatewayConnectionConfig gatewayConnectionConfig : mVcnGatewayConnections.keySet()) {
@@ -366,16 +391,35 @@ public class Vcn extends Handler {
             if (isRequestSatisfiedByGatewayConnectionConfig(request, gatewayConnectionConfig)) {
                 Slog.v(getLogTag(), "Bringing up new VcnGatewayConnection for request " + request);
 
+                if (getExposedCapabilitiesForMobileDataState(gatewayConnectionConfig).isEmpty()) {
+                    // Skip; this network does not provide any services if mobile data is disabled.
+                    continue;
+                }
+
                 final VcnGatewayConnection vcnGatewayConnection =
                         mDeps.newVcnGatewayConnection(
                                 mVcnContext,
                                 mSubscriptionGroup,
                                 mLastSnapshot,
                                 gatewayConnectionConfig,
-                                new VcnGatewayStatusCallbackImpl(gatewayConnectionConfig));
+                                new VcnGatewayStatusCallbackImpl(gatewayConnectionConfig),
+                                mIsMobileDataEnabled);
                 mVcnGatewayConnections.put(gatewayConnectionConfig, vcnGatewayConnection);
             }
         }
+    }
+
+    private Set<Integer> getExposedCapabilitiesForMobileDataState(
+            VcnGatewayConnectionConfig gatewayConnectionConfig) {
+        if (mIsMobileDataEnabled) {
+            return gatewayConnectionConfig.getAllExposedCapabilities();
+        }
+
+        final Set<Integer> exposedCapsWithoutMobileData =
+                new ArraySet<>(gatewayConnectionConfig.getAllExposedCapabilities());
+        exposedCapsWithoutMobileData.removeAll(CAPS_REQUIRING_MOBILE_DATA);
+
+        return exposedCapsWithoutMobileData;
     }
 
     private void handleGatewayConnectionQuit(VcnGatewayConnectionConfig config) {
@@ -396,12 +440,55 @@ public class Vcn extends Handler {
         }
     }
 
+    private void handleMobileDataToggled() {
+        final boolean oldMobileDataEnabledStatus = mIsMobileDataEnabled;
+        mIsMobileDataEnabled = getMobileDataStatus();
+
+        if (oldMobileDataEnabledStatus != mIsMobileDataEnabled) {
+            // Teardown any GatewayConnections that advertise INTERNET or DUN. If they provide other
+            // services, the VcnGatewayConnections will be restarted without advertising INTERNET or
+            // DUN.
+            for (Entry<VcnGatewayConnectionConfig, VcnGatewayConnection> entry :
+                    mVcnGatewayConnections.entrySet()) {
+                final VcnGatewayConnectionConfig gatewayConnectionConfig = entry.getKey();
+                final VcnGatewayConnection gatewayConnection = entry.getValue();
+
+                final Set<Integer> exposedCaps =
+                        gatewayConnectionConfig.getAllExposedCapabilities();
+                if (exposedCaps.contains(NET_CAPABILITY_INTERNET)
+                        || exposedCaps.contains(NET_CAPABILITY_DUN)) {
+                    if (gatewayConnection == null) {
+                        Slog.wtf(
+                                getLogTag(),
+                                "Found gatewayConnectionConfig without GatewayConnection");
+                    } else {
+                        // TODO(b/184868850): Optimize by restarting NetworkAgents without teardown.
+                        gatewayConnection.teardownAsynchronously();
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean getMobileDataStatus() {
+        final TelephonyManager genericTelMan =
+                mVcnContext.getContext().getSystemService(TelephonyManager.class);
+
+        for (int subId : mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup)) {
+            if (genericTelMan.createForSubscriptionId(subId).isDataEnabled()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private boolean isRequestSatisfiedByGatewayConnectionConfig(
             @NonNull NetworkRequest request, @NonNull VcnGatewayConnectionConfig config) {
         final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
         builder.addTransportType(TRANSPORT_CELLULAR);
         builder.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
-        for (int cap : config.getAllExposedCapabilities()) {
+        for (int cap : getExposedCapabilitiesForMobileDataState(config)) {
             builder.addCapability(cap);
         }
 
@@ -432,12 +519,20 @@ public class Vcn extends Handler {
         pw.decreaseIndent();
     }
 
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public boolean isMobileDataEnabled() {
+        return mIsMobileDataEnabled;
+    }
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public void setMobileDataEnabled(boolean isMobileDataEnabled) {
+        mIsMobileDataEnabled = isMobileDataEnabled;
+    }
+
     /** Retrieves the network score for a VCN Network */
-    // Package visibility for use in VcnGatewayConnection
-    static int getNetworkScore() {
-        // TODO: STOPSHIP (b/173549607): Make this use new NetworkSelection, or some magic "max in
-        //                               subGrp" value
-        return 52;
+    // Package visibility for use in VcnGatewayConnection and VcnNetworkProvider
+    static NetworkScore getNetworkScore() {
+        return new NetworkScore.Builder().setLegacyInt(VCN_LEGACY_SCORE_INT).build();
     }
 
     /** Callback used for passing status signals from a VcnGatewayConnection to its managing Vcn. */
@@ -485,6 +580,17 @@ public class Vcn extends Handler {
         }
     }
 
+    private class VcnMobileDataContentObserver extends ContentObserver {
+        private VcnMobileDataContentObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            sendMessage(obtainMessage(MSG_EVENT_MOBILE_DATA_TOGGLED));
+        }
+    }
+
     /** External dependencies used by Vcn, for injection in tests */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public static class Dependencies {
@@ -494,13 +600,36 @@ public class Vcn extends Handler {
                 ParcelUuid subscriptionGroup,
                 TelephonySubscriptionSnapshot snapshot,
                 VcnGatewayConnectionConfig connectionConfig,
-                VcnGatewayStatusCallback gatewayStatusCallback) {
+                VcnGatewayStatusCallback gatewayStatusCallback,
+                boolean isMobileDataEnabled) {
             return new VcnGatewayConnection(
                     vcnContext,
                     subscriptionGroup,
                     snapshot,
                     connectionConfig,
-                    gatewayStatusCallback);
+                    gatewayStatusCallback,
+                    isMobileDataEnabled);
+        }
+
+        /** Builds a new VcnContentResolver instance */
+        public VcnContentResolver newVcnContentResolver(VcnContext vcnContext) {
+            return new VcnContentResolver(vcnContext);
+        }
+    }
+
+    /** Proxy Implementation of NetworkAgent, used for testing. */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static class VcnContentResolver {
+        private final ContentResolver mImpl;
+
+        public VcnContentResolver(VcnContext vcnContext) {
+            mImpl = vcnContext.getContext().getContentResolver();
+        }
+
+        /** Registers the content observer */
+        public void registerContentObserver(
+                @NonNull Uri uri, boolean notifyForDescendants, @NonNull ContentObserver observer) {
+            mImpl.registerContentObserver(uri, notifyForDescendants, observer);
         }
     }
 }
