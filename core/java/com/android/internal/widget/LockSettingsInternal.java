@@ -16,15 +16,41 @@
 
 package com.android.internal.widget;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.admin.PasswordMetrics;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 /**
  * LockSettingsService local system service interface.
  *
  * @hide Only for use within the system server.
  */
 public abstract class LockSettingsInternal {
+    /** ErrorCode for armRebootEscrow failures. **/
+    @IntDef(prefix = {"ARM_REBOOT_ERROR_"}, value = {
+            ARM_REBOOT_ERROR_NONE,
+            ARM_REBOOT_ERROR_UNSPECIFIED,
+            ARM_REBOOT_ERROR_ESCROW_NOT_READY,
+            ARM_REBOOT_ERROR_NO_PROVIDER,
+            ARM_REBOOT_ERROR_PROVIDER_MISMATCH,
+            ARM_REBOOT_ERROR_NO_ESCROW_KEY,
+            ARM_REBOOT_ERROR_KEYSTORE_FAILURE,
+            ARM_REBOOT_ERROR_STORE_ESCROW_KEY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ArmRebootEscrowErrorCode {}
+
+    public static final int ARM_REBOOT_ERROR_NONE = 0;
+    public static final int ARM_REBOOT_ERROR_UNSPECIFIED = 1;
+    public static final int ARM_REBOOT_ERROR_ESCROW_NOT_READY = 2;
+    public static final int ARM_REBOOT_ERROR_NO_PROVIDER = 3;
+    public static final int ARM_REBOOT_ERROR_PROVIDER_MISMATCH = 4;
+    public static final int ARM_REBOOT_ERROR_NO_ESCROW_KEY = 5;
+    public static final int ARM_REBOOT_ERROR_KEYSTORE_FAILURE = 6;
+    public static final int ARM_REBOOT_ERROR_STORE_ESCROW_KEY = 7;
+    // TODO(b/183140900) split store escrow key errors into detailed ones.
 
     /**
      * Create an escrow token for the current user, which can later be used to unlock FBE
@@ -104,9 +130,9 @@ public abstract class LockSettingsInternal {
      * Should be called immediately before rebooting for an update. This depends on {@link
      * #prepareRebootEscrow()} having been called and the escrow completing.
      *
-     * @return true if the arming worked
+     * @return ARM_ERROR_NONE if the arming worked
      */
-    public abstract boolean armRebootEscrow();
+    public abstract @ArmRebootEscrowErrorCode int armRebootEscrow();
 
 
     /**
