@@ -55,6 +55,8 @@ import static com.android.server.wm.StartingSurfaceController.DEBUG_ENABLE_SHELL
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -153,6 +155,22 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     Transaction mTransaction;
 
+    /**
+     * Whether device-specific global overrides have already been checked in
+     * {@link WindowTestsBase#setUpBase()}.
+     */
+    private static boolean sGlobalOverridesChecked;
+    /**
+     * Whether device-specific overrides have already been checked in
+     * {@link WindowTestsBase#setUpBase()} when the default display is used.
+     */
+    private static boolean sOverridesCheckedDefaultDisplay;
+    /**
+     * Whether device-specific overrides have already been checked in
+     * {@link WindowTestsBase#setUpBase()} when a {@link TestDisplayContent} is used.
+     */
+    private static boolean sOverridesCheckedTestDisplay;
+
     @BeforeClass
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
@@ -190,6 +208,28 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // {@link com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}, is set
         // on some device form factors.
         mAtm.mWindowManager.setFixedOrientationLetterboxAspectRatio(0);
+
+        checkDeviceSpecificOverridesNotApplied();
+    }
+
+    /**
+     * Check that device-specific overrides are not applied. Only need to check once during entire
+     * test run for each case: global overrides, default display, and test display.
+     */
+    private void checkDeviceSpecificOverridesNotApplied() {
+        // Check global overrides
+        if (!sGlobalOverridesChecked) {
+            assertEquals(0, mWm.getFixedOrientationLetterboxAspectRatio(), 0 /* delta */);
+            sGlobalOverridesChecked = true;
+        }
+        // Check display-specific overrides
+        if (!sOverridesCheckedDefaultDisplay && mDisplayContent == mDefaultDisplay) {
+            assertFalse(mDisplayContent.getIgnoreOrientationRequest());
+            sOverridesCheckedDefaultDisplay = true;
+        } else if (!sOverridesCheckedTestDisplay && mDisplayContent instanceof TestDisplayContent) {
+            assertFalse(mDisplayContent.getIgnoreOrientationRequest());
+            sOverridesCheckedTestDisplay = true;
+        }
     }
 
     private void createTestDisplay(UseTestDisplay annotation) {
