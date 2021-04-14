@@ -32,5 +32,5 @@ interface IVibratorManagerService {
             in CombinedVibration vibration, in VibrationAttributes attributes);
     void vibrate(int uid, String opPkg, in CombinedVibration vibration,
             in VibrationAttributes attributes, String reason, IBinder token);
-    void cancelVibrate(IBinder token);
+    void cancelVibrate(int usageFilter, IBinder token);
 }

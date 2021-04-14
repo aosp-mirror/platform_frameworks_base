@@ -138,12 +138,11 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
     @Override
     protected void handleUpdateState(State state, Object arg) {
-        CharSequence qawLabel = mQuickAccessWalletClient.getServiceLabel();
-        state.label = qawLabel == null ? mLabel : qawLabel;
+        state.label = mLabel;
         state.contentDescription = state.label;
         state.icon = ResourceIcon.get(R.drawable.ic_qs_wallet);
         boolean isDeviceLocked = !mKeyguardStateController.isUnlocked();
-        if (mQuickAccessWalletClient.isWalletFeatureAvailable()) {
+        if (mQuickAccessWalletClient.isWalletServiceAvailable()) {
             if (mHasCard) {
                 if (isDeviceLocked) {
                     state.state = Tile.STATE_INACTIVE;

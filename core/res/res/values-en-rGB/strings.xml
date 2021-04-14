@@ -1852,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Updated by your admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Deleted by your admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"To extend battery life, Battery Saver:\n\n• Turns on Dark theme\n• Turns off or restricts background activity, some visual effects and other features like “Hey Google”\n\n"<annotation id="url">"Learn more"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"To extend battery life, Battery Saver:\n\n• Turns on Dark theme\n• Turns off or restricts background activity, some visual effects and other features like “Hey Google”"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app that you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Turn on Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Turn on"</string>
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"This notification was demoted to silent. Tap to provide feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"This notification was ranked higher. Tap to provide feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"This notification was ranked lower. Tap to provide feedback."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Routine Mode info notification"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Battery may run out before usual charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Battery Saver activated to extend battery life"</string>

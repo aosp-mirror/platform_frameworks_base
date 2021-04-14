@@ -5277,6 +5277,13 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
+     * @return whether this task is always on top without taking visibility into account.
+     */
+    public boolean isAlwaysOnTopWhenVisible() {
+        return super.isAlwaysOnTop();
+    }
+
+    /**
      * Returns whether this task is currently forced to be hidden for any reason.
      */
     protected boolean isForceHidden() {
@@ -5397,16 +5404,6 @@ class Task extends WindowContainer<WindowContainer> {
             if (creating) {
                 // Nothing else to do if we don't have a window container yet. E.g. call from ctor.
                 return;
-            }
-
-            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && alreadyInSplitScreenMode) {
-                // We already have a root split-screen task in this display, so just move the
-                // tasks over.
-                // TODO: Figure-out how to do all the stuff in
-                // AMS.setTaskWindowingModeSplitScreenPrimary
-                throw new IllegalArgumentException("Setting primary split-screen windowing mode"
-                        + " while there is already one isn't currently supported");
-                //return;
             }
         } finally {
             mAtmService.continueWindowLayout();

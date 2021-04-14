@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DeviceControlsController;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Named;
@@ -63,6 +64,7 @@ public interface QSModule {
             CastController castController,
             ReduceBrightColorsController reduceBrightColorsController,
             DeviceControlsController deviceControlsController,
+            WalletController walletController,
             @Named(RBC_AVAILABLE) boolean isReduceBrightColorsAvailable) {
         AutoTileManager manager = new AutoTileManager(
                 context,
@@ -77,6 +79,7 @@ public interface QSModule {
                 castController,
                 reduceBrightColorsController,
                 deviceControlsController,
+                walletController,
                 isReduceBrightColorsAvailable
         );
         manager.init();

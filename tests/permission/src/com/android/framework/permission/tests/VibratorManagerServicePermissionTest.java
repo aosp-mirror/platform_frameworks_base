@@ -140,7 +140,7 @@ public class VibratorManagerServicePermissionTest {
     @Test
     public void testCancelVibrateFails() throws RemoteException {
         expectSecurityException("VIBRATE");
-        mVibratorService.cancelVibrate(new Binder());
+        mVibratorService.cancelVibrate(/* usageFilter= */ -1, new Binder());
     }
 
     private void expectSecurityException(String expectedPermission) {

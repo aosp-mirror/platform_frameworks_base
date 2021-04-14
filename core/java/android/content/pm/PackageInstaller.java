@@ -229,8 +229,7 @@ public class PackageInstaller {
 
     /**
      * Type of DataLoader for this session. Will be one of
-     * {@link #DATA_LOADER_TYPE_NONE}, {@link #DATA_LOADER_TYPE_STREAMING},
-     * {@link #DATA_LOADER_TYPE_INCREMENTAL}.
+     * {@link #DATA_LOADER_TYPE_NONE}, {@link #DATA_LOADER_TYPE_STREAMING}.
      * <p>
      * See the individual types documentation for details.
      *
@@ -359,7 +358,9 @@ public class PackageInstaller {
      * Streaming installation using Incremental FileSystem.
      *
      * @see #EXTRA_DATA_LOADER_TYPE
+     * @hide
      */
+    @SystemApi
     public static final int DATA_LOADER_TYPE_INCREMENTAL = DataLoaderType.INCREMENTAL;
 
     /**
@@ -1165,7 +1166,7 @@ public class PackageInstaller {
         }
 
         /**
-         * Adds a file to session. On commit this file will be pulled from dataLoader {@code
+         * Adds a file to session. On commit this file will be pulled from DataLoader {@code
          * android.service.dataloader.DataLoaderService.DataLoader}.
          *
          * @param location target location for the file. Possible values:
@@ -1180,7 +1181,7 @@ public class PackageInstaller {
          * @param lengthBytes total size of the file being written.
          *            The system may clear various caches as needed to allocate
          *            this space.
-         * @param metadata additional info use by dataLoader to pull data for the file.
+         * @param metadata additional info use by DataLoader to pull data for the file.
          * @param signature additional file signature, e.g.
          *                  <a href="https://source.android.com/security/apksigning/v4.html">APK Signature Scheme v4</a>
          * @throws SecurityException if called after the session has been
@@ -2021,7 +2022,7 @@ public class PackageInstaller {
 
         /**
          * Set the data loader params for the session.
-         * This also switches installation into data provider mode and disallow direct writes into
+         * This also switches installation into data loading mode and disallow direct writes into
          * staging folder.
          *
          * @see android.service.dataloader.DataLoaderService.DataLoader

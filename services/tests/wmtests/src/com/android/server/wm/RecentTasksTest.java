@@ -34,6 +34,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -754,6 +755,7 @@ public class RecentTasksTest extends WindowTestsBase {
         final Task alwaysOnTopTask = taskDisplayArea.createRootTask(WINDOWING_MODE_MULTI_WINDOW,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         alwaysOnTopTask.setAlwaysOnTop(true);
+        alwaysOnTopTask.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, true);
 
         assertFalse("Always on top tasks should not be visible recents",
                 mRecentTasks.isVisibleRecentTask(alwaysOnTopTask));
@@ -1030,9 +1032,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertNotRestoreTask(() -> mAtm.cancelTaskWindowTransition(taskId));
         assertNotRestoreTask(
                 () -> mAtm.resizeTask(taskId, null /* bounds */, 0 /* resizeMode */));
-        assertNotRestoreTask(
-                () -> mAtm.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
-                        false/* toTop */));
     }
 
     @Test
@@ -1196,8 +1195,6 @@ public class RecentTasksTest extends WindowTestsBase {
                 () -> mAtm.removeRootTasksWithActivityTypes(
                         new int[]{ACTIVITY_TYPE_UNDEFINED}));
         assertSecurityException(expectCallable, () -> mAtm.removeTask(0));
-        assertSecurityException(expectCallable,
-                () -> mAtm.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
                 () -> mAtm.moveTaskToRootTask(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable, () -> mAtm.getAllRootTaskInfos());

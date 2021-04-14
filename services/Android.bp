@@ -7,6 +7,22 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+// Defaults for platform code that runs inside system_server
+java_defaults {
+    name: "platform_service_defaults",
+    plugins: ["error_prone_android_framework"],
+    errorprone: {
+        javacflags: [
+            // "-Xep:AndroidFrameworkBinderIdentity:ERROR",
+            "-Xep:AndroidFrameworkCompatChange:ERROR",
+            // "-Xep:AndroidFrameworkUid:ERROR",
+            // NOTE: only enable to generate local patchfiles
+            // "-XepPatchChecks:refaster:frameworks/base/errorprone/refaster/EfficientXml.java.refaster",
+            // "-XepPatchLocation:/tmp/refaster/",
+        ],
+    },
+}
+
 filegroup {
     name: "services-main-sources",
     srcs: [

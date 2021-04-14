@@ -28,7 +28,7 @@
 namespace android {
 namespace uirenderer {
 
-static constexpr size_t UI_THREAD_FRAME_INFO_SIZE = 11;
+static constexpr size_t UI_THREAD_FRAME_INFO_SIZE = 12;
 
 enum class FrameInfoIndex {
     Flags = 0,
@@ -42,6 +42,7 @@ enum class FrameInfoIndex {
     DrawStart,
     FrameDeadline,
     FrameStartTime,
+    FrameInterval,
     // End of UI frame info
 
     SyncQueued,
@@ -77,6 +78,9 @@ enum {
 class UiFrameInfoBuilder {
 public:
     static constexpr int64_t INVALID_VSYNC_ID = -1;
+    static constexpr int64_t UNKNOWN_DEADLINE = std::numeric_limits<int64_t>::max();
+    static constexpr int64_t UNKNOWN_FRAME_INTERVAL = -1;
+
 
     explicit UiFrameInfoBuilder(int64_t* buffer) : mBuffer(buffer) {
         memset(mBuffer, 0, UI_THREAD_FRAME_INFO_SIZE * sizeof(int64_t));
@@ -89,7 +93,7 @@ public:
     }
 
     UiFrameInfoBuilder& setVsync(nsecs_t vsyncTime, nsecs_t intendedVsync,
-                                 int64_t vsyncId, int64_t frameDeadline) {
+                                 int64_t vsyncId, int64_t frameDeadline, nsecs_t frameInterval) {
         set(FrameInfoIndex::FrameTimelineVsyncId) = vsyncId;
         set(FrameInfoIndex::Vsync) = vsyncTime;
         set(FrameInfoIndex::IntendedVsync) = intendedVsync;
@@ -100,6 +104,7 @@ public:
         set(FrameInfoIndex::PerformTraversalsStart) = vsyncTime;
         set(FrameInfoIndex::DrawStart) = vsyncTime;
         set(FrameInfoIndex::FrameDeadline) = frameDeadline;
+        set(FrameInfoIndex::FrameInterval) = frameInterval;
         return *this;
     }
 

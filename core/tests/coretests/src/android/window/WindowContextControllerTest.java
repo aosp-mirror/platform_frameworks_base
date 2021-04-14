@@ -60,34 +60,39 @@ public class WindowContextControllerTest {
         mMockWms = mock(IWindowManager.class);
         mController = new WindowContextController(new Binder(), mMockWms);
 
-        doReturn(true).when(mMockWms).registerWindowContextListener(
-                any(), anyInt(), anyInt(), any());
+        doReturn(true).when(mMockWms).attachWindowContextToDisplayArea(any(), anyInt(),
+                anyInt(), any());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testRegisterListenerTwiceThrowException() {
-        mController.registerListener(TYPE_APPLICATION_OVERLAY, DEFAULT_DISPLAY,
+    @Test(expected = IllegalStateException.class)
+    public void testAttachToDisplayAreaTwiceThrowException() {
+        mController.attachToDisplayArea(TYPE_APPLICATION_OVERLAY, DEFAULT_DISPLAY,
                 null /* options */);
-        mController.registerListener(TYPE_APPLICATION_OVERLAY, DEFAULT_DISPLAY,
+        mController.attachToDisplayArea(TYPE_APPLICATION_OVERLAY, DEFAULT_DISPLAY,
                 null /* options */);
-    }
-
-    @Test
-    public void testUnregisterListenerIfNeeded_NotRegisteredYet_DoNothing() throws Exception {
-        mController.unregisterListenerIfNeeded();
-
-        verify(mMockWms, never()).registerWindowContextListener(any(), anyInt(), anyInt(), any());
     }
 
     @Test
-    public void testRegisterAndUnRegisterListener() {
-        mController.registerListener(TYPE_APPLICATION_OVERLAY, DEFAULT_DISPLAY,
+    public void testDetachIfNeeded_NotAttachedYet_DoNothing() throws Exception {
+        mController.detachIfNeeded();
+
+        verify(mMockWms, never()).detachWindowContextFromWindowContainer(any());
+    }
+
+    @Test
+    public void testAttachAndDetachDisplayArea() {
+        mController.attachToDisplayArea(TYPE_APPLICATION_OVERLAY, DEFAULT_DISPLAY,
                 null /* options */);
 
-        assertThat(mController.mListenerRegistered).isTrue();
+        assertThat(mController.mAttachedToDisplayArea).isTrue();
 
-        mController.unregisterListenerIfNeeded();
+        mController.detachIfNeeded();
 
-        assertThat(mController.mListenerRegistered).isFalse();
+        assertThat(mController.mAttachedToDisplayArea).isFalse();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testAttachToWindowTokenBeforeAttachingToDAThrowException() {
+        mController.attachToWindowToken(new Binder());
     }
 }
