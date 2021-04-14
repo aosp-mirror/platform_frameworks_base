@@ -15315,9 +15315,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final BroadcastOptions bOptions = getTemporaryAppAllowlistBroadcastOptions(
                     REASON_LOCKED_BOOT_COMPLETED);
             am.broadcastIntentWithFeature(null, null, lockedBcIntent, null, null, 0, null, null,
-                    requiredPermissions, android.app.AppOpsManager.OP_NONE, bOptions.toBundle(),
-                    false, false,
-                    userId);
+                    requiredPermissions, null, android.app.AppOpsManager.OP_NONE,
+                    bOptions.toBundle(), false, false, userId);
 
             // Deliver BOOT_COMPLETED only if user is unlocked
             final UserManagerInternal umInternal = mInjector.getUserManagerInternal();
@@ -15327,9 +15326,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 }
                 am.broadcastIntentWithFeature(null, null, bcIntent, null, null, 0, null, null,
-                        requiredPermissions, android.app.AppOpsManager.OP_NONE, bOptions.toBundle(),
-                        false, false,
-                        userId);
+                        requiredPermissions, null, android.app.AppOpsManager.OP_NONE,
+                        bOptions.toBundle(), false, false, userId);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -22197,7 +22195,7 @@ public class PackageManagerService extends IPackageManager.Stub
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             try {
                 am.broadcastIntentWithFeature(null, null, intent, null, null,
-                        0, null, null, null, android.app.AppOpsManager.OP_NONE,
+                        0, null, null, null, null, android.app.AppOpsManager.OP_NONE,
                         null, false, false, userId);
             } catch (RemoteException e) {
             }
@@ -27810,8 +27808,8 @@ public class PackageManagerService extends IPackageManager.Stub
             };
             try {
                 am.broadcastIntentWithFeature(null, null, intent, null, null, 0, null, null,
-                        requiredPermissions, android.app.AppOpsManager.OP_NONE, null, false, false,
-                        UserHandle.USER_ALL);
+                        requiredPermissions, null, android.app.AppOpsManager.OP_NONE, null, false,
+                        false, UserHandle.USER_ALL);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
