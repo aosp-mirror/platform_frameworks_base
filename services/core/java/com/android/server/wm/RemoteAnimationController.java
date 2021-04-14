@@ -121,7 +121,10 @@ class RemoteAnimationController implements DeathRecipient {
 
         // Create the app targets
         final RemoteAnimationTarget[] appTargets = createAppAnimations();
-        if (appTargets.length == 0) {
+        if (appTargets.length == 0 && !AppTransition.isKeyguardOccludeTransitOld(transit)) {
+            // Keyguard occlude transition can be executed before the occluding activity becomes
+            // visible. Even in this case, KeyguardService expects to receive binder call, so we
+            // don't cancel remote animation.
             ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS,
                     "goodToGo(): No apps to animate, mPendingAnimations=%d",
                     mPendingAnimations.size());
@@ -133,12 +136,16 @@ class RemoteAnimationController implements DeathRecipient {
         // Create the remote wallpaper animation targets (if any)
         final RemoteAnimationTarget[] wallpaperTargets = createWallpaperAnimations();
 
-        // TODO(bc-unlock): Create the remote non app animation targets (if any)
+        // Create the remote non app animation targets (if any)
         final RemoteAnimationTarget[] nonAppTargets = createNonAppWindowAnimations(transit);
 
         mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             try {
                 linkToDeathOfRunner();
+                ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "goodToGo(): onAnimationStart,"
+                                + " transit=%s, apps=%d, wallpapers=%d, nonApps=%d",
+                        AppTransition.appTransitionOldToString(transit), appTargets.length,
+                        wallpaperTargets.length, nonAppTargets.length);
                 mRemoteAnimationAdapter.getRunner().onAnimationStart(transit, appTargets,
                         wallpaperTargets, nonAppTargets, mFinishedCallback);
             } catch (RemoteException e) {
