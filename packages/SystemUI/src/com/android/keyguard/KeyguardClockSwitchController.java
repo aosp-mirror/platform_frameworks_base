@@ -188,6 +188,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 mSmartspaceView.registerDataProvider(plugin);
                 View asView = (View) mSmartspaceView;
 
+                // Place plugin view below normal clock...
                 RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                         MATCH_PARENT, WRAP_CONTENT);
                 lp.addRule(RelativeLayout.BELOW, R.id.lockscreen_clock_view);
@@ -196,6 +197,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 int padding = getContext().getResources()
                         .getDimensionPixelSize(R.dimen.below_clock_padding_start);
                 asView.setPadding(padding, 0, padding, 0);
+
+                // ... but above the large clock
+                lp = new RelativeLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+                lp.addRule(RelativeLayout.BELOW, asView.getId());
+                mLargeClockFrame.setLayoutParams(lp);
 
                 View nic = mView.findViewById(
                         com.android.systemui.R.id.left_aligned_notification_icon_container);
@@ -219,6 +225,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                         nic.getLayoutParams();
                 lp.addRule(RelativeLayout.BELOW, R.id.keyguard_status_area);
                 nic.setLayoutParams(lp);
+                mLargeClockFrame.setLayoutParams(lp);
 
                 mSmartspaceView = null;
             }
