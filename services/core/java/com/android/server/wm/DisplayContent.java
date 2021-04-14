@@ -901,6 +901,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         && preferredModeId != 0) {
                     mTmpApplySurfaceChangesTransactionState.preferredModeId = preferredModeId;
                 }
+
+                final float preferredMaxRefreshRate = getDisplayPolicy().getRefreshRatePolicy()
+                        .getPreferredMaxRefreshRate(w);
+                if (mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate == 0
+                        && preferredMaxRefreshRate != 0) {
+                    mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate =
+                            preferredMaxRefreshRate;
+                }
             }
         }
 
@@ -4229,6 +4237,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mLastHasContent,
                     mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferredModeId,
+                    mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
                     true /* inTraversal, must call performTraversalInTrans... below */);
         }
@@ -4512,12 +4521,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     private static final class ApplySurfaceChangesTransactionState {
-        boolean displayHasContent;
-        boolean obscured;
-        boolean syswin;
-        boolean preferMinimalPostProcessing;
-        float preferredRefreshRate;
-        int preferredModeId;
+        public boolean displayHasContent;
+        public boolean obscured;
+        public boolean syswin;
+        public boolean preferMinimalPostProcessing;
+        public float preferredRefreshRate;
+        public int preferredModeId;
+        public float preferredMaxRefreshRate;
 
         void reset() {
             displayHasContent = false;
@@ -4526,6 +4536,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             preferMinimalPostProcessing = false;
             preferredRefreshRate = 0;
             preferredModeId = 0;
+            preferredMaxRefreshRate = 0;
         }
     }
 

@@ -23,10 +23,12 @@ import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REF
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HIGH_ZONE;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE;
 
+import static com.android.server.display.DisplayModeDirector.Vote.INVALID_SIZE;
 import static com.android.server.display.DisplayModeDirector.Vote.PRIORITY_FLICKER;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -722,6 +724,164 @@ public class DisplayModeDirectorTest {
         hbmListener.onHbmDisabled(IUdfpsHbmListener.GLOBAL_HBM, DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_UDFPS);
         assertNull(vote);
+    }
+
+    @Test
+    public void testAppRequestMaxRefreshRate() {
+        // Confirm that the app max request range doesn't include flicker or min refresh rate
+        // settings but does include everything else.
+        assertTrue(Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE
+                >= Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF);
+
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
+        SparseArray<Vote> votes = new SparseArray<>();
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID, votes);
+        votes.put(PRIORITY_FLICKER, Vote.forRefreshRates(60, 60));
+        director.injectVotesByDisplay(votesByDisplay);
+        DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isAtMost(60f);
+        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isAtLeast(90f);
+
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_REFRESH_RATE,
+                Vote.forRefreshRates(90, Float.POSITIVE_INFINITY));
+        director.injectVotesByDisplay(votesByDisplay);
+        desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primaryRefreshRateRange.max).isAtLeast(90f);
+        assertThat(desiredSpecs.appRequestRefreshRateRange.min).isAtMost(60f);
+        assertThat(desiredSpecs.appRequestRefreshRateRange.max).isAtLeast(90f);
+
+        votes.put(Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE, Vote.forRefreshRates(0, 75));
+        director.injectVotesByDisplay(votesByDisplay);
+        desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        // TODO(b/183226498): ideally the refresh rate range should be a single value since
+        // PRIORITY_FLICKER voted, however since PRIORITY_APP_REQUEST_MAX_REFRESH_RATE votes for
+        // range, PRIORITY_FLICKER is ignored. The same thing would happen with
+        // PRIORITY_LOW_POWER_MODE so this is not a regression. This will be fixed in a subsequent
+        // CL.
+        //assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(75);
+        assertThat(desiredSpecs.primaryRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(75);
+        //assertThat(desiredSpecs.appRequestRefreshRateRange.min)
+        //        .isWithin(FLOAT_TOLERANCE)
+        //        .of(75);
+        assertThat(desiredSpecs.appRequestRefreshRateRange.max)
+                .isWithin(FLOAT_TOLERANCE)
+                .of(75);
+    }
+
+    @Test
+    public void testAppRequestObserver_modeId() {
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
+        director.getAppRequestObserver().setAppRequest(DISPLAY_ID, 60, 0);
+
+        Vote appRequestRefreshRate =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE);
+        assertNotNull(appRequestRefreshRate);
+        assertThat(appRequestRefreshRate.refreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(appRequestRefreshRate.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(appRequestRefreshRate.height).isEqualTo(INVALID_SIZE);
+        assertThat(appRequestRefreshRate.width).isEqualTo(INVALID_SIZE);
+
+        Vote appRequestSize = director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_SIZE);
+        assertNotNull(appRequestSize);
+        assertThat(appRequestSize.refreshRateRange.min).isZero();
+        assertThat(appRequestSize.refreshRateRange.max).isPositiveInfinity();
+        assertThat(appRequestSize.height).isEqualTo(1000);
+        assertThat(appRequestSize.width).isEqualTo(1000);
+
+        Vote appRequestMaxRefreshRate =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE);
+        assertNull(appRequestMaxRefreshRate);
+
+        director.getAppRequestObserver().setAppRequest(DISPLAY_ID, 90, 0);
+
+        appRequestRefreshRate =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE);
+        assertNotNull(appRequestRefreshRate);
+        assertThat(appRequestRefreshRate.refreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(appRequestRefreshRate.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(appRequestRefreshRate.height).isEqualTo(INVALID_SIZE);
+        assertThat(appRequestRefreshRate.width).isEqualTo(INVALID_SIZE);
+
+        appRequestSize = director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_SIZE);
+        assertNotNull(appRequestSize);
+        assertThat(appRequestSize.refreshRateRange.min).isZero();
+        assertThat(appRequestSize.refreshRateRange.max).isPositiveInfinity();
+        assertThat(appRequestSize.height).isEqualTo(1000);
+        assertThat(appRequestSize.width).isEqualTo(1000);
+
+        appRequestMaxRefreshRate =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE);
+        assertNull(appRequestMaxRefreshRate);
+    }
+
+    @Test
+    public void testAppRequestObserver_maxRefreshRate() {
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
+        director.getAppRequestObserver().setAppRequest(DISPLAY_ID, -1, 90);
+        Vote appRequestRefreshRate =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE);
+        assertNull(appRequestRefreshRate);
+
+        Vote appRequestSize = director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_SIZE);
+        assertNull(appRequestSize);
+
+        Vote appRequestMaxRefreshRate =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE);
+        assertNotNull(appRequestMaxRefreshRate);
+        assertThat(appRequestMaxRefreshRate.refreshRateRange.min).isZero();
+        assertThat(appRequestMaxRefreshRate.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(appRequestMaxRefreshRate.height).isEqualTo(INVALID_SIZE);
+        assertThat(appRequestMaxRefreshRate.width).isEqualTo(INVALID_SIZE);
+
+        director.getAppRequestObserver().setAppRequest(DISPLAY_ID, -1, 60);
+        appRequestRefreshRate =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE);
+        assertNull(appRequestRefreshRate);
+
+        appRequestSize = director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_SIZE);
+        assertNull(appRequestSize);
+
+        appRequestMaxRefreshRate =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE);
+        assertNotNull(appRequestMaxRefreshRate);
+        assertThat(appRequestMaxRefreshRate.refreshRateRange.min).isZero();
+        assertThat(appRequestMaxRefreshRate.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(appRequestMaxRefreshRate.height).isEqualTo(INVALID_SIZE);
+        assertThat(appRequestMaxRefreshRate.width).isEqualTo(INVALID_SIZE);
+    }
+
+    @Test
+    public void testAppRequestObserver_modeIdAndMaxRefreshRate() {
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
+        director.getAppRequestObserver().setAppRequest(DISPLAY_ID, 60, 90);
+
+        Vote appRequestRefreshRate =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_REFRESH_RATE);
+        assertNotNull(appRequestRefreshRate);
+        assertThat(appRequestRefreshRate.refreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(appRequestRefreshRate.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(appRequestRefreshRate.height).isEqualTo(INVALID_SIZE);
+        assertThat(appRequestRefreshRate.width).isEqualTo(INVALID_SIZE);
+
+        Vote appRequestSize =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_SIZE);
+        assertNotNull(appRequestSize);
+        assertThat(appRequestSize.refreshRateRange.min).isZero();
+        assertThat(appRequestSize.refreshRateRange.max).isPositiveInfinity();
+        assertThat(appRequestSize.height).isEqualTo(1000);
+        assertThat(appRequestSize.width).isEqualTo(1000);
+
+        Vote appRequestMaxRefreshRate =
+                director.getVote(DISPLAY_ID, Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE);
+        assertNotNull(appRequestMaxRefreshRate);
+        assertThat(appRequestMaxRefreshRate.refreshRateRange.min).isZero();
+        assertThat(appRequestMaxRefreshRate.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(appRequestMaxRefreshRate.height).isEqualTo(INVALID_SIZE);
+        assertThat(appRequestMaxRefreshRate.width).isEqualTo(INVALID_SIZE);
     }
 
     private void assertVoteForRefreshRate(Vote vote, float refreshRate) {

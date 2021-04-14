@@ -3010,6 +3010,14 @@ public interface WindowManager extends ViewManager {
         public int preferredDisplayModeId;
 
         /**
+         * The max display refresh rate while the window is in focus.
+         *
+         * This value is ignored if {@link #preferredDisplayModeId} is set.
+         * @hide
+         */
+        public float preferredMaxDisplayRefreshRate;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #systemUiVisibility}
          * and {@link #subtreeSystemUiVisibility}.
          *

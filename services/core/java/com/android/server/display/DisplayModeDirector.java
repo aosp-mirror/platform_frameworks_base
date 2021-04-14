@@ -922,6 +922,11 @@ public class DisplayModeDirector {
         // It votes [MIN_REFRESH_RATE, Float.POSITIVE_INFINITY]
         public static final int PRIORITY_USER_SETTING_MIN_REFRESH_RATE = 2;
 
+        // APP_REQUEST_MAX_REFRESH_RATE is used to for internal apps to limit the refresh
+        // rate in certain cases, mostly to preserve power.
+        // It votes to [0, APP_REQUEST_MAX_REFRESH_RATE].
+        public static final int PRIORITY_APP_REQUEST_MAX_REFRESH_RATE = 3;
+
         // We split the app request into different priorities in case we can satisfy one desire
         // without the other.
 
@@ -930,19 +935,19 @@ public class DisplayModeDirector {
         // @see android.view.WindowManager.LayoutParams#preferredDisplayModeId
         // System also forces some apps like denylisted app to run at a lower refresh rate.
         // @see android.R.array#config_highRefreshRateBlacklist
-        public static final int PRIORITY_APP_REQUEST_REFRESH_RATE = 3;
-        public static final int PRIORITY_APP_REQUEST_SIZE = 4;
+        public static final int PRIORITY_APP_REQUEST_REFRESH_RATE = 4;
+        public static final int PRIORITY_APP_REQUEST_SIZE = 5;
 
         // SETTING_PEAK_REFRESH_RATE has a high priority and will restrict the bounds of the rest
         // of low priority voters. It votes [0, max(PEAK, MIN)]
-        public static final int PRIORITY_USER_SETTING_PEAK_REFRESH_RATE = 5;
+        public static final int PRIORITY_USER_SETTING_PEAK_REFRESH_RATE = 6;
 
         // LOW_POWER_MODE force display to [0, 60HZ] if Settings.Global.LOW_POWER_MODE is on.
-        public static final int PRIORITY_LOW_POWER_MODE = 6;
+        public static final int PRIORITY_LOW_POWER_MODE = 7;
 
         // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
         // to function, so this needs to be the highest priority of all votes.
-        public static final int PRIORITY_UDFPS = 7;
+        public static final int PRIORITY_UDFPS = 8;
 
         // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
         // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
@@ -953,7 +958,7 @@ public class DisplayModeDirector {
         // The cutoff for the app request refresh rate range. Votes with priorities lower than this
         // value will not be considered when constructing the app request refresh rate range.
         public static final int APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF =
-                PRIORITY_APP_REQUEST_REFRESH_RATE;
+                PRIORITY_APP_REQUEST_MAX_REFRESH_RATE;
 
         /**
          * A value signifying an invalid width or height in a vote.
@@ -997,6 +1002,8 @@ public class DisplayModeDirector {
                     return "PRIORITY_FLICKER";
                 case PRIORITY_USER_SETTING_MIN_REFRESH_RATE:
                     return "PRIORITY_USER_SETTING_MIN_REFRESH_RATE";
+                case PRIORITY_APP_REQUEST_MAX_REFRESH_RATE:
+                    return "PRIORITY_APP_REQUEST_MAX_REFRESH_RATE";
                 case PRIORITY_APP_REQUEST_REFRESH_RATE:
                     return "PRIORITY_APP_REQUEST_REFRESH_RATE";
                 case PRIORITY_APP_REQUEST_SIZE:
@@ -1182,14 +1189,17 @@ public class DisplayModeDirector {
 
     final class AppRequestObserver {
         private final SparseArray<Display.Mode> mAppRequestedModeByDisplay;
+        private final SparseArray<Float> mAppPreferredMaxRefreshRateByDisplay;
 
         AppRequestObserver() {
             mAppRequestedModeByDisplay = new SparseArray<>();
+            mAppPreferredMaxRefreshRateByDisplay = new SparseArray<>();
         }
 
-        public void setAppRequestedMode(int displayId, int modeId) {
+        public void setAppRequest(int displayId, int modeId, float requestedMaxRefreshRate) {
             synchronized (mLock) {
                 setAppRequestedModeLocked(displayId, modeId);
+                setAppPreferredMaxRefreshRateLocked(displayId, requestedMaxRefreshRate);
             }
         }
 
@@ -1217,6 +1227,29 @@ public class DisplayModeDirector {
             updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_SIZE, sizeVote);
         }
 
+        private void setAppPreferredMaxRefreshRateLocked(int displayId,
+                float requestedMaxRefreshRate) {
+            final Vote vote;
+            final Float requestedMaxRefreshRateVote =
+                    requestedMaxRefreshRate > 0
+                            ? new Float(requestedMaxRefreshRate) : null;
+            if (Objects.equals(requestedMaxRefreshRateVote,
+                    mAppPreferredMaxRefreshRateByDisplay.get(displayId))) {
+                return;
+            }
+
+            if (requestedMaxRefreshRate > 0) {
+                mAppPreferredMaxRefreshRateByDisplay.put(displayId, requestedMaxRefreshRateVote);
+                vote = Vote.forRefreshRates(0, requestedMaxRefreshRate);
+            } else {
+                mAppPreferredMaxRefreshRateByDisplay.remove(displayId);
+                vote = null;
+            }
+            synchronized (mLock) {
+                updateVoteLocked(displayId, Vote.PRIORITY_APP_REQUEST_MAX_REFRESH_RATE, vote);
+            }
+        }
+
         private Display.Mode findModeByIdLocked(int displayId, int modeId) {
             Display.Mode[] modes = mSupportedModesByDisplay.get(displayId);
             if (modes == null) {
@@ -1237,6 +1270,12 @@ public class DisplayModeDirector {
                 final int id = mAppRequestedModeByDisplay.keyAt(i);
                 final Display.Mode mode = mAppRequestedModeByDisplay.valueAt(i);
                 pw.println("    " + id + " -> " + mode);
+            }
+            pw.println("    mAppPreferredMaxRefreshRateByDisplay:");
+            for (int i = 0; i < mAppPreferredMaxRefreshRateByDisplay.size(); i++) {
+                final int id = mAppPreferredMaxRefreshRateByDisplay.keyAt(i);
+                final Float refreshRate = mAppPreferredMaxRefreshRateByDisplay.valueAt(i);
+                pw.println("    " + id + " -> " + refreshRate);
             }
         }
     }
