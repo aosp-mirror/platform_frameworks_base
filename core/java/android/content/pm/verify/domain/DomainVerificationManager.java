@@ -32,7 +32,9 @@ import android.os.UserHandle;
 
 import com.android.internal.util.CollectionUtils;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -350,6 +352,8 @@ public final class DomainVerificationManager {
      *
      * The set will be ordered from lowest to highest priority.
      *
+     * @param domain The host to query for. An invalid domain will result in an empty set.
+     *
      * @hide
      */
     @SystemApi
@@ -357,11 +361,11 @@ public final class DomainVerificationManager {
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
     public SortedSet<DomainOwner> getOwnersForDomain(@NonNull String domain) {
         try {
+            Objects.requireNonNull(domain);
             final List<DomainOwner> orderedList = mDomainVerificationManager.getOwnersForDomain(
                     domain, mContext.getUserId());
             SortedSet<DomainOwner> set = new TreeSet<>(
-                    (first, second) -> Integer.compare(orderedList.indexOf(first),
-                            orderedList.indexOf(second)));
+                    Comparator.comparingInt(orderedList::indexOf));
             set.addAll(orderedList);
             return set;
         } catch (RemoteException e) {

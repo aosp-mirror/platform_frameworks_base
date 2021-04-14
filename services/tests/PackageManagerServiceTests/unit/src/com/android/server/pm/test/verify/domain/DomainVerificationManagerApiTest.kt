@@ -292,8 +292,17 @@ class DomainVerificationManagerApiTest {
         val manager0 = makeManager(service, 0)
         val manager1 = makeManager(service, 1)
 
-        assertThat(service.getOwnersForDomain(DOMAIN_1, 0)).isEmpty()
-        assertThat(manager0.getOwnersForDomain(DOMAIN_1)).isEmpty()
+        listOf(DOMAIN_1, "").forEach {
+            assertThat(service.getOwnersForDomain(it, 0)).isEmpty()
+            assertThat(manager0.getOwnersForDomain(it)).isEmpty()
+        }
+
+        assertFailsWith(NullPointerException::class) {
+            DomainVerificationJavaUtil.getOwnersForDomain(service, null, 0)
+        }
+        assertFailsWith(NullPointerException::class) {
+            DomainVerificationJavaUtil.getOwnersForDomain(manager0, null)
+        }
 
         assertThat(
             service.setStatus(
