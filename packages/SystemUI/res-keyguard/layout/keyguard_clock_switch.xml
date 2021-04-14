@@ -79,7 +79,6 @@
         android:id="@+id/left_aligned_notification_icon_container"
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_shelf_height"
-        android:layout_marginTop="@dimen/widget_vertical_padding"
         android:layout_below="@id/keyguard_status_area"
         android:paddingStart="@dimen/below_clock_padding_start"
     />
