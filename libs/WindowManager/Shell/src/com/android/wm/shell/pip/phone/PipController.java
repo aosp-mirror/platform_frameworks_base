@@ -116,7 +116,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
         if (!mPipTaskOrganizer.isInPip()
                 || mPipBoundsState.getDisplayLayout().rotation() == toRotation
-                || mPipTaskOrganizer.isDeferringEnterPipAnimation()) {
+                || mPipTaskOrganizer.isDeferringEnterPipAnimation()
+                || mPipTaskOrganizer.isEntryScheduled()) {
             // Skip if the same rotation has been set or we aren't in PIP or haven't actually
             // entered PIP yet. We still need to update the display layout in the bounds handler
             // in this case.
@@ -124,6 +125,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             // do not forget to update the movement bounds as well.
             updateMovementBounds(mPipBoundsState.getNormalBounds(), true /* fromRotation */,
                     false /* fromImeAdjustment */, false /* fromShelfAdjustment */, t);
+            mPipTaskOrganizer.onDisplayRotationSkipped();
             return;
         }
         // If there is an animation running (ie. from a shelf offset), then ensure that we calculate
