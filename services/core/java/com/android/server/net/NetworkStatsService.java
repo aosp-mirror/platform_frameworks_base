@@ -1084,13 +1084,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         if (callingUid != android.os.Process.SYSTEM_UID && callingUid != uid) {
             return UNSUPPORTED;
         }
-        return nativeGetUidStat(uid, type, checkBpfStatsEnable());
+        return nativeGetUidStat(uid, type);
     }
 
     @Override
     public long getIfaceStats(@NonNull String iface, int type) {
         Objects.requireNonNull(iface);
-        long nativeIfaceStats = nativeGetIfaceStat(iface, type, checkBpfStatsEnable());
+        long nativeIfaceStats = nativeGetIfaceStat(iface, type);
         if (nativeIfaceStats == -1) {
             return nativeIfaceStats;
         } else {
@@ -1104,7 +1104,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public long getTotalStats(int type) {
-        long nativeTotalStats = nativeGetTotalStat(type, checkBpfStatsEnable());
+        long nativeTotalStats = nativeGetTotalStat(type);
         if (nativeTotalStats == -1) {
             return nativeTotalStats;
         } else {
@@ -1135,10 +1135,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             default:
                 return 0;
         }
-    }
-
-    private boolean checkBpfStatsEnable() {
-        return mUseBpfTrafficStats;
     }
 
     /**
@@ -2249,7 +2245,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
-    private static native long nativeGetTotalStat(int type, boolean useBpfStats);
-    private static native long nativeGetIfaceStat(String iface, int type, boolean useBpfStats);
-    private static native long nativeGetUidStat(int uid, int type, boolean useBpfStats);
+    private static native long nativeGetTotalStat(int type);
+    private static native long nativeGetIfaceStat(String iface, int type);
+    private static native long nativeGetUidStat(int uid, int type);
 }
