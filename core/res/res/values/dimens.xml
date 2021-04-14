@@ -242,6 +242,9 @@
          this = conversation_content_start (80dp) - button inset (4dp) - action padding (12dp) -->
     <dimen name="call_notification_collapsible_indent">64dp</dimen>
 
+    <!-- The minimum width of the system actions added to the CallStyle notifications. -->
+    <dimen name="call_notification_system_action_min_width">100dp</dimen>
+
     <!-- The size of icons for visual actions in the notification_material_action_list -->
     <dimen name="notification_actions_icon_size">56dp</dimen>
 

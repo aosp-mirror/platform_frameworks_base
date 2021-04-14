@@ -3126,6 +3126,7 @@
   <java-symbol type="color" name="call_notification_decline_color"/>
   <java-symbol type="color" name="call_notification_answer_color"/>
   <java-symbol type="dimen" name="call_notification_collapsible_indent"/>
+  <java-symbol type="dimen" name="call_notification_system_action_min_width"/>
   <java-symbol type="drawable" name="ic_call_answer" />
   <java-symbol type="drawable" name="ic_call_answer_video" />
   <java-symbol type="drawable" name="ic_call_decline" />
