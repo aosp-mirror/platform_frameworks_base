@@ -406,6 +406,7 @@ applications that come with the platform
         <permission name="android.permission.TOGGLE_AUTOMOTIVE_PROJECTION" />
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
+        <permission name="android.permission.UWB_PRIVILEGED"/>
         <permission name="android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
