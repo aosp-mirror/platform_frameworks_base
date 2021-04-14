@@ -33,8 +33,8 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
-import com.android.server.wm.flicker.appLayerReplacesWallpaperLayer
+import com.android.server.wm.flicker.launcherWindowBecomesInvisible
+import com.android.server.wm.flicker.appLayerReplacesLauncher
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
@@ -107,7 +107,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun wallpaperWindowBecomesInvisible() = testSpec.wallpaperWindowBecomesInvisible()
+    fun launcherWindowBecomesInvisible() = testSpec.launcherWindowBecomesInvisible()
 
     @Presubmit
     @Test
@@ -138,8 +138,8 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun appLayerReplacesWallpaperLayer() =
-        testSpec.appLayerReplacesWallpaperLayer(testAppComponentName.className)
+    fun appLayerReplacesLauncher() =
+        testSpec.appLayerReplacesLauncher(testAppComponentName.className)
 
     @FlakyTest
     @Test
@@ -168,9 +168,9 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
                     repetitions = 1,
+                    supportedRotations = listOf(Surface.ROTATION_0),
                     supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY
                     )
                 )
         }
