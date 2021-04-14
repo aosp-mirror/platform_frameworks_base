@@ -54,6 +54,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private static final String MOVE_FULL_ROWS = "sysui_qs_move_whole_rows";
 
     public static final float EXPANDED_TILE_DELAY = .86f;
+    public static final float SHORT_PARALLAX_AMOUNT = 0.1f;
     private static final long QQS_FADE_IN_DURATION = 200L;
     // Fade out faster than fade in to finish before QQS hides.
     private static final long QQS_FADE_OUT_DURATION = 50L;
@@ -101,6 +102,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private final Executor mExecutor;
     private final TunerService mTunerService;
     private boolean mShowCollapsedOnKeyguard;
+    private boolean mTranslateWhileExpanding;
 
     @Inject
     public QSAnimator(QS qs, QuickQSPanel quickPanel, QuickStatusBarHeader quickStatusBarHeader,
@@ -242,6 +244,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         int width = mQs.getView() != null ? mQs.getView().getMeasuredWidth() : 0;
         int heightDiff = height - mQs.getHeader().getBottom()
                 + mQs.getHeader().getPaddingBottom();
+        if (!mTranslateWhileExpanding) {
+            heightDiff *= SHORT_PARALLAX_AMOUNT;
+        }
         firstPageBuilder.addFloat(tileLayout, "translationY", heightDiff, 0);
 
         int qqsTileHeight = 0;
@@ -569,6 +574,13 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         updateAnimators();
         setCurrentPosition();
     };
+
+    /**
+     * True whe QS will be pulled from the top, false when it will be clipped.
+     */
+    public void setTranslateWhileExpanding(boolean shouldTranslate) {
+        mTranslateWhileExpanding = shouldTranslate;
+    }
 
     static class HeightExpansionAnimator {
         private final List<View> mViews = new ArrayList<>();

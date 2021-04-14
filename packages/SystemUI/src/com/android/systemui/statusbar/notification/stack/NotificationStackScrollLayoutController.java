@@ -780,7 +780,7 @@ public class NotificationStackScrollLayoutController {
         return mView.isLayoutRtl();
     }
 
-    public float getLeft() {
+    public int getLeft() {
         return  mView.getLeft();
     }
 
