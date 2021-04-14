@@ -731,7 +731,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         // If multiple subscription IDs exist, they MUST all point to the same subscription
         // group. Otherwise undefined behavior may occur.
-        for (int subId : networkCapabilities.getSubIds()) {
+        for (int subId : networkCapabilities.getSubscriptionIds()) {
             // Verify that all subscriptions point to the same group
             if (subGrp != null && !subGrp.equals(snapshot.getGroupForSubId(subId))) {
                 Slog.wtf(TAG, "Got multiple subscription groups for a single network");
@@ -987,14 +987,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
 
         private boolean requiresRestartForCarrierWifi(NetworkCapabilities caps) {
-            if (!caps.hasTransport(TRANSPORT_WIFI) || caps.getSubIds() == null) {
+            if (!caps.hasTransport(TRANSPORT_WIFI) || caps.getSubscriptionIds() == null) {
                 return false;
             }
 
             synchronized (mCaps) {
                 for (NetworkCapabilities existing : mCaps.values()) {
                     if (existing.hasTransport(TRANSPORT_WIFI)
-                            && caps.getSubIds().equals(existing.getSubIds())) {
+                            && caps.getSubscriptionIds().equals(existing.getSubscriptionIds())) {
                         // Restart if any immutable capabilities have changed
                         return existing.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
                                 != caps.hasCapability(NET_CAPABILITY_NOT_RESTRICTED);

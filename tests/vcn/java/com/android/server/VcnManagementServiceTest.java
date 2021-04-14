@@ -696,7 +696,7 @@ public class VcnManagementServiceTest {
                         .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
                         .addTransportType(transport);
         if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-            ncBuilder.setSubIds(Collections.singleton(subId));
+            ncBuilder.setSubscriptionIds(Collections.singleton(subId));
         }
 
         return ncBuilder;

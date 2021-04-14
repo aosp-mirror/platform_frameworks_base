@@ -12310,12 +12310,12 @@ public class ConnectivityServiceTest {
     public void testSubIdsClearedWithoutNetworkFactoryPermission() throws Exception {
         mServiceContext.setPermission(NETWORK_FACTORY, PERMISSION_DENIED);
         final NetworkCapabilities nc = new NetworkCapabilities();
-        nc.setSubIds(Collections.singleton(Process.myUid()));
+        nc.setSubscriptionIds(Collections.singleton(Process.myUid()));
 
         final NetworkCapabilities result =
                 mService.networkCapabilitiesRestrictedForCallerPermissions(
                         nc, Process.myPid(), Process.myUid());
-        assertTrue(result.getSubIds().isEmpty());
+        assertTrue(result.getSubscriptionIds().isEmpty());
     }
 
     @Test
@@ -12324,17 +12324,17 @@ public class ConnectivityServiceTest {
 
         final Set<Integer> subIds = Collections.singleton(Process.myUid());
         final NetworkCapabilities nc = new NetworkCapabilities();
-        nc.setSubIds(subIds);
+        nc.setSubscriptionIds(subIds);
 
         final NetworkCapabilities result =
                 mService.networkCapabilitiesRestrictedForCallerPermissions(
                         nc, Process.myPid(), Process.myUid());
-        assertEquals(subIds, result.getSubIds());
+        assertEquals(subIds, result.getSubscriptionIds());
     }
 
     private NetworkRequest getRequestWithSubIds() {
         return new NetworkRequest.Builder()
-                .setSubIds(Collections.singleton(Process.myUid()))
+                .setSubscriptionIds(Collections.singleton(Process.myUid()))
                 .build();
     }
 

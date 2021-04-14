@@ -508,8 +508,8 @@ public class NetworkRequest implements Parcelable {
          */
         @NonNull
         @SystemApi
-        public Builder setSubIds(@NonNull Set<Integer> subIds) {
-            mNetworkCapabilities.setSubIds(subIds);
+        public Builder setSubscriptionIds(@NonNull Set<Integer> subIds) {
+            mNetworkCapabilities.setSubscriptionIds(subIds);
             return this;
         }
     }

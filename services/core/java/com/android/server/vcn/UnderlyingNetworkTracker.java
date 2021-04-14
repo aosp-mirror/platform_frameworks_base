@@ -153,14 +153,14 @@ public class UnderlyingNetworkTracker {
      * Builds the Route selection request
      *
      * <p>This request is guaranteed to select carrier-owned, non-VCN underlying networks by virtue
-     * of a populated set of subIds as expressed in NetworkCapabilities#getSubIds(). Only carrier
-     * owned networks may be selected, as the request specifies only subIds in the VCN's
+     * of a populated set of subIds as expressed in NetworkCapabilities#getSubscriptionIds(). Only
+     * carrier owned networks may be selected, as the request specifies only subIds in the VCN's
      * subscription group, while the VCN networks are excluded by virtue of not having subIds set on
      * the VCN-exposed networks.
      */
     private NetworkRequest getRouteSelectionRequest() {
         return getBaseNetworkRequestBuilder()
-                .setSubIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
+                .setSubscriptionIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
                 .build();
     }
 
@@ -176,7 +176,7 @@ public class UnderlyingNetworkTracker {
     private NetworkRequest getWifiNetworkRequest() {
         return getBaseNetworkRequestBuilder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                .setSubIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
+                .setSubscriptionIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
                 .build();
     }
 
