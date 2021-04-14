@@ -107,6 +107,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Checking filter %s",
                         mFilters.get(i));
                 if (mFilters.get(i).first.matches(info)) {
+                    Slog.d(TAG, "Found filter" + mFilters.get(i));
                     pendingRemote = mFilters.get(i).second;
                     // Add to requested list so that it can be found for merge requests.
                     mRequestedRemotes.put(transition, pendingRemote);

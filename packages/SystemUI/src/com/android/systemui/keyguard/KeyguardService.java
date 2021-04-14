@@ -18,14 +18,26 @@ package com.android.systemui.keyguard;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.RemoteAnimationTarget.MODE_CLOSING;
+import static android.view.RemoteAnimationTarget.MODE_OPENING;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
+import static android.view.WindowManager.TRANSIT_OLD_NONE;
+import static android.view.WindowManager.TransitionOldType;
+import static android.view.WindowManager.TransitionType;
 
+import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.Service;
+import android.app.WindowConfiguration;
 import android.content.Intent;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -42,8 +54,13 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
+import android.window.IRemoteTransition;
+import android.window.IRemoteTransitionFinishedCallback;
+import android.window.TransitionFilter;
+import android.window.TransitionInfo;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
@@ -51,7 +68,10 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.systemui.SystemUIApplication;
+import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
+
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -79,40 +99,163 @@ public class KeyguardService extends Service {
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
      */
     public static boolean sEnableRemoteKeyguardGoingAwayAnimation =
-            !Transitions.ENABLE_SHELL_TRANSITIONS && sEnableRemoteKeyguardAnimation >= 1;
+            sEnableRemoteKeyguardAnimation >= 1;
 
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
      */
     public static boolean sEnableRemoteKeyguardOccludeAnimation =
-            !Transitions.ENABLE_SHELL_TRANSITIONS && sEnableRemoteKeyguardAnimation >= 2;
+            sEnableRemoteKeyguardAnimation >= 2;
 
     private final KeyguardViewMediator mKeyguardViewMediator;
     private final KeyguardLifecyclesDispatcher mKeyguardLifecyclesDispatcher;
 
+    private static int newModeToLegacyMode(int newMode) {
+        switch (newMode) {
+            case WindowManager.TRANSIT_OPEN:
+            case WindowManager.TRANSIT_TO_FRONT:
+                return MODE_OPENING;
+            case WindowManager.TRANSIT_CLOSE:
+            case WindowManager.TRANSIT_TO_BACK:
+                return MODE_CLOSING;
+            default:
+                return 2; // MODE_CHANGING
+        }
+    }
+
+    private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers) {
+        final ArrayList<RemoteAnimationTarget> out = new ArrayList<>();
+        for (int i = 0; i < info.getChanges().size(); i++) {
+            boolean changeIsWallpaper =
+                    (info.getChanges().get(i).getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0;
+            if (wallpapers != changeIsWallpaper) continue;
+
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            final int taskId = taskInfo != null ? change.getTaskInfo().taskId : -1;
+            boolean isNotInRecents;
+            WindowConfiguration windowConfiguration = null;
+            if (taskInfo != null) {
+                if (taskInfo.getConfiguration() != null) {
+                    windowConfiguration =
+                            change.getTaskInfo().getConfiguration().windowConfiguration;
+                }
+                isNotInRecents = !change.getTaskInfo().isRunning;
+            } else {
+                isNotInRecents = true;
+            }
+            Rect localBounds = new Rect(change.getEndAbsBounds());
+            localBounds.offsetTo(change.getEndRelOffset().x, change.getEndRelOffset().y);
+
+            out.add(new RemoteAnimationTarget(
+                    taskId,
+                    newModeToLegacyMode(change.getMode()),
+                    change.getLeash(),
+                    (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0
+                            || (change.getFlags() & TransitionInfo.FLAG_SHOW_WALLPAPER) != 0,
+                    null /* clipRect */,
+                    new Rect(0, 0, 0, 0) /* contentInsets */,
+                    info.getChanges().size() - i,
+                    new Point(), localBounds, new Rect(change.getEndAbsBounds()),
+                    windowConfiguration, isNotInRecents, null /* startLeash */,
+                    change.getStartAbsBounds(), taskInfo));
+        }
+        return out.toArray(new RemoteAnimationTarget[out.size()]);
+    }
+
+    private static @TransitionOldType int getTransitionOldType(@TransitionType int type,
+            RemoteAnimationTarget[] apps) {
+        if (type == TRANSIT_KEYGUARD_GOING_AWAY) {
+            return apps.length == 0 ? TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
+                    : TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+        } else if (type == TRANSIT_KEYGUARD_OCCLUDE) {
+            return TRANSIT_OLD_KEYGUARD_OCCLUDE;
+        } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {
+            return TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
+        } else {
+            Slog.d(TAG, "Unexpected transit type: " + type);
+            return TRANSIT_OLD_NONE;
+        }
+    }
+
+    private static IRemoteTransition wrap(IRemoteAnimationRunner runner) {
+        return new IRemoteTransition.Stub() {
+            @Override
+            public void startAnimation(IBinder transition, TransitionInfo info,
+                    SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
+                    throws RemoteException {
+                Slog.d(TAG, "Starts IRemoteAnimationRunner: info=" + info);
+                final RemoteAnimationTarget[] apps = wrap(info, false /* wallpapers */);
+                final RemoteAnimationTarget[] wallpapers = wrap(info, true /* wallpapers */);
+                final RemoteAnimationTarget[] nonApps = new RemoteAnimationTarget[0];
+
+                // TODO: Remove this, and update alpha value in the IAnimationRunner.
+                for (TransitionInfo.Change change : info.getChanges()) {
+                    t.setAlpha(change.getLeash(), 1.0f);
+                }
+                t.apply();
+                runner.onAnimationStart(getTransitionOldType(info.getType(), apps),
+                        apps, wallpapers, nonApps,
+                        new IRemoteAnimationFinishedCallback.Stub() {
+                            @Override
+                            public void onAnimationFinished() throws RemoteException {
+                                Slog.d(TAG, "Finish IRemoteAnimationRunner.");
+                                finishCallback.onTransitionFinished(null /* wct */, null /* t */);
+                            }
+                        }
+                );
+            }
+
+            public void mergeAnimation(IBinder transition, TransitionInfo info,
+                    SurfaceControl.Transaction t, IBinder mergeTarget,
+                    IRemoteTransitionFinishedCallback finishCallback) {
+
+            }
+        };
+    }
+
     @Inject
     public KeyguardService(KeyguardViewMediator keyguardViewMediator,
-                           KeyguardLifecyclesDispatcher keyguardLifecyclesDispatcher) {
+                           KeyguardLifecyclesDispatcher keyguardLifecyclesDispatcher,
+                           ShellTransitions shellTransitions) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
 
-        RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
-        if (sEnableRemoteKeyguardGoingAwayAnimation) {
-            final RemoteAnimationAdapter exitAnimationAdapter =
-                    new RemoteAnimationAdapter(mExitAnimationRunner, 0, 0);
-            definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY, exitAnimationAdapter);
-            definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
-                    exitAnimationAdapter);
+        if (shellTransitions != null && Transitions.ENABLE_SHELL_TRANSITIONS) {
+            if (sEnableRemoteKeyguardGoingAwayAnimation) {
+                Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_GOING_AWAY");
+                TransitionFilter f = new TransitionFilter();
+                f.mTypeSet = new int[]{TRANSIT_KEYGUARD_GOING_AWAY};
+                shellTransitions.registerRemote(f, wrap(mExitAnimationRunner));
+            }
+            if (sEnableRemoteKeyguardOccludeAnimation) {
+                Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_(UN)OCCLUDE");
+                TransitionFilter f = new TransitionFilter();
+                f.mTypeSet = new int[]{TRANSIT_KEYGUARD_OCCLUDE, TRANSIT_KEYGUARD_UNOCCLUDE};
+                shellTransitions.registerRemote(f, wrap(mOccludeAnimationRunner));
+            }
+        } else {
+            RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
+            if (sEnableRemoteKeyguardGoingAwayAnimation) {
+                final RemoteAnimationAdapter exitAnimationAdapter =
+                        new RemoteAnimationAdapter(mExitAnimationRunner, 0, 0);
+                definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
+                        exitAnimationAdapter);
+                definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+                        exitAnimationAdapter);
+            }
+            if (sEnableRemoteKeyguardOccludeAnimation) {
+                final RemoteAnimationAdapter occludeAnimationAdapter =
+                        new RemoteAnimationAdapter(mOccludeAnimationRunner, 0, 0);
+                definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_OCCLUDE,
+                        occludeAnimationAdapter);
+                definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_UNOCCLUDE,
+                        occludeAnimationAdapter);
+            }
+            ActivityTaskManager.getInstance().registerRemoteAnimationsForDisplay(
+                    DEFAULT_DISPLAY, definition);
         }
-        if (sEnableRemoteKeyguardOccludeAnimation) {
-            final RemoteAnimationAdapter occludeAnimationAdapter =
-                    new RemoteAnimationAdapter(mOccludeAnimationRunner, 0, 0);
-            definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_OCCLUDE, occludeAnimationAdapter);
-            definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_UNOCCLUDE, occludeAnimationAdapter);
-        }
-        ActivityTaskManager.getInstance().registerRemoteAnimationsForDisplay(
-                DEFAULT_DISPLAY, definition);
     }
 
     @Override
@@ -145,10 +288,10 @@ public class KeyguardService extends Service {
                 RemoteAnimationTarget[] wallpapers,
                 RemoteAnimationTarget[] nonApps,
                 IRemoteAnimationFinishedCallback finishedCallback) {
-            Trace.beginSection("KeyguardService.mBinder#startKeyguardExitAnimation");
+            Trace.beginSection("mExitAnimationRunner.onAnimationStart#startKeyguardExitAnimation");
             checkPermission();
             mKeyguardViewMediator.startKeyguardExitAnimation(transit, apps, wallpapers,
-                    null /* nonApps */, finishedCallback);
+                    nonApps, finishedCallback);
             Trace.endSection();
         }
 
@@ -166,14 +309,14 @@ public class KeyguardService extends Service {
                        RemoteAnimationTarget[] wallpapers,
                         RemoteAnimationTarget[] nonApps,
                         IRemoteAnimationFinishedCallback finishedCallback) {
+            Slog.d(TAG, "mOccludeAnimationRunner.onAnimationStart: transit=" + transit);
             try {
                 if (transit == TRANSIT_OLD_KEYGUARD_OCCLUDE) {
                     mBinder.setOccluded(true /* isOccluded */, true /* animate */);
                 } else if (transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE) {
                     mBinder.setOccluded(false /* isOccluded */, true /* animate */);
                 }
-                // TODO(bc-unlock): Implement occlude/unocclude animation applied on apps,
-                //  wallpapers and nonApps.
+                // TODO(bc-unlock): Implement (un)occlude animation.
                 finishedCallback.onAnimationFinished();
             } catch (RemoteException e) {
                 Slog.e(TAG, "RemoteException");
