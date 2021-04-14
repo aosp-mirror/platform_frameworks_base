@@ -5189,6 +5189,10 @@ public class AudioManager {
      */
     public static final int DEVICE_OUT_HDMI_ARC = AudioSystem.DEVICE_OUT_HDMI_ARC;
     /** @hide
+     * The audio output device code for HDMI enhanced Audio Return Channel.
+     */
+    public static final int DEVICE_OUT_HDMI_EARC = AudioSystem.DEVICE_OUT_HDMI_EARC;
+    /** @hide
      * The audio output device code for S/PDIF digital connection.
      */
     public static final int DEVICE_OUT_SPDIF = AudioSystem.DEVICE_OUT_SPDIF;
@@ -5239,6 +5243,12 @@ public class AudioManager {
      */
     public static final int DEVICE_IN_HDMI_ARC =
                                     AudioSystem.DEVICE_IN_HDMI_ARC;
+
+    /** @hide
+     * The audio input device code for HDMI EARC
+     */
+    public static final int DEVICE_IN_HDMI_EARC =
+                                    AudioSystem.DEVICE_IN_HDMI_EARC;
 
     /** @hide
      * The audio input device code for telephony voice RX path
@@ -5354,6 +5364,7 @@ public class AudioManager {
      *            {@link #DEVICE_OUT_TELEPHONY_TX}.
      *            {@link #DEVICE_OUT_LINE}.
      *            {@link #DEVICE_OUT_HDMI_ARC}.
+     *            {@link #DEVICE_OUT_HDMI_EARC}.
      *            {@link #DEVICE_OUT_SPDIF}.
      *            {@link #DEVICE_OUT_FM}.
      *            {@link #DEVICE_OUT_DEFAULT} is not used here.

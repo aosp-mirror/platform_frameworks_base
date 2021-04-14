@@ -121,7 +121,7 @@ public class IpSecAlgorithmTest {
 
     @Test
     public void testValidationForAlgosAddedInS() throws Exception {
-        if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.R) {
+        if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.R) {
             return;
         }
 
@@ -194,13 +194,13 @@ public class IpSecAlgorithmTest {
     private static Set<String> getMandatoryAlgos() {
         return CollectionUtils.filter(
                 ALGO_TO_REQUIRED_FIRST_SDK.keySet(),
-                i -> Build.VERSION.FIRST_SDK_INT >= ALGO_TO_REQUIRED_FIRST_SDK.get(i));
+                i -> Build.VERSION.DEVICE_INITIAL_SDK_INT >= ALGO_TO_REQUIRED_FIRST_SDK.get(i));
     }
 
     private static Set<String> getOptionalAlgos() {
         return CollectionUtils.filter(
                 ALGO_TO_REQUIRED_FIRST_SDK.keySet(),
-                i -> Build.VERSION.FIRST_SDK_INT < ALGO_TO_REQUIRED_FIRST_SDK.get(i));
+                i -> Build.VERSION.DEVICE_INITIAL_SDK_INT < ALGO_TO_REQUIRED_FIRST_SDK.get(i));
     }
 
     @Test

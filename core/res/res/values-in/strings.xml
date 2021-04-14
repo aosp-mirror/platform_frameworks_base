@@ -1854,8 +1854,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Diupdate oleh admin Anda"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Dihapus oleh admin Anda"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Oke"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Untuk memperpanjang masa pakai baterai, Penghemat Baterai akan:\n\n• Mengaktifkan Tema gelap\n• Menonaktifkan atau membatasi aktivitas di latar belakang, beberapa efek visual, dan fitur lain seperti “Ok Google”\n\n"<annotation id="url">"Pelajari lebih lanjut"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Untuk memperpanjang masa pakai baterai, Penghemat Baterai akan:\n\n• Mengaktifkan Tema gelap\n• Menonaktifkan atau membatasi aktivitas di latar belakang, beberapa efek visual, dan fitur lain seperti “Ok Google”"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangi penggunaan data, Penghemat Data mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah diketuk."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Aktifkan Penghemat Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktifkan"</string>
@@ -2074,6 +2076,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Notifikasi ini didemosikan menjadi Senyap. Ketuk untuk memberikan masukan."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Notifikasi ini diberi peringkat lebih tinggi. Ketuk untuk memberikan masukan."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Notifikasi ini diberi peringkat lebih rendah. Ketuk untuk memberikan masukan."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifikasi info Mode Rutinitas"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterai mungkin habis sebelum pengisian daya biasanya"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Penghemat Baterai diaktifkan untuk memperpanjang masa pakai baterai"</string>

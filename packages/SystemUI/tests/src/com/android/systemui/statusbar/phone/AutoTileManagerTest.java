@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +57,7 @@ import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DeviceControlsController;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -95,7 +97,8 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Mock private ManagedProfileController mManagedProfileController;
     @Mock private NightDisplayListener mNightDisplayListener;
     @Mock private ReduceBrightColorsController mReduceBrightColorsController;
-    @Mock private DeviceControlsController mDeviceControlsController;;
+    @Mock private DeviceControlsController mDeviceControlsController;
+    @Mock private WalletController mWalletController;
     @Mock(answer = Answers.RETURNS_SELF)
     private AutoAddTracker.Builder mAutoAddTrackerBuilder;
     @Mock private Context mUserContext;
@@ -142,6 +145,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
             CastController castController,
             ReduceBrightColorsController reduceBrightColorsController,
             DeviceControlsController deviceControlsController,
+            WalletController walletController,
             @Named(RBC_AVAILABLE) boolean isReduceBrightColorsAvailable) {
         return new AutoTileManager(context, autoAddTrackerBuilder, mQsTileHost,
                 Handler.createAsync(TestableLooper.get(this).getLooper()),
@@ -153,6 +157,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
                 castController,
                 reduceBrightColorsController,
                 deviceControlsController,
+                walletController,
                 isReduceBrightColorsAvailable);
     }
 
@@ -160,7 +165,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         return createAutoTileManager(context, mAutoAddTrackerBuilder, mHotspotController,
                 mDataSaverController, mManagedProfileController, mNightDisplayListener,
                 mCastController, mReduceBrightColorsController, mDeviceControlsController,
-                mIsReduceBrightColorsAvailable);
+                mWalletController, mIsReduceBrightColorsAvailable);
     }
 
     @Test
@@ -175,10 +180,11 @@ public class AutoTileManagerTest extends SysuiTestCase {
         CastController cC = mock(CastController.class);
         ReduceBrightColorsController rBC = mock(ReduceBrightColorsController.class);
         DeviceControlsController dCC = mock(DeviceControlsController.class);
+        WalletController wC = mock(WalletController.class);
 
         AutoTileManager manager =
                 createAutoTileManager(mock(Context.class), builder, hC, dSC, mPC, nDS, cC, rBC,
-                        dCC, true);
+                        dCC, wC, true);
 
         verify(tracker, never()).initialize();
         verify(hC, never()).addCallback(any());
@@ -188,6 +194,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         verify(cC, never()).addCallback(any());
         verify(rBC, never()).addCallback(any());
         verify(dCC, never()).setCallback(any());
+        verify(wC, never()).getWalletPosition();
         assertNull(manager.getSecureSettingForKey(TEST_SETTING));
         assertNull(manager.getSecureSettingForKey(TEST_SETTING_COMPONENT));
     }
@@ -240,6 +247,8 @@ public class AutoTileManagerTest extends SysuiTestCase {
         inOrderDevices.verify(mDeviceControlsController).removeCallback();
         inOrderDevices.verify(mDeviceControlsController).setCallback(any());
 
+        verify(mWalletController, times(2)).getWalletPosition();
+
         SecureSetting setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertTrue(setting.isListening());
@@ -287,6 +296,8 @@ public class AutoTileManagerTest extends SysuiTestCase {
         InOrder inOrderDevices = inOrder(mDeviceControlsController);
         inOrderDevices.verify(mDeviceControlsController).removeCallback();
         inOrderDevices.verify(mDeviceControlsController).setCallback(any());
+
+        verify(mWalletController, times(2)).getWalletPosition();
 
         SecureSetting setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());

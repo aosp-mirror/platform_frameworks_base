@@ -20,6 +20,8 @@ import static android.net.IpSecManager.DIRECTION_IN;
 import static android.net.IpSecManager.DIRECTION_OUT;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.ipsec.ike.exceptions.IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED;
+import static android.net.ipsec.ike.exceptions.IkeProtocolException.ERROR_TYPE_TEMPORARY_FAILURE;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_INTERNAL_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
@@ -48,10 +51,9 @@ import android.net.LinkProperties;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.ChildSaProposal;
-import android.net.ipsec.ike.exceptions.AuthenticationFailedException;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
-import android.net.ipsec.ike.exceptions.TemporaryFailureException;
+import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.net.vcn.VcnControlPlaneIkeConfig;
 import android.net.vcn.VcnManager.VcnErrorCode;
 
@@ -470,10 +472,17 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         any());
     }
 
+    private static IkeProtocolException buildMockIkeProtocolException(int errorCode) {
+        final IkeProtocolException exception = mock(IkeProtocolException.class);
+        when(exception.getErrorType()).thenReturn(errorCode);
+        return exception;
+    }
+
     @Test
     public void testIkeSessionClosedExceptionallyAuthenticationFailure() throws Exception {
         verifyIkeSessionClosedExceptionalltyNotifiesStatusCallback(
-                new AuthenticationFailedException("vcn test"), VCN_ERROR_CODE_CONFIG_ERROR);
+                buildMockIkeProtocolException(ERROR_TYPE_AUTHENTICATION_FAILED),
+                VCN_ERROR_CODE_CONFIG_ERROR);
     }
 
     @Test
@@ -485,7 +494,8 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     @Test
     public void testIkeSessionClosedExceptionallyInternalFailure() throws Exception {
         verifyIkeSessionClosedExceptionalltyNotifiesStatusCallback(
-                new TemporaryFailureException("vcn test"), VCN_ERROR_CODE_INTERNAL_ERROR);
+                buildMockIkeProtocolException(ERROR_TYPE_TEMPORARY_FAILURE),
+                VCN_ERROR_CODE_INTERNAL_ERROR);
     }
 
     @Test

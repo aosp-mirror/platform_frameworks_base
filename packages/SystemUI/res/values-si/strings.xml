@@ -92,8 +92,14 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"තව ග්‍රහණය කරන්න"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"තිර රුව ඉවත ලන්න"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"තිර රූ පෙර දසුන"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ඉහළම මායිම"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"පහළම මායිම"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"තිර රෙකෝඩරය"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"තිර පටිගත කිරීම සකසමින්"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"තිර පටිගත කිරීමේ සැසියක් සඳහා කෙරෙන දැනුම් දීම"</string>
@@ -349,8 +355,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"ආදාන ක්‍රමය"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ස්ථානය"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ස්ථානය අක්‍රියයි"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"කැමරාව අවහිර කරන්න"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"මයික්‍රෆෝනය නිහඬ කරන්න"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"කැමරා ප්‍රවේශය"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"මයික් ප්‍රවේශය"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"තිබේ"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"අවහිර කර ඇත"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"මාධ්‍ය උපාංගය"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"හදිසි ඇමතුම් පමණි"</string>
@@ -422,8 +430,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"තිර පටිගත කිරීම"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ආරම්භ කරන්න"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"නතර කරන්න"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"දිගටම කර ගෙන යාමට, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; හට ඔබගේ උපාංගයෙහි මයික්‍රෆෝනයට ප්‍රවේශය අවශ්‍යයි."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"දිගටම කර ගෙන යාමට, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; හට ඔබගේ උපාංගයෙහි කැමරාවට ප්‍රවේශය අවශ්‍යයි."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"උපාංග මයික්‍රෆෝනය අවහිර කිරීම ඉවත් කරන්නද?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"උපාංග කැමරාව අවහිර කිරීම ඉවත් කරන්නද?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"උපාංග කැමරාව සහ මයික්‍රෆෝනය අවහිර කිරීම ඉවත් කරන්නද?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"මෙය ඔබගේ මයික්‍රෆෝනය භාවිත කිරීමට ඉඩ දී ඇති සියලු යෙදුම් සහ සේවා සඳහා ප්‍රවේශය අවහිර කිරීම ඉවත් කරයි."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"මෙය ඔබගේ කැමරාව භාවිතා කිරීමට ඉඩ දී ඇති සියලු යෙදුම් සහ සේවා සඳහා ප්‍රවේශය අවහිර කිරීම ඉවත් කරයි."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"මෙය ඔබගේ කැමරාව හෝ මයික්‍රෆෝනය භාවිත කිරීමට ඉඩ දී ඇති සියලු යෙදුම් සහ සේවා සඳහා ප්‍රවේශය අවහිර කිරීම ඉවත් කරයි."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"උපාංගය"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"යෙදුම් මාරු කිරීමට ස්වයිප් කරන්න"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ඉක්මනින් යෙදුම් මාරු කිරීමට දකුණට අදින්න"</string>
@@ -657,8 +669,10 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"එලාමය"</string>
     <string name="wallet_title" msgid="5369767670735827105">"පසුම්බිය"</string>
-    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"සියල්ල පෙන්වන්න"</string>
-    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"ගෙවීමට අගුලු හරින්න"</string>
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
+    <skip />
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
+    <skip />
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"සූදානම්"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ගෙවීම පිහිටුවන්න"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"භාවිත කිරීමට අගුලු හරින්න"</string>

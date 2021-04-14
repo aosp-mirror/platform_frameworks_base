@@ -27,11 +27,14 @@ TimeLord::TimeLord() : mFrameIntervalNanos(milliseconds_to_nanoseconds(16)),
                        mFrameDeadline(std::numeric_limits<int64_t>::max()){}
 
 bool TimeLord::vsyncReceived(nsecs_t vsync, nsecs_t intendedVsync, int64_t vsyncId,
-                             int64_t frameDeadline) {
+                             int64_t frameDeadline, nsecs_t frameInterval) {
     if (intendedVsync > mFrameIntendedTimeNanos) {
         mFrameIntendedTimeNanos = intendedVsync;
         mFrameVsyncId = vsyncId;
         mFrameDeadline = frameDeadline;
+        if (frameInterval > 0) {
+            mFrameIntervalNanos = frameInterval;
+        }
     }
 
     if (vsync > mFrameTimeNanos) {

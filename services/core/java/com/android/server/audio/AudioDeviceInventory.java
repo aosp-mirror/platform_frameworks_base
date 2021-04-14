@@ -1257,6 +1257,7 @@ public class AudioDeviceInventory {
                 break;
             case AudioSystem.DEVICE_OUT_HDMI:
             case AudioSystem.DEVICE_OUT_HDMI_ARC:
+            case AudioSystem.DEVICE_OUT_HDMI_EARC:
                 configureHdmiPlugIntent(intent, state);
                 break;
         }
@@ -1292,6 +1293,7 @@ public class AudioDeviceInventory {
                 break;
             case AudioSystem.DEVICE_OUT_HDMI:
             case AudioSystem.DEVICE_OUT_HDMI_ARC:
+            case AudioSystem.DEVICE_OUT_HDMI_EARC:
                 connType = AudioRoutesInfo.MAIN_HDMI;
                 break;
             case AudioSystem.DEVICE_OUT_USB_DEVICE:
@@ -1336,7 +1338,8 @@ public class AudioDeviceInventory {
             }
             final AudioDevicePort devicePort = (AudioDevicePort) port;
             if (devicePort.type() != AudioManager.DEVICE_OUT_HDMI
-                    && devicePort.type() != AudioManager.DEVICE_OUT_HDMI_ARC) {
+                    && devicePort.type() != AudioManager.DEVICE_OUT_HDMI_ARC
+                    && devicePort.type() != AudioManager.DEVICE_OUT_HDMI_EARC) {
                 continue;
             }
             // found an HDMI port: format the list of supported encodings

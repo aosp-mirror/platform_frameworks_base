@@ -383,7 +383,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @Override // Binder call
-    public void cancelVibrate(IBinder token) {
+    public void cancelVibrate(int usageFilter, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "cancelVibrate");
         try {
             mContext.enforceCallingOrSelfPermission(
@@ -392,16 +392,24 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Canceling vibration.");
+                    Slog.d(TAG, "Canceling vibration");
                 }
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    mNextVibration = null;
+                    if (mNextVibration != null
+                            && shouldCancelVibration(mNextVibration.getVibration(),
+                            usageFilter, token)) {
+                        mNextVibration = null;
+                    }
                     if (mCurrentVibration != null
-                            && mCurrentVibration.getVibration().token == token) {
+                            && shouldCancelVibration(mCurrentVibration.getVibration(),
+                            usageFilter, token)) {
                         mCurrentVibration.cancel();
                     }
-                    if (mCurrentExternalVibration != null) {
+                    if (mCurrentExternalVibration != null
+                            && shouldCancelVibration(
+                            mCurrentExternalVibration.externalVibration.getVibrationAttributes(),
+                            usageFilter)) {
                         mCurrentExternalVibration.end(Vibration.Status.CANCELLED);
                         mVibratorManagerRecords.record(mCurrentExternalVibration);
                         mCurrentExternalVibration.externalVibration.mute();
@@ -690,6 +698,30 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         return null;
+    }
+
+    /**
+     * Return true if the vibration has the same token and usage belongs to given usage class.
+     *
+     * @param vib         The ongoing or pending vibration to be cancelled.
+     * @param usageFilter The vibration usages to be cancelled, any bitwise combination of
+     *                    VibrationAttributes.USAGE_* values.
+     * @param token       The binder token to identify the vibration origin. Only vibrations
+     *                    started with the same token can be cancelled with it.
+     */
+    private boolean shouldCancelVibration(Vibration vib, int usageFilter, IBinder token) {
+        return (vib.token == token) && shouldCancelVibration(vib.attrs, usageFilter);
+    }
+
+    /**
+     * Return true if the external vibration usage belongs to given usage class.
+     *
+     * @param attrs       The attributes of an ongoing or pending vibration to be cancelled.
+     * @param usageFilter The vibration usages to be cancelled, any bitwise combination of
+     *                    VibrationAttributes.USAGE_* values.
+     */
+    private boolean shouldCancelVibration(VibrationAttributes attrs, int usageFilter) {
+        return (usageFilter & attrs.getUsage()) == attrs.getUsage();
     }
 
     /**
@@ -1501,7 +1533,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         private int runCancel() {
-            cancelVibrate(mToken);
+            cancelVibrate(/* usageFilter= */ -1, mToken);
             return 0;
         }
 

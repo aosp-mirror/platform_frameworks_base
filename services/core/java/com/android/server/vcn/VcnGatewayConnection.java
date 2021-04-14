@@ -23,6 +23,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.ipsec.ike.exceptions.IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_INTERNAL_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
@@ -57,7 +58,6 @@ import android.net.ipsec.ike.IkeSession;
 import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.ipsec.ike.IkeSessionConfiguration;
 import android.net.ipsec.ike.IkeSessionParams;
-import android.net.ipsec.ike.exceptions.AuthenticationFailedException;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
@@ -1051,12 +1051,21 @@ public class VcnGatewayConnection extends StateMachine {
         sessionLostWithoutCallback(token, exception);
     }
 
+    private static boolean isIkeAuthFailure(@NonNull Exception exception) {
+        if (!(exception instanceof IkeProtocolException)) {
+            return false;
+        }
+
+        return ((IkeProtocolException) exception).getErrorType()
+                == ERROR_TYPE_AUTHENTICATION_FAILED;
+    }
+
     private void notifyStatusCallbackForSessionClosed(@NonNull Exception exception) {
         final int errorCode;
         final String exceptionClass;
         final String exceptionMessage;
 
-        if (exception instanceof AuthenticationFailedException) {
+        if (isIkeAuthFailure(exception)) {
             errorCode = VCN_ERROR_CODE_CONFIG_ERROR;
             exceptionClass = exception.getClass().getName();
             exceptionMessage = exception.getMessage();

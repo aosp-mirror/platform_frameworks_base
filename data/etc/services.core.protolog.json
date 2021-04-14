@@ -2029,12 +2029,6 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
-    "236210101": {
-      "message": "registerWindowContextListener: trying to add listener to a non-existing display:%d",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "240271590": {
       "message": "moveFocusableActivityToTop: unfocusable activity=%s",
       "level": "DEBUG",
@@ -2471,6 +2465,12 @@
       "message": "All windows drawn!",
       "level": "DEBUG",
       "group": "WM_DEBUG_SCREEN_ON",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "666937535": {
+      "message": "attachWindowContextToDisplayArea: trying to attach to a non-existing display:%d",
+      "level": "WARN",
+      "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "674932310": {
@@ -3306,6 +3306,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
+    },
+    "1789321832": {
+      "message": "Then token:%s is invalid. It might be removed",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "1789603530": {
       "message": "Removing activity %s hasSavedState=%b stateNotNeeded=%s finishing=%b state=%s callers=%s",

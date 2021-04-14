@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -40,8 +41,6 @@ import android.widget.Toast;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-
-import androidx.annotation.Nullable;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.R;
@@ -63,7 +62,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -496,11 +494,13 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
 
     public boolean splitPrimaryTask() {
         try {
-            if (ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED
-                    || isSplitActive()) {
+            if (ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED) {
                 return false;
             }
         } catch (RemoteException e) {
+            return false;
+        }
+        if (isSplitActive() || mSplits.mPrimary == null) {
             return false;
         }
 
@@ -523,8 +523,12 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
             return false;
         }
 
-        return ActivityTaskManager.getInstance().setTaskWindowingModeSplitScreenPrimary(
-                topRunningTask.taskId, true /* onTop */);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        // Clear out current windowing mode before reparenting to split task.
+        wct.setWindowingMode(topRunningTask.token, WINDOWING_MODE_UNDEFINED);
+        wct.reparent(topRunningTask.token, mSplits.mPrimary.token, true /* onTop */);
+        mWindowManagerProxy.applySyncTransaction(wct);
+        return true;
     }
 
     public void dismissSplitToPrimaryTask() {

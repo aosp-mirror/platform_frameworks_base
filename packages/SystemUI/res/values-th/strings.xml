@@ -92,8 +92,14 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"จับภาพได้มากขึ้น"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ปิดภาพหน้าจอ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ตัวอย่างภาพหน้าจอ"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ขอบเขตด้านบน"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"ขอบเขตด้านล่าง"</string>
+    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
+    <skip />
+    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
+    <skip />
+    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมบันทึกหน้าจอ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
@@ -349,8 +355,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"วิธีป้อนข้อมูล"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ตำแหน่ง"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ปิดตำแหน่ง"</string>
-    <string name="quick_settings_camera_label" msgid="1367149596242401934">"บล็อกกล้องถ่ายรูป"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"ปิดเสียงไมโครโฟน"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"สิทธิ์เข้าถึงกล้อง"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"สิทธิ์เข้าถึงไมโครโฟน"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"มี"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ถูกบล็อก"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"อุปกรณ์สื่อ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"โทรฉุกเฉินเท่านั้น"</string>
@@ -422,8 +430,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"บันทึกหน้าจอ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"เริ่ม"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"หยุด"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ต้องได้รับสิทธิ์เข้าถึงไมโครโฟนของอุปกรณ์เพื่อดำเนินการต่อ"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ต้องได้รับสิทธิ์เข้าถึงกล้องของอุปกรณ์เพื่อดำเนินการต่อ"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"เลิกบล็อกไมโครโฟนของอุปกรณ์ใช่ไหม"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"เลิกบล็อกกล้องของอุปกรณ์ใช่ไหม"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"เลิกบล็อกกล้องและไมโครโฟนของอุปกรณ์ใช่ไหม"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"การดำเนินการนี้จะเลิกบล็อกสิทธิ์เข้าถึงของแอปและบริการทั้งหมดที่ได้รับอนุญาตให้ใช้ไมโครโฟนของคุณ"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"การดำเนินการนี้จะเลิกบล็อกสิทธิ์เข้าถึงของแอปและบริการทั้งหมดที่ได้รับอนุญาตให้ใช้กล้องของคุณ"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"การดำเนินการนี้จะเลิกบล็อกสิทธิ์เข้าถึงของแอปและบริการทั้งหมดที่ได้รับอนุญาตให้ใช้กล้องหรือไมโครโฟนของคุณ"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"อุปกรณ์"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"เลื่อนขึ้นเพื่อสลับแอป"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ลากไปทางขวาเพื่อสลับแอปอย่างรวดเร็ว"</string>
@@ -550,8 +562,8 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"องค์กรของคุณติดตั้งผู้ออกใบรับรองในอุปกรณ์นี้ อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"องค์กรของคุณติดตั้งผู้ออกใบรับรองในโปรไฟล์งาน อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"มีการติดตั้งผู้ออกใบรับรองในอุปกรณ์นี้ อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ผู้ดูแลระบบได้เปิดการบันทึกเครือข่าย ซึ่งจะตรวจสอบการจราจรของข้อมูลในอุปกรณ์ของคุณ"</string>
-    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ผู้ดูแลระบบได้เปิดการบันทึกเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในโปรไฟล์งาน แต่ไม่ตรวจสอบในโปรไฟล์ส่วนตัวของคุณ"</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในอุปกรณ์ของคุณ"</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในโปรไฟล์งานแต่ไม่ตรวจสอบในโปรไฟล์ส่วนตัวของคุณ"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"คุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"คุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP_0">%1$s</xliff:g> และ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"โปรไฟล์งานของคุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์"</string>
@@ -566,7 +578,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"เปิดการตั้งค่า VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"เปิดข้อมูลรับรองที่เชื่อถือได้"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"ผู้ดูแลระบบได้เปิดการทำบันทึกเครือข่าย ซึ่งจะติดตามดูการรับส่งข้อมูลบนอุปกรณ์ของคุณ\n\nโปรดติดต่อผู้ดูแลระบบสำหรับข้อมูลเพิ่มเติม"</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในอุปกรณ์ของคุณ\n\nโปรดติดต่อผู้ดูแลระบบหากต้องการข้อมูลเพิ่มเติม"</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"คุณได้ให้สิทธิ์แอปในการตั้งค่าการเชื่อมต่อ VPN\n\nแอปนี้จะสามารถตรวจสอบอุปกรณ์และกิจกรรมในเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ได้"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"โปรไฟล์งานของคุณได้รับการจัดการโดย <xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ ซึ่งรวมถึงอีเมล แอป และเว็บไซต์ต่างๆ\n\nโปรดติดต่อผู้ดูแลระบบสำหรับข้อมูลเพิ่มเติม\n\nนอกจากนี้คุณยังเชื่อมต่อกับ VPN ซึ่งตรวจสอบกิจกรรมในเครือข่ายของคุณได้"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"อุปกรณ์นี้จัดการโดยผู้ปกครอง ผู้ปกครองจะดูและจัดการข้อมูลต่างๆ ได้ เช่น แอปที่คุณใช้ ตำแหน่งของคุณ และเวลาอยู่หน้าจอ"</string>
@@ -657,8 +669,10 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"อีเทอร์เน็ต"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"การปลุก"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"แสดงทั้งหมด"</string>
-    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"ปลดล็อกเพื่อชำระเงิน"</string>
+    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
+    <skip />
+    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
+    <skip />
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"พร้อม"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ตั้งค่าการชำระเงิน"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ปลดล็อกเพื่อใช้"</string>

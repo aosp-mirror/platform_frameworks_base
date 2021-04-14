@@ -1898,8 +1898,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizoval správca"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Odstránil správca"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Šetrič batérie predlžuje výdrž batérie:\n\n• zapnutím tmavého motívu;\n• vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad kľúčového výrazu „Hey Google“.\n\n"<annotation id="url">"Ďalšie informácie"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Šetrič batérie predlžuje výdrž batérie:\n\n• zapnutím tmavého motívu;\n• vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad kľúčového výrazu „Hey Google“."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"S cieľom znížiť spotrebu dát bráni šetrič dát niektorým aplikáciám odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú práve používate, môže využívať dáta, ale možno to bude robiť menej často. Môže to napríklad znamenať, že sa obrázky zobrazia, až keď na ne klepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnúť šetrič dát?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnúť"</string>
@@ -2138,6 +2140,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Toto upozornenie bolo znížené na Tiché. Klepnutím nám poskytnite spätnú väzbu."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Toto upozornenie bolo preradené vyššie. Klepnutím nám poskytnite spätnú väzbu."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Toto upozornenie bolo preradené nižšie. Klepnutím nám poskytnite spätnú väzbu."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Upozornenie s informáciami o rutinnom režime"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batéria sa môže vybiť pred obvyklým nabitím"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bol aktivovaný šetrič batérie na predĺženie výdrže batérie"</string>

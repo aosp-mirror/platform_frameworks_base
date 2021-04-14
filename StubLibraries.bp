@@ -313,11 +313,6 @@ java_defaults {
     name: "android-non-updatable_defaults_stubs_current",
     libs: ["stub-annotations"],
     static_libs: ["framework-res-package-jar"], // Export package of framework-res
-    errorprone: {
-        javacflags: [
-            "-XepDisableAllChecks",
-        ],
-    },
     sdk_version: "none",
     system_modules: "none",
     java_version: "1.8",

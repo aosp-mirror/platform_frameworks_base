@@ -1854,8 +1854,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"आपल्या प्रशासकाने हटवले"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ओके"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर:\n\n•गडद थीम सुरू करते\n•बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि \"Ok Google\" यांसारखी वैशिष्ट्ये बंद किंवा मर्यादित करते.\n\n"<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर:\n\n• गडद थीम सुरू करते\n• बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि “Ok Google” यांसारखी इतर वैशिष्ट्ये बंद किंवा मर्यादित करते"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना बॅकग्राउंडमध्ये डेटा पाठवण्यास किंवा मिळवण्यास डेटा सर्व्हर प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अ‍ॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा की, तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असे होऊ शकते."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेव्हर सुरू करायचे?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"सुरू करा"</string>
@@ -2074,6 +2076,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ही सूचना सायलंट करण्यात आली आहे. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"हा सूचनेला उच्च रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"या सूचनेला कमी रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनक्रम मोडची माहिती सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"चार्जिंगची सामान्य पातळी गाठेपर्यंत कदाचित बॅटरी संपू शकते"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर सुरू केला आहे"</string>

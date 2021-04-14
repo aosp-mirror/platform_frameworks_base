@@ -1854,8 +1854,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Do quản trị viên của bạn xóa"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Để tăng thời lượng pin, Trình tiết kiệm pin sẽ:\n\n• Bật Giao diện tối\n• Tắt hoặc hạn chế hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng khác như lệnh “Ok Google”\n\n"<annotation id="url">"Tìm hiểu thêm"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Để tăng thời lượng pin, Trình tiết kiệm pin sẽ:\n\n• Bật Giao diện tối\n• Tắt hoặc hạn chế hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng khác như lệnh “Ok Google”"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể dùng dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bật"</string>
@@ -2074,6 +2076,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Hệ thống đã hạ mức ưu tiên của thông báo này xuống thành Im lặng. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Hệ thống đã nâng mức ưu tiên của thông báo này. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Hệ thống đã hạ mức ưu tiên của thông báo này. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pin có thể hết trước khi sạc bình thường"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>

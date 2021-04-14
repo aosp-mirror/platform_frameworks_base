@@ -1852,8 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n• Gai iluna aktibatzen du.\n• Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\".\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n• Gai iluna aktibatzen du.\n• Atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk desaktibatzen edo murrizten ditu, hala nola \"Ok Google\"."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (7695751399533397741) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>
@@ -2072,6 +2074,18 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Isilarazi da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Mailaz igo da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Mailaz jaitsi da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
+    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohitura moduaren informazio-jakinarazpena"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baliteke bateria ohi baino lehenago agortzea"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bateria-aurrezlea aktibatuta dago bateriaren iraupena luzatzeko"</string>
