@@ -26,14 +26,18 @@ import android.app.smartspace.SmartspaceSession;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.graphics.ColorUtils;
 import com.android.keyguard.clock.ClockManager;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -50,6 +54,7 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
 
 import java.util.Locale;
@@ -87,6 +92,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private Executor mUiExecutor;
     private SmartspaceSession mSmartspaceSession;
     private SmartspaceSession.Callback mSmartspaceCallback;
+    private float mDozeAmount;
+    private int mWallpaperTextColor;
+    private int mDozeColor = Color.WHITE;
+    private ConfigurationController mConfigurationController;
 
     /**
      * Listener for changes to the color palette.
@@ -103,7 +112,24 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
     };
 
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+        @Override
+        public void onThemeChanged() {
+            updateWallpaperColor();
+        }
+    };
+
     private ClockManager.ClockChangedListener mClockChangedListener = this::setClockPlugin;
+
+    private final StatusBarStateController.StateListener mStatusBarStateListener =
+            new StatusBarStateController.StateListener() {
+                @Override
+                public void onDozeAmountChanged(float linear, float eased) {
+                    mDozeAmount = eased;
+                    updateSmartspaceColor();
+                }
+            };
 
     // If set, will replace keyguard_status_area
     private BcSmartspaceDataPlugin.SmartspaceView mSmartspaceView;
@@ -121,7 +147,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             PluginManager pluginManager,
             FeatureFlags featureFlags,
             @Main Executor uiExecutor,
-            BatteryController batteryController) {
+            BatteryController batteryController,
+            ConfigurationController configurationController) {
         super(keyguardClockSwitch);
         mResources = resources;
         mStatusBarStateController = statusBarStateController;
@@ -134,6 +161,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mIsSmartspaceEnabled = featureFlags.isSmartspaceEnabled();
         mUiExecutor = uiExecutor;
         mBatteryController = batteryController;
+        mConfigurationController = configurationController;
     }
 
     /**
@@ -172,6 +200,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 mBatteryController);
         mLargeClockViewController.init();
 
+        mDozeAmount = mStatusBarStateController.getDozeAmount();
+        updateWallpaperColor();
+
+        mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mConfigurationController.addCallback(mConfigurationListener);
+
         // If a smartspace plugin is detected, replace the existing smartspace
         // (keyguard_status_area), and initialize a new session
         mPluginListener = new PluginListener<BcSmartspaceDataPlugin>() {
@@ -186,6 +220,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
                 mSmartspaceView = plugin.getView(mView);
                 mSmartspaceView.registerDataProvider(plugin);
+                updateSmartspaceColor();
                 View asView = (View) mSmartspaceView;
 
                 // Place plugin view below normal clock...
@@ -242,6 +277,19 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mPluginManager.addPluginListener(mPluginListener, BcSmartspaceDataPlugin.class, false);
     }
 
+    private void updateWallpaperColor() {
+        mWallpaperTextColor = Utils.getColorAttrDefaultColor(getContext(),
+                R.attr.wallpaperTextColor);
+        updateSmartspaceColor();
+    }
+
+    private void updateSmartspaceColor() {
+        if (mSmartspaceView != null) {
+            int color = ColorUtils.blendARGB(mWallpaperTextColor, mDozeColor, mDozeAmount);
+            mSmartspaceView.setPrimaryTextColor(color);
+        }
+    }
+
     @Override
     protected void onViewDetached() {
         if (CUSTOM_CLOCKS_ENABLED) {
@@ -256,6 +304,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             mSmartspaceSession = null;
         }
         mPluginManager.removePluginListener(mPluginListener);
+        mStatusBarStateController.removeCallback(mStatusBarStateListener);
+        mConfigurationController.removeCallback(mConfigurationListener);
     }
 
     /**
@@ -398,5 +448,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private int getCurrentLayoutDirection() {
         return TextUtils.getLayoutDirectionFromLocale(Locale.getDefault());
+    }
+
+    @VisibleForTesting
+    ConfigurationController.ConfigurationListener getConfigurationListener() {
+        return mConfigurationListener;
     }
 }

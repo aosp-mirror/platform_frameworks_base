@@ -58,5 +58,7 @@ public interface BcSmartspaceDataPlugin extends Plugin {
     /** View to which this plugin can be registered, in order to get updates. */
     interface SmartspaceView {
         void registerDataProvider(BcSmartspaceDataPlugin plugin);
+
+        void setPrimaryTextColor(int color);
     }
 }
