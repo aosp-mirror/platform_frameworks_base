@@ -52715,6 +52715,22 @@ package android.view.textservice {
     method public void onGetSuggestions(android.view.textservice.SuggestionsInfo[]);
   }
 
+  public static class SpellCheckerSession.SpellCheckerSessionParams {
+    method @NonNull public android.os.Bundle getExtras();
+    method @Nullable public java.util.Locale getLocale();
+    method public int getSupportedAttributes();
+    method public boolean shouldReferToSpellCheckerLanguageSettings();
+  }
+
+  public static final class SpellCheckerSession.SpellCheckerSessionParams.Builder {
+    ctor public SpellCheckerSession.SpellCheckerSessionParams.Builder();
+    method @NonNull public android.view.textservice.SpellCheckerSession.SpellCheckerSessionParams build();
+    method @NonNull public android.view.textservice.SpellCheckerSession.SpellCheckerSessionParams.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.view.textservice.SpellCheckerSession.SpellCheckerSessionParams.Builder setLocale(@Nullable java.util.Locale);
+    method @NonNull public android.view.textservice.SpellCheckerSession.SpellCheckerSessionParams.Builder setShouldReferToSpellCheckerLanguageSettings(boolean);
+    method @NonNull public android.view.textservice.SpellCheckerSession.SpellCheckerSessionParams.Builder setSupportedAttributes(int);
+  }
+
   public final class SpellCheckerSubtype implements android.os.Parcelable {
     ctor @Deprecated public SpellCheckerSubtype(int, String, String);
     method public boolean containsExtraValueKey(String);
@@ -52768,7 +52784,7 @@ package android.view.textservice {
     method @NonNull public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckerInfos();
     method public boolean isSpellCheckerEnabled();
     method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
-    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable java.util.Locale, boolean, int, @Nullable android.os.Bundle, @NonNull java.util.concurrent.Executor, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener);
+    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionParams, @NonNull java.util.concurrent.Executor, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener);
   }
 
 }
