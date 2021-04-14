@@ -25,6 +25,13 @@
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
 
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="8dp"/>
+
     <TextView
         android:id="@+id/title"
         android:layout_width="0dp"
@@ -34,16 +41,18 @@
 
     <TextView
         android:id="@+id/amount"
-        android:layout_width="0dp"
-        android:layout_weight="0.7"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:gravity="right"
+        android:maxLines="1"
         android:textAppearance="@style/TextAppearanceBody"/>
 
     <TextView
         android:id="@+id/percent"
-        android:layout_width="64dp"
+        android:layout_width="76dp"
         android:layout_height="wrap_content"
         android:gravity="right"
+        android:maxLines="1"
         android:textAppearance="@style/TextAppearanceBody"/>
 </LinearLayout>
