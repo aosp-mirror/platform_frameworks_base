@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.media.audio.common.AidlConversion;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioProductStrategy;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
  * TO UPDATE THE CORRESPONDING NATIVE GLUE AND AudioManager.java.
@@ -1655,9 +1657,63 @@ public class AudioSystem
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static native boolean getMasterMute();
-    /** @hide */
+    /** @hide
+     * Only used (unsupported) for legacy apps.
+     * @deprecated on {@link android.os.Build.VERSION_CODES#T} as new devices
+     *             will have multi-bit device types.
+     *             Use {@link AudioManager#getDevicesForAttributes(AudioAttributes)} instead.
+     */
     @UnsupportedAppUsage
-    public static native int getDevicesForStream(int stream);
+    @Deprecated
+    public static int getDevicesForStream(int stream) {
+        final AudioAttributes attr =
+                AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(stream);
+        return getDeviceMaskFromSet(generateAudioDeviceTypesSet(
+                getDevicesForAttributes(attr, true /* forVolume */)));
+    }
+
+    /** @hide
+     * Conversion from a device set to a bit mask.
+     *
+     * Legacy compatibility method (use a device list instead of a bit mask).
+     * Conversion to bit mask skips multi-bit (S and later) internal device types
+     * (e.g. AudioSystem.DEVICE_OUT* or AudioManager.DEVICE_OUT*) for legacy
+     * compatibility reasons.  Legacy apps will not understand these new device types
+     * and it will raise false matches with old device types.
+     */
+    public static int getDeviceMaskFromSet(@NonNull Set<Integer> deviceSet) {
+        int deviceMask = DEVICE_NONE; // zero.
+        int deviceInChecksum = DEVICE_BIT_IN;
+        for (Integer device : deviceSet) {
+            if ((device & (device - 1) & ~DEVICE_BIT_IN) != 0) {
+                Log.v(TAG, "getDeviceMaskFromSet skipping multi-bit device value " + device);
+                continue;
+            }
+            deviceMask |= device;
+            deviceInChecksum &= device;
+        }
+        // Validate that deviceSet is either ALL input devices or ALL output devices.
+        // We check that the "OR" of all the DEVICE_BIT_INs == the "AND" of all DEVICE_BIT_INs.
+        if (!deviceSet.isEmpty() && deviceInChecksum != (deviceMask & DEVICE_BIT_IN)) {
+            Log.e(TAG, "getDeviceMaskFromSet: Invalid set: " + deviceSetToString(deviceSet));
+        }
+        return deviceMask;
+    }
+
+    /** @hide */
+    @NonNull
+    public static String deviceSetToString(@NonNull Set<Integer> devices) {
+        int n = 0;
+        StringBuilder sb = new StringBuilder();
+        for (Integer device : devices) {
+            if (n++ > 0) {
+                sb.append(", ");
+            }
+            sb.append(AudioSystem.getDeviceName(device));
+            sb.append("(" + Integer.toHexString(device) + ")");
+        }
+        return sb.toString();
+    }
 
     /**
      * @hide
@@ -2252,18 +2308,15 @@ public class AudioSystem
 
     /**
      * @hide
-     * Return a set of audio device types from a bit mask audio device type, which may
+     * Return a set of audio device types from a list of audio device attributes, which may
      * represent multiple audio device types.
-     * FIXME: Remove this when getting ride of bit mask usage of audio device types.
      */
-    public static Set<Integer> generateAudioDeviceTypesSet(int types) {
-        Set<Integer> deviceTypes = new HashSet<>();
-        Set<Integer> allDeviceTypes =
-                (types & DEVICE_BIT_IN) == 0 ? DEVICE_OUT_ALL_SET : DEVICE_IN_ALL_SET;
-        for (int deviceType : allDeviceTypes) {
-            if ((types & deviceType) == deviceType) {
-                deviceTypes.add(deviceType);
-            }
+    @NonNull
+    public static Set<Integer> generateAudioDeviceTypesSet(
+            @NonNull List<AudioDeviceAttributes> deviceList) {
+        Set<Integer> deviceTypes = new TreeSet<>();
+        for (AudioDeviceAttributes device : deviceList) {
+            deviceTypes.add(device.getInternalType());
         }
         return deviceTypes;
     }
@@ -2274,7 +2327,7 @@ public class AudioSystem
      */
     public static Set<Integer> intersectionAudioDeviceTypes(
             @NonNull Set<Integer> a, @NonNull Set<Integer> b) {
-        Set<Integer> intersection = new HashSet<>(a);
+        Set<Integer> intersection = new TreeSet<>(a);
         intersection.retainAll(b);
         return intersection;
     }
