@@ -3488,7 +3488,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         @Override
-        public boolean armRebootEscrow() {
+        public @ArmRebootEscrowErrorCode int armRebootEscrow() {
             return mRebootEscrowManager.armRebootEscrowIfNeeded();
         }
 
