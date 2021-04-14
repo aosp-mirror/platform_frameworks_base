@@ -3906,7 +3906,10 @@ public final class ViewRootImpl implements ViewParent,
             mDrawsNeededToReport = 0;
             mWindowSession.finishDrawing(mWindow, mSurfaceChangedTransaction);
         } catch (RemoteException e) {
-            // Have fun!
+            Log.e(mTag, "Unable to report draw finished", e);
+            mSurfaceChangedTransaction.apply();
+        } finally {
+            mSurfaceChangedTransaction.clear();
         }
     }
 
