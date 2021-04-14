@@ -104,15 +104,15 @@ public class EdgeEffect {
 
     /**
      * The velocity threshold before the spring animation is considered settled.
-     * The idea here is that velocity should be less than 1 pixel per frame (~16ms).
+     * The idea here is that velocity should be less than 0.1 pixel per second.
      */
-    private static final double VELOCITY_THRESHOLD = 1.0 / 0.016;
+    private static final double VELOCITY_THRESHOLD = 0.1;
 
     /**
      * The value threshold before the spring animation is considered close enough to
-     * the destination to be settled. This should be around 1 pixel.
+     * the destination to be settled. This should be around 0.01 pixel.
      */
-    private static final double VALUE_THRESHOLD = 1;
+    private static final double VALUE_THRESHOLD = 0.01;
 
     /**
      * The natural frequency of the stretch spring.
@@ -788,8 +788,8 @@ public class EdgeEffect {
      * considered at rest or false if it is still animating.
      */
     private boolean isAtEquilibrium() {
-        double displacement = mDistance * mHeight * LINEAR_STRETCH_INTENSITY; // in pixels
-        double velocity = mVelocity * LINEAR_STRETCH_INTENSITY;
+        double displacement = mDistance * mHeight; // in pixels
+        double velocity = mVelocity;
         return Math.abs(velocity) < VELOCITY_THRESHOLD
                 && Math.abs(displacement) < VALUE_THRESHOLD;
     }
