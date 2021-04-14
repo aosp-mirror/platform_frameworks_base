@@ -19,6 +19,11 @@
     <!-- This test requires root to side load fs-verity cert. -->
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
 
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
+        <option name="test-file-name" value="EmojiRenderingTestApp.apk" />
+    </target_preparer>
+
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="cleanup" value="true" />
         <option name="push" value="UpdatableSystemFontTestCert.der->/data/local/tmp/UpdatableSystemFontTestCert.der" />
