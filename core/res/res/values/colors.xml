@@ -427,4 +427,7 @@
     <!-- Darkest shade of the secondary neutral color used by the system. Black.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_neutral2_1000">#000000</color>
+
+    <!-- Exposes colorSurface in cases where it can't be directly referenced. -->
+    <color name="surface_above_background">?attr/colorSurface</color>
 </resources>
