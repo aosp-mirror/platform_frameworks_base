@@ -7132,7 +7132,7 @@ package android.app.admin {
     method public int getGlobalPrivateDnsMode(@NonNull android.content.ComponentName);
     method @NonNull public java.util.List<byte[]> getInstalledCaCerts(@Nullable android.content.ComponentName);
     method @Nullable public java.util.List<java.lang.String> getKeepUninstalledPackages(@Nullable android.content.ComponentName);
-    method @NonNull public java.util.Set<java.util.Set<java.lang.String>> getKeyPairGrants(@NonNull String);
+    method @NonNull public java.util.Map<java.lang.Integer,java.util.Set<java.lang.String>> getKeyPairGrants(@NonNull String);
     method public int getKeyguardDisabledFeatures(@Nullable android.content.ComponentName);
     method public int getLockTaskFeatures(@NonNull android.content.ComponentName);
     method @NonNull public String[] getLockTaskPackages(@NonNull android.content.ComponentName);
