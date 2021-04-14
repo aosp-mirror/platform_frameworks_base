@@ -658,10 +658,14 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* cont
         if (gpuCompleteTime == -1) {
             gpuCompleteTime = frameInfo->get(FrameInfoIndex::SwapBuffersCompleted);
         }
-        if (gpuCompleteTime < frameInfo->get(FrameInfoIndex::SwapBuffers)) {
-            // TODO (b/180488606): Investigate why this can happen for first frames.
-            ALOGW("Impossible GPU complete time swapBuffers=%" PRIi64 " gpuComplete=%" PRIi64,
-                    frameInfo->get(FrameInfoIndex::SwapBuffers), gpuCompleteTime);
+        if (gpuCompleteTime < frameInfo->get(FrameInfoIndex::IssueDrawCommandsStart)) {
+            // On Vulkan the GPU commands are flushed to the GPU during IssueDrawCommands rather
+            // than after SwapBuffers. So if the GPU signals before issue draw commands, then
+            // something probably went wrong. Anything after that could just be expected
+            // pipeline differences
+            ALOGW("Impossible GPU complete time issueCommandsStart=%" PRIi64
+                  " gpuComplete=%" PRIi64,
+                  frameInfo->get(FrameInfoIndex::IssueDrawCommandsStart), gpuCompleteTime);
             gpuCompleteTime = frameInfo->get(FrameInfoIndex::SwapBuffersCompleted);
         }
         frameInfo->set(FrameInfoIndex::FrameCompleted) = gpuCompleteTime;
