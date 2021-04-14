@@ -18,13 +18,10 @@ package com.android.frameworks.core.batterystatsviewer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.BatteryStats;
 import android.os.BatteryStatsManager;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Bundle;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +38,6 @@ import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.internal.os.BatteryStatsHelper;
 import com.android.settingslib.utils.AsyncLoaderCompat;
 
 import java.util.Collections;
@@ -50,24 +46,24 @@ import java.util.Locale;
 
 public class BatteryStatsViewerActivity extends ComponentActivity {
     private static final int BATTERY_STATS_REFRESH_RATE_MILLIS = 60 * 1000;
-    public static final String PREF_SELECTED_BATTERY_CONSUMER = "batteryConsumerId";
-    public static final int LOADER_BATTERY_STATS_HELPER = 0;
-    public static final int LOADER_BATTERY_USAGE_STATS = 1;
+    private static final int MILLIS_IN_MINUTE = 60000;
+    private static final String PREF_SELECTED_BATTERY_CONSUMER = "batteryConsumerId";
+    private static final int LOADER_BATTERY_USAGE_STATS = 1;
 
     private BatteryStatsDataAdapter mBatteryStatsDataAdapter;
-    private Runnable mBatteryStatsRefresh = this::periodicBatteryStatsRefresh;
+    private final Runnable mBatteryStatsRefresh = this::periodicBatteryStatsRefresh;
     private SharedPreferences mSharedPref;
     private String mBatteryConsumerId;
     private TextView mTitleView;
     private TextView mDetailsView;
     private ImageView mIconView;
     private TextView mPackagesView;
+    private View mHeadingsView;
     private RecyclerView mBatteryConsumerDataView;
     private View mLoadingView;
     private View mEmptyView;
-    private ActivityResultLauncher<Void> mStartAppPicker = registerForActivityResult(
+    private final ActivityResultLauncher<Void> mStartAppPicker = registerForActivityResult(
             BatteryConsumerPickerActivity.CONTRACT, this::onApplicationSelected);
-    private BatteryStatsHelper mBatteryStatsHelper;
     private List<BatteryUsageStats> mBatteryUsageStats;
 
     @Override
@@ -85,6 +81,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         mDetailsView = findViewById(R.id.details);
         mIconView = findViewById(android.R.id.icon);
         mPackagesView = findViewById(R.id.packages);
+        mHeadingsView = findViewById(R.id.headings);
 
         mBatteryConsumerDataView = findViewById(R.id.battery_consumer_data_view);
         mBatteryConsumerDataView.setLayoutManager(new LinearLayoutManager(this));
@@ -139,53 +136,8 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
 
     private void loadBatteryStats() {
         LoaderManager loaderManager = LoaderManager.getInstance(this);
-        loaderManager.restartLoader(LOADER_BATTERY_STATS_HELPER, null,
-                new BatteryStatsHelperLoaderCallbacks());
         loaderManager.restartLoader(LOADER_BATTERY_USAGE_STATS, null,
                 new BatteryUsageStatsLoaderCallbacks());
-    }
-
-    private static class BatteryStatsHelperLoader extends AsyncLoaderCompat<BatteryStatsHelper> {
-        private final BatteryStatsHelper mBatteryStatsHelper;
-        private final UserManager mUserManager;
-
-        BatteryStatsHelperLoader(Context context) {
-            super(context);
-            mUserManager = context.getSystemService(UserManager.class);
-            mBatteryStatsHelper = new BatteryStatsHelper(context,
-                    false /* collectBatteryBroadcast */);
-            mBatteryStatsHelper.create((Bundle) null);
-            mBatteryStatsHelper.clearStats();
-        }
-
-        @Override
-        public BatteryStatsHelper loadInBackground() {
-            mBatteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED,
-                    UserHandle.myUserId());
-            return mBatteryStatsHelper;
-        }
-
-        @Override
-        protected void onDiscardResult(BatteryStatsHelper result) {
-        }
-    }
-
-    private class BatteryStatsHelperLoaderCallbacks implements LoaderCallbacks<BatteryStatsHelper> {
-        @NonNull
-        @Override
-        public Loader<BatteryStatsHelper> onCreateLoader(int id, Bundle args) {
-            return new BatteryStatsHelperLoader(BatteryStatsViewerActivity.this);
-        }
-
-        @Override
-        public void onLoadFinished(@NonNull Loader<BatteryStatsHelper> loader,
-                BatteryStatsHelper batteryStatsHelper) {
-            onBatteryStatsHelperLoaded(batteryStatsHelper);
-        }
-
-        @Override
-        public void onLoaderReset(@NonNull Loader<BatteryStatsHelper> loader) {
-        }
     }
 
     private static class BatteryUsageStatsLoader extends
@@ -200,10 +152,13 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         @Override
         public List<BatteryUsageStats> loadInBackground() {
             final BatteryUsageStatsQuery queryDefault =
-                    new BatteryUsageStatsQuery.Builder().build();
+                    new BatteryUsageStatsQuery.Builder()
+                            .includePowerModels()
+                            .build();
             final BatteryUsageStatsQuery queryPowerProfileModeledOnly =
                     new BatteryUsageStatsQuery.Builder()
                             .powerProfileModeledOnly()
+                            .includePowerModels()
                             .build();
             return mBatteryStatsManager.getBatteryUsageStats(
                     List.of(queryDefault, queryPowerProfileModeledOnly));
@@ -233,22 +188,13 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         }
     }
 
-    public void onBatteryStatsHelperLoaded(BatteryStatsHelper batteryStatsHelper) {
-        mBatteryStatsHelper = batteryStatsHelper;
-        onBatteryStatsDataLoaded();
-    }
-
     private void onBatteryUsageStatsLoaded(List<BatteryUsageStats> batteryUsageStats) {
         mBatteryUsageStats = batteryUsageStats;
         onBatteryStatsDataLoaded();
     }
 
     public void onBatteryStatsDataLoaded() {
-        if (mBatteryStatsHelper == null || mBatteryUsageStats == null) {
-            return;
-        }
-
-        BatteryConsumerData batteryConsumerData = new BatteryConsumerData(this, mBatteryStatsHelper,
+        BatteryConsumerData batteryConsumerData = new BatteryConsumerData(this,
                 mBatteryUsageStats, mBatteryConsumerId);
 
         BatteryConsumerInfoHelper.BatteryConsumerInfo
@@ -256,6 +202,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         if (batteryConsumerInfo == null) {
             mTitleView.setText("Battery consumer not found");
             mPackagesView.setVisibility(View.GONE);
+            mHeadingsView.setVisibility(View.GONE);
         } else {
             mTitleView.setText(batteryConsumerInfo.label);
             if (batteryConsumerInfo.details != null) {
@@ -272,6 +219,12 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
                 mPackagesView.setVisibility(View.VISIBLE);
             } else {
                 mPackagesView.setVisibility(View.GONE);
+            }
+
+            if (batteryConsumerInfo.isSystemBatteryConsumer) {
+                mHeadingsView.setVisibility(View.VISIBLE);
+            } else {
+                mHeadingsView.setVisibility(View.GONE);
             }
         }
 
@@ -290,6 +243,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     private static class BatteryStatsDataAdapter extends
             RecyclerView.Adapter<BatteryStatsDataAdapter.ViewHolder> {
         public static class ViewHolder extends RecyclerView.ViewHolder {
+            public ImageView iconImageView;
             public TextView titleTextView;
             public TextView amountTextView;
             public TextView percentTextView;
@@ -297,6 +251,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
             ViewHolder(View itemView) {
                 super(itemView);
 
+                iconImageView = itemView.findViewById(R.id.icon);
                 titleTextView = itemView.findViewById(R.id.title);
                 amountTextView = itemView.findViewById(R.id.amount);
                 percentTextView = itemView.findViewById(R.id.percent);
@@ -328,21 +283,56 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
             BatteryConsumerData.Entry entry = mEntries.get(position);
             switch (entry.entryType) {
-                case POWER:
+                case POWER_MODELED:
                     viewHolder.titleTextView.setText(entry.title);
                     viewHolder.amountTextView.setText(
                             String.format(Locale.getDefault(), "%.1f mAh", entry.value));
+                    viewHolder.iconImageView.setImageResource(R.drawable.gm_calculate_24);
+                    viewHolder.itemView.setBackgroundResource(
+                            R.color.battery_consumer_bg_power_profile);
+                    break;
+                case POWER_MEASURED:
+                    viewHolder.titleTextView.setText(entry.title);
+                    viewHolder.amountTextView.setText(
+                            String.format(Locale.getDefault(), "%.1f mAh", entry.value));
+                    viewHolder.iconImageView.setImageResource(R.drawable.gm_amp_24);
+                    viewHolder.itemView.setBackgroundResource(
+                            R.color.battery_consumer_bg_measured_energy);
+                    break;
+                case POWER_CUSTOM:
+                    viewHolder.titleTextView.setText(entry.title);
+                    viewHolder.amountTextView.setText(
+                            String.format(Locale.getDefault(), "%.1f mAh", entry.value));
+                    viewHolder.iconImageView.setImageResource(R.drawable.gm_custom_24);
+                    viewHolder.itemView.setBackgroundResource(
+                            R.color.battery_consumer_bg_measured_energy);
                     break;
                 case DURATION:
                     viewHolder.titleTextView.setText(entry.title);
-                    viewHolder.amountTextView.setText(
-                            String.format(Locale.getDefault(), "%,d ms", (long) entry.value));
+                    final long durationMs = (long) entry.value;
+                    CharSequence text;
+                    if (durationMs < MILLIS_IN_MINUTE) {
+                        text = String.format(Locale.getDefault(), "%,d ms", durationMs);
+                    } else {
+                        text = String.format(Locale.getDefault(), "%,d m %d s",
+                                durationMs / MILLIS_IN_MINUTE,
+                                (durationMs % MILLIS_IN_MINUTE) / 1000);
+                    }
+
+                    viewHolder.amountTextView.setText(text);
+                    viewHolder.iconImageView.setImageResource(R.drawable.gm_timer_24);
+                    viewHolder.itemView.setBackground(null);
                     break;
             }
 
-            double proportion = entry.total != 0 ? entry.value * 100 / entry.total : 0;
-            viewHolder.percentTextView.setText(String.format(Locale.getDefault(), "%.1f%%",
-                    proportion));
+            double proportion;
+            if (entry.isSystemBatteryConsumer) {
+                proportion = entry.value != 0 ? entry.total * 100 / entry.value : 0;
+            } else {
+                proportion = entry.total != 0 ? entry.value * 100 / entry.total : 0;
+            }
+            viewHolder.percentTextView.setText(
+                    String.format(Locale.getDefault(), "%.1f%%", proportion));
         }
     }
 }
