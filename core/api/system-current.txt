@@ -10146,7 +10146,7 @@ package android.service.rotationresolver {
     ctor public RotationResolutionRequest(@NonNull String, int, int, boolean, long);
     method public int describeContents();
     method public int getCurrentRotation();
-    method @NonNull public String getPackageName();
+    method @NonNull public String getForegroundPackageName();
     method public int getProposedRotation();
     method public long getTimeoutMillis();
     method public boolean shouldUseCamera();
