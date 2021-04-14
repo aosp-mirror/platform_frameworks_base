@@ -56,6 +56,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private ProgressBar mProgressBar;
     private TextView mTitle;
     private TextView mText;
+    protected View mSmartReplyContainer;
     protected View mActionsContainer;
 
     private int mContentHeight;
@@ -160,6 +161,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             // It's still a viewstub
             mProgressBar = null;
         }
+        mSmartReplyContainer = mView.findViewById(com.android.internal.R.id.smart_reply_container);
         mActionsContainer = mView.findViewById(com.android.internal.R.id.actions_container);
         mActions = mView.findViewById(com.android.internal.R.id.actions);
         mRemoteInputHistory = mView.findViewById(
@@ -275,6 +277,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                     mProgressBar);
         }
         addViewsTransformingToSimilar(mLeftIcon);
+        addTransformedViews(mSmartReplyContainer);
     }
 
     @Override
