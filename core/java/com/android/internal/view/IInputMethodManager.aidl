@@ -89,8 +89,7 @@ interface IInputMethodManager {
     /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
     oneway void removeImeSurface(in IVoidResultCallback resultCallback);
     /** Remove the IME surface. Requires passing the currently focused window. */
-    oneway void removeImeSurfaceFromWindow(in IBinder windowToken,
-            in IVoidResultCallback resultCallback);
+    oneway void removeImeSurfaceFromWindowAsync(in IBinder windowToken);
     oneway void startProtoDump(in byte[] protoDump, int source, String where,
             in IVoidResultCallback resultCallback);
     oneway void isImeTraceEnabled(in IBooleanResultCallback resultCallback);
