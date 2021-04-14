@@ -3159,6 +3159,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    public void testSetUserProvisioningState_profileFinalized_canTransitionToUserUnmanaged()
+            throws Exception {
+        setupProfileOwner();
+
+        exerciseUserProvisioningTransitions(CALLER_USER_HANDLE,
+                DevicePolicyManager.STATE_USER_PROFILE_FINALIZED,
+                DevicePolicyManager.STATE_USER_UNMANAGED);
+    }
+
+    @Test
     public void testSetUserProvisioningState_illegalTransitionToAnotherInProgressState()
             throws Exception {
         setupProfileOwner();
