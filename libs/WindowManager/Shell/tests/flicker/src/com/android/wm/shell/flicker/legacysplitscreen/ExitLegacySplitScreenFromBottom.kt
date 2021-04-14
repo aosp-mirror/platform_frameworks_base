@@ -84,7 +84,7 @@ class ExitLegacySplitScreenFromBottom(
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun appWindowBecomesInVisible() =
         testSpec.appWindowBecomesInVisible(secondaryApp.defaultWindowName)

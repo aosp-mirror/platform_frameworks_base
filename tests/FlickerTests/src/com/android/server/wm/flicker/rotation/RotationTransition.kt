@@ -36,6 +36,7 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Test
 
 abstract class RotationTransition(protected val testSpec: FlickerTestParameter) {
@@ -68,16 +69,16 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun navBarWindowIsAlwaysVisible() {
         testSpec.navBarWindowIsAlwaysVisible()
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun navBarLayerIsAlwaysVisible() {
-        testSpec.navBarLayerIsAlwaysVisible()
+        testSpec.navBarLayerIsAlwaysVisible(rotatesScreen = true)
     }
 
     @FlakyTest
@@ -87,16 +88,16 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
             testSpec.config.startRotation, testSpec.config.endRotation)
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun statusBarWindowIsAlwaysVisible() {
         testSpec.statusBarWindowIsAlwaysVisible()
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun statusBarLayerIsAlwaysVisible() {
-        testSpec.statusBarLayerIsAlwaysVisible()
+        testSpec.statusBarLayerIsAlwaysVisible(rotatesScreen = true)
     }
 
     @FlakyTest
@@ -110,7 +111,12 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
-            this.visibleLayersShownMoreThanOneConsecutiveEntry()
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                ignoreLayers = listOf(WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+                    WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME,
+                    "SecondaryHomeHandle"
+                )
+            )
         }
     }
 
