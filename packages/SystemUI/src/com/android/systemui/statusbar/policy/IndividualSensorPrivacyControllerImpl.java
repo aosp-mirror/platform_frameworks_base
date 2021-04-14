@@ -45,10 +45,15 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
     public void init() {
         for (int sensor : SENSORS) {
             mSensorPrivacyManager.addSensorPrivacyListener(sensor,
-                    (enabled) -> onSensorPrivacyChanged(sensor, enabled));
+                    (s, enabled) -> onSensorPrivacyChanged(sensor, enabled));
 
             mState.put(sensor, mSensorPrivacyManager.isSensorPrivacyEnabled(sensor));
         }
+    }
+
+    @Override
+    public boolean supportsSensorToggle(int sensor) {
+        return mSensorPrivacyManager.supportsSensorToggle(sensor);
     }
 
     @Override

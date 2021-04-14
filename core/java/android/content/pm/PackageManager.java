@@ -3654,32 +3654,6 @@ public abstract class PackageManager {
     public static final String FEATURE_TUNER = "android.hardware.tv.tuner";
 
     /**
-     * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device supports a enabling/disabling sensor privacy for
-     * microphone. When sensory privacy for the microphone is enabled no microphone data is sent to
-     * clients, e.g. all audio data is silent.
-     *
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_MICROPHONE_TOGGLE = "android.hardware.microphone.toggle";
-
-    /**
-     * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device supports a enabling/disabling sensor privacy for
-     * camera. When sensory privacy for the camera is enabled no camera data is sent to clients,
-     * e.g. the view finder in a camera app would appear blank.
-     *
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_CAMERA_TOGGLE = "android.hardware.camera.toggle";
-
-    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
      * the necessary changes to support app enumeration.
      *

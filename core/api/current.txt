@@ -17694,6 +17694,15 @@ package android.hardware {
     method public void onDynamicSensorDisconnected(android.hardware.Sensor);
   }
 
+  public final class SensorPrivacyManager {
+    method public boolean supportsSensorToggle(int);
+  }
+
+  public static class SensorPrivacyManager.Sensors {
+    field public static final int CAMERA = 2; // 0x2
+    field public static final int MICROPHONE = 1; // 0x1
+  }
+
   public final class TriggerEvent {
     field public android.hardware.Sensor sensor;
     field public long timestamp;
