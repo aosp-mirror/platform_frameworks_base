@@ -570,6 +570,12 @@
     <!-- Width of the outline stroke used by the accessibility focus rectangle -->
     <dimen name="accessibility_focus_highlight_stroke_width">4dp</dimen>
 
+    <!-- The size of the Accessibility icon -->
+    <dimen name="accessibility_icon_size">32dp</dimen>
+
+    <!-- The size of the Accessibility icon foreground part -->
+    <dimen name="accessibility_icon_foreground_size">18dp</dimen>
+
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
 
