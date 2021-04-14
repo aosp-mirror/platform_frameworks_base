@@ -54,8 +54,8 @@ public class IdlePowerCalculator extends PowerCalculator {
                 BatteryStats.STATS_SINCE_CHARGED);
         if (mPowerMah != 0) {
             builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_IDLE)
-                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, mPowerMah)
-                    .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE, mDurationMs);
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_IDLE, mPowerMah)
+                    .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_IDLE, mDurationMs);
         }
     }
 
