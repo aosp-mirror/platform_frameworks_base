@@ -36,6 +36,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -153,7 +154,7 @@ public class VisibilityStore {
      * AppSearchImpl.
      */
     static final String VISIBILITY_STORE_PREFIX =
-            AppSearchImpl.createPrefix(PACKAGE_NAME, DATABASE_NAME);
+            PrefixUtil.createPrefix(PACKAGE_NAME, DATABASE_NAME);
 
     /** Namespace of documents that contain visibility settings */
     private static final String NAMESPACE = "";
