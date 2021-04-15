@@ -75,7 +75,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -94,7 +94,7 @@ public class AppSearchManagerService extends SystemService {
     // mutate requests will need to gain write lock and query requests need to gain read lock.
     private static final Executor EXECUTOR = new ThreadPoolExecutor(/*corePoolSize=*/1,
             Runtime.getRuntime().availableProcessors(), /*keepAliveTime*/ 60L, TimeUnit.SECONDS,
-            new SynchronousQueue<Runnable>());
+            new LinkedBlockingQueue<>());
 
     // Cache of unlocked user ids so we don't have to query UserManager service each time. The
     // "locked" suffix refers to the fact that access to the field should be locked; unrelated to
