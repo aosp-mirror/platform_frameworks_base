@@ -14,8 +14,6 @@
 
 package com.android.systemui.qs.tileimpl;
 
-import static com.android.systemui.qs.dagger.QSFlagsModule.QS_LABELS_FLAG;
-
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
@@ -56,7 +54,6 @@ import com.android.systemui.qs.tiles.WorkModeTile;
 import com.android.systemui.util.leak.GarbageMonitor;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Provider;
 
 import dagger.Lazy;
@@ -97,12 +94,9 @@ public class QSFactoryImpl implements QSFactory {
     private final Lazy<QSHost> mQsHostLazy;
     private final Provider<CustomTile.Builder> mCustomTileBuilderProvider;
 
-    private final boolean mSideLabels;
-
     @Inject
     public QSFactoryImpl(
             Lazy<QSHost> qsHostLazy,
-            @Named(QS_LABELS_FLAG) boolean useSideLabels,
             Provider<CustomTile.Builder> customTileBuilderProvider,
             Provider<WifiTile> wifiTileProvider,
             Provider<InternetTile> internetTileProvider,
@@ -133,8 +127,6 @@ public class QSFactoryImpl implements QSFactory {
             Provider<QuickAccessWalletTile> quickAccessWalletTileProvider) {
         mQsHostLazy = qsHostLazy;
         mCustomTileBuilderProvider = customTileBuilderProvider;
-
-        mSideLabels = useSideLabels;
 
         mWifiTileProvider = wifiTileProvider;
         mInternetTileProvider = internetTileProvider;
@@ -251,12 +243,6 @@ public class QSFactoryImpl implements QSFactory {
     @Override
     public QSTileView createTileView(Context context, QSTile tile, boolean collapsedView) {
         QSIconView icon = tile.createTileView(context);
-        if (mSideLabels) {
-            return new QSTileViewHorizontal(context, icon, collapsedView);
-        } else if (collapsedView) {
-            return new QSTileBaseView(context, icon, collapsedView);
-        } else {
-            return new com.android.systemui.qs.tileimpl.QSTileView(context, icon);
-        }
+        return new QSTileViewHorizontal(context, icon, collapsedView);
     }
 }

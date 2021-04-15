@@ -20,11 +20,10 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <!-- The maximum number of tiles in the QuickQSPanel -->
-    <integer name="quick_qs_panel_max_columns">6</integer>
-
     <!-- The maximum number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">2</integer>
+
+    <integer name="quick_settings_num_columns">4</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">2</integer>
