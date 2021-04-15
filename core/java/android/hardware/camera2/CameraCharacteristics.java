@@ -2513,7 +2513,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.scaler.availableInputOutputFormatsMap.</p>
      * <p>The following table describes the minimum required output stream
      * configurations based on the hardware level
-     * ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel}):</p>
+     * ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel}), prior to Android 12:</p>
      * <table>
      * <thead>
      * <tr>
@@ -2563,6 +2563,76 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <tr>
      * <td align="center">YUV_420_888</td>
      * <td align="center">all output sizes available for JPEG, up to the maximum video size</td>
+     * <td align="center">LIMITED</td>
+     * <td align="center"></td>
+     * </tr>
+     * <tr>
+     * <td align="center">IMPLEMENTATION_DEFINED</td>
+     * <td align="center">same as YUV_420_888</td>
+     * <td align="center">Any</td>
+     * <td align="center"></td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>Starting from Android 12, the camera device may not support JPEG sizes smaller than the
+     * minimum of 1080p and the camera sensor active array size. The requirements for
+     * IMPLEMENTATION_DEFINED and YUV_420_888 stay the same. This new minimum required output
+     * stream configurations are illustrated by the table below:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">Format</th>
+     * <th align="center">Size</th>
+     * <th align="center">Hardware Level</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">JPEG</td>
+     * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
+     * <td align="center">Any</td>
+     * <td align="center"></td>
+     * </tr>
+     * <tr>
+     * <td align="center">JPEG</td>
+     * <td align="center">1920x1080 (1080p)</td>
+     * <td align="center">Any</td>
+     * <td align="center">if 1080p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
+     * <td align="center">FULL</td>
+     * <td align="center"></td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">1920x1080 (1080p)</td>
+     * <td align="center">FULL</td>
+     * <td align="center">if 1080p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">1280x720 (720)</td>
+     * <td align="center">FULL</td>
+     * <td align="center">if 720p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">640x480 (480p)</td>
+     * <td align="center">FULL</td>
+     * <td align="center">if 480p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">320x240 (240p)</td>
+     * <td align="center">FULL</td>
+     * <td align="center">if 240p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">all output sizes available for FULL hardware level, up to the maximum video size</td>
      * <td align="center">LIMITED</td>
      * <td align="center"></td>
      * </tr>
