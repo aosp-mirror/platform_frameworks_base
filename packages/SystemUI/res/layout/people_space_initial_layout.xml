@@ -57,7 +57,7 @@
         </LinearLayout>
 
         <TextView
-            android:text="@string/empty_status"
+            android:text="@string/status_before_loading"
             android:textColor="?android:attr/textColorPrimary"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
             android:textSize="12sp"
