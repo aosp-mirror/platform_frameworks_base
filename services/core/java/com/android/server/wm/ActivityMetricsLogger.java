@@ -96,6 +96,8 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.apphibernation.AppHibernationManagerInternal;
+import com.android.server.apphibernation.AppHibernationService;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -163,6 +165,9 @@ class ActivityMetricsLogger {
      */
     private final LaunchObserverRegistryImpl mLaunchObserver;
     @VisibleForTesting static final int LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE = 512;
+    private final ArrayMap<String, Boolean> mLastHibernationStates = new ArrayMap<>();
+    private AppHibernationManagerInternal mAppHibernationManagerInternal;
+    private boolean mIsAppHibernationEnabled;
 
     /**
      * The information created when an intent is incoming but we do not yet know whether it will be
@@ -789,6 +794,27 @@ class ActivityMetricsLogger {
         }
     }
 
+    @Nullable
+    private AppHibernationManagerInternal getAppHibernationManagerInternal() {
+        if (mAppHibernationManagerInternal == null) {
+            mIsAppHibernationEnabled = AppHibernationService.isAppHibernationEnabled();
+            mAppHibernationManagerInternal =
+                    LocalServices.getService(AppHibernationManagerInternal.class);
+        }
+        return mAppHibernationManagerInternal;
+    }
+
+    /**
+     * Notifies the tracker before the package is unstopped because of launching activity.
+     * @param packageName The package to be unstopped.
+     */
+    void notifyBeforePackageUnstopped(@NonNull String packageName) {
+        final AppHibernationManagerInternal ahmInternal = getAppHibernationManagerInternal();
+        if (ahmInternal != null && mIsAppHibernationEnabled) {
+            mLastHibernationStates.put(packageName, ahmInternal.isHibernatingGlobally(packageName));
+        }
+    }
+
     /**
      * Notifies the tracker that we called immediately before we call bindApplication on the client.
      *
@@ -823,6 +849,8 @@ class ActivityMetricsLogger {
         }
 
         stopLaunchTrace(info);
+        final Boolean isHibernating =
+                mLastHibernationStates.remove(info.mLastLaunchedActivity.packageName);
         if (abort) {
             mSupervisor.stopWaitingForActivityVisible(info.mLastLaunchedActivity);
             launchObserverNotifyActivityLaunchCancelled(info);
@@ -830,7 +858,7 @@ class ActivityMetricsLogger {
             if (info.isInterestingToLoggerAndObserver()) {
                 launchObserverNotifyActivityLaunchFinished(info, timestampNs);
             }
-            logAppTransitionFinished(info);
+            logAppTransitionFinished(info, isHibernating != null ? isHibernating : false);
         }
         info.mPendingDrawActivities.clear();
         mTransitionInfoList.remove(info);
@@ -859,7 +887,7 @@ class ActivityMetricsLogger {
         }
     }
 
-    private void logAppTransitionFinished(@NonNull TransitionInfo info) {
+    private void logAppTransitionFinished(@NonNull TransitionInfo info, boolean isHibernating) {
         if (DEBUG_METRICS) Slog.i(TAG, "logging finished transition " + info);
 
         // Take a snapshot of the transition info before sending it to the handler for logging.
@@ -868,7 +896,7 @@ class ActivityMetricsLogger {
         if (info.isInterestingToLoggerAndObserver()) {
             BackgroundThread.getHandler().post(() -> logAppTransition(
                     info.mCurrentTransitionDeviceUptime, info.mCurrentTransitionDelayMs,
-                    infoSnapshot));
+                    infoSnapshot, isHibernating));
         }
         BackgroundThread.getHandler().post(() -> logAppDisplayed(infoSnapshot));
         if (info.mPendingFullyDrawn != null) {
@@ -880,7 +908,7 @@ class ActivityMetricsLogger {
 
     // This gets called on a background thread without holding the activity manager lock.
     private void logAppTransition(int currentTransitionDeviceUptime, int currentTransitionDelayMs,
-            TransitionInfoSnapshot info) {
+            TransitionInfoSnapshot info, boolean isHibernating) {
         final LogMaker builder = new LogMaker(APP_TRANSITION);
         builder.setPackageName(info.packageName);
         builder.setType(info.type);
@@ -933,7 +961,8 @@ class ActivityMetricsLogger {
                 packageOptimizationInfo.getCompilationReason(),
                 packageOptimizationInfo.getCompilationFilter(),
                 info.sourceType,
-                info.sourceEventDelayMs);
+                info.sourceEventDelayMs,
+                isHibernating);
 
         if (DEBUG_METRICS) {
             Slog.i(TAG, String.format("APP_START_OCCURRED(%s, %s, %s, %s, %s)",
