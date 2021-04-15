@@ -18,6 +18,9 @@ package android.os;
 
 import android.annotation.NonNull;
 
+import com.android.internal.os.PowerCalculator;
+
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +53,18 @@ public class UserBatteryConsumer extends BatteryConsumer implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(mUserId);
+    }
+
+    @Override
+    public void dump(PrintWriter pw, boolean skipEmptyComponents) {
+        final double consumedPower = getConsumedPower();
+        pw.print("User ");
+        pw.print(mUserId);
+        pw.print(": ");
+        PowerCalculator.printPowerMah(pw, consumedPower);
+        pw.print(" ( ");
+        mPowerComponents.dump(pw, skipEmptyComponents  /* skipTotalPowerComponent */);
+        pw.print(" ) ");
     }
 
     public static final Creator<UserBatteryConsumer> CREATOR =

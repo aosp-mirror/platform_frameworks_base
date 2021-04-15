@@ -17,6 +17,10 @@ package android.os;
 
 import android.annotation.NonNull;
 
+import com.android.internal.os.PowerCalculator;
+
+import java.io.PrintWriter;
+
 /**
  * Contains details of battery attribution data broken down to individual power drain types
  * such as CPU, RAM, GPU etc.
@@ -200,6 +204,37 @@ class PowerComponents {
             }
         }
         return max;
+    }
+
+    public void dump(PrintWriter pw, boolean skipEmptyComponents) {
+        String separator = "";
+        for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
+                componentId++) {
+            final double componentPower = getConsumedPower(componentId);
+            if (skipEmptyComponents && componentPower == 0) {
+                continue;
+            }
+            pw.print(separator); separator = " ";
+            pw.print(BatteryConsumer.powerComponentIdToString(componentId));
+            pw.print("=");
+            PowerCalculator.printPowerMah(pw, componentPower);
+        }
+
+        final int customComponentCount = getCustomPowerComponentCount();
+        for (int customComponentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+                customComponentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
+                        + customComponentCount;
+                customComponentId++) {
+            final double customComponentPower =
+                    getConsumedPowerForCustomComponent(customComponentId);
+            if (skipEmptyComponents && customComponentPower == 0) {
+                continue;
+            }
+            pw.print(separator); separator = " ";
+            pw.print(getCustomPowerComponentName(customComponentId));
+            pw.print("=");
+            PowerCalculator.printPowerMah(pw, customComponentPower);
+        }
     }
 
     /**
