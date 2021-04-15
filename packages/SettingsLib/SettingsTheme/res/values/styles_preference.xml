@@ -15,7 +15,7 @@
   limitations under the License.
   -->
 <resources>
-    <!--DEPRECATED. It will remove after all of client team migrated to new style. -->
+    <!--DEPRECATED. It will be removed after all of client teams migrated to new style. -->
     <style name="PreferenceTheme" parent="@style/PreferenceThemeOverlay">
         <item name="preferenceCategoryStyle">@style/SettingsCategoryPreference</item>
         <item name="preferenceStyle">@style/SettingsPreference</item>
@@ -28,7 +28,7 @@
         <item name="footerPreferenceStyle">@style/Preference.Material</item>
     </style>
 
-    <style name="SettingsPreferenceTheme" parent="@style/PreferenceThemeOverlay">
+    <style name="PreferenceTheme.SettingsBase" parent="@style/PreferenceThemeOverlay">
         <item name="preferenceCategoryStyle">@style/SettingsCategoryPreference</item>
         <item name="preferenceStyle">@style/SettingsPreference</item>
         <item name="checkBoxPreferenceStyle">@style/SettingsCheckBoxPreference</item>
