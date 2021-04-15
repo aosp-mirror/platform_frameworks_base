@@ -19,11 +19,11 @@ package android.nfc;
 /**
  * @hide
  */
-oneway interface INfcControllerAlwaysOnStateCallback {
+oneway interface INfcControllerAlwaysOnListener {
   /**
    * Called whenever the controller always on state changes
    *
    * @param isEnabled true if the state is enabled, false otherwise
    */
-  void onControllerAlwaysOnStateChanged(boolean isEnabled);
+  void onControllerAlwaysOnChanged(boolean isEnabled);
 }
