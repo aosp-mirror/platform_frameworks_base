@@ -587,10 +587,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     AnimatingActivityRegistry mAnimatingActivityRegistry;
 
-    // Set whenever the ActivityRecord gets reparented to a Task so we can know the last known
-    // parent was when the ActivityRecord is detached from the hierarchy
-    private Task mLastKnownParent;
-
     // Set to the previous Task parent of the ActivityRecord when it is reparented to a new Task
     // due to picture-in-picture. This gets cleared whenever this activity or the Task
     // it references to gets removed. This should also be cleared when we move out of pip.
@@ -1359,7 +1355,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (getDisplayContent() != null) {
                 getDisplayContent().mClosingApps.remove(this);
             }
-        } else if (mLastKnownParent != null && mLastKnownParent.getRootTask() != null) {
+        } else if (oldTask != null && oldTask.getRootTask() != null) {
             task.getRootTask().mExitingActivities.remove(this);
         }
         final Task rootTask = getRootTask();
@@ -1372,8 +1368,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ? rootTask.getAnimatingActivityRegistry()
                 : null;
 
-        mLastKnownParent = task;
-        if (mLastKnownParent == mLastParentBeforePip) {
+        if (task == mLastParentBeforePip) {
             // Activity's reparented back from pip, clear the links once established
             clearLastParentBeforePip();
         }
