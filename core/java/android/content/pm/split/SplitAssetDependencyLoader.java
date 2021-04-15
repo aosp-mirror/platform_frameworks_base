@@ -128,6 +128,11 @@ public class SplitAssetDependencyLoader extends SplitDependencyLoader<PackagePar
     }
 
     @Override
+    public ApkAssets getBaseApkAssets() {
+        return mCachedSplitApks[0][0];
+    }
+
+    @Override
     public void close() throws Exception {
         for (AssetManager assets : mCachedAssetManagers) {
             IoUtils.closeQuietly(assets);
