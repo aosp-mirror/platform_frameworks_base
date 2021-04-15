@@ -1916,6 +1916,18 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private interface Computer {
 
+        /**
+         * Administrative statistics: record that the snapshot has been used.  Every call
+         * to use() increments the usage counter.
+         */
+        void use();
+
+        /**
+         * Fetch the snapshot usage counter.
+         * @return The number of times this snapshot was used.
+         */
+        int getUsed();
+
         @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
                 int flags, @PrivateResolveFlags int privateResolveFlags, int filterCallingUid,
                 int userId, boolean resolveForStart, boolean allowDynamicSplits);
@@ -2067,6 +2079,9 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private static class ComputerEngine implements Computer {
 
+        // The administrative use counter.
+        private int mUsed = 0;
+
         // Cached attributes.  The names in this class are the same as the
         // names in PackageManagerService; see that class for documentation.
         protected final Settings mSettings;
@@ -2157,6 +2172,20 @@ public class PackageManagerService extends IPackageManager.Stub
             // Used to reference PMS attributes that are primitives and which are not
             // updated under control of the PMS lock.
             mService = args.service;
+        }
+
+        /**
+         * Record that the snapshot was used.
+         */
+        public void use() {
+            mUsed++;
+        }
+
+        /**
+         * Return the usage counter.
+         */
+        public int getUsed() {
+            return mUsed;
         }
 
         public @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
@@ -4887,121 +4916,11 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private final Object mSnapshotLock = new Object();
 
-    // A counter of all queries that hit the current snapshot.
-    @GuardedBy("mSnapshotLock")
-    private int mSnapshotHits = 0;
-
-    // A class to record snapshot statistics.
-    private static class SnapshotStatistics {
-        // A build time is "big" if it takes longer than 5ms.
-        private static final long SNAPSHOT_BIG_BUILD_TIME_NS = TimeUnit.MILLISECONDS.toNanos(5);
-
-        // A snapshot is in quick succession to the previous snapshot if it less than
-        // 100ms since the previous snapshot.
-        private static final long SNAPSHOT_QUICK_REBUILD_INTERVAL_NS =
-                TimeUnit.MILLISECONDS.toNanos(100);
-
-        // The interval between snapshot statistics logging, in ns.
-        private static final long SNAPSHOT_LOG_INTERVAL_NS = TimeUnit.MINUTES.toNanos(10);
-
-        // The throttle parameters for big build reporting.  Do not report more than this
-        // many events in a single log interval.
-        private static final int SNAPSHOT_BUILD_REPORT_LIMIT = 10;
-
-        // The time the snapshot statistics were last logged.
-        private long mStatisticsSent = 0;
-
-        // The number of build events logged since the last periodic log.
-        private int mLoggedBuilds = 0;
-
-        // The time of the last build.
-        private long mLastBuildTime = 0;
-
-        // The number of times the snapshot has been rebuilt since the statistics were
-        // last logged.
-        private int mRebuilds = 0;
-
-        // The number of times the snapshot has been used since it was rebuilt.
-        private int mReused = 0;
-
-        // The number of "big" build times since the last log.  "Big" is defined by
-        // SNAPSHOT_BIG_BUILD_TIME.
-        private int mBigBuilds = 0;
-
-        // The number of quick rebuilds.  "Quick" is defined by
-        // SNAPSHOT_QUICK_REBUILD_INTERVAL_NS.
-        private int mQuickRebuilds = 0;
-
-        // The time take to build a snapshot.  This is cumulative over the rebuilds recorded
-        // in mRebuilds, so the average time to build a snapshot is given by
-        // mBuildTimeNs/mRebuilds.
-        private int mBuildTimeNs = 0;
-
-        // The maximum build time since the last log.
-        private long mMaxBuildTimeNs = 0;
-
-        // The constant that converts ns to ms.  This is the divisor.
-        private final long NS_TO_MS = TimeUnit.MILLISECONDS.toNanos(1);
-
-        // Convert ns to an int ms.  The maximum range of this method is about 24 days.
-        // There is no expectation that an event will take longer than that.
-        private int nsToMs(long ns) {
-            return (int) (ns / NS_TO_MS);
-        }
-
-        // The single method records a rebuild.  The "now" parameter is passed in because
-        // the caller needed it to computer the duration, so pass it in to avoid
-        // recomputing it.
-        private void rebuild(long now, long done, int hits) {
-            if (mStatisticsSent == 0) {
-                mStatisticsSent = now;
-            }
-            final long elapsed = now - mLastBuildTime;
-            final long duration = done - now;
-            mLastBuildTime = now;
-
-            if (mMaxBuildTimeNs < duration) {
-                mMaxBuildTimeNs = duration;
-            }
-            mRebuilds++;
-            mReused += hits;
-            mBuildTimeNs += duration;
-
-            boolean log_build = false;
-            if (duration > SNAPSHOT_BIG_BUILD_TIME_NS) {
-                log_build = true;
-                mBigBuilds++;
-            }
-            if (elapsed < SNAPSHOT_QUICK_REBUILD_INTERVAL_NS) {
-                log_build = true;
-                mQuickRebuilds++;
-            }
-            if (log_build && mLoggedBuilds < SNAPSHOT_BUILD_REPORT_LIMIT) {
-                EventLogTags.writePmSnapshotRebuild(nsToMs(duration), nsToMs(elapsed));
-                mLoggedBuilds++;
-            }
-
-            final long log_interval = now - mStatisticsSent;
-            if (log_interval >= SNAPSHOT_LOG_INTERVAL_NS) {
-                EventLogTags.writePmSnapshotStats(mRebuilds, mReused,
-                                                  mBigBuilds, mQuickRebuilds,
-                                                  nsToMs(mMaxBuildTimeNs),
-                                                  nsToMs(mBuildTimeNs));
-                mStatisticsSent = now;
-                mRebuilds = 0;
-                mReused = 0;
-                mBuildTimeNs = 0;
-                mMaxBuildTimeNs = 0;
-                mBigBuilds = 0;
-                mQuickRebuilds = 0;
-                mLoggedBuilds = 0;
-            }
-        }
-    }
-
-    // Snapshot statistics.
-    @GuardedBy("mLock")
-    private final SnapshotStatistics mSnapshotStatistics = new SnapshotStatistics();
+    /**
+     * The snapshot statistics.  These are collected to track performance and to identify
+     * situations in which the snapshots are misbehaving.
+     */
+    private final SnapshotStatistics mSnapshotStatistics;
 
     // The snapshot disable/enable switch.  An image with the flag set true uses snapshots
     // and an image with the flag set false does not use snapshots.
@@ -5035,10 +4954,9 @@ public class PackageManagerService extends IPackageManager.Stub
             Computer c = mSnapshotComputer;
             if (sSnapshotCorked && (c != null)) {
                 // Snapshots are corked, which means new ones should not be built right now.
+                c.use();
                 return c;
             }
-            // Deliberately capture the value pre-increment
-            final int hits = mSnapshotHits++;
             if (sSnapshotInvalid || (c == null)) {
                 // The snapshot is invalid if it is marked as invalid or if it is null.  If it
                 // is null, then it is currently being rebuilt by rebuildSnapshot().
@@ -5048,7 +4966,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // self-consistent (the lock is being held) and is current as of the time
                     // this function is entered.
                     if (sSnapshotInvalid) {
-                        rebuildSnapshot(hits);
+                        rebuildSnapshot();
                     }
 
                     // Guaranteed to be non-null.  mSnapshotComputer is only be set to null
@@ -5058,6 +4976,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     c = mSnapshotComputer;
                 }
             }
+            c.use();
             return c;
         }
     }
@@ -5067,16 +4986,16 @@ public class PackageManagerService extends IPackageManager.Stub
      * threads from using the invalid computer until it is rebuilt.
      */
     @GuardedBy("mLock")
-    private void rebuildSnapshot(int hits) {
-        final long now = System.nanoTime();
+    private void rebuildSnapshot() {
+        final long now = SystemClock.currentTimeMicro();
+        final int hits = mSnapshotComputer == null ? -1 : mSnapshotComputer.getUsed();
         mSnapshotComputer = null;
         sSnapshotInvalid = false;
         final Snapshot args = new Snapshot(Snapshot.SNAPPED);
         mSnapshotComputer = new ComputerEngine(args);
-        final long done = System.nanoTime();
+        final long done = SystemClock.currentTimeMicro();
 
         mSnapshotStatistics.rebuild(now, done, hits);
-        mSnapshotHits = 0;
     }
 
     /**
@@ -6329,6 +6248,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSnapshotEnabled = false;
         mLiveComputer = createLiveComputer();
         mSnapshotComputer = null;
+        mSnapshotStatistics = null;
 
         mPackages.putAll(testParams.packages);
         mEnableFreeCacheV2 = testParams.enableFreeCacheV2;
@@ -6481,17 +6401,20 @@ public class PackageManagerService extends IPackageManager.Stub
         mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
         mDomainVerificationManager.setConnection(mDomainVerificationConnection);
 
-        // Create the computer as soon as the state objects have been installed.  The
-        // cached computer is the same as the live computer until the end of the
-        // constructor, at which time the invalidation method updates it.  The cache is
-        // corked initially to ensure a cached computer is not built until the end of the
-        // constructor.
-        mSnapshotEnabled = SNAPSHOT_ENABLED;
-        sSnapshotCorked = true;
-        sSnapshotInvalid = true;
-        mLiveComputer = createLiveComputer();
-        mSnapshotComputer = null;
-        registerObserver();
+        synchronized (mLock) {
+            // Create the computer as soon as the state objects have been installed.  The
+            // cached computer is the same as the live computer until the end of the
+            // constructor, at which time the invalidation method updates it.  The cache is
+            // corked initially to ensure a cached computer is not built until the end of the
+            // constructor.
+            mSnapshotEnabled = SNAPSHOT_ENABLED;
+            sSnapshotCorked = true;
+            sSnapshotInvalid = true;
+            mSnapshotStatistics = new SnapshotStatistics();
+            mLiveComputer = createLiveComputer();
+            mSnapshotComputer = null;
+            registerObserver();
+        }
 
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
@@ -23959,6 +23882,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.println("    dexopt: dump dexopt state");
                 pw.println("    compiler-stats: dump compiler statistics");
                 pw.println("    service-permissions: dump permissions required by services");
+                pw.println("    snapshot: dump snapshot statistics");
                 pw.println("    known-packages: dump known packages");
                 pw.println("    <package.name>: info about given package");
                 return;
@@ -24107,6 +24031,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 dumpState.setDump(DumpState.DUMP_KNOWN_PACKAGES);
             } else if ("t".equals(cmd) || "timeouts".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PER_UID_READ_TIMEOUTS);
+            } else if ("snapshot".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_SNAPSHOT_STATISTICS);
             } else if ("write".equals(cmd)) {
                 synchronized (mLock) {
                     writeSettingsLPrTEMP();
@@ -24433,6 +24359,22 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.print("minPendingTimeUs=" + item.minPendingTimeUs + ", ");
                 pw.print("maxPendingTimeUs=" + item.maxPendingTimeUs);
                 pw.println(")");
+            }
+        }
+
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_SNAPSHOT_STATISTICS)) {
+            pw.println("Snapshot statistics");
+            if (!mSnapshotEnabled) {
+                pw.println("  Snapshots disabled");
+            } else {
+                int hits = 0;
+                synchronized (mSnapshotLock) {
+                    if (mSnapshotComputer != null) {
+                        hits = mSnapshotComputer.getUsed();
+                    }
+                }
+                final long now = SystemClock.currentTimeMicro();
+                mSnapshotStatistics.dump(pw, "  ", now, hits, true);
             }
         }
     }
