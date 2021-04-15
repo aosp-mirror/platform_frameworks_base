@@ -178,8 +178,9 @@ public class LocationEventLog extends LocalEventLog {
     }
 
     /** Logs that a provider has entered or exited stationary throttling. */
-    public void logProviderStationaryThrottled(String provider, boolean throttled) {
-        addLogEvent(EVENT_PROVIDER_STATIONARY_THROTTLED, provider, throttled);
+    public void logProviderStationaryThrottled(String provider, boolean throttled,
+            ProviderRequest request) {
+        addLogEvent(EVENT_PROVIDER_STATIONARY_THROTTLED, provider, throttled, request);
     }
 
     /** Logs that the location power save mode has changed. */
@@ -217,7 +218,7 @@ public class LocationEventLog extends LocalEventLog {
                         (Integer) args[1], (CallerIdentity) args[2]);
             case EVENT_PROVIDER_STATIONARY_THROTTLED:
                 return new ProviderStationaryThrottledEvent(timeDelta, (String) args[0],
-                        (Boolean) args[1]);
+                        (Boolean) args[1], (ProviderRequest) args[2]);
             case EVENT_LOCATION_POWER_SAVE_MODE_CHANGE:
                 return new LocationPowerSaveModeEvent(timeDelta, (Integer) args[0]);
             default:
@@ -355,17 +356,19 @@ public class LocationEventLog extends LocalEventLog {
     private static final class ProviderStationaryThrottledEvent extends ProviderEvent {
 
         private final boolean mStationaryThrottled;
+        private final ProviderRequest mRequest;
 
         ProviderStationaryThrottledEvent(long timeDelta, String provider,
-                boolean stationaryThrottled) {
+                boolean stationaryThrottled, ProviderRequest request) {
             super(timeDelta, provider);
             mStationaryThrottled = stationaryThrottled;
+            mRequest = request;
         }
 
         @Override
         public String getLogString() {
             return mProvider + " provider stationary/idle " + (mStationaryThrottled ? "throttled"
-                    : "unthrottled");
+                    : "unthrottled") + ", request = " + mRequest;
         }
     }
 
