@@ -2234,7 +2234,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /** Returns true if both the calling and source users for the job are started. */
-    private boolean areUsersStartedLocked(final JobStatus job) {
+    @GuardedBy("mLock")
+    public boolean areUsersStartedLocked(final JobStatus job) {
         boolean sourceStarted = ArrayUtils.contains(mStartedUsers, job.getSourceUserId());
         if (job.getUserId() == job.getSourceUserId()) {
             return sourceStarted;
