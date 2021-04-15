@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -78,6 +80,7 @@ public abstract class BluetoothProfileConnector<T> {
         mServiceName = serviceName;
     }
 
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     private boolean doBind() {
         synchronized (mConnection) {
             if (mService == null) {

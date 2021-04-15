@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package android.content;
+package android.foo;
 
-public class Context {
-    public int getUserId() {
-        return 0;
-    }
+import android.annotation.RequiresPermission;
 
-    public void enforceCallingOrSelfPermission(String permission, String message) {
-    }
+public interface IColorService extends android.os.IInterface {
+    public static final String RED = "red";
+    public static final String BLUE = "blue";
+
+    public void none();
+    @RequiresPermission(RED)
+    public void red();
+    @RequiresPermission(allOf = { RED, BLUE })
+    public void redAndBlue();
+    @RequiresPermission(anyOf = { RED, BLUE })
+    public void redOrBlue();
 }

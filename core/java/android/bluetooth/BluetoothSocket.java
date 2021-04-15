@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.LocalSocket;
 import android.os.Build;
@@ -69,9 +71,6 @@ import java.util.UUID;
  * <p>{@link BluetoothSocket} is thread
  * safe. In particular, {@link #close} will always immediately abort ongoing
  * operations and close the socket.
- *
- * <p class="note"><strong>Note:</strong>
- * Requires the {@link android.Manifest.permission#BLUETOOTH} permission.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
@@ -199,6 +198,7 @@ public final class BluetoothSocket implements Closeable {
      * @throws IOException On error, for example Bluetooth not available, or insufficient
      * privileges
      */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt,
             BluetoothDevice device, int port, ParcelUuid uuid, boolean mitm, boolean min16DigitPin)
             throws IOException {
@@ -386,6 +386,7 @@ public final class BluetoothSocket implements Closeable {
      *
      * @throws IOException on error, for example connection failure
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void connect() throws IOException {
         if (mDevice == null) throw new IOException("Connect is called on null device");
 
@@ -427,6 +428,7 @@ public final class BluetoothSocket implements Closeable {
      * Currently returns unix errno instead of throwing IOException,
      * so that BluetoothAdapter can check the error code for EADDRINUSE
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     /*package*/ int bindListen() {
         int ret;
         if (mSocketState == SocketState.CLOSED) return EBADFD;
@@ -682,6 +684,7 @@ public final class BluetoothSocket implements Closeable {
      * connection. This function is currently used for testing only.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void requestMaximumTxDataLength() throws IOException {
         if (mDevice == null) {
             throw new IOException("requestMaximumTxDataLength is called on null device");
