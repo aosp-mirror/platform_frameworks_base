@@ -851,7 +851,7 @@ public class LocationProviderManager extends
                     mUseWakeLock = false;
                     final int size = locationResult.size();
                     for (int i = 0; i < size; ++i) {
-                        if (!locationResult.get(i).isFromMockProvider()) {
+                        if (!locationResult.get(i).isMock()) {
                             mUseWakeLock = true;
                             break;
                         }
@@ -2302,7 +2302,7 @@ public class LocationProviderManager extends
         LocationResult filtered;
         if (mPassiveManager != null) {
             filtered = locationResult.filter(location -> {
-                if (!location.isFromMockProvider()) {
+                if (!location.isMock()) {
                     if (location.getLatitude() == 0 && location.getLongitude() == 0) {
                         Log.w(TAG, "blocking 0,0 location from " + mName + " provider");
                         return false;
@@ -2539,16 +2539,16 @@ public class LocationProviderManager extends
         LastLocation() {}
 
         public void clearMock() {
-            if (mFineLocation != null && mFineLocation.isFromMockProvider()) {
+            if (mFineLocation != null && mFineLocation.isMock()) {
                 mFineLocation = null;
             }
-            if (mCoarseLocation != null && mCoarseLocation.isFromMockProvider()) {
+            if (mCoarseLocation != null && mCoarseLocation.isMock()) {
                 mCoarseLocation = null;
             }
-            if (mFineBypassLocation != null && mFineBypassLocation.isFromMockProvider()) {
+            if (mFineBypassLocation != null && mFineBypassLocation.isMock()) {
                 mFineBypassLocation = null;
             }
-            if (mCoarseBypassLocation != null && mCoarseBypassLocation.isFromMockProvider()) {
+            if (mCoarseBypassLocation != null && mCoarseBypassLocation.isMock()) {
                 mCoarseBypassLocation = null;
             }
         }

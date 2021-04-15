@@ -603,7 +603,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             Log.d(TAG, "injectBestLocation: " + location);
         }
 
-        if (location.isFromMockProvider()) {
+        if (location.isMock()) {
             return;
         }
 
@@ -676,7 +676,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     private void injectLocation(Location location) {
-        if (!location.isFromMockProvider()) {
+        if (!location.isMock()) {
             mGnssNative.injectLocation(location);
         }
     }
