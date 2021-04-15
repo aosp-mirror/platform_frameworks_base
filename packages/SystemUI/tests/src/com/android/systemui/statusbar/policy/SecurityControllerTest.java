@@ -202,8 +202,8 @@ public class SecurityControllerTest extends SysuiTestCase {
     @Test
     public void testNetworkRequest() {
         verify(mConnectivityManager, times(1)).registerNetworkCallback(argThat(
-                (NetworkRequest request) -> request.networkCapabilities.getUids() == null
-                        && request.networkCapabilities.getCapabilities().length == 0
+                (NetworkRequest request) ->
+                        request.equals(new NetworkRequest.Builder().clearCapabilities().build())
                 ), any(NetworkCallback.class));
     }
 
