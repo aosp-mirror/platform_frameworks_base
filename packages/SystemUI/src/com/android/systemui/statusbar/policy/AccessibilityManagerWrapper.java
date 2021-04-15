@@ -41,7 +41,7 @@ public class AccessibilityManagerWrapper implements
 
     @Override
     public void addCallback(@NonNull AccessibilityServicesStateChangeListener listener) {
-        mAccessibilityManager.addAccessibilityServicesStateChangeListener(listener, null);
+        mAccessibilityManager.addAccessibilityServicesStateChangeListener(listener);
     }
 
     @Override
