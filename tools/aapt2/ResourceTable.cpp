@@ -577,6 +577,7 @@ Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNam
 
 std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
   std::unique_ptr<ResourceTable> new_table = util::make_unique<ResourceTable>();
+  CloningValueTransformer cloner(&new_table->string_pool);
   for (const auto& pkg : packages) {
     ResourceTablePackage* new_pkg = new_table->FindOrCreatePackage(pkg->name);
     for (const auto& type : pkg->types) {
@@ -593,7 +594,7 @@ std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
         for (const auto& config_value : entry->values) {
           ResourceConfigValue* new_value =
               new_entry->FindOrCreateValue(config_value->config, config_value->product);
-          new_value->value.reset(config_value->value->Clone(&new_table->string_pool));
+          new_value->value = config_value->value->Transform(cloner);
         }
       }
     }
