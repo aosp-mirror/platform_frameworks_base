@@ -241,9 +241,9 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             AppOpItem item = getAppOpItemLocked(mActiveItems, code, uid, packageName);
             if (item == null && active) {
                 item = new AppOpItem(code, uid, packageName, mClock.elapsedRealtime());
-                if (code == AppOpsManager.OP_RECORD_AUDIO) {
+                if (isOpMicrophone(code)) {
                     item.setDisabled(isAnyRecordingPausedLocked(uid));
-                } else if (code == AppOpsManager.OP_CAMERA) {
+                } else if (isOpCamera(code)) {
                     item.setDisabled(mCameraDisabled);
                 }
                 mActiveItems.add(item);
@@ -298,6 +298,11 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         return PermissionManager.shouldShowPackageForIndicatorCached(mContext, packageName);
     }
 
+    @WorkerThread
+    public List<AppOpItem> getActiveAppOps() {
+        return getActiveAppOps(false);
+    }
+
     /**
      * Returns a copy of the list containing all the active AppOps that the controller tracks.
      *
@@ -306,8 +311,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
      * @return List of active AppOps information
      */
     @WorkerThread
-    public List<AppOpItem> getActiveAppOps() {
-        return getActiveAppOpsForUser(UserHandle.USER_ALL);
+    public List<AppOpItem> getActiveAppOps(boolean showPaused) {
+        return getActiveAppOpsForUser(UserHandle.USER_ALL, showPaused);
     }
 
     /**
@@ -321,7 +326,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
      * @return List of active AppOps information for that user id
      */
     @WorkerThread
-    public List<AppOpItem> getActiveAppOpsForUser(int userId) {
+    public List<AppOpItem> getActiveAppOpsForUser(int userId, boolean showPaused) {
         Assert.isNotMainThread();
         List<AppOpItem> list = new ArrayList<>();
         synchronized (mActiveItems) {
@@ -330,7 +335,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
                 AppOpItem item = mActiveItems.get(i);
                 if ((userId == UserHandle.USER_ALL
                         || UserHandle.getUserId(item.getUid()) == userId)
-                        && isUserVisible(item.getPackageName()) && !item.isDisabled()) {
+                        && isUserVisible(item.getPackageName())
+                        && (showPaused || !item.isDisabled())) {
                     list.add(item);
                 }
             }
@@ -441,9 +447,9 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
                 AppOpItem item = mActiveItems.get(i);
 
                 boolean paused = false;
-                if (item.getCode() == AppOpsManager.OP_RECORD_AUDIO) {
+                if (isOpMicrophone(item.getCode())) {
                     paused = isAnyRecordingPausedLocked(item.getUid());
-                } else if (item.getCode() == AppOpsManager.OP_CAMERA) {
+                } else if (isOpCamera(item.getCode())) {
                     paused = mCameraDisabled;
                 }
 
@@ -500,6 +506,19 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             }
             updateSensorDisabledStatus();
         });
+    }
+
+    @Override
+    public boolean isMicMuted() {
+        return mMicMuted;
+    }
+
+    private boolean isOpCamera(int op) {
+        return op == AppOpsManager.OP_CAMERA || op == AppOpsManager.OP_PHONE_CALL_CAMERA;
+    }
+
+    private boolean isOpMicrophone(int op) {
+        return op == AppOpsManager.OP_RECORD_AUDIO || op == AppOpsManager.OP_PHONE_CALL_MICROPHONE;
     }
 
     protected class H extends Handler {
