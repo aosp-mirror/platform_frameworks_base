@@ -452,7 +452,8 @@ public class AlarmManagerService extends SystemService {
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
         private static final long DEFAULT_MAX_INTERVAL = 365 * INTERVAL_DAY;
-        private static final long DEFAULT_MIN_WINDOW = 10_000;
+        // TODO (b/185199076): Tune based on breakage reports.
+        private static final long DEFAULT_MIN_WINDOW = 30 * 60 * 1000;
         private static final long DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION = 10 * 1000;
         private static final long DEFAULT_LISTENER_TIMEOUT = 5 * 1000;
         private static final int DEFAULT_MAX_ALARMS_PER_UID = 500;
@@ -1688,12 +1689,22 @@ public class AlarmManagerService extends SystemService {
             windowLength = AlarmManager.WINDOW_EXACT;
         }
 
-        // Sanity check the window length.  This will catch people mistakenly
-        // trying to pass an end-of-window timestamp rather than a duration.
-        if (windowLength > AlarmManager.INTERVAL_HALF_DAY) {
+        // Snap the window to reasonable limits.
+        if (windowLength > INTERVAL_DAY) {
             Slog.w(TAG, "Window length " + windowLength
-                    + "ms suspiciously long; limiting to 1 hour");
-            windowLength = AlarmManager.INTERVAL_HOUR;
+                    + "ms suspiciously long; limiting to 1 day");
+            windowLength = INTERVAL_DAY;
+        } else if (windowLength > 0 && windowLength < mConstants.MIN_WINDOW) {
+            if (CompatChanges.isChangeEnabled(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS,
+                    callingPackage, UserHandle.getUserHandleForUid(callingUid))) {
+                Slog.w(TAG, "Window length " + windowLength + "ms too short; expanding to "
+                        + mConstants.MIN_WINDOW + "ms.");
+                windowLength = mConstants.MIN_WINDOW;
+            } else {
+                // TODO (b/185199076): Remove log once we have some data about what apps will break
+                Slog.wtf(TAG, "Short window " + windowLength + "ms specified by "
+                        + callingPackage);
+            }
         }
 
         // Sanity check the recurrence interval.  This will catch people who supply
@@ -1737,7 +1748,6 @@ public class AlarmManagerService extends SystemService {
             // Fix this window in place, so that as time approaches we don't collapse it.
             windowLength = maxElapsed - triggerElapsed;
         } else {
-            windowLength = Math.max(windowLength, mConstants.MIN_WINDOW);
             maxElapsed = triggerElapsed + windowLength;
         }
         synchronized (mLock) {
