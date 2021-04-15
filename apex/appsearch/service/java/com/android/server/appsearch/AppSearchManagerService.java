@@ -54,7 +54,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
@@ -181,10 +180,10 @@ public class AppSearchManagerService extends SystemService {
                 int schemaVersion,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(schemaBundles);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(schemaBundles);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -230,9 +229,9 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -257,9 +256,9 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -285,10 +284,10 @@ public class AppSearchManagerService extends SystemService {
                 @UserIdInt int userId,
                 @ElapsedRealtimeLong long binderCallStartTimeMillis,
                 @NonNull IAppSearchBatchResultCallback callback) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(documentBundles);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(documentBundles);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -359,11 +358,11 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull Map<String, List<String>> typePropertyPaths,
                 @UserIdInt int userId,
                 @NonNull IAppSearchBatchResultCallback callback) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(namespace);
-            Preconditions.checkNotNull(uris);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(namespace);
+            Objects.requireNonNull(uris);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -404,11 +403,11 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull Bundle searchSpecBundle,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(queryExpression);
-            Preconditions.checkNotNull(searchSpecBundle);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(queryExpression);
+            Objects.requireNonNull(searchSpecBundle);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -439,10 +438,10 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull Bundle searchSpecBundle,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(queryExpression);
-            Preconditions.checkNotNull(searchSpecBundle);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(queryExpression);
+            Objects.requireNonNull(searchSpecBundle);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -471,7 +470,7 @@ public class AppSearchManagerService extends SystemService {
                 long nextPageToken,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             // TODO(b/162450968) check nextPageToken is being advanced by the same uid as originally
@@ -644,10 +643,10 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull List<String> uris,
                 @UserIdInt int userId,
                 @NonNull IAppSearchBatchResultCallback callback) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(uris);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(uris);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -684,11 +683,11 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull Bundle searchSpecBundle,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(queryExpression);
-            Preconditions.checkNotNull(searchSpecBundle);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(queryExpression);
+            Objects.requireNonNull(searchSpecBundle);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -717,9 +716,9 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -757,7 +756,7 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void initialize(@UserIdInt int userId, @NonNull IAppSearchResultCallback callback) {
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             EXECUTOR.execute(() -> {
@@ -788,7 +787,7 @@ public class AppSearchManagerService extends SystemService {
         }
 
         private void verifyCallingPackage(int callingUid, @NonNull String callingPackage) {
-            Preconditions.checkNotNull(callingPackage);
+            Objects.requireNonNull(callingPackage);
             if (mPackageManagerInternal.getPackageUid(
                             callingPackage, /*flags=*/ 0, UserHandle.getUserId(callingUid))
                     != callingUid) {
