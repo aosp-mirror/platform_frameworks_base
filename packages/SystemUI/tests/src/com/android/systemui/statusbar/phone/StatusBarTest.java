@@ -38,6 +38,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.IWallpaperManager;
 import android.app.Notification;
 import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
@@ -265,6 +266,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private OngoingCallController mOngoingCallController;
     @Mock private TunerService mTunerService;
     @Mock private FeatureFlags mFeatureFlags;
+    @Mock private IWallpaperManager mWallpaperManager;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -323,7 +325,8 @@ public class StatusBarTest extends SysuiTestCase {
 
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
-        WakefulnessLifecycle wakefulnessLifecycle = new WakefulnessLifecycle();
+        WakefulnessLifecycle wakefulnessLifecycle =
+                new WakefulnessLifecycle(mContext, mWallpaperManager);
         wakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         wakefulnessLifecycle.dispatchFinishedWakingUp();
 
