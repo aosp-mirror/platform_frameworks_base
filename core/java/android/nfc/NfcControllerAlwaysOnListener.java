@@ -17,7 +17,7 @@
 package android.nfc;
 
 import android.annotation.NonNull;
-import android.nfc.NfcAdapter.ControllerAlwaysOnStateCallback;
+import android.nfc.NfcAdapter.ControllerAlwaysOnListener;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -29,77 +29,77 @@ import java.util.concurrent.Executor;
 /**
  * @hide
  */
-public class NfcControllerAlwaysOnStateListener extends INfcControllerAlwaysOnStateCallback.Stub {
-    private static final String TAG = "NfcControllerAlwaysOnStateListener";
+public class NfcControllerAlwaysOnListener extends INfcControllerAlwaysOnListener.Stub {
+    private static final String TAG = NfcControllerAlwaysOnListener.class.getSimpleName();
 
     private final INfcAdapter mAdapter;
 
-    private final Map<ControllerAlwaysOnStateCallback, Executor> mCallbackMap = new HashMap<>();
+    private final Map<ControllerAlwaysOnListener, Executor> mListenerMap = new HashMap<>();
 
     private boolean mCurrentState = false;
     private boolean mIsRegistered = false;
 
-    public NfcControllerAlwaysOnStateListener(@NonNull INfcAdapter adapter) {
+    public NfcControllerAlwaysOnListener(@NonNull INfcAdapter adapter) {
         mAdapter = adapter;
     }
 
     /**
-     * Register a {@link ControllerAlwaysOnStateCallback} with this
-     * {@link NfcControllerAlwaysOnStateListener}
+     * Register a {@link ControllerAlwaysOnListener} with this
+     * {@link NfcControllerAlwaysOnListener}
      *
-     * @param executor an {@link Executor} to execute given callback
-     * @param callback user implementation of the {@link ControllerAlwaysOnStateCallback}
+     * @param executor an {@link Executor} to execute given listener
+     * @param listener user implementation of the {@link ControllerAlwaysOnListener}
      */
     public void register(@NonNull Executor executor,
-            @NonNull ControllerAlwaysOnStateCallback callback) {
+            @NonNull ControllerAlwaysOnListener listener) {
         synchronized (this) {
-            if (mCallbackMap.containsKey(callback)) {
+            if (mListenerMap.containsKey(listener)) {
                 return;
             }
 
-            mCallbackMap.put(callback, executor);
+            mListenerMap.put(listener, executor);
             if (!mIsRegistered) {
                 try {
-                    mAdapter.registerControllerAlwaysOnStateCallback(this);
+                    mAdapter.registerControllerAlwaysOnListener(this);
                     mIsRegistered = true;
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to register ControllerAlwaysOnStateListener");
+                    Log.w(TAG, "Failed to register");
                 }
             }
         }
     }
 
     /**
-     * Unregister the specified {@link ControllerAlwaysOnStateCallback}
+     * Unregister the specified {@link ControllerAlwaysOnListener}
      *
-     * @param callback user implementation of the {@link ControllerAlwaysOnStateCallback}
+     * @param listener user implementation of the {@link ControllerAlwaysOnListener}
      */
-    public void unregister(@NonNull ControllerAlwaysOnStateCallback callback) {
+    public void unregister(@NonNull ControllerAlwaysOnListener listener) {
         synchronized (this) {
-            if (!mCallbackMap.containsKey(callback)) {
+            if (!mListenerMap.containsKey(listener)) {
                 return;
             }
 
-            mCallbackMap.remove(callback);
+            mListenerMap.remove(listener);
 
-            if (mCallbackMap.isEmpty() && mIsRegistered) {
+            if (mListenerMap.isEmpty() && mIsRegistered) {
                 try {
-                    mAdapter.unregisterControllerAlwaysOnStateCallback(this);
+                    mAdapter.unregisterControllerAlwaysOnListener(this);
                 } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to unregister ControllerAlwaysOnStateListener");
+                    Log.w(TAG, "Failed to unregister");
                 }
                 mIsRegistered = false;
             }
         }
     }
 
-    private void sendCurrentState(@NonNull ControllerAlwaysOnStateCallback callback) {
+    private void sendCurrentState(@NonNull ControllerAlwaysOnListener listener) {
         synchronized (this) {
-            Executor executor = mCallbackMap.get(callback);
+            Executor executor = mListenerMap.get(listener);
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                executor.execute(() -> callback.onStateChanged(
+                executor.execute(() -> listener.onControllerAlwaysOnChanged(
                         mCurrentState));
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -108,10 +108,10 @@ public class NfcControllerAlwaysOnStateListener extends INfcControllerAlwaysOnSt
     }
 
     @Override
-    public void onControllerAlwaysOnStateChanged(boolean isEnabled) {
+    public void onControllerAlwaysOnChanged(boolean isEnabled) {
         synchronized (this) {
             mCurrentState = isEnabled;
-            for (ControllerAlwaysOnStateCallback cb : mCallbackMap.keySet()) {
+            for (ControllerAlwaysOnListener cb : mListenerMap.keySet()) {
                 sendCurrentState(cb);
             }
         }
