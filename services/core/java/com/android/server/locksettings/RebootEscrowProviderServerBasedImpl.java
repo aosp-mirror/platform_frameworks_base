@@ -95,6 +95,11 @@ class RebootEscrowProviderServerBasedImpl implements RebootEscrowProviderInterfa
     }
 
     @Override
+    public int getType() {
+        return TYPE_SERVER_BASED;
+    }
+
+    @Override
     public boolean hasRebootEscrowSupport() {
         return mInjector.getServiceConnection() != null;
     }

@@ -28,6 +28,7 @@ import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.net.Network;
+import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -35,6 +36,7 @@ import android.provider.MediaStore;
 import android.text.format.DateFormat;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.Range;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -52,6 +54,7 @@ import com.android.server.job.JobStatusShortInfoProto;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.Predicate;
 
 /**
@@ -486,8 +489,15 @@ public final class JobStatus {
             // Later, when we check if a given network satisfies the required
             // network, we need to know the UID that is requesting it, so push
             // our source UID into place.
-            job.getRequiredNetwork().networkCapabilities.setSingleUid(this.sourceUid);
+            final JobInfo.Builder builder = new JobInfo.Builder(job);
+            final NetworkRequest.Builder requestBuilder =
+                    new NetworkRequest.Builder(job.getRequiredNetwork());
+            requestBuilder.setUids(
+                    Collections.singleton(new Range<Integer>(this.sourceUid, this.sourceUid)));
+            builder.setRequiredNetwork(requestBuilder.build());
+            job = builder.build();
         }
+
         final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
         mHasMediaBackupExemption = !job.hasLateConstraint() && exemptedMediaUrisOnly
                 && requiresNetwork && this.sourcePackageName.equals(jsi.getMediaBackupPackage());
@@ -1901,9 +1911,6 @@ public final class JobStatus {
             if (uriPerms != null) {
                 uriPerms.dump(proto, JobStatusDumpProto.JobInfo.GRANTED_URI_PERMISSIONS);
             }
-            if (job.getRequiredNetwork() != null) {
-                job.getRequiredNetwork().dumpDebug(proto, JobStatusDumpProto.JobInfo.REQUIRED_NETWORK);
-            }
             if (mTotalNetworkDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
                 proto.write(JobStatusDumpProto.JobInfo.TOTAL_NETWORK_DOWNLOAD_BYTES,
                         mTotalNetworkDownloadBytes);
@@ -1990,10 +1997,6 @@ public final class JobStatus {
                 Uri u = changedUris.valueAt(i);
                 proto.write(JobStatusDumpProto.CHANGED_URIS, u.toString());
             }
-        }
-
-        if (network != null) {
-            network.dumpDebug(proto, JobStatusDumpProto.NETWORK);
         }
 
         if (pendingWork != null) {

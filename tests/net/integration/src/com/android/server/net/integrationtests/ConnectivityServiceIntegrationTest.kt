@@ -44,12 +44,10 @@ import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.ConnectivityService
-import com.android.server.LocalServices
 import com.android.server.NetworkAgentWrapper
 import com.android.server.TestNetIdManager
 import com.android.server.connectivity.MockableSystemProperties
 import com.android.server.connectivity.ProxyTracker
-import com.android.server.net.NetworkPolicyManagerInternal
 import com.android.testutils.TestableNetworkCallback
 import org.junit.After
 import org.junit.Before
@@ -75,7 +73,7 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 
 const val SERVICE_BIND_TIMEOUT_MS = 5_000L
-const val TEST_TIMEOUT_MS = 1_000L
+const val TEST_TIMEOUT_MS = 10_000L
 
 /**
  * Test that exercises an instrumented version of ConnectivityService against an instrumented
@@ -161,10 +159,6 @@ class ConnectivityServiceIntegrationTest {
         networkStackClient = TestNetworkStackClient(realContext)
         networkStackClient.init()
         networkStackClient.start()
-
-        LocalServices.removeServiceForTest(NetworkPolicyManagerInternal::class.java)
-        LocalServices.addService(NetworkPolicyManagerInternal::class.java,
-                mock(NetworkPolicyManagerInternal::class.java))
 
         service = TestConnectivityService(makeDependencies())
         cm = ConnectivityManager(context, service)

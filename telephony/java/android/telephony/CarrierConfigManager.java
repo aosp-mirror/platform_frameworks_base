@@ -17,7 +17,6 @@
 package android.telephony;
 
 import android.Manifest;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -32,18 +31,17 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
+import android.telephony.gba.TlsParams;
+import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.ImsSsData;
-import android.telephony.ims.SipDelegateManager;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -110,31 +108,17 @@ public class CarrierConfigManager {
      */
     public static final int USSD_OVER_IMS_ONLY       = 3;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CARRIER_NR_AVAILABILITY_" }, value = {
-            CARRIER_NR_AVAILABILITY_NONE,
-            CARRIER_NR_AVAILABILITY_NSA,
-            CARRIER_NR_AVAILABILITY_SA,
-    })
-    public @interface DeviceNrCapability {}
-
-    /**
-     * Indicates CARRIER_NR_AVAILABILITY_NONE determine that the carrier does not enable 5G NR.
-     */
-    public static final int CARRIER_NR_AVAILABILITY_NONE = 0;
-
     /**
      * Indicates CARRIER_NR_AVAILABILITY_NSA determine that the carrier enable the non-standalone
      * (NSA) mode of 5G NR.
      */
-    public static final int CARRIER_NR_AVAILABILITY_NSA = 1 << 0;
+    public static final int CARRIER_NR_AVAILABILITY_NSA = 1;
 
     /**
      * Indicates CARRIER_NR_AVAILABILITY_SA determine that the carrier enable the standalone (SA)
      * mode of 5G NR.
      */
-    public static final int CARRIER_NR_AVAILABILITY_SA = 1 << 1;
+    public static final int CARRIER_NR_AVAILABILITY_SA = 2;
 
     private final Context mContext;
 
@@ -1807,23 +1791,20 @@ public class CarrierConfigManager {
             "show_precise_failed_cause_bool";
 
     /**
-     * Bit-field integer to determine whether the carrier enable the non-standalone (NSA) mode of
-     * 5G NR, standalone (SA) mode of 5G NR
+     * A list of carrier nr availability is used to determine whether the carrier enable the
+     * non-standalone (NSA) mode of 5G NR, standalone (SA) mode of 5G NR
      *
-     * <UL>
-     *  <LI>CARRIER_NR_AVAILABILITY_NONE: non-NR = 0 </LI>
-     *  <LI>CARRIER_NR_AVAILABILITY_NSA: NSA = 1 << 0</LI>
-     *  <LI>CARRIER_NR_AVAILABILITY_SA: SA = 1 << 1</LI>
-     * </UL>
-     * <p> The value of this key must be bitwise OR of
-     * {@link #CARRIER_NR_AVAILABILITY_NONE}, {@link #CARRIER_NR_AVAILABILITY_NSA},
-     * {@link #CARRIER_NR_AVAILABILITY_SA}.
+     * <p> The value of list is
+     * {@link #CARRIER_NR_AVAILABILITY_NSA}, or {@link #CARRIER_NR_AVAILABILITY_SA}.
      *
-     * <p> For example, if both NSA and SA are used, the value of key is 3 (1 << 0 | 1 << 1).
-     * If the carrier doesn't support 5G NR, the value of key is 0 (non-NR).
-     * If the key is invalid or not configured, a default value 3 (NSA|SA = 3) will apply.
+     * <p> For example, if both NSA and SA are used, the list value is {
+     * {@link #CARRIER_NR_AVAILABILITY_NSA},{@link #CARRIER_NR_AVAILABILITY_SA}}.
+     * If the carrier doesn't support 5G NR, the value is the empty array.
+     * If the key is invalid or not configured, the default value {
+     * {@link #CARRIER_NR_AVAILABILITY_NSA},{@link #CARRIER_NR_AVAILABILITY_SA}} will apply.
      */
-    public static final String KEY_CARRIER_NR_AVAILABILITY_INT = "carrier_nr_availability_int";
+    public static final String KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY =
+            "carrier_nr_availabilities_int_array";
 
     /**
      * Boolean to decide whether LTE is enabled.
@@ -3241,6 +3222,14 @@ public class CarrierConfigManager {
     public static final String KEY_USE_CALLER_ID_USSD_BOOL = "use_caller_id_ussd_bool";
 
     /**
+     * Call waiting uses USSD command without SS command.
+     * When {@code true}, the call waiting query/set by ussd command.
+     * When {@code false}, doesn't use USSD to query/set call waiting.
+     * @hide
+     */
+    public static final String KEY_USE_CALL_WAITING_USSD_BOOL = "use_call_waiting_ussd_bool";
+
+    /**
      * Specifies the service class for call waiting service.
      * Default value is
      * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_VOICE}.
@@ -3633,6 +3622,71 @@ public class CarrierConfigManager {
      *   EAP-AKA_PRIME: "6"
      */
     public static final String ENABLE_EAP_METHOD_PREFIX_BOOL = "enable_eap_method_prefix_bool";
+
+    /**
+     * Indicates that GBA_ME should be used for GBA authentication, as defined in 3GPP TS 33.220.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_ME = 1;
+
+    /**
+     * Indicates that GBA_U should be used for GBA authentication, as defined in 3GPP TS 33.220.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_U = 2;
+
+    /**
+     * Indicates that GBA_Digest should be used for GBA authentication, as defined
+     * in 3GPP TS 33.220.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_DIGEST = 3;
+
+    /**
+     * An integer representing the GBA mode to use for requesting credentials
+     * via {@link TelephonyManager#bootstrapAuthenticationRequest}.
+     *
+     * One of {@link #GBA_ME}, {@link #GBA_U}, or {@link #GBA_DIGEST}.
+     * @hide
+     */
+    @SystemApi
+    public static final String KEY_GBA_MODE_INT = "gba_mode_int";
+
+    /**
+     * An integer representing the organization code to be used when building the
+     * {@link UaSecurityProtocolIdentifier} used when requesting GBA authentication.
+     *
+     * See the {@code ORG_} constants in {@link UaSecurityProtocolIdentifier}.
+     * @hide
+     */
+    @SystemApi
+    public static final String KEY_GBA_UA_SECURITY_ORGANIZATION_INT =
+            "gba_ua_security_organization_int";
+
+    /**
+     * An integer representing the security protocol to be used when building the
+     * {@link UaSecurityProtocolIdentifier} used when requesting GBA authentication.
+     *
+     * See the {@code UA_SECURITY_PROTOCOL_} constants in {@link UaSecurityProtocolIdentifier}.
+     * @hide
+     */
+    @SystemApi
+    public static final String KEY_GBA_UA_SECURITY_PROTOCOL_INT =
+            "gba_ua_security_protocol_int";
+
+    /**
+     * An integer representing the cipher suite to be used when building the
+     * {@link UaSecurityProtocolIdentifier} used when requesting GBA authentication.
+     *
+     * See the {@code TLS_} constants in {@link android.telephony.gba.TlsParams}.
+     * @hide
+     */
+    @SystemApi
+    public static final String KEY_GBA_UA_TLS_CIPHER_SUITE_INT =
+            "gba_ua_tls_cipher_suite_int";
 
     /**
      * GPS configs. See the GNSS HAL documentation for more details.
@@ -4045,6 +4099,14 @@ public class CarrierConfigManager {
         public static final String KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT =
                 KEY_PREFIX + "non_rcs_capabilities_cache_expiration_sec_int";
 
+        /**
+         * Specifies the RCS feature tag allowed for the carrier.
+         *
+         * <p>The values refer to RCC.07 2.4.4.
+         */
+        public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY =
+                KEY_PREFIX + "rcs_feature_tag_allowed_string_array";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -4058,6 +4120,27 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, true);
             defaults.putInt(KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT, 30 * 24 * 60 * 60);
+            defaults.putStringArray(KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY, new String[]{
+                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.msg\"",
+                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.largemsg\"",
+                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.deferred\"",
+                    "+g.gsma.rcs.cpm.pager-large",
+                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.session\"",
+                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.session\"",
+                    "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.fthttp\"",
+                    "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftsms\"",
+                    "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.callcomposer\"",
+                    "+g.gsma.callcomposer",
+                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.callunanswered\"",
+                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.sharedmap\"",
+                    "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.sharedsketch\"",
+                    "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geopush\"",
+                    "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geosms\"",
+                    "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.chatbot\"",
+                    "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.chatbot.sa\"",
+                    "+g.gsma.rcs.botversion=\"#=1,#=2\"",
+                    "+g.gsma.rcs.cpimext"});
+
             return defaults;
         }
     }
@@ -4275,6 +4358,15 @@ public class CarrierConfigManager {
      * carriers.
      */
     public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
+
+    /**
+     * Determine whether or not to display no data notification when data setup is permanently
+     * failed.
+     *
+     * @hide
+     */
+    public static final String KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL =
+            "display_no_data_notification_on_permanent_failure_bool";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -4653,8 +4745,8 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
-        sDefaults.putInt(KEY_CARRIER_NR_AVAILABILITY_INT,
-                CARRIER_NR_AVAILABILITY_NSA | CARRIER_NR_AVAILABILITY_SA);
+        sDefaults.putIntArray(KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
+                new int[]{CARRIER_NR_AVAILABILITY_NSA, CARRIER_NR_AVAILABILITY_SA});
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
@@ -4736,6 +4828,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL, true);
         sDefaults.putBoolean(KEY_USE_CALL_FORWARDING_USSD_BOOL, false);
         sDefaults.putBoolean(KEY_USE_CALLER_ID_USSD_BOOL, false);
+        sDefaults.putBoolean(KEY_USE_CALL_WAITING_USSD_BOOL, false);
         sDefaults.putInt(KEY_CALL_WAITING_SERVICE_CLASS_INT, 1 /* SERVICE_CLASS_VOICE */);
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:5G,connected:5G,not_restricted_rrc_idle:5G,"
@@ -4813,6 +4906,13 @@ public class CarrierConfigManager {
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
+        sDefaults.putInt(KEY_GBA_MODE_INT, GBA_ME);
+        sDefaults.putInt(KEY_GBA_UA_SECURITY_ORGANIZATION_INT,
+                UaSecurityProtocolIdentifier.ORG_3GPP);
+        sDefaults.putInt(KEY_GBA_UA_SECURITY_PROTOCOL_INT,
+                UaSecurityProtocolIdentifier.UA_SECURITY_PROTOCOL_3GPP_TLS_DEFAULT);
+        sDefaults.putInt(KEY_GBA_UA_TLS_CIPHER_SUITE_INT, TlsParams.TLS_NULL_WITH_NULL_NULL);
+
         sDefaults.putBoolean(KEY_SHOW_FORWARDED_NUMBER_BOOL, false);
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
@@ -4834,6 +4934,7 @@ public class CarrierConfigManager {
                 new String[]{"ia", "default", "ims", "mms", "dun", "emergency"});
         sDefaults.putBoolean(KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_ENABLE_2G, false);
+        sDefaults.putBoolean(KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL, false);
     }
 
     /**

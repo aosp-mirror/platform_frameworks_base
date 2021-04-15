@@ -17,6 +17,7 @@ package android.telephony;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresFeature;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -52,6 +53,9 @@ public final class DataThrottlingRequest implements Parcelable {
      * @hide
      */
     @SystemApi
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING)
     public static final int DATA_THROTTLING_ACTION_THROTTLE_SECONDARY_CARRIER = 1;
 
     /**
@@ -63,6 +67,9 @@ public final class DataThrottlingRequest implements Parcelable {
      * @hide
      */
     @SystemApi
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING)
     public static final int DATA_THROTTLING_ACTION_THROTTLE_PRIMARY_CARRIER = 2;
 
     /**
@@ -76,6 +83,9 @@ public final class DataThrottlingRequest implements Parcelable {
      * @hide
      */
     @SystemApi
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING)
     public static final int DATA_THROTTLING_ACTION_HOLD = 3;
 
     /**

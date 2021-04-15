@@ -36,6 +36,11 @@ public final class QosSession implements Parcelable {
      */
     public static final int TYPE_EPS_BEARER = 1;
 
+    /**
+     * The {@link QosSession} is a NR Session.
+     */
+    public static final int TYPE_NR_BEARER = 2;
+
     private final int mSessionId;
 
     private final int mSessionType;
@@ -100,6 +105,7 @@ public final class QosSession implements Parcelable {
      */
     @IntDef(value = {
             TYPE_EPS_BEARER,
+            TYPE_NR_BEARER,
     })
     @interface QosSessionType {}
 

@@ -2231,10 +2231,12 @@ interface ITelephony {
      *
      * @param subId the id of the subscription
      * @param thermalMitigationRequest holds the parameters necessary for the request.
+     * @param callingPackage the package name of the calling package.
      * @throws InvalidThermalMitigationRequestException if the parametes are invalid.
      */
     int sendThermalMitigationRequest(int subId,
-            in ThermalMitigationRequest thermalMitigationRequest);
+            in ThermalMitigationRequest thermalMitigationRequest,
+            String callingPackage);
 
     /**
      * Get the Generic Bootstrapping Architecture authentication keys
@@ -2323,6 +2325,16 @@ interface ITelephony {
      * Gets the config of RCS VoLTE single registration enabled for the carrier/subscription.
      */
     boolean getCarrierSingleRegistrationEnabled(int subId);
+
+    /**
+     * Overrides the ims feature validation result
+     */
+    boolean setImsFeatureValidationOverride(int subId, String enabled);
+
+    /**
+     * Gets the ims feature validation override value
+     */
+    boolean getImsFeatureValidationOverride(int subId);
 
     /**
      *  Return the mobile provisioning url that is used to launch a browser to allow users to manage

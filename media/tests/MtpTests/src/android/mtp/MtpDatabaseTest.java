@@ -271,9 +271,10 @@ public class MtpDatabaseTest {
 
         Log.d(TAG, "testMtpDatabaseThumbnail: Test bad JPG");
 
-        testThumbnail(handleJpgBadThumb, jpgfileBadThumb, false);
+// Now we support to generate thumbnail if embedded thumbnail is corrupted or not existed
+        testThumbnail(handleJpgBadThumb, jpgfileBadThumb, true);
 
-        testThumbnail(handleJpgNoThumb, jpgFileNoThumb, false);
+        testThumbnail(handleJpgNoThumb, jpgFileNoThumb, true);
 
         testThumbnail(handleJpgBad, jpgfileBad, false);
 

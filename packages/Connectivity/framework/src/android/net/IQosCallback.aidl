@@ -19,6 +19,7 @@ package android.net;
 import android.os.Bundle;
 import android.net.QosSession;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 
 /**
  * AIDL interface for QosCallback
@@ -29,6 +30,8 @@ oneway interface IQosCallback
 {
      void onQosEpsBearerSessionAvailable(in QosSession session,
         in EpsBearerQosSessionAttributes attributes);
+     void onNrQosSessionAvailable(in QosSession session,
+        in NrQosSessionAttributes attributes);
      void onQosSessionLost(in QosSession session);
      void onError(in int type);
 }

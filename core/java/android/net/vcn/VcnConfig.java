@@ -183,11 +183,24 @@ public final class VcnConfig implements Parcelable {
          *
          * @param gatewayConnectionConfig the configuration for an individual gateway connection
          * @return this {@link Builder} instance, for chaining
+         * @throws IllegalArgumentException if a VcnGatewayConnectionConfig has already been set for
+         *     this {@link VcnConfig} with the same GatewayConnection name (as returned via {@link
+         *     VcnGatewayConnectionConfig#getGatewayConnectionName()}).
          */
         @NonNull
         public Builder addGatewayConnectionConfig(
                 @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig) {
             Objects.requireNonNull(gatewayConnectionConfig, "gatewayConnectionConfig was null");
+
+            for (final VcnGatewayConnectionConfig vcnGatewayConnectionConfig :
+                    mGatewayConnectionConfigs) {
+                if (vcnGatewayConnectionConfig
+                        .getGatewayConnectionName()
+                        .equals(gatewayConnectionConfig.getGatewayConnectionName())) {
+                    throw new IllegalArgumentException(
+                            "GatewayConnection for specified name already exists");
+                }
+            }
 
             mGatewayConnectionConfigs.add(gatewayConnectionConfig);
             return this;

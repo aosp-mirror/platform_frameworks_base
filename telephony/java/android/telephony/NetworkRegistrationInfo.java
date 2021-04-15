@@ -293,11 +293,12 @@ public final class NetworkRegistrationInfo implements Parcelable {
                                    @Nullable CellIdentity cellIdentity, @Nullable String rplmn,
                                    int maxDataCalls, boolean isDcNrRestricted,
                                    boolean isNrAvailable, boolean isEndcAvailable,
-                                   LteVopsSupportInfo lteVopsSupportInfo) {
+                                   @Nullable VopsSupportInfo vopsSupportInfo) {
         this(domain, transportType, registrationState, accessNetworkTechnology, rejectCause,
                 emergencyOnly, availableServices, cellIdentity, rplmn);
         mDataSpecificInfo = new DataSpecificRegistrationInfo(
-                maxDataCalls, isDcNrRestricted, isNrAvailable, isEndcAvailable, lteVopsSupportInfo);
+                maxDataCalls, isDcNrRestricted, isNrAvailable,
+                isEndcAvailable, vopsSupportInfo);
         updateNrState();
     }
 

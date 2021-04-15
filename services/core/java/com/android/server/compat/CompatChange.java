@@ -23,7 +23,9 @@ import static android.app.compat.PackageOverride.VALUE_UNDEFINED;
 import android.annotation.Nullable;
 import android.app.compat.PackageOverride;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -58,6 +60,15 @@ public final class CompatChange extends CompatibilityChangeInfo {
     @ChangeId
     @EnabledSince(targetSdkVersion = 31) // Needs to be > test APK targetSdkVersion.
     static final long CTS_SYSTEM_API_CHANGEID = 149391281; // This is a bug id.
+
+    /**
+     * An overridable change ID to be used only in the CTS test for this SystemApi
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    static final long CTS_SYSTEM_API_OVERRIDABLE_CHANGEID = 174043039; // This is a bug id.
+
 
     /**
      * Callback listener for when compat changes are updated for a package.
@@ -211,6 +222,7 @@ public final class CompatChange extends CompatibilityChangeInfo {
     boolean hasPackageOverride(String pname) {
         return mRawOverrides.containsKey(pname);
     }
+
     /**
      * Remove any package override for the given package name, restoring the default behaviour.
      *
@@ -355,7 +367,7 @@ public final class CompatChange extends CompatibilityChangeInfo {
             override.setPackageName(entry.getKey());
             override.setMinVersionCode(entry.getValue().getMinVersionCode());
             override.setMaxVersionCode(entry.getValue().getMaxVersionCode());
-            override.setEnabled(entry.getValue().getEnabled());
+            override.setEnabled(entry.getValue().isEnabled());
             rawList.add(override);
         }
         changeOverrides.setRaw(rawOverrides);

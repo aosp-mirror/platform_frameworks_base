@@ -24,6 +24,7 @@ import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.android.internal.telephony.SipMessageParsingUtils;
 
@@ -60,14 +61,19 @@ public final class SipMessage implements Parcelable {
      */
     public SipMessage(@NonNull String startLine, @NonNull String headerSection,
             @NonNull byte[] content) {
-        if (startLine == null || headerSection == null || content == null) {
-            throw new IllegalArgumentException("One or more null parameters entered");
-        }
+        Objects.requireNonNull(startLine, "Required parameter is null: startLine");
+        Objects.requireNonNull(headerSection, "Required parameter is null: headerSection");
+        Objects.requireNonNull(content, "Required parameter is null: content");
+
         mStartLine = startLine;
         mHeaderSection = headerSection;
         mContent = content;
 
         mViaBranchParam = SipMessageParsingUtils.getTransactionId(mHeaderSection);
+        if (TextUtils.isEmpty(mViaBranchParam)) {
+            throw new IllegalArgumentException("header section MUST contain a branch parameter "
+                    + "inside of the Via header.");
+        }
         mCallIdParam = SipMessageParsingUtils.getCallId(mHeaderSection);
     }
 
@@ -107,11 +113,9 @@ public final class SipMessage implements Parcelable {
 
     /**
      * @return the branch parameter enclosed in the Via header key's value. See RFC 3261 section
-     * 20.42 for more information on the Via header. If {@code null}, then there was either no
-     * Via parameter found in this SIP message's headers or no branch parameter found in the
-     * Via header.
+     * 20.42 for more information on the Via header.
      */
-    public @Nullable String getViaBranchParameter() {
+    public @NonNull String getViaBranchParameter() {
         return mViaBranchParam;
     }
 
@@ -199,9 +203,16 @@ public final class SipMessage implements Parcelable {
     }
 
     /**
-     * @return the UTF-8 encoded SIP message.
+     * According RFC-3261 section 7, SIP is a text protocol and uses the UTF-8 charset. Its format
+     * consists of a start-line, one or more header fields, an empty line indicating the end of the
+     * header fields, and an optional message-body.
+     *
+     * <p>
+     * Returns a byte array with UTF-8 format representation of the encoded SipMessage.
+     *
+     * @return byte array with UTF-8 format representation of the encoded SipMessage.
      */
-    public @NonNull byte[] getEncodedMessage() {
+    public @NonNull byte[] toEncodedMessage() {
         byte[] header = new StringBuilder()
                 .append(mStartLine)
                 .append(mHeaderSection)

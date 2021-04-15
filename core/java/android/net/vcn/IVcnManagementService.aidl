@@ -29,7 +29,7 @@ import android.os.ParcelUuid;
  */
 interface IVcnManagementService {
     void setVcnConfig(in ParcelUuid subscriptionGroup, in VcnConfig config, in String opPkgName);
-    void clearVcnConfig(in ParcelUuid subscriptionGroup);
+    void clearVcnConfig(in ParcelUuid subscriptionGroup, in String opPkgName);
 
     void addVcnUnderlyingNetworkPolicyListener(in IVcnUnderlyingNetworkPolicyListener listener);
     void removeVcnUnderlyingNetworkPolicyListener(in IVcnUnderlyingNetworkPolicyListener listener);

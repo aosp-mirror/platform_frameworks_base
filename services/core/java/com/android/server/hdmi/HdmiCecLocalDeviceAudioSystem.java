@@ -557,8 +557,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected boolean handleReportArcInitiate(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        // TODO(amyjojo): implement report arc initiate handler
-        HdmiLogger.debug(TAG + "Stub handleReportArcInitiate");
+        /*
+         * Ideally, we should have got this response before the {@link ArcInitiationActionFromAvr}
+         * has timed out. Even if the response is late, {@link ArcInitiationActionFromAvr
+         * #handleInitiateArcTimeout()} would not have disabled ARC. So nothing needs to be done
+         * here.
+         */
         return true;
     }
 
@@ -566,8 +570,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected boolean handleReportArcTermination(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        // TODO(amyjojo): implement report arc terminate handler
-        HdmiLogger.debug(TAG + "Stub handleReportArcTermination");
+        processArcTermination();
         return true;
     }
 
@@ -910,6 +913,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         notifyArcStatusToAudioService(enabled);
         // 3. Update arc status;
         mArcEstablished = enabled;
+    }
+
+    void processArcTermination() {
+        setArcStatus(false);
+        // Switch away from ARC input when ARC is terminated.
+        if (getLocalActivePort() == Constants.CEC_SWITCH_ARC) {
+            routeToInputFromPortId(getRoutingPort());
+        }
     }
 
     /** Switch hardware ARC circuit in the system. */

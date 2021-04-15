@@ -16,6 +16,9 @@
 
 package android.net;
 
+import static android.net.NetworkCapabilities.REDACT_FOR_NETWORK_SETTINGS;
+import static android.net.NetworkCapabilities.REDACT_NONE;
+
 import static com.android.testutils.ParcelUtils.assertParcelSane;
 
 import static org.junit.Assert.assertEquals;
@@ -33,23 +36,33 @@ public class VpnTransportInfoTest {
 
     @Test
     public void testParceling() {
-        VpnTransportInfo v = new VpnTransportInfo(VpnManager.TYPE_VPN_PLATFORM);
-        assertParcelSane(v, 1 /* fieldCount */);
+        VpnTransportInfo v = new VpnTransportInfo(VpnManager.TYPE_VPN_PLATFORM, "12345");
+        assertParcelSane(v, 2 /* fieldCount */);
     }
 
     @Test
     public void testEqualsAndHashCode() {
-        VpnTransportInfo v1 = new VpnTransportInfo(VpnManager.TYPE_VPN_PLATFORM);
-        VpnTransportInfo v2 = new VpnTransportInfo(VpnManager.TYPE_VPN_SERVICE);
-        VpnTransportInfo v3 = new VpnTransportInfo(VpnManager.TYPE_VPN_PLATFORM);
-        VpnTransportInfo v4 = new VpnTransportInfo(VpnManager.TYPE_VPN_LEGACY);
-        VpnTransportInfo v5 = new VpnTransportInfo(VpnManager.TYPE_VPN_OEM);
+        String session1 = "12345";
+        String session2 = "6789";
+        VpnTransportInfo v11 = new VpnTransportInfo(VpnManager.TYPE_VPN_PLATFORM, session1);
+        VpnTransportInfo v12 = new VpnTransportInfo(VpnManager.TYPE_VPN_SERVICE, session1);
+        VpnTransportInfo v13 = new VpnTransportInfo(VpnManager.TYPE_VPN_PLATFORM, session1);
+        VpnTransportInfo v14 = new VpnTransportInfo(VpnManager.TYPE_VPN_LEGACY, session1);
+        VpnTransportInfo v15 = new VpnTransportInfo(VpnManager.TYPE_VPN_OEM, session1);
+        VpnTransportInfo v21 = new VpnTransportInfo(VpnManager.TYPE_VPN_LEGACY, session2);
 
-        assertNotEquals(v1, v2);
-        assertNotEquals(v3, v4);
-        assertNotEquals(v4, v5);
+        VpnTransportInfo v31 = v11.makeCopy(REDACT_FOR_NETWORK_SETTINGS);
+        VpnTransportInfo v32 = v13.makeCopy(REDACT_FOR_NETWORK_SETTINGS);
 
-        assertEquals(v1, v3);
-        assertEquals(v1.hashCode(), v3.hashCode());
+        assertNotEquals(v11, v12);
+        assertNotEquals(v13, v14);
+        assertNotEquals(v14, v15);
+        assertNotEquals(v14, v21);
+
+        assertEquals(v11, v13);
+        assertEquals(v31, v32);
+        assertEquals(v11.hashCode(), v13.hashCode());
+        assertEquals(REDACT_FOR_NETWORK_SETTINGS, v32.getApplicableRedactions());
+        assertEquals(session1, v15.makeCopy(REDACT_NONE).sessionId);
     }
 }

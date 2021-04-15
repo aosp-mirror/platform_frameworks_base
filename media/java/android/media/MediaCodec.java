@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -4411,14 +4412,25 @@ final public class MediaCodec {
 
         int i = 0;
         for (final String key: params.keySet()) {
-            keys[i] = key;
-            Object value = params.get(key);
-
-            // Bundle's byte array is a byte[], JNI layer only takes ByteBuffer
-            if (value instanceof byte[]) {
-                values[i] = ByteBuffer.wrap((byte[])value);
+            if (key.equals(MediaFormat.KEY_AUDIO_SESSION_ID)) {
+                int sessionId = 0;
+                try {
+                    sessionId = (Integer)params.get(key);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Wrong Session ID Parameter!");
+                }
+                keys[i] = "audio-hw-sync";
+                values[i] = AudioSystem.getAudioHwSyncForSession(sessionId);
             } else {
-                values[i] = value;
+                keys[i] = key;
+                Object value = params.get(key);
+
+                // Bundle's byte array is a byte[], JNI layer only takes ByteBuffer
+                if (value instanceof byte[]) {
+                    values[i] = ByteBuffer.wrap((byte[])value);
+                } else {
+                    values[i] = value;
+                }
             }
             ++i;
         }
@@ -4553,6 +4565,150 @@ final public class MediaCodec {
     }
 
     private native void native_enableOnFrameRenderedListener(boolean enable);
+
+    /**
+     * Returns a list of vendor parameter names.
+     * <p>
+     * This method can be called in any codec state except for released state.
+     *
+     * @return a list containing supported vendor parameters; an empty
+     *         list if no vendor parameters are supported. The order of the
+     *         parameters is arbitrary.
+     * @throws IllegalStateException if in the Released state.
+     */
+    @NonNull
+    public List<String> getSupportedVendorParameters() {
+        return native_getSupportedVendorParameters();
+    }
+
+    @NonNull
+    private native List<String> native_getSupportedVendorParameters();
+
+    /**
+     * Contains description of a parameter.
+     */
+    public static class ParameterDescriptor {
+        private ParameterDescriptor() {}
+
+        /**
+         * Returns the name of the parameter.
+         */
+        @NonNull
+        public String getName() {
+            return mName;
+        }
+
+        /**
+         * Returns the type of the parameter.
+         * {@link MediaFormat#TYPE_NULL} is never returned.
+         */
+        @MediaFormat.Type
+        public int getType() {
+            return mType;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
+            if (!(o instanceof ParameterDescriptor)) {
+                return false;
+            }
+            ParameterDescriptor other = (ParameterDescriptor) o;
+            return this.mName.equals(other.mName) && this.mType == other.mType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.asList(
+                    (Object) mName,
+                    (Object) Integer.valueOf(mType)).hashCode();
+        }
+
+        private String mName;
+        private @MediaFormat.Type int mType;
+    }
+
+    /**
+     * Describe a parameter with the name.
+     * <p>
+     * This method can be called in any codec state except for released state.
+     *
+     * @param name name of the parameter to describe, typically one from
+     *             {@link #getSupportedVendorParameters}.
+     * @return {@link ParameterDescriptor} object that describes the parameter.
+     *         {@code null} if unrecognized / not able to describe.
+     * @throws IllegalStateException if in the Released state.
+     */
+    @Nullable
+    public ParameterDescriptor getParameterDescriptor(@NonNull String name) {
+        return native_getParameterDescriptor(name);
+    }
+
+    @Nullable
+    private native ParameterDescriptor native_getParameterDescriptor(@NonNull String name);
+
+    /**
+     * Subscribe to vendor parameters, so that these parameters will be present in
+     * {@link #getOutputFormat} and changes to these parameters generate
+     * output format change event.
+     * <p>
+     * Unrecognized parameter names or standard (non-vendor) parameter names will be ignored.
+     * {@link #reset} also resets the list of subscribed parameters.
+     * If a parameter in {@code names} is already subscribed, it will remain subscribed.
+     * <p>
+     * This method can be called in any codec state except for released state. When called in
+     * running state with newly subscribed parameters, it takes effect no later than the
+     * processing of the subsequently queued buffer. For the new parameters, the codec will generate
+     * output format change event.
+     * <p>
+     * Note that any vendor parameters set in a {@link #configure} or
+     * {@link #setParameters} call are automatically subscribed.
+     * <p>
+     * See also {@link #INFO_OUTPUT_FORMAT_CHANGED} or {@link Callback#onOutputFormatChanged}
+     * for output format change events.
+     *
+     * @param names names of the vendor parameters to subscribe. This may be an empty list,
+     *              and in that case this method will not change the list of subscribed parameters.
+     * @throws IllegalStateException if in the Released state.
+     */
+    public void subscribeToVendorParameters(@NonNull List<String> names) {
+        native_subscribeToVendorParameters(names);
+    }
+
+    private native void native_subscribeToVendorParameters(@NonNull List<String> names);
+
+    /**
+     * Unsubscribe from vendor parameters, so that these parameters will not be present in
+     * {@link #getOutputFormat} and changes to these parameters no longer generate
+     * output format change event.
+     * <p>
+     * Unrecognized parameter names, standard (non-vendor) parameter names will be ignored.
+     * {@link #reset} also resets the list of subscribed parameters.
+     * If a parameter in {@code names} is already unsubscribed, it will remain unsubscribed.
+     * <p>
+     * This method can be called in any codec state except for released state. When called in
+     * running state with newly unsubscribed parameters, it takes effect no later than the
+     * processing of the subsequently queued buffer. For the removed parameters, the codec will
+     * generate output format change event.
+     * <p>
+     * Note that any vendor parameters set in a {@link #configure} or
+     * {@link #setParameters} call are automatically subscribed, and with this method
+     * they can be unsubscribed.
+     * <p>
+     * See also {@link #INFO_OUTPUT_FORMAT_CHANGED} or {@link Callback#onOutputFormatChanged}
+     * for output format change events.
+     *
+     * @param names names of the vendor parameters to unsubscribe. This may be an empty list,
+     *              and in that case this method will not change the list of subscribed parameters.
+     * @throws IllegalStateException if in the Released state.
+     */
+    public void unsubscribeFromVendorParameters(@NonNull List<String> names) {
+        native_unsubscribeFromVendorParameters(names);
+    }
+
+    private native void native_unsubscribeFromVendorParameters(@NonNull List<String> names);
 
     private EventHandler getEventHandlerOn(
             @Nullable Handler handler, @NonNull EventHandler lastHandler) {

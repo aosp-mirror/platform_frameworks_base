@@ -15,16 +15,17 @@
  */
 package android.net;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Class that allows creation and management of per-app, test-only networks
@@ -50,7 +51,7 @@ public class TestNetworkManager {
 
     /** @hide */
     public TestNetworkManager(@NonNull ITestNetworkManager service) {
-        mService = Preconditions.checkNotNull(service, "missing ITestNetworkManager");
+        mService = Objects.requireNonNull(service, "missing ITestNetworkManager");
     }
 
     /**
@@ -59,6 +60,7 @@ public class TestNetworkManager {
      * @param network The test network that should be torn down
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_TEST_NETWORKS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void teardownTestNetwork(@NonNull Network network) {
         try {
@@ -93,7 +95,7 @@ public class TestNetworkManager {
      */
     public void setupTestNetwork(
             @NonNull LinkProperties lp, boolean isMetered, @NonNull IBinder binder) {
-        Preconditions.checkNotNull(lp, "Invalid LinkProperties");
+        Objects.requireNonNull(lp, "Invalid LinkProperties");
         setupTestNetwork(lp.getInterfaceName(), lp, isMetered, new int[0], binder);
     }
 
@@ -104,6 +106,7 @@ public class TestNetworkManager {
      * @param binder A binder object guarding the lifecycle of this test network.
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_TEST_NETWORKS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void setupTestNetwork(@NonNull String iface, @NonNull IBinder binder) {
         setupTestNetwork(iface, null, true, new int[0], binder);
@@ -146,6 +149,7 @@ public class TestNetworkManager {
      *     TUN interface.
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_TEST_NETWORKS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @NonNull
     public TestNetworkInterface createTunInterface(@NonNull Collection<LinkAddress> linkAddrs) {
@@ -164,6 +168,7 @@ public class TestNetworkManager {
      *     TAP interface.
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_TEST_NETWORKS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @NonNull
     public TestNetworkInterface createTapInterface() {

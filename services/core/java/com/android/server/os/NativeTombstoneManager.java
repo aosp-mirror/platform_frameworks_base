@@ -392,7 +392,7 @@ public final class NativeTombstoneManager {
 
             int pid = 0;
             int uid = 0;
-            String processName = "";
+            String processName = null;
             String crashReason = "";
             String selinuxLabel = "";
 
@@ -407,12 +407,19 @@ public final class NativeTombstoneManager {
                             uid = stream.readInt(Tombstone.UID);
                             break;
 
-                        case (int) Tombstone.PROCESS_NAME:
-                            processName = stream.readString(Tombstone.PROCESS_NAME);
+                        case (int) Tombstone.COMMAND_LINE:
+                            if (processName == null) {
+                                processName = stream.readString(Tombstone.COMMAND_LINE);
+                            }
                             break;
 
-                        case (int) Tombstone.CAUSE:
-                            long token = stream.start(Tombstone.CAUSE);
+                        case (int) Tombstone.CAUSES:
+                            if (!crashReason.equals("")) {
+                                // Causes appear in decreasing order of likelihood. For now we only
+                                // want the most likely crash reason here, so ignore all others.
+                                break;
+                            }
+                            long token = stream.start(Tombstone.CAUSES);
                         cause:
                             while (stream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
                                 switch (stream.getFieldNumber()) {
@@ -467,7 +474,7 @@ public final class NativeTombstoneManager {
             result.mAppId = appId;
             result.mPid = pid;
             result.mUid = uid;
-            result.mProcessName = processName;
+            result.mProcessName = processName == null ? "" : processName;
             result.mTimestampMs = timestampMs;
             result.mCrashReason = crashReason;
 

@@ -16,16 +16,27 @@
 
 package com.android.server.recoverysystem;
 
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_INVALID_PACKAGE_NAME;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_NONE;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_PROVIDER_PREPARATION_FAILURE;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMATCH;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_UNSPECIFIED;
+import static android.os.RecoverySystem.ResumeOnRebootRebootErrorCode;
 import static android.os.UserHandle.USER_SYSTEM;
+
+import static com.android.internal.widget.LockSettingsInternal.ARM_REBOOT_ERROR_NONE;
 
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.boot.V1_0.IBootControl;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.IRecoverySystem;
 import android.os.IRecoverySystemProgressListener;
 import android.os.PowerManager;
@@ -38,6 +49,7 @@ import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.FastImmutableArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -52,6 +64,7 @@ import libcore.io.IoUtils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -86,6 +99,12 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     private static final Object sRequestLock = new Object();
 
     private static final int SOCKET_CONNECTION_MAX_RETRY = 30;
+
+    static final String REQUEST_LSKF_TIMESTAMP_PREF_SUFFIX = "_request_lskf_timestamp";
+    static final String REQUEST_LSKF_COUNT_PREF_SUFFIX = "_request_lskf_count";
+
+    static final String LSKF_CAPTURED_TIMESTAMP_PREF = "lskf_captured_timestamp";
+    static final String LSKF_CAPTURED_COUNT_PREF = "lskf_captured_count";
 
     private final Injector mInjector;
     private final Context mContext;
@@ -135,32 +154,100 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
      */
     @IntDef({ ROR_NOT_REQUESTED,
             ROR_REQUESTED_NEED_CLEAR,
-            ROR_REQUESTED_SKIP_CLEAR})
+            ROR_REQUESTED_SKIP_CLEAR })
     private @interface ResumeOnRebootActionsOnClear {}
 
     /**
-     * The error code for reboots initiated by resume on reboot clients.
+     * Fatal arm escrow errors from lock settings that means the RoR is in a bad state. So clients
+     * need to prepare RoR again.
      */
-    private static final int REBOOT_ERROR_NONE = 0;
-    private static final int REBOOT_ERROR_UNKNOWN = 1;
-    private static final int REBOOT_ERROR_INVALID_PACKAGE_NAME = 2;
-    private static final int REBOOT_ERROR_LSKF_NOT_CAPTURED = 3;
-    private static final int REBOOT_ERROR_SLOT_MISMATCH = 4;
-    private static final int REBOOT_ERROR_ARM_REBOOT_ESCROW_FAILURE = 5;
+    static final FastImmutableArraySet<Integer> FATAL_ARM_ESCROW_ERRORS =
+            new FastImmutableArraySet<>(new Integer[]{
+                    LockSettingsInternal.ARM_REBOOT_ERROR_ESCROW_NOT_READY,
+                    LockSettingsInternal.ARM_REBOOT_ERROR_NO_PROVIDER,
+                    LockSettingsInternal.ARM_REBOOT_ERROR_PROVIDER_MISMATCH,
+                    LockSettingsInternal.ARM_REBOOT_ERROR_NO_ESCROW_KEY,
+                    LockSettingsInternal.ARM_REBOOT_ERROR_KEYSTORE_FAILURE,
+            });
 
-    @IntDef({ REBOOT_ERROR_NONE,
-            REBOOT_ERROR_UNKNOWN,
-            REBOOT_ERROR_INVALID_PACKAGE_NAME,
-            REBOOT_ERROR_LSKF_NOT_CAPTURED,
-            REBOOT_ERROR_SLOT_MISMATCH,
-            REBOOT_ERROR_ARM_REBOOT_ESCROW_FAILURE})
-    private @interface ResumeOnRebootRebootErrorCode {}
+    /**
+     * The error details for ArmRebootEscrow. It contains error codes from RecoverySystemService
+     * and LockSettingsService.
+     */
+    static class RebootPreparationError {
+        final @ResumeOnRebootRebootErrorCode int mRebootErrorCode;
+        final int mProviderErrorCode;  // The supplemental error code from lock settings
+
+        RebootPreparationError(int rebootErrorCode, int providerErrorCode) {
+            mRebootErrorCode = rebootErrorCode;
+            mProviderErrorCode = providerErrorCode;
+        }
+
+        int getErrorCodeForMetrics() {
+            // The ResumeOnRebootRebootErrorCode are aligned with 1000; so it's safe to add them
+            // for metrics purpose.
+            return mRebootErrorCode + mProviderErrorCode;
+        }
+    }
+
+    /**
+     * Manages shared preference, i.e. the storage used for metrics reporting.
+     */
+    public static class PreferencesManager {
+        private static final String METRICS_DIR = "recovery_system";
+        private static final String METRICS_PREFS_FILE = "RecoverySystemMetricsPrefs.xml";
+
+        protected final SharedPreferences mSharedPreferences;
+        private final File mMetricsPrefsFile;
+
+        PreferencesManager(Context context) {
+            File prefsDir = new File(Environment.getDataSystemCeDirectory(USER_SYSTEM),
+                    METRICS_DIR);
+            mMetricsPrefsFile = new File(prefsDir, METRICS_PREFS_FILE);
+            mSharedPreferences = context.getSharedPreferences(mMetricsPrefsFile, 0);
+        }
+
+        /** Reads the value of a given key with type long. **/
+        public long getLong(String key, long defaultValue) {
+            return mSharedPreferences.getLong(key, defaultValue);
+        }
+
+        /** Reads the value of a given key with type int. **/
+        public int getInt(String key, int defaultValue) {
+            return mSharedPreferences.getInt(key, defaultValue);
+        }
+
+        /** Stores the value of a given key with type long. **/
+        public void putLong(String key, long value) {
+            mSharedPreferences.edit().putLong(key, value).commit();
+        }
+
+        /** Stores the value of a given key with type int. **/
+        public void putInt(String key, int value) {
+            mSharedPreferences.edit().putInt(key, value).commit();
+        }
+
+        /** Increments the value of a given key with type int. **/
+        public synchronized void incrementIntKey(String key, int defaultInitialValue) {
+            int oldValue = getInt(key, defaultInitialValue);
+            putInt(key, oldValue + 1);
+        }
+
+        /** Delete the preference file and cleanup all metrics storage. **/
+        public void deletePrefsFile() {
+            if (!mMetricsPrefsFile.delete()) {
+                Slog.w(TAG, "Failed to delete metrics prefs");
+            }
+        }
+    }
 
     static class Injector {
         protected final Context mContext;
+        protected final PreferencesManager mPrefs;
 
         Injector(Context context) {
             mContext = context;
+            mPrefs = new PreferencesManager(context);
         }
 
         public Context getContext() {
@@ -234,6 +321,14 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
                 Slog.w(TAG, "Failed to find uid for " + packageName);
             }
             return -1;
+        }
+
+        public PreferencesManager getMetricsPrefs() {
+            return mPrefs;
+        }
+
+        public long getCurrentTimeMillis() {
+            return System.currentTimeMillis();
         }
 
         public void reportRebootEscrowPreparationMetrics(int uid,
@@ -414,7 +509,7 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.RECOVERY)
                 != PackageManager.PERMISSION_GRANTED
                 && mContext.checkCallingOrSelfPermission(android.Manifest.permission.REBOOT)
-                        != PackageManager.PERMISSION_GRANTED) {
+                    != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller must have " + android.Manifest.permission.RECOVERY
                     + " or " + android.Manifest.permission.REBOOT + " for resume on reboot.");
         }
@@ -426,6 +521,12 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         synchronized (this) {
             pendingRequestCount = mCallerPendingRequest.size();
         }
+
+        // Save the timestamp and request count for new ror request
+        PreferencesManager prefs = mInjector.getMetricsPrefs();
+        prefs.putLong(packageName + REQUEST_LSKF_TIMESTAMP_PREF_SUFFIX,
+                mInjector.getCurrentTimeMillis());
+        prefs.incrementIntKey(packageName + REQUEST_LSKF_COUNT_PREF_SUFFIX, 0);
 
         mInjector.reportRebootEscrowPreparationMetrics(uid, requestResult, pendingRequestCount);
     }
@@ -486,15 +587,31 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     }
 
     private void reportMetricsOnPreparedForReboot() {
+        long currentTimestamp = mInjector.getCurrentTimeMillis();
+
         List<String> preparedClients;
         synchronized (this) {
             preparedClients = new ArrayList<>(mCallerPreparedForReboot);
         }
 
+        // Save the timestamp & lskf capture count for lskf capture
+        PreferencesManager prefs = mInjector.getMetricsPrefs();
+        prefs.putLong(LSKF_CAPTURED_TIMESTAMP_PREF, currentTimestamp);
+        prefs.incrementIntKey(LSKF_CAPTURED_COUNT_PREF, 0);
+
         for (String packageName : preparedClients) {
             int uid = mInjector.getUidFromPackageName(packageName);
+
+            int durationSeconds = -1;
+            long requestLskfTimestamp = prefs.getLong(
+                    packageName + REQUEST_LSKF_TIMESTAMP_PREF_SUFFIX, -1);
+            if (requestLskfTimestamp != -1 && currentTimestamp > requestLskfTimestamp) {
+                durationSeconds = (int) (currentTimestamp - requestLskfTimestamp) / 1000;
+            }
+            Slog.i(TAG, String.format("Reporting lskf captured, lskf capture takes %d seconds for"
+                    + " package %s", durationSeconds, packageName));
             mInjector.reportRebootEscrowLskfCapturedMetrics(uid, preparedClients.size(),
-                    -1 /* duration */);
+                    durationSeconds);
         }
     }
 
@@ -541,6 +658,7 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             Slog.w(TAG, "Missing packageName when clearing lskf.");
             return false;
         }
+        // TODO(179105110) Clear the RoR metrics for the given packageName.
 
         @ResumeOnRebootActionsOnClear int action = updateRoRPreparationStateOnClear(packageName);
         switch (action) {
@@ -627,65 +745,123 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         return true;
     }
 
-    private @ResumeOnRebootRebootErrorCode int armRebootEscrow(String packageName,
+    private RebootPreparationError armRebootEscrow(String packageName,
             boolean slotSwitch) {
         if (packageName == null) {
             Slog.w(TAG, "Missing packageName when rebooting with lskf.");
-            return REBOOT_ERROR_INVALID_PACKAGE_NAME;
+            return new RebootPreparationError(
+                    RESUME_ON_REBOOT_REBOOT_ERROR_INVALID_PACKAGE_NAME, ARM_REBOOT_ERROR_NONE);
         }
         if (!isLskfCaptured(packageName)) {
-            return REBOOT_ERROR_LSKF_NOT_CAPTURED;
+            return new RebootPreparationError(RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED,
+                    ARM_REBOOT_ERROR_NONE);
         }
 
         if (!verifySlotForNextBoot(slotSwitch)) {
-            return REBOOT_ERROR_SLOT_MISMATCH;
+            return new RebootPreparationError(RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMATCH,
+                    ARM_REBOOT_ERROR_NONE);
         }
 
-        if (!mInjector.getLockSettingsService().armRebootEscrow()) {
-            Slog.w(TAG, "Failure to escrow key for reboot");
-            return REBOOT_ERROR_ARM_REBOOT_ESCROW_FAILURE;
+        final long origId = Binder.clearCallingIdentity();
+        int providerErrorCode;
+        try {
+            providerErrorCode = mInjector.getLockSettingsService().armRebootEscrow();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
 
-        return REBOOT_ERROR_NONE;
+        if (providerErrorCode != ARM_REBOOT_ERROR_NONE) {
+            Slog.w(TAG, "Failure to escrow key for reboot, providerErrorCode: "
+                    + providerErrorCode);
+            return new RebootPreparationError(
+                    RESUME_ON_REBOOT_REBOOT_ERROR_PROVIDER_PREPARATION_FAILURE, providerErrorCode);
+        }
+
+        return new RebootPreparationError(RESUME_ON_REBOOT_REBOOT_ERROR_NONE,
+                ARM_REBOOT_ERROR_NONE);
+    }
+
+    private boolean useServerBasedRoR() {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_OTA,
+                    "server_based_ror_enabled", false);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     private void reportMetricsOnRebootWithLskf(String packageName, boolean slotSwitch,
-            @ResumeOnRebootRebootErrorCode int errorCode) {
+            RebootPreparationError escrowError) {
         int uid = mInjector.getUidFromPackageName(packageName);
-        boolean serverBased = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_OTA,
-                "server_based_ror_enabled", false);
+        boolean serverBased = useServerBasedRoR();
         int preparedClientCount;
         synchronized (this) {
             preparedClientCount = mCallerPreparedForReboot.size();
         }
 
-        // TODO(b/179105110) report the true value of duration and counts
-        mInjector.reportRebootEscrowRebootMetrics(errorCode, uid, preparedClientCount,
-                1 /* request count */, slotSwitch, serverBased,
-                -1 /* duration */, 1 /* lskf capture count */);
+        long currentTimestamp = mInjector.getCurrentTimeMillis();
+        int durationSeconds = -1;
+        PreferencesManager prefs = mInjector.getMetricsPrefs();
+        long lskfCapturedTimestamp = prefs.getLong(LSKF_CAPTURED_TIMESTAMP_PREF, -1);
+        if (lskfCapturedTimestamp != -1 && currentTimestamp > lskfCapturedTimestamp) {
+            durationSeconds = (int) (currentTimestamp - lskfCapturedTimestamp) / 1000;
+        }
+
+        int requestCount = prefs.getInt(packageName + REQUEST_LSKF_COUNT_PREF_SUFFIX, -1);
+        int lskfCapturedCount = prefs.getInt(LSKF_CAPTURED_COUNT_PREF, -1);
+
+        Slog.i(TAG, String.format("Reporting reboot with lskf, package name %s, client count %d,"
+                        + " request count %d, lskf captured count %d, duration since lskf captured"
+                        + " %d seconds.", packageName, preparedClientCount, requestCount,
+                lskfCapturedCount, durationSeconds));
+        mInjector.reportRebootEscrowRebootMetrics(escrowError.getErrorCodeForMetrics(), uid,
+                preparedClientCount, requestCount, slotSwitch, serverBased, durationSeconds,
+                lskfCapturedCount);
     }
 
-    private boolean rebootWithLskfImpl(String packageName, String reason, boolean slotSwitch) {
-        @ResumeOnRebootRebootErrorCode int errorCode = armRebootEscrow(packageName, slotSwitch);
-        reportMetricsOnRebootWithLskf(packageName, slotSwitch, errorCode);
-
-        if (errorCode != REBOOT_ERROR_NONE) {
-            return false;
+    private void clearRoRPreparationStateOnRebootFailure(RebootPreparationError escrowError) {
+        if (!FATAL_ARM_ESCROW_ERRORS.contains(escrowError.mProviderErrorCode)) {
+            return;
         }
+
+        Slog.w(TAG, "Clearing resume on reboot states for all clients on arm escrow error: "
+                + escrowError.mProviderErrorCode);
+        synchronized (this) {
+            mCallerPendingRequest.clear();
+            mCallerPreparedForReboot.clear();
+        }
+    }
+
+    private @ResumeOnRebootRebootErrorCode int rebootWithLskfImpl(String packageName, String reason,
+            boolean slotSwitch) {
+        RebootPreparationError escrowError = armRebootEscrow(packageName, slotSwitch);
+        reportMetricsOnRebootWithLskf(packageName, slotSwitch, escrowError);
+        clearRoRPreparationStateOnRebootFailure(escrowError);
+
+        @ResumeOnRebootRebootErrorCode int errorCode = escrowError.mRebootErrorCode;
+        if (errorCode != RESUME_ON_REBOOT_REBOOT_ERROR_NONE) {
+            return errorCode;
+        }
+
+        // Clear the metrics prefs after a successful RoR reboot.
+        mInjector.getMetricsPrefs().deletePrefsFile();
 
         PowerManager pm = mInjector.getPowerManager();
         pm.reboot(reason);
-        return true;
+        return RESUME_ON_REBOOT_REBOOT_ERROR_UNSPECIFIED;
     }
 
     @Override // Binder call for the legacy rebootWithLskf
-    public boolean rebootWithLskfAssumeSlotSwitch(String packageName, String reason) {
+    public @ResumeOnRebootRebootErrorCode int rebootWithLskfAssumeSlotSwitch(String packageName,
+            String reason) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
         return rebootWithLskfImpl(packageName, reason, true);
     }
 
     @Override // Binder call
-    public boolean rebootWithLskf(String packageName, String reason, boolean slotSwitch) {
+    public @ResumeOnRebootRebootErrorCode int rebootWithLskf(String packageName, String reason,
+            boolean slotSwitch) {
         enforcePermissionForResumeOnReboot();
         return rebootWithLskfImpl(packageName, reason, slotSwitch);
     }

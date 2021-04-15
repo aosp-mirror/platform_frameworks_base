@@ -19,16 +19,18 @@ package com.android.server.vcn;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -50,7 +52,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -131,6 +134,7 @@ public class VcnTest {
     private void startVcnGatewayWithCapabilities(
             NetworkRequestListener requestListener, int... netCapabilities) {
         final NetworkRequest.Builder requestBuilder = new NetworkRequest.Builder();
+        requestBuilder.addTransportType(TRANSPORT_CELLULAR);
         for (final int netCapability : netCapabilities) {
             requestBuilder.addCapability(netCapability);
         }
@@ -139,8 +143,7 @@ public class VcnTest {
         mTestLooper.dispatchAll();
     }
 
-    @Test
-    public void testSubscriptionSnapshotUpdatesVcnGatewayConnections() {
+    private void verifyUpdateSubscriptionSnapshotNotifiesGatewayConnections(int status) {
         final NetworkRequestListener requestListener = verifyAndGetRequestListener();
         startVcnGatewayWithCapabilities(requestListener, TEST_CAPS[0]);
 
@@ -150,12 +153,24 @@ public class VcnTest {
         final TelephonySubscriptionSnapshot updatedSnapshot =
                 mock(TelephonySubscriptionSnapshot.class);
 
+        mVcn.setStatus(status);
+
         mVcn.updateSubscriptionSnapshot(updatedSnapshot);
         mTestLooper.dispatchAll();
 
         for (final VcnGatewayConnection gateway : gatewayConnections) {
             verify(gateway).updateSubscriptionSnapshot(eq(updatedSnapshot));
         }
+    }
+
+    @Test
+    public void testSubscriptionSnapshotUpdatesVcnGatewayConnections() {
+        verifyUpdateSubscriptionSnapshotNotifiesGatewayConnections(VCN_STATUS_CODE_ACTIVE);
+    }
+
+    @Test
+    public void testSubscriptionSnapshotUpdatesVcnGatewayConnectionsInSafeMode() {
+        verifyUpdateSubscriptionSnapshotNotifiesGatewayConnections(VCN_STATUS_CODE_SAFE_MODE);
     }
 
     private void triggerVcnRequestListeners(NetworkRequestListener requestListener) {
@@ -185,33 +200,53 @@ public class VcnTest {
 
     private void verifySafeMode(
             NetworkRequestListener requestListener,
-            Set<VcnGatewayConnection> expectedGatewaysTornDown) {
-        assertFalse(mVcn.isActive());
-        assertTrue(mVcn.getVcnGatewayConnections().isEmpty());
-        for (final VcnGatewayConnection gatewayConnection : expectedGatewaysTornDown) {
-            verify(gatewayConnection).teardownAsynchronously();
+            Set<VcnGatewayConnection> activeGateways,
+            boolean expectInSafeMode) {
+        for (VcnGatewayConnection gatewayConnection : activeGateways) {
+            verify(gatewayConnection, never()).teardownAsynchronously();
         }
-        verify(mVcnNetworkProvider).unregisterListener(requestListener);
-        verify(mVcnCallback).onEnteredSafeMode();
+
+        assertEquals(
+                expectInSafeMode ? VCN_STATUS_CODE_SAFE_MODE : VCN_STATUS_CODE_ACTIVE,
+                mVcn.getStatus());
+        verify(mVcnCallback).onSafeModeStatusChanged(expectInSafeMode);
     }
 
     @Test
-    public void testGatewayEnteringSafeModeNotifiesVcn() {
+    public void testGatewayEnteringAndExitingSafeModeNotifiesVcn() {
         final NetworkRequestListener requestListener = verifyAndGetRequestListener();
         final Set<VcnGatewayConnection> gatewayConnections =
                 startGatewaysAndGetGatewayConnections(requestListener);
 
-        // Doesn't matter which callback this gets - any Gateway entering Safemode should shut down
-        // all Gateways
+        // Doesn't matter which callback this gets, or which VCN is in safe mode - any Gateway
+        // entering Safemode should trigger safe mode
         final VcnGatewayStatusCallback statusCallback = mGatewayStatusCallbackCaptor.getValue();
-        statusCallback.onEnteredSafeMode();
+        final VcnGatewayConnection gatewayConnection = gatewayConnections.iterator().next();
+
+        doReturn(true).when(gatewayConnection).isInSafeMode();
+        statusCallback.onSafeModeStatusChanged();
         mTestLooper.dispatchAll();
 
-        verifySafeMode(requestListener, gatewayConnections);
+        verifySafeMode(requestListener, gatewayConnections, true /* expectInSafeMode */);
+
+        // Verify that when all GatewayConnections exit safe mode, the VCN also exits safe mode
+        doReturn(false).when(gatewayConnection).isInSafeMode();
+        statusCallback.onSafeModeStatusChanged();
+        mTestLooper.dispatchAll();
+
+        verifySafeMode(requestListener, gatewayConnections, false /* expectInSafeMode */);
+
+        // Re-trigger, verify safe mode callback does not get fired again for identical state
+        statusCallback.onSafeModeStatusChanged();
+        mTestLooper.dispatchAll();
+
+        // Expect only once still; from above.
+        verify(mVcnCallback).onSafeModeStatusChanged(false);
     }
 
-    @Test
-    public void testGatewayQuit() {
+    private void verifyGatewayQuit(int status) {
+        mVcn.setStatus(status);
+
         final NetworkRequestListener requestListener = verifyAndGetRequestListener();
         final Set<VcnGatewayConnection> gatewayConnections =
                 new ArraySet<>(startGatewaysAndGetGatewayConnections(requestListener));
@@ -224,7 +259,7 @@ public class VcnTest {
         assertEquals(1, mVcn.getVcnGatewayConnections().size());
         verify(mVcnNetworkProvider).resendAllRequests(requestListener);
 
-        // Verify that the VcnGatewayConnection is restarted
+        // Verify that the VcnGatewayConnection is restarted if a request exists for it
         triggerVcnRequestListeners(requestListener);
         mTestLooper.dispatchAll();
         assertEquals(2, mVcn.getVcnGatewayConnections().size());
@@ -238,37 +273,40 @@ public class VcnTest {
     }
 
     @Test
-    public void testUpdateConfigExitsSafeMode() {
+    public void testGatewayQuitReevaluatesRequests() {
+        verifyGatewayQuit(VCN_STATUS_CODE_ACTIVE);
+    }
+
+    @Test
+    public void testGatewayQuitReevaluatesRequestsInSafeMode() {
+        verifyGatewayQuit(VCN_STATUS_CODE_SAFE_MODE);
+    }
+
+    @Test
+    public void testUpdateConfigReevaluatesGatewayConnections() {
         final NetworkRequestListener requestListener = verifyAndGetRequestListener();
-        final Set<VcnGatewayConnection> gatewayConnections =
-                new ArraySet<>(startGatewaysAndGetGatewayConnections(requestListener));
+        startGatewaysAndGetGatewayConnections(requestListener);
+        assertEquals(2, mVcn.getVcnGatewayConnectionConfigMap().size());
 
-        final VcnGatewayStatusCallback statusCallback = mGatewayStatusCallbackCaptor.getValue();
-        statusCallback.onEnteredSafeMode();
+        // Create VcnConfig with only one VcnGatewayConnectionConfig so a gateway connection is torn
+        // down. Reuse existing VcnGatewayConnectionConfig so that the gateway connection name
+        // matches.
+        final List<VcnGatewayConnectionConfig> currentConfigs =
+                new ArrayList<>(mVcn.getVcnGatewayConnectionConfigMap().keySet());
+        final VcnGatewayConnectionConfig activeConfig = currentConfigs.get(0);
+        final VcnGatewayConnectionConfig removedConfig = currentConfigs.get(1);
+        final VcnConfig updatedConfig =
+                new VcnConfig.Builder(mContext).addGatewayConnectionConfig(activeConfig).build();
+
+        mVcn.updateConfig(updatedConfig);
         mTestLooper.dispatchAll();
-        verifySafeMode(requestListener, gatewayConnections);
 
-        doAnswer(invocation -> {
-            final NetworkRequestListener listener = invocation.getArgument(0);
-            triggerVcnRequestListeners(listener);
-            return null;
-        }).when(mVcnNetworkProvider).registerListener(eq(requestListener));
-
-        mVcn.updateConfig(mConfig);
-        mTestLooper.dispatchAll();
-
-        // Registered on start, then re-registered with new configs
-        verify(mVcnNetworkProvider, times(2)).registerListener(eq(requestListener));
-        assertTrue(mVcn.isActive());
-        for (final int[] caps : TEST_CAPS) {
-            // Expect each gateway connection created on initial startup, and again with new configs
-            verify(mDeps, times(2))
-                    .newVcnGatewayConnection(
-                            eq(mVcnContext),
-                            eq(TEST_SUB_GROUP),
-                            eq(mSubscriptionSnapshot),
-                            argThat(config -> Arrays.equals(caps, config.getExposedCapabilities())),
-                            any());
-        }
+        final VcnGatewayConnection activeGatewayConnection =
+                mVcn.getVcnGatewayConnectionConfigMap().get(activeConfig);
+        final VcnGatewayConnection removedGatewayConnection =
+                mVcn.getVcnGatewayConnectionConfigMap().get(removedConfig);
+        verify(activeGatewayConnection, never()).teardownAsynchronously();
+        verify(removedGatewayConnection).teardownAsynchronously();
+        verify(mVcnNetworkProvider).resendAllRequests(requestListener);
     }
 }

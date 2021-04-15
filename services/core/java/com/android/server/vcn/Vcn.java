@@ -17,6 +17,10 @@
 package com.android.server.vcn;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_INACTIVE;
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
 
 import static com.android.server.VcnManagementService.VDBG;
 
@@ -34,6 +38,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.VcnManagementService.VcnCallback;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 
@@ -41,9 +46,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Represents an single instance of a VCN.
@@ -93,16 +98,20 @@ public class Vcn extends Handler {
      */
     private static final int MSG_EVENT_GATEWAY_CONNECTION_QUIT = MSG_EVENT_BASE + 3;
 
+    /**
+     * Triggers reevaluation of safe mode conditions.
+     *
+     * <p>Upon entering safe mode, the VCN will only provide gateway connections opportunistically,
+     * leaving the underlying networks marked as NOT_VCN_MANAGED.
+     *
+     * <p>Any VcnGatewayConnection in safe mode will result in the entire Vcn instance being put
+     * into safe mode. Upon receiving this message, the Vcn MUST query all VcnGatewayConnections to
+     * determine if any are in safe mode.
+     */
+    private static final int MSG_EVENT_SAFE_MODE_STATE_CHANGED = MSG_EVENT_BASE + 4;
+
     /** Triggers an immediate teardown of the entire Vcn, including GatewayConnections. */
     private static final int MSG_CMD_TEARDOWN = MSG_CMD_BASE;
-
-    /**
-     * Causes this VCN to immediately enter safe mode.
-     *
-     * <p>Upon entering safe mode, the VCN will unregister its RequestListener, tear down all of its
-     * VcnGatewayConnections, and notify VcnManagementService that it is in safe mode.
-     */
-    private static final int MSG_CMD_ENTER_SAFE_MODE = MSG_CMD_BASE + 1;
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
@@ -110,6 +119,24 @@ public class Vcn extends Handler {
     @NonNull private final VcnNetworkRequestListener mRequestListener;
     @NonNull private final VcnCallback mVcnCallback;
 
+    /**
+     * Map containing all VcnGatewayConnections and their VcnGatewayConnectionConfigs.
+     *
+     * <p>Due to potential for race conditions, VcnGatewayConnections MUST only be created and added
+     * to this map in {@link #handleNetworkRequested(NetworkRequest, int, int)}, when a VCN receives
+     * a NetworkRequest that matches a VcnGatewayConnectionConfig for this VCN's VcnConfig.
+     *
+     * <p>A VcnGatewayConnection instance MUST NEVER overwrite an existing instance - otherwise
+     * there is potential for a orphaned VcnGatewayConnection instance that does not get properly
+     * shut down.
+     *
+     * <p>Due to potential for race conditions, VcnGatewayConnections MUST only be removed from this
+     * map once they have finished tearing down, which is reported to this VCN via {@link
+     * VcnGatewayStatusCallback#onQuit()}. Once this is done, all NetworkRequests are retrieved from
+     * the NetworkProvider so that another VcnGatewayConnectionConfig can match the
+     * previously-matched request.
+     */
+    // TODO(b/182533200): remove the invariant on VcnGatewayConnection lifecycles
     @NonNull
     private final Map<VcnGatewayConnectionConfig, VcnGatewayConnection> mVcnGatewayConnections =
             new HashMap<>();
@@ -118,17 +145,14 @@ public class Vcn extends Handler {
     @NonNull private TelephonySubscriptionSnapshot mLastSnapshot;
 
     /**
-     * Whether this Vcn instance is active and running.
+     * The current status of this Vcn instance
      *
-     * <p>The value will be {@code true} while running. It will be {@code false} if the VCN has been
-     * shut down or has entered safe mode.
-     *
-     * <p>This AtomicBoolean is required in order to ensure consistency and correctness across
-     * multiple threads. Unlike the rest of the Vcn, this is queried synchronously on Binder threads
-     * from VcnManagementService, and therefore cannot rely on guarantees of running on the VCN
-     * Looper.
+     * <p>The value will be {@link VCN_STATUS_CODE_ACTIVE} while all VcnGatewayConnections are in
+     * good standing, {@link VCN_STATUS_CODE_SAFE_MODE} if any VcnGatewayConnections are in safe
+     * mode, and {@link VCN_STATUS_CODE_INACTIVE} once a teardown has been commanded.
      */
-    private final AtomicBoolean mIsActive = new AtomicBoolean(true);
+    // Accessed from different threads, but always under lock in VcnManagementService
+    private volatile int mCurrentStatus = VCN_STATUS_CODE_ACTIVE;
 
     public Vcn(
             @NonNull VcnContext vcnContext,
@@ -180,15 +204,28 @@ public class Vcn extends Handler {
         sendMessageAtFrontOfQueue(obtainMessage(MSG_CMD_TEARDOWN));
     }
 
-    /** Synchronously checks whether this Vcn is active. */
-    public boolean isActive() {
-        return mIsActive.get();
+    /** Synchronously retrieves the current status code. */
+    public int getStatus() {
+        return mCurrentStatus;
+    }
+
+    /** Sets the status of this VCN */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public void setStatus(int status) {
+        mCurrentStatus = status;
     }
 
     /** Get current Gateways for testing purposes */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public Set<VcnGatewayConnection> getVcnGatewayConnections() {
         return Collections.unmodifiableSet(new HashSet<>(mVcnGatewayConnections.values()));
+    }
+
+    /** Get current Configs and Gateways for testing purposes */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public Map<VcnGatewayConnectionConfig, VcnGatewayConnection>
+            getVcnGatewayConnectionConfigMap() {
+        return Collections.unmodifiableMap(new HashMap<>(mVcnGatewayConnections));
     }
 
     private class VcnNetworkRequestListener implements VcnNetworkProvider.NetworkRequestListener {
@@ -202,8 +239,8 @@ public class Vcn extends Handler {
 
     @Override
     public void handleMessage(@NonNull Message msg) {
-        // Ignore if this Vcn is not active and we're not receiving new configs
-        if (!isActive() && msg.what != MSG_EVENT_CONFIG_UPDATED) {
+        if (mCurrentStatus != VCN_STATUS_CODE_ACTIVE
+                && mCurrentStatus != VCN_STATUS_CODE_SAFE_MODE) {
             return;
         }
 
@@ -220,11 +257,11 @@ public class Vcn extends Handler {
             case MSG_EVENT_GATEWAY_CONNECTION_QUIT:
                 handleGatewayConnectionQuit((VcnGatewayConnectionConfig) msg.obj);
                 break;
+            case MSG_EVENT_SAFE_MODE_STATE_CHANGED:
+                handleSafeModeStatusChanged();
+                break;
             case MSG_CMD_TEARDOWN:
                 handleTeardown();
-                break;
-            case MSG_CMD_ENTER_SAFE_MODE:
-                handleEnterSafeMode();
                 break;
             default:
                 Slog.wtf(getLogTag(), "Unknown msg.what: " + msg.what);
@@ -237,13 +274,28 @@ public class Vcn extends Handler {
 
         mConfig = config;
 
-        // TODO(b/181815405): Reevaluate active VcnGatewayConnection(s)
+        // Teardown any GatewayConnections whose configs have been removed and get all current
+        // requests
+        for (final Entry<VcnGatewayConnectionConfig, VcnGatewayConnection> entry :
+                mVcnGatewayConnections.entrySet()) {
+            final VcnGatewayConnectionConfig gatewayConnectionConfig = entry.getKey();
+            final VcnGatewayConnection gatewayConnection = entry.getValue();
 
-        if (!mIsActive.getAndSet(true)) {
-            // If this VCN was not previously active, it is exiting Safe Mode. Re-register the
-            // request listener to get NetworkRequests again (and all cached requests).
-            mVcnContext.getVcnNetworkProvider().registerListener(mRequestListener);
+            // GatewayConnectionConfigs must match exactly (otherwise authentication or
+            // connection details may have changed).
+            if (!mConfig.getGatewayConnectionConfigs().contains(gatewayConnectionConfig)) {
+                if (gatewayConnection == null) {
+                    Slog.wtf(
+                            getLogTag(), "Found gatewayConnectionConfig without GatewayConnection");
+                } else {
+                    gatewayConnection.teardownAsynchronously();
+                }
+            }
         }
+
+        // Trigger a re-evaluation of all NetworkRequests (to make sure any that can be
+        // satisfied start a new GatewayConnection)
+        mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
     }
 
     private void handleTeardown() {
@@ -253,19 +305,32 @@ public class Vcn extends Handler {
             gatewayConnection.teardownAsynchronously();
         }
 
-        mIsActive.set(false);
+        mCurrentStatus = VCN_STATUS_CODE_INACTIVE;
     }
 
-    private void handleEnterSafeMode() {
-        handleTeardown();
+    private void handleSafeModeStatusChanged() {
+        boolean hasSafeModeGatewayConnection = false;
 
-        mVcnGatewayConnections.clear();
+        // If any VcnGatewayConnection is in safe mode, mark the entire VCN as being in safe mode
+        for (VcnGatewayConnection gatewayConnection : mVcnGatewayConnections.values()) {
+            if (gatewayConnection.isInSafeMode()) {
+                hasSafeModeGatewayConnection = true;
+                break;
+            }
+        }
 
-        mVcnCallback.onEnteredSafeMode();
+        final int oldStatus = mCurrentStatus;
+        mCurrentStatus =
+                hasSafeModeGatewayConnection ? VCN_STATUS_CODE_SAFE_MODE : VCN_STATUS_CODE_ACTIVE;
+        if (oldStatus != mCurrentStatus) {
+            mVcnCallback.onSafeModeStatusChanged(hasSafeModeGatewayConnection);
+        }
     }
 
     private void handleNetworkRequested(
             @NonNull NetworkRequest request, int score, int providerId) {
+        Slog.v(getLogTag(), "Received request " + request);
+
         if (score > getNetworkScore()) {
             if (VDBG) {
                 Slog.v(
@@ -318,23 +383,23 @@ public class Vcn extends Handler {
         mVcnGatewayConnections.remove(config);
 
         // Trigger a re-evaluation of all NetworkRequests (to make sure any that can be satisfied
-        // start a new GatewayConnection)
+        // start a new GatewayConnection). VCN is always alive here, courtesy of the liveness check
+        // in handleMessage()
         mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
     }
 
     private void handleSubscriptionsChanged(@NonNull TelephonySubscriptionSnapshot snapshot) {
         mLastSnapshot = snapshot;
 
-        if (isActive()) {
-            for (VcnGatewayConnection gatewayConnection : mVcnGatewayConnections.values()) {
-                gatewayConnection.updateSubscriptionSnapshot(mLastSnapshot);
-            }
+        for (VcnGatewayConnection gatewayConnection : mVcnGatewayConnections.values()) {
+            gatewayConnection.updateSubscriptionSnapshot(mLastSnapshot);
         }
     }
 
     private boolean isRequestSatisfiedByGatewayConnectionConfig(
             @NonNull NetworkRequest request, @NonNull VcnGatewayConnectionConfig config) {
         final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
+        builder.addTransportType(TRANSPORT_CELLULAR);
         builder.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
         for (int cap : config.getAllExposedCapabilities()) {
             builder.addCapability(cap);
@@ -345,6 +410,26 @@ public class Vcn extends Handler {
 
     private String getLogTag() {
         return TAG + " [" + mSubscriptionGroup.hashCode() + "]";
+    }
+
+    /**
+     * Dumps the state of this Vcn for logging and debugging purposes.
+     *
+     * <p>PII and credentials MUST NEVER be dumped here.
+     */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("Vcn (" + mSubscriptionGroup + "):");
+        pw.increaseIndent();
+
+        pw.println("mCurrentStatus: " + mCurrentStatus);
+
+        pw.println("mVcnGatewayConnections:");
+        for (VcnGatewayConnection gw : mVcnGatewayConnections.values()) {
+            gw.dump(pw);
+        }
+        pw.println();
+
+        pw.decreaseIndent();
     }
 
     /** Retrieves the network score for a VCN Network */
@@ -358,12 +443,12 @@ public class Vcn extends Handler {
     /** Callback used for passing status signals from a VcnGatewayConnection to its managing Vcn. */
     @VisibleForTesting(visibility = Visibility.PACKAGE)
     public interface VcnGatewayStatusCallback {
-        /** Called by a VcnGatewayConnection to indicate that it has entered safe mode. */
-        void onEnteredSafeMode();
+        /** Called by a VcnGatewayConnection to indicate that it's safe mode status has changed. */
+        void onSafeModeStatusChanged();
 
         /** Callback by a VcnGatewayConnection to indicate that an error occurred. */
         void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage);
@@ -385,18 +470,18 @@ public class Vcn extends Handler {
         }
 
         @Override
-        public void onEnteredSafeMode() {
-            sendMessage(obtainMessage(MSG_CMD_ENTER_SAFE_MODE));
+        public void onSafeModeStatusChanged() {
+            sendMessage(obtainMessage(MSG_EVENT_SAFE_MODE_STATE_CHANGED));
         }
 
         @Override
         public void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage) {
             mVcnCallback.onGatewayConnectionError(
-                    networkCapabilities, errorCode, exceptionClass, exceptionMessage);
+                    gatewayConnectionName, errorCode, exceptionClass, exceptionMessage);
         }
     }
 

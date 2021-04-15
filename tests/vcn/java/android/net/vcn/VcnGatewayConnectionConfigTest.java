@@ -19,6 +19,7 @@ package android.net.vcn;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.net.NetworkCapabilities;
@@ -61,13 +62,20 @@ public class VcnGatewayConnectionConfigTest {
     public static final VcnControlPlaneConfig CONTROL_PLANE_CONFIG =
             VcnControlPlaneIkeConfigTest.buildTestConfig();
 
+    public static final String GATEWAY_CONNECTION_NAME_PREFIX = "gatewayConnectionName-";
+    private static int sGatewayConnectionConfigCount = 0;
+
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfig() {
         return buildTestConfigWithExposedCaps(EXPOSED_CAPS);
     }
 
     private static VcnGatewayConnectionConfig.Builder newBuilder() {
-        return new VcnGatewayConnectionConfig.Builder(CONTROL_PLANE_CONFIG);
+        // Append a unique identifier to the name prefix to guarantee that all created
+        // VcnGatewayConnectionConfigs have a unique name (required by VcnConfig).
+        return new VcnGatewayConnectionConfig.Builder(
+                GATEWAY_CONNECTION_NAME_PREFIX + sGatewayConnectionConfigCount++,
+                CONTROL_PLANE_CONFIG);
     }
 
     // Public for use in VcnGatewayConnectionTest
@@ -87,9 +95,23 @@ public class VcnGatewayConnectionConfigTest {
     }
 
     @Test
+    public void testBuilderRequiresNonNullGatewayConnectionName() {
+        try {
+            new VcnGatewayConnectionConfig.Builder(
+                            null /* gatewayConnectionName */, CONTROL_PLANE_CONFIG)
+                    .build();
+
+            fail("Expected exception due to invalid gateway connection name");
+        } catch (NullPointerException e) {
+        }
+    }
+
+    @Test
     public void testBuilderRequiresNonNullControlPlaneConfig() {
         try {
-            new VcnGatewayConnectionConfig.Builder(null).build();
+            new VcnGatewayConnectionConfig.Builder(
+                            GATEWAY_CONNECTION_NAME_PREFIX, null /* ctrlPlaneConfig */)
+                    .build();
 
             fail("Expected exception due to invalid control plane config");
         } catch (NullPointerException e) {
@@ -138,6 +160,8 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderAndGetters() {
         final VcnGatewayConnectionConfig config = buildTestConfig();
+
+        assertTrue(config.getGatewayConnectionName().startsWith(GATEWAY_CONNECTION_NAME_PREFIX));
 
         int[] exposedCaps = config.getExposedCapabilities();
         Arrays.sort(exposedCaps);

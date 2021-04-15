@@ -68,6 +68,7 @@ package android.net {
     method public boolean bindProcessToNetwork(@Nullable android.net.Network);
     method @NonNull public android.net.SocketKeepalive createSocketKeepalive(@NonNull android.net.Network, @NonNull android.net.IpSecManager.UdpEncapsulationSocket, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.Network getActiveNetwork();
+    method @Nullable @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public android.net.Network getActiveNetworkForUid(int);
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.NetworkInfo getActiveNetworkInfo();
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.NetworkInfo[] getAllNetworkInfo();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.Network[] getAllNetworks();
@@ -297,7 +298,6 @@ package android.net {
     method @Nullable public android.net.NetworkSpecifier getNetworkSpecifier();
     method public int getOwnerUid();
     method public int getSignalStrength();
-    method @NonNull public java.util.Set<java.lang.Integer> getSubIds();
     method @Nullable public android.net.TransportInfo getTransportInfo();
     method public boolean hasCapability(int);
     method public boolean hasTransport(int);
@@ -387,7 +387,9 @@ package android.net {
   public class NetworkRequest implements android.os.Parcelable {
     method public boolean canBeSatisfiedBy(@Nullable android.net.NetworkCapabilities);
     method public int describeContents();
+    method @NonNull public int[] getCapabilities();
     method @Nullable public android.net.NetworkSpecifier getNetworkSpecifier();
+    method @NonNull public int[] getTransportTypes();
     method public boolean hasCapability(int);
     method public boolean hasTransport(int);
     method public void writeToParcel(android.os.Parcel, int);
@@ -396,6 +398,7 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     ctor public NetworkRequest.Builder();
+    ctor public NetworkRequest.Builder(@NonNull android.net.NetworkRequest);
     method public android.net.NetworkRequest.Builder addCapability(int);
     method public android.net.NetworkRequest.Builder addTransportType(int);
     method public android.net.NetworkRequest build();
@@ -404,10 +407,11 @@ package android.net {
     method public android.net.NetworkRequest.Builder removeTransportType(int);
     method @Deprecated public android.net.NetworkRequest.Builder setNetworkSpecifier(String);
     method public android.net.NetworkRequest.Builder setNetworkSpecifier(android.net.NetworkSpecifier);
-    method @NonNull public android.net.NetworkRequest.Builder setSubIds(@NonNull java.util.Set<java.lang.Integer>);
   }
 
   public class ParseException extends java.lang.RuntimeException {
+    ctor public ParseException(@NonNull String);
+    ctor public ParseException(@NonNull String, @NonNull Throwable);
     field public String response;
   }
 

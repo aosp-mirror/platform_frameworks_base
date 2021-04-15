@@ -78,10 +78,8 @@ public class VpnManager {
 
     /**
      * An IPsec VPN created by the built-in LegacyVpnRunner.
-     * @deprecated new Android devices should use VPN_TYPE_PLATFORM instead.
      * @hide
      */
-    @Deprecated
     @SystemApi(client = MODULE_LIBRARIES)
     public static final int TYPE_VPN_LEGACY = 3;
 

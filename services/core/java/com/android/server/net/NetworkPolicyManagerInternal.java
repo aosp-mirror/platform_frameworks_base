@@ -96,9 +96,10 @@ public abstract class NetworkPolicyManagerInternal {
 
     /**
      *  Notifies that the specified {@link NetworkStatsProvider} has reached its quota
-     *  which was set through {@link NetworkStatsProvider#onSetLimit(String, long)}.
+     *  which was set through {@link NetworkStatsProvider#onSetLimit(String, long)} or
+     *  {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
      *
      * @param tag the human readable identifier of the custom network stats provider.
      */
-    public abstract void onStatsProviderLimitReached(@NonNull String tag);
+    public abstract void onStatsProviderWarningOrLimitReached(@NonNull String tag);
 }

@@ -20,12 +20,10 @@ import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.SecurityLevel;
 import android.security.KeyStore2;
 import android.security.KeyStoreSecurityLevel;
-import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.ArrayUtils;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.security.keystore.KeymasterUtils;
 import android.security.keystore.StrongBoxUnavailableException;
 import android.system.keystore2.Domain;
 import android.system.keystore2.IKeystoreSecurityLevel;
@@ -259,7 +257,7 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 // Check that user authentication related parameters are acceptable. This method
                 // will throw an IllegalStateException if there are issues (e.g., secure lock screen
                 // not set up).
-                KeymasterUtils.addUserAuthArgs(new KeymasterArguments(), spec);
+                KeyStore2ParameterUtils.addUserAuthArgs(new ArrayList<>(), spec);
             } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }

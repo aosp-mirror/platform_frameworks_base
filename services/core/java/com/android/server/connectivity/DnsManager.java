@@ -420,7 +420,7 @@ public class DnsManager {
         /*
          * Tell the VMs to toss their DNS caches
          */
-        final Intent intent = new Intent(Intent.ACTION_CLEAR_DNS_CACHE);
+        final Intent intent = new Intent(ConnectivityManager.ACTION_CLEAR_DNS_CACHE);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         /*
          * Connectivity events can happen before boot has completed ...

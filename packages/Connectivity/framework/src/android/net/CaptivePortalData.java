@@ -42,7 +42,7 @@ public final class CaptivePortalData implements Parcelable {
     private final long mByteLimit;
     private final long mExpiryTimeMillis;
     private final boolean mCaptive;
-    private final CharSequence mVenueFriendlyName;
+    private final String mVenueFriendlyName;
     private final int mVenueInfoUrlSource;
     private final int mUserPortalUrlSource;
 
@@ -73,14 +73,14 @@ public final class CaptivePortalData implements Parcelable {
         mByteLimit = byteLimit;
         mExpiryTimeMillis = expiryTimeMillis;
         mCaptive = captive;
-        mVenueFriendlyName = venueFriendlyName;
+        mVenueFriendlyName = venueFriendlyName == null ? null : venueFriendlyName.toString();
         mVenueInfoUrlSource = venueInfoUrlSource;
         mUserPortalUrlSource = userPortalUrlSource;
     }
 
     private CaptivePortalData(Parcel p) {
         this(p.readLong(), p.readParcelable(null), p.readParcelable(null), p.readBoolean(),
-                p.readLong(), p.readLong(), p.readBoolean(), p.readCharSequence(), p.readInt(),
+                p.readLong(), p.readLong(), p.readBoolean(), p.readString(), p.readInt(),
                 p.readInt());
     }
 
@@ -98,7 +98,7 @@ public final class CaptivePortalData implements Parcelable {
         dest.writeLong(mByteLimit);
         dest.writeLong(mExpiryTimeMillis);
         dest.writeBoolean(mCaptive);
-        dest.writeCharSequence(mVenueFriendlyName);
+        dest.writeString(mVenueFriendlyName);
         dest.writeInt(mVenueInfoUrlSource);
         dest.writeInt(mUserPortalUrlSource);
     }
