@@ -20,6 +20,8 @@ import android.Manifest;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
@@ -109,7 +111,9 @@ public final class BluetoothManager {
      * {@link BluetoothProfile#STATE_CONNECTING}, {@link BluetoothProfile#STATE_DISCONNECTED},
      * {@link BluetoothProfile#STATE_DISCONNECTING}
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getConnectionState(BluetoothDevice device, int profile) {
         if (DBG) Log.d(TAG, "getConnectionState()");
 
@@ -136,7 +140,9 @@ public final class BluetoothManager {
      * @param profile GATT or GATT_SERVER
      * @return List of devices. The list will be empty on error.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getConnectedDevices(int profile) {
         if (DBG) Log.d(TAG, "getConnectedDevices");
         if (profile != BluetoothProfile.GATT && profile != BluetoothProfile.GATT_SERVER) {
@@ -177,7 +183,9 @@ public final class BluetoothManager {
      * {@link BluetoothProfile#STATE_DISCONNECTING},
      * @return List of devices. The list will be empty on error.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int profile, int[] states) {
         if (DBG) Log.d(TAG, "getDevicesMatchingConnectionStates");
 
@@ -210,6 +218,7 @@ public final class BluetoothManager {
      * @param callback GATT server callback handler that will receive asynchronous callbacks.
      * @return BluetoothGattServer instance
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothGattServer openGattServer(Context context,
             BluetoothGattServerCallback callback) {
 
@@ -229,6 +238,7 @@ public final class BluetoothManager {
      * @return BluetoothGattServer instance
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothGattServer openGattServer(Context context,
             BluetoothGattServerCallback callback, boolean eatt_support) {
         return (openGattServer(context, callback, BluetoothDevice.TRANSPORT_AUTO, eatt_support));
@@ -249,6 +259,7 @@ public final class BluetoothManager {
      * @return BluetoothGattServer instance
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothGattServer openGattServer(Context context,
             BluetoothGattServerCallback callback, int transport) {
         return (openGattServer(context, callback, transport, false));
@@ -270,6 +281,7 @@ public final class BluetoothManager {
      * @return BluetoothGattServer instance
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothGattServer openGattServer(Context context,
             BluetoothGattServerCallback callback, int transport, boolean eatt_support) {
         if (context == null || callback == null) {
