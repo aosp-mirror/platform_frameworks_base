@@ -1551,6 +1551,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testSetProfileOwner_failures() throws Exception {
         // TODO Test more failure cases.  Basically test all chacks in enforceCanSetProfileOwner().
+        // Package doesn't exist and caller is not system
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ "Calling identity is not authorized",
+                () -> dpm.setProfileOwner(admin1, "owner-name", UserHandle.USER_SYSTEM));
+
+        // Package exists, but caller is not system
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ "Calling identity is not authorized",
+                () -> dpm.setProfileOwner(admin1, "owner-name", UserHandle.USER_SYSTEM));
     }
 
     @Test
