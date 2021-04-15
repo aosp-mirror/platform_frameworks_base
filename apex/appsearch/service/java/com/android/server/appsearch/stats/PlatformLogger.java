@@ -29,7 +29,6 @@ import android.util.SparseIntArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.internal.util.Preconditions;
 import com.android.server.appsearch.external.localstorage.AppSearchLogger;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
@@ -38,6 +37,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -162,15 +162,15 @@ public final class PlatformLogger implements AppSearchLogger {
      * Westworld constructor
      */
     public PlatformLogger(@NonNull Context context, int userId, @NonNull Config config) {
-        mContext = Preconditions.checkNotNull(context);
-        mConfig = Preconditions.checkNotNull(config);
+        mContext = Objects.requireNonNull(context);
+        mConfig = Objects.requireNonNull(config);
         mUserId = userId;
     }
 
     /** Logs {@link CallStats}. */
     @Override
     public void logStats(@NonNull CallStats stats) {
-        Preconditions.checkNotNull(stats);
+        Objects.requireNonNull(stats);
         synchronized (mLock) {
             if (shouldLogForTypeLocked(stats.getCallType())) {
                 logStatsImplLocked(stats);
@@ -181,7 +181,7 @@ public final class PlatformLogger implements AppSearchLogger {
     /** Logs {@link PutDocumentStats}. */
     @Override
     public void logStats(@NonNull PutDocumentStats stats) {
-        Preconditions.checkNotNull(stats);
+        Objects.requireNonNull(stats);
         synchronized (mLock) {
             if (shouldLogForTypeLocked(CallStats.CALL_TYPE_PUT_DOCUMENT)) {
                 logStatsImplLocked(stats);
@@ -197,7 +197,7 @@ public final class PlatformLogger implements AppSearchLogger {
     */
     public int removeCachedUidForPackage(@NonNull String packageName) {
         // TODO(b/173532925) This needs to be called when we get PACKAGE_REMOVED intent
-        Preconditions.checkNotNull(packageName);
+        Objects.requireNonNull(packageName);
         synchronized (mLock) {
             Integer uid = mPackageUidCacheLocked.remove(packageName);
             return uid != null ? uid : Process.INVALID_UID;
