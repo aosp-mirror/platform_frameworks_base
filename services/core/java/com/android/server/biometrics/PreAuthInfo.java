@@ -197,17 +197,7 @@ class PreAuthInfo {
 
     private static boolean isEnabledForApp(BiometricService.SettingObserver settingObserver,
             @BiometricAuthenticator.Modality int modality, int userId) {
-        switch (modality) {
-            case TYPE_FINGERPRINT:
-                return true;
-            case TYPE_IRIS:
-                return true;
-            case TYPE_FACE:
-                return settingObserver.getFaceEnabledForApps(userId);
-            default:
-                Slog.w(TAG, "Unsupported modality: " + modality);
-                return false;
-        }
+        return settingObserver.getEnabledForApps(userId);
     }
 
     private static boolean isBiometricDisabledByDevicePolicy(
