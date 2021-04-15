@@ -27,24 +27,26 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/bubble_overflow_recycler"
-        android:layout_gravity="center_horizontal"
         android:nestedScrollingEnabled="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"/>
 
     <LinearLayout
         android:id="@+id/bubble_overflow_empty_state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:paddingLeft="@dimen/bubble_overflow_empty_state_padding"
         android:paddingRight="@dimen/bubble_overflow_empty_state_padding"
         android:orientation="vertical"
         android:gravity="center">
 
         <ImageView
+            android:id="@+id/bubble_overflow_empty_state_image"
             android:layout_width="@dimen/bubble_empty_overflow_image_height"
             android:layout_height="@dimen/bubble_empty_overflow_image_height"
-            android:id="@+id/bubble_overflow_empty_state_image"
             android:scaleType="fitCenter"
             android:layout_gravity="center"/>
 
@@ -60,12 +62,12 @@
 
         <TextView
             android:id="@+id/bubble_overflow_empty_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:fontFamily="@*android:string/config_bodyFontFamily"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"
             android:textColor="?android:attr/textColorSecondary"
             android:text="@string/bubble_overflow_empty_subtitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:paddingBottom="@dimen/bubble_empty_overflow_subtitle_padding"
             android:gravity="center"/>
     </LinearLayout>

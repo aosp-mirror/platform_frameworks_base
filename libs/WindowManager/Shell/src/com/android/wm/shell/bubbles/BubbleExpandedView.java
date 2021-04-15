@@ -19,6 +19,7 @@ package com.android.wm.shell.bubbles;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
@@ -335,7 +336,10 @@ public class BubbleExpandedView extends LinearLayout {
             mOverflowView = (BubbleOverflowContainerView) LayoutInflater.from(getContext()).inflate(
                     R.layout.bubble_overflow_container, null /* root */);
             mOverflowView.setBubbleController(mController);
-            mExpandedViewContainer.addView(mOverflowView);
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
+            mExpandedViewContainer.addView(mOverflowView, lp);
+            mExpandedViewContainer.setLayoutParams(
+                    new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
             bringChildToFront(mOverflowView);
             mSettingsIcon.setVisibility(GONE);
         } else {
@@ -600,9 +604,9 @@ public class BubbleExpandedView extends LinearLayout {
             return;
         }
 
-        if (mBubble != null || mIsOverflow) {
+        if ((mBubble != null && mTaskView != null) || mIsOverflow) {
             float desiredHeight = mIsOverflow
-                    ? mOverflowHeight
+                    ? mPositioner.isLargeScreen() ? getMaxExpandedHeight() : mOverflowHeight
                     : mBubble.getDesiredHeight(mContext);
             desiredHeight = Math.max(desiredHeight, mMinHeight);
             float height = Math.min(desiredHeight, getMaxExpandedHeight());
@@ -657,10 +661,10 @@ public class BubbleExpandedView extends LinearLayout {
                     + getBubbleKey());
         }
         mExpandedViewContainerLocation = containerLocationOnScreen;
+        updateHeight();
         if (mTaskView != null
                 && mTaskView.getVisibility() == VISIBLE
                 && mTaskView.isAttachedToWindow()) {
-            updateHeight();
             mTaskView.onLocationChanged();
         }
         if (mIsOverflow) {
