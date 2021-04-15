@@ -2240,6 +2240,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 packageShortcutsChanged(packageName, userId, changedShortcuts, removedShortcuts);
 
+                reportShortcutUsedInternal(packageName, shortcut.getId(), userId);
+
                 verifyStates();
 
                 ret.complete(null);
@@ -2850,18 +2852,22 @@ public class ShortcutService extends IShortcutService.Stub {
                     }
                 }
 
-                final long token = injectClearCallingIdentity();
-                try {
-                    mUsageStatsManagerInternal.reportShortcutUsage(packageName, shortcutId, userId);
-                } finally {
-                    injectRestoreCallingIdentity(token);
-                }
+                reportShortcutUsedInternal(packageName, shortcutId, userId);
                 ret.complete(true);
             } catch (Exception e) {
                 ret.completeExceptionally(e);
             }
         });
         return ret;
+    }
+
+    private void reportShortcutUsedInternal(String packageName, String shortcutId, int userId) {
+        final long token = injectClearCallingIdentity();
+        try {
+            mUsageStatsManagerInternal.reportShortcutUsage(packageName, shortcutId, userId);
+        } finally {
+            injectRestoreCallingIdentity(token);
+        }
     }
 
     @Override
