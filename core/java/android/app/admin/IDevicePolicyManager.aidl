@@ -20,6 +20,7 @@ package android.app.admin;
 import android.app.admin.NetworkEvent;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
+import android.app.admin.ParcelableGranteeMap;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
@@ -485,7 +486,7 @@ interface IDevicePolicyManager {
     boolean startViewCalendarEventInManagedProfile(String packageName, long eventId, long start, long end, boolean allDay, int flags);
 
     boolean setKeyGrantForApp(in ComponentName admin, String callerPackage, String alias, String packageName, boolean hasGrant);
-    List<String> getKeyPairGrants(in String callerPackage, in String alias);
+    ParcelableGranteeMap getKeyPairGrants(in String callerPackage, in String alias);
     boolean setKeyGrantToWifiAuth(String callerPackage, String alias, boolean hasGrant);
     boolean isKeyPairGrantedToWifiAuth(String callerPackage, String alias);
 

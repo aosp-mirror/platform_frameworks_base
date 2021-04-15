@@ -86,7 +86,6 @@ import java.util.function.Consumer;
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 @Presubmit
-@FlakyTest(detail = "Promote once confirmed non-flaky")
 public class ActivityThreadTest {
     private static final int TIMEOUT_SEC = 10;
 
@@ -352,8 +351,9 @@ public class ActivityThreadTest {
         final Rect bounds = activity.getWindowManager().getCurrentWindowMetrics().getBounds();
         assertEquals(activityConfigPortrait.windowConfiguration.getBounds(), bounds);
 
-        // Ensure that Activity#onConfigurationChanged() is only called once.
-        assertEquals(numOfConfig + 1, activity.mNumOfConfigChanges);
+        // Ensure that Activity#onConfigurationChanged() not be called because the changes in
+        // WindowConfiguration shouldn't be reported.
+        assertEquals(numOfConfig, activity.mNumOfConfigChanges);
     }
 
     @Test
@@ -379,7 +379,7 @@ public class ActivityThreadTest {
 
         Configuration config = new Configuration();
         config.seq = BASE_SEQ + 1;
-        config.smallestScreenWidthDp = 100;
+        config.orientation = ORIENTATION_LANDSCAPE;
         appThread.scheduleTransaction(newActivityConfigTransaction(activity, config));
 
         // Wait until the main thread is performing the configuration change for the configuration
@@ -389,17 +389,17 @@ public class ActivityThreadTest {
 
         config = new Configuration();
         config.seq = BASE_SEQ + 2;
-        config.smallestScreenWidthDp = 200;
+        config.orientation = ORIENTATION_PORTRAIT;
         appThread.scheduleTransaction(newActivityConfigTransaction(activity, config));
 
         config = new Configuration();
         config.seq = BASE_SEQ + 3;
-        config.smallestScreenWidthDp = 300;
+        config.orientation = ORIENTATION_LANDSCAPE;
         appThread.scheduleTransaction(newActivityConfigTransaction(activity, config));
 
         config = new Configuration();
         config.seq = BASE_SEQ + 4;
-        config.smallestScreenWidthDp = 400;
+        config.orientation = ORIENTATION_PORTRAIT;
         appThread.scheduleTransaction(newActivityConfigTransaction(activity, config));
 
         activity.mConfigLatch.countDown();
@@ -411,7 +411,7 @@ public class ActivityThreadTest {
         // Only two more configuration changes: one with seq BASE_SEQ + 1; another with seq
         // BASE_SEQ + 4. Configurations scheduled in between should be dropped.
         assertEquals(numOfConfig + 2, activity.mNumOfConfigChanges);
-        assertEquals(400, activity.mConfig.smallestScreenWidthDp);
+        assertEquals(ORIENTATION_PORTRAIT, activity.mConfig.orientation);
     }
 
     @Test
@@ -515,6 +515,7 @@ public class ActivityThreadTest {
     }
 
     @Test
+    @FlakyTest(bugId = 176134235)
     public void testHandleConfigurationChanged_DoesntOverrideActivityConfig() {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
 

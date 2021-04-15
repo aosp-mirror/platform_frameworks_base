@@ -24,7 +24,6 @@ import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_INPUT_MONITOR;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_ONE_HANDED;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_PIP;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
@@ -62,7 +61,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.InputDevice;
-import android.view.InputMonitor;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -89,7 +87,6 @@ import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -352,24 +349,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
             final long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> notifyStartAssistant(bundle));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
-        public Bundle monitorGestureInput(String name, int displayId) {
-            if (!verifyCaller("monitorGestureInput")) {
-                return null;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final InputMonitor monitor =
-                        InputManager.getInstance().monitorGestureInput(name, displayId);
-                final Bundle result = new Bundle();
-                result.putParcelable(KEY_EXTRA_INPUT_MONITOR,
-                        InputMonitorCompat.obtainReturnValue(monitor));
-                return result;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

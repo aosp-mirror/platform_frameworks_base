@@ -1510,10 +1510,8 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void removeImeSurfaceFromWindow(IBinder windowToken,
-                IVoidResultCallback resultCallback) {
+        public void removeImeSurfaceFromWindowAsync(IBinder windowToken) {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread

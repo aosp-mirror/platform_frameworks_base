@@ -3015,6 +3015,7 @@
 
   <java-symbol type="layout" name="app_anr_dialog" />
   <java-symbol type="layout" name="notification_template_material_messaging" />
+  <java-symbol type="layout" name="notification_template_material_big_messaging" />
 
   <java-symbol type="id" name="aerr_wait" />
 
@@ -3115,6 +3116,7 @@
   <java-symbol type="layout" name="notification_template_material_call" />
   <java-symbol type="layout" name="notification_template_material_big_call" />
   <java-symbol type="string" name="call_notification_answer_action" />
+  <java-symbol type="string" name="call_notification_answer_video_action" />
   <java-symbol type="string" name="call_notification_decline_action" />
   <java-symbol type="string" name="call_notification_hang_up_action" />
   <java-symbol type="string" name="call_notification_incoming_text" />
@@ -3124,6 +3126,7 @@
   <java-symbol type="color" name="call_notification_answer_color"/>
   <java-symbol type="dimen" name="call_notification_collapsible_indent"/>
   <java-symbol type="drawable" name="ic_call_answer" />
+  <java-symbol type="drawable" name="ic_call_answer_video" />
   <java-symbol type="drawable" name="ic_call_decline" />
   <java-symbol type="id" name="verification_divider" />
   <java-symbol type="id" name="verification_icon" />
@@ -3645,6 +3648,7 @@
   <java-symbol type="id" name="bubble_button" />
   <java-symbol type="id" name="snooze_button" />
   <java-symbol type="dimen" name="text_size_body_2_material" />
+  <java-symbol type="dimen" name="notification_icon_circle_size" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
   <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />
@@ -4061,7 +4065,7 @@
   <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded_face_pile" />
   <java-symbol type="dimen" name="conversation_content_start" />
   <java-symbol type="dimen" name="expanded_group_conversation_message_padding" />
-  <java-symbol type="dimen" name="messaging_layout_margin_end" />
+  <java-symbol type="dimen" name="messaging_layout_icon_padding_start" />
   <java-symbol type="dimen" name="conversation_header_expanded_padding_end" />
   <java-symbol type="dimen" name="conversation_icon_container_top_padding" />
   <java-symbol type="dimen" name="conversation_icon_container_top_padding_small_avatar" />
@@ -4335,4 +4339,6 @@
   <java-symbol type="drawable" name="ic_accessibility_24dp" />
   <java-symbol type="string" name="view_and_control_notification_title" />
   <java-symbol type="string" name="view_and_control_notification_content" />
+
+  <java-symbol type="layout" name="notification_expand_button"/>
 </resources>

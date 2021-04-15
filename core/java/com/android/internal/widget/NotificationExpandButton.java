@@ -165,15 +165,23 @@ public class NotificationExpandButton extends FrameLayout {
 
     private void updateColors() {
         if (shouldShowNumber() && !mDisallowColor) {
-            mPillView.setBackgroundTintList(ColorStateList.valueOf(mHighlightPillColor));
+            if (mHighlightPillColor != 0) {
+                mPillView.setBackgroundTintList(ColorStateList.valueOf(mHighlightPillColor));
+            }
             mPillView.setBackgroundTintMode(PorterDuff.Mode.SRC_IN);
             mIconView.setColorFilter(mHighlightTextColor, PorterDuff.Mode.SRC_IN);
-            mNumberView.setTextColor(mHighlightTextColor);
+            if (mHighlightTextColor != 0) {
+                mNumberView.setTextColor(mHighlightTextColor);
+            }
         } else {
-            mPillView.setBackgroundTintList(ColorStateList.valueOf(mDefaultPillColor));
+            if (mDefaultPillColor != 0) {
+                mPillView.setBackgroundTintList(ColorStateList.valueOf(mDefaultPillColor));
+            }
             mPillView.setBackgroundTintMode(PorterDuff.Mode.SRC_IN);
             mIconView.setColorFilter(mDefaultTextColor, PorterDuff.Mode.SRC_IN);
-            mNumberView.setTextColor(mDefaultTextColor);
+            if (mDefaultTextColor != 0) {
+                mNumberView.setTextColor(mDefaultTextColor);
+            }
         }
     }
 

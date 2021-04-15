@@ -2936,8 +2936,8 @@ class UserController implements Handler.Callback {
             // TODO b/64165549 Verify that mLock is not held before calling AMS methods
             synchronized (mService) {
                 return mService.broadcastIntentLocked(null, null, null, intent, resolvedType,
-                        resultTo, resultCode, resultData, resultExtras, requiredPermissions, appOp,
-                        bOptions, ordered, sticky, callingPid, callingUid, realCallingUid,
+                        resultTo, resultCode, resultData, resultExtras, requiredPermissions, null,
+                        appOp, bOptions, ordered, sticky, callingPid, callingUid, realCallingUid,
                         realCallingPid, userId);
             }
         }

@@ -23,6 +23,7 @@ import android.app.blob.BlobStoreManager;
 import android.app.blob.LeaseInfo;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -53,6 +54,16 @@ public class Utils {
             in.read(buffer, 0, toWrite);
             out.write(buffer, 0, toWrite);
             bytesWrittern += toWrite;
+        }
+    }
+
+    public static void writeToSession(BlobStoreManager.Session session, ParcelFileDescriptor input)
+            throws IOException {
+        try (FileInputStream in = new ParcelFileDescriptor.AutoCloseInputStream(input)) {
+            try (FileOutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(
+                    session.openWrite(0, -1))) {
+                FileUtils.copy(in, out);
+            }
         }
     }
 

@@ -58,6 +58,7 @@ class WiredChargingRippleController @Inject constructor(
         title = "Wired Charging Animation"
         flags = (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        setTrustedOverlay()
     }
 
     @VisibleForTesting
@@ -103,7 +104,10 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     fun startRipple() {
-        if (rippleView.rippleInProgress) {
+        if (rippleView.rippleInProgress || rippleView.parent != null) {
+            // Skip if ripple is still playing, or not playing but already added the parent
+            // (which might happen just before the animation starts or right after
+            // the animation ends.)
             return
         }
         val mWM = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager

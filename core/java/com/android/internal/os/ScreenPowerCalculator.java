@@ -96,9 +96,9 @@ public class ScreenPowerCalculator extends PowerCalculator {
         }
 
         builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_SCREEN)
-                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE,
+                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN,
                         totalPowerAndDuration.durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE,
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
                         Math.max(totalPowerAndDuration.powerMah, totalAppPower), powerModel)
                 .setPowerConsumedByApps(totalAppPower);
     }

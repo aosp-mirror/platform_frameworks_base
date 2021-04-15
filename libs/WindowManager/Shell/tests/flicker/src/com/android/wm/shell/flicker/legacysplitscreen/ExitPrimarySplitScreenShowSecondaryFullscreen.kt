@@ -78,7 +78,7 @@ class ExitPrimarySplitScreenShowSecondaryFullscreen(
     @Test
     fun dockedStackDividerIsInvisible() = testSpec.dockedStackDividerIsInvisible()
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(splitScreenApp.defaultWindowName)
 
@@ -87,7 +87,7 @@ class ExitPrimarySplitScreenShowSecondaryFullscreen(
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun appWindowBecomesInVisible() =
         testSpec.appWindowBecomesInVisible(splitScreenApp.defaultWindowName)
