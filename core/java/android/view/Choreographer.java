@@ -693,71 +693,79 @@ public final class Choreographer {
         ThreadedRenderer.setFPSDivisor(divisor);
     }
 
+    private void traceMessage(String msg) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, msg);
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+    }
+
     void doFrame(long frameTimeNanos, int frame,
             DisplayEventReceiver.VsyncEventData vsyncEventData) {
         final long startNanos;
         final long frameIntervalNanos = vsyncEventData.frameInterval;
-        synchronized (mLock) {
-            if (!mFrameScheduled) {
-                return; // no work to do
-            }
-
-            if (DEBUG_JANK && mDebugPrintNextFrameTimeDelta) {
-                mDebugPrintNextFrameTimeDelta = false;
-                Log.d(TAG, "Frame time delta: "
-                        + ((frameTimeNanos - mLastFrameTimeNanos) * 0.000001f) + " ms");
-            }
-
-            long intendedFrameTimeNanos = frameTimeNanos;
-            startNanos = System.nanoTime();
-            final long jitterNanos = startNanos - frameTimeNanos;
-            if (jitterNanos >= frameIntervalNanos) {
-                final long skippedFrames = jitterNanos / frameIntervalNanos;
-                if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
-                    Log.i(TAG, "Skipped " + skippedFrames + " frames!  "
-                            + "The application may be doing too much work on its main thread.");
-                }
-                final long lastFrameOffset = jitterNanos % frameIntervalNanos;
-                if (DEBUG_JANK) {
-                    Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
-                            + "which is more than the frame interval of "
-                            + (frameIntervalNanos * 0.000001f) + " ms!  "
-                            + "Skipping " + skippedFrames + " frames and setting frame "
-                            + "time to " + (lastFrameOffset * 0.000001f) + " ms in the past.");
-                }
-                frameTimeNanos = startNanos - lastFrameOffset;
-            }
-
-            if (frameTimeNanos < mLastFrameTimeNanos) {
-                if (DEBUG_JANK) {
-                    Log.d(TAG, "Frame time appears to be going backwards.  May be due to a "
-                            + "previously skipped frame.  Waiting for next vsync.");
-                }
-                scheduleVsyncLocked();
-                return;
-            }
-
-            if (mFPSDivisor > 1) {
-                long timeSinceVsync = frameTimeNanos - mLastFrameTimeNanos;
-                if (timeSinceVsync < (frameIntervalNanos * mFPSDivisor) && timeSinceVsync > 0) {
-                    scheduleVsyncLocked();
-                    return;
-                }
-            }
-
-            mFrameInfo.setVsync(intendedFrameTimeNanos, frameTimeNanos, vsyncEventData.id,
-                    vsyncEventData.frameDeadline, startNanos, vsyncEventData.frameInterval);
-            mFrameScheduled = false;
-            mLastFrameTimeNanos = frameTimeNanos;
-            mLastFrameIntervalNanos = frameIntervalNanos;
-            mLastVsyncEventData = vsyncEventData;
-        }
-
         try {
             if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                 Trace.traceBegin(Trace.TRACE_TAG_VIEW,
                         "Choreographer#doFrame " + vsyncEventData.id);
             }
+            synchronized (mLock) {
+                if (!mFrameScheduled) {
+                    traceMessage("Frame not scheduled");
+                    return; // no work to do
+                }
+
+                if (DEBUG_JANK && mDebugPrintNextFrameTimeDelta) {
+                    mDebugPrintNextFrameTimeDelta = false;
+                    Log.d(TAG, "Frame time delta: "
+                            + ((frameTimeNanos - mLastFrameTimeNanos) * 0.000001f) + " ms");
+                }
+
+                long intendedFrameTimeNanos = frameTimeNanos;
+                startNanos = System.nanoTime();
+                final long jitterNanos = startNanos - frameTimeNanos;
+                if (jitterNanos >= frameIntervalNanos) {
+                    final long skippedFrames = jitterNanos / frameIntervalNanos;
+                    if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
+                        Log.i(TAG, "Skipped " + skippedFrames + " frames!  "
+                                + "The application may be doing too much work on its main thread.");
+                    }
+                    final long lastFrameOffset = jitterNanos % frameIntervalNanos;
+                    if (DEBUG_JANK) {
+                        Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
+                                + "which is more than the frame interval of "
+                                + (frameIntervalNanos * 0.000001f) + " ms!  "
+                                + "Skipping " + skippedFrames + " frames and setting frame "
+                                + "time to " + (lastFrameOffset * 0.000001f) + " ms in the past.");
+                    }
+                    frameTimeNanos = startNanos - lastFrameOffset;
+                }
+
+                if (frameTimeNanos < mLastFrameTimeNanos) {
+                    if (DEBUG_JANK) {
+                        Log.d(TAG, "Frame time appears to be going backwards.  May be due to a "
+                                + "previously skipped frame.  Waiting for next vsync.");
+                    }
+                    traceMessage("Frame time goes backward");
+                    scheduleVsyncLocked();
+                    return;
+                }
+
+                if (mFPSDivisor > 1) {
+                    long timeSinceVsync = frameTimeNanos - mLastFrameTimeNanos;
+                    if (timeSinceVsync < (frameIntervalNanos * mFPSDivisor) && timeSinceVsync > 0) {
+                        traceMessage("Frame skipped due to FPSDivisor");
+                        scheduleVsyncLocked();
+                        return;
+                    }
+                }
+
+                mFrameInfo.setVsync(intendedFrameTimeNanos, frameTimeNanos, vsyncEventData.id,
+                        vsyncEventData.frameDeadline, startNanos, vsyncEventData.frameInterval);
+                mFrameScheduled = false;
+                mLastFrameTimeNanos = frameTimeNanos;
+                mLastFrameIntervalNanos = frameIntervalNanos;
+                mLastVsyncEventData = vsyncEventData;
+            }
+
             AnimationUtils.lockAnimationClock(frameTimeNanos / TimeUtils.NANOS_PER_MS);
 
             mFrameInfo.markInputHandlingStart();
@@ -870,7 +878,12 @@ public final class Choreographer {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void scheduleVsyncLocked() {
-        mDisplayEventReceiver.scheduleVsync();
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Choreographer#scheduleVsyncLocked");
+            mDisplayEventReceiver.scheduleVsync();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
     }
 
     private boolean isRunningOnLooperThreadLocked() {
@@ -967,32 +980,40 @@ public final class Choreographer {
         @Override
         public void onVsync(long timestampNanos, long physicalDisplayId, int frame,
                 VsyncEventData vsyncEventData) {
-            // Post the vsync event to the Handler.
-            // The idea is to prevent incoming vsync events from completely starving
-            // the message queue.  If there are no messages in the queue with timestamps
-            // earlier than the frame time, then the vsync event will be processed immediately.
-            // Otherwise, messages that predate the vsync event will be handled first.
-            long now = System.nanoTime();
-            if (timestampNanos > now) {
-                Log.w(TAG, "Frame time is " + ((timestampNanos - now) * 0.000001f)
-                        + " ms in the future!  Check that graphics HAL is generating vsync "
-                        + "timestamps using the correct timebase.");
-                timestampNanos = now;
-            }
+            try {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                            "Choreographer#onVsync " + vsyncEventData.id);
+                }
+                // Post the vsync event to the Handler.
+                // The idea is to prevent incoming vsync events from completely starving
+                // the message queue.  If there are no messages in the queue with timestamps
+                // earlier than the frame time, then the vsync event will be processed immediately.
+                // Otherwise, messages that predate the vsync event will be handled first.
+                long now = System.nanoTime();
+                if (timestampNanos > now) {
+                    Log.w(TAG, "Frame time is " + ((timestampNanos - now) * 0.000001f)
+                            + " ms in the future!  Check that graphics HAL is generating vsync "
+                            + "timestamps using the correct timebase.");
+                    timestampNanos = now;
+                }
 
-            if (mHavePendingVsync) {
-                Log.w(TAG, "Already have a pending vsync event.  There should only be "
-                        + "one at a time.");
-            } else {
-                mHavePendingVsync = true;
-            }
+                if (mHavePendingVsync) {
+                    Log.w(TAG, "Already have a pending vsync event.  There should only be "
+                            + "one at a time.");
+                } else {
+                    mHavePendingVsync = true;
+                }
 
-            mTimestampNanos = timestampNanos;
-            mFrame = frame;
-            mLastVsyncEventData = vsyncEventData;
-            Message msg = Message.obtain(mHandler, this);
-            msg.setAsynchronous(true);
-            mHandler.sendMessageAtTime(msg, timestampNanos / TimeUtils.NANOS_PER_MS);
+                mTimestampNanos = timestampNanos;
+                mFrame = frame;
+                mLastVsyncEventData = vsyncEventData;
+                Message msg = Message.obtain(mHandler, this);
+                msg.setAsynchronous(true);
+                mHandler.sendMessageAtTime(msg, timestampNanos / TimeUtils.NANOS_PER_MS);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
         }
 
         @Override
