@@ -1259,20 +1259,21 @@ public class Typeface {
      * @hide
      */
     @TestApi
-    public static @NonNull Map<String, Typeface> deserializeFontMap(@NonNull ByteBuffer buffer)
+    public static @NonNull long[] deserializeFontMap(
+            @NonNull ByteBuffer buffer, @NonNull Map<String, Typeface> out)
             throws IOException {
-        Map<String, Typeface> fontMap = new ArrayMap<>();
         int typefacesBytesCount = buffer.getInt();
         long[] nativePtrs = nativeReadTypefaces(buffer.slice());
         if (nativePtrs == null) {
             throw new IOException("Could not read typefaces");
         }
+        out.clear();
         buffer.position(buffer.position() + typefacesBytesCount);
         for (long nativePtr : nativePtrs) {
             String name = readString(buffer);
-            fontMap.put(name, new Typeface(nativePtr));
+            out.put(name, new Typeface(nativePtr));
         }
-        return fontMap;
+        return nativePtrs;
     }
 
     private static String readString(ByteBuffer buffer) {
@@ -1330,7 +1331,14 @@ public class Typeface {
                 return;
             }
             sSystemFontMapBuffer = sharedMemory.mapReadOnly().order(ByteOrder.BIG_ENDIAN);
-            Map<String, Typeface> systemFontMap = deserializeFontMap(sSystemFontMapBuffer);
+            Map<String, Typeface> systemFontMap = new ArrayMap<>();
+            long[] nativePtrs = deserializeFontMap(sSystemFontMapBuffer, systemFontMap);
+
+            // Initialize native font APIs. The native font API will read fonts.xml by itself if
+            // Typeface is initialized with loadPreinstalledSystemFontMap.
+            for (long ptr : nativePtrs) {
+                nativeAddFontCollections(ptr);
+            }
             setSystemFontMap(systemFontMap);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
@@ -1527,6 +1535,9 @@ public class Typeface {
     private static native @Nullable long[] nativeReadTypefaces(@NonNull ByteBuffer buffer);
 
     private static native void nativeForceSetStaticFinalField(String fieldName, Typeface typeface);
+
+    @CriticalNative
+    private static native void nativeAddFontCollections(long nativePtr);
 
     private static native void nativeWarmUpCache(String fileName);
 }
