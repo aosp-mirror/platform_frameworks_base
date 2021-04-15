@@ -181,13 +181,6 @@ class Rollback {
     private final int[] mPackageSessionIds;
 
     /**
-     * The number of sessions in the install which are notified with success by
-     * {@link PackageInstaller.SessionCallback#onFinished(int, boolean)}.
-     * This rollback will be enabled only after all child sessions finished with success.
-     */
-    private int mNumPackageSessionsWithSuccess;
-
-    /**
      * The extension versions supported at the time of rollback creation.
      */
     @NonNull private final SparseIntArray mExtensionVersions;
@@ -829,17 +822,6 @@ class Rollback {
             }
         }
         return false;
-    }
-
-    /**
-     * Called when a child session finished with success.
-     * Returns true when all child sessions are notified with success. This rollback will be
-     * enabled only after all child sessions finished with success.
-     */
-    @WorkerThread
-    boolean notifySessionWithSuccess() {
-        assertInWorkerThread();
-        return ++mNumPackageSessionsWithSuccess == mPackageSessionIds.length;
     }
 
     /**
