@@ -71,6 +71,8 @@ public class LingerMonitorTest {
     static final int LOW_DAILY_LIMIT = 2;
     static final int HIGH_DAILY_LIMIT = 1000;
 
+    private static final int TEST_LINGER_DELAY_MS = 400;
+
     LingerMonitor mMonitor;
 
     @Mock ConnectivityService mConnService;
@@ -366,7 +368,7 @@ public class LingerMonitorTest {
         NetworkAgentInfo nai = new NetworkAgentInfo(null, new Network(netId), info,
                 new LinkProperties(), caps, new NetworkScore.Builder().setLegacyInt(50).build(),
                 mCtx, null, new NetworkAgentConfig.Builder().build(), mConnService, mNetd,
-                mDnsResolver, NetworkProvider.ID_NONE, Binder.getCallingUid(),
+                mDnsResolver, NetworkProvider.ID_NONE, Binder.getCallingUid(), TEST_LINGER_DELAY_MS,
                 mQosCallbackTracker, new ConnectivityService.Dependencies());
         nai.everValidated = true;
         return nai;

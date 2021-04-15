@@ -1353,8 +1353,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 new NetworkInfo(TYPE_NONE, 0, "", ""),
                 new LinkProperties(), new NetworkCapabilities(),
                 new NetworkScore.Builder().setLegacyInt(0).build(), mContext, null,
-                new NetworkAgentConfig(), this, null, null, 0, INVALID_UID, mQosCallbackTracker,
-                mDeps);
+                new NetworkAgentConfig(), this, null, null, 0, INVALID_UID,
+                mLingerDelayMs, mQosCallbackTracker, mDeps);
     }
 
     private static NetworkCapabilities createDefaultNetworkCapabilitiesForUid(int uid) {
@@ -3167,6 +3167,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     } else {
                         logwtf(nai.toShortString() + " set invalid teardown delay " + msg.arg1);
                     }
+                    break;
+                }
+                case NetworkAgent.EVENT_LINGER_DURATION_CHANGED: {
+                    nai.setLingerDuration((int) arg.second);
+                    break;
                 }
             }
         }
@@ -6516,7 +6521,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkAgentInfo nai = new NetworkAgentInfo(na,
                 new Network(mNetIdManager.reserveNetId()), new NetworkInfo(networkInfo), lp, nc,
                 currentScore, mContext, mTrackerHandler, new NetworkAgentConfig(networkAgentConfig),
-                this, mNetd, mDnsResolver, providerId, uid, mQosCallbackTracker, mDeps);
+                this, mNetd, mDnsResolver, providerId, uid, mLingerDelayMs,
+                mQosCallbackTracker, mDeps);
 
         // Make sure the LinkProperties and NetworkCapabilities reflect what the agent info says.
         processCapabilitiesFromAgent(nai, nc);
@@ -7759,7 +7765,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     log("   accepting network in place of " + previousSatisfier.toShortString());
                 }
                 previousSatisfier.removeRequest(previousRequest.requestId);
-                previousSatisfier.lingerRequest(previousRequest.requestId, now, mLingerDelayMs);
+                previousSatisfier.lingerRequest(previousRequest.requestId, now);
             } else {
                 if (VDBG || DDBG) log("   accepting network in place of null");
             }
