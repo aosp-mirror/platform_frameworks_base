@@ -9136,6 +9136,20 @@ public final class Settings {
                 "biometric_debug_enabled";
 
         /**
+         * Whether or not biometric is allowed on Keyguard.
+         * @hide
+         */
+        @Readable
+        public static final String BIOMETRIC_KEYGUARD_ENABLED = "biometric_keyguard_enabled";
+
+        /**
+         * Whether or not biometric is allowed for apps (through BiometricPrompt).
+         * @hide
+         */
+        @Readable
+        public static final String BIOMETRIC_APP_ENABLED = "biometric_app_enabled";
+
+        /**
          * Whether the assist gesture should be enabled.
          *
          * @hide
