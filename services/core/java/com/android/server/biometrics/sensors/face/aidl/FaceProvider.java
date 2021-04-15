@@ -435,13 +435,36 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     public void scheduleSetFeature(int sensorId, @NonNull IBinder token, int userId, int feature,
             boolean enabled, @NonNull byte[] hardwareAuthToken,
             @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
-        // TODO(b/171335732): implement this.
+        mHandler.post(() -> {
+            final List<Face> faces = FaceUtils.getInstance(sensorId)
+                    .getBiometricsForUser(mContext, userId);
+            if (faces.isEmpty()) {
+                Slog.w(getTag(), "Ignoring setFeature, no templates enrolled for user: " + userId);
+                return;
+            }
+            final FaceSetFeatureClient client = new FaceSetFeatureClient(mContext,
+                    mSensors.get(sensorId).getLazySession(), token,
+                    new ClientMonitorCallbackConverter(receiver), userId,
+                    mContext.getOpPackageName(), sensorId, feature, enabled, hardwareAuthToken);
+            scheduleForSensor(sensorId, client);
+        });
     }
 
     @Override
     public void scheduleGetFeature(int sensorId, @NonNull IBinder token, int userId, int feature,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName) {
-        // TODO(b/171335732): implement this.
+        mHandler.post(() -> {
+            final List<Face> faces = FaceUtils.getInstance(sensorId)
+                    .getBiometricsForUser(mContext, userId);
+            if (faces.isEmpty()) {
+                Slog.w(getTag(), "Ignoring getFeature, no templates enrolled for user: " + userId);
+                return;
+            }
+            final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext,
+                    mSensors.get(sensorId).getLazySession(), token, callback, userId,
+                    mContext.getOpPackageName(), sensorId);
+            scheduleForSensor(sensorId, client);
+        });
     }
 
     @Override

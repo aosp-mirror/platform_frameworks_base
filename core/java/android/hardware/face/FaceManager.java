@@ -133,11 +133,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
 
         @Override
-        public void onFeatureGet(boolean success, int feature, boolean value) {
+        public void onFeatureGet(boolean success, int[] features, boolean[] featureState) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = success;
-            args.argi1 = feature;
-            args.arg2 = value;
+            args.arg2 = features;
+            args.arg3 = featureState;
             mHandler.obtainMessage(MSG_GET_FEATURE_COMPLETED, args).sendToTarget();
         }
 
@@ -1088,7 +1088,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     public abstract static class GetFeatureCallback {
-        public abstract void onCompleted(boolean success, int feature, boolean value);
+        public abstract void onCompleted(boolean success, int[] features, boolean[] featureState);
     }
 
     /**
@@ -1179,8 +1179,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 case MSG_GET_FEATURE_COMPLETED:
                     SomeArgs args = (SomeArgs) msg.obj;
                     sendGetFeatureCompleted((boolean) args.arg1 /* success */,
-                            args.argi1 /* feature */,
-                            (boolean) args.arg2 /* value */);
+                            (int[]) args.arg2 /* features */,
+                            (boolean[]) args.arg3 /* featureState */);
                     args.recycle();
                     break;
                 case MSG_CHALLENGE_GENERATED:
@@ -1216,11 +1216,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         mSetFeatureCallback.onCompleted(success, feature);
     }
 
-    private void sendGetFeatureCompleted(boolean success, int feature, boolean value) {
+    private void sendGetFeatureCompleted(boolean success, int[] features, boolean[] featureState) {
         if (mGetFeatureCallback == null) {
             return;
         }
-        mGetFeatureCallback.onCompleted(success, feature, value);
+        mGetFeatureCallback.onCompleted(success, features, featureState);
     }
 
     private void sendChallengeGenerated(int sensorId, long challenge) {
