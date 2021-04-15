@@ -46,6 +46,7 @@
             android:layout_gravity="end"
             android:background="@drawable/notif_footer_btn_background"
             android:focusable="true"
+            android:textColor="@color/notif_pill_text"
             android:contentDescription="@string/accessibility_clear_all"
             android:text="@string/clear_all_notifications_text"
         />
