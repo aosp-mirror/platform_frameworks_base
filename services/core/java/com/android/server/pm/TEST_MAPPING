@@ -85,6 +85,15 @@
           "include-annotation": "android.platform.test.annotations.Presubmit"
         }
       ]
+    },
+    {
+      "name": "PackageManagerServiceHostTests",
+      "file_patterns": ["AppsFilter\\.java"],
+      "options": [
+        {
+          "include-filter": "com.android.server.pm.test.OverlayActorVisibilityTest"
+        }
+      ]
     }
   ],
   "postsubmit": [
