@@ -43,6 +43,8 @@ public class DefaultSplitAssetLoader implements SplitAssetLoader {
     private final @ParseFlags int mFlags;
     private AssetManager mCachedAssetManager;
 
+    private ApkAssets mBaseApkAssets;
+
     public DefaultSplitAssetLoader(PackageLite pkg, @ParseFlags int flags) {
         mBaseApkPath = pkg.getBaseApkPath();
         mSplitApkPaths = pkg.getSplitApkPaths();
@@ -76,7 +78,7 @@ public class DefaultSplitAssetLoader implements SplitAssetLoader {
 
         // Load the base.
         int splitIdx = 0;
-        apkAssets[splitIdx++] = loadApkAssets(mBaseApkPath, mFlags);
+        apkAssets[splitIdx++] = mBaseApkAssets = loadApkAssets(mBaseApkPath, mFlags);
 
         // Load any splits.
         if (!ArrayUtils.isEmpty(mSplitApkPaths)) {
@@ -97,6 +99,11 @@ public class DefaultSplitAssetLoader implements SplitAssetLoader {
     @Override
     public AssetManager getSplitAssetManager(int splitIdx) throws PackageParserException {
         return getBaseAssetManager();
+    }
+
+    @Override
+    public ApkAssets getBaseApkAssets() {
+        return mBaseApkAssets;
     }
 
     @Override
