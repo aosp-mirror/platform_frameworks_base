@@ -16,10 +16,10 @@
 package android.app.appsearch;
 
 import android.app.appsearch.AppSearchBatchResult;
-import android.os.ParcelableException;
+import android.app.appsearch.AppSearchResult;
 
 /** {@hide} */
 oneway interface IAppSearchBatchResultCallback {
     void onResult(in AppSearchBatchResult result);
-    void onSystemError(in ParcelableException exception);
+    void onSystemError(in AppSearchResult result);
 }

@@ -44,7 +44,6 @@ import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -837,13 +836,12 @@ public class AppSearchManagerService extends SystemService {
         /**
          * Invokes the {@link IAppSearchBatchResultCallback} with an unexpected internal throwable.
          *
-         * <p>The throwable is converted to {@link ParcelableException}.
+         * <p>The throwable is converted to {@link AppSearchResult}.
          */
         private void invokeCallbackOnError(
-                IAppSearchBatchResultCallback callback, Throwable throwable) {
+                @NonNull IAppSearchBatchResultCallback callback, @NonNull Throwable throwable) {
             try {
-                //TODO(b/175067650) verify ParcelableException could propagate throwable correctly.
-                callback.onSystemError(new ParcelableException(throwable));
+                callback.onSystemError(throwableToFailedResult(throwable));
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to send error to the callback", e);
             }
