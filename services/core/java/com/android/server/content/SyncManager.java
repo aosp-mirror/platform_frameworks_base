@@ -1261,8 +1261,19 @@ public class SyncManager {
         return types.toArray(new SyncAdapterType[] {});
     }
 
-    public String[] getSyncAdapterPackagesForAuthorityAsUser(String authority, int userId) {
-        return mSyncAdapters.getSyncAdapterPackagesForAuthority(authority, userId);
+    public String[] getSyncAdapterPackagesForAuthorityAsUser(String authority, int callingUid,
+            int userId) {
+        final String[] syncAdapterPackages = mSyncAdapters.getSyncAdapterPackagesForAuthority(
+                authority, userId);
+        final List<String> filteredResult = new ArrayList<>(syncAdapterPackages.length);
+        for (String packageName : syncAdapterPackages) {
+            if (TextUtils.isEmpty(packageName) || mPackageManagerInternal.filterAppAccess(
+                    packageName, callingUid, userId)) {
+                continue;
+            }
+            filteredResult.add(packageName);
+        }
+        return filteredResult.toArray(new String[] {});
     }
 
     private void sendSyncFinishedOrCanceledMessage(ActiveSyncContext syncContext,
