@@ -5863,6 +5863,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             nowVisible = true;
             lastVisibleTime = SystemClock.uptimeMillis();
             mAtmService.scheduleAppGcsLocked();
+            // The nowVisible may be false in onAnimationFinished because the transition animation
+            // was started by starting window but the main window hasn't drawn so the procedure
+            // didn't schedule. Hence also check when nowVisible becomes true (drawn) to avoid the
+            // closing activity having to wait until idle timeout to be stopped or destroyed if the
+            // next activity won't report idle (e.g. repeated view animation).
+            mTaskSupervisor.scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
         }
     }
 
@@ -6696,22 +6702,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getDisplayContent().mAppTransition.notifyAppTransitionFinishedLocked(token);
         scheduleAnimation();
 
-        if (!mTaskSupervisor.mStoppingActivities.isEmpty()
-                || !mTaskSupervisor.mFinishingActivities.isEmpty()) {
-            if (mRootWindowContainer.allResumedActivitiesIdle()) {
-                // If all activities are already idle then we now need to make sure we perform
-                // the full stop of this activity. This is because we won't do that while they
-                // are still waiting for the animation to finish.
-                mTaskSupervisor.scheduleIdle();
-            } else if (mRootWindowContainer.allResumedActivitiesVisible()) {
-                // If all resumed activities are already visible (and should be drawn, see
-                // updateReportedVisibility ~ nowVisible) but not idle, we still schedule to
-                // process the stopping and finishing activities because the transition is done.
-                // This also avoids if the next activity never reports idle (e.g. animating view),
-                // the previous will need to wait until idle timeout to be stopped or destroyed.
-                mTaskSupervisor.scheduleProcessStoppingAndFinishingActivities();
-            }
-        }
+        // Schedule to handle the stopping and finishing activities which the animation is done
+        // because the activities which were animating have not been stopped yet.
+        mTaskSupervisor.scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
