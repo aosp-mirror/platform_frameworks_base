@@ -19,10 +19,16 @@ import static android.app.StatusBarManager.DISABLE_CLOCK;
 import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
 import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
+import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
+import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_OUT;
+import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.IDLE;
+
+import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +42,9 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
+import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
@@ -43,6 +52,8 @@ import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +66,8 @@ import javax.inject.Inject;
  * updated by the StatusBarIconController and DarkIconManager while it is attached.
  */
 public class CollapsedStatusBarFragment extends Fragment implements CommandQueue.Callbacks,
-        StatusBarStateController.StateListener {
+        StatusBarStateController.StateListener,
+        SystemStatusAnimationCallback {
 
     public static final String TAG = "CollapsedStatusBarFragment";
     private static final String EXTRA_PANEL_STATE = "panel_state";
@@ -78,6 +90,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private View mOperatorNameFrame;
     private CommandQueue mCommandQueue;
     private OngoingCallController mOngoingCallController;
+    private final SystemStatusAnimationScheduler mAnimationScheduler;
+    private final PrivacyDotViewController mDotViewController;
 
     private List<String> mBlockedIcons = new ArrayList<>();
 
@@ -103,8 +117,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     };
 
     @Inject
-    public CollapsedStatusBarFragment(OngoingCallController ongoingCallController) {
+    public CollapsedStatusBarFragment(
+            OngoingCallController ongoingCallController,
+            SystemStatusAnimationScheduler animationScheduler,
+            PrivacyDotViewController dotViewController
+    ) {
         mOngoingCallController = ongoingCallController;
+        mAnimationScheduler = animationScheduler;
+        mDotViewController = dotViewController;
     }
 
     @Override
@@ -127,6 +147,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mStatusBar = (PhoneStatusBarView) view;
+        View contents = mStatusBar.findViewById(R.id.status_bar_contents);
+        contents.addOnLayoutChangeListener(mStatusBarLayoutListener);
+        updateStatusBarLocation(contents.getLeft(), contents.getRight());
         if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_PANEL_STATE)) {
             mStatusBar.restoreHierarchyState(
                     savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
@@ -143,6 +166,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         showClock(false);
         initEmergencyCryptkeeperText();
         initOperatorName();
+        mAnimationScheduler.addCallback(this);
     }
 
     @Override
@@ -208,6 +232,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         if (displayId != getContext().getDisplayId()) {
             return;
         }
+        Log.d(TAG, "disable: ");
         state1 = adjustDisableFlags(state1);
         final int old1 = mDisabled1;
         final int diff1 = state1 ^ old1;
@@ -292,19 +317,22 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         return false;
     }
 
-    public void hideSystemIconArea(boolean animate) {
+    private void hideSystemIconArea(boolean animate) {
         animateHide(mSystemIconArea, animate);
     }
 
-    public void showSystemIconArea(boolean animate) {
-        animateShow(mSystemIconArea, animate);
+    private void showSystemIconArea(boolean animate) {
+        // Only show the system icon area if we are not currently animating
+        if (mAnimationScheduler.getAnimationState() == IDLE) {
+            animateShow(mSystemIconArea, animate);
+        }
     }
 
-    public void hideClock(boolean animate) {
+    private void hideClock(boolean animate) {
         animateHiddenState(mClockView, clockHiddenMode(), animate);
     }
 
-    public void showClock(boolean animate) {
+    private void showClock(boolean animate) {
         animateShow(mClockView, animate);
     }
 
@@ -425,12 +453,60 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     @Override
-    public void onStateChanged(int newState) {
-
-    }
+    public void onStateChanged(int newState) { }
 
     @Override
     public void onDozingChanged(boolean isDozing) {
         disable(getContext().getDisplayId(), mDisabled1, mDisabled1, false /* animate */);
     }
+
+    @Override
+    public void onSystemChromeAnimationStart() {
+        if (mAnimationScheduler.getAnimationState() == ANIMATING_OUT
+                && !isSystemIconAreaDisabled()) {
+            mSystemIconArea.setVisibility(View.VISIBLE);
+            mSystemIconArea.setAlpha(0f);
+        }
+    }
+
+    @Override
+    public void onSystemChromeAnimationEnd() {
+        // Make sure the system icons are out of the way
+        if (mAnimationScheduler.getAnimationState() == ANIMATING_IN) {
+            mSystemIconArea.setVisibility(View.INVISIBLE);
+            mSystemIconArea.setAlpha(0f);
+        } else {
+            if (isSystemIconAreaDisabled()) {
+                // don't unhide
+                return;
+            }
+
+            mSystemIconArea.setAlpha(1f);
+            mSystemIconArea.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onSystemChromeAnimationUpdate(@NotNull ValueAnimator animator) {
+        mSystemIconArea.setAlpha((float) animator.getAnimatedValue());
+    }
+
+    private boolean isSystemIconAreaDisabled() {
+        return (mDisabled1 & DISABLE_SYSTEM_INFO) != 0 || (mDisabled2 & DISABLE2_SYSTEM_ICONS) != 0;
+    }
+
+    private void updateStatusBarLocation(int left, int right) {
+        int leftMargin = left - mStatusBar.getLeft();
+        int rightMargin = mStatusBar.getRight() - right;
+
+        mDotViewController.setStatusBarMargins(leftMargin, rightMargin);
+    }
+
+    // Listen for view end changes of PhoneStatusBarView and publish that to the privacy dot
+    private View.OnLayoutChangeListener mStatusBarLayoutListener =
+            (view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                if (left != oldLeft || right != oldRight) {
+                    updateStatusBarLocation(left, right);
+                }
+            };
 }
