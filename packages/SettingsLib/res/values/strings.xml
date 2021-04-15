@@ -1014,6 +1014,9 @@
     <!-- Settings item title to select whether to show transcoding notifications. [CHAR LIMIT=85] -->
     <string name="transcode_notification">Show transcoding notifications</string>
 
+    <!-- Settings item title to select whether to disable cache for transcoding. [CHAR LIMIT=85] -->
+    <string name="transcode_disable_cache">Disable transcoding cache</string>
+
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
     <!-- Services settings screen, setting option summary for the user to go to the screen to view running services  -->
