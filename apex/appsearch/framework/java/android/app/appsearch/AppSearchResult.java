@@ -37,6 +37,8 @@ import java.util.Objects;
  * @param <ValueType> The type of result object for successful calls.
  */
 public final class AppSearchResult<ValueType> implements Parcelable {
+    private static final String TAG = "AppSearchResult";
+
     /**
      * Result codes from {@link AppSearchSession} methods.
      * @hide
@@ -246,14 +248,22 @@ public final class AppSearchResult<ValueType> implements Parcelable {
     @NonNull
     public static <ValueType> AppSearchResult<ValueType> throwableToFailedResult(
             @NonNull Throwable t) {
-        Log.d("AppSearchResult", "Converting throwable to failed result.", t);
+        // Log for traceability. NOT_FOUND is logged at VERBOSE because this error can occur during
+        // the regular operation of the system (b/183550974). Everything else is logged at DEBUG.
+        if (t instanceof AppSearchException
+                && ((AppSearchException) t).getResultCode() == RESULT_NOT_FOUND) {
+            Log.v(TAG, "Converting throwable to failed result: " + t);
+        } else {
+            Log.d(TAG, "Converting throwable to failed result.", t);
+        }
 
         if (t instanceof AppSearchException) {
             return ((AppSearchException) t).toAppSearchResult();
         }
 
+        String exceptionClass = t.getClass().getSimpleName();
         @AppSearchResult.ResultCode int resultCode;
-        if (t instanceof IllegalStateException) {
+        if (t instanceof IllegalStateException || t instanceof NullPointerException) {
             resultCode = AppSearchResult.RESULT_INTERNAL_ERROR;
         } else if (t instanceof IllegalArgumentException) {
             resultCode = AppSearchResult.RESULT_INVALID_ARGUMENT;
@@ -262,6 +272,6 @@ public final class AppSearchResult<ValueType> implements Parcelable {
         } else {
             resultCode = AppSearchResult.RESULT_UNKNOWN_ERROR;
         }
-        return AppSearchResult.newFailedResult(resultCode, t.getMessage());
+        return AppSearchResult.newFailedResult(resultCode, exceptionClass + ": " + t.getMessage());
     }
 }
