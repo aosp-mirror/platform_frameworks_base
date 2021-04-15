@@ -486,7 +486,7 @@ class TaskSnapshotController {
         return builder.build();
     }
 
-    private boolean shouldDisableSnapshots() {
+    boolean shouldDisableSnapshots() {
         return mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT;
     }
 
