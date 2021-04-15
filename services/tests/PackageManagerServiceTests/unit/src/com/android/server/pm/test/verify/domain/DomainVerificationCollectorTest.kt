@@ -235,9 +235,23 @@ class DomainVerificationCollectorTest {
                     <category android:name="android.intent.category.BROWSABLE"/>
                     <category android:name="android.intent.category.DEFAULT"/>
                     <data android:scheme="https"/>
-                    <data android:path="/sub5"/>
-                    <data android:host="example5.com"/>
-                    <data android:host="invalid5"/>
+                    <data android:path="/sub6"/>
+                    <data android:host="example6.com"/>
+                    <data android:host="invalid6"/>
+                </intent-filter>
+                <intent-filter android:autoVerify="$autoVerify">
+                    <category android:name="android.intent.category.BROWSABLE"/>
+                    <category android:name="android.intent.category.DEFAULT"/>
+                    <data android:scheme="example7.com"/>
+                <intent-filter android:autoVerify="$autoVerify">
+                    <category android:name="android.intent.category.BROWSABLE"/>
+                    <category android:name="android.intent.category.DEFAULT"/>
+                    <data android:scheme="https"/>
+                </intent-filter>
+                <intent-filter android:autoVerify="$autoVerify">
+                    <category android:name="android.intent.category.BROWSABLE"/>
+                    <category android:name="android.intent.category.DEFAULT"/>
+                    <data android:path="/sub7"/>
                 </intent-filter>
             </xml>
         """.trimIndent()
@@ -322,6 +336,30 @@ class DomainVerificationCollectorTest {
                                     addDataPath("/sub6", PatternMatcher.PATTERN_LITERAL)
                                     addDataAuthority("example6.com", null)
                                     addDataAuthority("invalid6", null)
+                                }
+                        )
+                        addIntent(
+                                ParsedIntentInfo().apply {
+                                    setAutoVerify(autoVerify)
+                                    addCategory(Intent.CATEGORY_BROWSABLE)
+                                    addCategory(Intent.CATEGORY_DEFAULT)
+                                    addDataAuthority("example7.com", null)
+                                }
+                        )
+                        addIntent(
+                                ParsedIntentInfo().apply {
+                                    setAutoVerify(autoVerify)
+                                    addCategory(Intent.CATEGORY_BROWSABLE)
+                                    addCategory(Intent.CATEGORY_DEFAULT)
+                                    addDataScheme("https")
+                                }
+                        )
+                        addIntent(
+                                ParsedIntentInfo().apply {
+                                    setAutoVerify(autoVerify)
+                                    addCategory(Intent.CATEGORY_BROWSABLE)
+                                    addCategory(Intent.CATEGORY_DEFAULT)
+                                    addDataPath("/sub7", PatternMatcher.PATTERN_LITERAL)
                                 }
                         )
                     },
