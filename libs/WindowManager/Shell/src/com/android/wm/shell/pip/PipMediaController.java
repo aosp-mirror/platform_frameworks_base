@@ -216,7 +216,7 @@ public class PipMediaController {
         }
 
         ArrayList<RemoteAction> mediaActions = new ArrayList<>();
-        boolean isPlaying = mMediaController.getPlaybackState().isActive();
+        boolean isPlaying = mMediaController.getPlaybackState().isActiveState();
         long actions = mMediaController.getPlaybackState().getActions();
 
         // Prev action
