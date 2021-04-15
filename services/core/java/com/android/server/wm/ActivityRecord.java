@@ -6679,6 +6679,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // traverse the copy.
         final ArrayList<WindowState> children = new ArrayList<>(mChildren);
         children.forEach(WindowState::onExitAnimationDone);
+        // The starting window could transfer to another activity after app transition started, in
+        // that case the latest top activity might not receive exit animation done callback if the
+        // starting window didn't applied exit animation success. Notify animation finish to the
+        // starting window if needed.
+        if (task != null && startingMoved) {
+            final WindowState transferredStarting = task.getWindow(w ->
+                    w.mAttrs.type == TYPE_APPLICATION_STARTING);
+            if (transferredStarting != null && transferredStarting.mAnimatingExit
+                    && !transferredStarting.isSelfAnimating(0 /* flags */,
+                    ANIMATION_TYPE_WINDOW_ANIMATION)) {
+                transferredStarting.onExitAnimationDone();
+            }
+        }
 
         getDisplayContent().mAppTransition.notifyAppTransitionFinishedLocked(token);
         scheduleAnimation();
