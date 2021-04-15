@@ -113,6 +113,8 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.charging.WiredChargingRippleController;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -263,6 +265,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private BrightnessSlider.Factory mBrightnessSliderFactory;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
     @Mock private OngoingCallController mOngoingCallController;
+    @Mock private SystemStatusAnimationScheduler mAnimationScheduler;
+    @Mock private PrivacyDotViewController mDotViewController;
     @Mock private TunerService mTunerService;
     @Mock private FeatureFlags mFeatureFlags;
     private ShadeController mShadeController;
@@ -429,6 +433,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mBrightnessSliderFactory,
                 mWiredChargingRippleController,
                 mOngoingCallController,
+                mAnimationScheduler,
+                mDotViewController,
                 mTunerService,
                 mFeatureFlags);
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
