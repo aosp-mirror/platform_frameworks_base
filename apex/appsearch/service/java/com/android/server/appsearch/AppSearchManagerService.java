@@ -64,6 +64,8 @@ import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.stats.LoggerInstanceManager;
 import com.android.server.appsearch.stats.PlatformLogger;
 
+import com.google.android.icing.proto.PersistType;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -364,6 +366,8 @@ public class AppSearchManagerService extends SystemService {
                             ++operationFailureCount;
                         }
                     }
+                    // Now that the batch has been written. Persist the newly written data.
+                    impl.persistToDisk(PersistType.Code.LITE);
                     invokeCallbackOnResult(callback, resultBuilder.build());
                 } catch (Throwable t) {
                     invokeCallbackOnError(callback, t);
@@ -631,7 +635,7 @@ public class AppSearchManagerService extends SystemService {
                             }
                         }
                     }
-                    impl.persistToDisk();
+                    impl.persistToDisk(PersistType.Code.FULL);
                     invokeCallbackOnResult(callback,
                             AppSearchResult.newSuccessfulResult(migrationFailureBundles));
                 } catch (Throwable t) {
@@ -708,6 +712,8 @@ public class AppSearchManagerService extends SystemService {
                             resultBuilder.setResult(uri, throwableToFailedResult(t));
                         }
                     }
+                    // Now that the batch has been written. Persist the newly written data.
+                    impl.persistToDisk(PersistType.Code.LITE);
                     invokeCallbackOnResult(callback, resultBuilder.build());
                 } catch (Throwable t) {
                     invokeCallbackOnError(callback, t);
@@ -741,6 +747,8 @@ public class AppSearchManagerService extends SystemService {
                             databaseName,
                             queryExpression,
                             new SearchSpec(searchSpecBundle));
+                    // Now that the batch has been written. Persist the newly written data.
+                    impl.persistToDisk(PersistType.Code.LITE);
                     invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
                 } catch (Throwable t) {
                     invokeCallbackOnError(callback, t);
@@ -785,7 +793,7 @@ public class AppSearchManagerService extends SystemService {
                     verifyUserUnlocked(callingUserId);
                     AppSearchImpl impl =
                             mImplInstanceManager.getAppSearchImpl(callingUserId);
-                    impl.persistToDisk();
+                    impl.persistToDisk(PersistType.Code.FULL);
                 } catch (Throwable t) {
                     Log.e(TAG, "Unable to persist the data to disk", t);
                 }

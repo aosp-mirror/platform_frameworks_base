@@ -19,9 +19,9 @@ package com.android.server.appsearch.external.localstorage.converter;
 import android.annotation.NonNull;
 import android.app.appsearch.SetSchemaResponse;
 
-import com.android.internal.util.Preconditions;
-
 import com.google.android.icing.proto.SetSchemaResultProto;
+
+import java.util.Objects;
 
 /**
  * Translates a {@link SetSchemaResultProto} into {@link SetSchemaResponse}.
@@ -42,8 +42,8 @@ public class SetSchemaResponseToProtoConverter {
     @NonNull
     public static SetSchemaResponse toSetSchemaResponse(
             @NonNull SetSchemaResultProto proto, @NonNull String prefix) {
-        Preconditions.checkNotNull(proto);
-        Preconditions.checkNotNull(prefix);
+        Objects.requireNonNull(proto);
+        Objects.requireNonNull(prefix);
         SetSchemaResponse.Builder builder = new SetSchemaResponse.Builder();
 
         for (int i = 0; i < proto.getDeletedSchemaTypesCount(); i++) {

@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.app.appsearch.AppSearchSchema;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import com.google.android.icing.proto.DocumentIndexingConfig;
 import com.google.android.icing.proto.PropertyConfigProto;
 import com.google.android.icing.proto.SchemaTypeConfigProto;
@@ -30,6 +28,7 @@ import com.google.android.icing.proto.StringIndexingConfig;
 import com.google.android.icing.proto.TermMatchType;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Translates an {@link AppSearchSchema} into a {@link SchemaTypeConfigProto}.
@@ -48,7 +47,7 @@ public final class SchemaToProtoConverter {
     @NonNull
     public static SchemaTypeConfigProto toSchemaTypeConfigProto(
             @NonNull AppSearchSchema schema, int version) {
-        Preconditions.checkNotNull(schema);
+        Objects.requireNonNull(schema);
         SchemaTypeConfigProto.Builder protoBuilder =
                 SchemaTypeConfigProto.newBuilder()
                         .setSchemaType(schema.getSchemaType())
@@ -64,7 +63,7 @@ public final class SchemaToProtoConverter {
     @NonNull
     private static PropertyConfigProto toPropertyConfigProto(
             @NonNull AppSearchSchema.PropertyConfig property) {
-        Preconditions.checkNotNull(property);
+        Objects.requireNonNull(property);
         PropertyConfigProto.Builder builder =
                 PropertyConfigProto.newBuilder().setPropertyName(property.getName());
 
@@ -116,7 +115,7 @@ public final class SchemaToProtoConverter {
      */
     @NonNull
     public static AppSearchSchema toAppSearchSchema(@NonNull SchemaTypeConfigProtoOrBuilder proto) {
-        Preconditions.checkNotNull(proto);
+        Objects.requireNonNull(proto);
         AppSearchSchema.Builder builder = new AppSearchSchema.Builder(proto.getSchemaType());
         List<PropertyConfigProto> properties = proto.getPropertiesList();
         for (int i = 0; i < properties.size(); i++) {
@@ -129,7 +128,7 @@ public final class SchemaToProtoConverter {
     @NonNull
     private static AppSearchSchema.PropertyConfig toPropertyConfig(
             @NonNull PropertyConfigProto proto) {
-        Preconditions.checkNotNull(proto);
+        Objects.requireNonNull(proto);
         switch (proto.getDataType()) {
             case STRING:
                 return toStringPropertyConfig(proto);

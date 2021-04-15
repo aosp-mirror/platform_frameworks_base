@@ -31,6 +31,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -101,11 +102,11 @@ public class GenericDocument {
      * @hide
      */
     public GenericDocument(@NonNull Bundle bundle) {
-        Preconditions.checkNotNull(bundle);
+        Objects.requireNonNull(bundle);
         mBundle = bundle;
-        mProperties = Preconditions.checkNotNull(bundle.getParcelable(PROPERTIES_FIELD));
-        mUri = Preconditions.checkNotNull(mBundle.getString(URI_FIELD));
-        mSchemaType = Preconditions.checkNotNull(mBundle.getString(SCHEMA_TYPE_FIELD));
+        mProperties = Objects.requireNonNull(bundle.getParcelable(PROPERTIES_FIELD));
+        mUri = Objects.requireNonNull(mBundle.getString(URI_FIELD));
+        mSchemaType = Objects.requireNonNull(mBundle.getString(SCHEMA_TYPE_FIELD));
         mCreationTimestampMillis =
                 mBundle.getLong(CREATION_TIMESTAMP_MILLIS_FIELD, System.currentTimeMillis());
     }
@@ -199,7 +200,7 @@ public class GenericDocument {
      */
     @Nullable
     public Object getProperty(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         Object property = mProperties.get(key);
         if (property instanceof ArrayList) {
             return getPropertyBytesArray(key);
@@ -218,7 +219,7 @@ public class GenericDocument {
      */
     @Nullable
     public String getPropertyString(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         String[] propertyArray = getPropertyStringArray(key);
         if (propertyArray == null || propertyArray.length == 0) {
             return null;
@@ -235,7 +236,7 @@ public class GenericDocument {
      *     there is no such key or the value is of a different type.
      */
     public long getPropertyLong(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         long[] propertyArray = getPropertyLongArray(key);
         if (propertyArray == null || propertyArray.length == 0) {
             return 0;
@@ -252,7 +253,7 @@ public class GenericDocument {
      *     if there is no such key or the value is of a different type.
      */
     public double getPropertyDouble(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         double[] propertyArray = getPropertyDoubleArray(key);
         if (propertyArray == null || propertyArray.length == 0) {
             return 0.0;
@@ -269,7 +270,7 @@ public class GenericDocument {
      *     false} if there is no such key or the value is of a different type.
      */
     public boolean getPropertyBoolean(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         boolean[] propertyArray = getPropertyBooleanArray(key);
         if (propertyArray == null || propertyArray.length == 0) {
             return false;
@@ -287,7 +288,7 @@ public class GenericDocument {
      */
     @Nullable
     public byte[] getPropertyBytes(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         byte[][] propertyArray = getPropertyBytesArray(key);
         if (propertyArray == null || propertyArray.length == 0) {
             return null;
@@ -305,7 +306,7 @@ public class GenericDocument {
      */
     @Nullable
     public GenericDocument getPropertyDocument(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         GenericDocument[] propertyArray = getPropertyDocumentArray(key);
         if (propertyArray == null || propertyArray.length == 0) {
             return null;
@@ -342,7 +343,7 @@ public class GenericDocument {
      */
     @Nullable
     public String[] getPropertyStringArray(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         return getAndCastPropertyArray(key, String[].class);
     }
 
@@ -355,7 +356,7 @@ public class GenericDocument {
      */
     @Nullable
     public long[] getPropertyLongArray(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         return getAndCastPropertyArray(key, long[].class);
     }
 
@@ -368,7 +369,7 @@ public class GenericDocument {
      */
     @Nullable
     public double[] getPropertyDoubleArray(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         return getAndCastPropertyArray(key, double[].class);
     }
 
@@ -381,7 +382,7 @@ public class GenericDocument {
      */
     @Nullable
     public boolean[] getPropertyBooleanArray(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         return getAndCastPropertyArray(key, boolean[].class);
     }
 
@@ -396,7 +397,7 @@ public class GenericDocument {
     @Nullable
     @SuppressWarnings("unchecked")
     public byte[][] getPropertyBytesArray(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         ArrayList<Bundle> bundles = getAndCastPropertyArray(key, ArrayList.class);
         if (bundles == null || bundles.size() == 0) {
             return null;
@@ -428,7 +429,7 @@ public class GenericDocument {
     @SuppressLint("ArrayReturn")
     @Nullable
     public GenericDocument[] getPropertyDocumentArray(@NonNull String key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
         Parcelable[] bundles = getAndCastPropertyArray(key, Parcelable[].class);
         if (bundles == null || bundles.length == 0) {
             return null;
@@ -591,9 +592,9 @@ public class GenericDocument {
          */
         @SuppressWarnings("unchecked")
         public Builder(@NonNull String namespace, @NonNull String uri, @NonNull String schemaType) {
-            Preconditions.checkNotNull(namespace);
-            Preconditions.checkNotNull(uri);
-            Preconditions.checkNotNull(schemaType);
+            Objects.requireNonNull(namespace);
+            Objects.requireNonNull(uri);
+            Objects.requireNonNull(schemaType);
             mBuilderTypeInstance = (BuilderType) this;
             mBundle.putString(GenericDocument.NAMESPACE_FIELD, namespace);
             mBundle.putString(GenericDocument.URI_FIELD, uri);
@@ -682,8 +683,8 @@ public class GenericDocument {
         @NonNull
         public BuilderType setPropertyString(@NonNull String key, @NonNull String... values) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(key);
-            Preconditions.checkNotNull(values);
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(values);
             putInPropertyBundle(key, values);
             return mBuilderTypeInstance;
         }
@@ -694,15 +695,14 @@ public class GenericDocument {
          *
          * @param key the key associated with the {@code values}.
          * @param values the {@code boolean} values of the property.
-         * @throws IllegalArgumentException if no values are provided or if values exceed maximum
-         *     repeated property length.
+         * @throws IllegalArgumentException if values exceed maximum repeated property length.
          * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setPropertyBoolean(@NonNull String key, @NonNull boolean... values) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(key);
-            Preconditions.checkNotNull(values);
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(values);
             putInPropertyBundle(key, values);
             return mBuilderTypeInstance;
         }
@@ -712,15 +712,14 @@ public class GenericDocument {
          *
          * @param key the key associated with the {@code values}.
          * @param values the {@code long} values of the property.
-         * @throws IllegalArgumentException if no values are provided or if values exceed maximum
-         *     repeated property length.
+         * @throws IllegalArgumentException if values exceed maximum repeated property length.
          * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setPropertyLong(@NonNull String key, @NonNull long... values) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(key);
-            Preconditions.checkNotNull(values);
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(values);
             putInPropertyBundle(key, values);
             return mBuilderTypeInstance;
         }
@@ -730,15 +729,14 @@ public class GenericDocument {
          *
          * @param key the key associated with the {@code values}.
          * @param values the {@code double} values of the property.
-         * @throws IllegalArgumentException if no values are provided or if values exceed maximum
-         *     repeated property length.
+         * @throws IllegalArgumentException if values exceed maximum repeated property length.
          * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public BuilderType setPropertyDouble(@NonNull String key, @NonNull double... values) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(key);
-            Preconditions.checkNotNull(values);
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(values);
             putInPropertyBundle(key, values);
             return mBuilderTypeInstance;
         }
@@ -755,8 +753,8 @@ public class GenericDocument {
         @NonNull
         public BuilderType setPropertyBytes(@NonNull String key, @NonNull byte[]... values) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(key);
-            Preconditions.checkNotNull(values);
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(values);
             putInPropertyBundle(key, values);
             return mBuilderTypeInstance;
         }
@@ -776,8 +774,8 @@ public class GenericDocument {
         public BuilderType setPropertyDocument(
                 @NonNull String key, @NonNull GenericDocument... values) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(key);
-            Preconditions.checkNotNull(values);
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(values);
             putInPropertyBundle(key, values);
             return mBuilderTypeInstance;
         }
@@ -850,9 +848,7 @@ public class GenericDocument {
         }
 
         private static void validateRepeatedPropertyLength(@NonNull String key, int length) {
-            if (length == 0) {
-                throw new IllegalArgumentException("The input array is empty.");
-            } else if (length > MAX_REPEATED_PROPERTY_LENGTH) {
+            if (length > MAX_REPEATED_PROPERTY_LENGTH) {
                 throw new IllegalArgumentException(
                         "Repeated property \""
                                 + key
