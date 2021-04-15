@@ -5382,8 +5382,8 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_ATTRIBUTION_TAGS = "android.intent.extra.ATTRIBUTION_TAGS";
 
     /**
-     * A long representing the start timestamp (in millis) of the permission usage when used with
-     * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * A long representing the start timestamp (epoch time in millis) of the permission usage
+     * when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
      *
      * @hide
      */
@@ -5391,8 +5391,8 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_START_TIME = "android.intent.extra.START_TIME";
 
     /**
-     * A long representing the end timestamp (in millis) of the permission usage when used with
-     * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * A long representing the end timestamp (epoch time in millis) of the permission usage when
+     * used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
      *
      * @hide
      */
