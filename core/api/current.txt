@@ -18825,6 +18825,7 @@ package android.hardware.camera2.params {
 package android.hardware.display {
 
   public final class DeviceProductInfo implements android.os.Parcelable {
+    ctor public DeviceProductInfo(@Nullable String, @NonNull String, @NonNull String, @IntRange(from=1990) int, int);
     method public int describeContents();
     method public int getConnectionToSinkType();
     method @IntRange(from=0xffffffff, to=53) public int getManufactureWeek();
