@@ -871,7 +871,8 @@ public class PipTouchHandler {
                     mMotionHelper.flingToSnapTarget(vel.x, vel.y,
                             this::flingEndAction /* endAction */);
                 }
-            } else if (mTouchState.isDoubleTap() && !mPipBoundsState.isStashed()) {
+            } else if (mTouchState.isDoubleTap() && !mPipBoundsState.isStashed()
+                    && mMenuState != MENU_STATE_FULL) {
                 // If using pinch to zoom, double-tap functions as resizing between max/min size
                 if (mPipResizeGestureHandler.isUsingPinchToZoom()) {
                     final boolean toExpand = mPipBoundsState.getBounds().width()
