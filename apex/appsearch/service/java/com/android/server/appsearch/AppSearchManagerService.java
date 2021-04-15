@@ -16,7 +16,6 @@
 package com.android.server.appsearch;
 
 import static android.app.appsearch.AppSearchResult.throwableToFailedResult;
-import static android.os.Process.INVALID_UID;
 import static android.os.UserHandle.USER_NULL;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -37,7 +36,6 @@ import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaResponse;
 import android.app.appsearch.StorageInfo;
-import android.app.appsearch.exceptions.AppSearchException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +52,7 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -121,14 +120,6 @@ public class AppSearchManagerService extends SystemService {
         mContext.registerReceiverAsUser(new UserActionReceiver(), UserHandle.ALL,
                 new IntentFilter(Intent.ACTION_USER_REMOVED), /*broadcastPermission=*/ null,
                 /*scheduler=*/ null);
-
-        IntentFilter packageChangedFilter = new IntentFilter();
-        packageChangedFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
-        packageChangedFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
-        packageChangedFilter.addDataScheme("package");
-        mContext.registerReceiverAsUser(new PackageChangedReceiver(), UserHandle.ALL,
-                packageChangedFilter, /*broadcastPermission=*/ null,
-                /*scheduler=*/ null);
     }
 
     private class UserActionReceiver extends BroadcastReceiver {
@@ -136,15 +127,15 @@ public class AppSearchManagerService extends SystemService {
         public void onReceive(@NonNull Context context, @NonNull Intent intent) {
             switch (intent.getAction()) {
                 case Intent.ACTION_USER_REMOVED:
-                    int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                     if (userId == USER_NULL) {
-                        Log.e(TAG, "userId is missing in the intent: " + intent);
+                        Slog.e(TAG, "userId is missing in the intent: " + intent);
                         return;
                     }
                     handleUserRemoved(userId);
                     break;
                 default:
-                    Log.e(TAG, "Received unknown intent: " + intent);
+                    Slog.e(TAG, "Received unknown intent: " + intent);
             }
         }
     }
@@ -164,44 +155,9 @@ public class AppSearchManagerService extends SystemService {
         try {
             mImplInstanceManager.removeAppSearchImplForUser(userId);
             mLoggerInstanceManager.removePlatformLoggerForUser(userId);
-            Log.i(TAG, "Removed AppSearchImpl instance for user: " + userId);
+            Slog.i(TAG, "Removed AppSearchImpl instance for user: " + userId);
         } catch (Throwable t) {
-            Log.e(TAG, "Unable to remove data for user: " + userId, t);
-        }
-    }
-
-    private class PackageChangedReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(@NonNull Context context, @NonNull Intent intent) {
-            switch (intent.getAction()) {
-                case Intent.ACTION_PACKAGE_FULLY_REMOVED:
-                case Intent.ACTION_PACKAGE_DATA_CLEARED:
-                    String packageName = intent.getData().getSchemeSpecificPart();
-                    if (packageName == null) {
-                        Log.e(TAG, "Package name is missing in the intent: " + intent);
-                        return;
-                    }
-                    int uid = intent.getIntExtra(Intent.EXTRA_UID, INVALID_UID);
-                    if (uid == INVALID_UID) {
-                        Log.e(TAG, "uid is missing in the intent: " + intent);
-                        return;
-                    }
-                    handlePackageRemoved(packageName, uid);
-                    break;
-                default:
-                    Log.e(TAG, "Received unknown intent: " + intent);
-            }
-        }
-    }
-
-    private void handlePackageRemoved(String packageName, int uid) {
-        int userId = UserHandle.getUserId(uid);
-        try {
-            AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext, userId);
-            //TODO(b/145759910) clear visibility setting for package.
-            impl.clearPackageData(packageName);
-        } catch (AppSearchException e) {
-            Log.e(TAG, "Unable to remove data for package: " + packageName, e);
+            Slog.e(TAG, "Unable to remove data for user: " + userId, t);
         }
     }
 
