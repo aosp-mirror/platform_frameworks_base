@@ -257,7 +257,7 @@ class PrivacyItemController @Inject constructor(
             privacyList = emptyList()
             return
         }
-        val list = appOpsController.getActiveAppOpsForUser(UserHandle.USER_ALL).filter {
+        val list = appOpsController.getActiveAppOps(true).filter {
             UserHandle.getUserId(it.uid) in currentUserIds ||
                     it.code == AppOpsManager.OP_PHONE_CALL_MICROPHONE ||
                     it.code == AppOpsManager.OP_PHONE_CALL_CAMERA
@@ -279,7 +279,9 @@ class PrivacyItemController @Inject constructor(
 
         // Anything earlier than this timestamp can be removed
         val removeBeforeTime = systemClock.elapsedRealtime() - TIME_TO_HOLD_INDICATORS
-        val mustKeep = privacyList.filter { it.timeStampElapsed > removeBeforeTime && it !in list }
+        val mustKeep = privacyList.filter {
+            it.timeStampElapsed > removeBeforeTime && !(it isIn list)
+        }
 
         // There are items we must keep because they haven't been around for enough time.
         if (mustKeep.isNotEmpty()) {
@@ -291,7 +293,18 @@ class PrivacyItemController @Inject constructor(
             logger.logPrivacyItemsUpdateScheduled(delay)
             holdingRunnableCanceler = bgExecutor.executeDelayed(updateListAndNotifyChanges, delay)
         }
-        return list + mustKeep
+        return list.filter { !it.paused } + mustKeep
+    }
+
+    /**
+     * Ignores the paused status to determine if the element is in the list
+     */
+    private infix fun PrivacyItem.isIn(list: List<PrivacyItem>): Boolean {
+        return list.any {
+            it.privacyType == privacyType &&
+                    it.application == application &&
+                    it.timeStampElapsed == timeStampElapsed
+        }
     }
 
     private fun toPrivacyItem(appOpItem: AppOpItem): PrivacyItem? {
@@ -308,7 +321,7 @@ class PrivacyItemController @Inject constructor(
             return null
         }
         val app = PrivacyApplication(appOpItem.packageName, appOpItem.uid)
-        return PrivacyItem(type, app, appOpItem.timeStartedElapsed)
+        return PrivacyItem(type, app, appOpItem.timeStartedElapsed, appOpItem.isDisabled)
     }
 
     interface Callback {
