@@ -74,6 +74,12 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
     @Test
     override fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
+    @FlakyTest
+    @Test
+    override fun statusBarLayerIsAlwaysVisible() {
+        super.statusBarLayerIsAlwaysVisible()
+    }
+
     @Presubmit
     @Test
     fun bothAppWindowsVisible() {

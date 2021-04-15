@@ -125,6 +125,12 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
+    @FlakyTest
+    @Test
+    override fun noUncoveredRegions() {
+        super.noUncoveredRegions()
+    }
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

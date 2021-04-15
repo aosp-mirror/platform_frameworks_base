@@ -19,19 +19,21 @@ package com.android.server.wm.flicker
 import android.platform.helpers.IAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.NAV_BAR_LAYER_NAME
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.NAV_BAR_WINDOW_NAME
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.STATUS_BAR_LAYER_NAME
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.STATUS_BAR_WINDOW_NAME
 
-const val WALLPAPER_TITLE = "Wallpaper"
+val LAUNCHER_TITLE = arrayOf("Wallpaper", "Launcher", "com.google.android.googlequicksearchbox")
 
 fun FlickerTestParameter.statusBarWindowIsAlwaysVisible() {
     assertWm {
-        this.showsAboveAppWindow(NAV_BAR_LAYER_NAME)
+        this.showsAboveAppWindow(STATUS_BAR_WINDOW_NAME)
     }
 }
 
 fun FlickerTestParameter.navBarWindowIsAlwaysVisible() {
     assertWm {
-        this.showsAboveAppWindow(NAV_BAR_LAYER_NAME)
+        this.showsAboveAppWindow(NAV_BAR_WINDOW_NAME)
     }
 }
 
@@ -39,23 +41,23 @@ fun FlickerTestParameter.launcherReplacesAppWindowAsTopWindow(testApp: IAppHelpe
     assertWm {
         this.showsAppWindowOnTop(testApp.getPackage())
             .then()
-            .showsAppWindowOnTop("Launcher")
+            .showsAppWindowOnTop(*LAUNCHER_TITLE)
     }
 }
 
-fun FlickerTestParameter.wallpaperWindowBecomesVisible() {
+fun FlickerTestParameter.launcherWindowBecomesVisible() {
     assertWm {
-        this.hidesBelowAppWindow(WALLPAPER_TITLE)
+        this.hidesBelowAppWindow(*LAUNCHER_TITLE)
             .then()
-            .showsBelowAppWindow(WALLPAPER_TITLE)
+            .showsBelowAppWindow(*LAUNCHER_TITLE)
     }
 }
 
-fun FlickerTestParameter.wallpaperWindowBecomesInvisible() {
+fun FlickerTestParameter.launcherWindowBecomesInvisible() {
     assertWm {
-        this.showsBelowAppWindow(WALLPAPER_TITLE)
+        this.showsBelowAppWindow(*LAUNCHER_TITLE)
             .then()
-            .hidesBelowAppWindow(WALLPAPER_TITLE)
+            .hidesBelowAppWindow(*LAUNCHER_TITLE)
     }
 }
 
@@ -130,15 +132,15 @@ fun FlickerTestParameter.navBarLayerIsAlwaysVisible(rotatesScreen: Boolean = fal
 fun FlickerTestParameter.statusBarLayerIsAlwaysVisible(rotatesScreen: Boolean = false) {
     if (rotatesScreen) {
         assertLayers {
-            this.isVisible(STATUS_BAR_WINDOW_NAME)
+            this.isVisible(STATUS_BAR_LAYER_NAME)
                 .then()
-                .isInvisible(STATUS_BAR_WINDOW_NAME)
+                .isInvisible(STATUS_BAR_LAYER_NAME)
                 .then()
-                .isVisible(STATUS_BAR_WINDOW_NAME)
+                .isVisible(STATUS_BAR_LAYER_NAME)
         }
     } else {
         assertLayers {
-            this.isVisible(STATUS_BAR_WINDOW_NAME)
+            this.isVisible(STATUS_BAR_LAYER_NAME)
         }
     }
 }
@@ -168,34 +170,27 @@ fun FlickerTestParameter.statusBarLayerRotatesScales(
     val endingPos = WindowUtils.getStatusBarPosition(endRotation)
 
     assertLayersStart {
-        this.visibleRegion(STATUS_BAR_WINDOW_NAME).coversExactly(startingPos)
+        this.visibleRegion(STATUS_BAR_LAYER_NAME).coversExactly(startingPos)
     }
     assertLayersEnd {
-        this.visibleRegion(STATUS_BAR_WINDOW_NAME).coversExactly(endingPos)
+        this.visibleRegion(STATUS_BAR_LAYER_NAME).coversExactly(endingPos)
     }
 }
 
-fun FlickerTestParameter.appLayerReplacesWallpaperLayer(appName: String) {
+fun FlickerTestParameter.appLayerReplacesLauncher(appName: String) {
     assertLayers {
-        this.isVisible(WALLPAPER_TITLE)
+        this.isVisible(*LAUNCHER_TITLE)
             .then()
-            .isInvisible(WALLPAPER_TITLE)
             .isVisible(appName)
     }
 }
 
-fun FlickerTestParameter.wallpaperLayerReplacesAppLayer(testApp: IAppHelper) {
+fun FlickerTestParameter.launcherLayerReplacesApp(testApp: IAppHelper) {
     assertLayers {
         this.isVisible(testApp.getPackage())
             .then()
             .isInvisible(testApp.getPackage())
-            .isVisible(WALLPAPER_TITLE)
-    }
-}
-
-fun FlickerTestParameter.layerAlwaysVisible(packageName: String) {
-    assertLayers {
-        this.isVisible(packageName)
+            .isVisible(*LAUNCHER_TITLE)
     }
 }
 

@@ -2871,6 +2871,7 @@ public class Intent implements Parcelable, Cloneable {
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent by the system.
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_FULLY_LOADED =

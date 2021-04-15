@@ -53,7 +53,7 @@ public class WifiPowerCalculatorTest {
             .setAveragePower(PowerProfile.POWER_WIFI_SCAN, 480.0)
             .setAveragePower(PowerProfile.POWER_WIFI_BATCHED_SCAN, 720.0)
             .setAveragePower(PowerProfile.POWER_WIFI_ACTIVE, 1080.0)
-            .initMeasuredEnergyStatsLocked(0);
+            .initMeasuredEnergyStatsLocked();
 
     /** Sets up a batterystats object with pre-populated network values. */
     private BatteryStatsImpl setupTestNetworkNumbers() {

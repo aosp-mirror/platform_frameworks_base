@@ -362,8 +362,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     /** Notifies the VcnManagementService that external dependencies can be set up. */
     public void systemReady() {
-        mContext.getSystemService(ConnectivityManager.class)
-                .registerNetworkProvider(mNetworkProvider);
+        mNetworkProvider.register();
         mContext.getSystemService(ConnectivityManager.class)
                 .registerNetworkCallback(
                         new NetworkRequest.Builder().clearCapabilities().build(),
@@ -935,13 +934,31 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         pw.println("VcnManagementService dump:");
         pw.increaseIndent();
 
+        pw.println("mNetworkProvider:");
+        pw.increaseIndent();
         mNetworkProvider.dump(pw);
+        pw.decreaseIndent();
+        pw.println();
+
+        pw.println("mTrackingNetworkCallback:");
+        pw.increaseIndent();
+        mTrackingNetworkCallback.dump(pw);
+        pw.decreaseIndent();
+        pw.println();
 
         synchronized (mLock) {
+            pw.println("mLastSnapshot:");
+            pw.increaseIndent();
+            mLastSnapshot.dump(pw);
+            pw.decreaseIndent();
+            pw.println();
+
             pw.println("mVcns:");
+            pw.increaseIndent();
             for (Vcn vcn : mVcns.values()) {
                 vcn.dump(pw);
             }
+            pw.decreaseIndent();
             pw.println();
         }
 
@@ -1002,6 +1019,24 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             }
 
             return false;
+        }
+
+        /** Dumps the state of this snapshot for logging and debugging purposes. */
+        public void dump(IndentingPrintWriter pw) {
+            pw.println("TrackingNetworkCallback:");
+            pw.increaseIndent();
+
+            pw.println("mCaps:");
+            pw.increaseIndent();
+            synchronized (mCaps) {
+                for (Entry<Network, NetworkCapabilities> entry : mCaps.entrySet()) {
+                    pw.println(entry.getKey() + ": " + entry.getValue());
+                }
+            }
+            pw.decreaseIndent();
+            pw.println();
+
+            pw.decreaseIndent();
         }
     }
 

@@ -43,6 +43,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -318,6 +319,17 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
 
             return mSubIdToGroupMap.equals(other.mSubIdToGroupMap)
                     && mPrivilegedPackages.equals(other.mPrivilegedPackages);
+        }
+
+        /** Dumps the state of this snapshot for logging and debugging purposes. */
+        public void dump(IndentingPrintWriter pw) {
+            pw.println("TelephonySubscriptionSnapshot:");
+            pw.increaseIndent();
+
+            pw.println("mSubIdToGroupMap: " + mSubIdToGroupMap);
+            pw.println("mPrivilegedPackages: " + mPrivilegedPackages);
+
+            pw.decreaseIndent();
         }
 
         @Override

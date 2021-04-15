@@ -103,6 +103,12 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
         }
     }
 
+    @FlakyTest
+    @Test
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

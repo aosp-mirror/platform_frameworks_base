@@ -37,6 +37,7 @@ import com.android.wm.shell.animation.Interpolators;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Controller class of PiP animations (both from and to PiP mode).
@@ -112,6 +113,7 @@ public class PipAnimationController {
                     PipTransitionAnimator.ofAlpha(taskInfo, leash, destinationBounds, alphaStart,
                             alphaEnd));
         } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_ALPHA
+                && Objects.equals(destinationBounds, mCurrentAnimator.getDestinationBounds())
                 && mCurrentAnimator.isRunning()) {
             mCurrentAnimator.updateEndValue(alphaEnd);
         } else {

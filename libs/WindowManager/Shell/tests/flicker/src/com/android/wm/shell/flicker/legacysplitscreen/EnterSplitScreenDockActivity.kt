@@ -23,7 +23,7 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.WALLPAPER_TITLE
+import com.android.server.wm.flicker.LAUNCHER_TITLE
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -60,9 +60,9 @@ class EnterSplitScreenDockActivity(
         }
 
     override val ignoredWindows: List<String>
-        get() = listOf(LAUNCHER_PACKAGE_NAME, WALLPAPER_TITLE, LIVE_WALLPAPER_PACKAGE_NAME,
+        get() = listOf(LAUNCHER_PACKAGE_NAME, LIVE_WALLPAPER_PACKAGE_NAME,
             splitScreenApp.defaultWindowName, WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME, *LAUNCHER_TITLE)
 
     @FlakyTest(bugId = 169271943)
     @Test
