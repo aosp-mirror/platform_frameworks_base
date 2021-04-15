@@ -19,9 +19,9 @@ package android.app.appsearch;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.appsearch.exceptions.AppSearchException;
 import android.app.appsearch.util.SchemaMigrationUtil;
 import android.os.Bundle;
-import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArrayMap;
@@ -274,12 +274,14 @@ public final class AppSearchSession implements Closeable {
             mService.putDocuments(mPackageName, mDatabaseName, documentBundles, mUserId,
                     /*binderCallStartTimeMillis=*/ SystemClock.elapsedRealtime(),
                     new IAppSearchBatchResultCallback.Stub() {
+                        @Override
                         public void onResult(AppSearchBatchResult result) {
                             executor.execute(() -> callback.onResult(result));
                         }
 
-                        public void onSystemError(ParcelableException exception) {
-                            executor.execute(() -> callback.onSystemError(exception.getCause()));
+                        @Override
+                        public void onSystemError(AppSearchResult result) {
+                            executor.execute(() -> sendSystemErrorToCallback(result, callback));
                         }
                     });
             mIsMutated = true;
@@ -321,6 +323,7 @@ public final class AppSearchSession implements Closeable {
                     request.getProjectionsInternal(),
                     mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
+                        @Override
                         public void onResult(AppSearchBatchResult result) {
                             executor.execute(() -> {
                                 AppSearchBatchResult.Builder<String, GenericDocument>
@@ -359,8 +362,9 @@ public final class AppSearchSession implements Closeable {
                             });
                         }
 
-                        public void onSystemError(ParcelableException exception) {
-                            executor.execute(() -> callback.onSystemError(exception.getCause()));
+                        @Override
+                        public void onSystemError(AppSearchResult result) {
+                            executor.execute(() -> sendSystemErrorToCallback(result, callback));
                         }
                     });
         } catch (RemoteException e) {
@@ -515,12 +519,14 @@ public final class AppSearchSession implements Closeable {
             mService.removeByUri(mPackageName, mDatabaseName, request.getNamespace(),
                     new ArrayList<>(request.getUris()), mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
+                        @Override
                         public void onResult(AppSearchBatchResult result) {
                             executor.execute(() -> callback.onResult(result));
                         }
 
-                        public void onSystemError(ParcelableException exception) {
-                            executor.execute(() -> callback.onSystemError(exception.getCause()));
+                        @Override
+                        public void onSystemError(AppSearchResult result) {
+                            executor.execute(() -> sendSystemErrorToCallback(result, callback));
                         }
                     });
             mIsMutated = true;
@@ -816,5 +822,22 @@ public final class AppSearchSession implements Closeable {
                         AppSearchResult.throwableToFailedResult(t)));
             }
         });
+    }
+
+    /**
+     * Calls {@link BatchResultCallback#onSystemError} with a throwable derived from the given
+     * failed {@link AppSearchResult}.
+     *
+     * <p>The {@link AppSearchResult} generally comes from
+     * {@link IAppSearchBatchResultCallback#onSystemError}.
+     *
+     * <p>This method should be called from the callback executor thread.
+     */
+    private void sendSystemErrorToCallback(
+            @NonNull AppSearchResult<?> failedResult, @NonNull BatchResultCallback<?, ?> callback) {
+        Preconditions.checkArgument(!failedResult.isSuccess());
+        Throwable throwable = new AppSearchException(
+                failedResult.getResultCode(), failedResult.getErrorMessage());
+        callback.onSystemError(throwable);
     }
 }
