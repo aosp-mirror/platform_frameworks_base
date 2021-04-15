@@ -816,6 +816,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         mControllers.get(c).onAppRemovedLocked(pkgName, pkgUid);
                     }
                     mDebuggableApps.remove(pkgName);
+                    mConcurrencyManager.onAppRemovedLocked(pkgName, pkgUid);
                 }
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
