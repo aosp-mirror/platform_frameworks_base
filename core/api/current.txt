@@ -5666,6 +5666,7 @@ package android.app {
     field public static final String EXTRA_AUDIO_CONTENTS_URI = "android.audioContents";
     field public static final String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
     field public static final String EXTRA_BIG_TEXT = "android.bigText";
+    field public static final String EXTRA_CALL_IS_VIDEO = "android.callIsVideo";
     field public static final String EXTRA_CALL_PERSON = "android.callPerson";
     field public static final String EXTRA_CHANNEL_GROUP_ID = "android.intent.extra.CHANNEL_GROUP_ID";
     field public static final String EXTRA_CHANNEL_ID = "android.intent.extra.CHANNEL_ID";
@@ -5972,6 +5973,7 @@ package android.app {
     method @NonNull public static android.app.Notification.CallStyle forScreeningCall(@NonNull android.app.Person, @NonNull android.app.PendingIntent, @NonNull android.app.PendingIntent);
     method @NonNull public android.app.Notification.CallStyle setAnswerButtonColorHint(@ColorInt int);
     method @NonNull public android.app.Notification.CallStyle setDeclineButtonColorHint(@ColorInt int);
+    method @NonNull public android.app.Notification.CallStyle setIsVideo(boolean);
     method @NonNull public android.app.Notification.CallStyle setVerificationIcon(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.app.Notification.CallStyle setVerificationText(@Nullable CharSequence);
   }
@@ -7130,7 +7132,7 @@ package android.app.admin {
     method public int getGlobalPrivateDnsMode(@NonNull android.content.ComponentName);
     method @NonNull public java.util.List<byte[]> getInstalledCaCerts(@Nullable android.content.ComponentName);
     method @Nullable public java.util.List<java.lang.String> getKeepUninstalledPackages(@Nullable android.content.ComponentName);
-    method @NonNull public java.util.Set<java.util.Set<java.lang.String>> getKeyPairGrants(@NonNull String);
+    method @NonNull public java.util.Map<java.lang.Integer,java.util.Set<java.lang.String>> getKeyPairGrants(@NonNull String);
     method public int getKeyguardDisabledFeatures(@Nullable android.content.ComponentName);
     method public int getLockTaskFeatures(@NonNull android.content.ComponentName);
     method @NonNull public String[] getLockTaskPackages(@NonNull android.content.ComponentName);
@@ -11089,7 +11091,6 @@ package android.content {
     field public static final String ACTION_PACKAGE_CHANGED = "android.intent.action.PACKAGE_CHANGED";
     field public static final String ACTION_PACKAGE_DATA_CLEARED = "android.intent.action.PACKAGE_DATA_CLEARED";
     field public static final String ACTION_PACKAGE_FIRST_LAUNCH = "android.intent.action.PACKAGE_FIRST_LAUNCH";
-    field public static final String ACTION_PACKAGE_FULLY_LOADED = "android.intent.action.PACKAGE_FULLY_LOADED";
     field public static final String ACTION_PACKAGE_FULLY_REMOVED = "android.intent.action.PACKAGE_FULLY_REMOVED";
     field @Deprecated public static final String ACTION_PACKAGE_INSTALL = "android.intent.action.PACKAGE_INSTALL";
     field public static final String ACTION_PACKAGE_NEEDS_VERIFICATION = "android.intent.action.PACKAGE_NEEDS_VERIFICATION";
@@ -25216,6 +25217,7 @@ package android.media.session {
     method public float getPlaybackSpeed();
     method public long getPosition();
     method public int getState();
+    method public boolean isActive();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final long ACTION_FAST_FORWARD = 64L; // 0x40L
     field public static final long ACTION_PAUSE = 2L; // 0x2L

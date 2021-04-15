@@ -302,6 +302,11 @@ public class UiTranslationController {
                 }
                 final LongSparseArray<ViewTranslationResponse> virtualChildResponse =
                         translatedResult.valueAt(i);
+                if (DEBUG) {
+                    // TODO(b/182433547): remove before S release
+                    Log.v(TAG, "onVirtualViewTranslationCompleted: receive "
+                            + virtualChildResponse + " for AutofillId " + autofillId);
+                }
                 mActivity.runOnUiThread(() -> {
                     if (view.getViewTranslationCallback() == null) {
                         if (DEBUG) {
@@ -341,8 +346,13 @@ public class UiTranslationController {
             }
             for (int i = 0; i < resultCount; i++) {
                 final ViewTranslationResponse response = translatedResult.valueAt(i);
+                if (DEBUG) {
+                    // TODO(b/182433547): remove before S release
+                    Log.v(TAG, "onTranslationCompleted: response= " + response);
+                }
                 final AutofillId autofillId = response.getAutofillId();
                 if (autofillId == null) {
+                    Log.w(TAG, "No AutofillId is set in ViewTranslationResponse:" + response);
                     continue;
                 }
                 final View view = mViews.get(autofillId).get();
@@ -394,6 +404,9 @@ public class UiTranslationController {
         final TranslationRequest request = new TranslationRequest.Builder()
                 .setViewTranslationRequests(requests)
                 .build();
+        if (DEBUG) {
+            Log.d(TAG, "sendTranslationRequest: request= " + request);
+        }
         translator.requestUiTranslate(request, (r) -> r.run(), this::onTranslationCompleted);
     }
 
@@ -508,10 +521,17 @@ public class UiTranslationController {
     private void runForEachView(BiConsumer<View, ViewTranslationCallback> action) {
         synchronized (mLock) {
             final ArrayMap<AutofillId, WeakReference<View>> views = new ArrayMap<>(mViews);
+            if (views.size() == 0) {
+                Log.w(TAG, "No views can be excuted for runForEachView.");
+            }
             mActivity.runOnUiThread(() -> {
                 final int viewCounts = views.size();
                 for (int i = 0; i < viewCounts; i++) {
                     final View view = views.valueAt(i).get();
+                    if (DEBUG) {
+                        // TODO(b/182433547): remove before S release
+                        Log.d(TAG, "runForEachView: view= " + view);
+                    }
                     if (view == null || view.getViewTranslationCallback() == null) {
                         if (DEBUG) {
                             Log.d(TAG, "View was gone or ViewTranslationCallback for autofillid "

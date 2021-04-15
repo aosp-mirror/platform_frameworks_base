@@ -29,6 +29,8 @@ import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
+import android.content.Context;
+import android.os.Handler;
 import android.os.TimestampedValue;
 import android.util.IndentingPrintWriter;
 import android.util.LocalLog;
@@ -37,6 +39,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.timezonedetector.ArrayMapWithHistory;
+import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 
 import java.time.Instant;
@@ -132,6 +135,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     public interface Environment {
 
         /**
+         * Sets a {@link ConfigurationChangeListener} that will be invoked when there are any
+         * changes that could affect time detection. This is invoked during system server setup.
+         */
+        void setConfigChangeListener(@NonNull ConfigurationChangeListener listener);
+
+        /**
          * The absolute threshold below which the system clock need not be updated. i.e. if setting
          * the system clock would adjust it by less than this (either backwards or forwards) then it
          * need not be set.
@@ -178,8 +187,19 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         void releaseWakeLock();
     }
 
+    static TimeDetectorStrategy create(
+            @NonNull Context context, @NonNull Handler handler,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor) {
+
+        TimeDetectorStrategyImpl.Environment environment =
+                new EnvironmentImpl(context, handler, serviceConfigAccessor);
+        return new TimeDetectorStrategyImpl(environment);
+    }
+
+    @VisibleForTesting
     TimeDetectorStrategyImpl(@NonNull Environment environment) {
         mEnvironment = Objects.requireNonNull(environment);
+        mEnvironment.setConfigChangeListener(this::handleAutoTimeConfigChanged);
     }
 
     @Override
@@ -279,8 +299,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         return mEnvironment.configurationInternal(userId);
     }
 
-    @Override
-    public synchronized void handleAutoTimeConfigChanged() {
+    private synchronized void handleAutoTimeConfigChanged() {
         boolean enabled = mEnvironment.isAutoTimeDetectionEnabled();
         // When automatic time detection is enabled we update the system clock instantly if we can.
         // Conversely, when automatic time detection is disabled we leave the clock as it is.

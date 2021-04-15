@@ -4655,7 +4655,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // still check DC#okToAnimate again if the transition animation is fine to apply.
         // TODO(new-app-transition): Rewrite this logic using WM Shell.
         final boolean recentsAnimating = isAnimating(PARENTS, ANIMATION_TYPE_RECENTS);
-        if (okToAnimate(true /* ignoreFrozen */) && (appTransition.isTransitionSet()
+        if (okToAnimate(true /* ignoreFrozen */, canTurnScreenOn())
+                && (appTransition.isTransitionSet()
                 || (recentsAnimating && !isActivityTypeHome()))) {
             if (visible) {
                 displayContent.mOpeningApps.add(this);

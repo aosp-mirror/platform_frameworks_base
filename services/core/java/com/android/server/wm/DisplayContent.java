@@ -4436,9 +4436,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     boolean okToDisplay(boolean ignoreFrozen) {
+        return okToDisplay(ignoreFrozen, false /* ignoreScreenOn */);
+    }
+
+    boolean okToDisplay(boolean ignoreFrozen, boolean ignoreScreenOn) {
         if (mDisplayId == DEFAULT_DISPLAY) {
             return (!mWmService.mDisplayFrozen || ignoreFrozen)
-                    && mWmService.mDisplayEnabled && mWmService.mPolicy.isScreenOn();
+                    && mWmService.mDisplayEnabled
+                    && (ignoreScreenOn || mWmService.mPolicy.isScreenOn());
         }
         return mDisplayInfo.state == Display.STATE_ON;
     }
@@ -4448,8 +4453,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     boolean okToAnimate(boolean ignoreFrozen) {
-        return okToDisplay(ignoreFrozen) &&
-                (mDisplayId != DEFAULT_DISPLAY || mWmService.mPolicy.okToAnimate());
+        return okToAnimate(ignoreFrozen, false /* ignoreScreenOn */);
+    }
+
+    boolean okToAnimate(boolean ignoreFrozen, boolean ignoreScreenOn) {
+        return okToDisplay(ignoreFrozen, ignoreScreenOn)
+                && (mDisplayId != DEFAULT_DISPLAY
+                || mWmService.mPolicy.okToAnimate(ignoreScreenOn));
     }
 
     static final class TaskForResizePointSearchResult {

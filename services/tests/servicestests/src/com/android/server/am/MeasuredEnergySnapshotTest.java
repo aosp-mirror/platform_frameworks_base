@@ -18,6 +18,8 @@ package com.android.server.am;
 
 import static com.android.server.am.MeasuredEnergySnapshot.UNAVAILABLE;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -224,15 +226,15 @@ public final class MeasuredEnergySnapshotTest {
     }
 
     @Test
-    public void testGetNumOtherOrdinals() {
+    public void testGetOtherOrdinalNames() {
         final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
-        assertEquals(3, snapshot.getNumOtherOrdinals());
+        assertThat(snapshot.getOtherOrdinalNames()).asList().containsExactly("GPU", "HPU", "IPU");
     }
 
     @Test
-    public void testGetNumOtherOrdinals_none() {
+    public void testGetOtherOrdinalNames_none() {
         final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(SOME_ID_CONSUMER_MAP);
-        assertEquals(0, snapshot.getNumOtherOrdinals());
+        assertEquals(0, snapshot.getOtherOrdinalNames().length);
     }
 
     private static EnergyConsumer createEnergyConsumer(int id, int ord, byte type, String name) {

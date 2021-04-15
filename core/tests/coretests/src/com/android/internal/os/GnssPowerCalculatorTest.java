@@ -42,7 +42,7 @@ public class GnssPowerCalculatorTest {
             .setAveragePower(PowerProfile.POWER_GPS_ON, 360.0)
             .setAveragePower(PowerProfile.POWER_GPS_SIGNAL_QUALITY_BASED,
                     new double[] {720.0, 1440.0, 1800.0})
-            .initMeasuredEnergyStatsLocked(0);
+            .initMeasuredEnergyStatsLocked();
 
     @Test
     public void testTimerBasedModel() {

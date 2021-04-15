@@ -104,6 +104,7 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeApplyTransaction(long transactionObj, boolean sync);
     private static native void nativeMergeTransaction(long transactionObj,
             long otherTransactionObj);
+    private static native void nativeClearTransaction(long transactionObj);
     private static native void nativeSetAnimationTransaction(long transactionObj);
     private static native void nativeSetEarlyWakeupStart(long transactionObj);
     private static native void nativeSetEarlyWakeupEnd(long transactionObj);
@@ -2602,6 +2603,19 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Clear the transaction object, without applying it.
+         *
+         * @hide
+         */
+        public void clear() {
+            mResizedSurfaces.clear();
+            mReparentedSurfaces.clear();
+            if (mNativeObject != 0) {
+                nativeClearTransaction(mNativeObject);
+            }
+        }
+
+        /**
          * Release the native transaction object, without applying it.
          */
         @Override
@@ -3411,10 +3425,14 @@ public final class SurfaceControl implements Parcelable {
         public void writeToParcel(@NonNull Parcel dest, @WriteFlags int flags) {
             if (mNativeObject == 0) {
                 dest.writeInt(0);
-            } else {
-                dest.writeInt(1);
+                return;
             }
+
+            dest.writeInt(1);
             nativeWriteTransactionToParcel(mNativeObject, dest);
+            if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
+                nativeClearTransaction(mNativeObject);
+            }
         }
 
         private void readFromParcel(Parcel in) {

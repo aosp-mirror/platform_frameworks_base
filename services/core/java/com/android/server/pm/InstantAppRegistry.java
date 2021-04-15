@@ -57,6 +57,7 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.utils.Snappable;
+import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
 import com.android.server.utils.Watched;
@@ -146,7 +147,7 @@ class InstantAppRegistry implements Watchable, Snappable {
     /**
      * The cached snapshot
      */
-    private volatile InstantAppRegistry mSnapshot = null;
+    private final SnapshotCache<InstantAppRegistry> mSnapshot;
 
     /**
      * Watchable machinery
@@ -162,7 +163,6 @@ class InstantAppRegistry implements Watchable, Snappable {
         return mWatchable.isRegisteredObserver(observer);
     }
     public void dispatchChange(@Nullable Watchable what) {
-        mSnapshot = null;
         mWatchable.dispatchChange(what);
     }
     /**
@@ -180,6 +180,16 @@ class InstantAppRegistry implements Watchable, Snappable {
             }
         };
 
+    private SnapshotCache<InstantAppRegistry> makeCache() {
+        return new SnapshotCache<InstantAppRegistry>(this, this) {
+            @Override
+            public InstantAppRegistry createSnapshot() {
+                InstantAppRegistry s = new InstantAppRegistry(mSource);
+                s.mWatchable.seal();
+                return s;
+            }};
+    }
+
     public InstantAppRegistry(PackageManagerService service,
             PermissionManagerServiceInternal permissionManager) {
         mService = service;
@@ -194,6 +204,8 @@ class InstantAppRegistry implements Watchable, Snappable {
         mInstantGrants.registerObserver(mObserver);
         mInstalledInstantAppUids.registerObserver(mObserver);
         Watchable.verifyWatchedAttributes(this, mObserver);
+
+        mSnapshot = makeCache();
     }
 
     /**
@@ -211,20 +223,15 @@ class InstantAppRegistry implements Watchable, Snappable {
         mInstalledInstantAppUids = new WatchedSparseArray<WatchedSparseBooleanArray>(
             r.mInstalledInstantAppUids);
 
-        // Do not register any observers.  This is a clone
+        // Do not register any observers.  This is a snapshot.
+        mSnapshot = null;
     }
 
     /**
      * Return a snapshot: the value is the cached snapshot if available.
      */
     public InstantAppRegistry snapshot() {
-        InstantAppRegistry s = mSnapshot;
-        if (s == null) {
-            s = new InstantAppRegistry(this);
-            s.mWatchable.seal();
-            mSnapshot = s;
-        }
-        return s;
+        return mSnapshot.snapshot();
     }
 
     @GuardedBy("mService.mLock")
