@@ -45,8 +45,6 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:paddingLeft="@dimen/qs_tile_layout_margin_side"
-            android:paddingRight="@dimen/qs_tile_layout_margin_side"
             android:paddingBottom="28dp"
             android:clipToPadding="false"
             android:scrollIndicators="top"

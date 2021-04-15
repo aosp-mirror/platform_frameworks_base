@@ -43,10 +43,7 @@
             android:background="@android:color/transparent"
             android:focusable="true"
             android:accessibilityTraversalBefore="@android:id/edit">
-            <ViewStub
-                android:id="@+id/qs_footer_stub"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+            <include layout="@layout/qs_footer_impl" />
             <include layout="@layout/qs_media_divider"
                 android:id="@+id/divider"/>
         </com.android.systemui.qs.QSPanel>
