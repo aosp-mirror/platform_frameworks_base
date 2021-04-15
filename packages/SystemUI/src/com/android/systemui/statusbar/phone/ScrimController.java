@@ -487,6 +487,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     /**
+     * Set bounds for notifications background, all coordinates are absolute
+     */
+    public void setNotificationsBounds(float left, float top, float right, float bottom) {
+        mNotificationsScrim.setDrawableBounds(left, top, right, bottom);
+    }
+
+    /**
      * Current state of the QuickSettings when pulling it from the top.
      *
      * @param expansionFraction From 0 to 1 where 0 means collapsed and 1 expanded.
@@ -496,7 +503,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (isNaN(expansionFraction)) {
             return;
         }
-        shiftNotificationsScrim(qsPanelBottomY);
         updateNotificationsScrimAlpha(expansionFraction, qsPanelBottomY);
         if (mQsExpansion != expansionFraction) {
             mQsExpansion = expansionFraction;
@@ -508,14 +514,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 return;
             }
             applyAndDispatchExpansion();
-        }
-    }
-
-    private void shiftNotificationsScrim(int qsPanelBottomY) {
-        if (qsPanelBottomY > 0) {
-            mNotificationsScrim.setTranslationY(qsPanelBottomY);
-        } else {
-            mNotificationsScrim.setTranslationY(0);
         }
     }
 
