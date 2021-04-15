@@ -51,7 +51,7 @@ package android.app.prediction {
 package android.bluetooth {
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
-    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
   }
 
 }
