@@ -2721,8 +2721,22 @@ class ActivityStarter {
                     launchFlags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
                     break;
                 case ActivityInfo.DOCUMENT_LAUNCH_NEVER:
-                    launchFlags &=
-                            ~(Intent.FLAG_ACTIVITY_NEW_DOCUMENT | FLAG_ACTIVITY_MULTIPLE_TASK);
+                    if (mLaunchMode == LAUNCH_SINGLE_INSTANCE_PER_TASK) {
+                        // Remove MULTIPLE_TASK flag along with NEW_DOCUMENT only if NEW_DOCUMENT
+                        // is set, otherwise we still want to keep the MULTIPLE_TASK flag (if
+                        // any) for singleInstancePerTask that the multiple tasks can be created,
+                        // or a singleInstancePerTask activity is basically the same as a
+                        // singleTask activity when documentLaunchMode set to never.
+                        if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0) {
+                            launchFlags &= ~(Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                                    | FLAG_ACTIVITY_MULTIPLE_TASK);
+                        }
+                    } else {
+                        // TODO(b/184903976): Should FLAG_ACTIVITY_MULTIPLE_TASK always be
+                        // removed for document-never activity?
+                        launchFlags &=
+                                ~(Intent.FLAG_ACTIVITY_NEW_DOCUMENT | FLAG_ACTIVITY_MULTIPLE_TASK);
+                    }
                     break;
             }
         }
