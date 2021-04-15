@@ -2223,7 +2223,11 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
-    public void minWindow() {
+    public void minWindowChangeEnabled() {
+        doReturn(true).when(
+                () -> CompatChanges.isChangeEnabled(
+                        eq(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS),
+                        anyString(), any(UserHandle.class)));
         final long minWindow = 73;
         setDeviceConfigLong(KEY_MIN_WINDOW, minWindow);
 
@@ -2235,6 +2239,26 @@ public class AlarmManagerServiceTest {
             assertEquals(1, mService.mAlarmStore.size());
             final Alarm a = mService.mAlarmStore.remove(unused -> true).get(0);
             assertEquals(minWindow, a.windowLength);
+        }
+    }
+
+    @Test
+    public void minWindowChangeDisabled() {
+        doReturn(false).when(
+                () -> CompatChanges.isChangeEnabled(
+                        eq(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS),
+                        anyString(), any(UserHandle.class)));
+        final long minWindow = 73;
+        setDeviceConfigLong(KEY_MIN_WINDOW, minWindow);
+
+        // 0 is WINDOW_EXACT and < 0 is WINDOW_HEURISTIC.
+        for (int window = 1; window <= minWindow; window++) {
+            final PendingIntent pi = getNewMockPendingIntent();
+            setTestAlarm(ELAPSED_REALTIME, 0, window, pi, 0, 0, TEST_CALLING_UID, null);
+
+            assertEquals(1, mService.mAlarmStore.size());
+            final Alarm a = mService.mAlarmStore.remove(unused -> true).get(0);
+            assertEquals(window, a.windowLength);
         }
     }
 

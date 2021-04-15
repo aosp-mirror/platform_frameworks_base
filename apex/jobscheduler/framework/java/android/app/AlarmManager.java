@@ -208,16 +208,31 @@ public class AlarmManager {
     public static final int FLAG_PRIORITIZE = 1 << 6;
 
     /**
-     * For apps targeting {@link Build.VERSION_CODES#S} or above, APIs
-     * {@link #setExactAndAllowWhileIdle(int, long, PendingIntent)} and
-     * {@link #setAlarmClock(AlarmClockInfo, PendingIntent)} will require holding a new
-     * permission {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
+     * For apps targeting {@link Build.VERSION_CODES#S} or above, any APIs setting exact alarms,
+     * e.g. {@link #setExact(int, long, PendingIntent)},
+     * {@link #setAlarmClock(AlarmClockInfo, PendingIntent)} and others will require holding a new
+     * permission {@link Manifest.permission#SCHEDULE_EXACT_ALARM}
      *
      * @hide
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     public static final long REQUIRE_EXACT_ALARM_PERMISSION = 171306433L;
+
+    /**
+     * For apps targeting {@link Build.VERSION_CODES#S} or above, all inexact alarms will require
+     * to have a minimum window size, expected to be on the order of a few minutes.
+     *
+     * Practically, any alarms requiring smaller windows are the same as exact alarms and should use
+     * the corresponding APIs provided, like {@link #setExact(int, long, PendingIntent)}, et al.
+     *
+     * Inexact alarm with shorter windows specified will have their windows elongated by the system.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    public static final long ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS = 185199076L;
 
     @UnsupportedAppUsage
     private final IAlarmManager mService;
@@ -483,6 +498,11 @@ public class AlarmManager {
      * modest timeliness requirements for its alarms.
      *
      * <p>
+     * Note: Starting with API {@link Build.VERSION_CODES#S}, the system will ensure that the window
+     * specified is at least a few minutes, as smaller windows are considered practically exact
+     * and should use the other APIs provided for exact alarms.
+     *
+     * <p>
      * This method can also be used to achieve strict ordering guarantees among
      * multiple alarms by ensuring that the windows requested for each alarm do
      * not intersect.
@@ -532,6 +552,13 @@ public class AlarmManager {
      * The OnAlarmListener {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
+     *
+     * <p>
+     * Note: Starting with API {@link Build.VERSION_CODES#S}, the system will ensure that the window
+     * specified is at least a few minutes, as smaller windows are considered practically exact
+     * and should use the other APIs provided for exact alarms.
+     *
+     * @see #setWindow(int, long, long, PendingIntent)
      */
     public void setWindow(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
             String tag, OnAlarmListener listener, Handler targetHandler) {
