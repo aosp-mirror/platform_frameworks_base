@@ -165,6 +165,18 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
         mView.postInvalidate();
     }
 
+    /**
+     * Whether to listen for touches outside of the view.
+     */
+    boolean listenForTouchesOutsideView() {
+        return false;
+    }
+
+    /**
+     * Called on touches outside of the view if listenForTouchesOutsideView returns true
+     */
+    void onTouchOutsideView() { }
+
     private final StatusBar.ExpansionChangedListener mStatusBarExpansionChangedListener =
             new StatusBar.ExpansionChangedListener() {
                 @Override

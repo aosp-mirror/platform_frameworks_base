@@ -39,6 +39,7 @@ import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
 import android.media.AudioAttributes;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -106,6 +107,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     @NonNull private final Vibrator mVibrator;
     @NonNull private final Handler mMainHandler;
     @NonNull private final FalsingManager mFalsingManager;
+    @NonNull private final PowerManager mPowerManager;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -266,6 +268,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         final boolean isFingerDown = udfpsView.isIlluminationRequested();
         boolean handled = false;
         switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_OUTSIDE:
+                udfpsView.onTouchOutsideView();
+                break;
             case MotionEvent.ACTION_DOWN:
                 // To simplify the lifecycle of the velocity tracker, make sure it's never null
                 // after ACTION_DOWN, and always null after ACTION_CANCEL or ACTION_UP.
@@ -332,6 +337,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                             onFingerDown((int) x, (int) y, minor, major);
                             Log.v(TAG, "onTouch | finger down: " + touchInfo);
                             mTouchLogTime = SystemClock.elapsedRealtime();
+                            mPowerManager.userActivity(SystemClock.uptimeMillis(),
+                                    PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
                             handled = true;
                         } else if (sinceLastLog >= MIN_TOUCH_LOG_INTERVAL) {
                             Log.v(TAG, "onTouch | finger move: " + touchInfo);
@@ -377,7 +384,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             @NonNull DumpManager dumpManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull KeyguardViewMediator keyguardViewMediator,
-            @NonNull FalsingManager falsingManager) {
+            @NonNull FalsingManager falsingManager,
+            @NonNull PowerManager powerManager) {
         mContext = context;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
         mMainHandler = new Handler(Looper.getMainLooper());
@@ -395,6 +403,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardViewMediator = keyguardViewMediator;
         mFalsingManager = falsingManager;
+        mPowerManager = powerManager;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -403,10 +412,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
         mCoreLayoutParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                getCoreLayoutParamFlags(),
                 PixelFormat.TRANSLUCENT);
         mCoreLayoutParams.setTitle(TAG);
         mCoreLayoutParams.setFitInsetsTypes(0);
@@ -420,6 +426,13 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    private int getCoreLayoutParamFlags() {
+        return WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
     }
 
     @Nullable
@@ -466,6 +479,11 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             @Nullable UdfpsAnimationViewController animation) {
         final int paddingX = animation != null ? animation.getPaddingX() : 0;
         final int paddingY = animation != null ? animation.getPaddingY() : 0;
+
+        mCoreLayoutParams.flags = getCoreLayoutParamFlags();
+        if (animation.listenForTouchesOutsideView()) {
+            mCoreLayoutParams.flags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+        }
 
         // Default dimensions assume portrait mode.
         mCoreLayoutParams.x = mSensorProps.sensorLocationX - mSensorProps.sensorRadius - paddingX;
