@@ -72,6 +72,7 @@ import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -381,8 +382,10 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static StartingWindowController provideStartingWindowController(Context context,
-            @ShellSplashscreenThread ShellExecutor splashScreenExecutor, TransactionPool pool) {
-        return new StartingWindowController(context, splashScreenExecutor, pool);
+            @ShellSplashscreenThread ShellExecutor splashScreenExecutor,
+            StartingWindowTypeAlgorithm startingWindowTypeAlgorithm, TransactionPool pool) {
+        return new StartingWindowController(context, splashScreenExecutor,
+                startingWindowTypeAlgorithm, pool);
     }
 
     //
