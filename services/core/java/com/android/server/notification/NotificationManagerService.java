@@ -380,8 +380,6 @@ public class NotificationManagerService extends SystemService {
     static final int INVALID_UID = -1;
     static final String ROOT_PKG = "root";
 
-    static final boolean ENABLE_BLOCKED_TOASTS = true;
-
     static final String[] DEFAULT_ALLOWED_ADJUSTMENTS = new String[] {
             Adjustment.KEY_CONTEXTUAL_ACTIONS,
             Adjustment.KEY_TEXT_REPLIES,
@@ -3167,34 +3165,11 @@ public class NotificationManagerService extends SystemService {
             }
 
             final int callingUid = Binder.getCallingUid();
-            final UserHandle callingUser = Binder.getCallingUserHandle();
+            checkCallerIsSameApp(pkg);
             final boolean isSystemToast = isCallerSystemOrPhone()
                     || PackageManagerService.PLATFORM_PACKAGE_NAME.equals(pkg);
-            final boolean isPackageSuspended = isPackagePaused(pkg);
-            final boolean notificationsDisabledForPackage = !areNotificationsEnabledForPackage(pkg,
-                    callingUid);
-
-            final boolean appIsForeground;
-            final long callingIdentity = Binder.clearCallingIdentity();
-            try {
-                appIsForeground = mActivityManager.getUidImportance(callingUid)
-                        == IMPORTANCE_FOREGROUND;
-            } finally {
-                Binder.restoreCallingIdentity(callingIdentity);
-            }
-
-            if (ENABLE_BLOCKED_TOASTS && !isSystemToast && ((notificationsDisabledForPackage
-                    && !appIsForeground) || isPackageSuspended)) {
-                Slog.e(TAG, "Suppressing toast from package " + pkg
-                        + (isPackageSuspended ? " due to package suspended."
-                        : " by user request."));
-                return;
-            }
-
             boolean isAppRenderedToast = (callback != null);
-            if (blockToast(callingUid, isSystemToast, isAppRenderedToast)) {
-                Slog.w(TAG, "Blocking custom toast from package " + pkg
-                        + " due to package not in the foreground at time the toast was posted");
+            if (!checkCanEnqueueToast(pkg, callingUid, isAppRenderedToast, isSystemToast)) {
                 return;
             }
 
@@ -3246,6 +3221,39 @@ public class NotificationManagerService extends SystemService {
                     Binder.restoreCallingIdentity(callingId);
                 }
             }
+        }
+
+        private boolean checkCanEnqueueToast(String pkg, int callingUid,
+                boolean isAppRenderedToast, boolean isSystemToast) {
+            final boolean isPackageSuspended = isPackagePaused(pkg);
+            final boolean notificationsDisabledForPackage = !areNotificationsEnabledForPackage(pkg,
+                    callingUid);
+
+            final boolean appIsForeground;
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                appIsForeground = mActivityManager.getUidImportance(callingUid)
+                        == IMPORTANCE_FOREGROUND;
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+
+            if (!isSystemToast && ((notificationsDisabledForPackage && !appIsForeground)
+                    || isPackageSuspended)) {
+                Slog.e(TAG, "Suppressing toast from package " + pkg
+                        + (isPackageSuspended ? " due to package suspended."
+                        : " by user request."));
+                return false;
+            }
+
+            if (blockToast(callingUid, isSystemToast, isAppRenderedToast,
+                    isPackageInForegroundForToast(callingUid))) {
+                Slog.w(TAG, "Blocking custom toast from package " + pkg
+                        + " due to package not in the foreground at time the toast was posted");
+                return false;
+            }
+
+            return true;
         }
 
         @Override
@@ -7694,12 +7702,13 @@ public class NotificationManagerService extends SystemService {
             boolean isWithinQuota =
                     mToastRateLimiter.isWithinQuota(userId, record.pkg, TOAST_QUOTA_TAG)
                             || isExemptFromRateLimiting(record.pkg, userId);
+            boolean isPackageInForeground = isPackageInForegroundForToast(record.uid);
 
             if (tryShowToast(
-                    record, rateLimitingEnabled, isWithinQuota)) {
+                    record, rateLimitingEnabled, isWithinQuota, isPackageInForeground)) {
                 scheduleDurationReachedLocked(record, lastToastWasTextRecord);
                 mIsCurrentToastShown = true;
-                if (rateLimitingEnabled) {
+                if (rateLimitingEnabled && !isPackageInForeground) {
                     mToastRateLimiter.noteEvent(userId, record.pkg, TOAST_QUOTA_TAG);
                 }
                 return;
@@ -7715,14 +7724,15 @@ public class NotificationManagerService extends SystemService {
 
     /** Returns true if it successfully showed the toast. */
     private boolean tryShowToast(ToastRecord record, boolean rateLimitingEnabled,
-            boolean isWithinQuota) {
-        if (rateLimitingEnabled && !isWithinQuota) {
+            boolean isWithinQuota, boolean isPackageInForeground) {
+        if (rateLimitingEnabled && !isWithinQuota && !isPackageInForeground) {
             reportCompatRateLimitingToastsChange(record.uid);
             Slog.w(TAG, "Package " + record.pkg + " is above allowed toast quota, the "
                     + "following toast was blocked and discarded: " + record);
             return false;
         }
-        if (blockToast(record.uid, record.isSystemToast, record.isAppRendered())) {
+        if (blockToast(record.uid, record.isSystemToast, record.isAppRendered(),
+                isPackageInForeground)) {
             Slog.w(TAG, "Blocking custom toast from package " + record.pkg
                     + " due to package not in the foreground at the time of showing the toast");
             return false;
@@ -7913,10 +7923,11 @@ public class NotificationManagerService extends SystemService {
      * with targetSdk < R. For apps with targetSdk R+, text toasts are not app-rendered, so
      * isAppRenderedToast == true means it's a custom toast.
      */
-    private boolean blockToast(int uid, boolean isSystemToast, boolean isAppRenderedToast) {
+    private boolean blockToast(int uid, boolean isSystemToast, boolean isAppRenderedToast,
+            boolean isPackageInForeground) {
         return isAppRenderedToast
                 && !isSystemToast
-                && !isPackageInForegroundForToast(uid)
+                && !isPackageInForeground
                 && CompatChanges.isChangeEnabled(CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK, uid);
     }
 
