@@ -646,8 +646,12 @@ class TaskSnapshotController {
         if (shouldDisableSnapshots()) {
             return;
         }
+        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
+        if (displayContent == null) {
+            return;
+        }
         mTmpTasks.clear();
-        mService.mRoot.getDisplayContent(displayId).forAllTasks(task -> {
+        displayContent.forAllTasks(task -> {
             // Since RecentsAnimation will handle task snapshot while switching apps with the best
             // capture timing (e.g. IME window capture), No need additional task capture while task
             // is controlled by RecentsAnimation.
