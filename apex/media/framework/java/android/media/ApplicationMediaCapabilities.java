@@ -242,7 +242,7 @@ public final class ApplicationMediaCapabilities implements Parcelable {
                 }
             };
 
-    /*
+    /**
      * Query the video codec mime types supported by the application.
      * @return List of supported video codec mime types. The list will be empty if there are none.
      */
@@ -251,7 +251,7 @@ public final class ApplicationMediaCapabilities implements Parcelable {
         return new ArrayList<>(mSupportedVideoMimeTypes);
     }
 
-    /*
+    /**
      * Query the video codec mime types that are not supported by the application.
      * @return List of unsupported video codec mime types. The list will be empty if there are none.
      */
@@ -260,7 +260,7 @@ public final class ApplicationMediaCapabilities implements Parcelable {
         return new ArrayList<>(mUnsupportedVideoMimeTypes);
     }
 
-    /*
+    /**
      * Query all hdr types that are supported by the application.
      * @return List of supported hdr types. The list will be empty if there are none.
      */
@@ -269,7 +269,7 @@ public final class ApplicationMediaCapabilities implements Parcelable {
         return new ArrayList<>(mSupportedHdrTypes);
     }
 
-    /*
+    /**
      * Query all hdr types that are not supported by the application.
      * @return List of unsupported hdr types. The list will be empty if there are none.
      */
@@ -278,7 +278,7 @@ public final class ApplicationMediaCapabilities implements Parcelable {
         return new ArrayList<>(mUnsupportedHdrTypes);
     }
 
-    /*
+    /**
      * Whether handling of slow-motion video is supported
      * @hide
      */
