@@ -27,8 +27,7 @@ import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
-import static com.android.server.am.ActivityStackSupervisor
-        .MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
+import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,6 +45,8 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityOptions;
 import android.app.WaitResult;
 import android.graphics.Rect;
+import android.os.RemoteException;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -406,5 +407,34 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
 
         // Assert that the primary stack is returned.
         assertEquals(primaryStack, result);
+    }
+
+    @Test
+    public void testLockAllProfileTasks() throws Exception {
+        // Make an activity visible with the user id set to 1
+        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(mFullscreenStack).build();
+        final ActivityRecord activity = new ActivityBuilder(mService).setTask(task)
+                .setUid(UserHandle.PER_USER_RANGE + 1).build();
+
+        // Create another activity on top and the user id is 2
+        final ActivityRecord topActivity = new ActivityBuilder(mService)
+                .setTask(task).setUid(UserHandle.PER_USER_RANGE + 2).build();
+
+        // Make sure the listeners will be notified for putting the task to locked state
+        LocalTaskStackListener listener = new LocalTaskStackListener();
+        mService.registerTaskStackListener(listener);
+        mService.mStackSupervisor.lockAllProfileTasks(1);
+        assertTrue(listener.mTaskProfileLocked);
+        mService.unregisterTaskStackListener(listener);
+    }
+
+    private class LocalTaskStackListener extends android.app.TaskStackListener {
+        boolean mTaskProfileLocked;
+
+        @Override
+        public void onTaskProfileLocked(int taskId, int userId) throws RemoteException {
+            super.onTaskProfileLocked(taskId, userId);
+            mTaskProfileLocked = true;
+        }
     }
 }
