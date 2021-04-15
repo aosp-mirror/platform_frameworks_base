@@ -259,7 +259,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         // WHEN it is cancelled
-        mUdfpsController.onCancelAodInterrupt();
+        mUdfpsController.onCancelUdfps();
         // THEN the illumination is hidden
         verify(mUdfpsView).stopIllumination();
     }

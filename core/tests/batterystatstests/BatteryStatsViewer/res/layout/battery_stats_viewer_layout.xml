@@ -43,9 +43,39 @@
                 android:paddingEnd="10dp">
 
                 <include layout="@layout/battery_consumer_info_layout"/>
-
             </LinearLayout>
+
         </androidx.cardview.widget.CardView>
+
+
+        <LinearLayout
+            android:id="@+id/headings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="2dp"
+            android:paddingBottom="4dp">
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingEnd="10dp"
+                android:text="Total"/>
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingEnd="30dp"
+                android:text="Apps"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/battery_consumer_data_view"

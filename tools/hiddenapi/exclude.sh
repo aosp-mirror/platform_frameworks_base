@@ -10,7 +10,6 @@ LIBCORE_PACKAGES="\
   android.system \
   android.test \
   com.android.bouncycastle \
-  com.android.i18n.phonenumbers \
   com.android.okhttp \
   com.sun \
   dalvik \

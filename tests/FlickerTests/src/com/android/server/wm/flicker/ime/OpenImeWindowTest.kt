@@ -34,7 +34,6 @@ import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.appWindowAlwaysVisibleOnTop
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.layerAlwaysVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
@@ -113,7 +112,11 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun layerAlwaysVisible() = testSpec.layerAlwaysVisible(testApp.`package`)
+    fun layerAlwaysVisible() {
+        testSpec.assertLayers {
+            this.isVisible(testApp.`package`)
+        }
+    }
 
     @Presubmit
     @Test

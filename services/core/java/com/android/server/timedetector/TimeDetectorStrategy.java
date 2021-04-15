@@ -92,12 +92,6 @@ public interface TimeDetectorStrategy extends Dumpable {
     /** Returns the configuration that controls time detector behaviour for specified user. */
     ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
 
-    /**
-     * Handles the auto-time configuration changing For example, when the auto-time setting is
-     * toggled on or off.
-     */
-    void handleAutoTimeConfigChanged();
-
     // Utility methods below are to be moved to a better home when one becomes more obvious.
 
     /**

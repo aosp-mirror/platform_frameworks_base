@@ -123,13 +123,19 @@ droidstubs {
     },
     dists: [
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/public/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/public/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -137,21 +143,18 @@ droidstubs {
     ],
 }
 
-priv_apps =
-    " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+priv_apps = " --show-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
     "\\)"
 
-priv_apps_in_stubs =
-    " --show-for-stub-purposes-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+priv_apps_in_stubs = " --show-for-stub-purposes-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
     "\\)"
 
 test = " --show-annotation android.annotation.TestApi"
 
-module_libs =
-    " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
+module_libs = " --show-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
     "\\)"
 
 droidstubs {
@@ -166,7 +169,7 @@ droidstubs {
         last_released: {
             api_file: ":android-non-updatable.api.system.latest",
             removed_api_file: ":android-non-updatable-removed.api.system.latest",
-            baseline_file: ":android-non-updatable-incompatibilities.api.system.latest"
+            baseline_file: ":android-non-updatable-incompatibilities.api.system.latest",
         },
         api_lint: {
             enabled: true,
@@ -176,13 +179,19 @@ droidstubs {
     },
     dists: [
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -206,25 +215,37 @@ droidstubs {
     },
     dists: [
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/test/api",
             dest: "android.txt",
             tag: ".api.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/test/api",
             dest: "removed.txt",
             tag: ".removed-api.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/test/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/test/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -252,13 +273,19 @@ droidstubs {
     },
     dists: [
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/module-lib/api",
             dest: "android-non-updatable.txt",
             tag: ".api.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/module-lib/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
@@ -318,10 +345,13 @@ java_defaults {
     java_version: "1.8",
     compile_dex: true,
     dist: {
-        targets: ["sdk", "win_sdk"],
+        targets: [
+            "sdk",
+            "win_sdk",
+        ],
         tag: ".jar",
         dest: "android-non-updatable.jar",
-    }
+    },
 }
 
 java_library_static {
@@ -337,7 +367,7 @@ java_library_static {
 java_library_static {
     name: "android-non-updatable.stubs.system",
     defaults: ["android-non-updatable_defaults_stubs_current"],
-    srcs: [ ":system-api-stubs-docs-non-updatable" ],
+    srcs: [":system-api-stubs-docs-non-updatable"],
     libs: modules_system_stubs,
     dist: {
         dir: "apistubs/android/system",
@@ -380,7 +410,10 @@ java_defaults {
 java_defaults {
     name: "android_stubs_dists_default",
     dist: {
-        targets: ["sdk", "win_sdk"],
+        targets: [
+            "sdk",
+            "win_sdk",
+        ],
         tag: ".jar",
         dest: "android.jar",
     },
@@ -411,7 +444,10 @@ java_library_static {
     dists: [
         {
             // Legacy dist path
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             tag: ".jar",
             dest: "android_system.jar",
         },
@@ -433,14 +469,6 @@ java_library_static {
     dist: {
         dir: "apistubs/android/test",
     },
-    dists: [
-        {
-            // Legacy dist path
-            targets: ["sdk", "win_sdk"],
-            tag: ".jar",
-            dest: "android_test.jar",
-        },
-    ],
 }
 
 java_library_static {

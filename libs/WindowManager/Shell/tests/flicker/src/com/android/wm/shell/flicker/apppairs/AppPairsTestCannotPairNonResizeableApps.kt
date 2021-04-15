@@ -89,6 +89,12 @@ class AppPairsTestCannotPairNonResizeableApps(
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
+    @FlakyTest
+    @Test
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
+
     @Presubmit
     @Test
     fun appPairsDividerIsInvisible() = testSpec.appPairsDividerIsInvisible()

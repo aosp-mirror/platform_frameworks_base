@@ -3225,6 +3225,8 @@
     <public name="config_systemVisualIntelligence" />
     <!-- @hide @SystemApi -->
     <public name="config_systemActivityRecognizer" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemCompanionDeviceProvider"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01020055">

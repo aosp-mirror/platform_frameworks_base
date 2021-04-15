@@ -248,21 +248,6 @@ public class TimeDetectorServiceTest {
         mStubbedTimeDetectorStrategy.verifyDumpCalled();
     }
 
-    @Test
-    public void testAutoTimeDetectionToggle() throws Exception {
-        mTimeDetectorService.handleAutoTimeDetectionChanged();
-        mTestHandler.assertTotalMessagesEnqueued(1);
-        mTestHandler.waitForMessagesToBeProcessed();
-        mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionChangedCalled();
-
-        mStubbedTimeDetectorStrategy.resetCallTracking();
-
-        mTimeDetectorService.handleAutoTimeDetectionChanged();
-        mTestHandler.assertTotalMessagesEnqueued(2);
-        mTestHandler.waitForMessagesToBeProcessed();
-        mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionChangedCalled();
-    }
-
     private static TelephonyTimeSuggestion createTelephonyTimeSuggestion() {
         int slotIndex = 1234;
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
@@ -298,7 +283,6 @@ public class TimeDetectorServiceTest {
         private NetworkTimeSuggestion mLastNetworkSuggestion;
         private GnssTimeSuggestion mLastGnssSuggestion;
         private ExternalTimeSuggestion mLastExternalSuggestion;
-        private boolean mHandleAutoTimeDetectionChangedCalled;
         private boolean mDumpCalled;
 
         @Override
@@ -333,11 +317,6 @@ public class TimeDetectorServiceTest {
         }
 
         @Override
-        public void handleAutoTimeConfigChanged() {
-            mHandleAutoTimeDetectionChangedCalled = true;
-        }
-
-        @Override
         public void dump(IndentingPrintWriter pw, String[] args) {
             mDumpCalled = true;
         }
@@ -348,7 +327,6 @@ public class TimeDetectorServiceTest {
             mLastNetworkSuggestion = null;
             mLastGnssSuggestion = null;
             mLastExternalSuggestion = null;
-            mHandleAutoTimeDetectionChangedCalled = false;
             mDumpCalled = false;
         }
 
@@ -370,10 +348,6 @@ public class TimeDetectorServiceTest {
 
         void verifySuggestExternalTimeCalled(ExternalTimeSuggestion expectedSuggestion) {
             assertEquals(expectedSuggestion, mLastExternalSuggestion);
-        }
-
-        void verifyHandleAutoTimeDetectionChangedCalled() {
-            assertTrue(mHandleAutoTimeDetectionChangedCalled);
         }
 
         void verifyDumpCalled() {

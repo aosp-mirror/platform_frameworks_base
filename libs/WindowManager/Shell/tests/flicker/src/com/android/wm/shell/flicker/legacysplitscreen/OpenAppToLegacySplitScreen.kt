@@ -70,7 +70,7 @@ class OpenAppToLegacySplitScreen(
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun appWindowBecomesVisible() = testSpec.appWindowBecomesVisible(splitScreenApp.getPackage())
 
@@ -86,7 +86,7 @@ class OpenAppToLegacySplitScreen(
     @Test
     fun appPairsDividerBecomesVisible() = testSpec.appPairsDividerBecomesVisible()
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun layerBecomesVisible() = testSpec.layerBecomesVisible(splitScreenApp.getPackage())
 
