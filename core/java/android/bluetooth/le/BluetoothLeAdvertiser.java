@@ -89,10 +89,7 @@ public final class BluetoothLeAdvertiser {
      */
     @RequiresLegacyBluetoothAdminPermission
     @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.BLUETOOTH_ADVERTISE,
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-    })
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertising(AdvertiseSettings settings,
             AdvertiseData advertiseData, final AdvertiseCallback callback) {
         startAdvertising(settings, advertiseData, null, callback);
@@ -111,10 +108,7 @@ public final class BluetoothLeAdvertiser {
      */
     @RequiresLegacyBluetoothAdminPermission
     @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.BLUETOOTH_ADVERTISE,
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-    })
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertising(AdvertiseSettings settings,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             final AdvertiseCallback callback) {
@@ -247,10 +241,7 @@ public final class BluetoothLeAdvertiser {
      */
     @RequiresLegacyBluetoothAdminPermission
     @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.BLUETOOTH_ADVERTISE,
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-    })
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertisingSet(AdvertisingSetParameters parameters,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             PeriodicAdvertisingParameters periodicParameters,
@@ -283,10 +274,7 @@ public final class BluetoothLeAdvertiser {
      */
     @RequiresLegacyBluetoothAdminPermission
     @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.BLUETOOTH_ADVERTISE,
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-    })
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertisingSet(AdvertisingSetParameters parameters,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             PeriodicAdvertisingParameters periodicParameters,
@@ -324,10 +312,7 @@ public final class BluetoothLeAdvertiser {
      */
     @RequiresLegacyBluetoothAdminPermission
     @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.BLUETOOTH_ADVERTISE,
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-    })
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertisingSet(AdvertisingSetParameters parameters,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             PeriodicAdvertisingParameters periodicParameters,
@@ -370,10 +355,7 @@ public final class BluetoothLeAdvertiser {
      */
     @RequiresLegacyBluetoothAdminPermission
     @RequiresBluetoothAdvertisePermission
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.BLUETOOTH_ADVERTISE,
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-    })
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void startAdvertisingSet(AdvertisingSetParameters parameters,
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             PeriodicAdvertisingParameters periodicParameters,
@@ -516,7 +498,7 @@ public final class BluetoothLeAdvertiser {
     }
 
     // Compute the size of advertisement data or scan resp
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     private int totalBytes(AdvertiseData data, boolean isFlagsIncluded) {
         if (data == null) return 0;
         // Flags field is omitted if the advertising is not connectable.
@@ -587,8 +569,11 @@ public final class BluetoothLeAdvertiser {
         if (data.getIncludeTxPowerLevel()) {
             size += OVERHEAD_BYTES_PER_FIELD + 1; // tx power level value is one byte.
         }
-        if (data.getIncludeDeviceName() && mBluetoothAdapter.getName() != null) {
-            size += OVERHEAD_BYTES_PER_FIELD + mBluetoothAdapter.getName().length();
+        if (data.getIncludeDeviceName()) {
+            final int length = mBluetoothAdapter.getNameLengthForAdvertise();
+            if (length >= 0) {
+                size += OVERHEAD_BYTES_PER_FIELD + length;
+            }
         }
         return size;
     }
