@@ -50,14 +50,9 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    void initialize(boolean sideLabels) {
-        super.initialize(sideLabels);
+    void initialize() {
+        super.initialize();
         applyBottomMargin((View) mRegularTileLayout);
-    }
-
-    @Override
-    protected void inflateQSFooter(boolean newFooter) {
-        // No footer
     }
 
     private void applyBottomMargin(View view) {
@@ -74,22 +69,14 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     public TileLayout createRegularTileLayout() {
-        if (mSideLabels) {
-            return new QQSSideLabelTileLayout(mContext);
-        } else {
-            return new QuickQSPanel.HeaderTileLayout(mContext);
-        }
+        return new QQSSideLabelTileLayout(mContext);
     }
 
     @Override
     protected QSTileLayout createHorizontalTileLayout() {
-        if (mSideLabels) {
-            TileLayout t = createRegularTileLayout();
-            t.setMaxColumns(2);
-            return t;
-        } else {
-            return new DoubleLineTileLayout(mContext);
-        }
+        TileLayout t = createRegularTileLayout();
+        t.setMaxColumns(2);
+        return t;
     }
 
     @Override
