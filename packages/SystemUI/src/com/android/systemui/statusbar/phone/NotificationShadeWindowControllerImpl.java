@@ -666,7 +666,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         pw.println(TAG + ":");
         pw.println("  mKeyguardDisplayMode=" + mKeyguardDisplayMode);
         pw.println(mCurrentState);
-        mNotificationShadeView.getViewRootImpl().dump("  ", pw);
+        if (mNotificationShadeView != null && mNotificationShadeView.getViewRootImpl() != null) {
+            mNotificationShadeView.getViewRootImpl().dump("  ", pw);
+        }
     }
 
     @Override
