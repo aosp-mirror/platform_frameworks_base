@@ -19,6 +19,7 @@
 #include <SkCanvas.h>
 #include <SkDrawable.h>
 #include <SkRuntimeEffect.h>
+#include <math.h>
 #include <utils/RefBase.h>
 #include "CanvasProperty.h"
 
@@ -61,12 +62,14 @@ public:
                    uirenderer::CanvasPropertyPrimitive* radius,
                    uirenderer::CanvasPropertyPaint* paint,
                    uirenderer::CanvasPropertyPrimitive* progress,
+                   uirenderer::CanvasPropertyPrimitive* turbulencePhase,
                    const SkRuntimeShaderBuilder& effectBuilder)
             : mX(x)
             , mY(y)
             , mRadius(radius)
             , mPaint(paint)
             , mProgress(progress)
+            , mTurbulencePhase(turbulencePhase)
             , mRuntimeEffectBuilder(effectBuilder) {}
 
 protected:
@@ -77,22 +80,28 @@ protected:
         return SkRect::MakeLTRB(x - radius, y - radius, x + radius, y + radius);
     }
     virtual void onDraw(SkCanvas* canvas) override {
-        SkRuntimeShaderBuilder::BuilderUniform center = mRuntimeEffectBuilder.uniform("in_origin");
-        if (center.fVar != nullptr) {
-            center = SkV2{mX->value, mY->value};
-        }
+        setUniform2f("in_origin", mX->value, mY->value);
+        setUniform("in_radius", mRadius);
+        setUniform("in_progress", mProgress);
+        setUniform("in_turbulencePhase", mTurbulencePhase);
 
-        SkRuntimeShaderBuilder::BuilderUniform radiusU =
-                mRuntimeEffectBuilder.uniform("in_radius");
-        if (radiusU.fVar != nullptr) {
-            radiusU = mRadius->value;
-        }
-
-        SkRuntimeShaderBuilder::BuilderUniform progressU =
-                mRuntimeEffectBuilder.uniform("in_progress");
-        if (progressU.fVar != nullptr) {
-            progressU = mProgress->value;
-        }
+        //
+        // Keep in sync with:
+        // frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
+        //
+        const float turbulencePhase = mTurbulencePhase->value;
+        setUniform2f("in_tCircle1", SCALE * 0.5 + (turbulencePhase * CIRCLE_X_1),
+                     SCALE * 0.5 + (turbulencePhase * CIRCLE_Y_1));
+        setUniform2f("in_tCircle2", SCALE * 0.2 + (turbulencePhase * CIRCLE_X_2),
+                     SCALE * 0.2 + (turbulencePhase * CIRCLE_Y_2));
+        setUniform2f("in_tCircle3", SCALE + (turbulencePhase * CIRCLE_X_3),
+                     SCALE + (turbulencePhase * CIRCLE_Y_3));
+        const float rotation1 = turbulencePhase * PI_ROTATE_RIGHT + 1.7 * PI;
+        setUniform2f("in_tRotation1", cos(rotation1), sin(rotation1));
+        const float rotation2 = turbulencePhase * PI_ROTATE_LEFT + 2 * PI;
+        setUniform2f("in_tRotation2", cos(rotation2), sin(rotation2));
+        const float rotation3 = turbulencePhase * PI_ROTATE_RIGHT + 2.75 * PI;
+        setUniform2f("in_tRotation3", cos(rotation3), sin(rotation3));
 
         SkPaint paint = mPaint->value;
         paint.setShader(mRuntimeEffectBuilder.makeShader(nullptr, false));
@@ -105,7 +114,35 @@ private:
     sp<uirenderer::CanvasPropertyPrimitive> mRadius;
     sp<uirenderer::CanvasPropertyPaint> mPaint;
     sp<uirenderer::CanvasPropertyPrimitive> mProgress;
+    sp<uirenderer::CanvasPropertyPrimitive> mTurbulencePhase;
     SkRuntimeShaderBuilder mRuntimeEffectBuilder;
+
+    const float PI = 3.1415926535897932384626;
+    const float PI_ROTATE_RIGHT = PI * 0.0078125;
+    const float PI_ROTATE_LEFT = PI * -0.0078125;
+    const float SCALE = 1.5;
+    const float CIRCLE_X_1 = 0.01 * cos(SCALE * 0.55);
+    const float CIRCLE_Y_1 = 0.01 * sin(SCALE * 0.55);
+    const float CIRCLE_X_2 = -0.0066 * cos(SCALE * 0.45);
+    const float CIRCLE_Y_2 = -0.0066 * sin(SCALE * 0.45);
+    const float CIRCLE_X_3 = -0.0066 * cos(SCALE * 0.35);
+    const float CIRCLE_Y_3 = -0.0066 * sin(SCALE * 0.35);
+
+    virtual void setUniform(std::string name, sp<uirenderer::CanvasPropertyPrimitive> property) {
+        SkRuntimeShaderBuilder::BuilderUniform uniform =
+                mRuntimeEffectBuilder.uniform(name.c_str());
+        if (uniform.fVar != nullptr) {
+            uniform = property->value;
+        }
+    }
+
+    virtual void setUniform2f(std::string name, float a, float b) {
+        SkRuntimeShaderBuilder::BuilderUniform uniform =
+                mRuntimeEffectBuilder.uniform(name.c_str());
+        if (uniform.fVar != nullptr) {
+            uniform = SkV2{a, b};
+        }
+    }
 };
 
 class AnimatedCircle : public SkDrawable {
