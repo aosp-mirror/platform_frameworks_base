@@ -613,9 +613,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 PackageInstaller.SessionInfo session = mContext.getPackageManager()
                         .getPackageInstaller().getSessionInfo(rollback.getStagedSessionId());
                 if (session == null || session.isStagedSessionFailed()) {
-                    iter.remove();
-                    deleteRollback(rollback,
-                            "Session " + rollback.getStagedSessionId() + " not existed or failed");
+                    if (rollback.isEnabling()) {
+                        iter.remove();
+                        deleteRollback(rollback, "Session " + rollback.getStagedSessionId()
+                                + " not existed or failed");
+                    }
                     continue;
                 }
 
