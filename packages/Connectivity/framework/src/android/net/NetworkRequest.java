@@ -36,6 +36,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkCapabilities.NetCapability;
@@ -45,7 +46,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.text.TextUtils;
-import android.util.proto.ProtoOutputStream;
+import android.util.Range;
 
 import java.util.Arrays;
 import java.util.List;
@@ -214,6 +215,14 @@ public class NetworkRequest implements Parcelable {
         }
 
         /**
+         * Creates a new Builder of NetworkRequest from an existing instance.
+         */
+        public Builder(@NonNull final NetworkRequest request) {
+            Objects.requireNonNull(request);
+            mNetworkCapabilities = request.networkCapabilities;
+        }
+
+        /**
          * Build {@link NetworkRequest} give the current set of capabilities.
          */
         public NetworkRequest build() {
@@ -277,11 +286,14 @@ public class NetworkRequest implements Parcelable {
          * Set the watched UIDs for this request. This will be reset and wiped out unless
          * the calling app holds the CHANGE_NETWORK_STATE permission.
          *
-         * @param uids The watched UIDs as a set of UidRanges, or null for everything.
+         * @param uids The watched UIDs as a set of {@code Range<Integer>}, or null for everything.
          * @return The builder to facilitate chaining.
          * @hide
          */
-        public Builder setUids(Set<UidRange> uids) {
+        @NonNull
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public Builder setUids(@Nullable Set<Range<Integer>> uids) {
             mNetworkCapabilities.setUids(uids);
             return this;
         }
@@ -300,8 +312,27 @@ public class NetworkRequest implements Parcelable {
          *
          * @hide
          */
+        @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         public Builder addUnwantedCapability(@NetworkCapabilities.NetCapability int capability) {
             mNetworkCapabilities.addUnwantedCapability(capability);
+            return this;
+        }
+
+        /**
+         * Removes (if found) the given unwanted capability from this builder instance.
+         *
+         * @param capability The unwanted capability to remove.
+         * @return The builder to facilitate chaining.
+         *
+         * @hide
+         */
+        @NonNull
+        @SuppressLint("BuilderSetStyle")
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        public Builder removeUnwantedCapability(@NetworkCapabilities.NetCapability int capability) {
+            mNetworkCapabilities.removeUnwantedCapability(capability);
             return this;
         }
 
@@ -469,9 +500,14 @@ public class NetworkRequest implements Parcelable {
          * A network will satisfy this request only if it matches one of the subIds in this set.
          * An empty set matches all networks, including those without a subId.
          *
+         * <p>Registering a NetworkRequest with a non-empty set of subIds requires the
+         * NETWORK_FACTORY permission.
+         *
          * @param subIds A {@code Set} that represents subscription IDs.
+         * @hide
          */
         @NonNull
+        @SystemApi
         public Builder setSubIds(@NonNull Set<Integer> subIds) {
             mNetworkCapabilities.setSubIds(subIds);
             return this;
@@ -562,6 +598,7 @@ public class NetworkRequest implements Parcelable {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean hasUnwantedCapability(@NetCapability int capability) {
         return networkCapabilities.hasUnwantedCapability(capability);
     }
@@ -642,18 +679,6 @@ public class NetworkRequest implements Parcelable {
         }
     }
 
-    /** @hide */
-    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
-
-        proto.write(NetworkRequestProto.TYPE, typeToProtoEnum(type));
-        proto.write(NetworkRequestProto.REQUEST_ID, requestId);
-        proto.write(NetworkRequestProto.LEGACY_TYPE, legacyType);
-        networkCapabilities.dumpDebug(proto, NetworkRequestProto.NETWORK_CAPABILITIES);
-
-        proto.end(token);
-    }
-
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof NetworkRequest == false) return false;
         NetworkRequest that = (NetworkRequest)obj;
@@ -665,5 +690,44 @@ public class NetworkRequest implements Parcelable {
 
     public int hashCode() {
         return Objects.hash(requestId, legacyType, networkCapabilities, type);
+    }
+
+    /**
+     * Gets all the capabilities set on this {@code NetworkRequest} instance.
+     *
+     * @return an array of capability values for this instance.
+     */
+    @NonNull
+    public @NetCapability int[] getCapabilities() {
+        // No need to make a defensive copy here as NC#getCapabilities() already returns
+        // a new array.
+        return networkCapabilities.getCapabilities();
+    }
+
+    /**
+     * Gets all the unwanted capabilities set on this {@code NetworkRequest} instance.
+     *
+     * @return an array of unwanted capability values for this instance.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public @NetCapability int[] getUnwantedCapabilities() {
+        // No need to make a defensive copy here as NC#getUnwantedCapabilities() already returns
+        // a new array.
+        return networkCapabilities.getUnwantedCapabilities();
+    }
+
+    /**
+     * Gets all the transports set on this {@code NetworkRequest} instance.
+     *
+     * @return an array of transport type values for this instance.
+     */
+    @NonNull
+    public @Transport int[] getTransportTypes() {
+        // No need to make a defensive copy here as NC#getTransportTypes() already returns
+        // a new array.
+        return networkCapabilities.getTransportTypes();
     }
 }

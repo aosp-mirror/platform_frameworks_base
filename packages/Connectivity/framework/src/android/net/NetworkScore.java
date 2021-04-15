@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,7 +30,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * network is considered for a particular use.
  * @hide
  */
-// TODO : @SystemApi when the implementation is complete
+@SystemApi
 public final class NetworkScore implements Parcelable {
     // This will be removed soon. Do *NOT* depend on it for any new code that is not part of
     // a migration.
@@ -62,6 +63,8 @@ public final class NetworkScore implements Parcelable {
 
     /**
      * @return whether this score has a particular policy.
+     *
+     * @hide
      */
     @VisibleForTesting
     public boolean hasPolicy(final int policy) {

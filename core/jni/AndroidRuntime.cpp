@@ -50,6 +50,7 @@
 #include "jni.h"
 
 using namespace android;
+using android::base::GetBoolProperty;
 using android::base::GetProperty;
 
 extern int register_android_os_Binder(JNIEnv* env);
@@ -727,17 +728,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
         ALOGI("Leaving lock profiling enabled");
     }
 
-    bool checkJni = false;
-    property_get("dalvik.vm.checkjni", propBuf, "");
-    if (strcmp(propBuf, "true") == 0) {
-        checkJni = true;
-    } else if (strcmp(propBuf, "false") != 0) {
-        /* property is neither true nor false; fall back on kernel parameter */
-        property_get("ro.kernel.android.checkjni", propBuf, "");
-        if (propBuf[0] == '1') {
-            checkJni = true;
-        }
-    }
+    const bool checkJni = GetBoolProperty("dalvik.vm.checkjni", false);
     ALOGV("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
     if (checkJni) {
         /* extended JNI checking */

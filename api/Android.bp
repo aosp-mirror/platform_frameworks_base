@@ -308,6 +308,9 @@ genrule {
 
 genrule {
     name: "combined-removed-dex",
+    visibility: [
+        "//frameworks/base/boot",
+    ],
     srcs: [
         ":frameworks-base-api-removed.txt",
         ":frameworks-base-api-system-removed.txt",

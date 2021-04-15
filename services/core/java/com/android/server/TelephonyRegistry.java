@@ -313,13 +313,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private final LocalLog mListenLog = new LocalLog(200);
 
-    private List<PhysicalChannelConfig> mPhysicalChannelConfigs;
+    private List<List<PhysicalChannelConfig>> mPhysicalChannelConfigs;
 
     private boolean[] mIsDataEnabled;
 
     private int[] mDataEnabledReason;
 
-    private Map<Integer, Long> mAllowedNetworkTypesList;
+    private int[] mAllowedNetworkTypeReason;
+    private long[] mAllowedNetworkTypeValue;
 
     private List<List<LinkCapacityEstimate>> mLinkCapacityEstimateLists;
 
@@ -388,7 +389,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private boolean isPrivilegedPhoneStatePermissionRequired(Set<Integer> events) {
         return events.contains(TelephonyCallback.EVENT_SRVCC_STATE_CHANGED)
                 || events.contains(TelephonyCallback.EVENT_VOICE_ACTIVATION_STATE_CHANGED)
-                || events.contains(TelephonyCallback.EVENT_RADIO_POWER_STATE_CHANGED);
+                || events.contains(TelephonyCallback.EVENT_RADIO_POWER_STATE_CHANGED)
+                || events.contains(TelephonyCallback.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED);
     }
 
     private static final int MSG_USER_SWITCHED = 1;
@@ -400,10 +402,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             switch (msg.what) {
                 case MSG_USER_SWITCHED: {
                     if (VDBG) log("MSG_USER_SWITCHED userId=" + msg.arg1);
-                    int numPhones = getTelephonyManager().getPhoneCount();
-                    for (int sub = 0; sub < numPhones; sub++) {
-                        TelephonyRegistry.this.notifyCellLocationForSubscriber(sub,
-                                mCellIdentity[sub]);
+                    int numPhones = getTelephonyManager().getActiveModemCount();
+                    for (int phoneId = 0; phoneId < numPhones; phoneId++) {
+                        int[] subIds = SubscriptionManager.getSubId(phoneId);
+                        int subId =
+                                (subIds != null) && (subIds.length > 0)
+                                        ? subIds[0]
+                                        : SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+                        TelephonyRegistry.this.notifyCellLocationForSubscriber(
+                                subId, mCellIdentity[phoneId], true /* hasUserSwitched */);
                     }
                     break;
                 }
@@ -532,6 +539,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mTelephonyDisplayInfos = copyOf(mTelephonyDisplayInfos, mNumPhones);
         mIsDataEnabled= copyOf(mIsDataEnabled, mNumPhones);
         mDataEnabledReason = copyOf(mDataEnabledReason, mNumPhones);
+        mAllowedNetworkTypeReason = copyOf(mAllowedNetworkTypeReason, mNumPhones);
+        mAllowedNetworkTypeValue = copyOf(mAllowedNetworkTypeValue, mNumPhones);
 
         // ds -> ss switch.
         if (mNumPhones < oldNumPhones) {
@@ -574,9 +583,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPreciseDataConnectionStates.add(new ArrayMap<>());
             mBarringInfo.add(i, new BarringInfo());
             mTelephonyDisplayInfos[i] = null;
-            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
             mIsDataEnabled[i] = false;
             mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
+            mPhysicalChannelConfigs.add(i, new ArrayList<>());
+            mAllowedNetworkTypeReason[i] = -1;
+            mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, new ArrayList<>());
         }
     }
@@ -637,10 +648,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mBarringInfo = new ArrayList<>();
         mTelephonyDisplayInfos = new TelephonyDisplayInfo[numPhones];
         mPhysicalChannelConfigs = new ArrayList<>();
+        mAllowedNetworkTypeReason = new int[numPhones];
+        mAllowedNetworkTypeValue = new long[numPhones];
         mIsDataEnabled = new boolean[numPhones];
         mDataEnabledReason = new int[numPhones];
-        mAllowedNetworkTypesList = new HashMap<>();
         mLinkCapacityEstimateLists = new ArrayList<>();
+
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -670,9 +683,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPreciseDataConnectionStates.add(new ArrayMap<>());
             mBarringInfo.add(i, new BarringInfo());
             mTelephonyDisplayInfos[i] = null;
-            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
             mIsDataEnabled[i] = false;
             mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
+            mPhysicalChannelConfigs.add(i, new ArrayList<>());
+            mAllowedNetworkTypeReason[i] = -1;
+            mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, new ArrayList<>());
         }
 
@@ -1160,7 +1175,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         TelephonyCallback.EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED)) {
                     try {
                         r.callback.onPhysicalChannelConfigChanged(
-                                mPhysicalChannelConfigs);
+                                shouldSanitizeLocationForPhysicalChannelConfig(r)
+                                        ? getLocationSanitizedConfigs(
+                                                mPhysicalChannelConfigs.get(phoneId))
+                                        : mPhysicalChannelConfigs.get(phoneId));
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -1170,14 +1188,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onDataEnabledChanged(
                                 mIsDataEnabled[phoneId], mDataEnabledReason[phoneId]);
-                    } catch (RemoteException ex) {
-                        remove(r.binder);
-                    }
-                }
-                if (events.contains(
-                        TelephonyCallback.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED)) {
-                    try {
-                        r.callback.onAllowedNetworkTypesChanged(mAllowedNetworkTypesList);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -1875,20 +1885,20 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void notifyCellLocation(CellIdentity cellLocation) {
-        notifyCellLocationForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, cellLocation);
+    public void notifyCellLocationForSubscriber(int subId, CellIdentity cellIdentity) {
+        notifyCellLocationForSubscriber(subId, cellIdentity, false /* hasUserSwitched */);
     }
 
-    @Override
-    public void notifyCellLocationForSubscriber(int subId, CellIdentity cellIdentity) {
-        log("notifyCellLocationForSubscriber: subId=" + subId
-                + " cellIdentity=" + cellIdentity);
+    private void notifyCellLocationForSubscriber(int subId, CellIdentity cellIdentity,
+            boolean hasUserSwitched) {
+        log("notifyCellLocationForSubscriber: subId=" + subId + " cellIdentity=" + cellIdentity);
         if (!checkNotifyPermission("notifyCellLocation()")) {
             return;
         }
         int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
-            if (validatePhoneId(phoneId) && !Objects.equals(cellIdentity, mCellIdentity[phoneId])) {
+            if (validatePhoneId(phoneId)
+                    && (hasUserSwitched || !Objects.equals(cellIdentity, mCellIdentity[phoneId]))) {
                 mCellIdentity[phoneId] = cellIdentity;
                 for (Record r : mRecords) {
                     if (validateEventAndUserLocked(
@@ -2369,25 +2379,30 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
+        List<PhysicalChannelConfig> sanitizedConfigs = getLocationSanitizedConfigs(configs);
         if (VDBG) {
-            log("notifyPhysicalChannelConfig: subId=" + subId + " configs=" + configs);
+            log("notifyPhysicalChannelConfig: subId=" + subId + " configs=" + configs
+                    + " sanitizedConfigs=" + sanitizedConfigs);
         }
 
         synchronized (mRecords) {
             int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
-                mPhysicalChannelConfigs.set(phoneId, configs.get(phoneId));
+                mPhysicalChannelConfigs.set(phoneId, configs);
                 for (Record r : mRecords) {
                     if (r.matchTelephonyCallbackEvent(
                             TelephonyCallback.EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED)
                             && idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (DBG_LOC) {
-                                log("notifyPhysicalChannelConfig: "
-                                        + "mPhysicalChannelConfigs="
-                                        + configs + " r=" + r);
+                                log("notifyPhysicalChannelConfig: mPhysicalChannelConfigs="
+                                        + (shouldSanitizeLocationForPhysicalChannelConfig(r)
+                                                ? sanitizedConfigs : configs)
+                                        + " r=" + r);
                             }
-                            r.callback.onPhysicalChannelConfigChanged(configs);
+                            r.callback.onPhysicalChannelConfigChanged(
+                                    shouldSanitizeLocationForPhysicalChannelConfig(r)
+                                            ? sanitizedConfigs : configs);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
@@ -2396,6 +2411,25 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
+    }
+
+    private static boolean shouldSanitizeLocationForPhysicalChannelConfig(Record record) {
+        // Always redact location info from PhysicalChannelConfig if the registrant is from neither
+        // PHONE nor SYSTEM process. There is no user case that the registrant needs the location
+        // info (e.g. physicalCellId). This also remove the need for the location permissions check.
+        return record.callerUid != Process.PHONE_UID && record.callerUid != Process.SYSTEM_UID;
+    }
+
+    /**
+     * Return a copy of the PhysicalChannelConfig list but with location info removed.
+     */
+    private static List<PhysicalChannelConfig> getLocationSanitizedConfigs(
+            List<PhysicalChannelConfig> configs) {
+        List<PhysicalChannelConfig> sanitizedConfigs = new ArrayList<>(configs.size());
+        for (PhysicalChannelConfig config : configs) {
+            sanitizedConfigs.add(config.createLocationInfoSanitizedCopy());
+        }
+        return sanitizedConfigs;
     }
 
     /**
@@ -2443,18 +2477,19 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      *
      * @param phoneId the phone id.
      * @param subId the subId.
-     * @param allowedNetworkTypesList Map associating all allowed network type reasons with reason's
-     *                                allowed network type values.
+     * @param reason the allowed network type reason.
+     * @param allowedNetworkType the allowed network type value.
      */
-    public void notifyAllowedNetworkTypesChanged(int phoneId, int subId,
-            Map allowedNetworkTypesList) {
+    public void notifyAllowedNetworkTypesChanged(int phoneId, int subId, int reason,
+            long allowedNetworkType) {
         if (!checkNotifyPermission("notifyAllowedNetworkTypesChanged()")) {
             return;
         }
 
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
-                mAllowedNetworkTypesList = allowedNetworkTypesList;
+                mAllowedNetworkTypeReason[phoneId] = reason;
+                mAllowedNetworkTypeValue[phoneId] = allowedNetworkType;
 
                 for (Record r : mRecords) {
                     if (r.matchTelephonyCallbackEvent(
@@ -2462,10 +2497,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             && idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (VDBG) {
-                                log("notifyAllowedNetworkTypesChanged: AllowedNetworkTypesList= "
-                                        + mAllowedNetworkTypesList.toString());
+                                log("notifyAllowedNetworkTypesChanged: reason= " + reason
+                                        + ", allowed network type:"
+                                        + TelephonyManager.convertNetworkTypeBitmaskToString(
+                                        allowedNetworkType));
                             }
-                            r.callback.onAllowedNetworkTypesChanged(mAllowedNetworkTypesList);
+                            r.callback.onAllowedNetworkTypesChanged(reason, allowedNetworkType);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
@@ -2522,7 +2559,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             final int recordCount = mRecords.size();
             pw.println("last known state:");
             pw.increaseIndent();
-            for (int i = 0; i < getTelephonyManager().getPhoneCount(); i++) {
+            for (int i = 0; i < getTelephonyManager().getActiveModemCount(); i++) {
                 pw.println("Phone Id=" + i);
                 pw.increaseIndent();
                 pw.println("mCallState=" + mCallState[i]);
@@ -2556,6 +2593,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mTelephonyDisplayInfo=" + mTelephonyDisplayInfos[i]);
                 pw.println("mIsDataEnabled=" + mIsDataEnabled);
                 pw.println("mDataEnabledReason=" + mDataEnabledReason);
+                pw.println("mAllowedNetworkTypeReason=" + mAllowedNetworkTypeReason[i]);
+                pw.println("mAllowedNetworkTypeValue=" + mAllowedNetworkTypeValue[i]);
+                pw.println("mPhysicalChannelConfigs=" + mPhysicalChannelConfigs.get(i));
                 pw.println("mLinkCapacityEstimateList=" + mLinkCapacityEstimateLists.get(i));
                 pw.decreaseIndent();
             }
@@ -2566,7 +2606,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mEmergencyNumberList=" + mEmergencyNumberList);
             pw.println("mDefaultPhoneId=" + mDefaultPhoneId);
             pw.println("mDefaultSubId=" + mDefaultSubId);
-            pw.println("mPhysicalChannelConfigs=" + mPhysicalChannelConfigs);
 
             pw.decreaseIndent();
 

@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -74,6 +75,25 @@ class QosCallbackConnection extends android.net.IQosCallback.Stub {
     @Override
     public void onQosEpsBearerSessionAvailable(@NonNull final QosSession session,
             @NonNull final EpsBearerQosSessionAttributes attributes) {
+
+        mExecutor.execute(() -> {
+            final QosCallback callback = mCallback;
+            if (callback != null) {
+                callback.onQosSessionAvailable(session, attributes);
+            }
+        });
+    }
+
+    /**
+     * Called when either the {@link NrQosSessionAttributes} has changed or on the first time
+     * the attributes have become available.
+     *
+     * @param session the session that is now available
+     * @param attributes the corresponding attributes of session
+     */
+    @Override
+    public void onNrQosSessionAvailable(@NonNull final QosSession session,
+            @NonNull final NrQosSessionAttributes attributes) {
 
         mExecutor.execute(() -> {
             final QosCallback callback = mCallback;

@@ -33,6 +33,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -355,18 +356,25 @@ public class RcsCapabilityExchangeImplBase {
         void onTerminated(@NonNull String reason, long retryAfterMilliseconds) throws ImsException;
     }
 
-    private final Executor mBinderExecutor;
+    private Executor mBinderExecutor;
 
     /**
      * Create a new RcsCapabilityExchangeImplBase instance.
      *
      * @param executor The executor that remote calls from the framework will be called on.
+     * @hide
      */
     public RcsCapabilityExchangeImplBase(@NonNull Executor executor) {
         if (executor == null) {
             throw new IllegalArgumentException("executor must not be null");
         }
         mBinderExecutor = executor;
+    }
+
+    /**
+     * Create a new RcsCapabilityExchangeImplBase instance.
+     */
+    public RcsCapabilityExchangeImplBase() {
     }
 
     /**
@@ -437,7 +445,7 @@ public class RcsCapabilityExchangeImplBase {
     // executor used is defined in the constructor.
     @SuppressLint("ExecutorRegistration")
     public void sendOptionsCapabilityRequest(@NonNull Uri contactUri,
-            @NonNull List<String> myCapabilities, @NonNull OptionsResponseCallback callback) {
+            @NonNull Set<String> myCapabilities, @NonNull OptionsResponseCallback callback) {
         // Stub - to be implemented by service
         Log.w(LOG_TAG, "sendOptionsCapabilityRequest called with no implementation.");
         try {

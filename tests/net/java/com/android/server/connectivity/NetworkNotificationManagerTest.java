@@ -20,6 +20,7 @@ import static com.android.server.connectivity.NetworkNotificationManager.Notific
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -35,6 +36,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.ConnectivityResources;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.UserHandle;
@@ -43,9 +45,10 @@ import android.telephony.TelephonyManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.R;
+import com.android.connectivity.resources.R;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -119,9 +122,23 @@ public class NetworkNotificationManagerTest {
         when(mCtx.getSystemService(eq(Context.NOTIFICATION_SERVICE)))
                 .thenReturn(mNotificationManager);
         when(mNetworkInfo.getExtraInfo()).thenReturn(TEST_EXTRA_INFO);
+        ConnectivityResources.setResourcesContextForTest(mCtx);
         when(mResources.getColor(anyInt(), any())).thenReturn(0xFF607D8B);
 
+        // Come up with some credible-looking transport names. The actual values do not matter.
+        String[] transportNames = new String[NetworkCapabilities.MAX_TRANSPORT + 1];
+        for (int transport = 0; transport <= NetworkCapabilities.MAX_TRANSPORT; transport++) {
+            transportNames[transport] = NetworkCapabilities.transportNameOf(transport);
+        }
+        when(mResources.getStringArray(R.array.network_switch_type_name))
+            .thenReturn(transportNames);
+
         mManager = new NetworkNotificationManager(mCtx, mTelephonyManager);
+    }
+
+    @After
+    public void tearDown() {
+        ConnectivityResources.setResourcesContextForTest(null);
     }
 
     private void verifyTitleByNetwork(final int id, final NetworkAgentInfo nai, final int title) {
@@ -142,15 +159,15 @@ public class NetworkNotificationManagerTest {
     public void testTitleOfPrivateDnsBroken() {
         // Test the title of mobile data.
         verifyTitleByNetwork(100, mCellNai, R.string.mobile_no_internet);
-        reset(mResources);
+        clearInvocations(mResources);
 
         // Test the title of wifi.
         verifyTitleByNetwork(101, mWifiNai, R.string.wifi_no_internet);
-        reset(mResources);
+        clearInvocations(mResources);
 
         // Test the title of other networks.
         verifyTitleByNetwork(102, mVpnNai, R.string.other_networks_no_internet);
-        reset(mResources);
+        clearInvocations(mResources);
     }
 
     @Test

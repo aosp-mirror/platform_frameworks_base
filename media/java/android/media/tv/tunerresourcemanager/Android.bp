@@ -6,6 +6,12 @@ package {
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
 }
+filegroup {
+    // NOTE: This is purposefully left empty, and exists only so that it can be
+    // referenced in frameworks/base/Android.bp.
+    name: "framework-media-tv-tunerresourcemanager-sources-aidl",
+    srcs: [],
+}
 
 filegroup {
     name: "framework-media-tv-tunerresourcemanager-sources",

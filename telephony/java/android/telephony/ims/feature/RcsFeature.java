@@ -47,6 +47,7 @@ import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -145,8 +146,8 @@ public class RcsFeature extends ImsFeature {
                 throws RemoteException {
             OptionsResponseCallback callbackWrapper = new RcsOptionsResponseAidlWrapper(callback);
             executeMethodAsync(() -> mReference.getCapabilityExchangeImplBaseInternal()
-                    .sendOptionsCapabilityRequest(contactUri, myCapabilities, callbackWrapper),
-                    "sendOptionsCapabilityRequest");
+                    .sendOptionsCapabilityRequest(contactUri, new HashSet<>(myCapabilities),
+                        callbackWrapper), "sendOptionsCapabilityRequest");
         }
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
@@ -390,6 +391,7 @@ public class RcsFeature extends ImsFeature {
      * event to the framework.
      * @return An instance of {@link RcsCapabilityExchangeImplBase} that implements capability
      * exchange if it is supported by the device.
+     * @hide
      */
     public @NonNull RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(
             @NonNull Executor executor, @NonNull CapabilityExchangeEventListener listener) {
@@ -398,12 +400,43 @@ public class RcsFeature extends ImsFeature {
     }
 
     /**
+     * Retrieve the implementation of UCE for this {@link RcsFeature}, which can use either
+     * presence or OPTIONS for capability exchange.
+     *
+     * Will only be requested by the framework if capability exchange is configured
+     * as capable during a
+     * {@link #changeEnabledCapabilities(CapabilityChangeRequest, CapabilityCallbackProxy)}
+     * operation and the RcsFeature sets the status of the capability to true using
+     * {@link #notifyCapabilitiesStatusChanged(RcsImsCapabilities)}.
+     *
+     * @param listener A {@link CapabilityExchangeEventListener} to send the capability exchange
+     * event to the framework.
+     * @return An instance of {@link RcsCapabilityExchangeImplBase} that implements capability
+     * exchange if it is supported by the device.
+     */
+    public @NonNull RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(
+            @NonNull CapabilityExchangeEventListener listener) {
+        // Base Implementation, override to implement functionality
+        return new RcsCapabilityExchangeImplBase();
+    }
+
+    /**
      * Remove the given CapabilityExchangeImplBase instance.
      * @param capExchangeImpl The {@link RcsCapabilityExchangeImplBase} instance to be removed.
+     * @hide
      */
     public void removeCapabilityExchangeImpl(
             @NonNull RcsCapabilityExchangeImplBase capExchangeImpl) {
         // Override to implement the process of removing RcsCapabilityExchangeImplBase instance.
+    }
+
+    /**
+     * Remove the given CapabilityExchangeImplBase instance.
+     * @param capExchangeImpl The {@link RcsCapabilityExchangeImplBase} instance to be destroyed.
+     */
+    public void destroyCapabilityExchangeImpl(
+            @NonNull RcsCapabilityExchangeImplBase capExchangeImpl) {
+        // Override to implement the process of destroying RcsCapabilityExchangeImplBase instance.
     }
 
     /**{@inheritDoc}*/

@@ -2127,7 +2127,7 @@ public final class SmsManager {
                 ret = iccISms.getSmsCapacityOnIccForSubscriber(getSubscriptionId());
             }
         } catch (RemoteException ex) {
-            throw new RuntimeException(ex);
+            Log.e(TAG, "getSmsCapacityOnIcc() RemoteException", ex);
         }
         return ret;
     }

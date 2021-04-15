@@ -79,6 +79,18 @@ public class VcnConfigTest {
     }
 
     @Test
+    public void testBuilderRequiresUniqueGatewayConnectionNames() {
+        final VcnGatewayConnectionConfig config = VcnGatewayConnectionConfigTest.buildTestConfig();
+        try {
+            new VcnConfig.Builder(mContext)
+                    .addGatewayConnectionConfig(config)
+                    .addGatewayConnectionConfig(config);
+            fail("Expected exception due to duplicate gateway connection name");
+        } catch (IllegalArgumentException e) {
+        }
+    }
+
+    @Test
     public void testBuilderAndGetters() {
         final VcnConfig config = buildTestConfig(mContext);
 

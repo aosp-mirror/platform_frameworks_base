@@ -892,6 +892,22 @@ public abstract class KeyProperties {
     }
 
     /**
+     * Namespaces provide system developers and vendors with a way to use keystore without
+     * requiring an applications uid. Namespaces can be configured using SEPolicy.
+     * See <a href="https://source.android.com/security/keystore#access-control">
+     *     Keystore 2.0 access-control</a>
+     * {@See KeyGenParameterSpec.Builder#setNamespace}
+     * {@See android.security.keystore2.AndroidKeyStoreLoadStoreParameter}
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "NAMESPACE_" }, value = {
+            NAMESPACE_APPLICATION,
+            NAMESPACE_WIFI,
+    })
+    public @interface Namespace {}
+
+    /**
      * This value indicates the implicit keystore namespace of the calling application.
      * It is used by default. Only select system components can choose a different namespace
      * which it must be configured in SEPolicy.
@@ -912,14 +928,12 @@ public abstract class KeyProperties {
      * For legacy support, translate namespaces into known UIDs.
      * @hide
      */
-    public static int namespaceToLegacyUid(int namespace) {
+    public static int namespaceToLegacyUid(@Namespace int namespace) {
         switch (namespace) {
             case NAMESPACE_APPLICATION:
                 return KeyStore.UID_SELF;
             case NAMESPACE_WIFI:
                 return Process.WIFI_UID;
-            // TODO Translate WIFI and VPN UIDs once the namespaces are defined.
-            //  b/171305388 and b/171305607
             default:
                 throw new IllegalArgumentException("No UID corresponding to namespace "
                         + namespace);
@@ -930,14 +944,12 @@ public abstract class KeyProperties {
      * For legacy support, translate namespaces into known UIDs.
      * @hide
      */
-    public static int legacyUidToNamespace(int uid) {
+    public static @Namespace int legacyUidToNamespace(int uid) {
         switch (uid) {
             case KeyStore.UID_SELF:
                 return NAMESPACE_APPLICATION;
             case Process.WIFI_UID:
                 return NAMESPACE_WIFI;
-            // TODO Translate WIFI and VPN UIDs once the namespaces are defined.
-            //  b/171305388 and b/171305607
             default:
                 throw new IllegalArgumentException("No namespace corresponding to uid "
                         + uid);

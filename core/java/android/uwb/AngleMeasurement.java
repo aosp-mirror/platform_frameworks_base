@@ -48,7 +48,10 @@ public final class AngleMeasurement implements Parcelable {
      * @throws IllegalArgumentException if the radians, errorRadians, or confidenceLevel is out of
      *                                  allowed range
      */
-    public AngleMeasurement(double radians, double errorRadians, double confidenceLevel) {
+    public AngleMeasurement(
+            @FloatRange(from = -Math.PI, to = +Math.PI) double radians,
+            @FloatRange(from = 0.0, to = +Math.PI) double errorRadians,
+            @FloatRange(from = 0.0, to = 1.0) double confidenceLevel) {
         if (radians < -Math.PI || radians > Math.PI) {
             throw new IllegalArgumentException("Invalid radians: " + radians);
         }

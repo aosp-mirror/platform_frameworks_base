@@ -28,6 +28,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.drawable.Icon;
+import android.net.ConnectivityResources;
 import android.net.NetworkSpecifier;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.wifi.WifiInfo;
@@ -40,7 +42,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.widget.Toast;
 
-import com.android.internal.R;
+import com.android.connectivity.resources.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 
@@ -82,6 +84,7 @@ public class NetworkNotificationManager {
 
     // The context is for the current user (system server)
     private final Context mContext;
+    private final Resources mResources;
     private final TelephonyManager mTelephonyManager;
     // The notification manager is created from a context for User.ALL, so notifications
     // will be sent to all users.
@@ -96,6 +99,7 @@ public class NetworkNotificationManager {
                 (NotificationManager) c.createContextAsUser(UserHandle.ALL, 0 /* flags */)
                         .getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationTypeMap = new SparseIntArray();
+        mResources = new ConnectivityResources(mContext).get();
     }
 
     @VisibleForTesting
@@ -113,20 +117,19 @@ public class NetworkNotificationManager {
         return -1;
     }
 
-    private static String getTransportName(final int transportType) {
-        Resources r = Resources.getSystem();
-        String[] networkTypes = r.getStringArray(R.array.network_switch_type_name);
+    private String getTransportName(final int transportType) {
+        String[] networkTypes = mResources.getStringArray(R.array.network_switch_type_name);
         try {
             return networkTypes[transportType];
         } catch (IndexOutOfBoundsException e) {
-            return r.getString(R.string.network_switch_type_name_unknown);
+            return mResources.getString(R.string.network_switch_type_name_unknown);
         }
     }
 
     private static int getIcon(int transportType) {
         return (transportType == TRANSPORT_WIFI)
-                ? R.drawable.stat_notify_wifi_in_range :  // TODO: Distinguish ! from ?.
-                R.drawable.stat_notify_rssi_in_range;
+                ? R.drawable.stat_notify_wifi_in_range  // TODO: Distinguish ! from ?.
+                : R.drawable.stat_notify_rssi_in_range;
     }
 
     /**
@@ -194,10 +197,10 @@ public class NetworkNotificationManager {
                     tag, nameOf(eventId), getTransportName(transportType), name, highPriority));
         }
 
-        Resources r = mContext.getResources();
+        final Resources r = mResources;
         final CharSequence title;
         final CharSequence details;
-        int icon = getIcon(transportType);
+        Icon icon = Icon.createWithResource(r, getIcon(transportType));
         if (notifyType == NotificationType.NO_INTERNET && transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.wifi_no_internet, name);
             details = r.getString(R.string.wifi_no_internet_detailed);
@@ -272,8 +275,7 @@ public class NetworkNotificationManager {
                 .setSmallIcon(icon)
                 .setAutoCancel(true)
                 .setTicker(title)
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
+                .setColor(mContext.getColor(android.R.color.system_notification_accent_color))
                 .setContentTitle(title)
                 .setContentIntent(intent)
                 .setLocalOnly(true)
@@ -353,7 +355,7 @@ public class NetworkNotificationManager {
     public void showToast(NetworkAgentInfo fromNai, NetworkAgentInfo toNai) {
         String fromTransport = getTransportName(approximateTransportType(fromNai));
         String toTransport = getTransportName(approximateTransportType(toNai));
-        String text = mContext.getResources().getString(
+        String text = mResources.getString(
                 R.string.network_switch_metered_toast, fromTransport, toTransport);
         Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
     }

@@ -63,88 +63,9 @@ import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-
-// The following class is Android Emulator specific. It is used to read and
-// write contents of the host system's clipboard.
-class HostClipboardMonitor implements Runnable {
-    public interface HostClipboardCallback {
-        void onHostClipboardUpdated(String contents);
-    }
-
-    private RandomAccessFile mPipe = null;
-    private HostClipboardCallback mHostClipboardCallback;
-    private static final String PIPE_NAME = "pipe:clipboard";
-    private static final String PIPE_DEVICE = "/dev/qemu_pipe";
-
-    private static byte[] createOpenHandshake() {
-        // String.getBytes doesn't include the null terminator,
-        // but the QEMU pipe device requires the pipe service name
-        // to be null-terminated.
-
-        final byte[] bits = Arrays.copyOf(PIPE_NAME.getBytes(), PIPE_NAME.length() + 1);
-        bits[PIPE_NAME.length()] = 0;
-        return bits;
-    }
-
-    private void openPipe() {
-        try {
-            mPipe = new RandomAccessFile(PIPE_DEVICE, "rw");
-            mPipe.write(createOpenHandshake());
-        } catch (IOException e) {
-            try {
-                if (mPipe != null) mPipe.close();
-            } catch (IOException ee) {}
-            mPipe = null;
-        }
-    }
-
-    public HostClipboardMonitor(HostClipboardCallback cb) {
-        mHostClipboardCallback = cb;
-    }
-
-    @Override
-    public void run() {
-        while(!Thread.interrupted()) {
-            try {
-                // There's no guarantee that QEMU pipes will be ready at the moment
-                // this method is invoked. We simply try to get the pipe open and
-                // retry on failure indefinitely.
-                while (mPipe == null) {
-                    openPipe();
-                    Thread.sleep(100);
-                }
-                int size = mPipe.readInt();
-                size = Integer.reverseBytes(size);
-                byte[] receivedData = new byte[size];
-                mPipe.readFully(receivedData);
-                mHostClipboardCallback.onHostClipboardUpdated(
-                    new String(receivedData));
-            } catch (IOException e) {
-                try {
-                    mPipe.close();
-                } catch (IOException ee) {}
-                mPipe = null;
-            } catch (InterruptedException e) {}
-        }
-    }
-
-    public void setHostClipboard(String content) {
-        try {
-            if (mPipe != null) {
-                mPipe.writeInt(Integer.reverseBytes(content.getBytes().length));
-                mPipe.write(content.getBytes());
-            }
-        } catch(IOException e) {
-            Slog.e("HostClipboardMonitor",
-                   "Failed to set host clipboard " + e.getMessage());
-        }
-    }
-}
+import java.util.function.Consumer;
 
 /**
  * Implementation of the clipboard for copy and paste.
@@ -170,8 +91,7 @@ public class ClipboardService extends SystemService {
     private final ContentCaptureManagerInternal mContentCaptureInternal;
     private final AutofillManagerInternal mAutofillInternal;
     private final IBinder mPermissionOwner;
-    private HostClipboardMonitor mHostClipboardMonitor = null;
-    private Thread mHostMonitorThread = null;
+    private final Consumer<ClipData> mEmulatorClipboardMonitor;
 
     private final SparseArray<PerUserClipboard> mClipboards = new SparseArray<>();
 
@@ -193,22 +113,13 @@ public class ClipboardService extends SystemService {
         final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
         if (IS_EMULATOR) {
-            mHostClipboardMonitor = new HostClipboardMonitor(
-                new HostClipboardMonitor.HostClipboardCallback() {
-                    @Override
-                    public void onHostClipboardUpdated(String contents){
-                        ClipData clip =
-                            new ClipData("host clipboard",
-                                         new String[]{"text/plain"},
-                                         new ClipData.Item(contents));
-                        synchronized(mClipboards) {
-                            setPrimaryClipInternal(getClipboard(0), clip,
-                                    android.os.Process.SYSTEM_UID);
-                        }
-                    }
-                });
-            mHostMonitorThread = new Thread(mHostClipboardMonitor);
-            mHostMonitorThread.start();
+            mEmulatorClipboardMonitor = new EmulatorClipboardMonitor((clip) -> {
+                synchronized (this) {
+                    setPrimaryClipInternal(getClipboard(0), clip, android.os.Process.SYSTEM_UID);
+                }
+            });
+        } else {
+            mEmulatorClipboardMonitor = (clip) -> {};
         }
     }
 
@@ -503,18 +414,7 @@ public class ClipboardService extends SystemService {
     }
 
     void setPrimaryClipInternal(@Nullable ClipData clip, int uid) {
-        // Push clipboard to host, if any
-        if (mHostClipboardMonitor != null) {
-            if (clip == null) {
-                // Someone really wants the clipboard cleared, so push empty
-                mHostClipboardMonitor.setHostClipboard("");
-            } else if (clip.getItemCount() > 0) {
-                final CharSequence text = clip.getItemAt(0).getText();
-                if (text != null) {
-                    mHostClipboardMonitor.setHostClipboard(text.toString());
-                }
-            }
-        }
+        mEmulatorClipboardMonitor.accept(clip);
 
         // Update this user
         final int userId = UserHandle.getUserId(uid);

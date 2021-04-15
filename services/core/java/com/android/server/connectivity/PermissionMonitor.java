@@ -271,6 +271,13 @@ public class PermissionMonitor {
         return mApps.containsKey(uid);
     }
 
+    /**
+     * Returns whether the given uid has permission to use restricted networks.
+     */
+    public synchronized boolean hasRestrictedNetworksPermission(int uid) {
+        return Boolean.TRUE.equals(mApps.get(uid));
+    }
+
     private void update(Set<UserHandle> users, Map<Integer, Boolean> apps, boolean add) {
         List<Integer> network = new ArrayList<>();
         List<Integer> system = new ArrayList<>();
@@ -279,7 +286,7 @@ public class PermissionMonitor {
             for (UserHandle user : users) {
                 if (user == null) continue;
 
-                list.add(UserHandle.getUid(user, app.getKey()));
+                list.add(user.getUid(app.getKey()));
             }
         }
         try {
@@ -548,7 +555,7 @@ public class PermissionMonitor {
                     final UserHandle handle = UserHandle.of(userId);
                     if (handle == null) continue;
 
-                    final int uid = UserHandle.getUid(handle, appId);
+                    final int uid = handle.getUid(appId);
                     if (range.contains(uid)) {
                         result.add(uid);
                     }

@@ -1363,6 +1363,8 @@ public final class CameraManager {
                     // devices going offline (in real world scenarios, these permissions aren't
                     // changeable). Future calls to getCameraIdList() will reflect the changes in
                     // the camera id list after getCameraIdListNoLazy() is called.
+                    // We need to remove the torch ids which may have been associated with the
+                    // devices removed as well. This is the same situation.
                     cameraStatuses = mCameraService.addListener(testListener);
                     mCameraService.removeListener(testListener);
                     for (CameraStatus c : cameraStatuses) {
@@ -1381,6 +1383,7 @@ public final class CameraManager {
                     }
                     for (String id : deviceIdsToRemove) {
                         onStatusChangedLocked(ICameraServiceListener.STATUS_NOT_PRESENT, id);
+                        mTorchStatus.remove(id);
                     }
                 } catch (ServiceSpecificException e) {
                     // Unexpected failure
@@ -2024,7 +2027,9 @@ public final class CameraManager {
                 // Tell listeners that the cameras and torch modes are unavailable and schedule a
                 // reconnection to camera service. When camera service is reconnected, the camera
                 // and torch statuses will be updated.
-                for (int i = 0; i < mDeviceStatus.size(); i++) {
+                // Iterate from the end to the beginning befcause onStatusChangedLocked removes
+                // entries from the ArrayMap.
+                for (int i = mDeviceStatus.size() - 1; i >= 0; i--) {
                     String cameraId = mDeviceStatus.keyAt(i);
                     onStatusChangedLocked(ICameraServiceListener.STATUS_NOT_PRESENT, cameraId);
                 }

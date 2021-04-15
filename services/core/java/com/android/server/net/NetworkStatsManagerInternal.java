@@ -37,8 +37,9 @@ public abstract class NetworkStatsManagerInternal {
     public abstract void forceUpdate();
 
     /**
-     * Set the quota limit to all registered custom network stats providers.
+     * Set the warning and limit to all registered custom network stats providers.
      * Note that invocation of any interface will be sent to all providers.
      */
-    public abstract void setStatsProviderLimitAsync(@NonNull String iface, long quota);
+    public abstract void setStatsProviderWarningAndLimitAsync(@NonNull String iface, long warning,
+            long limit);
 }

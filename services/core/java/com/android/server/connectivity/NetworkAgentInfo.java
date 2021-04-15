@@ -25,6 +25,8 @@ import android.content.Context;
 import android.net.CaptivePortalData;
 import android.net.IDnsResolver;
 import android.net.INetd;
+import android.net.INetworkAgent;
+import android.net.INetworkAgentRegistry;
 import android.net.INetworkMonitor;
 import android.net.LinkProperties;
 import android.net.NattKeepalivePacketData;
@@ -47,12 +49,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
-import com.android.connectivity.aidl.INetworkAgent;
-import com.android.connectivity.aidl.INetworkAgentRegistry;
 import com.android.internal.util.WakeupMessage;
 import com.android.server.ConnectivityService;
 
@@ -199,6 +200,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     // Set to true when partial connectivity was detected.
     public boolean partialConnectivity;
+
+    // Delay between when the network is disconnected and when the native network is destroyed.
+    public int teardownDelayMs;
 
     // Captive portal info of the network from RFC8908, if any.
     // Obtained by ConnectivityService and merged into NetworkAgent-provided information.
@@ -576,6 +580,28 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
     }
 
+    /**
+     * Notify the NetworkAgent that the network is successfully connected.
+     */
+    public void onNetworkCreated() {
+        try {
+            networkAgent.onNetworkCreated();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending network created event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that the native network has been destroyed.
+     */
+    public void onNetworkDestroyed() {
+        try {
+            networkAgent.onNetworkDestroyed();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending network destroyed event", e);
+        }
+    }
+
     // TODO: consider moving out of NetworkAgentInfo into its own class
     private class NetworkAgentMessageHandler extends INetworkAgentRegistry.Stub {
         private final Handler mHandler;
@@ -633,7 +659,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         @Override
         public void sendEpsQosSessionAvailable(final int qosCallbackId, final QosSession session,
                 final EpsBearerQosSessionAttributes attributes) {
-            mQosCallbackTracker.sendEventQosSessionAvailable(qosCallbackId, session, attributes);
+            mQosCallbackTracker.sendEventEpsQosSessionAvailable(qosCallbackId, session, attributes);
+        }
+
+        @Override
+        public void sendNrQosSessionAvailable(final int qosCallbackId, final QosSession session,
+                final NrQosSessionAttributes attributes) {
+            mQosCallbackTracker.sendEventNrQosSessionAvailable(qosCallbackId, session, attributes);
         }
 
         @Override
@@ -645,6 +677,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         public void sendQosCallbackError(final int qosCallbackId,
                 @QosCallbackException.ExceptionType final int exceptionType) {
             mQosCallbackTracker.sendEventQosCallbackError(qosCallbackId, exceptionType);
+        }
+
+        @Override
+        public void sendTeardownDelayMs(int teardownDelayMs) {
+            mHandler.obtainMessage(NetworkAgent.EVENT_TEARDOWN_DELAY_CHANGED,
+                    teardownDelayMs, 0, new Pair<>(NetworkAgentInfo.this, null)).sendToTarget();
         }
     }
 

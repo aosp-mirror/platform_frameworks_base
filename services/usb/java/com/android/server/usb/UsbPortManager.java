@@ -60,9 +60,9 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.service.ServiceProtoEnums;
 import android.service.usb.UsbPortInfoProto;
 import android.service.usb.UsbPortManagerProto;
-import android.service.usb.UsbServiceProto;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -992,15 +992,15 @@ public class UsbPortManager {
     private static int convertContaminantDetectionStatusToProto(int contaminantDetectionStatus) {
         switch (contaminantDetectionStatus) {
             case UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED:
-                return UsbServiceProto.CONTAMINANT_STATUS_NOT_SUPPORTED;
+                return ServiceProtoEnums.CONTAMINANT_STATUS_NOT_SUPPORTED;
             case UsbPortStatus.CONTAMINANT_DETECTION_DISABLED:
-                return UsbServiceProto.CONTAMINANT_STATUS_DISABLED;
+                return ServiceProtoEnums.CONTAMINANT_STATUS_DISABLED;
             case UsbPortStatus.CONTAMINANT_DETECTION_NOT_DETECTED:
-                return UsbServiceProto.CONTAMINANT_STATUS_NOT_DETECTED;
+                return ServiceProtoEnums.CONTAMINANT_STATUS_NOT_DETECTED;
             case UsbPortStatus.CONTAMINANT_DETECTION_DETECTED:
-                return UsbServiceProto.CONTAMINANT_STATUS_DETECTED;
+                return ServiceProtoEnums.CONTAMINANT_STATUS_DETECTED;
             default:
-                return UsbServiceProto.CONTAMINANT_STATUS_UNKNOWN;
+                return ServiceProtoEnums.CONTAMINANT_STATUS_UNKNOWN;
         }
     }
 

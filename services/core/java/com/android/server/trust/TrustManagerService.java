@@ -54,7 +54,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Authorization;
-import android.security.KeyStore;
 import android.service.trust.TrustAgentService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -701,13 +700,11 @@ public class TrustManagerService extends SystemService {
             dispatchDeviceLocked(userId, locked);
 
             Authorization.onLockScreenEvent(locked, userId, null);
-            KeyStore.getInstance().onUserLockedStateChanged(userId, locked);
             // Also update the user's profiles who have unified challenge, since they
             // share the same unlocked state (see {@link #isDeviceLocked(int)})
             for (int profileHandle : mUserManager.getEnabledProfileIds(userId)) {
                 if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(profileHandle)) {
                     mAuthorizationService.onLockScreenEvent(locked, profileHandle, null);
-                    KeyStore.getInstance().onUserLockedStateChanged(profileHandle, locked);
                 }
             }
         }
@@ -1259,7 +1256,6 @@ public class TrustManagerService extends SystemService {
                     }
 
                     Authorization.onLockScreenEvent(locked, userId, null);
-                    KeyStore.getInstance().onUserLockedStateChanged(userId, locked);
 
                     if (locked) {
                         try {

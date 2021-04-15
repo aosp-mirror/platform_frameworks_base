@@ -160,14 +160,4 @@ interface IUwbAdapter {
    * closed.
    */
   const int RANGING_SESSION_CLOSE_THRESHOLD_MS = 3000; // Value TBD
-
-  /**
-   * Ranging scheduling time unit (RSTU) for High Rate Pulse (HRP) PHY
-   */
-  const int HIGH_RATE_PULSE_CHIRPS_PER_RSTU = 416;
-
-  /**
-   * Ranging scheduling time unit (RSTU) for Low Rate Pulse (LRP) PHY
-   */
-  const int LOW_RATE_PULSE_CHIRPS_PER_RSTU = 1;
 }

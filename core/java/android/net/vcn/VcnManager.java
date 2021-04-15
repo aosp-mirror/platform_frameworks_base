@@ -154,7 +154,7 @@ public class VcnManager {
         requireNonNull(subscriptionGroup, "subscriptionGroup was null");
 
         try {
-            mService.clearVcnConfig(subscriptionGroup);
+            mService.clearVcnConfig(subscriptionGroup, mContext.getOpPackageName());
         } catch (ServiceSpecificException e) {
             throw new IOException(e);
         } catch (RemoteException e) {
@@ -437,26 +437,25 @@ public class VcnManager {
          * Invoked when status of the VCN for this callback's subscription group changes.
          *
          * @param statusCode the code for the status change encountered by this {@link
-         *     VcnStatusCallback}'s subscription group.
+         *     VcnStatusCallback}'s subscription group. This value will be one of VCN_STATUS_CODE_*.
          */
-        public abstract void onVcnStatusChanged(@VcnStatusCode int statusCode);
+        public abstract void onStatusChanged(@VcnStatusCode int statusCode);
 
         /**
          * Invoked when a VCN Gateway Connection corresponding to this callback's subscription group
          * encounters an error.
          *
-         * @param networkCapabilities an array of NetworkCapabilities.NET_CAPABILITY_* capabilities
-         *     for the Gateway Connection that encountered the error, for identification purposes.
-         *     These will be a sorted list with no duplicates and will match {@link
-         *     VcnGatewayConnectionConfig#getExposedCapabilities()} for one of the {@link
-         *     VcnGatewayConnectionConfig}s set in the {@link VcnConfig} for this subscription
-         *     group.
-         * @param errorCode the code to indicate the error that occurred
+         * @param gatewayConnectionName the String GatewayConnection name for the GatewayConnection
+         *     encountering an error. This will match the name for exactly one {@link
+         *     VcnGatewayConnectionConfig} for the {@link VcnConfig} configured for this callback's
+         *     subscription group
+         * @param errorCode the code to indicate the error that occurred. This value will be one of
+         *     VCN_ERROR_CODE_*.
          * @param detail Throwable to provide additional information about the error, or {@code
          *     null} if none
          */
         public abstract void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable Throwable detail);
     }
@@ -476,7 +475,7 @@ public class VcnManager {
      * and there is a VCN active for its specified subscription group (this may happen after the
      * callback is registered).
      *
-     * <p>{@link VcnStatusCallback#onVcnStatusChanged(int)} will be invoked on registration with the
+     * <p>{@link VcnStatusCallback#onStatusChanged(int)} will be invoked on registration with the
      * current status for the specified subscription group's VCN. If the registrant is not
      * privileged for this subscription group, {@link #VCN_STATUS_CODE_NOT_CONFIGURED} will be
      * returned.
@@ -580,13 +579,13 @@ public class VcnManager {
         @Override
         public void onVcnStatusChanged(@VcnStatusCode int statusCode) {
             Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(() -> mCallback.onVcnStatusChanged(statusCode)));
+                    () -> mExecutor.execute(() -> mCallback.onStatusChanged(statusCode)));
         }
 
         // TODO(b/180521637): use ServiceSpecificException for safer Exception 'parceling'
         @Override
         public void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage) {
@@ -597,7 +596,7 @@ public class VcnManager {
                             mExecutor.execute(
                                     () ->
                                             mCallback.onGatewayConnectionError(
-                                                    networkCapabilities, errorCode, cause)));
+                                                    gatewayConnectionName, errorCode, cause)));
         }
 
         private static Throwable createThrowableByClassName(

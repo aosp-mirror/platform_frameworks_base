@@ -80,12 +80,12 @@ public final class KeepalivePacketDataUtil {
         parcel.srcPort = pkt.getSrcPort();
         parcel.dstAddress = dstAddress.getAddress();
         parcel.dstPort = pkt.getDstPort();
-        parcel.seq = pkt.tcpSeq;
-        parcel.ack = pkt.tcpAck;
-        parcel.rcvWnd = pkt.tcpWindow;
-        parcel.rcvWndScale = pkt.tcpWindowScale;
-        parcel.tos = pkt.ipTos;
-        parcel.ttl = pkt.ipTtl;
+        parcel.seq = pkt.getTcpSeq();
+        parcel.ack = pkt.getTcpAck();
+        parcel.rcvWnd = pkt.getTcpWindow();
+        parcel.rcvWndScale = pkt.getTcpWindowScale();
+        parcel.tos = pkt.getIpTos();
+        parcel.ttl = pkt.getIpTtl();
         return parcel;
     }
 

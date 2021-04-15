@@ -38,6 +38,15 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_ADMIN_DISABLED;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_MASK;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
+import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
+import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
+import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
+import static android.net.ConnectivityManager.BLOCKED_REASON_RESTRICTED_MODE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
@@ -56,7 +65,9 @@ import static android.net.NetworkIdentity.OEM_NONE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
+import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_FOREGROUND;
 import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_MASK;
+import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_SYSTEM;
 import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_USER_EXEMPTED;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_FOREGROUND;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
@@ -64,15 +75,6 @@ import static android.net.NetworkPolicyManager.ALLOWED_REASON_POWER_SAVE_ALLOWLI
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_SYSTEM;
-import static android.net.NetworkPolicyManager.BLOCKED_METERED_REASON_ADMIN_DISABLED;
-import static android.net.NetworkPolicyManager.BLOCKED_METERED_REASON_DATA_SAVER;
-import static android.net.NetworkPolicyManager.BLOCKED_METERED_REASON_MASK;
-import static android.net.NetworkPolicyManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
-import static android.net.NetworkPolicyManager.BLOCKED_REASON_APP_STANDBY;
-import static android.net.NetworkPolicyManager.BLOCKED_REASON_BATTERY_SAVER;
-import static android.net.NetworkPolicyManager.BLOCKED_REASON_DOZE;
-import static android.net.NetworkPolicyManager.BLOCKED_REASON_NONE;
-import static android.net.NetworkPolicyManager.BLOCKED_REASON_RESTRICTED_MODE;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.MASK_ALL_NETWORKS;
@@ -172,12 +174,10 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
@@ -261,6 +261,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
+import com.android.net.module.util.PermissionUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -422,15 +423,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_LIMIT_REACHED = 5;
     private static final int MSG_RESTRICT_BACKGROUND_CHANGED = 6;
     private static final int MSG_ADVISE_PERSIST_THRESHOLD = 7;
-    private static final int MSG_UPDATE_INTERFACE_QUOTA = 10;
-    private static final int MSG_REMOVE_INTERFACE_QUOTA = 11;
+    private static final int MSG_UPDATE_INTERFACE_QUOTAS = 10;
+    private static final int MSG_REMOVE_INTERFACE_QUOTAS = 11;
     private static final int MSG_POLICIES_CHANGED = 13;
     private static final int MSG_RESET_FIREWALL_RULES_BY_UID = 15;
     private static final int MSG_SUBSCRIPTION_OVERRIDE = 16;
     private static final int MSG_METERED_RESTRICTED_PACKAGES_CHANGED = 17;
     private static final int MSG_SET_NETWORK_TEMPLATE_ENABLED = 18;
     private static final int MSG_SUBSCRIPTION_PLANS_CHANGED = 19;
-    private static final int MSG_STATS_PROVIDER_LIMIT_REACHED = 20;
+    private static final int MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED = 20;
     // TODO: Add similar docs for other messages.
     /**
      * Message to indicate that reasons for why an uid is blocked changed.
@@ -1217,10 +1218,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static boolean updateCapabilityChange(SparseBooleanArray lastValues, boolean newValue,
             Network network) {
-        final boolean lastValue = lastValues.get(network.netId, false);
-        final boolean changed = (lastValue != newValue) || lastValues.indexOfKey(network.netId) < 0;
+        final boolean lastValue = lastValues.get(network.getNetId(), false);
+        final boolean changed = (lastValue != newValue)
+                || lastValues.indexOfKey(network.getNetId()) < 0;
         if (changed) {
-            lastValues.put(network.netId, newValue);
+            lastValues.put(network.getNetId(), newValue);
         }
         return changed;
     }
@@ -1243,7 +1245,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mNetworkRoaming, newRoaming, network);
 
                 if (meteredChanged || roamingChanged) {
-                    mLogger.meterednessChanged(network.netId, newMetered);
+                    mLogger.meterednessChanged(network.getNetId(), newMetered);
                     updateNetworkRulesNL();
                 }
             }
@@ -1919,16 +1921,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Collect all ifaces from a {@link NetworkStateSnapshot} into the given set.
      */
     private static void collectIfaces(ArraySet<String> ifaces, NetworkStateSnapshot snapshot) {
-        final String baseIface = snapshot.linkProperties.getInterfaceName();
-        if (baseIface != null) {
-            ifaces.add(baseIface);
-        }
-        for (LinkProperties stackedLink : snapshot.linkProperties.getStackedLinks()) {
-            final String stackedIface = stackedLink.getInterfaceName();
-            if (stackedIface != null) {
-                ifaces.add(stackedIface);
-            }
-        }
+        ifaces.addAll(snapshot.linkProperties.getAllInterfaceNames());
     }
 
     /**
@@ -2009,7 +2002,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mNetIdToSubId.clear();
         final ArrayMap<NetworkStateSnapshot, NetworkIdentity> identified = new ArrayMap<>();
         for (final NetworkStateSnapshot snapshot : snapshots) {
-            mNetIdToSubId.put(snapshot.network.netId, parseSubId(snapshot));
+            mNetIdToSubId.put(snapshot.network.getNetId(), parseSubId(snapshot));
 
             // Policies matched by NPMS only match by subscriber ID or by ssid. Thus subtype
             // in the object created here is never used and its value doesn't matter, so use
@@ -2042,39 +2035,45 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final boolean hasWarning = policy.warningBytes != LIMIT_DISABLED;
             final boolean hasLimit = policy.limitBytes != LIMIT_DISABLED;
-            if (hasLimit || policy.metered) {
-                final long quotaBytes;
-                if (hasLimit && policy.hasCycle()) {
-                    final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
-                            .cycleIterator(policy).next();
-                    final long start = cycle.first.toInstant().toEpochMilli();
-                    final long end = cycle.second.toInstant().toEpochMilli();
-                    final long totalBytes = getTotalBytes(policy.template, start, end);
+            long limitBytes = Long.MAX_VALUE;
+            long warningBytes = Long.MAX_VALUE;
+            if ((hasLimit || hasWarning) && policy.hasCycle()) {
+                final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
+                        .cycleIterator(policy).next();
+                final long start = cycle.first.toInstant().toEpochMilli();
+                final long end = cycle.second.toInstant().toEpochMilli();
+                final long totalBytes = getTotalBytes(policy.template, start, end);
 
-                    if (policy.lastLimitSnooze >= start) {
-                        // snoozing past quota, but we still need to restrict apps,
-                        // so push really high quota.
-                        quotaBytes = Long.MAX_VALUE;
-                    } else {
-                        // remaining "quota" bytes are based on total usage in
-                        // current cycle. kernel doesn't like 0-byte rules, so we
-                        // set 1-byte quota and disable the radio later.
-                        quotaBytes = Math.max(1, policy.limitBytes - totalBytes);
-                    }
-                } else {
-                    // metered network, but no policy limit; we still need to
-                    // restrict apps, so push really high quota.
-                    quotaBytes = Long.MAX_VALUE;
+                // If the limit notification is not snoozed, the limit quota needs to be calculated.
+                if (hasLimit && policy.lastLimitSnooze < start) {
+                    // remaining "quota" bytes are based on total usage in
+                    // current cycle. kernel doesn't like 0-byte rules, so we
+                    // set 1-byte quota and disable the radio later.
+                    limitBytes = Math.max(1, policy.limitBytes - totalBytes);
                 }
 
+                // If the warning notification was snoozed by user, or the service already knows
+                // it is over warning bytes, doesn't need to calculate warning bytes.
+                if (hasWarning && policy.lastWarningSnooze < start
+                        && !policy.isOverWarning(totalBytes)) {
+                    warningBytes = Math.max(1, policy.warningBytes - totalBytes);
+                }
+            }
+
+            if (hasWarning || hasLimit || policy.metered) {
                 if (matchingIfaces.size() > 1) {
                     // TODO: switch to shared quota once NMS supports
                     Slog.w(TAG, "shared quota unsupported; generating rule for each iface");
                 }
 
+                // Set the interface warning and limit. For interfaces which has no cycle,
+                // or metered with no policy quotas, or snoozed notification; we still need to put
+                // iptables rule hooks to restrict apps for data saver, so push really high quota.
+                // TODO: Push NetworkStatsProvider.QUOTA_UNLIMITED instead of Long.MAX_VALUE to
+                //  providers.
                 for (int j = matchingIfaces.size() - 1; j >= 0; j--) {
                     final String iface = matchingIfaces.valueAt(j);
-                    setInterfaceQuotaAsync(iface, quotaBytes);
+                    setInterfaceQuotasAsync(iface, warningBytes, limitBytes);
                     newMeteredIfaces.add(iface);
                 }
             }
@@ -2097,7 +2096,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 for (int j = matchingIfaces.size() - 1; j >= 0; j--) {
                     final String iface = matchingIfaces.valueAt(j);
                     if (!newMeteredIfaces.contains(iface)) {
-                        setInterfaceQuotaAsync(iface, Long.MAX_VALUE);
+                        setInterfaceQuotasAsync(iface, Long.MAX_VALUE, Long.MAX_VALUE);
                         newMeteredIfaces.add(iface);
                     }
                 }
@@ -2109,7 +2108,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int i = mMeteredIfaces.size() - 1; i >= 0; i--) {
                 final String iface = mMeteredIfaces.valueAt(i);
                 if (!newMeteredIfaces.contains(iface)) {
-                    removeInterfaceQuotaAsync(iface);
+                    removeInterfaceQuotasAsync(iface);
                 }
             }
             mMeteredIfaces = newMeteredIfaces;
@@ -3112,8 +3111,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @Override
     public int getRestrictBackgroundByCaller() {
         mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
-        final int uid = Binder.getCallingUid();
+        return getRestrictBackgroundStatusInternal(Binder.getCallingUid());
+    }
 
+    @Override
+    public int getRestrictBackgroundStatus(int uid) {
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        return getRestrictBackgroundStatusInternal(uid);
+    }
+
+    private int getRestrictBackgroundStatusInternal(int uid) {
         synchronized (mUidRulesFirstLock) {
             // Must clear identity because getUidPolicy() is restricted to system.
             final long token = Binder.clearCallingIdentity();
@@ -3582,6 +3589,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Get multipath preference value for the given network.
      */
     public int getMultipathPreference(Network network) {
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         final Integer preference = mMultipathPolicyTracker.getMultipathPreference(network);
         if (preference != null) {
             return preference;
@@ -4626,8 +4634,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         newBlockedReasons |= (mRestrictBackground ? BLOCKED_METERED_REASON_DATA_SAVER : 0);
         newBlockedReasons |= (isDenied ? BLOCKED_METERED_REASON_USER_RESTRICTED : 0);
 
-        newAllowedReasons |= (isSystem(uid) ? ALLOWED_REASON_SYSTEM : 0);
-        newAllowedReasons |= (isForeground ? ALLOWED_REASON_FOREGROUND : 0);
+        newAllowedReasons |= (isSystem(uid) ? ALLOWED_METERED_REASON_SYSTEM : 0);
+        newAllowedReasons |= (isForeground ? ALLOWED_METERED_REASON_FOREGROUND : 0);
         newAllowedReasons |= (isAllowed ? ALLOWED_METERED_REASON_USER_EXEMPTED : 0);
 
         if (LOGV) {
@@ -4701,18 +4709,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             // Dispatch changed rule to existing listeners.
             mHandler.obtainMessage(MSG_RULES_CHANGED, uid, newUidRules).sendToTarget();
+        }
 
-            final int oldEffectiveBlockedReasons = uidBlockedState.effectiveBlockedReasons;
-            uidBlockedState.blockedReasons = (uidBlockedState.blockedReasons
-                    & ~BLOCKED_METERED_REASON_MASK) | newBlockedReasons;
-            uidBlockedState.allowedReasons = (uidBlockedState.allowedReasons
-                    & ~ALLOWED_METERED_REASON_MASK) | newAllowedReasons;
-            uidBlockedState.updateEffectiveBlockedReasons();
-            if (oldEffectiveBlockedReasons != uidBlockedState.effectiveBlockedReasons) {
-                mHandler.obtainMessage(MSG_BLOCKED_REASON_CHANGED, uid,
-                        uidBlockedState.effectiveBlockedReasons, oldEffectiveBlockedReasons)
-                        .sendToTarget();
-            }
+        final int oldEffectiveBlockedReasons = uidBlockedState.effectiveBlockedReasons;
+        uidBlockedState.blockedReasons = (uidBlockedState.blockedReasons
+                & ~BLOCKED_METERED_REASON_MASK) | newBlockedReasons;
+        uidBlockedState.allowedReasons = (uidBlockedState.allowedReasons
+                & ~ALLOWED_METERED_REASON_MASK) | newAllowedReasons;
+        uidBlockedState.updateEffectiveBlockedReasons();
+        if (oldEffectiveBlockedReasons != uidBlockedState.effectiveBlockedReasons) {
+            mHandler.obtainMessage(MSG_BLOCKED_REASON_CHANGED, uid,
+                    uidBlockedState.effectiveBlockedReasons, oldEffectiveBlockedReasons)
+                    .sendToTarget();
         }
     }
 
@@ -4970,7 +4978,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     mListeners.finishBroadcast();
                     return true;
                 }
-                case MSG_STATS_PROVIDER_LIMIT_REACHED: {
+                case MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED: {
                     mNetworkStats.forceUpdate();
 
                     synchronized (mNetworkPoliciesSecondLock) {
@@ -5041,19 +5049,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     mNetworkStats.advisePersistThreshold(persistThreshold);
                     return true;
                 }
-                case MSG_UPDATE_INTERFACE_QUOTA: {
-                    final String iface = (String) msg.obj;
-                    // int params need to be stitched back into a long
-                    final long quota = ((long) msg.arg1 << 32) | (msg.arg2 & 0xFFFFFFFFL);
-                    removeInterfaceQuota(iface);
-                    setInterfaceQuota(iface, quota);
-                    mNetworkStats.setStatsProviderLimitAsync(iface, quota);
+                case MSG_UPDATE_INTERFACE_QUOTAS: {
+                    final IfaceQuotas val = (IfaceQuotas) msg.obj;
+                    // TODO: Consider set a new limit before removing the original one.
+                    removeInterfaceLimit(val.iface);
+                    setInterfaceLimit(val.iface, val.limit);
+                    mNetworkStats.setStatsProviderWarningAndLimitAsync(val.iface, val.warning,
+                            val.limit);
                     return true;
                 }
-                case MSG_REMOVE_INTERFACE_QUOTA: {
+                case MSG_REMOVE_INTERFACE_QUOTAS: {
                     final String iface = (String) msg.obj;
-                    removeInterfaceQuota(iface);
-                    mNetworkStats.setStatsProviderLimitAsync(iface, QUOTA_UNLIMITED);
+                    removeInterfaceLimit(iface);
+                    mNetworkStats.setStatsProviderWarningAndLimitAsync(iface, QUOTA_UNLIMITED,
+                            QUOTA_UNLIMITED);
                     return true;
                 }
                 case MSG_RESET_FIREWALL_RULES_BY_UID: {
@@ -5201,15 +5210,32 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private void setInterfaceQuotaAsync(String iface, long quotaBytes) {
-        // long quotaBytes split up into two ints to fit in message
-        mHandler.obtainMessage(MSG_UPDATE_INTERFACE_QUOTA, (int) (quotaBytes >> 32),
-                (int) (quotaBytes & 0xFFFFFFFF), iface).sendToTarget();
+    private static final class IfaceQuotas {
+        @NonNull public final String iface;
+        // Warning and limit bytes of interface qutoas, could be QUOTA_UNLIMITED or Long.MAX_VALUE
+        // if not set. 0 is not acceptable since kernel doesn't like 0-byte rules.
+        public final long warning;
+        public final long limit;
+
+        private IfaceQuotas(@NonNull String iface, long warning, long limit) {
+            this.iface = iface;
+            this.warning = warning;
+            this.limit = limit;
+        }
     }
 
-    private void setInterfaceQuota(String iface, long quotaBytes) {
+    private void setInterfaceQuotasAsync(@NonNull String iface,
+            long warningBytes, long limitBytes) {
+        mHandler.obtainMessage(MSG_UPDATE_INTERFACE_QUOTAS,
+                new IfaceQuotas(iface, warningBytes, limitBytes)).sendToTarget();
+    }
+
+    private void setInterfaceLimit(String iface, long limitBytes) {
         try {
-            mNetworkManager.setInterfaceQuota(iface, quotaBytes);
+            // For legacy design the data warning is covered by global alert, where the
+            // kernel will notify upper layer for a small amount of change of traffic
+            // statistics. Thus, passing warning is not needed.
+            mNetworkManager.setInterfaceQuota(iface, limitBytes);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting interface quota", e);
         } catch (RemoteException e) {
@@ -5217,11 +5243,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private void removeInterfaceQuotaAsync(String iface) {
-        mHandler.obtainMessage(MSG_REMOVE_INTERFACE_QUOTA, iface).sendToTarget();
+    private void removeInterfaceQuotasAsync(String iface) {
+        mHandler.obtainMessage(MSG_REMOVE_INTERFACE_QUOTAS, iface).sendToTarget();
     }
 
-    private void removeInterfaceQuota(String iface) {
+    private void removeInterfaceLimit(String iface) {
         try {
             mNetworkManager.removeInterfaceQuota(iface);
         } catch (IllegalStateException e) {
@@ -5555,17 +5581,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    public boolean checkUidNetworkingBlocked(int uid, int uidRules,
-            boolean isNetworkMetered, boolean isBackgroundRestricted) {
-        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
-        // Log of invoking this function is disabled because it will be called very frequently. And
-        // metrics are unlikely needed on this method because the callers are external and this
-        // method doesn't take any locks or perform expensive operations.
-        return isUidNetworkingBlockedInternal(uid, uidRules, isNetworkMetered,
-                isBackgroundRestricted, null);
-    }
-
-    @Override
     public boolean isUidRestrictedOnMeteredNetworks(int uid) {
         mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
         final int uidRules;
@@ -5726,9 +5741,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override
-        public void onStatsProviderLimitReached(@NonNull String tag) {
-            Log.v(TAG, "onStatsProviderLimitReached: " + tag);
-            mHandler.obtainMessage(MSG_STATS_PROVIDER_LIMIT_REACHED).sendToTarget();
+        public void onStatsProviderWarningOrLimitReached(@NonNull String tag) {
+            Log.v(TAG, "onStatsProviderWarningOrLimitReached: " + tag);
+            mHandler.obtainMessage(MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED).sendToTarget();
         }
     }
 
@@ -5770,7 +5785,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @GuardedBy("mNetworkPoliciesSecondLock")
     private int getSubIdLocked(Network network) {
-        return mNetIdToSubId.get(network.netId, INVALID_SUBSCRIPTION_ID);
+        return mNetIdToSubId.get(network.getNetId(), INVALID_SUBSCRIPTION_ID);
     }
 
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -5842,7 +5857,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return (bundle != null) ? bundle.getBoolean(key, defaultValue) : defaultValue;
     }
 
-    private class UidBlockedState {
+    @VisibleForTesting
+    static final class UidBlockedState {
         public int blockedReasons;
         public int allowedReasons;
         public int effectiveBlockedReasons;
@@ -5854,18 +5870,28 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         void updateEffectiveBlockedReasons() {
-            effectiveBlockedReasons = blockedReasons;
+            effectiveBlockedReasons = getEffectiveBlockedReasons(blockedReasons, allowedReasons);
+        }
+
+        @VisibleForTesting
+        static int getEffectiveBlockedReasons(int blockedReasons, int allowedReasons) {
+            int effectiveBlockedReasons = blockedReasons;
             // If the uid is not subject to any blocked reasons, then return early
             if (blockedReasons == BLOCKED_REASON_NONE) {
-                return;
+                return effectiveBlockedReasons;
             }
             if ((allowedReasons & ALLOWED_REASON_SYSTEM) != 0) {
-                effectiveBlockedReasons = BLOCKED_REASON_NONE;
+                effectiveBlockedReasons &= ALLOWED_METERED_REASON_MASK;
+            }
+            if ((allowedReasons & ALLOWED_METERED_REASON_SYSTEM) != 0) {
+                effectiveBlockedReasons &= ~ALLOWED_METERED_REASON_MASK;
             }
             if ((allowedReasons & ALLOWED_REASON_FOREGROUND) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_REASON_BATTERY_SAVER;
                 effectiveBlockedReasons &= ~BLOCKED_REASON_DOZE;
                 effectiveBlockedReasons &= ~BLOCKED_REASON_APP_STANDBY;
+            }
+            if ((allowedReasons & ALLOWED_METERED_REASON_FOREGROUND) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_DATA_SAVER;
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_USER_RESTRICTED;
             }
@@ -5884,6 +5910,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if ((allowedReasons & ALLOWED_METERED_REASON_USER_EXEMPTED) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_DATA_SAVER;
             }
+            return effectiveBlockedReasons;
         }
     }
 

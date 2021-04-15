@@ -8689,6 +8689,8 @@ package android.bluetooth {
     field public static final String ACTION_NAME_CHANGED = "android.bluetooth.device.action.NAME_CHANGED";
     field public static final String ACTION_PAIRING_REQUEST = "android.bluetooth.device.action.PAIRING_REQUEST";
     field public static final String ACTION_UUID = "android.bluetooth.device.action.UUID";
+    field public static final int ADDRESS_TYPE_PUBLIC = 0; // 0x0
+    field public static final int ADDRESS_TYPE_RANDOM = 1; // 0x1
     field public static final int BOND_BONDED = 12; // 0xc
     field public static final int BOND_BONDING = 11; // 0xb
     field public static final int BOND_NONE = 10; // 0xa
@@ -12137,6 +12139,7 @@ package android.content.pm {
     field public static final String FEATURE_FINGERPRINT = "android.hardware.fingerprint";
     field public static final String FEATURE_FREEFORM_WINDOW_MANAGEMENT = "android.software.freeform_window_management";
     field public static final String FEATURE_GAMEPAD = "android.hardware.gamepad";
+    field public static final String FEATURE_HARDWARE_KEYSTORE = "android.hardware.hardware_keystore";
     field public static final String FEATURE_HIFI_SENSORS = "android.hardware.sensor.hifi_sensors";
     field public static final String FEATURE_HOME_SCREEN = "android.software.home_screen";
     field public static final String FEATURE_IDENTITY_CREDENTIAL_HARDWARE = "android.hardware.identity_credential";
@@ -19852,6 +19855,7 @@ package android.media {
     method public android.media.AudioDeviceInfo getPreferredDevice();
     method public android.media.AudioDeviceInfo getRoutedDevice();
     method public int getSampleRate();
+    method @IntRange(from=1) public int getStartThresholdInFrames();
     method public int getState();
     method public int getStreamType();
     method public boolean getTimestamp(android.media.AudioTimestamp);
@@ -19882,6 +19886,7 @@ package android.media {
     method public int setPositionNotificationPeriod(int);
     method public boolean setPreferredDevice(android.media.AudioDeviceInfo);
     method public int setPresentation(@NonNull android.media.AudioPresentation);
+    method @IntRange(from=1) public int setStartThresholdInFrames(@IntRange(from=1) int);
     method @Deprecated protected void setState(int);
     method @Deprecated public int setStereoVolume(float, float);
     method public int setVolume(float);
@@ -20441,7 +20446,9 @@ package android.media {
     method @NonNull public android.media.MediaFormat getOutputFormat(int);
     method @NonNull public android.media.MediaCodec.OutputFrame getOutputFrame(int);
     method @Nullable public android.media.Image getOutputImage(int);
+    method @Nullable public android.media.MediaCodec.ParameterDescriptor getParameterDescriptor(@NonNull String);
     method @NonNull public android.media.MediaCodec.QueueRequest getQueueRequest(int);
+    method @NonNull public java.util.List<java.lang.String> getSupportedVendorParameters();
     method @Nullable public static android.media.Image mapHardwareBuffer(@NonNull android.hardware.HardwareBuffer);
     method public void queueInputBuffer(int, int, int, long, int) throws android.media.MediaCodec.CryptoException;
     method public void queueSecureInputBuffer(int, int, @NonNull android.media.MediaCodec.CryptoInfo, long, int) throws android.media.MediaCodec.CryptoException;
@@ -20460,6 +20467,8 @@ package android.media {
     method public void signalEndOfInputStream();
     method public void start();
     method public void stop();
+    method public void subscribeToVendorParameters(@NonNull java.util.List<java.lang.String>);
+    method public void unsubscribeFromVendorParameters(@NonNull java.util.List<java.lang.String>);
     field public static final int BUFFER_FLAG_CODEC_CONFIG = 2; // 0x2
     field public static final int BUFFER_FLAG_END_OF_STREAM = 4; // 0x4
     field public static final int BUFFER_FLAG_KEY_FRAME = 1; // 0x1
@@ -20579,6 +20588,11 @@ package android.media {
     method @Nullable public android.hardware.HardwareBuffer getHardwareBuffer();
     method @Nullable public android.media.MediaCodec.LinearBlock getLinearBlock();
     method public long getPresentationTimeUs();
+  }
+
+  public static class MediaCodec.ParameterDescriptor {
+    method @NonNull public String getName();
+    method public int getType();
   }
 
   public final class MediaCodec.QueueRequest {
@@ -25689,12 +25703,13 @@ package android.net.vcn {
 
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
+    method @NonNull public String getGatewayConnectionName();
     method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
     method @NonNull public long[] getRetryInterval();
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
-    ctor public VcnGatewayConnectionConfig.Builder(@NonNull android.net.vcn.VcnControlPlaneConfig);
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.vcn.VcnControlPlaneConfig);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
@@ -25718,8 +25733,8 @@ package android.net.vcn {
 
   public abstract static class VcnManager.VcnStatusCallback {
     ctor public VcnManager.VcnStatusCallback();
-    method public abstract void onGatewayConnectionError(@NonNull int[], int, @Nullable Throwable);
-    method public abstract void onVcnStatusChanged(int);
+    method public abstract void onGatewayConnectionError(@NonNull String, int, @Nullable Throwable);
+    method public abstract void onStatusChanged(int);
   }
 
 }
@@ -29269,7 +29284,6 @@ package android.os {
     field public static final String HARDWARE;
     field public static final String HOST;
     field public static final String ID;
-    field public static final boolean IS_DEBUGGABLE;
     field public static final String MANUFACTURER;
     field public static final String MODEL;
     field @NonNull public static final String ODM_SKU;
@@ -33587,7 +33601,7 @@ package android.provider {
     field public static final String ACTION_LOCATION_SOURCE_SETTINGS = "android.settings.LOCATION_SOURCE_SETTINGS";
     field public static final String ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS = "android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS";
     field public static final String ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION = "android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION";
-    field public static final String ACTION_MANAGE_ALL_SUBSCRIPTIONS_SETTINGS = "android.settings.MANAGE_ALL_SUBSCRIPTIONS_SETTINGS";
+    field public static final String ACTION_MANAGE_ALL_SIM_PROFILES_SETTINGS = "android.settings.MANAGE_ALL_SIM_PROFILES_SETTINGS";
     field public static final String ACTION_MANAGE_APPLICATIONS_SETTINGS = "android.settings.MANAGE_APPLICATIONS_SETTINGS";
     field public static final String ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION = "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION";
     field public static final String ACTION_MANAGE_DEFAULT_APPS_SETTINGS = "android.settings.MANAGE_DEFAULT_APPS_SETTINGS";
@@ -33983,8 +33997,8 @@ package android.provider {
 
   public static final class SimPhonebookContract.SimRecords {
     method @NonNull public static android.net.Uri getContentUri(int, int);
-    method @WorkerThread public static int getEncodedNameLength(@NonNull android.content.ContentResolver, @NonNull String);
-    method @NonNull public static android.net.Uri getItemUri(int, int, int);
+    method @IntRange(from=0) @WorkerThread public static int getEncodedNameLength(@NonNull android.content.ContentResolver, @NonNull String);
+    method @NonNull public static android.net.Uri getItemUri(int, int, @IntRange(from=1) int);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sim-contact_v2";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/sim-contact_v2";
     field public static final String ELEMENTARY_FILE_TYPE = "elementary_file_type";
@@ -34215,6 +34229,9 @@ package android.provider {
     method public static android.net.Uri getUriForSubscriptionIdAndField(int, String);
     field public static final String AUTHORITY = "service-state";
     field public static final android.net.Uri CONTENT_URI;
+    field public static final String DATA_NETWORK_TYPE = "data_network_type";
+    field public static final String DATA_REG_STATE = "data_reg_state";
+    field public static final String DUPLEX_MODE = "duplex_mode";
     field public static final String IS_MANUAL_NETWORK_SELECTION = "is_manual_network_selection";
     field public static final String VOICE_OPERATOR_NUMERIC = "voice_operator_numeric";
     field public static final String VOICE_REG_STATE = "voice_reg_state";
@@ -39092,7 +39109,6 @@ package android.telephony {
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
     method public void notifyConfigChangedForSubId(int);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
-    field public static final int CARRIER_NR_AVAILABILITY_NONE = 0; // 0x0
     field public static final int CARRIER_NR_AVAILABILITY_NSA = 1; // 0x1
     field public static final int CARRIER_NR_AVAILABILITY_SA = 2; // 0x2
     field public static final int DATA_CYCLE_THRESHOLD_DISABLED = -2; // 0xfffffffe
@@ -39153,7 +39169,7 @@ package android.telephony {
     field public static final String KEY_CARRIER_INSTANT_LETTERING_LENGTH_LIMIT_INT = "carrier_instant_lettering_length_limit_int";
     field public static final String KEY_CARRIER_NAME_OVERRIDE_BOOL = "carrier_name_override_bool";
     field public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
-    field public static final String KEY_CARRIER_NR_AVAILABILITY_INT = "carrier_nr_availability_int";
+    field public static final String KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY = "carrier_nr_availabilities_int_array";
     field public static final String KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL = "carrier_rcs_provisioning_required_bool";
     field public static final String KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING = "carrier_settings_activity_component_name_string";
     field public static final String KEY_CARRIER_SETTINGS_ENABLE_BOOL = "carrier_settings_enable_bool";
@@ -39388,6 +39404,7 @@ package android.telephony {
     field public static final String KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT = "ims.non_rcs_capabilities_cache_expiration_sec_int";
     field public static final String KEY_PREFIX = "ims.";
     field public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL = "ims.rcs_bulk_capability_exchange_bool";
+    field public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY = "ims.rcs_feature_tag_allowed_string_array";
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
   }
 
@@ -40395,6 +40412,7 @@ package android.telephony {
   public final class PreciseDataConnectionState implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.telephony.data.ApnSetting getApnSetting();
+    method public int getId();
     method public int getLastCauseCode();
     method @Nullable public android.net.LinkProperties getLinkProperties();
     method public int getNetworkType();
@@ -40659,7 +40677,6 @@ package android.telephony {
     method public static int[] calculateLength(String, boolean);
     method @Deprecated public static android.telephony.SmsMessage createFromPdu(byte[]);
     method public static android.telephony.SmsMessage createFromPdu(byte[], String);
-    method @Nullable public static android.telephony.SmsMessage createSmsSubmitPdu(@NonNull byte[], boolean);
     method public String getDisplayMessageBody();
     method public String getDisplayOriginatingAddress();
     method public String getEmailBody();
@@ -41022,6 +41039,7 @@ package android.telephony {
     method @Deprecated public String iccTransmitApduBasicChannel(int, int, int, int, int, String);
     method @Deprecated public String iccTransmitApduLogicalChannel(int, int, int, int, int, int, String);
     method public boolean isConcurrentVoiceAndDataSupported();
+    method public boolean isDataCapable();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isDataConnectionAllowed();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataEnabledForReason(int);
@@ -41350,6 +41368,7 @@ package android.telephony.data {
     field public static final int PROTOCOL_NON_IP = 4; // 0x4
     field public static final int PROTOCOL_PPP = 3; // 0x3
     field public static final int PROTOCOL_UNSTRUCTURED = 5; // 0x5
+    field public static final int TYPE_BIP = 8192; // 0x2000
     field public static final int TYPE_CBS = 128; // 0x80
     field public static final int TYPE_DEFAULT = 17; // 0x11
     field public static final int TYPE_DUN = 8; // 0x8
@@ -41361,6 +41380,7 @@ package android.telephony.data {
     field public static final int TYPE_MCX = 1024; // 0x400
     field public static final int TYPE_MMS = 2; // 0x2
     field public static final int TYPE_SUPL = 4; // 0x4
+    field public static final int TYPE_VSIM = 4096; // 0x1000
     field public static final int TYPE_XCAP = 2048; // 0x800
   }
 

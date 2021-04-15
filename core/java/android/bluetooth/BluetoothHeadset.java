@@ -567,6 +567,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      * @deprecated Replaced with {@link #setConnectionPolicy(BluetoothDevice, int)}
+     * @removed
      */
     @Deprecated
     @SystemApi

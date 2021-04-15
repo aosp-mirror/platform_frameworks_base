@@ -19,6 +19,7 @@ package android.net
 import android.os.Build
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
+import com.android.modules.utils.build.SdkLevel.isAtLeastS
 import com.android.testutils.DevSdkIgnoreRule
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo
 import com.android.testutils.assertParcelSane
@@ -43,8 +44,17 @@ class NetworkAgentConfigTest {
             setSubscriberId("MySubId")
             setPartialConnectivityAcceptable(false)
             setUnvalidatedConnectivityAcceptable(true)
+            if (isAtLeastS()) {
+                setBypassableVpn(true)
+            }
         }.build()
-        assertParcelSane(config, 10)
+        if (isAtLeastS()) {
+            // From S, the config will have 12 items
+            assertParcelSane(config, 12)
+        } else {
+            // For R or below, the config will have 10 items
+            assertParcelSane(config, 10)
+        }
     }
 
     @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
@@ -56,8 +66,11 @@ class NetworkAgentConfigTest {
             setPartialConnectivityAcceptable(false)
             setUnvalidatedConnectivityAcceptable(true)
             setLegacyTypeName("TEST_NETWORK")
-            disableNat64Detection()
-            disableProvisioningNotification()
+            if (isAtLeastS()) {
+                setNat64DetectionEnabled(false)
+                setProvisioningNotificationEnabled(false)
+                setBypassableVpn(true)
+            }
         }.build()
 
         assertTrue(config.isExplicitlySelected())
@@ -66,7 +79,13 @@ class NetworkAgentConfigTest {
         assertFalse(config.isPartialConnectivityAcceptable())
         assertTrue(config.isUnvalidatedConnectivityAcceptable())
         assertEquals("TEST_NETWORK", config.getLegacyTypeName())
-        assertFalse(config.isNat64DetectionEnabled())
-        assertFalse(config.isProvisioningNotificationEnabled())
+        if (isAtLeastS()) {
+            assertFalse(config.isNat64DetectionEnabled())
+            assertFalse(config.isProvisioningNotificationEnabled())
+            assertTrue(config.isBypassableVpn())
+        } else {
+            assertTrue(config.isNat64DetectionEnabled())
+            assertTrue(config.isProvisioningNotificationEnabled())
+        }
     }
 }

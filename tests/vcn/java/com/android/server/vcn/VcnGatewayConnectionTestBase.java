@@ -18,9 +18,12 @@ package com.android.server.vcn;
 
 import static com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
+import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 import static com.android.server.vcn.VcnTestUtils.setupIpSecManager;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -71,8 +74,14 @@ public class VcnGatewayConnectionTestBase {
     protected static final ParcelUuid TEST_SUB_GRP = new ParcelUuid(UUID.randomUUID());
     protected static final InetAddress TEST_DNS_ADDR =
             InetAddresses.parseNumericAddress("2001:DB8:0:1::");
+    protected static final InetAddress TEST_DNS_ADDR_2 =
+            InetAddresses.parseNumericAddress("2001:DB8:0:2::");
     protected static final LinkAddress TEST_INTERNAL_ADDR =
-            new LinkAddress(InetAddresses.parseNumericAddress("2001:DB8:0:2::"), 64);
+            new LinkAddress(InetAddresses.parseNumericAddress("2001:DB8:1:1::"), 64);
+    protected static final LinkAddress TEST_INTERNAL_ADDR_2 =
+            new LinkAddress(InetAddresses.parseNumericAddress("2001:DB8:1:2::"), 64);
+    protected static final LinkAddress TEST_INTERNAL_ADDR_3 =
+            new LinkAddress(InetAddresses.parseNumericAddress("2001:DB8:1:3::"), 64);
 
     protected static final int TEST_IPSEC_SPI_VALUE = 0x1234;
     protected static final int TEST_IPSEC_SPI_RESOURCE_ID = 1;
@@ -81,18 +90,28 @@ public class VcnGatewayConnectionTestBase {
     protected static final int TEST_SUB_ID = 5;
     protected static final long ELAPSED_REAL_TIME = 123456789L;
     protected static final String TEST_IPSEC_TUNNEL_IFACE = "IPSEC_IFACE";
+
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_1 =
             new UnderlyingNetworkRecord(
                     new Network(0),
                     new NetworkCapabilities(),
                     new LinkProperties(),
                     false /* blocked */);
+
+    static {
+        TEST_UNDERLYING_NETWORK_RECORD_1.linkProperties.setMtu(1500);
+    }
+
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_2 =
             new UnderlyingNetworkRecord(
                     new Network(1),
                     new NetworkCapabilities(),
                     new LinkProperties(),
                     false /* blocked */);
+
+    static {
+        TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.setMtu(1460);
+    }
 
     protected static final TelephonySubscriptionSnapshot TEST_SUBSCRIPTION_SNAPSHOT =
             new TelephonySubscriptionSnapshot(
@@ -267,7 +286,12 @@ public class VcnGatewayConnectionTestBase {
                 expectCanceled);
     }
 
-    protected void verifySafeModeTimeoutNotifiesCallback(@NonNull State expectedState) {
+    protected void verifySafeModeTimeoutNotifiesCallbackAndUnregistersNetworkAgent(
+            @NonNull State expectedState) {
+        // Set a VcnNetworkAgent, and expect it to be unregistered and cleared
+        final VcnNetworkAgent mockNetworkAgent = mock(VcnNetworkAgent.class);
+        mGatewayConnection.setNetworkAgent(mockNetworkAgent);
+
         // SafeMode timer starts when VcnGatewayConnection exits DisconnectedState (the initial
         // state)
         final Runnable delayedEvent =
@@ -275,7 +299,11 @@ public class VcnGatewayConnectionTestBase {
         delayedEvent.run();
         mTestLooper.dispatchAll();
 
-        verify(mGatewayStatusCallback).onEnteredSafeMode();
+        verify(mGatewayStatusCallback).onSafeModeStatusChanged();
         assertEquals(expectedState, mGatewayConnection.getCurrentState());
+        assertTrue(mGatewayConnection.isInSafeMode());
+
+        verify(mockNetworkAgent).unregister();
+        assertNull(mGatewayConnection.getNetworkAgent());
     }
 }

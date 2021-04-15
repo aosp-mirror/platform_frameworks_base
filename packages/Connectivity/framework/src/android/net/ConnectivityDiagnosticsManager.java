@@ -28,7 +28,6 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -70,8 +69,8 @@ public class ConnectivityDiagnosticsManager {
 
     /** @hide */
     public ConnectivityDiagnosticsManager(Context context, IConnectivityManager service) {
-        mContext = Preconditions.checkNotNull(context, "missing context");
-        mService = Preconditions.checkNotNull(service, "missing IConnectivityManager");
+        mContext = Objects.requireNonNull(context, "missing context");
+        mService = Objects.requireNonNull(service, "missing IConnectivityManager");
     }
 
     /** @hide */

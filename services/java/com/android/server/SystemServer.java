@@ -96,6 +96,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.appbinding.AppBindingService;
+import com.android.server.art.ArtManagerLocal;
 import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.AuthService;
@@ -390,6 +391,11 @@ public final class SystemServer {
      * Start the sensor service. This is a blocking call and can take time.
      */
     private static native void startSensorService();
+
+    /**
+     * Start the memtrack proxy service.
+     */
+    private static native void startMemtrackProxyService();
 
     /**
      * Start all HIDL services that are run inside the system server. This may take some time.
@@ -827,6 +833,12 @@ public final class SystemServer {
         // Uri Grants Manager.
         t.traceBegin("UriGrantsManagerService");
         mSystemServiceManager.startService(UriGrantsManagerService.Lifecycle.class);
+        t.traceEnd();
+
+        // Start MemtrackProxyService before ActivityManager, so that early calls
+        // to Memtrack::getMemory() don't fail.
+        t.traceBegin("MemtrackProxyService");
+        startMemtrackProxyService();
         t.traceEnd();
 
         // Activity manager runs the show.
@@ -2328,6 +2340,10 @@ public final class SystemServer {
             }
             t.traceEnd();
         }
+        t.traceEnd();
+
+        t.traceBegin("ArtManagerLocal");
+        LocalManagerRegistry.addManager(ArtManagerLocal.class, new ArtManagerLocal());
         t.traceEnd();
 
         t.traceBegin("StartBootPhaseDeviceSpecificServicesReady");
