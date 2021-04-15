@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import static junit.framework.Assert.assertEquals;
 
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.testing.AndroidTestingRunner;
@@ -88,5 +89,18 @@ public class ScrimViewTest extends LeakCheckedTest {
         int tint = Color.BLUE;
         mView.setTint(tint);
         assertEquals(mView.getTint(), tint);
+    }
+
+    @Test
+    public void setDrawableBounds_propagatesToDrawable() {
+        ColorDrawable drawable = new ColorDrawable();
+        Rect expectedBounds = new Rect(100, 100, 100, 100);
+        mView.setDrawable(drawable);
+        mView.setDrawableBounds(100, 100, 100, 100);
+
+        assertEquals(expectedBounds, drawable.getBounds());
+        // set bounds that are different from expected drawable bounds
+        mView.onLayout(true, 200, 200, 200, 200);
+        assertEquals(expectedBounds, drawable.getBounds());
     }
 }
