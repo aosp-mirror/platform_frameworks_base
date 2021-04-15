@@ -1515,6 +1515,129 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(primarySplitBounds, letterboxedBounds);
     }
 
+    @Test
+    public void testUpdateResolvedBoundsHorizontalPosition_left() {
+        // Display configured as (2800, 1400).
+        assertHorizontalPositionForDifferentDisplayConfigsForPortraitActivity(
+                /* letterboxHorizontalPositionMultiplier */ 0.0f,
+                // At launch.
+                /* fixedOrientationLetterbox */ new Rect(0, 0, 700, 1400),
+                // After 90 degree rotation.
+                /* sizeCompatUnscaled */ new Rect(0, 0, 700, 1400),
+                // After the display is resized to (700, 1400).
+                /* sizeCompatScaled */ new Rect(0, 0, 350, 700));
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsHorizontalPosition_center() {
+        // Display configured as (2800, 1400).
+        assertHorizontalPositionForDifferentDisplayConfigsForPortraitActivity(
+                /* letterboxHorizontalPositionMultiplier */ 0.5f,
+                // At launch.
+                /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
+                // After 90 degree rotation.
+                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
+                // After the display is resized to (700, 1400).
+                /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsHorizontalPosition_invalidMultiplier_defaultToCenter() {
+        // Display configured as (2800, 1400).
+
+        // Below 0.0.
+        assertHorizontalPositionForDifferentDisplayConfigsForPortraitActivity(
+                /* letterboxHorizontalPositionMultiplier */ -1.0f,
+                // At launch.
+                /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
+                // After 90 degree rotation.
+                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
+                // After the display is resized to (700, 1400).
+                /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
+
+        // Above 1.0
+        assertHorizontalPositionForDifferentDisplayConfigsForPortraitActivity(
+                /* letterboxHorizontalPositionMultiplier */ 2.0f,
+                // At launch.
+                /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
+                // After 90 degree rotation.
+                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
+                // After the display is resized to (700, 1400).
+                /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsHorizontalPosition_right() {
+        // Display configured as (2800, 1400).
+        assertHorizontalPositionForDifferentDisplayConfigsForPortraitActivity(
+                /* letterboxHorizontalPositionMultiplier */ 1.0f,
+                // At launch.
+                /* fixedOrientationLetterbox */ new Rect(2100, 0, 2800, 1400),
+                // After 90 degree rotation.
+                /* sizeCompatUnscaled */ new Rect(700, 0, 1400, 1400),
+                // After the display is resized to (700, 1400).
+                /* sizeCompatScaled */ new Rect(1050, 0, 1400, 700));
+    }
+
+    private void assertHorizontalPositionForDifferentDisplayConfigsForPortraitActivity(
+            float letterboxHorizontalPositionMultiplier, Rect fixedOrientationLetterbox,
+            Rect sizeCompatUnscaled, Rect sizeCompatScaled) {
+        // Set up a display in landscape and ignoring orientation request.
+        setUpDisplaySizeWithApp(2800, 1400);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        mActivity.mWmService.setLetterboxHorizontalPositionMultiplier(
+                letterboxHorizontalPositionMultiplier);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        assertEquals(fixedOrientationLetterbox, mActivity.getBounds());
+
+        // Rotate to put activity in size compat mode.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        assertTrue(mActivity.inSizeCompatMode());
+        // Activity is in size compat mode but not scaled.
+        assertEquals(sizeCompatUnscaled, mActivity.getBounds());
+
+        // Force activity to scaled down for size compat mode.
+        resizeDisplay(mTask.mDisplayContent, 700, 1400);
+
+        assertTrue(mActivity.inSizeCompatMode());
+        assertScaled();
+        assertEquals(sizeCompatScaled, mActivity.getBounds());
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsHorizontalPosition_activityFillParentWidth() {
+        // When activity width equals parent width, multiplier shouldn't have any effect.
+        assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(
+                /* letterboxHorizontalPositionMultiplier */ 0.0f);
+        assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(
+                /* letterboxHorizontalPositionMultiplier */ 0.5f);
+        assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(
+                /* letterboxHorizontalPositionMultiplier */ 1.0f);
+    }
+
+    private void assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(
+            float letterboxHorizontalPositionMultiplier) {
+        // Set up a display in landscape and ignoring orientation request.
+        setUpDisplaySizeWithApp(2800, 1400);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        mActivity.mWmService.setLetterboxHorizontalPositionMultiplier(
+                letterboxHorizontalPositionMultiplier);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertFitted();
+
+        // Rotate to put activity in size compat mode.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        assertTrue(mActivity.inSizeCompatMode());
+        // Activity is in size compat mode but not scaled.
+        assertEquals(new Rect(0, 0, 1400, 700), mActivity.getBounds());
+    }
+
     private static WindowState addWindowToActivity(ActivityRecord activity) {
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;

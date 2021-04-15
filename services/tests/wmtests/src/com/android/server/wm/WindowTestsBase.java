@@ -101,6 +101,7 @@ import android.window.TransitionRequestInfo;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.ArrayUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.Description;
@@ -208,8 +209,23 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // {@link com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}, is set
         // on some device form factors.
         mAtm.mWindowManager.setFixedOrientationLetterboxAspectRatio(0);
+        // Ensure letterbox position multiplier is not overridden on any device target.
+        // {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier},
+        // may be set on some device form factors.
+        mAtm.mWindowManager.setLetterboxHorizontalPositionMultiplier(0.5f);
 
         checkDeviceSpecificOverridesNotApplied();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        // Revert back to device overrides.
+        mAtm.mWindowManager.setFixedOrientationLetterboxAspectRatio(
+                mContext.getResources().getFloat(
+                        com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio));
+        mAtm.mWindowManager.setLetterboxHorizontalPositionMultiplier(
+                mContext.getResources().getFloat(
+                    com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier));
     }
 
     /**
