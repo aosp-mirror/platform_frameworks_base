@@ -22,7 +22,6 @@ import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLA
 
 import android.annotation.NonNull;
 import android.content.res.Configuration;
-import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -288,11 +287,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     /** */
     public void setContentMargins(int startMargin, int endMargin) {
         mView.setContentMargins(startMargin, endMargin, mMediaHost.getHostView());
-    }
-
-    /** */
-    public Pair<Integer, Integer> getVisualSideMargins() {
-        return mView.getVisualSideMargins();
     }
 
     /** */
