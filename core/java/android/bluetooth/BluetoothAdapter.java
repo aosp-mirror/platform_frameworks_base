@@ -3062,8 +3062,6 @@ public final class BluetoothAdapter {
          *
          * @param transport - whether the {@link OobData} is generated for LE or Classic.
          * @param oobData - data generated in the host stack(LE) or controller (Classic)
-         *
-         * @hide
          */
         void onOobData(@Transport int transport, @Nullable OobData oobData);
 
@@ -3071,8 +3069,6 @@ public final class BluetoothAdapter {
          * Provides feedback when things don't go as expected.
          *
          * @param errorCode - the code descibing the type of error that occurred.
-         *
-         * @hide
          */
         void onError(@OobError int errorCode);
     }
