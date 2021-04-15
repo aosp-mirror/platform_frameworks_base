@@ -22,6 +22,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.StatusBarNotificationPresenter;
@@ -103,9 +104,10 @@ public class NotificationShelfController {
         return mView.getHeight();
     }
 
-    public void updateState(AmbientState ambientState) {
+    public void updateState(StackScrollAlgorithm.StackScrollAlgorithmState algorithmState,
+            AmbientState ambientState) {
         mAmbientState = ambientState;
-        mView.updateState(ambientState);
+        mView.updateState(algorithmState, ambientState);
     }
 
     public int getIntrinsicHeight() {
