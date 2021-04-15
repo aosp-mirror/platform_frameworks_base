@@ -5057,7 +5057,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testToastRateLimiterCanPreventShowCallForCustomToast() throws Exception {
+    public void testToastRateLimiterWontPreventShowCallForCustomToastWhenInForeground()
+            throws Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
@@ -5075,30 +5076,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         INotificationManager nmService = (INotificationManager) mService.mService;
 
         nmService.enqueueToast(testPackage, token, callback, 2000, 0);
-        verify(callback, times(0)).show(any());
-    }
-
-    @Test
-    public void testCustomToastRateLimiterAllowsLimitAvoidanceWithPermission() throws Exception {
-        final String testPackage = "testPackageName";
-        assertEquals(0, mService.mToastQueue.size());
-        mService.isSystemUid = false;
-        setToastRateIsWithinQuota(false); // rate limit reached
-        // Avoids rate limiting.
-        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, true);
-
-        // package is not suspended
-        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
-                .thenReturn(false);
-
-        setAppInForegroundForToasts(mUid, true);
-
-        Binder token = new Binder();
-        ITransientNotification callback = mock(ITransientNotification.class);
-        INotificationManager nmService = (INotificationManager) mService.mService;
-
-        nmService.enqueueToast(testPackage, token, callback, 2000, 0);
-        verify(callback).show(any());
+        verify(callback, times(1)).show(any());
     }
 
     @Test
@@ -5206,12 +5184,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testToastRateLimiterCanPreventShowCallForTextToast() throws Exception {
+    public void testToastRateLimiterCanPreventShowCallForTextToast_whenInBackground()
+            throws Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
         setToastRateIsWithinQuota(false); // rate limit reached
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
+        setAppInForegroundForToasts(mUid, false);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -5226,12 +5206,35 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testToastRateLimiterWontPreventShowCallForTextToast_whenInForeground()
+            throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+        setToastRateIsWithinQuota(false); // rate limit reached
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
+        setAppInForegroundForToasts(mUid, true);
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        Binder token = new Binder();
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+        verify(mStatusBar, times(1))
+                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+    }
+
+    @Test
     public void testTextToastRateLimiterAllowsLimitAvoidanceWithPermission() throws Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
         setToastRateIsWithinQuota(false); // rate limit reached
         setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, true);
+        setAppInForegroundForToasts(mUid, false);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
