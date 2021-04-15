@@ -758,23 +758,23 @@
     <dimen name="notification_grayscale_icon_max_size">256dp</dimen>
 
     <dimen name="messaging_avatar_size">36dp</dimen>
-    <dimen name="conversation_avatar_size">52dp</dimen>
+    <dimen name="conversation_avatar_size">48dp</dimen>
     <!-- start margin of the icon circle in the conversation's skin of the header -->
     <dimen name="conversation_icon_circle_start">28dp</dimen>
     <!-- Start of the content in the conversation template -->
     <dimen name="conversation_content_start">80dp</dimen>
     <!-- Height of the expand button in the conversation layout -->
-    <dimen name="conversation_expand_button_height">80dp</dimen>
+    <dimen name="conversation_expand_button_height">88dp</dimen>
     <!-- this is the margin between the Conversation image and the content -->
     <dimen name="conversation_image_start_margin">12dp</dimen>
     <!-- Side margins of the conversation badge in relation to the conversation icon -->
-    <dimen name="conversation_badge_side_margin">36dp</dimen>
+    <dimen name="conversation_badge_side_margin">32dp</dimen>
     <!-- size of the notification badge when applied to the conversation icon -->
     <dimen name="conversation_icon_size_badged">20dp</dimen>
     <!-- size of the conversation avatar in an expanded group -->
     <dimen name="conversation_avatar_size_group_expanded">@dimen/messaging_avatar_size</dimen>
     <!-- size of the face pile icons -->
-    <dimen name="conversation_face_pile_avatar_size">@dimen/messaging_avatar_size</dimen>
+    <dimen name="conversation_face_pile_avatar_size">32dp</dimen>
     <!-- size of the face pile icons when the group is expanded -->
     <dimen name="conversation_face_pile_avatar_size_group_expanded">25dp</dimen>
     <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
@@ -795,7 +795,7 @@
     <dimen name="importance_ring_size">20dp</dimen>
 
     <!-- The top padding of the conversation icon container in the regular state-->
-    <dimen name="conversation_icon_container_top_padding">12dp</dimen>
+    <dimen name="conversation_icon_container_top_padding">20dp</dimen>
 
     <!-- The top padding of the conversation icon container when the avatar is small-->
     <dimen name="conversation_icon_container_top_padding_small_avatar">9dp</dimen>
@@ -803,8 +803,8 @@
     <!-- The padding of the conversation header when expanded. This is calculated from the expand button size + notification_content_margin_end -->
     <dimen name="conversation_header_expanded_padding_end">38dp</dimen>
 
-    <!-- margin at the end of messaging group icons when not conversations -->
-    <dimen name="messaging_layout_margin_end">12dp</dimen>
+    <!-- extra padding at the start of the icons when not conversations to keep them horizontally aligned with the notification icon -->
+    <dimen name="messaging_layout_icon_padding_start">4dp</dimen>
 
     <!-- Padding between text and sender when singleline -->
     <dimen name="messaging_group_singleline_sender_padding_end">4dp</dimen>

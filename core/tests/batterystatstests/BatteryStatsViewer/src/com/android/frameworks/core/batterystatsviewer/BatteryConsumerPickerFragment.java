@@ -18,10 +18,11 @@ package com.android.frameworks.core.batterystatsviewer;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.BatteryStats;
+import android.os.BatteryStatsManager;
+import android.os.BatteryUsageStats;
 import android.os.Bundle;
-import android.os.UserHandle;
-import android.os.UserManager;
+import android.os.SystemBatteryConsumer;
+import android.os.UidBatteryConsumer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,8 +38,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.frameworks.core.batterystatsviewer.BatteryConsumerInfoHelper.BatteryConsumerInfo;
-import com.android.internal.os.BatterySipper;
-import com.android.internal.os.BatteryStatsHelper;
 import com.android.settingslib.utils.AsyncLoaderCompat;
 
 import java.util.ArrayList;
@@ -99,44 +98,39 @@ public class BatteryConsumerPickerFragment extends Fragment {
 
     private static class BatteryConsumerListLoader extends
             AsyncLoaderCompat<List<BatteryConsumerInfo>> {
-        private final BatteryStatsHelper mStatsHelper;
         private final int mPickerType;
-        private final UserManager mUserManager;
+        private final BatteryStatsManager mBatteryStatsManager;
         private final PackageManager mPackageManager;
 
         BatteryConsumerListLoader(Context context, int pickerType) {
             super(context);
-            mUserManager = context.getSystemService(UserManager.class);
-            mStatsHelper = new BatteryStatsHelper(context, false /* collectBatteryBroadcast */);
+            mBatteryStatsManager = context.getSystemService(BatteryStatsManager.class);
             mPickerType = pickerType;
-            mStatsHelper.create((Bundle) null);
-            mStatsHelper.clearStats();
             mPackageManager = context.getPackageManager();
         }
 
         @Override
         public List<BatteryConsumerInfo> loadInBackground() {
+            final BatteryUsageStats batteryUsageStats = mBatteryStatsManager.getBatteryUsageStats();
+
             List<BatteryConsumerInfo> batteryConsumerList = new ArrayList<>();
-
-            mStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, UserHandle.myUserId());
-
-            final List<BatterySipper> usageList = mStatsHelper.getUsageList();
-            for (BatterySipper sipper : usageList) {
-                switch (mPickerType) {
-                    case PICKER_TYPE_APP:
-                        if (sipper.drainType != BatterySipper.DrainType.APP) {
-                            continue;
-                        }
-                        break;
-                    case PICKER_TYPE_DRAIN:
-                    default:
-                        if (sipper.drainType == BatterySipper.DrainType.APP) {
-                            continue;
-                        }
-                }
-
-                batteryConsumerList.add(
-                        BatteryConsumerInfoHelper.makeBatteryConsumerInfo(mPackageManager, sipper));
+            switch (mPickerType) {
+                case PICKER_TYPE_APP:
+                    for (UidBatteryConsumer consumer : batteryUsageStats.getUidBatteryConsumers()) {
+                        batteryConsumerList.add(
+                                BatteryConsumerInfoHelper.makeBatteryConsumerInfo(mPackageManager,
+                                        consumer));
+                    }
+                    break;
+                case PICKER_TYPE_DRAIN:
+                default:
+                    for (SystemBatteryConsumer consumer :
+                            batteryUsageStats.getSystemBatteryConsumers()) {
+                        batteryConsumerList.add(
+                                BatteryConsumerInfoHelper.makeBatteryConsumerInfo(mPackageManager,
+                                        consumer));
+                    }
+                    break;
             }
 
             batteryConsumerList.sort(

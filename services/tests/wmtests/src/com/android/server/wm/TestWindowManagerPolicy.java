@@ -210,7 +210,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean okToAnimate() {
+    public boolean okToAnimate(boolean ignoreScreenOn) {
         return mOkToAnimate;
     }
 

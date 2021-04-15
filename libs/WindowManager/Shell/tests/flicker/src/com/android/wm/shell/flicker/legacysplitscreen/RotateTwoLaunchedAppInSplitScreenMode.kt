@@ -98,7 +98,7 @@ class RotateTwoLaunchedAppInSplitScreenMode(
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation,
             testSpec.config.endRotation)
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun appWindowBecomesVisible() =
         testSpec.appWindowBecomesVisible(secondaryApp.defaultWindowName)

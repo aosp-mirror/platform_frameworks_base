@@ -250,6 +250,7 @@ public class BroadcastOptions {
      * them.  This only applies to receivers declared in the app's AndroidManifest.xml.
      * @hide
      */
+    @TestApi
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void setMaxManifestReceiverApiLevel(int apiLevel) {
         mMaxManifestReceiverApiLevel = apiLevel;
@@ -259,6 +260,7 @@ public class BroadcastOptions {
      * Return {@link #setMaxManifestReceiverApiLevel}.
      * @hide
      */
+    @TestApi
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public int getMaxManifestReceiverApiLevel() {
         return mMaxManifestReceiverApiLevel;

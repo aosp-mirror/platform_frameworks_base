@@ -16,12 +16,18 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkProvider.NetworkOfferCallback;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.os.test.TestLooper;
 
@@ -33,18 +39,23 @@ import com.android.server.vcn.VcnNetworkProvider.NetworkRequestListener;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** Tests for TelephonySubscriptionTracker */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnNetworkProviderTest {
     private static final int TEST_SCORE_UNSATISFIED = 0;
-    private static final int TEST_SCORE_HIGH = 100;
     private static final int TEST_PROVIDER_ID = 1;
 
     @NonNull private final Context mContext;
     @NonNull private final TestLooper mTestLooper;
 
+    @NonNull private VcnNetworkProvider.Dependencies mDeps;
+    @NonNull private ConnectivityManager mConnMgr;
     @NonNull private VcnNetworkProvider mVcnNetworkProvider;
     @NonNull private NetworkRequestListener mListener;
 
@@ -55,8 +66,39 @@ public class VcnNetworkProviderTest {
 
     @Before
     public void setUp() throws Exception {
-        mVcnNetworkProvider = new VcnNetworkProvider(mContext, mTestLooper.getLooper());
+        mDeps = mock(VcnNetworkProvider.Dependencies.class);
+        mConnMgr = mock(ConnectivityManager.class);
+        VcnTestUtils.setupSystemService(
+                mContext, mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
+
+        mVcnNetworkProvider = new VcnNetworkProvider(mContext, mTestLooper.getLooper(), mDeps);
         mListener = mock(NetworkRequestListener.class);
+    }
+
+    private NetworkOfferCallback verifyRegisterAndGetOfferCallback() throws Exception {
+        mVcnNetworkProvider.register();
+
+        final ArgumentCaptor<NetworkOfferCallback> cbCaptor =
+                ArgumentCaptor.forClass(NetworkOfferCallback.class);
+
+        verify(mConnMgr).registerNetworkProvider(eq(mVcnNetworkProvider));
+        verify(mDeps)
+                .registerNetworkOffer(
+                        eq(mVcnNetworkProvider),
+                        argThat(
+                                score ->
+                                        score.getLegacyInt()
+                                                == Vcn.getNetworkScore().getLegacyInt()),
+                        any(),
+                        any(),
+                        cbCaptor.capture());
+
+        return cbCaptor.getValue();
+    }
+
+    @Test
+    public void testRegister() throws Exception {
+        verifyRegisterAndGetOfferCallback();
     }
 
     @Test
@@ -64,18 +106,8 @@ public class VcnNetworkProviderTest {
         mVcnNetworkProvider.registerListener(mListener);
 
         final NetworkRequest request = mock(NetworkRequest.class);
-        mVcnNetworkProvider.onNetworkRequested(request, TEST_SCORE_UNSATISFIED, TEST_PROVIDER_ID);
-        verify(mListener).onNetworkRequested(request, TEST_SCORE_UNSATISFIED, TEST_PROVIDER_ID);
-    }
-
-    @Test
-    public void testRequestsPassedToRegisteredListeners_satisfiedByHighScoringProvider()
-            throws Exception {
-        mVcnNetworkProvider.registerListener(mListener);
-
-        final NetworkRequest request = mock(NetworkRequest.class);
-        mVcnNetworkProvider.onNetworkRequested(request, TEST_SCORE_HIGH, TEST_PROVIDER_ID);
-        verify(mListener).onNetworkRequested(request, TEST_SCORE_HIGH, TEST_PROVIDER_ID);
+        verifyRegisterAndGetOfferCallback().onNetworkNeeded(request);
+        verify(mListener).onNetworkRequested(request);
     }
 
     @Test
@@ -84,7 +116,33 @@ public class VcnNetworkProviderTest {
         mVcnNetworkProvider.unregisterListener(mListener);
 
         final NetworkRequest request = mock(NetworkRequest.class);
-        mVcnNetworkProvider.onNetworkRequested(request, TEST_SCORE_UNSATISFIED, TEST_PROVIDER_ID);
+        verifyRegisterAndGetOfferCallback().onNetworkNeeded(request);
+        verifyNoMoreInteractions(mListener);
+    }
+
+    @Test
+    public void testCachedRequestsPassedOnRegister() throws Exception {
+        final List<NetworkRequest> requests = new ArrayList<>();
+        final NetworkOfferCallback offerCb = verifyRegisterAndGetOfferCallback();
+
+        for (int i = 0; i < 10; i++) {
+            // Build unique network requests; in this case, iterate down the capabilities as a way
+            // to unique-ify requests.
+            final NetworkRequest request =
+                    new NetworkRequest.Builder().clearCapabilities().addCapability(i).build();
+
+            requests.add(request);
+            offerCb.onNetworkNeeded(request);
+        }
+
+        // Remove one, and verify that it is never sent to the listeners.
+        final NetworkRequest removed = requests.remove(0);
+        offerCb.onNetworkUnneeded(removed);
+
+        mVcnNetworkProvider.registerListener(mListener);
+        for (NetworkRequest request : requests) {
+            verify(mListener).onNetworkRequested(request);
+        }
         verifyNoMoreInteractions(mListener);
     }
 }

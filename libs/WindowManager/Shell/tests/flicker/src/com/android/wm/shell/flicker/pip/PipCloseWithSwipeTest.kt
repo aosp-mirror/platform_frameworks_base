@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -67,11 +68,11 @@ class PipCloseWithSwipeTest(testSpec: FlickerTestParameter) : PipCloseTransition
     @Test
     override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
-    @Presubmit
+    @FlakyTest
     @Test
     override fun pipWindowBecomesInvisible() = super.pipWindowBecomesInvisible()
 
-    @Presubmit
+    @FlakyTest
     @Test
     override fun pipLayerBecomesInvisible() = super.pipLayerBecomesInvisible()
 

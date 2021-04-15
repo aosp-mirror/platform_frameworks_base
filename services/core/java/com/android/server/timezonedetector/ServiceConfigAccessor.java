@@ -133,8 +133,8 @@ public final class ServiceConfigAccessor {
     }
 
     /**
-     * Adds a listener that will be called server flags related to this class change. The callbacks
-     * are delivered on the main looper thread.
+     * Adds a listener that will be called when server flags related to this class change. The
+     * callbacks are delivered on the main looper thread.
      *
      * <p>Note: Only for use by long-lived objects. There is deliberately no associated remove
      * method.

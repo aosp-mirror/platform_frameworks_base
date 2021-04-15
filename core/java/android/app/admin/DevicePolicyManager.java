@@ -119,6 +119,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -1214,15 +1215,14 @@ public class DevicePolicyManager {
     public @interface ProvisioningTrigger {}
 
     /**
-     * Possible values for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES}.
+     * Flags for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES}.
      *
      * @hide
      */
-    @IntDef(prefix = { "SUPPORTED_MODES_" }, value = {
-            SUPPORTED_MODES_ORGANIZATION_OWNED,
-            SUPPORTED_MODES_PERSONALLY_OWNED,
-            SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED,
-            SUPPORTED_MODES_DEVICE_OWNER
+    @IntDef(flag = true, prefix = { "FLAG_SUPPORTED_MODES_" }, value = {
+            FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED,
+            FLAG_SUPPORTED_MODES_PERSONALLY_OWNED,
+            FLAG_SUPPORTED_MODES_DEVICE_OWNER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProvisioningConfiguration {}
@@ -1307,7 +1307,7 @@ public class DevicePolicyManager {
     public static final int PROVISIONING_TRIGGER_MANAGED_ACCOUNT = 4;
 
     /**
-     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
+     * Flag for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
      * organization-owned.
      *
      * <p>Using this value indicates the admin app can only be provisioned in either a
@@ -1316,55 +1316,48 @@ public class DevicePolicyManager {
      * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
      * #PROVISIONING_MODE_MANAGED_PROFILE} and {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}.
      *
-     * <p>Also, if this value is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
+     * <p>Also, if this flag is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
      * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
      * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
      *
-     * @hide
-     */
-    @SystemApi
-    public static final int SUPPORTED_MODES_ORGANIZATION_OWNED = 1;
-
-    /**
-     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
-     * personally-owned.
-     *
-     * <p>Using this value will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
-     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
-     * contain only {@link #PROVISIONING_MODE_MANAGED_PROFILE}.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int SUPPORTED_MODES_PERSONALLY_OWNED = 2;
-
-    /**
-     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning could
-     * be organization-owned or personally-owned.
-     *
-     * <p>Using this value will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
-     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
-     * contain {@link
+     * <p>This flag can be combined with {@link #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED}. In
+     * that case, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity will have
+     * the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
      * #PROVISIONING_MODE_MANAGED_PROFILE}, {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE} and
      * {@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_PERSONAL_DEVICE}.
      *
-     * <p>Also, if this value is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
-     * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
-     * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
-     *
      * @hide
      */
     @SystemApi
-    public static final int SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED = 3;
+    public static final int FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED = 1;
 
     /**
-     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that the only supported
-     * provisioning mode is device owner.
+     * Flag for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning
+     * is personally-owned.
+     *
+     * <p>Using this flag will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
+     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
+     * contain only {@link #PROVISIONING_MODE_MANAGED_PROFILE}.
+     *
+     * <p>This flag can be combined with {@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}. In
+     * that case, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity will have the
+     * {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
+     * #PROVISIONING_MODE_MANAGED_PROFILE}, {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE} and
+     * {@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_PERSONAL_DEVICE}.
      *
      * @hide
      */
     @SystemApi
-    public static final int SUPPORTED_MODES_DEVICE_OWNER = 4;
+    public static final int FLAG_SUPPORTED_MODES_PERSONALLY_OWNED = 1 << 1;
+
+    /**
+     * Flag for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that the only
+     * supported provisioning mode is device owner.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_SUPPORTED_MODES_DEVICE_OWNER = 1 << 2;
 
     /**
      * This MIME type is used for starting the device owner provisioning.
@@ -2637,7 +2630,7 @@ public class DevicePolicyManager {
      * An integer extra indication what provisioning modes should be available for the admin app
      * to pick.
      *
-     * <p>The default value is {@link #SUPPORTED_MODES_ORGANIZATION_OWNED}.
+     * <p>The default value is {@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}.
      *
      * <p>The value of this extra will determine the contents of the {@link
      * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array that is passed to the admin app as an
@@ -2648,13 +2641,21 @@ public class DevicePolicyManager {
      * #ACTION_GET_PROVISIONING_MODE} activity via the {@link #EXTRA_PROVISIONING_IMEI} and {@link
      * #EXTRA_PROVISIONING_SERIAL_NUMBER} respectively.
      *
+     * <p>The allowed flag combinations are:
+     * <ul>
+     *     <li>{@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}</li>
+     *     <li>{@link #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED}</li>
+     *     <li>{@link #FLAG_SUPPORTED_MODES_DEVICE_OWNER}</li>
+     *     <li>{@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}
+     *             | {@link #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED}</li>
+     * </ul>
+     *
      * <p>This extra is only respected when provided alongside the {@link
      * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.
      *
-     * @see #SUPPORTED_MODES_ORGANIZATION_OWNED
-     * @see #SUPPORTED_MODES_PERSONALLY_OWNED
-     * @see #SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED
-     * @see #SUPPORTED_MODES_DEVICE_OWNER
+     * @see #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED
+     * @see #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED
+     * @see #FLAG_SUPPORTED_MODES_DEVICE_OWNER
      * @hide
      */
     @SystemApi
@@ -6460,12 +6461,14 @@ public class DevicePolicyManager {
      * to a given KeyChain key.
      *
      * Key are granted on a per-UID basis, so if several apps share the same UID, granting access to
-     * one of them automatically grants it to others. This method returns a set of sets of package
-     * names, where each internal set contains all packages sharing the same UID. Grantee packages
-     * that don't share UID with other packages are represented by singleton sets.
+     * one of them automatically grants it to others. This method returns a map containing one entry
+     * per grantee UID. Entries have UIDs as keys and sets of corresponding package names as values.
+     * In particular, grantee packages that don't share UID with other packages are represented by
+     * entries having singleton sets as values.
      *
      * @param alias The alias of the key to grant access to.
-     * @return package names of apps that have access to a given key, grouped by UIDs
+     * @return apps that have access to a given key, arranged in a map from UID to sets of
+     *       package names.
      *
      * @throws SecurityException if the caller is not a device owner, a profile owner or
      *         delegated certificate chooser.
@@ -6473,26 +6476,11 @@ public class DevicePolicyManager {
      *
      * @see #grantKeyPairToApp(ComponentName, String, String)
      */
-    public @NonNull Set<Set<String>> getKeyPairGrants(@NonNull String alias) {
+    public @NonNull Map<Integer, Set<String>> getKeyPairGrants(@NonNull String alias) {
         throwIfParentInstance("getKeyPairGrants");
         try {
-            // Set of sets is flattened into a null-separated list.
-            final List<String> flattened =
-                    mService.getKeyPairGrants(mContext.getPackageName(), alias);
-            final Set<Set<String>> result = new HashSet<>();
-            Set<String> pkgsForOneUid = new HashSet<>();
-            for (final String pkg : flattened) {
-                if (pkg == null) {
-                    result.add(pkgsForOneUid);
-                    pkgsForOneUid = new HashSet<>();
-                } else {
-                    pkgsForOneUid.add(pkg);
-                }
-            }
-            if (!pkgsForOneUid.isEmpty()) {
-                result.add(pkgsForOneUid);
-            }
-            return result;
+            // The result is wrapped into intermediate parcelable representation.
+            return mService.getKeyPairGrants(mContext.getPackageName(), alias).getPackagesByUid();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

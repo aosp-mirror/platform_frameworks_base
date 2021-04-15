@@ -139,9 +139,9 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         public long mTimeInBackgroundMs;
         private boolean mExcludeFromBatteryUsageStats;
 
-        public Builder(int customPowerComponentCount, int customTimeComponentCount,
+        public Builder(@NonNull String[] customPowerComponentNames, int customTimeComponentCount,
                 boolean includePowerModels, @NonNull BatteryStats.Uid batteryStatsUid) {
-            super(customPowerComponentCount, customTimeComponentCount, includePowerModels);
+            super(customPowerComponentNames, customTimeComponentCount, includePowerModels);
             mBatteryStatsUid = batteryStatsUid;
             mUid = batteryStatsUid.getUid();
         }

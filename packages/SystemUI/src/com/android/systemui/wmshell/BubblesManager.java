@@ -633,7 +633,7 @@ public class BubblesManager implements Dumpable {
                     } else {
                         mNotificationGroupManager.onEntryRemoved(entry);
                     }
-                });
+                }, mSysuiMainExecutor);
     }
 
     /**

@@ -65,6 +65,7 @@ interface IUsageStatsManager {
     void reportPastUsageStart(in IBinder activity, String token, long timeAgoMs,
             String callingPackage);
     void reportUsageStop(in IBinder activity, String token, String callingPackage);
+    void reportUserInteraction(String packageName, int userId);
     int getUsageSource();
     void forceUsageSourceSettingRead();
     long getLastTimeAnyComponentUsed(String packageName);

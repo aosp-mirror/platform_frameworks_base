@@ -89,7 +89,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         mNetworkAgent = mock(VcnNetworkAgent.class);
         doReturn(mNetworkAgent)
                 .when(mDeps)
-                .newNetworkAgent(any(), any(), any(), any(), anyInt(), any(), any(), any(), any());
+                .newNetworkAgent(any(), any(), any(), any(), any(), any(), any(), any(), any());
 
         mGatewayConnection.setUnderlyingNetwork(TEST_UNDERLYING_NETWORK_RECORD_1);
 
@@ -216,7 +216,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         any(),
                         any(),
                         any(),
-                        anyInt(),
+                        any(),
                         any(),
                         any(),
                         any(),
@@ -244,7 +244,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         any(String.class),
                         ncCaptor.capture(),
                         lpCaptor.capture(),
-                        anyInt(),
+                        any(),
                         argThat(nac -> nac.getLegacyType() == ConnectivityManager.TYPE_MOBILE),
                         any(),
                         any(),
@@ -297,7 +297,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                                         startingInternalAddrs.equals(lp.getLinkAddresses())
                                                 && Collections.singletonList(TEST_DNS_ADDR)
                                                         .equals(lp.getDnsServers())),
-                        anyInt(),
+                        any(),
                         any(),
                         any(),
                         any(),
@@ -356,7 +356,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         any(),
                         any(),
                         any(),
-                        anyInt(),
+                        any(),
                         any(),
                         any(),
                         unwantedCallbackCaptor.capture(),

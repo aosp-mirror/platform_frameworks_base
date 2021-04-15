@@ -739,14 +739,11 @@ public class BubbleController {
         return (isSummary && isSuppressedSummary) || isSuppressedBubble;
     }
 
-    private void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback,
-            Executor callbackExecutor) {
+    private void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback) {
         if (mBubbleData.isSummarySuppressed(groupKey)) {
             mBubbleData.removeSuppressedSummary(groupKey);
             if (callback != null) {
-                callbackExecutor.execute(() -> {
-                    callback.accept(mBubbleData.getSummaryKey(groupKey));
-                });
+                callback.accept(mBubbleData.getSummaryKey(groupKey));
             }
         }
     }
@@ -1298,8 +1295,10 @@ public class BubbleController {
         public void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback,
                 Executor callbackExecutor) {
             mMainExecutor.execute(() -> {
-                BubbleController.this.removeSuppressedSummaryIfNecessary(groupKey, callback,
-                        callbackExecutor);
+                Consumer<String> cb = callback != null
+                        ? (key) -> callbackExecutor.execute(() -> callback.accept(key))
+                        : null;
+                BubbleController.this.removeSuppressedSummaryIfNecessary(groupKey, cb);
             });
         }
 
@@ -1340,10 +1339,13 @@ public class BubbleController {
 
         @Override
         public boolean handleDismissalInterception(BubbleEntry entry,
-                @Nullable List<BubbleEntry> children, IntConsumer removeCallback) {
+                @Nullable List<BubbleEntry> children, IntConsumer removeCallback,
+                Executor callbackExecutor) {
+            IntConsumer cb = removeCallback != null
+                    ? (index) -> callbackExecutor.execute(() -> removeCallback.accept(index))
+                    : null;
             return mMainExecutor.executeBlockingForResult(() -> {
-                return BubbleController.this.handleDismissalInterception(entry, children,
-                        removeCallback);
+                return BubbleController.this.handleDismissalInterception(entry, children, cb);
             }, Boolean.class);
         }
 

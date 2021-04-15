@@ -933,19 +933,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
-     * Not the most secure, but it is at least a second level of protection. First level is that
-     * the file is in a location only readable by the system process.
-     *
-     * @param password the gesture pattern.
-     *
-     * @return the hash of the pattern in a byte array.
-     */
-    public String legacyPasswordToHash(byte[] password, int userId) {
-        return LockscreenCredential.legacyPasswordToHash(password, getSalt(userId).getBytes());
-    }
-
-    /**
      * Returns the credential type of the user, can be one of {@link #CREDENTIAL_TYPE_NONE},
      * {@link #CREDENTIAL_TYPE_PATTERN}, {@link #CREDENTIAL_TYPE_PIN} and
      * {@link #CREDENTIAL_TYPE_PASSWORD}
