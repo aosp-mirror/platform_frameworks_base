@@ -454,8 +454,10 @@ public class BtHelper {
         }
         final BluetoothDevice btDevice = deviceList.get(0);
         // the device is guaranteed CONNECTED
-        mDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(btDevice,
-                BluetoothA2dp.STATE_CONNECTED, BluetoothProfile.A2DP_SINK, true, -1);
+        mDeviceBroker.queueBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                new AudioDeviceBroker.BtDeviceConnectionInfo(btDevice,
+                    BluetoothA2dp.STATE_CONNECTED, BluetoothProfile.A2DP_SINK,
+                        true, -1));
     }
 
     /*package*/ synchronized void onA2dpSinkProfileConnected(BluetoothProfile profile) {
