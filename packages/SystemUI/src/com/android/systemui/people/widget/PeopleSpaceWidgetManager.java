@@ -764,12 +764,12 @@ public class PeopleSpaceWidgetManager {
      * Builds a request to pin a People Tile app widget, with a preview and storing necessary
      * information as the callback.
      */
-    public boolean requestPinAppWidget(ShortcutInfo shortcutInfo) {
+    public boolean requestPinAppWidget(ShortcutInfo shortcutInfo, Bundle options) {
         if (DEBUG) Log.d(TAG, "Requesting pin widget, shortcutId: " + shortcutInfo.getId());
 
         RemoteViews widgetPreview = PeopleSpaceUtils.getPreview(mContext, mIPeopleManager,
                 mLauncherApps, mNotificationEntryManager, shortcutInfo.getId(),
-                shortcutInfo.getUserHandle(), shortcutInfo.getPackage());
+                shortcutInfo.getUserHandle(), shortcutInfo.getPackage(), options);
         if (widgetPreview == null) {
             Log.w(TAG, "Skipping pinning widget: no tile for shortcutId: " + shortcutInfo.getId());
             return false;

@@ -93,7 +93,7 @@ public class PeopleProvider extends ContentProvider {
                 : Dependency.get(NotificationEntryManager.class);
 
         RemoteViews view = PeopleSpaceUtils.getPreview(getContext(), mPeopleManager, mLauncherApps,
-                mNotificationEntryManager, shortcutId, userHandle, packageName);
+                mNotificationEntryManager, shortcutId, userHandle, packageName, extras);
         if (view == null) {
             if (DEBUG) Log.d(TAG, "No preview available for shortcutId: " + shortcutId);
             return null;

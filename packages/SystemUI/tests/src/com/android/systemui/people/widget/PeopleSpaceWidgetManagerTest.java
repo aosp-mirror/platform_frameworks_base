@@ -1038,7 +1038,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mAppWidgetManager.requestPinAppWidget(any(), any(), any())).thenReturn(true);
 
         ShortcutInfo info = new ShortcutInfo.Builder(mMockContext, SHORTCUT_ID).build();
-        boolean valid = mManager.requestPinAppWidget(info);
+        boolean valid = mManager.requestPinAppWidget(info, new Bundle());
 
         assertThat(valid).isTrue();
         verify(mAppWidgetManager, times(1)).requestPinAppWidget(
@@ -1052,7 +1052,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mIPeopleManager.getConversation(PACKAGE_NAME, 0, SHORTCUT_ID)).thenReturn(null);
 
         ShortcutInfo info = new ShortcutInfo.Builder(mMockContext, SHORTCUT_ID).build();
-        boolean valid = mManager.requestPinAppWidget(info);
+        boolean valid = mManager.requestPinAppWidget(info, new Bundle());
 
         assertThat(valid).isFalse();
         verify(mAppWidgetManager, never()).requestPinAppWidget(any(), any(), any());
