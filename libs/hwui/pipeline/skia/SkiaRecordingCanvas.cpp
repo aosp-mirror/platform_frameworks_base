@@ -60,12 +60,11 @@ void SkiaRecordingCanvas::punchHole(const SkRRect& rect) {
     // Add the marker annotation to allow HWUI to determine where the current
     // clip/transformation should be applied
     SkVector vector = rect.getSimpleRadii();
-    const int dataSize = 2;
-    float data[dataSize];
+    float data[2];
     data[0] = vector.x();
     data[1] = vector.y();
     mRecorder.drawAnnotation(rect.rect(), HOLE_PUNCH_ANNOTATION.c_str(),
-                             SkData::MakeWithCopy(data, dataSize));
+                             SkData::MakeWithCopy(data, 2 * sizeof(float)));
 
     // Clear the current rect within the layer itself
     SkPaint paint = SkPaint();
