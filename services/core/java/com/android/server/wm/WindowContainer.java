@@ -1257,7 +1257,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mOrientation = orientation;
         final WindowContainer parent = getParent();
         if (parent != null) {
-            if (getConfiguration().orientation != getRequestedConfigurationOrientation()) {
+            if (getConfiguration().orientation != getRequestedConfigurationOrientation()
+                    // Update configuration directly only if the change won't be dispatched from
+                    // ancestor. This prevents from computing intermediate configuration when the
+                    // parent also needs to be updated from the ancestor. E.g. the app requests
+                    // portrait but the task is still in landscape. While updating from display,
+                    // the task can be updated to portrait first so the configuration can be
+                    // computed in a consistent environment.
+                    && (inMultiWindowMode() || !handlesOrientationChangeFromDescendant())) {
                 // Resolve the requested orientation.
                 onConfigurationChanged(parent.getConfiguration());
             }
