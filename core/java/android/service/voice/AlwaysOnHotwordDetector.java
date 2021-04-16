@@ -276,7 +276,6 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     private final IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
     private final SoundTriggerListener mInternalCallback;
     private final Callback mExternalCallback;
-    private final Object mLock = new Object();
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
     private final int mTargetSdkVersion;
@@ -584,24 +583,15 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     }
 
     /**
-     * Set configuration and pass read-only data to hotword detection service.
-     *
-     * @param options Application configuration data to provide to the
-     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
-     * other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob to provide to the
-     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
-     * such data to the trusted process.
+     * {@inheritDoc}
      *
      * @throws IllegalStateException if this AlwaysOnHotwordDetector wasn't specified to use a
      * {@link HotwordDetectionService} when it was created. In addition, if this
      * AlwaysOnHotwordDetector is in an invalid or error state.
      */
+    @Override
     public final void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
-        if (DBG) {
-            Slog.d(TAG, "updateState()");
-        }
         synchronized (mLock) {
             if (!mSupportHotwordDetectionService) {
                 throw new IllegalStateException(
@@ -611,20 +601,9 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                 throw new IllegalStateException(
                         "updateState called on an invalid detector or error state");
             }
-            updateStateLocked(options, sharedMemory, null /* callback */);
         }
-    }
 
-    private void updateStateLocked(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
-        if (DBG) {
-            Slog.d(TAG, "updateStateLocked()");
-        }
-        try {
-            mModelManagementService.updateState(options, sharedMemory, callback);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        super.updateState(options, sharedMemory);
     }
 
     /**

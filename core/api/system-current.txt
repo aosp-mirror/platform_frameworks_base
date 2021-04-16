@@ -10504,6 +10504,7 @@ package android.service.voice {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition();
     method public boolean startRecognition(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle);
     method public boolean stopRecognition();
+    method public void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
     field public static final int CONFIDENCE_LEVEL_HIGH = 3; // 0x3
     field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
     field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
