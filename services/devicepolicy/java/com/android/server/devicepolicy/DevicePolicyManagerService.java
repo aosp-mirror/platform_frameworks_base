@@ -4505,8 +4505,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(parentUser);
             final List<PasswordValidationError> passwordValidationErrors =
-                    PasswordMetrics.validatePasswordMetrics(
-                            minMetrics, complexity, false, metrics);
+                    PasswordMetrics.validatePasswordMetrics(minMetrics, complexity, metrics);
             isSufficient = passwordValidationErrors.isEmpty();
         }
         DevicePolicyEventLogger
@@ -4583,7 +4582,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 maxRequiredComplexity = Math.max(maxRequiredComplexity, admin.mPasswordComplexity);
             }
             return PasswordMetrics.validatePasswordMetrics(PasswordMetrics.merge(adminMetrics),
-                    maxRequiredComplexity, false, metrics).isEmpty();
+                    maxRequiredComplexity, metrics).isEmpty();
         }
     }
 
@@ -4619,8 +4618,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int complexity = getAggregatedPasswordComplexityLocked(userId);
         PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(userId);
         final List<PasswordValidationError> passwordValidationErrors =
-                PasswordMetrics.validatePasswordMetrics(
-                        minMetrics, complexity, false, metrics);
+                PasswordMetrics.validatePasswordMetrics(minMetrics, complexity, metrics);
         return passwordValidationErrors.isEmpty();
     }
 
@@ -4967,8 +4965,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // TODO: Consider changing validation API to take LockscreenCredential.
             if (password.isEmpty()) {
                 validationErrors = PasswordMetrics.validatePasswordMetrics(
-                        minMetrics, complexity, isPin,
-                        new PasswordMetrics(CREDENTIAL_TYPE_NONE));
+                        minMetrics, complexity, new PasswordMetrics(CREDENTIAL_TYPE_NONE));
             } else {
                 // TODO(b/120484642): remove getBytes() below
                 validationErrors = PasswordMetrics.validatePassword(
