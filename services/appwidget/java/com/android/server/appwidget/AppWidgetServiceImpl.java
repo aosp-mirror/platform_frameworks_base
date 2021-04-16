@@ -1589,6 +1589,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     public ParceledListSlice<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
             int profileId, String packageName) {
         final int userId = UserHandle.getCallingUserId();
+        final int callingUid = Binder.getCallingUid();
 
         if (DEBUG) {
             Slog.i(TAG, "getInstalledProvidersForProfiles() " + userId);
@@ -1601,7 +1602,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         synchronized (mLock) {
             if (mSecurityPolicy.isCallerInstantAppLocked()) {
-                Slog.w(TAG, "Instant uid " + Binder.getCallingUid()
+                Slog.w(TAG, "Instant uid " + callingUid
                         + " cannot access widget providers");
                 return ParceledListSlice.emptyList();
             }
@@ -1614,11 +1615,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             for (int i = 0; i < providerCount; i++) {
                 Provider provider = mProviders.get(i);
                 AppWidgetProviderInfo info = provider.getInfoLocked(mContext);
+                final String providerPackageName = provider.id.componentName.getPackageName();
 
                 // Ignore an invalid provider, one not matching the filter,
                 // or one that isn't in the given package, if any.
                 boolean inPackage = packageName == null
-                        || provider.id.componentName.getPackageName().equals(packageName);
+                        || providerPackageName.equals(packageName);
                 if (provider.zombie || (info.widgetCategory & categoryFilter) == 0 || !inPackage) {
                     continue;
                 }
@@ -1627,7 +1629,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 final int providerProfileId = info.getProfile().getIdentifier();
                 if (providerProfileId == profileId
                         && mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
-                            provider.id.componentName.getPackageName(), providerProfileId)) {
+                        providerPackageName, providerProfileId)
+                        && !mPackageManagerInternal.filterAppAccess(providerPackageName, callingUid,
+                        userId)) {
                     result.add(cloneIfLocalBinder(info));
                 }
             }
