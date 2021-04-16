@@ -29,6 +29,7 @@ import androidx.annotation.StyleRes;
 
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.util.Utils;
 
 /**
  * Provides background color and radius animations for key pad buttons.
@@ -100,7 +101,8 @@ class NumPadAnimator {
 
         ContextThemeWrapper ctw = new ContextThemeWrapper(context, mStyle);
         TypedArray a = ctw.obtainStyledAttributes(customAttrs);
-        mNormalColor = a.getColor(0, 0);
+        mNormalColor = Utils.getPrivateAttrColorIfUnset(ctw, a, 0, 0,
+                com.android.internal.R.attr.colorSurface);
         mHighlightColor = a.getColor(1, 0);
         a.recycle();
 
