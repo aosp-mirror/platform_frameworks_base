@@ -14,8 +14,6 @@
 
 package com.android.systemui.qs.customize;
 
-import static com.android.systemui.qs.dagger.QSFlagsModule.QS_LABELS_FLAG;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -61,7 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /** */
 @QSScope
@@ -110,25 +107,21 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private final AccessibilityDelegateCompat mAccessibilityDelegate;
     private RecyclerView mRecyclerView;
     private int mNumColumns;
-    private final boolean mUseHorizontalTiles;
 
     @Inject
     public TileAdapter(
             @QSThemedContext Context context,
             QSTileHost qsHost,
-            UiEventLogger uiEventLogger,
-            @Named(QS_LABELS_FLAG) boolean useHorizontalTiles
-    ) {
+            UiEventLogger uiEventLogger) {
         mContext = context;
         mHost = qsHost;
         mUiEventLogger = uiEventLogger;
         mItemTouchHelper = new ItemTouchHelper(mCallbacks);
         mDecoration = new TileItemDecoration(context);
-        mMarginDecoration = new MarginTileDecoration(!useHorizontalTiles);
+        mMarginDecoration = new MarginTileDecoration();
         mMinNumTiles = context.getResources().getInteger(R.integer.quick_settings_min_num_tiles);
         mNumColumns = context.getResources().getInteger(NUM_COLUMNS_ID);
         mAccessibilityDelegate = new TileAdapterDelegate();
-        mUseHorizontalTiles = useHorizontalTiles;
         mSizeLookup.setSpanIndexCacheEnabled(true);
     }
 
@@ -287,9 +280,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         FrameLayout frame = (FrameLayout) inflater.inflate(R.layout.qs_customize_tile_frame, parent,
                 false);
-        View view = mUseHorizontalTiles
-                ? new CustomizeTileViewHorizontal(context, new QSIconViewImpl(context))
-                : new CustomizeTileView(context, new QSIconViewImpl(context));
+        View view = new CustomizeTileViewHorizontal(context, new QSIconViewImpl(context));
         frame.addView(view);
         return new Holder(frame);
     }
@@ -715,11 +706,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     private static class MarginTileDecoration extends ItemDecoration {
         private int mHalfMargin;
-        private final boolean mUseOutsideMargins;
-
-        private MarginTileDecoration(boolean useOutsideMargins) {
-            mUseOutsideMargins = useOutsideMargins;
-        }
 
         public void setHalfMargin(int halfMargin) {
             mHalfMargin = halfMargin;
@@ -738,9 +724,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             if (view instanceof TextView) {
                 super.getItemOffsets(outRect, view, parent, state);
             } else {
-                if (mUseOutsideMargins || (column != 0 && column != lm.getSpanCount() - 1)) {
-                    // Using outside margins or in a column that's not leftmost or rightmost
-                    // (half of the margin between columns).
+                if (column != 0 && column != lm.getSpanCount() - 1) {
+                    // In a column that's not leftmost or rightmost (half of the margin between
+                    // columns).
                     outRect.left = mHalfMargin;
                     outRect.right = mHalfMargin;
                 } else if (column == 0) {

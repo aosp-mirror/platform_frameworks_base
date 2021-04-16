@@ -275,6 +275,7 @@
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
   <java-symbol type="bool" name="config_avoidGfxAccel" />
   <java-symbol type="bool" name="config_bluetooth_address_validation" />
+  <java-symbol type="bool" name="config_flipToScreenOffEnabled" />
   <java-symbol type="bool" name="config_bluetooth_sco_off_call" />
   <java-symbol type="bool" name="config_bluetooth_le_peripheral_mode_supported" />
   <java-symbol type="bool" name="config_bluetooth_hfp_inband_ringing_support" />
@@ -4185,6 +4186,7 @@
   <java-symbol type="dimen" name="config_letterboxBackgroundWallaperDarkScrimAlpha" />
   <java-symbol type="integer" name="config_letterboxBackgroundType" />
   <java-symbol type="color" name="config_letterboxBackgroundColor" />
+  <java-symbol type="dimen" name="config_letterboxHorizontalPositionMultiplier" />
 
   <java-symbol type="bool" name="config_hideDisplayCutoutWithDisplayArea" />
 

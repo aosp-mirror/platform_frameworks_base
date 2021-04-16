@@ -308,6 +308,7 @@ message TaskProto {
     optional float minimize_amount = 27;
     optional bool created_by_organizer = 28;
     optional string affinity = 29;
+    optional bool has_child_pip_activity = 30;
 }
 
 /* represents ActivityRecordProto */

@@ -8517,20 +8517,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     + " as profile owner for user " + userHandle);
             return false;
         }
-        if (who == null
-                || !isPackageInstalledForUser(who.getPackageName(), userHandle)) {
-            throw new IllegalArgumentException("Component " + who
-                    + " not installed for userId:" + userHandle);
-        }
+        Preconditions.checkArgument(who != null);
 
         final CallerIdentity caller = getCallerIdentity();
         synchronized (getLockObject()) {
             enforceCanSetProfileOwnerLocked(caller, who, userHandle);
-
+            Preconditions.checkArgument(isPackageInstalledForUser(who.getPackageName(), userHandle),
+                    "Component " + who + " not installed for userId:" + userHandle);
             final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
-            if (admin == null || getUserData(userHandle).mRemovingAdmins.contains(who)) {
-                throw new IllegalArgumentException("Not active admin: " + who);
-            }
+            Preconditions.checkArgument(admin != null && !getUserData(
+                    userHandle).mRemovingAdmins.contains(who), "Not active admin: " + who);
 
             final int parentUserId = getProfileParentId(userHandle);
             // When trying to set a profile owner on a new user, it may be that this user is

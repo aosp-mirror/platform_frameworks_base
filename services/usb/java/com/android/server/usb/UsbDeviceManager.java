@@ -2136,6 +2136,12 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 Slog.d(TAG, "setEnabledFunctions functions=" + functions + ", "
                         + "forceRestart=" + forceRestart);
             }
+            if (mCurrentGadgetHalVersion < UsbManager.GADGET_HAL_V1_2) {
+                if ((functions & UsbManager.FUNCTION_NCM) != 0) {
+                    Slog.e(TAG, "Could not set unsupported function for the GadgetHal");
+                    return;
+                }
+            }
             if (mCurrentFunctions != functions
                     || !mCurrentFunctionsApplied
                     || forceRestart) {

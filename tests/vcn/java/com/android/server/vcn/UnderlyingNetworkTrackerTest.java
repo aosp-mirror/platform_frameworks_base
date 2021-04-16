@@ -153,21 +153,19 @@ public class UnderlyingNetworkTrackerTest {
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
                         eq(getWifiRequest(expectedSubIds)),
-                        any(),
-                        any(NetworkBringupCallback.class));
+                        any(NetworkBringupCallback.class),
+                        any());
         for (final int subId : expectedSubIds) {
             verify(mConnectivityManager)
                     .requestBackgroundNetwork(
                             eq(getCellRequestForSubId(subId)),
-                            any(),
-                            any(NetworkBringupCallback.class));
+                            any(NetworkBringupCallback.class), any());
         }
 
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
                         eq(getRouteSelectionRequest(expectedSubIds)),
-                        any(),
-                        any(RouteSelectionCallback.class));
+                        any(RouteSelectionCallback.class), any());
     }
 
     @Test
@@ -267,8 +265,8 @@ public class UnderlyingNetworkTrackerTest {
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
                         eq(getRouteSelectionRequest(INITIAL_SUB_IDS)),
-                        any(),
-                        mRouteSelectionCallbackCaptor.capture());
+                        mRouteSelectionCallbackCaptor.capture(),
+                        any());
 
         RouteSelectionCallback cb = mRouteSelectionCallbackCaptor.getValue();
         cb.onAvailable(mNetwork);

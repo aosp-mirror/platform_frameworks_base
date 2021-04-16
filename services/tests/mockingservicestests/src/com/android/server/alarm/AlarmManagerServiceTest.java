@@ -468,8 +468,9 @@ public class AlarmManagerServiceTest {
                 TEST_CALLING_UID);
     }
 
-    private void setPrioritizedAlarm(int type, long triggerTime, IAlarmListener listener) {
-        mService.setImpl(type, triggerTime, WINDOW_EXACT, 0, null, listener, "test",
+    private void setPrioritizedAlarm(int type, long triggerTime, long windowLength,
+            IAlarmListener listener) {
+        mService.setImpl(type, triggerTime, windowLength, 0, null, listener, "test",
                 FLAG_STANDALONE | FLAG_PRIORITIZE, null, null, TEST_CALLING_UID,
                 TEST_CALLING_PACKAGE, null);
     }
@@ -1685,7 +1686,7 @@ public class AlarmManagerServiceTest {
         final int numAlarms = 10;
         for (int i = 0; i < numAlarms; i++) {
             setPrioritizedAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
-                    new IAlarmListener.Stub() {
+                    0, new IAlarmListener.Stub() {
                         @Override
                         public void doAlarm(IAlarmCompleteListener callback)
                                 throws RemoteException {
@@ -1720,7 +1721,7 @@ public class AlarmManagerServiceTest {
         final int numAlarms = 10;
         for (int i = 0; i < numAlarms; i++) {
             setPrioritizedAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
-                    new IAlarmListener.Stub() {
+                    0, new IAlarmListener.Stub() {
                         @Override
                         public void doAlarm(IAlarmCompleteListener callback)
                                 throws RemoteException {
@@ -1738,12 +1739,12 @@ public class AlarmManagerServiceTest {
         }
         assertEquals(numAlarms, alarmsFired.get());
 
-        setPrioritizedAlarm(ELAPSED_REALTIME_WAKEUP, idleUntil - 3, new IAlarmListener.Stub() {
+        setPrioritizedAlarm(ELAPSED_REALTIME_WAKEUP, idleUntil - 3, 0, new IAlarmListener.Stub() {
             @Override
             public void doAlarm(IAlarmCompleteListener callback) throws RemoteException {
             }
         });
-        setPrioritizedAlarm(ELAPSED_REALTIME_WAKEUP, idleUntil - 2, new IAlarmListener.Stub() {
+        setPrioritizedAlarm(ELAPSED_REALTIME_WAKEUP, idleUntil - 2, 0, new IAlarmListener.Stub() {
             @Override
             public void doAlarm(IAlarmCompleteListener callback) throws RemoteException {
             }
@@ -2223,7 +2224,11 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
-    public void minWindow() {
+    public void minWindowChangeEnabled() {
+        doReturn(true).when(
+                () -> CompatChanges.isChangeEnabled(
+                        eq(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS),
+                        anyString(), any(UserHandle.class)));
         final long minWindow = 73;
         setDeviceConfigLong(KEY_MIN_WINDOW, minWindow);
 
@@ -2235,6 +2240,48 @@ public class AlarmManagerServiceTest {
             assertEquals(1, mService.mAlarmStore.size());
             final Alarm a = mService.mAlarmStore.remove(unused -> true).get(0);
             assertEquals(minWindow, a.windowLength);
+        }
+    }
+
+    @Test
+    public void minWindowChangeDisabled() {
+        doReturn(false).when(
+                () -> CompatChanges.isChangeEnabled(
+                        eq(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS),
+                        anyString(), any(UserHandle.class)));
+        final long minWindow = 73;
+        setDeviceConfigLong(KEY_MIN_WINDOW, minWindow);
+
+        // 0 is WINDOW_EXACT and < 0 is WINDOW_HEURISTIC.
+        for (int window = 1; window <= minWindow; window++) {
+            final PendingIntent pi = getNewMockPendingIntent();
+            setTestAlarm(ELAPSED_REALTIME, 0, window, pi, 0, 0, TEST_CALLING_UID, null);
+
+            assertEquals(1, mService.mAlarmStore.size());
+            final Alarm a = mService.mAlarmStore.remove(unused -> true).get(0);
+            assertEquals(window, a.windowLength);
+        }
+    }
+
+    @Test
+    public void minWindowPriorityAlarm() {
+        doReturn(true).when(
+                () -> CompatChanges.isChangeEnabled(
+                        eq(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS),
+                        anyString(), any(UserHandle.class)));
+        final long minWindow = 73;
+        setDeviceConfigLong(KEY_MIN_WINDOW, minWindow);
+
+        // 0 is WINDOW_EXACT and < 0 is WINDOW_HEURISTIC.
+        for (int window = 1; window <= minWindow; window++) {
+            setPrioritizedAlarm(ELAPSED_REALTIME, 0, window, new IAlarmListener.Stub() {
+                @Override
+                public void doAlarm(IAlarmCompleteListener callback) throws RemoteException {
+                }
+            });
+            assertEquals(1, mService.mAlarmStore.size());
+            final Alarm a = mService.mAlarmStore.remove(unused -> true).get(0);
+            assertEquals(window, a.windowLength);
         }
     }
 

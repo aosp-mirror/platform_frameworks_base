@@ -587,7 +587,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     AnimatingActivityRegistry mAnimatingActivityRegistry;
 
-    private Task mLastParent;
+    // Set whenever the ActivityRecord gets reparented to a Task so we can know the last known
+    // parent was when the ActivityRecord is detached from the hierarchy
+    private Task mLastKnownParent;
+
+    // Set to the previous Task parent of the ActivityRecord when it is reparented to a new Task
+    // due to picture-in-picture. This gets cleared whenever this activity or the Task
+    // it references to gets removed. This should also be cleared when we move out of pip.
+    private Task mLastParentBeforePip;
 
     boolean firstWindowDrawn;
     /** Whether the visible window(s) of this activity is drawn. */
@@ -1096,6 +1103,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.println(prefix + "configChanges=0x" + Integer.toHexString(info.configChanges));
             }
         }
+        if (mLastParentBeforePip != null) {
+            pw.println(prefix + "lastParentTaskIdBeforePip=" + mLastParentBeforePip.mTaskId);
+        }
 
         dumpLetterboxInfo(pw, prefix);
     }
@@ -1133,6 +1143,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.println(prefix + "  letterboxBackgroundWallpaperBlurRadius="
                     + getLetterboxWallpaperBlurRadius());
         }
+        pw.println(prefix + "  letterboxHorizontalPositionMultiplier="
+                + mWmService.getLetterboxHorizontalPositionMultiplier());
     }
 
     /**
@@ -1349,7 +1361,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (getDisplayContent() != null) {
                 getDisplayContent().mClosingApps.remove(this);
             }
-        } else if (mLastParent != null && mLastParent.getRootTask() != null) {
+        } else if (mLastKnownParent != null && mLastKnownParent.getRootTask() != null) {
             task.getRootTask().mExitingActivities.remove(this);
         }
         final Task rootTask = getRootTask();
@@ -1362,7 +1374,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ? rootTask.getAnimatingActivityRegistry()
                 : null;
 
-        mLastParent = task;
+        mLastKnownParent = task;
+        if (mLastKnownParent == mLastParentBeforePip) {
+            // Activity's reparented back from pip, clear the links once established
+            clearLastParentBeforePip();
+        }
 
         updateColorTransform();
 
@@ -1379,6 +1395,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 rootTask.setHasBeenVisible(true);
             }
         }
+    }
+
+    /**
+     * Sets {@link #mLastParentBeforePip} to the current parent Task, it's caller's job to ensure
+     * {@link #getTask()} is set before this is called.
+     */
+    void setLastParentBeforePip() {
+        mLastParentBeforePip = getTask();
+        mLastParentBeforePip.mChildPipActivity = this;
+    }
+
+    private void clearLastParentBeforePip() {
+        if (mLastParentBeforePip != null) {
+            mLastParentBeforePip.mChildPipActivity = null;
+            mLastParentBeforePip = null;
+        }
+    }
+
+    @Nullable Task getLastParentBeforePip() {
+        return mLastParentBeforePip;
     }
 
     private void updateColorTransform() {
@@ -3434,6 +3470,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     void cleanUp(boolean cleanServices, boolean setState) {
         task.cleanUpActivityReferences(this);
+        clearLastParentBeforePip();
 
         deferRelaunchUntilPaused = false;
         frozenBeforeDestroy = false;
@@ -5863,6 +5900,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             nowVisible = true;
             lastVisibleTime = SystemClock.uptimeMillis();
             mAtmService.scheduleAppGcsLocked();
+            // The nowVisible may be false in onAnimationFinished because the transition animation
+            // was started by starting window but the main window hasn't drawn so the procedure
+            // didn't schedule. Hence also check when nowVisible becomes true (drawn) to avoid the
+            // closing activity having to wait until idle timeout to be stopped or destroyed if the
+            // next activity won't report idle (e.g. repeated view animation).
+            mTaskSupervisor.scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
         }
     }
 
@@ -6679,26 +6722,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // traverse the copy.
         final ArrayList<WindowState> children = new ArrayList<>(mChildren);
         children.forEach(WindowState::onExitAnimationDone);
+        // The starting window could transfer to another activity after app transition started, in
+        // that case the latest top activity might not receive exit animation done callback if the
+        // starting window didn't applied exit animation success. Notify animation finish to the
+        // starting window if needed.
+        if (task != null && startingMoved) {
+            final WindowState transferredStarting = task.getWindow(w ->
+                    w.mAttrs.type == TYPE_APPLICATION_STARTING);
+            if (transferredStarting != null && transferredStarting.mAnimatingExit
+                    && !transferredStarting.isSelfAnimating(0 /* flags */,
+                    ANIMATION_TYPE_WINDOW_ANIMATION)) {
+                transferredStarting.onExitAnimationDone();
+            }
+        }
 
         getDisplayContent().mAppTransition.notifyAppTransitionFinishedLocked(token);
         scheduleAnimation();
 
-        if (!mTaskSupervisor.mStoppingActivities.isEmpty()
-                || !mTaskSupervisor.mFinishingActivities.isEmpty()) {
-            if (mRootWindowContainer.allResumedActivitiesIdle()) {
-                // If all activities are already idle then we now need to make sure we perform
-                // the full stop of this activity. This is because we won't do that while they
-                // are still waiting for the animation to finish.
-                mTaskSupervisor.scheduleIdle();
-            } else if (mRootWindowContainer.allResumedActivitiesVisible()) {
-                // If all resumed activities are already visible (and should be drawn, see
-                // updateReportedVisibility ~ nowVisible) but not idle, we still schedule to
-                // process the stopping and finishing activities because the transition is done.
-                // This also avoids if the next activity never reports idle (e.g. animating view),
-                // the previous will need to wait until idle timeout to be stopped or destroyed.
-                mTaskSupervisor.scheduleProcessStoppingAndFinishingActivities();
-            }
-        }
+        // Schedule to handle the stopping and finishing activities which the animation is done
+        // because the activities which were animating have not been stopped yet.
+        mTaskSupervisor.scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
@@ -7022,11 +7065,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // and back which can cause visible issues (see b/184078928).
         final int parentWindowingMode =
                 newParentConfiguration.windowConfiguration.getWindowingMode();
+        final boolean isFixedOrientationLetterboxAllowed =
+                isSplitScreenWindowingMode(parentWindowingMode)
+                        || parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
+                        || parentWindowingMode == WINDOWING_MODE_FULLSCREEN;
         // TODO(b/181207944): Consider removing the if condition and always run
         // resolveFixedOrientationConfiguration() since this should be applied for all cases.
-        if (isSplitScreenWindowingMode(parentWindowingMode)
-                || parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
-                || parentWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+        if (isFixedOrientationLetterboxAllowed) {
             resolveFixedOrientationConfiguration(newParentConfiguration);
         }
 
@@ -7047,11 +7092,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             resolveFullscreenConfiguration(newParentConfiguration);
         }
 
+        if (isFixedOrientationLetterboxAllowed || mCompatDisplayInsets != null
+                // In fullscreen, can be letterboxed for aspect ratio.
+                || !inMultiWindowMode()) {
+            updateResolvedBoundsHorizontalPosition(newParentConfiguration);
+        }
+
         if (mVisibleRequested) {
             updateCompatDisplayInsets();
         }
-
-        // TODO(b/175212232): Consolidate position logic from each "resolve" method above here.
 
         // Assign configuration sequence number into hierarchy because there is a different way than
         // ensureActivityConfiguration() in this class that uses configuration in WindowState during
@@ -7080,6 +7129,47 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         shouldCreateCompatDisplayInsets());
             }
             resolvedConfig.windowConfiguration.setMaxBounds(mTmpBounds);
+        }
+    }
+
+
+    /**
+     * Adjusts horizontal position of resolved bounds if they doesn't fill the parent using gravity
+     * requested in the config or via an ADB command. For more context see {@link
+     * WindowManagerService#getLetterboxHorizontalPositionMultiplier}.
+     */
+    private void updateResolvedBoundsHorizontalPosition(Configuration newParentConfiguration) {
+        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+        final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
+        final Rect screenResolvedBounds =
+                mSizeCompatBounds != null ? mSizeCompatBounds : resolvedBounds;
+        final Rect parentAppBounds = newParentConfiguration.windowConfiguration.getAppBounds();
+        final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
+        if (resolvedBounds.isEmpty() || parentBounds.width() == screenResolvedBounds.width()) {
+            return;
+        }
+
+        int offsetX = 0;
+        if (screenResolvedBounds.width() >= parentAppBounds.width()) {
+            // If resolved bounds overlap with insets, center within app bounds.
+            offsetX = getHorizontalCenterOffset(
+                    parentAppBounds.width(), screenResolvedBounds.width());
+        } else {
+            float positionMultiplier = mWmService.getLetterboxHorizontalPositionMultiplier();
+            positionMultiplier =
+                    (positionMultiplier < 0.0f || positionMultiplier > 1.0f)
+                            // Default to central position if invalid value is provided.
+                            ? 0.5f : positionMultiplier;
+            offsetX = (int) Math.ceil((parentAppBounds.width() - screenResolvedBounds.width())
+                    * positionMultiplier);
+        }
+
+        if (mSizeCompatBounds != null) {
+            mSizeCompatBounds.offset(offsetX, 0 /* offsetY */);
+            final int dx = mSizeCompatBounds.left - resolvedBounds.left;
+            offsetBounds(resolvedConfig, dx,  0 /* offsetY */);
+        } else {
+            offsetBounds(resolvedConfig, offsetX, 0 /* offsetY */);
         }
     }
 
@@ -7160,7 +7250,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             resolvedBounds.set(parentBounds.left, top, parentBounds.right, top + height);
         } else {
             final int width = (int) Math.rint(parentHeight / aspect);
-            final int left = parentBounds.centerX() - width / 2;
+            final Rect parentAppBounds = newParentConfig.windowConfiguration.getAppBounds();
+            final int left = width <= parentAppBounds.width()
+                    // Avoid overlapping with the horizontal decor area when possible.
+                    ? parentAppBounds.left : parentBounds.centerX() - width / 2;
             resolvedBounds.set(left, parentBounds.top, left + width, parentBounds.bottom);
         }
 
@@ -7211,12 +7304,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // restrict, the bounds should be the requested override bounds.
             task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
                     getFixedRotationTransformDisplayInfo());
-        }
-        if (needToBeCentered) {
-            // Offset to center relative to parent's app bounds.
-            final int offsetX = getHorizontalCenterOffset(
-                    parentAppBounds.width(), resolvedBounds.width());
-            offsetBounds(resolvedConfig, offsetX, 0 /* offsetY */);
         }
     }
 
@@ -7315,8 +7402,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final Rect resolvedAppBounds = resolvedConfig.windowConfiguration.getAppBounds();
 
-        // Calculates the scale and offset to horizontal center the size compatibility bounds into
-        // the region which is available to application.
+        // Calculates the scale the size compatibility bounds into the region which is available
+        // to application.
         final int contentW = resolvedAppBounds.width();
         final int contentH = resolvedAppBounds.height();
         final int viewportW = containerAppBounds.width();
@@ -7324,8 +7411,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Only allow to scale down.
         mSizeCompatScale = (contentW <= viewportW && contentH <= viewportH)
                 ? 1f : Math.min((float) viewportW / contentW, (float) viewportH / contentH);
-        final int screenTopInset = containerAppBounds.top - containerBounds.top;
-        final boolean topNotAligned = screenTopInset != resolvedAppBounds.top - resolvedBounds.top;
+        final int containerTopInset = containerAppBounds.top - containerBounds.top;
+        final boolean topNotAligned =
+                containerTopInset != resolvedAppBounds.top - resolvedBounds.top;
         if (mSizeCompatScale != 1f || topNotAligned) {
             if (mSizeCompatBounds == null) {
                 mSizeCompatBounds = new Rect();
@@ -7334,18 +7422,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mSizeCompatBounds.offsetTo(0, 0);
             mSizeCompatBounds.scale(mSizeCompatScale);
             // The insets are included in height, e.g. the area of real cutout shouldn't be scaled.
-            mSizeCompatBounds.bottom += screenTopInset;
+            mSizeCompatBounds.bottom += containerTopInset;
         } else {
             mSizeCompatBounds = null;
         }
 
-        // Center horizontally in parent (app bounds) and align to top of parent (bounds)
-        // - this is a UX choice.
-        final int offsetX = getHorizontalCenterOffset(
-                (int) viewportW, (int) (contentW * mSizeCompatScale));
+        // Align to top of parent (bounds) - this is a UX choice and exclude the horizontal decor
+        // if needed. Horizontal position is adjusted in updateResolvedBoundsHorizontalPosition.
         // Above coordinates are in "@" space, now place "*" and "#" to screen space.
-        final int screenPosX = (fillContainer
-                ? containerBounds.left : containerAppBounds.left) + offsetX;
+        final int screenPosX = fillContainer ? containerBounds.left : containerAppBounds.left;
         final int screenPosY = containerBounds.top;
         if (screenPosX != 0 || screenPosY != 0) {
             if (mSizeCompatBounds != null) {

@@ -143,6 +143,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runSetLetterboxBackgroundWallpaperDarkScrimAlpha(pw);
                 case "get-letterbox-background-wallpaper-dark-scrim-alpha":
                     return runGetLetterboxBackgroundWallpaperDarkScrimAlpha(pw);
+                case "set-letterbox-horizontal-position-multiplier":
+                    return runSeLetterboxHorizontalPositionMultiplier(pw);
+                case "get-letterbox-horizontal-position-multiplier":
+                    return runGetLetterboxHorizontalPositionMultiplier(pw);
                 case "set-sandbox-display-apis":
                     return runSandboxDisplayApis(pw);
                 case "reset":
@@ -846,6 +850,43 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSeLetterboxHorizontalPositionMultiplier(PrintWriter pw) throws RemoteException {
+        final float multiplier;
+        try {
+            String arg = getNextArgRequired();
+            if ("reset".equals(arg)) {
+                synchronized (mInternal.mGlobalLock) {
+                    mInternal.resetLetterboxHorizontalPositionMultiplier();
+                }
+                return 0;
+            }
+            multiplier = Float.parseFloat(arg);
+        } catch (NumberFormatException  e) {
+            getErrPrintWriter().println("Error: bad multiplier format " + e);
+            return -1;
+        } catch (IllegalArgumentException  e) {
+            getErrPrintWriter().println(
+                    "Error: 'reset' or multiplier should be provided as an argument " + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mInternal.setLetterboxHorizontalPositionMultiplier(multiplier);
+        }
+        return 0;
+    }
+
+    private int runGetLetterboxHorizontalPositionMultiplier(PrintWriter pw) throws RemoteException {
+        synchronized (mInternal.mGlobalLock) {
+            final float multiplier = mInternal.getLetterboxHorizontalPositionMultiplier();
+            if (multiplier < 0) {
+                pw.println("Letterbox horizontal position multiplier is not set");
+            } else {
+                pw.println("Letterbox horizontal position multiplier is " + multiplier);
+            }
+        }
+        return 0;
+    }
+
     private int runReset(PrintWriter pw) throws RemoteException {
         int displayId = getDisplayId(getNextArg());
 
@@ -887,6 +928,9 @@ public class WindowManagerShellCommand extends ShellCommand {
 
         // set-letterbox-background-wallpaper-dark-scrim-alpha
         mInternal.resetLetterboxBackgroundWallpaperDarkScrimAlpha();
+
+        // set-letterbox-horizontal-position-multiplier
+        mInternal.resetLetterboxHorizontalPositionMultiplier();
 
         // set-sandbox-display-apis
         mInternal.setSandboxDisplayApis(displayId, /* sandboxDisplayApis= */ true);
@@ -954,6 +998,11 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    letterbox background. If alpha < 0 or >= 1 both it and");
         pw.println("    R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha are ignored and ");
         pw.println("    0.0 (transparent) is used instead.");
+        pw.println("  set-letterbox-horizontal-position-multiplier [reset|multiplier]");
+        pw.println("  get-letterbox-horizontal-position-multiplier");
+        pw.println("    horizontal position of a center of a letterboxed app. If it < 0 or > 1");
+        pw.println("    then both it and R.dimen.config_letterboxHorizontalPositionMultiplier");
+        pw.println("    are ignored and central position (0.5) is used.");
         pw.println("  set-sandbox-display-apis [true|1|false|0]");
         pw.println("    Sets override of Display APIs getRealSize / getRealMetrics to reflect ");
         pw.println("    DisplayArea of the activity, or the window bounds if in letterbox or");

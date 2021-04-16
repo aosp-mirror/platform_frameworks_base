@@ -1997,10 +1997,33 @@ public class NotificationPanelViewController extends PanelViewController {
         float qsExpansionFraction = getQsExpansionFraction();
         mQs.setQsExpansion(qsExpansionFraction, getHeaderTranslation());
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
-        mScrimController.setQsPosition(qsExpansionFraction,
-                calculateQsBottomPosition(qsExpansionFraction));
+        int qsPanelBottomY = calculateQsBottomPosition(qsExpansionFraction);
+        mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
+        setNotificationBounds(qsExpansionFraction, qsPanelBottomY);
         mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
+    }
+
+    private void setNotificationBounds(float qsExpansionFraction, int qsPanelBottomY) {
+        float top = 0;
+        float bottom = 0;
+        float left = 0;
+        float right = 0;
+        if (qsPanelBottomY > 0) {
+            // notification shade is expanding/expanded
+            if (!mShouldUseSplitNotificationShade) {
+                top = qsPanelBottomY;
+                bottom = getView().getBottom();
+                left = getView().getLeft();
+                right = getView().getRight();
+            } else {
+                top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
+                bottom = mNotificationStackScrollLayoutController.getHeight();
+                left = mNotificationStackScrollLayoutController.getLeft();
+                right = mNotificationStackScrollLayoutController.getRight();
+            }
+        }
+        mScrimController.setNotificationsBounds(left, top, right, bottom);
     }
 
     private int calculateQsBottomPosition(float qsExpansionFraction) {
@@ -2030,7 +2053,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private float calculateNotificationsTopPadding() {
         if (mShouldUseSplitNotificationShade && !mKeyguardShowing) {
-            return mSplitShadeNotificationsTopPadding;
+            return mSplitShadeNotificationsTopPadding + mQsNotificationTopPadding;
         }
         if (mKeyguardShowing && (mQsExpandImmediate
                 || mIsExpanding && mQsExpandedWhenExpandingStarted)) {

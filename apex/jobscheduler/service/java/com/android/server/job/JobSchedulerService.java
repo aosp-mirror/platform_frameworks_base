@@ -816,6 +816,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         mControllers.get(c).onAppRemovedLocked(pkgName, pkgUid);
                     }
                     mDebuggableApps.remove(pkgName);
+                    mConcurrencyManager.onAppRemovedLocked(pkgName, pkgUid);
                 }
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
@@ -2233,7 +2234,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /** Returns true if both the calling and source users for the job are started. */
-    private boolean areUsersStartedLocked(final JobStatus job) {
+    @GuardedBy("mLock")
+    public boolean areUsersStartedLocked(final JobStatus job) {
         boolean sourceStarted = ArrayUtils.contains(mStartedUsers, job.getSourceUserId());
         if (job.getUserId() == job.getSourceUserId()) {
             return sourceStarted;

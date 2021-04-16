@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Encapsulates a request to index documents into an {@link AppSearchSession} database.
@@ -61,7 +62,7 @@ public final class PutDocumentsRequest {
          */
         @NonNull
         public Builder addGenericDocuments(@NonNull GenericDocument... documents) {
-            Preconditions.checkNotNull(documents);
+            Objects.requireNonNull(documents);
             return addGenericDocuments(Arrays.asList(documents));
         }
 
@@ -74,7 +75,7 @@ public final class PutDocumentsRequest {
         public Builder addGenericDocuments(
                 @NonNull Collection<? extends GenericDocument> documents) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(documents);
+            Objects.requireNonNull(documents);
             mDocuments.addAll(documents);
             return this;
         }

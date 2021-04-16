@@ -68,6 +68,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
@@ -154,6 +155,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private StatusBar mStatusBar;
     private KeyguardAffordanceHelper mAffordanceHelper;
     private FalsingManager mFalsingManager;
+    @Nullable private Executor mUiExecutor;
     private boolean mUserSetupComplete;
     private boolean mPrewarmBound;
     private Messenger mPrewarmMessenger;
@@ -429,7 +431,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private void updateWalletVisibility() {
-        if (mDozing || !mWalletEnabled) {
+        if (mDozing || !mWalletEnabled || !mHasCard) {
             mWalletButton.setVisibility(GONE);
         } else {
             mWalletButton.setVisibility(VISIBLE);
@@ -657,6 +659,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     public void onUnlockedChanged() {
         updateCameraVisibility();
+    }
+
+    @Override
+    public void onKeyguardShowingChanged() {
+        if (mKeyguardStateController.isShowing()) {
+            queryWalletCards();
+        }
     }
 
     private void inflateCameraPreview() {
@@ -897,18 +906,20 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void initWallet(QuickAccessWalletClient client, Executor uiExecutor, boolean enabled) {
         mQuickAccessWalletClient = client;
         mWalletEnabled = enabled && client.isWalletFeatureAvailable();
+        mUiExecutor = uiExecutor;
+        queryWalletCards();
 
-        if (mWalletEnabled) {
-            queryWalletCards(uiExecutor);
-        }
         updateWalletVisibility();
     }
 
-    private void queryWalletCards(Executor uiExecutor) {
+    private void queryWalletCards() {
+        if (!mWalletEnabled || mUiExecutor == null) {
+            return;
+        }
         GetWalletCardsRequest request =
                 new GetWalletCardsRequest(1 /* cardWidth */, 1 /* cardHeight */,
                         1 /* iconSizePx */, 2 /* maxCards */);
-        mQuickAccessWalletClient.getWalletCards(uiExecutor, request, mCardRetriever);
+        mQuickAccessWalletClient.getWalletCards(mUiExecutor, request, mCardRetriever);
     }
 
     private void onWalletClick(View v) {
