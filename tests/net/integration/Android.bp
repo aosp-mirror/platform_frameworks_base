@@ -62,6 +62,7 @@ android_test {
 // Utilities for testing framework code both in integration and unit tests.
 java_library {
     name: "frameworks-net-integration-testutils",
+    defaults: ["framework-connectivity-test-defaults"],
     srcs: ["util/**/*.java", "util/**/*.kt"],
     static_libs: [
         "androidx.annotation_annotation",

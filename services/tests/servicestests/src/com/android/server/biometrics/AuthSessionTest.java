@@ -308,6 +308,8 @@ public class AuthSessionTest {
                 componentInfo,
                 type,
                 false /* resetLockoutRequiresHardwareAuthToken */));
+
+        when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(true);
     }
 
     private void setupFace(int id, boolean confirmationAlwaysRequired,
@@ -329,6 +331,6 @@ public class AuthSessionTest {
             }
         });
 
-        when(mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(true);
+        when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(true);
     }
 }

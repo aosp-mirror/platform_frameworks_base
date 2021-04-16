@@ -176,10 +176,6 @@
         <attr name="android:alpha" />
     </declare-styleable>
 
-    <declare-styleable name="PagedTileLayout">
-        <attr name="sideLabels" format="boolean"/>
-    </declare-styleable>
-
     <declare-styleable name="CropView">
         <attr name="handleThickness" />
         <attr name="handleColor" />

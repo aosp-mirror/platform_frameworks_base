@@ -62,9 +62,6 @@ import java.io.IOException;
  * safe. In particular, {@link #close} will always immediately abort ongoing
  * operations and close the server socket.
  *
- * <p class="note"><strong>Note:</strong>
- * Requires the {@link android.Manifest.permission#BLUETOOTH} permission.
- *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about using Bluetooth, read the

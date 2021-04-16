@@ -1827,7 +1827,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        mHistoricalRegistry.clearHistory(uid, packageName);
+        mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::clearHistory,
+                    mHistoricalRegistry, uid, packageName));
     }
 
     public void uidRemoved(int uid) {

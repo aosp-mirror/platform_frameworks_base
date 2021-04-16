@@ -44,6 +44,9 @@ class NetworkAgentConfigTest {
             setSubscriberId("MySubId")
             setPartialConnectivityAcceptable(false)
             setUnvalidatedConnectivityAcceptable(true)
+            if (isAtLeastS()) {
+                setBypassableVpn(true)
+            }
         }.build()
         if (isAtLeastS()) {
             // From S, the config will have 12 items
@@ -66,6 +69,7 @@ class NetworkAgentConfigTest {
             if (isAtLeastS()) {
                 setNat64DetectionEnabled(false)
                 setProvisioningNotificationEnabled(false)
+                setBypassableVpn(true)
             }
         }.build()
 
@@ -78,6 +82,7 @@ class NetworkAgentConfigTest {
         if (isAtLeastS()) {
             assertFalse(config.isNat64DetectionEnabled())
             assertFalse(config.isProvisioningNotificationEnabled())
+            assertTrue(config.isBypassableVpn())
         } else {
             assertTrue(config.isNat64DetectionEnabled())
             assertTrue(config.isProvisioningNotificationEnabled())

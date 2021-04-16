@@ -49,7 +49,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.face.FaceManager;
@@ -188,8 +187,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mSpiedContext.getPackageManager()).thenReturn(mPackageManager);
         doAnswer(invocation -> {
             IBiometricEnabledOnKeyguardCallback callback = invocation.getArgument(0);
-            callback.onChanged(BiometricSourceType.FACE, true /* enabled */,
-                    KeyguardUpdateMonitor.getCurrentUser());
+            callback.onChanged(true /* enabled */, KeyguardUpdateMonitor.getCurrentUser());
             return null;
         }).when(mBiometricManager).registerEnabledOnKeyguardCallback(any());
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
@@ -495,6 +493,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void testFingerprintWhenStrongAuth(int strongAuth) {
+        // Clear invocations, since previous setup (e.g. registering BiometricManager callbacks)
+        // will trigger updateBiometricListeningState();
+        clearInvocations(mFingerprintManager);
+        mKeyguardUpdateMonitor.resetBiometricListeningState();
+
         when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(strongAuth);
         mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
         mTestableLooper.processAllMessages();

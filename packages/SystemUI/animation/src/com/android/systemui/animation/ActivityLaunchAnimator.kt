@@ -313,12 +313,14 @@ class ActivityLaunchAnimator(context: Context) {
             }
 
             context.mainExecutor.execute {
-                startAnimation(remoteAnimationTargets, iRemoteAnimationFinishedCallback)
+                startAnimation(remoteAnimationTargets, remoteAnimationNonAppTargets,
+                        iRemoteAnimationFinishedCallback)
             }
         }
 
         private fun startAnimation(
             remoteAnimationTargets: Array<out RemoteAnimationTarget>,
+            remoteAnimationNonAppTargets: Array<out RemoteAnimationTarget>,
             iCallback: IRemoteAnimationFinishedCallback
         ) {
             val window = remoteAnimationTargets.firstOrNull {
@@ -332,7 +334,7 @@ class ActivityLaunchAnimator(context: Context) {
                 return
             }
 
-            val navigationBar = remoteAnimationTargets.firstOrNull {
+            val navigationBar = remoteAnimationNonAppTargets.firstOrNull {
                 it.windowType == WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
             }
 
