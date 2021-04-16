@@ -6475,7 +6475,7 @@ public class AppOpsManager {
                     historicalDiscreteAccesses.add(other.mDiscreteAccesses.get(i++));
                 }
             }
-            mDiscreteAccesses = historicalDiscreteAccesses;
+            mDiscreteAccesses = deduplicateDiscreteEvents(historicalDiscreteAccesses);
         }
 
         private void increaseAccessCount(@UidState int uidState, @OpFlags int flags,
@@ -6996,21 +6996,7 @@ public class AppOpsManager {
             }
             result.add(entry);
         }
-        nAccesses = result.size();
-        int i = 0;
-        for (int j = 0, k = 0; j < nAccesses; i++, j = k) {
-            long currentAccessTime = result.get(j).getLastAccessTime(OP_FLAGS_ALL);
-            k = j + 1;
-            while(k < nAccesses &&
-                    result.get(k).getLastAccessTime(OP_FLAGS_ALL) == currentAccessTime) {
-                k++;
-            }
-            result.set(i, mergeAttributedOpEntries(result.subList(j, k)));
-        }
-        for (; i < nAccesses; i++) {
-            result.remove(result.size() - 1);
-        }
-        return result;
+        return deduplicateDiscreteEvents(result);
     }
 
     /**
@@ -9832,6 +9818,23 @@ public class AppOpsManager {
                 // Swallow error, only meant for logging ops, should not affect flow of the code
             }
         }
+    }
+
+    private static List<AttributedOpEntry> deduplicateDiscreteEvents(List<AttributedOpEntry> list) {
+        int n = list.size();
+        int i = 0;
+        for (int j = 0, k = 0; j < n; i++, j = k) {
+            long currentAccessTime = list.get(j).getLastAccessTime(OP_FLAGS_ALL);
+            k = j + 1;
+            while(k < n && list.get(k).getLastAccessTime(OP_FLAGS_ALL) == currentAccessTime) {
+                k++;
+            }
+            list.set(i, mergeAttributedOpEntries(list.subList(j, k)));
+        }
+        for (; i < n; i++) {
+            list.remove(list.size() - 1);
+        }
+        return list;
     }
 
     private static AttributedOpEntry mergeAttributedOpEntries(List<AttributedOpEntry> opEntries) {
