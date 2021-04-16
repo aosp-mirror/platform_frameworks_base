@@ -18,7 +18,6 @@ package com.android.systemui.screenshot;
 
 import android.app.Activity;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
@@ -32,7 +31,6 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.IWindowManager;
 import android.view.ScrollCaptureResponse;
 import android.view.View;
 import android.widget.ImageView;
@@ -65,14 +63,10 @@ public class LongScreenshotActivity extends Activity {
     private static final String KEY_SAVED_IMAGE_PATH = "saved-image-path";
 
     private final UiEventLogger mUiEventLogger;
-    private final ScrollCaptureController mScrollCaptureController;
     private final Executor mUiExecutor;
     private final Executor mBackgroundExecutor;
     private final ImageExporter mImageExporter;
-
-    // If true, the activity is re-loading an image from storage, which should either succeed and
-    // populate the UI or fail and finish the activity.
-    private boolean mRestoringInstance;
+    private final LongScreenshotHolder mLongScreenshotHolder;
 
     private ImageView mPreview;
     private View mSave;
@@ -86,7 +80,6 @@ public class LongScreenshotActivity extends Activity {
     private ListenableFuture<File> mCacheSaveFuture;
     private ListenableFuture<ImageLoader.Result> mCacheLoadFuture;
 
-    private ListenableFuture<LongScreenshot> mLongScreenshotFuture;
     private LongScreenshot mLongScreenshot;
 
     private enum PendingAction {
@@ -97,13 +90,13 @@ public class LongScreenshotActivity extends Activity {
 
     @Inject
     public LongScreenshotActivity(UiEventLogger uiEventLogger, ImageExporter imageExporter,
-            @Main Executor mainExecutor, @Background Executor bgExecutor, IWindowManager wms,
-            Context context, ScrollCaptureController scrollCaptureController) {
+            @Main Executor mainExecutor, @Background Executor bgExecutor,
+            LongScreenshotHolder longScreenshotHolder) {
         mUiEventLogger = uiEventLogger;
         mUiExecutor = mainExecutor;
         mBackgroundExecutor = bgExecutor;
         mImageExporter = imageExporter;
-        mScrollCaptureController = scrollCaptureController;
+        mLongScreenshotHolder = longScreenshotHolder;
     }
 
 
@@ -152,7 +145,7 @@ public class LongScreenshotActivity extends Activity {
         super.onStart();
 
         if (mCacheLoadFuture != null) {
-            Log.d(TAG, "mRestoringInstance = true");
+            Log.d(TAG, "mCacheLoadFuture != null");
             final ListenableFuture<ImageLoader.Result> future = mCacheLoadFuture;
             mCacheLoadFuture.addListener(() -> {
                 Log.d(TAG, "cached bitmap load complete");
@@ -170,40 +163,19 @@ public class LongScreenshotActivity extends Activity {
             }, mUiExecutor);
             mCacheLoadFuture = null;
             return;
-        }
-
-        if (mLongScreenshotFuture == null) {
-            Log.d(TAG, "mLongScreenshotFuture == null");
-            // First run through, ensure we have a connection to use (see #onCreate)
-            if (mScrollCaptureResponse == null || !mScrollCaptureResponse.isConnected()) {
-                Log.e(TAG, "Did not receive a live scroll capture connection, bailing out!");
-                finishAndRemoveTask();
-                return;
-            }
-            mLongScreenshotFuture = mScrollCaptureController.run(mScrollCaptureResponse);
-            mLongScreenshotFuture.addListener(() -> {
-                LongScreenshot longScreenshot;
-                try {
-                    longScreenshot = mLongScreenshotFuture.get();
-                } catch (CancellationException | InterruptedException | ExecutionException e) {
-                    Log.e(TAG, "Error capturing long screenshot!", e);
-                    finishAndRemoveTask();
-                    return;
-                }
-                if (longScreenshot.getHeight() == 0) {
-                    Log.e(TAG, "Got a zero height result");
-                    finishAndRemoveTask();
-                    return;
-                }
-                onCaptureCompleted(longScreenshot);
-            }, mUiExecutor);
         } else {
-            Log.d(TAG, "mLongScreenshotFuture != null");
+            LongScreenshot longScreenshot = mLongScreenshotHolder.takeLongScreenshot();
+            if (longScreenshot != null) {
+                onLongScreenshotReceived(longScreenshot);
+            } else {
+                Log.e(TAG, "No long screenshot available!");
+                finishAndRemoveTask();
+            }
         }
     }
 
-    private void onCaptureCompleted(LongScreenshot longScreenshot) {
-        Log.d(TAG, "onCaptureCompleted(longScreenshot=" + longScreenshot + ")");
+    private void onLongScreenshotReceived(LongScreenshot longScreenshot) {
+        Log.d(TAG, "onLongScreenshotReceived(longScreenshot=" + longScreenshot + ")");
         mLongScreenshot = longScreenshot;
         mPreview.setImageDrawable(mLongScreenshot.getDrawable());
         updateImageDimensions();
@@ -283,9 +255,6 @@ public class LongScreenshotActivity extends Activity {
             }
             cleanupCache();
 
-            if (mLongScreenshotFuture != null) {
-                mLongScreenshotFuture.cancel(true);
-            }
             if (mLongScreenshot != null) {
                 mLongScreenshot.release();
             }
