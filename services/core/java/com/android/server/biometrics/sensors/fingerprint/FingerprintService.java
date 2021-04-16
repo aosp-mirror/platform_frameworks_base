@@ -50,6 +50,7 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintServiceReceiver;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -61,6 +62,7 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -71,6 +73,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
@@ -99,13 +102,21 @@ public class FingerprintService extends SystemService {
 
     protected static final String TAG = "FingerprintService";
 
+    private final Object mLock = new Object();
     private final AppOpsManager mAppOps;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     private final LockPatternUtils mLockPatternUtils;
     private final FingerprintServiceWrapper mServiceWrapper;
-    @NonNull private List<ServiceProvider> mServiceProviders;
+    @NonNull private final List<ServiceProvider> mServiceProviders;
     @NonNull private final FingerprintStateCallback mFingerprintStateCallback;
+
+    @GuardedBy("mLock")
+    @NonNull private final RemoteCallbackList<IFingerprintAuthenticatorsRegisteredCallback>
+            mAuthenticatorsRegisteredCallbacks;
+
+    @GuardedBy("mLock")
+    @NonNull private final List<FingerprintSensorPropertiesInternal> mSensorProps;
 
     /**
      * Registers FingerprintStateListener in list stored by FingerprintService
@@ -744,7 +755,7 @@ public class FingerprintService extends SystemService {
 
         @Override // Binder call
         public void resetLockout(IBinder token, int sensorId, int userId,
-                @Nullable byte [] hardwareAuthToken, String opPackageName) {
+                @Nullable byte[] hardwareAuthToken, String opPackageName) {
             Utils.checkPermission(getContext(), RESET_FINGERPRINT_LOCKOUT);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -856,7 +867,37 @@ public class FingerprintService extends SystemService {
                         }
                     }
                 }
+
+                synchronized (mLock) {
+                    for (ServiceProvider provider : mServiceProviders) {
+                        mSensorProps.addAll(provider.getSensorProperties());
+                    }
+                }
+
+                broadcastAllAuthenticatorsRegistered();
             });
+        }
+
+        @Override
+        public void addAuthenticatorsRegisteredCallback(
+                IFingerprintAuthenticatorsRegisteredCallback callback) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            if (callback == null) {
+                Slog.e(TAG, "addAuthenticatorsRegisteredCallback, callback is null");
+                return;
+            }
+
+            final boolean registered;
+            final boolean hasSensorProps;
+            synchronized (mLock) {
+                registered = mAuthenticatorsRegisteredCallbacks.register(callback);
+                hasSensorProps = !mSensorProps.isEmpty();
+            }
+            if (registered && hasSensorProps) {
+                broadcastAllAuthenticatorsRegistered();
+            } else if (!registered) {
+                Slog.e(TAG, "addAuthenticatorsRegisteredCallback failed to register callback");
+            }
         }
 
         @Override
@@ -870,6 +911,7 @@ public class FingerprintService extends SystemService {
             }
             provider.onPointerDown(sensorId, x, y, minor, major);
         }
+
         @Override
         public void onPointerUp(int sensorId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
@@ -906,6 +948,40 @@ public class FingerprintService extends SystemService {
         mLockPatternUtils = new LockPatternUtils(context);
         mServiceProviders = new ArrayList<>();
         mFingerprintStateCallback = new FingerprintStateCallback();
+        mAuthenticatorsRegisteredCallbacks = new RemoteCallbackList<>();
+        mSensorProps = new ArrayList<>();
+    }
+
+    // Notifies the callbacks that all of the authenticators have been registered and removes the
+    // invoked callbacks from the callback list.
+    private void broadcastAllAuthenticatorsRegistered() {
+        // Make a local copy of the data so it can be used outside of the synchronized block when
+        // making Binder calls.
+        final List<IFingerprintAuthenticatorsRegisteredCallback> callbacks = new ArrayList<>();
+        final List<FingerprintSensorPropertiesInternal> props;
+        synchronized (mLock) {
+            if (!mSensorProps.isEmpty()) {
+                props = new ArrayList<>(mSensorProps);
+            } else {
+                Slog.e(TAG, "mSensorProps is empty");
+                return;
+            }
+            final int n = mAuthenticatorsRegisteredCallbacks.beginBroadcast();
+            for (int i = 0; i < n; ++i) {
+                final IFingerprintAuthenticatorsRegisteredCallback cb =
+                        mAuthenticatorsRegisteredCallbacks.getBroadcastItem(i);
+                callbacks.add(cb);
+                mAuthenticatorsRegisteredCallbacks.unregister(cb);
+            }
+            mAuthenticatorsRegisteredCallbacks.finishBroadcast();
+        }
+        for (IFingerprintAuthenticatorsRegisteredCallback cb : callbacks) {
+            try {
+                cb.onAllAuthenticatorsRegistered(props);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in onAllAuthenticatorsRegistered", e);
+            }
+        }
     }
 
     @Override
@@ -950,12 +1026,9 @@ public class FingerprintService extends SystemService {
 
     @NonNull
     private List<FingerprintSensorPropertiesInternal> getSensorProperties() {
-        final List<FingerprintSensorPropertiesInternal> properties = new ArrayList<>();
-
-        for (ServiceProvider provider : mServiceProviders) {
-            properties.addAll(provider.getSensorProperties());
+        synchronized (mLock) {
+            return mSensorProps;
         }
-        return properties;
     }
 
     @NonNull

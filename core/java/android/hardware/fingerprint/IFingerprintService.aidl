@@ -21,6 +21,7 @@ import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IFingerprintStateListener;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -148,6 +149,10 @@ interface IFingerprintService {
     // AIDL sensor properties are retrieved directly from the available HALs. If no HIDL HALs exist,
     // hidlSensors must be non-null and empty. See AuthService.java
     void registerAuthenticators(in List<FingerprintSensorPropertiesInternal> hidlSensors);
+
+    // Adds a callback which gets called when the service registers all of the fingerprint
+    // authenticators. The callback is automatically removed after it's invoked.
+    void addAuthenticatorsRegisteredCallback(IFingerprintAuthenticatorsRegisteredCallback callback);
 
     // Notifies about a finger touching the sensor area.
     void onPointerDown(int sensorId, int x, int y, float minor, float major);
