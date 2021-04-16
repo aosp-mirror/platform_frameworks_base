@@ -271,6 +271,21 @@ class WindowContextListenerController {
             if (mDeathRecipient == null) {
                 throw new IllegalStateException("Invalid client token: " + mClientToken);
             }
+            final WindowToken windowToken = mContainer.asWindowToken();
+            if (windowToken != null && windowToken.isFromClient()) {
+                // If the WindowContext created WindowToken is removed by
+                // WMS#postWindowRemoveCleanupLocked, the WindowContext should switch back to
+                // listen to previous associated DisplayArea.
+                final DisplayContent dc = windowToken.mWmService.mRoot
+                        .getDisplayContent(mLastReportedDisplay);
+                // If we cannot obtain the DisplayContent, the DisplayContent may also be removed.
+                // We should proceed the removal process.
+                if (dc != null) {
+                    final DisplayArea da = dc.findAreaForToken(windowToken);
+                    updateContainer(da);
+                    return;
+                }
+            }
             mDeathRecipient.unlinkToDeath();
             IWindowToken windowTokenClient = IWindowToken.Stub.asInterface(mClientToken);
             try {
