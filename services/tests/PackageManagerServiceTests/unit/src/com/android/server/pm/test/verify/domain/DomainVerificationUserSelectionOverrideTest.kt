@@ -145,6 +145,7 @@ class DomainVerificationUserStateOverrideTest {
         whenever(firstInstallTime) { 0L }
         whenever(readUserState(0)) { PackageUserState() }
         whenever(readUserState(1)) { PackageUserState() }
+        whenever(isSystem()) { false }
     }
 
     @Test
