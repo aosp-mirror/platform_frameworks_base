@@ -25,6 +25,7 @@ import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
+import android.apex.CompressedApexInfoList;
 import android.apex.IApexService;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -355,6 +356,21 @@ public abstract class ApexManager {
      * Inform apexd that the boot has completed.
      */
     public abstract void markBootCompleted();
+
+    /**
+     * Estimate how much storage space is needed on /data/ for decompressing apexes
+     * @param infoList List of apexes that are compressed in target build.
+     * @return Size, in bytes, the amount of space needed on /data/
+     */
+    public abstract long calculateSizeForCompressedApex(CompressedApexInfoList infoList)
+            throws RemoteException;
+
+    /**
+     * Reserve space on /data so that apexes can be decompressed after OTA
+     * @param infoList List of apexes that are compressed in target build.
+     */
+    public abstract void reserveSpaceForCompressedApex(CompressedApexInfoList infoList)
+            throws RemoteException;
 
     /**
      * Dumps various state information to the provided {@link PrintWriter} object.
@@ -898,6 +914,18 @@ public abstract class ApexManager {
             }
         }
 
+        @Override
+        public long calculateSizeForCompressedApex(CompressedApexInfoList infoList)
+                throws RemoteException {
+            return waitForApexService().calculateSizeForCompressedApex(infoList);
+        }
+
+        @Override
+        public void reserveSpaceForCompressedApex(CompressedApexInfoList infoList)
+                throws RemoteException {
+            waitForApexService().reserveSpaceForCompressedApex(infoList);
+        }
+
         /**
          * Dump information about the packages contained in a particular cache
          * @param packagesCache the cache to print information about.
@@ -1147,6 +1175,16 @@ public abstract class ApexManager {
         @Override
         public void markBootCompleted() {
             // No-op
+        }
+
+        @Override
+        public long calculateSizeForCompressedApex(CompressedApexInfoList infoList) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void reserveSpaceForCompressedApex(CompressedApexInfoList infoList) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
