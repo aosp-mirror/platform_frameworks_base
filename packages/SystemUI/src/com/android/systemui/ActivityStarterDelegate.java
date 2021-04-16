@@ -91,6 +91,13 @@ public class ActivityStarterDelegate implements ActivityStarter {
     }
 
     @Override
+    public void startActivity(Intent intent, boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController) {
+        mActualStarter.ifPresent(
+                starter -> starter.get().startActivity(intent, dismissShade, animationController));
+    }
+
+    @Override
     public void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade) {
         mActualStarter.ifPresent(
                 starter -> starter.get().startActivity(intent, onlyProvisioned, dismissShade));
