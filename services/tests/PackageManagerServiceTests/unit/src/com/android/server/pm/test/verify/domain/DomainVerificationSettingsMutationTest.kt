@@ -238,6 +238,7 @@ class DomainVerificationSettingsMutationTest {
             whenever(readUserState(0)) { PackageUserState() }
             whenever(readUserState(10)) { PackageUserState() }
             whenever(getInstantApp(anyInt())) { false }
+            whenever(isSystem()) { false }
         }
     }
 
