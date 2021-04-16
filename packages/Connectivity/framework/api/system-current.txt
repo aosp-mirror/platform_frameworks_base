@@ -239,6 +239,7 @@ package android.net {
     method public final void sendQosSessionLost(int, int, int);
     method public final void sendSocketKeepaliveEvent(int, int);
     method @Deprecated public void setLegacySubtype(int, @NonNull String);
+    method public void setLingerDuration(@NonNull java.time.Duration);
     method public void setTeardownDelayMs(@IntRange(from=0, to=0x1388) int);
     method public final void setUnderlyingNetworks(@Nullable java.util.List<android.net.Network>);
     method public void unregister();

@@ -167,7 +167,15 @@ public class NetworkProvider {
         ConnectivityManager.from(mContext).declareNetworkRequestUnfulfillable(request);
     }
 
-    /** @hide */
+    /**
+     * A callback for parties registering a NetworkOffer.
+     *
+     * This is used with {@link ConnectivityManager#offerNetwork}. When offering a network,
+     * the system will use this callback to inform the caller that a network corresponding to
+     * this offer is needed or unneeded.
+     *
+     * @hide
+     */
     @SystemApi
     public interface NetworkOfferCallback {
         /**

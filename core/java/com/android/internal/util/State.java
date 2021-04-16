@@ -16,6 +16,7 @@
 
 package com.android.internal.util;
 
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Message;
@@ -25,6 +26,7 @@ import android.os.Message;
  *
  * The class for implementing states in a StateMachine
  */
+@SuppressLint("AndroidFrameworkRequiresPermission")
 public class State implements IState {
 
     /**

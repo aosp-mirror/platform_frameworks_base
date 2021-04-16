@@ -31,7 +31,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
-import static android.app.admin.PasswordMetrics.computeForPassword;
+import static android.app.admin.PasswordMetrics.computeForPasswordOrPin;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
 import static android.net.InetAddresses.parseNumericAddress;
 
@@ -1551,6 +1551,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testSetProfileOwner_failures() throws Exception {
         // TODO Test more failure cases.  Basically test all chacks in enforceCanSetProfileOwner().
+        // Package doesn't exist and caller is not system
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ "Calling identity is not authorized",
+                () -> dpm.setProfileOwner(admin1, "owner-name", UserHandle.USER_SYSTEM));
+
+        // Package exists, but caller is not system
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ "Calling identity is not authorized",
+                () -> dpm.setProfileOwner(admin1, "owner-name", UserHandle.USER_SYSTEM));
     }
 
     @Test
@@ -5156,7 +5166,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         reset(mContext.spiedContext);
 
-        PasswordMetrics passwordMetricsNoSymbols = computeForPassword("abcdXYZ5".getBytes());
+        PasswordMetrics passwordMetricsNoSymbols = computeForPasswordOrPin(
+                "abcdXYZ5".getBytes(), /* isPin */ false);
 
         setActivePasswordState(passwordMetricsNoSymbols);
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
@@ -5183,7 +5194,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(mContext.spiedContext);
         assertThat(dpm.isActivePasswordSufficient()).isFalse();
 
-        PasswordMetrics passwordMetricsWithSymbols = computeForPassword("abcd.XY5".getBytes());
+        PasswordMetrics passwordMetricsWithSymbols = computeForPasswordOrPin(
+                "abcd.XY5".getBytes(), /* isPin */ false);
 
         setActivePasswordState(passwordMetricsWithSymbols);
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
@@ -5237,7 +5249,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         parentDpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_MEDIUM);
 
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
-                .thenReturn(computeForPassword("184342".getBytes()));
+                .thenReturn(computeForPasswordOrPin("184342".getBytes(), /* isPin */ true));
 
         // Numeric password is compliant with current requirement (QUALITY_NUMERIC set explicitly
         // on the parent admin)
@@ -6360,7 +6372,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(CALLER_USER_HANDLE);
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(CALLER_USER_HANDLE))
-                .thenReturn(computeForPassword("asdf".getBytes()));
+                .thenReturn(computeForPasswordOrPin("asdf".getBytes(), /* isPin */ false));
 
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_MEDIUM);
     }
@@ -6380,10 +6392,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(CALLER_USER_HANDLE))
-                .thenReturn(computeForPassword("asdf".getBytes()));
+                .thenReturn(computeForPasswordOrPin("asdf".getBytes(), /* isPin */ false));
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(parentUser.id))
-                .thenReturn(computeForPassword("parentUser".getBytes()));
+                .thenReturn(computeForPasswordOrPin("parentUser".getBytes(), /* isPin */ false));
 
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_HIGH);
     }
@@ -7059,13 +7071,15 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_NONE);
 
         reset(mContext.spiedContext);
-        PasswordMetrics passwordMetricsNoSymbols = computeForPassword("1234".getBytes());
+        PasswordMetrics passwordMetricsNoSymbols = computeForPasswordOrPin(
+                "1234".getBytes(), /* isPin */ true);
         setActivePasswordState(passwordMetricsNoSymbols);
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_LOW);
         assertThat(dpm.isActivePasswordSufficient()).isFalse();
 
         reset(mContext.spiedContext);
-        passwordMetricsNoSymbols = computeForPassword("84125312943a".getBytes());
+        passwordMetricsNoSymbols = computeForPasswordOrPin(
+                "84125312943a".getBytes(), /* isPin */ false);
         setActivePasswordState(passwordMetricsNoSymbols);
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_HIGH);
         // using isActivePasswordSufficient

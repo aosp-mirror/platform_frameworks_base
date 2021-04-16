@@ -3172,5 +3172,12 @@ package android.window {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void applyTransaction(@NonNull android.window.WindowContainerTransaction);
   }
 
+  @UiContext public abstract class WindowProviderService extends android.app.Service {
+    ctor public WindowProviderService();
+    method public final void attachToWindowToken(@NonNull android.os.IBinder);
+    method @Nullable public android.os.Bundle getWindowContextOptions();
+    method public abstract int getWindowType();
+  }
+
 }
 

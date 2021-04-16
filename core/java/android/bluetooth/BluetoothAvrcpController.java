@@ -16,6 +16,10 @@
 
 package android.bluetooth;
 
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -54,10 +58,10 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
      * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
      * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
      * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
-     * receive.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.avrcp-controller.profile.action.CONNECTION_STATE_CHANGED";
 

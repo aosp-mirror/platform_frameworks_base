@@ -742,6 +742,7 @@ public class DomainVerificationService extends SystemService
     }
 
     public List<DomainOwner> getOwnersForDomain(@NonNull String domain, @UserIdInt int userId) {
+        Objects.requireNonNull(domain);
         mEnforcer.assertOwnerQuerent(mConnection.getCallingUid(), mConnection.getCallingUserId(),
                 userId);
 

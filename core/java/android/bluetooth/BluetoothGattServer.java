@@ -16,6 +16,9 @@
 
 package android.bluetooth;
 
+import android.annotation.RequiresPermission;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.util.Log;
@@ -425,6 +428,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * Application should call this method as early as possible after it is done with
      * this GATT server.
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void close() {
         if (DBG) Log.d(TAG, "close()");
         unregisterCallback();
@@ -436,12 +440,13 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * <p>This is an asynchronous call. The callback is used to notify
      * success or failure if the function returns true.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param callback GATT callback handler that will receive asynchronous callbacks.
      * @return true, the callback will be called to notify success or failure, false on immediate
      * error
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     /*package*/ boolean registerCallback(BluetoothGattServerCallback callback) {
         return registerCallback(callback, false);
     }
@@ -452,14 +457,15 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * <p>This is an asynchronous call. The callback is used to notify
      * success or failure if the function returns true.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param callback GATT callback handler that will receive asynchronous callbacks.
      * @param eatt_support indicates if server can use eatt
      * @return true, the callback will be called to notify success or failure, false on immediate
      * error
      * @hide
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     /*package*/ boolean registerCallback(BluetoothGattServerCallback callback,
                                          boolean eatt_support) {
         if (DBG) Log.d(TAG, "registerCallback()");
@@ -504,6 +510,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Unregister the current application and callbacks.
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     private void unregisterCallback() {
         if (DBG) Log.d(TAG, "unregisterCallback() - mServerIf=" + mServerIf);
         if (mService == null || mServerIf == 0) return;
@@ -548,12 +555,13 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * subsequent connections to known devices should be invoked with the
      * autoConnect parameter set to true.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param autoConnect Whether to directly connect to the remote device (false) or to
      * automatically connect as soon as the remote device becomes available (true).
      * @return true, if the connection attempt was initiated successfully
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean connect(BluetoothDevice device, boolean autoConnect) {
         if (DBG) {
             Log.d(TAG,
@@ -576,10 +584,11 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * Disconnects an established connection, or cancels a connection attempt
      * currently in progress.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param device Remote device
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void cancelConnection(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "cancelConnection() - device: " + device.getAddress());
         if (mService == null || mServerIf == 0) return;
@@ -609,6 +618,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * of {@link BluetoothDevice#PHY_OPTION_NO_PREFERRED}, {@link BluetoothDevice#PHY_OPTION_S2} or
      * {@link BluetoothDevice#PHY_OPTION_S8}
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void setPreferredPhy(BluetoothDevice device, int txPhy, int rxPhy, int phyOptions) {
         try {
             mService.serverSetPreferredPhy(mServerIf, device.getAddress(), txPhy, rxPhy,
@@ -624,6 +634,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      *
      * @param device The remote device to send this response to
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void readPhy(BluetoothDevice device) {
         try {
             mService.serverReadPhy(mServerIf, device.getAddress());
@@ -645,14 +656,15 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * <li>{@link BluetoothGattServerCallback#onDescriptorWriteRequest}
      * </ul>
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param device The remote device to send this response to
      * @param requestId The ID of the request that was received with the callback
      * @param status The status of the request to be sent to the remote devices
      * @param offset Value offset for partial read/write response
      * @param value The value of the attribute that was read/written (optional)
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean sendResponse(BluetoothDevice device, int requestId,
             int status, int offset, byte[] value) {
         if (VDBG) Log.d(TAG, "sendResponse() - device: " + device.getAddress());
@@ -677,8 +689,6 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * for every client that requests notifications/indications by writing
      * to the "Client Configuration" descriptor for the given characteristic.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param device The remote device to receive the notification/indication
      * @param characteristic The local characteristic that has been updated
      * @param confirm true to request confirmation from the client (indication), false to send a
@@ -686,6 +696,9 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * @return true, if the notification has been triggered successfully
      * @throws IllegalArgumentException
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean notifyCharacteristicChanged(BluetoothDevice device,
             BluetoothGattCharacteristic characteristic, boolean confirm) {
         if (VDBG) Log.d(TAG, "notifyCharacteristicChanged() - device: " + device.getAddress());
@@ -724,11 +737,12 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * whether this service has been added successfully. Do not add another service
      * before this callback.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param service Service to be added to the list of services provided by this device.
      * @return true, if the request to add service has been initiated
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean addService(BluetoothGattService service) {
         if (DBG) Log.d(TAG, "addService() - service: " + service.getUuid());
         if (mService == null || mServerIf == 0) return false;
@@ -748,11 +762,12 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Removes a service from the list of services to be provided.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param service Service to be removed.
      * @return true, if the service has been removed
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean removeService(BluetoothGattService service) {
         if (DBG) Log.d(TAG, "removeService() - service: " + service.getUuid());
         if (mService == null || mServerIf == 0) return false;
@@ -774,8 +789,10 @@ public final class BluetoothGattServer implements BluetoothProfile {
 
     /**
      * Remove all services from the list of provided services.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void clearServices() {
         if (DBG) Log.d(TAG, "clearServices()");
         if (mService == null || mServerIf == 0) return;
@@ -794,10 +811,9 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * <p>An application must call {@link #addService} to add a serice to the
      * list of services offered by this device.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return List of services. Returns an empty list if no services have been added yet.
      */
+    @RequiresLegacyBluetoothPermission
     public List<BluetoothGattService> getServices() {
         return mServices;
     }
@@ -809,12 +825,11 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * <p>If multiple instances of the same service (as identified by UUID)
      * exist, the first instance of the service is returned.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param uuid UUID of the requested service
      * @return BluetoothGattService if supported, or null if the requested service is not offered by
      * this device.
      */
+    @RequiresLegacyBluetoothPermission
     public BluetoothGattService getService(UUID uuid) {
         for (BluetoothGattService service : mServices) {
             if (service.getUuid().equals(uuid)) {

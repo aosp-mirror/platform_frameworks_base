@@ -20,11 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class represents a page of {@link SearchResult}s
@@ -41,7 +40,7 @@ public class SearchResultPage {
     @NonNull private final Bundle mBundle;
 
     public SearchResultPage(@NonNull Bundle bundle) {
-        mBundle = Preconditions.checkNotNull(bundle);
+        mBundle = Objects.requireNonNull(bundle);
         mNextPageToken = mBundle.getLong(NEXT_PAGE_TOKEN_FIELD);
     }
 

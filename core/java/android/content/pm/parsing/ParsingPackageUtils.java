@@ -383,10 +383,9 @@ public class ParsingPackageUtils {
         }
 
         try {
-            final AssetManager assets = assetLoader.getBaseAssetManager();
             final File baseApk = new File(lite.getBaseApkPath());
             final ParseResult<ParsingPackage> result = parseBaseApk(input, baseApk,
-                    lite.getPath(), assets, flags);
+                    lite.getPath(), assetLoader, flags);
             if (result.isError()) {
                 return input.error(result);
             }
@@ -442,7 +441,7 @@ public class ParsingPackageUtils {
             final ParseResult<ParsingPackage> result = parseBaseApk(input,
                     apkFile,
                     apkFile.getCanonicalPath(),
-                    assetLoader.getBaseAssetManager(), flags);
+                    assetLoader, flags);
             if (result.isError()) {
                 return input.error(result);
             }
@@ -458,7 +457,8 @@ public class ParsingPackageUtils {
     }
 
     private ParseResult<ParsingPackage> parseBaseApk(ParseInput input, File apkFile,
-            String codePath, AssetManager assets, int flags) {
+            String codePath, SplitAssetLoader assetLoader, int flags)
+            throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
         String volumeUuid = null;
@@ -469,6 +469,7 @@ public class ParsingPackageUtils {
 
         if (DEBUG_JAR) Slog.d(TAG, "Scanning base APK: " + apkPath);
 
+        final AssetManager assets = assetLoader.getBaseAssetManager();
         final int cookie = assets.findCookieForPath(apkPath);
         if (cookie == 0) {
             return input.error(INSTALL_PARSE_FAILED_BAD_MANIFEST,
@@ -500,12 +501,19 @@ public class ParsingPackageUtils {
                 }
             }
 
-            ApkAssets apkAssets = assets.getApkAssets()[0];
-            if (apkAssets.definesOverlayable()) {
+            ApkAssets apkAssets = assetLoader.getBaseApkAssets();
+            boolean definesOverlayable = false;
+            try {
+                definesOverlayable = apkAssets.definesOverlayable();
+            } catch (IOException ignored) {
+                // Will fail if there's no packages in the ApkAssets, which can be treated as false
+            }
+
+            if (definesOverlayable) {
                 SparseArray<String> packageNames = assets.getAssignedPackageIdentifiers();
                 int size = packageNames.size();
                 for (int index = 0; index < size; index++) {
-                    String packageName = packageNames.get(index);
+                    String packageName = packageNames.valueAt(index);
                     Map<String, String> overlayableToActor = assets.getOverlayableMap(packageName);
                     if (overlayableToActor != null && !overlayableToActor.isEmpty()) {
                         for (String overlayable : overlayableToActor.keySet()) {
@@ -2800,12 +2808,6 @@ public class ParsingPackageUtils {
     }
 
     private void convertSplitPermissions(ParsingPackage pkg) {
-        // STOPSHIP(b/183905675): REMOVE THIS TERRIBLE, HORRIBLE, NO GOOD, VERY BAD HACK
-        if ("com.android.chrome".equals(pkg.getPackageName())
-                && (445500383 == pkg.getVersionCode() || 438500084 == pkg.getVersionCode())) {
-            pkg.setTargetSdkVersion(Build.VERSION_CODES.R);
-        }
-
         final int listSize = mSplitPermissionInfos.size();
         for (int is = 0; is < listSize; is++) {
             final PermissionManager.SplitPermissionInfo spi = mSplitPermissionInfos.get(is);

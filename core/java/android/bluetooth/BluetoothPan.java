@@ -22,6 +22,8 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -74,10 +76,11 @@ public final class BluetoothPan implements BluetoothProfile {
      *
      * <p> {@link #EXTRA_LOCAL_ROLE} can be one of {@link #LOCAL_NAP_ROLE} or
      * {@link #LOCAL_PANU_ROLE}
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
-     * receive.
      */
     @SuppressLint("ActionValue")
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED";
@@ -102,9 +105,10 @@ public final class BluetoothPan implements BluetoothProfile {
      *
      * <p> {@link #EXTRA_TETHERING_STATE} can be any of {@link #TETHERING_STATE_OFF} or
      * {@link #TETHERING_STATE_ON}
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
-     * receive.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_TETHERING_STATE_CHANGED =
             "android.bluetooth.action.TETHERING_STATE_CHANGED";
@@ -236,6 +240,10 @@ public final class BluetoothPan implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothPan service = getService();
@@ -274,6 +282,7 @@ public final class BluetoothPan implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothPan service = getService();
@@ -302,7 +311,10 @@ public final class BluetoothPan implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
@@ -330,7 +342,10 @@ public final class BluetoothPan implements BluetoothProfile {
      */
     @SystemApi
     @Override
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         final IBluetoothPan service = getService();
@@ -351,7 +366,12 @@ public final class BluetoothPan implements BluetoothProfile {
      * @hide
      */
     @Override
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         final IBluetoothPan service = getService();
@@ -396,7 +416,11 @@ public final class BluetoothPan implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+            android.Manifest.permission.TETHER_PRIVILEGED,
+    })
     public void setBluetoothTethering(boolean value) {
         String pkgName = mContext.getOpPackageName();
         if (DBG) log("setBluetoothTethering(" + value + "), calling package:" + pkgName);
@@ -417,7 +441,7 @@ public final class BluetoothPan implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean isTetheringOn() {
         if (VDBG) log("isTetheringOn()");
         final IBluetoothPan service = getService();
