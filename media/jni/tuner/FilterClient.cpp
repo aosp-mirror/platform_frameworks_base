@@ -921,7 +921,7 @@ Result FilterClient::getFilterMq() {
         Status s = mTunerFilter->getQueueDesc(&aidlMqDesc);
         res = ClientHelper::getServiceSpecificErrorCode(s);
         if (res == Result::SUCCESS) {
-            mFilterMQ = new (nothrow) AidlMQ(aidlMqDesc);
+            mFilterMQ = new (nothrow) AidlMQ(aidlMqDesc, false/*resetPointer*/);
             EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);
         }
         return res;
@@ -938,7 +938,7 @@ Result FilterClient::getFilterMq() {
             AidlMQDesc aidlMQDesc;
             unsafeHidlToAidlMQDescriptor<uint8_t, int8_t, SynchronizedReadWrite>(
                     filterMQDesc,  &aidlMQDesc);
-            mFilterMQ = new (nothrow) AidlMessageQueue(aidlMQDesc);
+            mFilterMQ = new (nothrow) AidlMessageQueue(aidlMQDesc, false/*resetPointer*/);
             EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);
         }
     }
