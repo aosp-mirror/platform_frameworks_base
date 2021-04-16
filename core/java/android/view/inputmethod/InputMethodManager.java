@@ -581,7 +581,7 @@ public final class InputMethodManager {
      */
     public void reportPerceptible(IBinder windowToken, boolean perceptible) {
         try {
-            mService.reportPerceptible(windowToken, perceptible);
+            mService.reportPerceptibleAsync(windowToken, perceptible);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
