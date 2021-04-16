@@ -320,6 +320,15 @@ public class AppWidgetHost {
     }
 
     /**
+     * Set the host's interaction handler.
+     *
+     * @hide
+     */
+    public void setInteractionHandler(InteractionHandler interactionHandler) {
+        mInteractionHandler = interactionHandler;
+    }
+
+    /**
      * Gets a list of all the appWidgetIds that are bound to the current host
      */
     public int[] getAppWidgetIds() {
