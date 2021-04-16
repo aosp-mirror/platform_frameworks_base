@@ -161,7 +161,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 197;
+    static final int VERSION = 198;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -15606,7 +15606,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mNextMaxDailyDeadlineMs);
         out.writeLong(mBatteryTimeToFullSeconds);
 
-        MeasuredEnergyStats.writeSummaryToParcel(mGlobalMeasuredEnergyStats, out, false);
+        MeasuredEnergyStats.writeSummaryToParcel(mGlobalMeasuredEnergyStats, out, false, false);
 
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mScreenDozeTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -15931,7 +15931,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(0);
             }
 
-            MeasuredEnergyStats.writeSummaryToParcel(u.mUidMeasuredEnergyStats, out, true);
+            MeasuredEnergyStats.writeSummaryToParcel(u.mUidMeasuredEnergyStats, out, true, true);
 
             final ArrayMap<String, Uid.Wakelock> wakeStats = u.mWakelockStats.getMap();
             int NW = wakeStats.size();
