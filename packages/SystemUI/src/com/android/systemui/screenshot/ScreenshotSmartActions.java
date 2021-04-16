@@ -20,6 +20,7 @@ import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS;
 import static com.android.systemui.screenshot.LogConfig.logTag;
+import static com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider.ScreenshotSmartActionType;
 
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -87,8 +88,8 @@ public class ScreenshotSmartActions {
                     (runningTask != null && runningTask.topActivity != null)
                             ? runningTask.topActivity
                             : new ComponentName("", "");
-            smartActionsFuture = smartActionsProvider.getActions(
-                    screenshotId, screenshotUri, image, componentName, userHandle);
+            smartActionsFuture = smartActionsProvider.getActions(screenshotId, screenshotUri, image,
+                    componentName, ScreenshotSmartActionType.REGULAR_SMART_ACTIONS, userHandle);
         } catch (Throwable e) {
             long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
             smartActionsFuture = CompletableFuture.completedFuture(Collections.emptyList());
