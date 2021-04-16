@@ -97,7 +97,7 @@
             android:gravity="bottom"
             android:layout_gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingTop="4dp"
+            android:paddingTop="2dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipToOutline="true">
