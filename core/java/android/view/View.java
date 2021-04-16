@@ -30143,6 +30143,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setScrollCaptureHint(@ScrollCaptureHint int hint) {
         mPrivateFlags4 &= ~PFLAG4_SCROLL_CAPTURE_HINT_MASK;
+        // Since include/exclude are mutually exclusive, exclude takes precedence.
+        if ((hint & SCROLL_CAPTURE_HINT_EXCLUDE) != 0) {
+            hint &= ~SCROLL_CAPTURE_HINT_INCLUDE;
+        }
         mPrivateFlags4 |= ((hint << PFLAG4_SCROLL_CAPTURE_HINT_SHIFT)
                 & PFLAG4_SCROLL_CAPTURE_HINT_MASK);
     }
