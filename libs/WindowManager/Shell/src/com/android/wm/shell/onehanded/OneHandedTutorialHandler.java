@@ -78,16 +78,21 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
 
     private final OneHandedAnimationCallback mAnimationCallback = new OneHandedAnimationCallback() {
         @Override
-        public void onTutorialAnimationUpdate(int offset) {
-            onAnimationUpdate(offset);
+        public void onAnimationUpdate(float xPos, float yPos) {
+            if (!canShowTutorial()) {
+                return;
+            }
+            mTargetViewContainer.setVisibility(View.VISIBLE);
+            mTargetViewContainer.setTransitionGroup(true);
+            mTargetViewContainer.setTranslationY(yPos - mTargetViewContainer.getHeight());
         }
 
         @Override
         public void onOneHandedAnimationStart(
                 OneHandedAnimationController.OneHandedTransitionAnimator animator) {
-            final Rect startValue = (Rect) animator.getStartValue();
+            final float startValue = (float) animator.getStartValue();
             if (mTriggerState == ONE_HANDED_TRIGGER_STATE.UNSET) {
-                mTriggerState = (startValue.top == 0)
+                mTriggerState = (startValue == 0f)
                         ? ONE_HANDED_TRIGGER_STATE.ENTERING : ONE_HANDED_TRIGGER_STATE.EXITING;
                 if (mCanShowTutorial && mTriggerState == ONE_HANDED_TRIGGER_STATE.ENTERING) {
                     attachTurtorialTarget();
@@ -237,15 +242,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
             return false;
         }
         return true;
-    }
-
-    private void onAnimationUpdate(float value) {
-        if (!canShowTutorial()) {
-            return;
-        }
-        mTargetViewContainer.setVisibility(View.VISIBLE);
-        mTargetViewContainer.setTransitionGroup(true);
-        mTargetViewContainer.setTranslationY(value - mTargetViewContainer.getHeight());
     }
 
     /**

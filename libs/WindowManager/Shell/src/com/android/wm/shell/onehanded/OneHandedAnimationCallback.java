@@ -44,8 +44,9 @@ public interface OneHandedAnimationCallback {
     }
 
     /**
-     * Called when OneHanded animator is updating offset
+     * Called when OneHanded animator is updating position
      */
-    default void onTutorialAnimationUpdate(int offset) {}
+    default void onAnimationUpdate(float xPos, float yPos) {
+    }
 
 }

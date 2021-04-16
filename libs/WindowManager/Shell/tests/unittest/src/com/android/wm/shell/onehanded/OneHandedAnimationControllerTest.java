@@ -26,8 +26,6 @@ import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.common.ShellExecutor;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,8 +41,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class OneHandedAnimationControllerTest extends OneHandedTestCase {
-    private static final int TEST_BOUNDS_WIDTH = 1000;
-    private static final int TEST_BOUNDS_HEIGHT = 1000;
 
     OneHandedAnimationController mOneHandedAnimationController;
 
@@ -52,9 +48,7 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
     private SurfaceControl mMockLeash;
     @Mock
     private WindowContainerToken mMockToken;
-
-    @Mock
-    private ShellExecutor mMainExecutor;
+    private Rect mDisplayBounds = new Rect();
 
     @Before
     public void setUp() throws Exception {
@@ -64,12 +58,10 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
 
     @Test
     public void testGetAnimator_withSameBounds_returnAnimator() {
-        final Rect originalBounds = new Rect(0, 0, TEST_BOUNDS_WIDTH, TEST_BOUNDS_HEIGHT);
-        final Rect destinationBounds = originalBounds;
-        destinationBounds.offset(0, 300);
+        final float yOffset = 300;
         final OneHandedAnimationController.OneHandedTransitionAnimator animator =
                 mOneHandedAnimationController
-                        .getAnimator(mMockToken, mMockLeash, originalBounds, destinationBounds);
+                        .getAnimator(mMockToken, mMockLeash, 0, yOffset, mDisplayBounds);
 
         assertNotNull(animator);
     }
