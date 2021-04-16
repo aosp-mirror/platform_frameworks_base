@@ -23,7 +23,7 @@ import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelpe
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.STATUS_BAR_LAYER_NAME
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.STATUS_BAR_WINDOW_NAME
 
-val LAUNCHER_TITLE = arrayOf("Wallpaper", "Launcher", "com.google.android.googlequicksearchbox")
+val HOME_WINDOW_TITLE = arrayOf("Wallpaper", "Launcher")
 
 fun FlickerTestParameter.statusBarWindowIsAlwaysVisible() {
     assertWm {
@@ -41,23 +41,23 @@ fun FlickerTestParameter.launcherReplacesAppWindowAsTopWindow(testApp: IAppHelpe
     assertWm {
         this.showsAppWindowOnTop(testApp.getPackage())
             .then()
-            .showsAppWindowOnTop(*LAUNCHER_TITLE)
+            .showsAppWindowOnTop(*HOME_WINDOW_TITLE)
     }
 }
 
 fun FlickerTestParameter.launcherWindowBecomesVisible() {
     assertWm {
-        this.hidesBelowAppWindow(*LAUNCHER_TITLE)
+        this.hidesBelowAppWindow(*HOME_WINDOW_TITLE)
             .then()
-            .showsBelowAppWindow(*LAUNCHER_TITLE)
+            .showsBelowAppWindow(*HOME_WINDOW_TITLE)
     }
 }
 
 fun FlickerTestParameter.launcherWindowBecomesInvisible() {
     assertWm {
-        this.showsBelowAppWindow(*LAUNCHER_TITLE)
+        this.showsBelowAppWindow(*HOME_WINDOW_TITLE)
             .then()
-            .hidesBelowAppWindow(*LAUNCHER_TITLE)
+            .hidesBelowAppWindow(*HOME_WINDOW_TITLE)
     }
 }
 
@@ -179,7 +179,7 @@ fun FlickerTestParameter.statusBarLayerRotatesScales(
 
 fun FlickerTestParameter.appLayerReplacesLauncher(appName: String) {
     assertLayers {
-        this.isVisible(*LAUNCHER_TITLE)
+        this.isVisible(*HOME_WINDOW_TITLE)
             .then()
             .isVisible(appName)
     }
@@ -190,7 +190,7 @@ fun FlickerTestParameter.launcherLayerReplacesApp(testApp: IAppHelper) {
         this.isVisible(testApp.getPackage())
             .then()
             .isInvisible(testApp.getPackage())
-            .isVisible(*LAUNCHER_TITLE)
+            .isVisible(*HOME_WINDOW_TITLE)
     }
 }
 
