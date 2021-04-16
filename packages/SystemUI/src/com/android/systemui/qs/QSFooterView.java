@@ -280,7 +280,7 @@ public class QSFooterView extends FrameLayout {
         mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.GONE);
         mSettingsButton.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
 
-        mBuildText.setVisibility(mExpanded && mShouldShowBuildText ? View.VISIBLE : View.GONE);
+        mBuildText.setVisibility(mExpanded && mShouldShowBuildText ? View.VISIBLE : View.INVISIBLE);
     }
 
     private boolean showUserSwitcher() {
