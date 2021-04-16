@@ -475,7 +475,18 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
      * configuration.
      */
     public void updateResources() {
-        int gravity = mView.getResources().getInteger(R.integer.keyguard_host_view_gravity);
+        int gravity;
+
+        Resources resources = mView.getResources();
+
+        if (resources.getBoolean(R.bool.can_use_one_handed_bouncer)
+                && resources.getBoolean(
+                com.android.internal.R.bool.config_enableOneHandedKeyguard)) {
+            gravity = resources.getInteger(
+                    R.integer.keyguard_host_view_one_handed_gravity);
+        } else {
+            gravity = resources.getInteger(R.integer.keyguard_host_view_gravity);
+        }
 
         // Android SysUI uses a FrameLayout as the top-level, but Auto uses RelativeLayout.
         // We're just changing the gravity here though (which can't be applied to RelativeLayout),
