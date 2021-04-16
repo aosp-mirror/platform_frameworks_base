@@ -5992,9 +5992,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void reportStartInput(IBinder startInputToken, IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.reportStartInput(mToken, startInputToken));
+        public void reportStartInputAsync(IBinder startInputToken) {
+            mImms.reportStartInput(mToken, startInputToken);
         }
 
         @BinderThread
