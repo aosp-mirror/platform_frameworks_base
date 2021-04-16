@@ -19,7 +19,6 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -493,15 +492,26 @@ public final class PlaybackState implements Parcelable {
 
     /**
      * Returns whether this is considered as an active playback state.
-     * @hide
+     * <p>
+     * The playback state is considered as an active if the state is one of the following:
+     * <ul>
+     * <li>{@link #STATE_BUFFERING}</li>
+     * <li>{@link #STATE_CONNECTING}</li>
+     * <li>{@link #STATE_FAST_FORWARDING}</li>
+     * <li>{@link #STATE_PLAYING}</li>
+     * <li>{@link #STATE_REWINDING}</li>
+     * <li>{@link #STATE_SKIPPING_TO_NEXT}</li>
+     * <li>{@link #STATE_SKIPPING_TO_PREVIOUS}</li>
+     * <li>{@link #STATE_SKIPPING_TO_QUEUE_ITEM}</li>
+     * </ul>
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public boolean isActiveState() {
+    public boolean isActive() {
         switch (mState) {
             case PlaybackState.STATE_FAST_FORWARDING:
             case PlaybackState.STATE_REWINDING:
             case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
             case PlaybackState.STATE_SKIPPING_TO_NEXT:
+            case PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM:
             case PlaybackState.STATE_BUFFERING:
             case PlaybackState.STATE_CONNECTING:
             case PlaybackState.STATE_PLAYING:
