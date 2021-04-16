@@ -21,7 +21,7 @@
     <LinearLayout
         android:id="@+id/item"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         android:background="@drawable/people_space_tile_view_card"
         android:orientation="vertical"
@@ -42,12 +42,12 @@
             android:tint="?android:attr/colorAccent"
             android:layout_gravity="center"
             android:layout_width="18dp"
-            android:layout_height="22dp"
-            android:layout_weight="1" />
+            android:layout_height="22dp" />
 
         <TextView
             android:id="@+id/messages_count"
             android:layout_gravity="center"
+            android:gravity="center"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
@@ -59,7 +59,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:layout_weight="1"
             />
 
         <TextView
@@ -67,7 +66,6 @@
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
             android:paddingHorizontal="4dp"
