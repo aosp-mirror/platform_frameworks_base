@@ -16,16 +16,15 @@
 
 package com.android.keyguard;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -38,13 +37,13 @@ import android.widget.RelativeLayout;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -87,11 +86,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Mock
     NotificationIconAreaController mNotificationIconAreaController;
     @Mock
-    ContentResolver mContentResolver;
-    @Mock
     BroadcastDispatcher mBroadcastDispatcher;
-    @Mock
-    private PluginManager mPluginManager;
     @Mock
     private FeatureFlags mFeatureFlags;
     @Mock
@@ -106,6 +101,12 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     BatteryController mBatteryController;
     @Mock
     ConfigurationController mConfigurationController;
+    @Mock
+    BcSmartspaceDataPlugin mSmartspaceDataProvider;
+    @Mock
+    SmartspaceView mSmartspaceView;
+    @Mock
+    SystemUIFactory mSystemUIFactory;
 
     private KeyguardClockSwitchController mController;
     private View mStatusArea;
@@ -129,27 +130,28 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mFeatureFlags.isSmartspaceEnabled()).thenReturn(true);
         when(mView.isAttachedToWindow()).thenReturn(true);
         when(mResources.getString(anyInt())).thenReturn("h:mm");
+        when(mSystemUIFactory.getSmartspaceDataProvider()).thenReturn(mSmartspaceDataProvider);
         mController = new KeyguardClockSwitchController(
                 mView,
-                mResources,
                 mStatusBarStateController,
                 mColorExtractor,
                 mClockManager,
                 mKeyguardSliceViewController,
                 mNotificationIconAreaController,
-                mContentResolver,
                 mBroadcastDispatcher,
-                mPluginManager,
                 mFeatureFlags,
                 mExecutor,
                 mBatteryController,
-                mConfigurationController);
+                mConfigurationController,
+                mSystemUIFactory
+        );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mColorExtractor.getColors(anyInt())).thenReturn(mGradientColors);
 
-        mStatusArea = mock(View.class);
+        mStatusArea = new View(getContext());
         when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(mStatusArea);
+        when(mSmartspaceDataProvider.getView(any())).thenReturn(mSmartspaceView);
 
     }
 
@@ -210,43 +212,37 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSmartspacePluginConnectedRemovesKeyguardStatusArea() {
+    public void testSmartspaceEnabledRemovesKeyguardStatusArea() {
+        when(mFeatureFlags.isSmartspaceEnabled()).thenReturn(true);
         mController.init();
 
-        BcSmartspaceDataPlugin plugin = mock(BcSmartspaceDataPlugin.class);
-        TestView view = mock(TestView.class);
-        when(plugin.getView(any())).thenReturn(view);
-
-        mController.mPluginListener.onPluginConnected(plugin, mContext);
-        verify(mStatusArea).setVisibility(View.GONE);
+        assertEquals(View.GONE, mStatusArea.getVisibility());
     }
 
     @Test
-    public void testSmartspacePluginDisconnectedShowsKeyguardStatusArea() {
+    public void testSmartspaceEnabledNoDataProviderShowsKeyguardStatusArea() {
+        when(mFeatureFlags.isSmartspaceEnabled()).thenReturn(true);
+        when(mSystemUIFactory.getSmartspaceDataProvider()).thenReturn(null);
         mController.init();
 
-        BcSmartspaceDataPlugin plugin = mock(BcSmartspaceDataPlugin.class);
-        TestView view = mock(TestView.class);
-        when(plugin.getView(any())).thenReturn(view);
+        assertEquals(View.VISIBLE, mStatusArea.getVisibility());
+    }
 
-        mController.mPluginListener.onPluginConnected(plugin, mContext);
-        mController.mPluginListener.onPluginDisconnected(plugin);
-        verify(mStatusArea).setVisibility(View.VISIBLE);
+    @Test
+    public void testSmartspaceDisabledShowsKeyguardStatusArea() {
+        when(mFeatureFlags.isSmartspaceEnabled()).thenReturn(false);
+        mController.init();
+
+        assertEquals(View.VISIBLE, mStatusArea.getVisibility());
     }
 
     @Test
     public void testThemeChangeNotifiesSmartspace() {
         mController.init();
+        verify(mSmartspaceView).setPrimaryTextColor(anyInt());
 
-        BcSmartspaceDataPlugin plugin = mock(BcSmartspaceDataPlugin.class);
-        TestView view = mock(TestView.class);
-        when(plugin.getView(any())).thenReturn(view);
-
-        mController.mPluginListener.onPluginConnected(plugin, mContext);
-
-        reset(view);
         mController.getConfigurationListener().onThemeChanged();
-        verify(view).setPrimaryTextColor(anyInt());
+        verify(mSmartspaceView, times(2)).setPrimaryTextColor(anyInt());
     }
 
     private void verifyAttachment(VerificationMode times) {
@@ -257,8 +253,9 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         verify(mView, times).updateColors(mGradientColors);
     }
 
-    private static class TestView extends View implements BcSmartspaceDataPlugin.SmartspaceView {
-        TestView(Context context, AttributeSet attrs) {
+    private static class SmartspaceView extends View
+            implements BcSmartspaceDataPlugin.SmartspaceView {
+        SmartspaceView(Context context, AttributeSet attrs) {
             super(context, attrs);
         }
 
