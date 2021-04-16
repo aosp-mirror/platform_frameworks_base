@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
@@ -50,7 +51,13 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.view.IWindowSessionCallback;
+import android.view.InsetsSourceControl;
+import android.view.InsetsState;
+import android.view.View;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -249,5 +256,32 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         verify(mWm.mWindowContextListenerController).registerWindowContainerListener(
                 eq(clientToken), eq(windowToken), anyInt(), eq(TYPE_INPUT_METHOD),
                 eq(windowToken.mOptions));
+    }
+
+    @Test
+    public void testAddWindowWithSubWindowTypeByWindowContext() {
+        spyOn(mWm.mWindowContextListenerController);
+
+        final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float v) throws RemoteException {}
+        });
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                TYPE_APPLICATION_ATTACHED_DIALOG);
+        params.token = windowToken.token;
+        final IBinder windowContextToken = new Binder();
+        params.setWindowContextToken(windowContextToken);
+        doReturn(true).when(mWm.mWindowContextListenerController)
+                .hasListener(eq(windowContextToken));
+        doReturn(TYPE_INPUT_METHOD).when(mWm.mWindowContextListenerController)
+                .getWindowType(eq(windowContextToken));
+
+        mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
+                UserHandle.USER_SYSTEM, new InsetsState(), null, new InsetsState(),
+                new InsetsSourceControl[0]);
+
+        verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
+                any(), anyInt(), anyInt(), any());
     }
 }

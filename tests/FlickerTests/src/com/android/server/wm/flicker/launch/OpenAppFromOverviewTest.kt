@@ -98,6 +98,12 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
         super.focusChanges()
     }
 
+    @FlakyTest(bugId = 185400889)
+    @Test
+    override fun noUncoveredRegions() {
+        super.noUncoveredRegions()
+    }
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

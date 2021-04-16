@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -52,9 +53,9 @@ public final class GetByUriRequest {
             @NonNull String namespace,
             @NonNull Set<String> uris,
             @NonNull Map<String, List<String>> typePropertyPathsMap) {
-        mNamespace = Preconditions.checkNotNull(namespace);
-        mUris = Preconditions.checkNotNull(uris);
-        mTypePropertyPathsMap = Preconditions.checkNotNull(typePropertyPathsMap);
+        mNamespace = Objects.requireNonNull(namespace);
+        mUris = Objects.requireNonNull(uris);
+        mTypePropertyPathsMap = Objects.requireNonNull(typePropertyPathsMap);
     }
 
     /** Returns the namespace attached to the request. */
@@ -114,7 +115,7 @@ public final class GetByUriRequest {
 
         /** Creates a {@link GetByUriRequest.Builder} instance. */
         public Builder(@NonNull String namespace) {
-            mNamespace = Preconditions.checkNotNull(namespace);
+            mNamespace = Objects.requireNonNull(namespace);
         }
 
         /**
@@ -124,7 +125,7 @@ public final class GetByUriRequest {
          */
         @NonNull
         public Builder addUris(@NonNull String... uris) {
-            Preconditions.checkNotNull(uris);
+            Objects.requireNonNull(uris);
             return addUris(Arrays.asList(uris));
         }
 
@@ -136,7 +137,7 @@ public final class GetByUriRequest {
         @NonNull
         public Builder addUris(@NonNull Collection<String> uris) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(uris);
+            Objects.requireNonNull(uris);
             mUris.addAll(uris);
             return this;
         }
@@ -161,11 +162,11 @@ public final class GetByUriRequest {
         public Builder addProjection(
                 @NonNull String schemaType, @NonNull Collection<String> propertyPaths) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(schemaType);
-            Preconditions.checkNotNull(propertyPaths);
+            Objects.requireNonNull(schemaType);
+            Objects.requireNonNull(propertyPaths);
             List<String> propertyPathsList = new ArrayList<>(propertyPaths.size());
             for (String propertyPath : propertyPaths) {
-                Preconditions.checkNotNull(propertyPath);
+                Objects.requireNonNull(propertyPath);
                 propertyPathsList.add(propertyPath);
             }
             mProjectionTypePropertyPaths.put(schemaType, propertyPathsList);

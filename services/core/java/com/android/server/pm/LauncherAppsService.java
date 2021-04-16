@@ -636,9 +636,25 @@ public class LauncherAppsService extends SystemService {
             Objects.requireNonNull(component);
 
             // All right, create the sender.
-            Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT).setComponent(component);
+            final int callingUid = injectBinderCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
+                final PackageManagerInternal pmInt =
+                        LocalServices.getService(PackageManagerInternal.class);
+                Intent packageIntent = new Intent(Intent.ACTION_CREATE_SHORTCUT)
+                        .setPackage(component.getPackageName());
+                List<ResolveInfo> apps = pmInt.queryIntentActivities(packageIntent,
+                        packageIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                        callingUid, user.getIdentifier());
+                // ensure that the component is present in the list
+                if (!apps.stream().anyMatch(
+                        ri -> component.getClassName().equals(ri.activityInfo.name))) {
+                    return null;
+                }
+
+                Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT).setComponent(component);
                 final PendingIntent pi = PendingIntent.getActivityAsUser(
                         mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
                                 | PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT,

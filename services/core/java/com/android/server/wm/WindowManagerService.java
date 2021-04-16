@@ -731,7 +731,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final TaskSnapshotController mTaskSnapshotController;
 
-    final BlurController mBlurController = new BlurController();
+    final BlurController mBlurController;
 
     boolean mIsTouchDevice;
     boolean mIsFakeTouchDevice;
@@ -1418,6 +1418,8 @@ public class WindowManagerService extends IWindowManager.Stub
         setGlobalShadowSettings();
         mAnrController = new AnrController(this);
         mStartingSurfaceController = new StartingSurfaceController(this);
+
+        mBlurController = new BlurController(mContext, mPowerManager);
     }
 
     DisplayAreaPolicy.Provider getDisplayAreaPolicyProvider() {
@@ -1740,8 +1742,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // Switch to listen to the {@link WindowToken token}'s configuration changes when
-            // adding a window to the window context.
-            if (mWindowContextListenerController.hasListener(windowContextToken)) {
+            // adding a window to the window context. Filter sub window type here because the sub
+            // window must be attached to the parent window, which is attached to the window context
+            // created window token.
+            if (!win.isChildWindow()
+                    && mWindowContextListenerController.hasListener(windowContextToken)) {
                 final int windowContextType = mWindowContextListenerController
                         .getWindowType(windowContextToken);
                 if (type != windowContextType) {
