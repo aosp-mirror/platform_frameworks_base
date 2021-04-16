@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ຖືກອັບໂຫລດໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ຖືກລຶບອອກໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ຕົກລົງ"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"ຕົວປະຢັດແບັດເຕີຣີຈະເປີດໃຊ້ຮູບແບບສີສັນມືດ ແລະ ຈຳກັດ ຫຼື ປິດການ​ເຄື່ອນ​ໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດຕ່າງໆ ເຊັ່ນ: “Ok Google”\n\n"<annotation id="url">"ສຶກສາເພີ່ມເຕີມ"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"ຕົວປະຢັດແບັດເຕີຣີຈະເປີດໃຊ້ຮູບແບບສີສັນມືດ ແລະ ຈຳກັດ ຫຼື ປິດການ​ເຄື່ອນ​ໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດຕ່າງໆ ເຊັ່ນ: “Ok Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດອິນເຕີເນັດຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ເປີດຕົວປະຢັດອິນເຕີເນັດບໍ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ເປີດໃຊ້"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"ປິດ"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"ຮັບສາຍ"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"ປະຕິເສດ"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ວາງສາຍ"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ສາຍໂທເຂົ້າ"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ການແຈ້ງເຕືອນນີ້ຖືກຫຼຸດລະດັບເປັນປິດສຽງແລ້ວ. ແຕະເພື່ອສົ່ງຄຳຕິຊົມ."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ການແຈ້ງເຕືອນນີ້ຖືກເລື່ອນລະດັບຂຶ້ນແລ້ວ. ແຕະເພື່ອສົ່ງຄຳຕິຊົມ."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ການແຈ້ງເຕືອນນີ້ຖືກຫຼຸດລະດັບລົງແລ້ວ. ແຕະເພື່ອສົ່ງຄຳຕິຊົມ."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"ລອງໃຊ້ການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນ"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"ກະລຸນາເປີດໃຊ້ການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນເພື່ອສືບຕໍ່ຮັບຄຳສັ່ງທີ່ແນະນຳ, ການຕອບກັບ ແລະ ອື່ນໆ. ບໍ່ຮອງຮັບການແຈ້ງເຕືອນແບບປັບຕົວໄດ້ຂອງ Android ອີກຕໍ່ໄປແລ້ວ."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ເປີດໃຊ້"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"ບໍ່ຟ້າວເທື່ອ"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ສຶກສາເພີ່ມເຕີມ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"ການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນສາມາດອ່ານເນື້ອຫາການແຈ້ງເຕືອນທັງໝົດໄດ້, ຮວມທັງຂໍ້ມູນສ່ວນຕົວ ເຊັ່ນ: ຊື່ຜູ້ຕິດຕໍ່ ແລະ ຂໍ້ຄວາມຕ່າງໆ. ນອກຈາກນັ້ນ, ຄຸນສົມບັດນີ້ຍັງສາມາດປິດການແຈ້ງເຕືອນໄວ້ ຫຼື ໃຊ້ຄຳສັ່ງຕ່າງໆຢູ່ປຸ່ມໃນການແຈ້ງເຕືອນໄດ້ນຳ ເຊັ່ນ: ການຮັບສາຍໂທລະສັບ.\n\nຄຸນສົມບັດນີ້ສາມາດເປີດ ຫຼື ປິດໂໝດສຳຄັນ ແລະ ປ່ຽນການຕັ້ງຄ່າທີ່ກ່ຽວຂ້ອງໄດ້ນຳ."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ການແຈ້ງເຕືອນຂໍ້ມູນໂໝດກິດຈະວັດປະຈຳວັນ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>

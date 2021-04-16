@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"በእርስዎ አስተዳዳሪ ተዘምኗል"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"በእርስዎ አስተዳዳሪ ተሰርዟል"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"እሺ"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"የባትሪ ኃይል ቆጣቢ የጠቆር ያለ ገጽታን ያበራል እና የጀርባ እንቅስቃሴን፣ አንዳንድ የእይታ ውጤቶችን እና እንደ «Hey Google» ያሉ ባህሪያትን ይገድባል ወይም ያጠፋል።\n\n"<annotation id="url">"የበለጠ ለመረዳት"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"የባትሪ ኃይል ቆጣቢ የጠቆር ያለ ገጽታን ያበራል እና የጀርባ እንቅስቃሴን፣ አንዳንድ የእይታ ውጤቶችን እና እንደ «Hey Google» ያሉ ባህሪያትን ይገድባል ወይም ያጠፋል።"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"የውሂብ አጠቃቀም እንዲቀንስ ለማገዝ ውሂብ ቆጣቢ አንዳንድ መተግበሪያዎች ከበስተጀርባ ሆነው ውሂብ እንዳይልኩ ወይም እንዳይቀበሉ ይከለክላቸዋል። በአሁኑ ጊዜ እየተጠቀሙበት ያለ መተግበሪያ ውሂብ ሊደርስ ይችላል፣ ነገር ግን ባነሰ ተደጋጋሚነት ሊሆን ይችላል። ይሄ ማለት ለምሳሌ ምስሎችን መታ እስኪያደርጓቸው ድረስ ላይታዩ ይችላሉ ማለት ነው።"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ውሂብ ቆጣቢ ይጥፋ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"አብራ"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"ዝጋ"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>፦ <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"መልስ"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"አትቀበል"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ስልኩን ዝጋ"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ገቢ ጥሪ"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ይህ ማሳወቂያ ወደ ዝምታ ዝቅ ብሏል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ይህ ማሳወቂያ ከፍተኛ ደረጃ ተሰጥቶታል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ይህ ማሳወቂያ ዝቅተኛ ደረጃ ተሰጥቶታል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"የተሻሻሉ ማሳወቂያዎችን ይሞክሩ"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"የተጠቆሙ እርምጃዎችን፣ ምላሾችን እና ሌሎችን ማግኘትን ለመቀጠል የተሻሻሉ ማሳወቂያዎችን ያብሩ። የAndroid አስማሚ ማሳወቂያዎች ከአሁን በኋላ አይደገፉም።"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"አብራ"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"አሁን አይደለም"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"የበለጠ ለመረዳት"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"የተሻሻሉ ማሳወቂያዎች እንደ የእውቂያ ስሞች እና መልዕክቶች ያሉ የግል መረጃዎችን ጨምሮ ሁሉንም የማሳወቂያ ይዘቶችን ማንበብ ይችላሉ። ይህ ባህሪ ማሳወቂያዎችን ማሰናከል ወይም እንደ የስልክ ጥሪዎችን ማንሳት በመሳሰሉ ማሳወቂያዎች ውስጥ ባሉ አዝራሮች ላይ እርምጃዎችንም አዝራሮች ላይ እርምጃዎችንም መውሰድ ይችላል።\n\nይህ ባህሪ የቅድሚያ ሁነታን ማብራት ወይም ማጥፋት እና ተዛማጅ ቅንብሮችን መለወጥ ይችላል።"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"የዕለት ተዕለት ሁነታ መረጃ ማሳወቂያዎች"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ባትሪ ከተለመደው ኃይል መሙላት በፊት ሊያልቅ ይችላል"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"የባትሪ ቆጣቢ የባትሪ ዕድሜን ለማራዘም ገብሯል።"</string>

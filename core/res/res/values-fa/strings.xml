@@ -84,7 +84,7 @@
     <string name="RestrictedStateContent" msgid="7693575344608618926">"شرکت مخابراتی شما موقتاً آن را خاموش کرده است"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"شرکت مخابراتی‌تان موقتاً آن را برای سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> خاموش کرده است"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"شبکه تلفن همراه دردسترس نیست"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"تغییر شبکه برگزیده را امتحان کنید. برای تغییر ضربه بزنید."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"تغییر شبکه ترجیحی را امتحان کنید. برای تغییر، ضربه بزنید."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"تماس اضطراری امکان‌پذیر نیست"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏تماس اضطراری ازطریق Wi‑Fi امکان‌پذیر نیست"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"هشدارها"</string>
@@ -113,7 +113,7 @@
     <string name="roamingText2" msgid="2834048284153110598">"نشانگر چشمک زن فراگردی"</string>
     <string name="roamingText3" msgid="831690234035748988">"خارج از محله"</string>
     <string name="roamingText4" msgid="2171252529065590728">"خارج از ساختمان"</string>
-    <string name="roamingText5" msgid="4294671587635796641">"فراگردی - سیستم برگزیده"</string>
+    <string name="roamingText5" msgid="4294671587635796641">"فراگردی - سیستم ترجیحی"</string>
     <string name="roamingText6" msgid="5536156746637992029">"فراگردی - سیستم موجود"</string>
     <string name="roamingText7" msgid="1783303085512907706">"فراگردی - شریک"</string>
     <string name="roamingText8" msgid="7774800704373721973">"فراگردی - شریک ویژه"</string>
@@ -1322,7 +1322,7 @@
     <string name="select_character" msgid="3352797107930786979">"درج نویسه"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"درحال ارسال پیامک‌ها"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; درحال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
-    <string name="sms_control_yes" msgid="4858845109269524622">"مجاز است"</string>
+    <string name="sms_control_yes" msgid="4858845109269524622">"مجاز بودن"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"مجاز نبودن"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; مایل است پیامی به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ارسال کند."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"این مورد "<b>"شاید هزینه‌ای"</b>" را به حساب دستگاه همراهتان بگذارد."</string>
@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"تأیید"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"‏«بهینه‌سازی باتری» «طرح زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، و ویژگی‌هایی مثل «Ok Google» را محدود یا خاموش می‌کند.\n\n"<annotation id="url">"بیشتر بدانید"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"‏«بهینه‌سازی باتری» «طرح زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، و ویژگی‌هایی مثل «Ok Google» را محدود یا خاموش می‌کند."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه در بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است. این می‌تواند به این معنی باشد که، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"بستن"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>:‏ <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"پاسخ"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"رد کردن"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"قطع تماس"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"تماس ورودی"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"این اعلان به «بی‌صدا» تنزل داده شد. برای ارائه بازخورد، ضربه بزنید."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"این اعلان در رتبه بالاتری قرار گرفت. برای ارائه بازخورد، ضربه بزنید."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"این اعلان در رتبه پایین‌تری قرار گرفت. برای ارائه بازخورد، ضربه بزنید."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"امتحان کردن اعلان‌های بهبودیافته"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"‏برای اینکه پاسخ‌ها و کنش‌های پیشنهادی و موارد دیگر را همچنان دریافت کنید، اعلان‌های بهبودیافته را روشن کنید. از «اعلان‌های تطبیقی Android» دیگر پشتیبانی نمی‌شود."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"روشن کردن"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"الآن نه"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"بیشتر بدانید"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"اعلان‌های بهبودیافته می‌تواند محتوای همه اعلان‌ها، ازجمله اطلاعات شخصی مثل نام مخاطبین و پیام‌ها را بخواند. این ویژگی همچنین می‌تواند اعلان‌ها را ببندد یا بااستفاده از دکمه‌های موجود در اعلان‌ها اقداماتی انجام دهد، مثلاً به تماس‌های تلفنی پاسخ دهد.\n\nبه‌علاوه، این ویژگی می‌تواند «حالت اولویت» را روشن یا خاموش کند و تنظیمات مربوطه را تغییر دهد."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"اعلان اطلاعات حالت روال معمول"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ممکن است شارژ باتری قبل از شارژ معمول تمام شود"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"جهت افزایش عمر باتری، «بهینه‌سازی باتری» فعال شد"</string>

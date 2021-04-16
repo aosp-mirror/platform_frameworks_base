@@ -538,10 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Թույլ է տալիս հավելվածին հայտնաբերել և զուգակցել մոտակա Bluetooth սարքերը"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"միանալ զուգակցված Bluetooth սարքերի"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Թույլ է տալիս հավելվածին միանալ զուգակցված Bluetooth սարքերի"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Գովազդ մոտակա Bluetooth սարքերում"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Թույլատրում է հավելվածին գովազդ փոխանցել մոտակա Bluetooth սարքերին"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"որոշել մոտակա UWB սարքերի միջև հարաբերական դիրքավորումը"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Թույլատրել հավելվածին որոշել գերլայնաշերտ կապի տեխնոլոգիան աջակցող մոտակա սարքերի միջև հարաբերական դիրքավորումը"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Տեղեկություններ NFC վճարային ծառայության մասին"</string>
@@ -1854,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Եղավ"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Մարտկոցի տնտեսումը միացնում է մուգ թեման և սահմանափակում կամ անջատում է ֆոնային գործընթացները, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգի ճանաչումը։\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Մարտկոցի տնտեսումը միացնում է մուգ թեման և սահմանափակում կամ անջատում է ֆոնային գործընթացները, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգի ճանաչումը։"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար տվյալների ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի տնտեսումը"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Միացնել"</string>
@@ -1933,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Փակել"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>՝ <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Պատասխանել"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Մերժել"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Ավարտել"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Մուտքային զանգ"</string>
@@ -2059,7 +2057,7 @@
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> հավելվածն ուզում է ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Փոփոխել"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Զանգերի և ծանուցումների համար թրթռոցը միացված է"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Զանգերի և ծանուցումների համար ձայնն անջատած է"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Զանգերի և ծանուցումների համար ձայնն անջատված է"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Համակարգի փոփոխություններ"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Չանհանգստացնել"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Այժմ «Չանհանգստացնել» ռեժիմում ծանուցումները թաքցվում են"</string>
@@ -2076,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Այս ծանուցման կարևորության մակարդակը իջեցվել է և դարձել անձայն։ Հպեք՝ կարծիք հայտնելու համար։"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Այս ծանուցման կարևորության մակարդակը բարձրացվել է։ Հպեք՝ կարծիք հայտնելու համար։"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Այս ծանուցման կարևորության մակարդակն իջեցվել է։ Հպեք՝ կարծիք հայտնելու համար։"</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Փորձեք ընդլայնված ծանուցումները"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Միացրեք ընդլայնված ծանուցումները, որպեսզի այսուհետ ևս ստանաք գործողությունների, պատասխանների և այլ առաջարկներ։ Android-ի հարմարվող ծանուցումներն այլևս չեն աջակցվում։"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Միացնել"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Ոչ հիմա"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Իմանալ ավելին"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Ընդլայնված ծանուցումներին հասանելի է բոլոր ծանուցումների պարունակությունը, ներառյալ անձնական տվյալները, օրինակ՝ կոնտակտների անուններն ու հաղորդագրությունները։ Այս գործառույթը կարող է նաև փակել ծանուցումները կամ ակտիվացնել դրանցում առկա կոճակները, այդ թվում՝ պատասխանել հեռախոսազանգերի։\n\nԱյս գործառույթը կարող է նաև միացնել/անջատել «Միայն կարևորները» ռեժիմը և փոխել համապատասխան կարգավորումները։"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ծանուցում լիցքավորման մասին"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Մարտկոցը կարող է սովորականից շուտ սպառվել"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Մարտկոցի կյանքը երկարացնելու համար ակտիվացվել է մարտկոցի տնտեսման ռեժիմը"</string>
@@ -2275,14 +2267,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Դուք կարող եք խոշորացնել ձեր էկրանի մի մասը"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Միացնել կարգավորումներում"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Փակել"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Արգելահանել սարքի խոսափողը"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Արգելահանել սարքի տեսախցիկը"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; հավելվածի և մյուս բոլոր հավելվածների ու ծառայությունների համար"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Արգելահանել"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Տվիչների գաղտնիություն"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Հավելվածի պատկերակ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Հավելվածի բրենդային պատկեր"</string>

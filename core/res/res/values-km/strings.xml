@@ -538,10 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"អនុញ្ញាតឱ្យកម្មវិធី​ស្វែងរក និងផ្គូផ្គង​ឧបករណ៍​ប៊្លូធូសដែលនៅជិត"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ភ្ជាប់ទៅឧបករណ៍​ប៊្លូធូសដែលបានផ្គូផ្គង"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"អនុញ្ញាតឱ្យ​កម្មវិធីភ្ជាប់ទៅ​ឧបករណ៍​ប៊្លូធូសដែលបានផ្គូផ្គង"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"ផ្សាយពាណិជ្ជកម្ម​ទៅឧបករណ៍​ប៊្លូធូសដែលនៅជិត"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"អនុញ្ញាតឱ្យ​កម្មវិធី​ផ្សាយពាណិជ្ជកម្ម​ទៅឧបករណ៍​ប៊្លូធូសដែលនៅជិត"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"កំណត់ចម្ងាយពាក់ព័ន្ធរវាងឧបករណ៍ Ultra-Wideband ដែលនៅជិត"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"អនុញ្ញាតឱ្យ​កម្មវិធី​កំណត់ចម្ងាយ​ពាក់ព័ន្ធ​រវាងឧបករណ៍ Ultra-Wideband ដែលនៅជិត"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ព័ត៌មានអំពី​សេវាបង់ប្រាក់តាម NFC ជាអាទិភាព"</string>
@@ -1854,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"យល់ព្រម"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"មុខងារ​សន្សំថ្ម​បើករចនាប័ទ្មងងឹត និងបិទឬដាក់កំហិត​លើសកម្មភាព​ផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាព​មួយចំនួន និងមុខងារ​ដូចជា “Ok Google” ជាដើម\n\n"<annotation id="url">"ស្វែងយល់​បន្ថែម"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"មុខងារ​សន្សំថ្ម​បើករចនាប័ទ្មងងឹត និងបិទឬដាក់កំហិត​លើសកម្មភាព​ផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាព​មួយចំនួន និងមុខងារ​ដូចជា “Ok Google” ជាដើម។"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"បើក"</string>
@@ -1933,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"បិទ"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>៖ <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"ឆ្លើយ"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"បដិសេធ"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ដាក់​ចុះ"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ការ​ហៅ​ចូល"</string>
@@ -2076,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ការជូនដំណឹងនេះ​ត្រូវបានបន្ទាបតំណែងទៅ​ស្ងាត់។ សូមចុច​ដើម្បី​ផ្ដល់មតិកែលម្អ។"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ការជូនដំណឹងនេះ​ត្រូវបានចាត់ថ្នាក់​ខ្ពស់ជាងមុន។ សូមចុច​ដើម្បី​ផ្ដល់មតិកែលម្អ។"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ការជូនដំណឹងនេះ​ត្រូវបានចាត់ថ្នាក់​ទាបជាងមុន។ សូមចុច​ដើម្បី​ផ្ដល់មតិកែលម្អ។"</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"សាកល្បងប្រើការជូនដំណឹងប្រសើរជាងមុន"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"ដើម្បីបន្ត​ទទួលបាន​ការឆ្លើយតប សកម្មភាព​ដែលបានណែនាំ និងអ្វីៗ​ជាច្រើនទៀត សូមបើក​ការជូនដំណឹង​ប្រសើរជាងមុន​។ ការជូនដំណឺង​ដែលមានភាព​បត់បែន Android មិនអាចប្រើ​បានទៀតទេ​។"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"បើក"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"កុំទាន់"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ស្វែងយល់បន្ថែម"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"ការជូនដំណឹង​ប្រសើរជាងមុន​អាចអាន​ខ្លឹមសារ​ជូនដំណឹង​ទាំងអស់ រួមទាំង​ព័ត៌មានផ្ទាល់ខ្លួនដូចជា ឈ្មោះទំនាក់ទំនង និង​សារជាដើម​។ មុខងារនេះ​ក៏អាចច្រានចោល​ការជូនដំណឹង ឬធ្វើសកម្មភាព​លើប៊ូតុង​នៅក្នុង​ការជូនដំណឹង​ផងដែរ ដូចជា​ការទទួល​ការហៅទូរសព្ទ​ជាដើម។\n\nមុខងារនេះ​ក៏អាចបើក​ឬបិទមុខងារ​អាទិភាព និង​ផ្លាស់ប្ដូរ​ការកំណត់​ដែលពាក់ព័ន្ធ​ផងដែរ​។"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការមុខងារ​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
@@ -2275,14 +2267,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ឥឡូវនេះ អ្នកអាចពង្រីក​ផ្នែកនៃអេក្រង់​របស់អ្នកបានហើយ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"បើកនៅក្នុងការកំណត់"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ច្រានចោល"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ឈប់ទប់ស្កាត់​មីក្រូហ្វូន​របស់ឧបករណ៍"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ឈប់ទប់ស្កាត់​កាមេរ៉ា​របស់ឧបករណ៍"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"សម្រាប់ &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; និង កម្មវិធីនិង​សេវាកម្ម​ទាំងអស់"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"ឈប់ទប់ស្កាត់"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ឯកជនភាព​ឧបករណ៍​ចាប់សញ្ញា"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"រូប​កម្មវិធី"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"រូបភាព​ផ្សព្វផ្សាយម៉ាក​កម្មវិធី"</string>

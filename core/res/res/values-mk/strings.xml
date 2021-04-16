@@ -297,7 +297,7 @@
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Користење на пристапноста"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> користи батерија"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> апликации користат батерија"</string>
-    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Допрете за детали за батеријата и потрошениот сообраќај"</string>
+    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Допрете за детали за батеријата и потрошениот интернет"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Безбеден режим"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Систем Android"</string>
@@ -1160,7 +1160,7 @@
     <string name="redo" msgid="7231448494008532233">"Повтори"</string>
     <string name="autofill" msgid="511224882647795296">"Автоматско пополнување"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Избор на текст"</string>
-    <string name="addToDictionary" msgid="8041821113480950096">"Додај во речник"</string>
+    <string name="addToDictionary" msgid="8041821113480950096">"Додајте во речникот"</string>
     <string name="deleteText" msgid="4200807474529938112">"Избриши"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Метод на внес"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Дејства со текст"</string>
@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"„Штедачот на батерија“ вклучува темна тема и исклучува или ограничува активност во заднина, некои визуелни ефекти и функции како „Ok Google“\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"„Штедачот на батерија“ вклучува темна тема и исклучува или ограничува активност во заднина, некои визуелни ефекти и функции како „Ok Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Затвори"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Одговори"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Одбиј"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Спушти"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Дојдовен повик"</string>
@@ -1948,7 +1948,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"Дозволувате <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Додајте јазик"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Претпочитувања за регион"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Внеси име на јазик"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Внесете име на јазик"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Предложени"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Сите јазици"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Сите региони"</string>
@@ -1992,7 +1992,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"Продуктивност"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Пристапност"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Простор на уредот"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Отстранување грешки на USB"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Отстранување грешки преку USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"час"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"минута"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"Постави време"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Приоритетноста на известувањево е намалена на „Тивко“. Допрете за да дадете повратни информации."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Известувањево е рангирано повисоко. Допрете за да дадете повратни информации."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Известувањево е рангирано пониско. Допрете за да дадете повратни информации."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Пробај „Подобрени известувања“"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Вклучете ги „Подобрените известувања“ за да продолжите да добивате предлози за дејства, одговори и слично. „Приспособливите известувања на Android“ веќе не се достапни."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Вклучи"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Не сега"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Дознајте повеќе"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"„Подобрените известувања“ може да ги читаат сите содржини од известувањата, вклучително и личните податоци, како што се имињата на контактите и пораките. Функцијава ќе може и да отфрла известувања или да ги користи копчињата во известувањата, како на пр., да одговара на телефонски повици.\n\nФункцијава може и да го вклучува или исклучува „Приоритетниот режим“ и да ги менува поврзаните поставки."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известување за информации за режимот за рутини"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батеријата може да се потроши пред вообичаеното време за полнење"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Активиран е „Штедачот на батерија“ за да се продолжи траењето на батеријата"</string>
