@@ -184,8 +184,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
     @Override
     public CharSequence getTileLabel() {
-        CharSequence qawLabel = mQuickAccessWalletClient.getServiceLabel();
-        return qawLabel == null ? mLabel : qawLabel;
+        return mLabel;
     }
 
     private void queryWalletCards() {
