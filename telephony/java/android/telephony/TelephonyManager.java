@@ -15036,6 +15036,15 @@ public class TelephonyManager {
             "CAPABILITY_SLICING_CONFIG_SUPPORTED";
 
     /**
+     * Indicates whether PHYSICAL_CHANNEL_CONFIG HAL1.6 is supported. See comments on
+     * respective methods for more information.
+     *
+     * @hide
+     */
+    public static final String CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED =
+            "CAPABILITY_PHYSICAL_CHANNEL_CONFIG_1_6_SUPPORTED";
+
+    /**
      * A list of the radio interface capability values with public valid constants.
      *
      * Here is a related list for the systemapi-only valid constants:
