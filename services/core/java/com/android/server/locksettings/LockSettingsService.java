@@ -1261,7 +1261,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         return getCredentialTypeInternal(userId) != CREDENTIAL_TYPE_NONE;
     }
 
-    private void setKeystorePassword(byte[] password, int userHandle) {
+    @VisibleForTesting /** Note: this method is overridden in unit tests */
+    void setKeystorePassword(byte[] password, int userHandle) {
         AndroidKeyStoreMaintenance.onUserPasswordChanged(userHandle, password);
     }
 
