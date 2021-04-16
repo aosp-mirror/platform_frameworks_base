@@ -93,6 +93,8 @@ stubs_defaults {
     ],
     api_levels_annotations_enabled: false,
     filter_packages: packages_to_document,
+    defaults_visibility: ["//visibility:private"],
+    visibility: ["//frameworks/base/api"],
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -341,6 +343,8 @@ java_defaults {
         tag: ".jar",
         dest: "android-non-updatable.jar",
     },
+    defaults_visibility: ["//visibility:private"],
+    visibility: ["//visibility:private"],
 }
 
 java_library_static {
@@ -394,6 +398,8 @@ java_defaults {
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,
+    defaults_visibility: ["//visibility:private"],
+    visibility: ["//visibility:public"],
 }
 
 java_defaults {
@@ -406,6 +412,7 @@ java_defaults {
         tag: ".jar",
         dest: "android.jar",
     },
+    defaults_visibility: ["//frameworks/base/services"],
 }
 
 java_library_static {
@@ -505,6 +512,7 @@ droidstubs {
         "metalava-manual",
     ],
     args: priv_apps,
+    visibility: ["//visibility:private"],
 }
 
 java_library_static {
@@ -514,4 +522,5 @@ java_library_static {
     srcs: [
         ":hwbinder-stubs-docs",
     ],
+    visibility: ["//visibility:public"],
 }
