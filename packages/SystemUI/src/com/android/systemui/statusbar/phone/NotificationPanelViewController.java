@@ -122,7 +122,6 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -183,7 +182,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private static final int FLING_HIDE = 2;
     private static final long ANIMATION_DELAY_ICON_FADE_IN =
             ActivityLaunchAnimator.ANIMATION_DURATION - CollapsedStatusBarFragment.FADE_IN_DURATION
-                    - CollapsedStatusBarFragment.FADE_IN_DELAY - 16;
+                    - CollapsedStatusBarFragment.FADE_IN_DELAY - 48;
 
     private final DozeParameters mDozeParameters;
     private final OnHeightChangedListener mOnHeightChangedListener = new OnHeightChangedListener();
@@ -444,7 +443,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mUserSetupComplete;
     private int mQsNotificationTopPadding;
-    private boolean mHideIconsDuringNotificationLaunch = true;
+    private boolean mHideIconsDuringLaunchAnimation = true;
     private int mStackScrollerMeasuringPass;
     private ArrayList<Consumer<ExpandableNotificationRow>>
             mTrackingHeadsUpListeners =
@@ -3089,8 +3088,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public boolean hideStatusBarIconsWhenExpanded() {
-        if (mLaunchingNotification) {
-            return mHideIconsDuringNotificationLaunch;
+        if (mIsLaunchAnimationRunning) {
+            return mHideIconsDuringLaunchAnimation;
         }
         if (mHeadsUpAppearanceController != null
                 && mHeadsUpAppearanceController.shouldBeVisible()) {
@@ -3219,14 +3218,11 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea.setUserSetupComplete(userSetupComplete);
     }
 
-    public void applyExpandAnimationParams(ExpandAnimationParameters params) {
-        if (params == null) {
-            return;
-        }
-
-        boolean hideIcons = params.getProgress(ANIMATION_DELAY_ICON_FADE_IN, 100) == 0.0f;
-        if (hideIcons != mHideIconsDuringNotificationLaunch) {
-            mHideIconsDuringNotificationLaunch = hideIcons;
+    public void applyLaunchAnimationProgress(float linearProgress) {
+        boolean hideIcons = ActivityLaunchAnimator.getProgress(linearProgress,
+                ANIMATION_DELAY_ICON_FADE_IN, 100) == 0.0f;
+        if (hideIcons != mHideIconsDuringLaunchAnimation) {
+            mHideIconsDuringLaunchAnimation = hideIcons;
             if (!hideIcons) {
                 mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
             }
