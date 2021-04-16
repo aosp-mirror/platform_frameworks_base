@@ -426,6 +426,7 @@
     <uses-permission android:name="android.permission.ACCESS_SHARED_LIBRARIES" />
 
     <!-- Permissions required for CTS test - TVInputManagerTest -->
+    <uses-permission android:name="android.permission.ACCESS_TUNED_INFO" />
     <uses-permission android:name="android.permission.TV_INPUT_HARDWARE" />
 
     <!-- Permission needed for CTS test - PrivilegedLocationPermissionTest -->
