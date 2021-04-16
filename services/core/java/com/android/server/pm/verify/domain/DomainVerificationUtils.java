@@ -22,6 +22,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.text.TextUtils;
+import android.util.Patterns;
 
 import com.android.internal.util.CollectionUtils;
 import com.android.server.compat.PlatformCompat;
@@ -29,8 +31,12 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.Set;
+import java.util.regex.Matcher;
 
 public final class DomainVerificationUtils {
+
+    private static final ThreadLocal<Matcher> sCachedMatcher = ThreadLocal.withInitial(
+            () -> Patterns.DOMAIN_NAME.matcher(""));
 
     /**
      * Consolidates package exception messages. A generic unavailable message is included since the
@@ -45,6 +51,15 @@ public final class DomainVerificationUtils {
     public static boolean isDomainVerificationIntent(Intent intent,
             @PackageManager.ResolveInfoFlags int resolveInfoFlags) {
         if (!intent.isWebIntent()) {
+            return false;
+        }
+
+        String host = intent.getData().getHost();
+        if (TextUtils.isEmpty(host)) {
+            return false;
+        }
+
+        if (!sCachedMatcher.get().reset(host).matches()) {
             return false;
         }
 

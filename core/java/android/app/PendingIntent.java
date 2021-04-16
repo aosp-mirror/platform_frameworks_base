@@ -53,7 +53,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.IResultReceiver;
@@ -371,19 +370,9 @@ public final class PendingIntent implements Parcelable {
                 "Cannot set both FLAG_IMMUTABLE and FLAG_MUTABLE for PendingIntent");
         }
 
-        // TODO(b/178092897) Remove the below instrumentation check and enforce
-        // the explicit mutability requirement for apps under instrumentation.
-        ActivityThread thread = ActivityThread.currentActivityThread();
-        Instrumentation mInstrumentation = thread.getInstrumentation();
-
         if (Compatibility.isChangeEnabled(PENDING_INTENT_EXPLICIT_MUTABILITY_REQUIRED)
                 && !flagImmutableSet && !flagMutableSet) {
-
-            if (mInstrumentation.isInstrumenting()) {
-                Log.e(TAG, msg);
-            } else {
                 throw new IllegalArgumentException(msg);
-            }
         }
     }
 

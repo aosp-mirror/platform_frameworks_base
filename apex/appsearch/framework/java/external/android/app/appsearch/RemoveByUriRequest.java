@@ -24,6 +24,7 @@ import com.android.internal.util.Preconditions;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -65,7 +66,7 @@ public final class RemoveByUriRequest {
 
         /** Creates a {@link RemoveByUriRequest.Builder} instance. */
         public Builder(@NonNull String namespace) {
-            mNamespace = Preconditions.checkNotNull(namespace);
+            mNamespace = Objects.requireNonNull(namespace);
         }
 
         /**
@@ -75,7 +76,7 @@ public final class RemoveByUriRequest {
          */
         @NonNull
         public Builder addUris(@NonNull String... uris) {
-            Preconditions.checkNotNull(uris);
+            Objects.requireNonNull(uris);
             return addUris(Arrays.asList(uris));
         }
 
@@ -87,7 +88,7 @@ public final class RemoveByUriRequest {
         @NonNull
         public Builder addUris(@NonNull Collection<String> uris) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(uris);
+            Objects.requireNonNull(uris);
             mUris.addAll(uris);
             return this;
         }

@@ -21,6 +21,8 @@ import android.os.Bundle;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
+
 /** The response class of {@code AppSearchSession#getStorageInfo}. */
 public class StorageInfo {
 
@@ -31,7 +33,7 @@ public class StorageInfo {
     private final Bundle mBundle;
 
     StorageInfo(@NonNull Bundle bundle) {
-        mBundle = Preconditions.checkNotNull(bundle);
+        mBundle = Objects.requireNonNull(bundle);
     }
 
     /**

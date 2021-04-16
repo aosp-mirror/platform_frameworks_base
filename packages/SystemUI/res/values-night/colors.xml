@@ -33,7 +33,6 @@
     <!-- The color of the text inside a notification -->
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_dark</color>
 
-    <color name="notif_pill_background">@*android:color/surface_dark</color>
     <color name="notif_pill_text">@android:color/system_neutral1_50</color>
 
     <color name="notification_guts_link_icon_tint">@color/GM2_grey_500</color>

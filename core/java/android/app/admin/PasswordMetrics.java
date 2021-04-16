@@ -28,6 +28,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.MIN_LOCK_PASSWORD_SIZE;
 import static com.android.internal.widget.PasswordValidationError.CONTAINS_INVALID_CHARACTERS;
 import static com.android.internal.widget.PasswordValidationError.CONTAINS_SEQUENCE;
@@ -74,11 +75,8 @@ public final class PasswordMetrics implements Parcelable {
     // consider it a complex PIN/password.
     public static final int MAX_ALLOWED_SEQUENCE = 3;
 
-    // One of CREDENTIAL_TYPE_NONE, CREDENTIAL_TYPE_PATTERN or CREDENTIAL_TYPE_PASSWORD.
-    // Note that this class still uses CREDENTIAL_TYPE_PASSWORD to represent both numeric PIN
-    // and alphabetic password. This is OK as long as this definition is only used internally,
-    // and the value never gets mixed up with credential types from other parts of the framework.
-    // TODO: fix this (ideally after we move logic to PasswordPolicy)
+    // One of CREDENTIAL_TYPE_NONE, CREDENTIAL_TYPE_PATTERN, CREDENTIAL_TYPE_PIN or
+    // CREDENTIAL_TYPE_PASSWORD.
     public @CredentialType int credType;
     // Fields below only make sense when credType is PASSWORD.
     public int length = 0;
@@ -192,13 +190,15 @@ public final class PasswordMetrics implements Parcelable {
     /**
      * Returns the {@code PasswordMetrics} for a given credential.
      *
-     * If the credential is a pin or a password, equivalent to {@link #computeForPassword(byte[])}.
-     * {@code credential} cannot be null when {@code type} is
+     * If the credential is a pin or a password, equivalent to
+     * {@link #computeForPasswordOrPin(byte[], boolean)}. {@code credential} cannot be null
+     * when {@code type} is
      * {@link com.android.internal.widget.LockPatternUtils#CREDENTIAL_TYPE_PASSWORD}.
      */
     public static PasswordMetrics computeForCredential(LockscreenCredential credential) {
         if (credential.isPassword() || credential.isPin()) {
-            return PasswordMetrics.computeForPassword(credential.getCredential());
+            return PasswordMetrics.computeForPasswordOrPin(credential.getCredential(),
+                    credential.isPin());
         } else if (credential.isPattern())  {
             return new PasswordMetrics(CREDENTIAL_TYPE_PATTERN);
         } else if (credential.isNone()) {
@@ -209,9 +209,9 @@ public final class PasswordMetrics implements Parcelable {
     }
 
     /**
-     * Returns the {@code PasswordMetrics} for a given password
+     * Returns the {@code PasswordMetrics} for a given password or pin
      */
-    public static PasswordMetrics computeForPassword(@NonNull byte[] password) {
+    public static PasswordMetrics computeForPasswordOrPin(byte[] password, boolean isPin) {
         // Analyse the characters used
         int letters = 0;
         int upperCase = 0;
@@ -245,8 +245,9 @@ public final class PasswordMetrics implements Parcelable {
             }
         }
 
+        final int credType = isPin ? CREDENTIAL_TYPE_PIN : CREDENTIAL_TYPE_PASSWORD;
         final int seqLength = maxLengthSequence(password);
-        return new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD, length, letters, upperCase, lowerCase,
+        return new PasswordMetrics(credType, length, letters, upperCase, lowerCase,
                 numeric, symbols, nonLetter, nonNumeric, seqLength);
     }
 
@@ -353,7 +354,7 @@ public final class PasswordMetrics implements Parcelable {
      */
     public void maxWith(PasswordMetrics other) {
         credType = Math.max(credType, other.credType);
-        if (credType != CREDENTIAL_TYPE_PASSWORD) {
+        if (credType != CREDENTIAL_TYPE_PASSWORD && credType != CREDENTIAL_TYPE_PIN) {
             return;
         }
         length = Math.max(length, other.length);
@@ -408,7 +409,7 @@ public final class PasswordMetrics implements Parcelable {
 
             @Override
             boolean allowsCredType(int credType) {
-                return credType == CREDENTIAL_TYPE_PASSWORD;
+                return credType == CREDENTIAL_TYPE_PASSWORD || credType == CREDENTIAL_TYPE_PIN;
             }
         },
         BUCKET_MEDIUM(PASSWORD_COMPLEXITY_MEDIUM) {
@@ -424,7 +425,7 @@ public final class PasswordMetrics implements Parcelable {
 
             @Override
             boolean allowsCredType(int credType) {
-                return credType == CREDENTIAL_TYPE_PASSWORD;
+                return credType == CREDENTIAL_TYPE_PASSWORD || credType == CREDENTIAL_TYPE_PIN;
             }
         },
         BUCKET_LOW(PASSWORD_COMPLEXITY_LOW) {
@@ -489,7 +490,7 @@ public final class PasswordMetrics implements Parcelable {
         if (!bucket.allowsCredType(credType)) {
             return false;
         }
-        if (credType != CREDENTIAL_TYPE_PASSWORD) {
+        if (credType != CREDENTIAL_TYPE_PASSWORD && credType != CREDENTIAL_TYPE_PIN) {
             return true;
         }
         return (bucket.canHaveSequence() || seqLength <= MAX_ALLOWED_SEQUENCE)
@@ -529,7 +530,7 @@ public final class PasswordMetrics implements Parcelable {
                     new PasswordValidationError(CONTAINS_INVALID_CHARACTERS, 0));
         }
 
-        final PasswordMetrics enteredMetrics = computeForPassword(password);
+        final PasswordMetrics enteredMetrics = computeForPasswordOrPin(password, isPin);
         return validatePasswordMetrics(adminMetrics, minComplexity, isPin, enteredMetrics);
     }
 
@@ -555,8 +556,8 @@ public final class PasswordMetrics implements Parcelable {
                 || !bucket.allowsCredType(actualMetrics.credType)) {
             return Collections.singletonList(new PasswordValidationError(WEAK_CREDENTIAL_TYPE, 0));
         }
-        // TODO: this needs to be modified if CREDENTIAL_TYPE_PIN is added.
-        if (actualMetrics.credType != CREDENTIAL_TYPE_PASSWORD) {
+        if (actualMetrics.credType != CREDENTIAL_TYPE_PASSWORD
+                && actualMetrics.credType != CREDENTIAL_TYPE_PIN) {
             return Collections.emptyList(); // Nothing to check for pattern or none.
         }
 

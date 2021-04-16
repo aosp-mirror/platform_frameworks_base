@@ -105,6 +105,7 @@ public class WindowContextController {
      * a {@link com.android.server.wm.DisplayArea} by
      * {@link #attachToDisplayArea(int, int, Bundle)}.
      *
+     * @see WindowProviderService#attachToWindowToken(IBinder))
      * @see IWindowManager#attachWindowContextToWindowToken(IBinder, IBinder)
      */
     public void attachToWindowToken(IBinder windowToken) {

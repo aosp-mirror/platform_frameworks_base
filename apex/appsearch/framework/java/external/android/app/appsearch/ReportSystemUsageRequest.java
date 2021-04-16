@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
+
 /**
  * A request to report usage of a document owned by another app from a system UI surface.
  *
@@ -42,10 +44,10 @@ public final class ReportSystemUsageRequest {
             @NonNull String namespace,
             @NonNull String uri,
             long usageTimeMillis) {
-        mPackageName = Preconditions.checkNotNull(packageName);
-        mDatabase = Preconditions.checkNotNull(database);
-        mNamespace = Preconditions.checkNotNull(namespace);
-        mUri = Preconditions.checkNotNull(uri);
+        mPackageName = Objects.requireNonNull(packageName);
+        mDatabase = Objects.requireNonNull(database);
+        mNamespace = Objects.requireNonNull(namespace);
+        mUri = Objects.requireNonNull(uri);
         mUsageTimeMillis = usageTimeMillis;
     }
 
@@ -95,9 +97,9 @@ public final class ReportSystemUsageRequest {
         /** Creates a {@link ReportSystemUsageRequest.Builder} instance. */
         public Builder(
                 @NonNull String packageName, @NonNull String database, @NonNull String namespace) {
-            mPackageName = Preconditions.checkNotNull(packageName);
-            mDatabase = Preconditions.checkNotNull(database);
-            mNamespace = Preconditions.checkNotNull(namespace);
+            mPackageName = Objects.requireNonNull(packageName);
+            mDatabase = Objects.requireNonNull(database);
+            mNamespace = Objects.requireNonNull(namespace);
         }
 
         /**
@@ -110,7 +112,7 @@ public final class ReportSystemUsageRequest {
         @NonNull
         public ReportSystemUsageRequest.Builder setUri(@NonNull String uri) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(uri);
+            Objects.requireNonNull(uri);
             mUri = uri;
             return this;
         }
@@ -142,7 +144,7 @@ public final class ReportSystemUsageRequest {
         @NonNull
         public ReportSystemUsageRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(mUri, "ReportUsageRequest is missing a URI");
+            Objects.requireNonNull(mUri, "ReportUsageRequest is missing a URI");
             if (mUsageTimeMillis == null) {
                 mUsageTimeMillis = System.currentTimeMillis();
             }

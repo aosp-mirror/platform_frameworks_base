@@ -71,7 +71,6 @@ public class QSFooterView extends FrameLayout {
     private float mExpansionAmount;
 
     protected View mEdit;
-    protected View mEditContainer;
     private TouchAnimator mSettingsCogAnimator;
 
     private View mActionsContainer;
@@ -107,7 +106,6 @@ public class QSFooterView extends FrameLayout {
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
 
         mActionsContainer = requireViewById(R.id.qs_footer_actions_container);
-        mEditContainer = findViewById(R.id.qs_footer_actions_edit_container);
         mBuildText = findViewById(R.id.build);
         mTunerIcon = requireViewById(R.id.tuner_icon);
 
@@ -185,9 +183,6 @@ public class QSFooterView extends FrameLayout {
                 .addFloat(mPageIndicator, "alpha", 0, 1)
                 .addFloat(mBuildText, "alpha", 0, 1)
                 .setStartDelay(0.9f);
-        if (mEditContainer != null) {
-            builder.addFloat(mEditContainer, "alpha", 0, 1);
-        }
         return builder.build();
     }
 
@@ -283,9 +278,6 @@ public class QSFooterView extends FrameLayout {
         mTunerIcon.setVisibility(isTunerEnabled ? View.VISIBLE : View.INVISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
         mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.GONE);
-        if (mEditContainer != null) {
-            mEditContainer.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
-        }
         mSettingsButton.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
 
         mBuildText.setVisibility(mExpanded && mShouldShowBuildText ? View.VISIBLE : View.GONE);

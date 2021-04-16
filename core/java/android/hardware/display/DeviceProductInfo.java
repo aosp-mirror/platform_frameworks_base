@@ -74,12 +74,26 @@ public final class DeviceProductInfo implements Parcelable {
             Integer modelYear,
             ManufactureDate manufactureDate,
             int connectionToSinkType) {
-        this.mName = name;
-        this.mManufacturerPnpId = manufacturerPnpId;
-        this.mProductId = productId;
-        this.mModelYear = modelYear;
-        this.mManufactureDate = manufactureDate;
-        this.mConnectionToSinkType = connectionToSinkType;
+        mName = name;
+        mManufacturerPnpId = manufacturerPnpId;
+        mProductId = productId;
+        mModelYear = modelYear;
+        mManufactureDate = manufactureDate;
+        mConnectionToSinkType = connectionToSinkType;
+    }
+
+    public DeviceProductInfo(
+            @Nullable String name,
+            @NonNull String manufacturerPnpId,
+            @NonNull String productId,
+            @IntRange(from = 1990) int modelYear,
+            @ConnectionToSinkType int connectionToSinkType) {
+        mName = name;
+        mManufacturerPnpId = Objects.requireNonNull(manufacturerPnpId);
+        mProductId = Objects.requireNonNull(productId);
+        mModelYear = modelYear;
+        mManufactureDate = null;
+        mConnectionToSinkType = connectionToSinkType;
     }
 
     private DeviceProductInfo(Parcel in) {
@@ -100,6 +114,9 @@ public final class DeviceProductInfo implements Parcelable {
     }
 
     /**
+     * Returns the Manufacturer Plug and Play ID. This ID identifies the manufacture according to
+     * the list: https://uefi.org/PNP_ID_List. It consist of 3 characters, each character
+     * is an uppercase letter (A-Z).
      * @return Manufacturer Plug and Play ID.
      */
     @NonNull

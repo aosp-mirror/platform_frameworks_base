@@ -93,8 +93,8 @@ public class PasswordMetricsTest {
 
     @Test
     public void testComputeForPassword_metrics() {
-        final PasswordMetrics metrics =
-                PasswordMetrics.computeForPassword("6B~0z1Z3*8A".getBytes());
+        final PasswordMetrics metrics = PasswordMetrics.computeForPasswordOrPin(
+                "6B~0z1Z3*8A".getBytes(), /* isPin */ false);
         assertEquals(11, metrics.length);
         assertEquals(4, metrics.letters);
         assertEquals(3, metrics.upperCase);
@@ -133,61 +133,71 @@ public class PasswordMetricsTest {
     @Test
     public void testDetermineComplexity_lowNumeric() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPassword("1234".getBytes()).determineComplexity());
+                PasswordMetrics.computeForPasswordOrPin("1234".getBytes(),
+                        /* isPin */true).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_lowNumericComplex() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPassword("124".getBytes()).determineComplexity());
+                PasswordMetrics.computeForPasswordOrPin("124".getBytes(),
+                        /* isPin */ true).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_lowAlphabetic() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPassword("a!".getBytes()).determineComplexity());
+                PasswordMetrics.computeForPasswordOrPin("a!".getBytes(),
+                        /* isPin */ false).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_lowAlphanumeric() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPassword("a!1".getBytes()).determineComplexity());
+                PasswordMetrics.computeForPasswordOrPin("a!1".getBytes(),
+                        /* isPin */ false).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_mediumNumericComplex() {
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
-                PasswordMetrics.computeForPassword("1238".getBytes()).determineComplexity());
+                PasswordMetrics.computeForPasswordOrPin("1238".getBytes(),
+                        /* isPin */ true).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_mediumAlphabetic() {
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
-                PasswordMetrics.computeForPassword("ab!c".getBytes()).determineComplexity());
+                PasswordMetrics.computeForPasswordOrPin("ab!c".getBytes(),
+                        /* isPin */ false).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_mediumAlphanumeric() {
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
-                PasswordMetrics.computeForPassword("ab!1".getBytes()).determineComplexity());
+                PasswordMetrics.computeForPasswordOrPin("ab!1".getBytes(),
+                        /* isPin */ false).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_highNumericComplex() {
         assertEquals(PASSWORD_COMPLEXITY_HIGH,
-                PasswordMetrics.computeForPassword("12389647!".getBytes()).determineComplexity());
+                PasswordMetrics.computeForPasswordOrPin("12389647!".getBytes(),
+                        /* isPin */ true).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_highAlphabetic() {
         assertEquals(PASSWORD_COMPLEXITY_HIGH,
-                PasswordMetrics.computeForPassword("alphabetic!".getBytes()).determineComplexity());
+                PasswordMetrics.computeForPasswordOrPin("alphabetic!".getBytes(),
+                        /* isPin */ false).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_highAlphanumeric() {
-        assertEquals(PASSWORD_COMPLEXITY_HIGH, PasswordMetrics.computeForPassword(
-                "alphanumeric123!".getBytes()).determineComplexity());
+        assertEquals(PASSWORD_COMPLEXITY_HIGH,
+                PasswordMetrics.computeForPasswordOrPin("alphanumeric123!".getBytes(),
+                        /* isPin */ false).determineComplexity());
     }
 
     @Test

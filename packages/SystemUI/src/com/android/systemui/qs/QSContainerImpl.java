@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.util.AttributeSet;
-import android.util.Pair;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
@@ -61,7 +60,6 @@ public class QSContainerImpl extends FrameLayout {
     private QuickStatusBarHeader mHeader;
     private float mQsExpansion;
     private QSCustomizer mQSCustomizer;
-    private View mDragHandle;
     private NonInterceptingScrollView mQSPanelContainer;
 
     private View mBackground;
@@ -84,7 +82,6 @@ public class QSContainerImpl extends FrameLayout {
         mQSDetail = findViewById(R.id.qs_detail);
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
-        mDragHandle = findViewById(R.id.qs_drag_handle_view);
         mBackground = findViewById(R.id.quick_settings_background);
         mHeader.getHeaderQsPanel().setMediaVisibilityChangedListener((visible) -> {
             if (mHeader.getHeaderQsPanel().isShown()) {
@@ -240,8 +237,6 @@ public class QSContainerImpl extends FrameLayout {
         int scrollBottom = calculateContainerBottom();
         setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + scrollBottom);
-        // Pin the drag handle to the bottom of the panel.
-        mDragHandle.setTranslationY(scrollBottom - mDragHandle.getHeight());
         mBackground.setTop(mQSPanelContainer.getTop());
         updateBackgroundBottom(scrollBottom, animate);
     }
@@ -278,7 +273,6 @@ public class QSContainerImpl extends FrameLayout {
 
     public void setExpansion(float expansion) {
         mQsExpansion = expansion;
-        mDragHandle.setAlpha(1.0f - expansion);
         updateExpansion();
     }
 
@@ -296,9 +290,6 @@ public class QSContainerImpl extends FrameLayout {
             if (view == mQSPanelContainer) {
                 // QS panel lays out some of its content full width
                 qsPanelController.setContentMargins(mContentPadding, mContentPadding);
-                Pair<Integer, Integer> margins = qsPanelController.getVisualSideMargins();
-                // Apply paddings based on QSPanel
-                mQSCustomizer.setContentPaddings(margins.first, margins.second);
             } else if (view == mHeader) {
                 // The header contains the QQS panel which needs to have special padding, to
                 // visually align them.

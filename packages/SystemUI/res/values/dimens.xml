@@ -407,10 +407,10 @@
 
     <!-- The height of the quick settings footer that holds the user switcher, settings icon,
          etc. -->
-    <dimen name="qs_footer_height">48dp</dimen>
+    <dimen name="qs_footer_height">96dp</dimen>
 
     <!-- The size of each of the icon buttons in the QS footer -->
-    <dimen name="qs_footer_action_button_size">@dimen/qs_footer_height</dimen>
+    <dimen name="qs_footer_action_button_size">48dp</dimen>
 
     <dimen name="qs_footer_action_corner_radius">20dp</dimen>
 
@@ -529,25 +529,25 @@
     <dimen name="pull_span_min">25dp</dimen>
 
     <dimen name="qs_corner_radius">14dp</dimen>
-    <dimen name="qs_tile_height">96dp</dimen>
+    <dimen name="qs_tile_height">88dp</dimen>
     <!--notification_side_paddings + notification_content_margin_start - (qs_quick_tile_size - qs_tile_background_size) / 2 -->
     <dimen name="qs_tile_layout_margin_side">18dp</dimen>
-    <dimen name="qs_tile_margin_horizontal">18dp</dimen>
+    <dimen name="qs_tile_margin_horizontal">8dp</dimen>
     <dimen name="qs_tile_margin_horizontal_two_line">2dp</dimen>
-    <dimen name="qs_tile_margin_vertical">2dp</dimen>
-    <dimen name="qs_tile_margin_top_bottom">12dp</dimen>
-    <dimen name="qs_tile_margin_top_bottom_negative">-12dp</dimen>
+    <dimen name="qs_tile_margin_vertical">@dimen/qs_tile_margin_horizontal</dimen>
+    <dimen name="qs_tile_margin_top_bottom">4dp</dimen>
+    <dimen name="qs_tile_margin_top_bottom_negative">-4dp</dimen>
     <!-- The height of the qs customize header. Should be
-         (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_tile_margin_top (0dp)) -
-         (Toolbar_minWidth (56dp) + qs_tile_margin_top_bottom (12dp))
+         (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_tile_margin_top (18dp)) -
+         (Toolbar_minWidth (56dp) + qs_tile_margin_top_bottom (4dp))
     -->
-    <dimen name="qs_customize_header_min_height">28dp</dimen>
-    <dimen name="qs_tile_margin_top">0dp</dimen>
+    <dimen name="qs_customize_header_min_height">54dp</dimen>
+    <dimen name="qs_tile_margin_top">18dp</dimen>
     <dimen name="qs_tile_icon_background_stroke_width">-1dp</dimen>
-    <dimen name="qs_tile_background_size">44dp</dimen>
+    <dimen name="qs_tile_background_size">56dp</dimen>
     <dimen name="qs_icon_size">20dp</dimen>
     <dimen name="qs_label_container_margin">10dp</dimen>
-    <dimen name="qs_quick_tile_size">48dp</dimen>
+    <dimen name="qs_quick_tile_size">60dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>
     <dimen name="qs_header_tile_margin_bottom">18dp</dimen>
@@ -557,9 +557,9 @@
          Scaled @dimen/qs_page_indicator-width by .4f.
     -->
     <dimen name="qs_page_indicator_dot_width">6.4dp</dimen>
-    <dimen name="qs_tile_side_label_padding">6dp</dimen>
+    <dimen name="qs_tile_side_label_padding">12dp</dimen>
     <dimen name="qs_tile_icon_size">24dp</dimen>
-    <dimen name="qs_tile_text_size">12sp</dimen>
+    <dimen name="qs_tile_text_size">14sp</dimen>
     <dimen name="qs_tile_divider_height">1dp</dimen>
     <dimen name="qs_panel_padding">16dp</dimen>
     <dimen name="qs_dual_tile_height">112dp</dimen>
@@ -570,7 +570,7 @@
     <dimen name="qs_tile_padding_bottom">16dp</dimen>
     <dimen name="qs_tile_spacing">4dp</dimen>
     <dimen name="qs_panel_padding_bottom">0dp</dimen>
-    <dimen name="qs_panel_padding_top">@dimen/qs_header_tooltip_height</dimen>
+    <dimen name="qs_panel_padding_top">48dp</dimen>
     <dimen name="qs_detail_header_height">56dp</dimen>
     <dimen name="qs_detail_header_padding">0dp</dimen>
     <dimen name="qs_detail_image_width">56dp</dimen>
@@ -594,7 +594,6 @@
     <dimen name="qs_detail_item_icon_width">32dp</dimen>
     <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>
     <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
-    <dimen name="qs_header_tooltip_height">48dp</dimen>
     <dimen name="qs_header_alarm_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <dimen name="qs_header_mobile_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <dimen name="qs_header_alarm_text_margin_start">6dp</dimen>
