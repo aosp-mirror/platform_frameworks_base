@@ -53,6 +53,7 @@ import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams.WindowType;
 import android.window.WindowContext;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -70,10 +71,10 @@ import java.util.Comparator;
 class WindowToken extends WindowContainer<WindowState> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowToken" : TAG_WM;
 
-    // The actual token.
+    /** The actual token */
     final IBinder token;
 
-    // The type of window this token is for, as per WindowManager.LayoutParams.
+    /** The type of window this token is for, as per {@link WindowManager.LayoutParams} */
     final int windowType;
 
     /**
@@ -86,8 +87,10 @@ class WindowToken extends WindowContainer<WindowState> {
     /** {@code true} if this holds the rounded corner overlay */
     final boolean mRoundedCornerOverlay;
 
-    // Set if this token was explicitly added by a client, so should
-    // persist (not be removed) when all windows are removed.
+    /**
+     * Set if this token was explicitly added by a client, so should persist (not be removed)
+     * when all windows are removed.
+     */
     boolean mPersistOnEmpty;
 
     // For printing.
@@ -198,21 +201,15 @@ class WindowToken extends WindowContainer<WindowState> {
         return isFirstChildWindowGreaterThanSecond(newWindow, existingWindow) ? 1 : -1;
     };
 
-    WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
-            DisplayContent dc, boolean ownerCanManageAppTokens) {
+    protected WindowToken(WindowManagerService service, IBinder _token, int type,
+            boolean persistOnEmpty, DisplayContent dc, boolean ownerCanManageAppTokens) {
         this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens,
-                false /* roundedCornerOverlay */);
+                false /* roundedCornerOverlay */, false /* fromClientToken */, null /* options */);
     }
 
-    WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
-            DisplayContent dc, boolean ownerCanManageAppTokens, boolean roundedCornerOverlay) {
-        this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens,
-                roundedCornerOverlay, false /* fromClientToken */, null /* options */);
-    }
-
-    WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
-            DisplayContent dc, boolean ownerCanManageAppTokens, boolean roundedCornerOverlay,
-            boolean fromClientToken, @Nullable Bundle options) {
+    protected WindowToken(WindowManagerService service, IBinder _token, int type,
+            boolean persistOnEmpty, DisplayContent dc, boolean ownerCanManageAppTokens,
+            boolean roundedCornerOverlay, boolean fromClientToken, @Nullable Bundle options) {
         super(service);
         token = _token;
         windowType = type;
@@ -770,7 +767,69 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     @Override
-    @WindowManager.LayoutParams.WindowType int getWindowType() {
+    @WindowType int getWindowType() {
         return windowType;
+    }
+
+    static class Builder {
+        private final WindowManagerService mService;
+        private final IBinder mToken;
+        @WindowType
+        private final int mType;
+
+        private boolean mPersistOnEmpty;
+        private DisplayContent mDisplayContent;
+        private boolean mOwnerCanManageAppTokens;
+        private boolean mRoundedCornerOverlay;
+        private boolean mFromClientToken;
+        @Nullable
+        private Bundle mOptions;
+
+        Builder(WindowManagerService service, IBinder token, int type) {
+            mService = service;
+            mToken = token;
+            mType = type;
+        }
+
+        /** @see WindowToken#mPersistOnEmpty */
+        Builder setPersistOnEmpty(boolean persistOnEmpty) {
+            mPersistOnEmpty = persistOnEmpty;
+            return this;
+        }
+
+        /** Sets the {@link DisplayContent} to be associated. */
+        Builder setDisplayContent(DisplayContent dc) {
+            mDisplayContent = dc;
+            return this;
+        }
+
+        /** @see WindowToken#mOwnerCanManageAppTokens */
+        Builder setOwnerCanManageAppTokens(boolean ownerCanManageAppTokens) {
+            mOwnerCanManageAppTokens = ownerCanManageAppTokens;
+            return this;
+        }
+
+        /** @see WindowToken#mRoundedCornerOverlay */
+        Builder setRoundedCornerOverlay(boolean roundedCornerOverlay) {
+            mRoundedCornerOverlay = roundedCornerOverlay;
+            return this;
+        }
+
+        /** @see WindowToken#mFromClientToken */
+        Builder setFromClientToken(boolean fromClientToken) {
+            mFromClientToken = fromClientToken;
+            return this;
+        }
+
+        /** @see WindowToken#mOptions */
+        Builder setOptions(Bundle options) {
+            mOptions = options;
+            return this;
+        }
+
+        WindowToken build() {
+            return new WindowToken(mService, mToken, mType, mPersistOnEmpty, mDisplayContent,
+                    mOwnerCanManageAppTokens, mRoundedCornerOverlay, mFromClientToken, mOptions);
+        }
     }
 }
