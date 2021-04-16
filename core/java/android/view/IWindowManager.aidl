@@ -858,4 +858,6 @@ interface IWindowManager
     void unregisterCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener);
 
     void setForceCrossWindowBlurDisabled(boolean disable);
+
+    boolean isTaskSnapshotSupported();
 }
