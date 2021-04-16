@@ -458,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"מושבת"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"מורשה"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"לא מורשה"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"להתקין גם אם לא מוכר לך?"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"התקנת אפליקציות לא מוכרות"</string>
     <string name="home" msgid="973834627243661438">"דף הבית של ההגדרות"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"અજાણ્યું"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"વપરાશકર્તા: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"કેટલાંક ડિફોલ્ટ્સ સેટ કરેલ છે"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"કોઇ ડિફોલ્ટ્સ સેટ કરેલ નથી"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"કોઈ ડિફૉલ્ટ સેટ કરેલા નથી"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ટેક્સ્ટ-ટુ-સ્પીચ સેટિંગ્સ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"ટેક્સ્ટ ટુ સ્પીચ આઉટપુટ"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"વાણી દર"</string>
@@ -458,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"અક્ષમ કર્યો"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"મંજૂરી છે"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"મંજૂરી નથી"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"અજાણી ઍપ્લિકેશનો ઇન્સ્ટૉલ કરો"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"અજાણી ઍપ ઇન્સ્ટૉલ કરો"</string>
     <string name="home" msgid="973834627243661438">"સેટિંગ્સ હોમ"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
