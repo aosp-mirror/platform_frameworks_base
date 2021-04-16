@@ -36,9 +36,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.icu.text.MeasureFormat;
-import android.icu.util.Measure;
-import android.icu.util.MeasureUnit;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -65,7 +62,6 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -73,7 +69,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -85,9 +80,6 @@ public class PeopleSpaceUtils {
     /** Turns on debugging information about People Space. */
     public static final boolean DEBUG = true;
     private static final String TAG = "PeopleSpaceUtils";
-    private static final int DAYS_IN_A_WEEK = 7;
-    private static final int MIN_HOUR = 1;
-    private static final int ONE_DAY = 1;
     public static final String PACKAGE_NAME = "package_name";
     public static final String USER_ID = "user_id";
     public static final String SHORTCUT_ID = "shortcut_id";
@@ -424,36 +416,6 @@ public class PeopleSpaceUtils {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
-    }
-
-    /** Returns a readable status describing the {@code lastInteraction}. */
-    public static String getLastInteractionString(Context context, long lastInteraction) {
-        if (lastInteraction == 0L) {
-            Log.e(TAG, "Could not get valid last interaction");
-            return context.getString(R.string.basic_status);
-        }
-        long now = System.currentTimeMillis();
-        Duration durationSinceLastInteraction = Duration.ofMillis(now - lastInteraction);
-        MeasureFormat formatter = MeasureFormat.getInstance(Locale.getDefault(),
-                MeasureFormat.FormatWidth.WIDE);
-        if (durationSinceLastInteraction.toHours() < MIN_HOUR) {
-            return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toMinutes(), MeasureUnit.MINUTE)));
-        } else if (durationSinceLastInteraction.toDays() < ONE_DAY) {
-            return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toHours(),
-                            MeasureUnit.HOUR)));
-        } else if (durationSinceLastInteraction.toDays() < DAYS_IN_A_WEEK) {
-            return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toHours(),
-                            MeasureUnit.DAY)));
-        } else {
-            return context.getString(durationSinceLastInteraction.toDays() == DAYS_IN_A_WEEK
-                            ? R.string.timestamp : R.string.over_timestamp,
-                    formatter.formatMeasures(
-                            new Measure(durationSinceLastInteraction.toDays() / DAYS_IN_A_WEEK,
-                                    MeasureUnit.WEEK)));
-        }
     }
 
     /**
