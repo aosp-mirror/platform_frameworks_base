@@ -188,6 +188,7 @@ public final class HdmiCecConfigTest {
         assertThat(hdmiCecConfig.getAllowedStringValues(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
                 .containsExactly(HdmiControlManager.POWER_CONTROL_MODE_TV,
+                                 HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM,
                                  HdmiControlManager.POWER_CONTROL_MODE_BROADCAST,
                                  HdmiControlManager.POWER_CONTROL_MODE_NONE);
     }
@@ -199,6 +200,7 @@ public final class HdmiCecConfigTest {
         assertThat(hdmiCecConfig.getAllowedStringValues(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
                 .containsExactly(HdmiControlManager.POWER_CONTROL_MODE_TV,
+                                 HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM,
                                  HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
     }
 

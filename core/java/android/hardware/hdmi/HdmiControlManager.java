@@ -373,21 +373,40 @@ public final class HdmiControlManager {
 
     // -- Scope of CEC power control messages sent by a playback device.
     /**
-     * Send CEC power control messages to TV only.
+     * Send CEC power control messages to TV only:
+     * Upon going to sleep, send {@code <Standby>} to TV only.
+     * Upon waking up, attempt to turn on the TV via {@code <One Touch Play>} but do not turn on the
+     * Audio system via {@code <System Audio Mode Request>}.
      *
      * @hide
      */
     @SystemApi
     public static final String POWER_CONTROL_MODE_TV = "to_tv";
     /**
-     * Broadcast CEC power control messages to all devices in the network.
+     * Send CEC power control messages to TV and Audio System:
+     * Upon going to sleep, send {@code <Standby>} to TV and Audio system.
+     * Upon waking up, attempt to turn on the TV via {@code <One Touch Play>} and attempt to turn on
+     * the Audio system via {@code <System Audio Mode Request>}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM = "to_tv_and_audio_system";
+    /**
+     * Broadcast CEC power control messages to all devices in the network:
+     * Upon going to sleep, send {@code <Standby>} to all devices in the network.
+     * Upon waking up, attempt to turn on the TV via {@code <One Touch Play>} and attempt to turn on
+     * the Audio system via {@code <System Audio Mode Request>}.
      *
      * @hide
      */
     @SystemApi
     public static final String POWER_CONTROL_MODE_BROADCAST = "broadcast";
     /**
-     * Don't send any CEC power control messages.
+     * Don't send any CEC power control messages:
+     * Upon going to sleep, do not send any {@code <Standby>} message.
+     * Upon waking up, do not turn on the TV via {@code <One Touch Play>} and do not turn on the
+     * Audio system via {@code <System Audio Mode Request>}.
      *
      * @hide
      */
@@ -398,6 +417,7 @@ public final class HdmiControlManager {
      */
     @StringDef(prefix = { "POWER_CONTROL_MODE_" }, value = {
             POWER_CONTROL_MODE_TV,
+            POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM,
             POWER_CONTROL_MODE_BROADCAST,
             POWER_CONTROL_MODE_NONE
     })

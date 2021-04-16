@@ -4255,6 +4255,8 @@
   <java-symbol type="bool" name="config_cecPowerControlMode_userConfigurable" />
   <java-symbol type="bool" name="config_cecPowerControlModeTv_allowed" />
   <java-symbol type="bool" name="config_cecPowerControlModeTv_default" />
+  <java-symbol type="bool" name="config_cecPowerControlModeTvAndAudioSystem_allowed" />
+  <java-symbol type="bool" name="config_cecPowerControlModeTvAndAudioSystem_default" />
   <java-symbol type="bool" name="config_cecPowerControlModeBroadcast_allowed" />
   <java-symbol type="bool" name="config_cecPowerControlModeBroadcast_default" />
   <java-symbol type="bool" name="config_cecPowerControlModeNone_allowed" />

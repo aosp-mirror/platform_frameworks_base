@@ -3350,6 +3350,7 @@ package android.hardware.hdmi {
     field public static final String POWER_CONTROL_MODE_BROADCAST = "broadcast";
     field public static final String POWER_CONTROL_MODE_NONE = "none";
     field public static final String POWER_CONTROL_MODE_TV = "to_tv";
+    field public static final String POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM = "to_tv_and_audio_system";
     field public static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE = "none";
     field public static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW = "standby_now";
     field public static final int POWER_STATUS_ON = 0; // 0x0

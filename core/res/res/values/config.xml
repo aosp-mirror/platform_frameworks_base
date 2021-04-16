@@ -4770,6 +4770,8 @@
     <bool name="config_cecPowerControlMode_userConfigurable">true</bool>
     <bool name="config_cecPowerControlModeTv_allowed">true</bool>
     <bool name="config_cecPowerControlModeTv_default">true</bool>
+    <bool name="config_cecPowerControlModeTvAndAudioSystem_allowed">true</bool>
+    <bool name="config_cecPowerControlModeTvAndAudioSystem_default">false</bool>
     <bool name="config_cecPowerControlModeBroadcast_allowed">true</bool>
     <bool name="config_cecPowerControlModeBroadcast_default">false</bool>
     <bool name="config_cecPowerControlModeNone_allowed">true</bool>
