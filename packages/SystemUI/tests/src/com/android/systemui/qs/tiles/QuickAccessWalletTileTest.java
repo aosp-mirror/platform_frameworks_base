@@ -233,6 +233,11 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
+    public void testGetTileLabel() {
+        assertEquals(mContext.getString(R.string.wallet_title), mTile.getTileLabel().toString());
+    }
+
+    @Test
     public void testHandleUpdateState_hasCard_deviceLocked_tileInactive() {
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
         QSTile.State state = new QSTile.State();
