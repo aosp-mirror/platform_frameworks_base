@@ -259,6 +259,14 @@ public class FullScore {
     }
 
     /**
+     * Returns this score but validated.
+     */
+    public FullScore asValidated() {
+        return new FullScore(mLegacyInt, mPolicies | (1L << POLICY_IS_VALIDATED),
+                mKeepConnectedReason);
+    }
+
+    /**
      * For backward compatibility, get the legacy int.
      * This will be removed before S is published.
      */
