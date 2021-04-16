@@ -35,7 +35,9 @@ import static com.android.systemui.people.widget.AppWidgetOptionsHelper.OPTIONS_
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -45,8 +47,10 @@ import static org.mockito.Mockito.when;
 
 import static java.util.Objects.requireNonNull;
 
+import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Person;
 import android.app.people.ConversationChannel;
 import android.app.people.ConversationStatus;
@@ -59,11 +63,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.os.UserManager;
+import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 
@@ -95,6 +102,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -169,6 +177,10 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private NotificationEntryManager mNotificationEntryManager;
     @Mock
     private PackageManager mPackageManager;
+    @Mock
+    private INotificationManager mNotificationManager;
+    @Mock
+    private UserManager mUserManager;
 
     @Captor
     private ArgumentCaptor<NotificationHandler> mListenerCaptor;
@@ -189,7 +201,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mProvider = new PeopleSpaceWidgetProvider();
         mProvider.setPeopleSpaceWidgetManager(mManager);
         mManager.setAppWidgetManager(mAppWidgetManager, mIPeopleManager, mPeopleManager,
-                mLauncherApps, mNotificationEntryManager, mPackageManager, true, mProvider);
+                mLauncherApps, mNotificationEntryManager, mPackageManager, true, mProvider,
+                mUserManager, mNotificationManager);
         mManager.attach(mListenerService);
 
         verify(mListenerService).addNotificationHandler(mListenerCaptor.capture());
@@ -201,6 +214,98 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         addTileForWidget(PERSON_TILE_WITH_SAME_URI, WIDGET_ID_WITH_SAME_URI);
         when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITHOUT_SHORTCUT)))
                 .thenReturn(new Bundle());
+        when(mUserManager.isQuietModeEnabled(any())).thenReturn(false);
+    }
+
+    @Test
+    public void testGetRecentTilesReturnsSortedListWithOnlyRecentConversations() throws Exception {
+        // Ensure the less-recent Important conversation is before more recent conversations.
+        ConversationChannelWrapper newerNonImportantConversation = getConversationChannelWrapper(
+                SHORTCUT_ID, false, 3);
+        ConversationChannelWrapper newerImportantConversation = getConversationChannelWrapper(
+                SHORTCUT_ID + 1, true, 3);
+        ConversationChannelWrapper olderImportantConversation = getConversationChannelWrapper(
+                SHORTCUT_ID + 2,
+                true, 1);
+        when(mNotificationManager.getConversations(anyBoolean())).thenReturn(
+                new ParceledListSlice(Arrays.asList(
+                        newerNonImportantConversation, newerImportantConversation,
+                        olderImportantConversation)));
+
+        // Ensure the non-Important conversation is sorted between these recent conversations.
+        ConversationChannel recentConversationBeforeNonImportantConversation =
+                getConversationChannel(
+                        SHORTCUT_ID + 3, 4);
+        ConversationChannel recentConversationAfterNonImportantConversation =
+                getConversationChannel(SHORTCUT_ID + 4,
+                        2);
+        when(mIPeopleManager.getRecentConversations()).thenReturn(
+                new ParceledListSlice(Arrays.asList(recentConversationAfterNonImportantConversation,
+                        recentConversationBeforeNonImportantConversation)));
+
+        List<String> orderedShortcutIds = mManager.getRecentTiles()
+                .stream().map(tile -> tile.getId()).collect(Collectors.toList());
+
+        // Check for sorted recent conversations.
+        assertThat(orderedShortcutIds).containsExactly(
+                recentConversationBeforeNonImportantConversation.getShortcutInfo().getId(),
+                newerNonImportantConversation.getShortcutInfo().getId(),
+                recentConversationAfterNonImportantConversation.getShortcutInfo().getId())
+                .inOrder();
+    }
+
+    @Test
+    public void testGetPriorityTilesReturnsSortedListWithOnlyImportantConversations()
+            throws Exception {
+        // Ensure the less-recent Important conversation is before more recent conversations.
+        ConversationChannelWrapper newerNonImportantConversation = getConversationChannelWrapper(
+                SHORTCUT_ID, false, 3);
+        ConversationChannelWrapper newerImportantConversation = getConversationChannelWrapper(
+                SHORTCUT_ID + 1, true, 3);
+        ConversationChannelWrapper olderImportantConversation = getConversationChannelWrapper(
+                SHORTCUT_ID + 2,
+                true, 1);
+        when(mNotificationManager.getConversations(anyBoolean())).thenReturn(
+                new ParceledListSlice(Arrays.asList(
+                        newerNonImportantConversation, newerImportantConversation,
+                        olderImportantConversation)));
+
+        List<String> orderedShortcutIds = mManager.getPriorityTiles()
+                .stream().map(tile -> tile.getId()).collect(Collectors.toList());
+
+        // Check for sorted priority conversations.
+        assertThat(orderedShortcutIds).containsExactly(
+                newerImportantConversation.getShortcutInfo().getId(),
+                olderImportantConversation.getShortcutInfo().getId())
+                .inOrder();
+    }
+
+    @Test
+    public void testGetTilesReturnsNothingInQuietMode()
+            throws Exception {
+        // Ensure the less-recent Important conversation is before more recent conversations.
+        ConversationChannelWrapper newerNonImportantConversation = getConversationChannelWrapper(
+                SHORTCUT_ID, false, 3);
+        ConversationChannelWrapper newerImportantConversation = getConversationChannelWrapper(
+                SHORTCUT_ID + 1, true, 3);
+        ConversationChannelWrapper olderImportantConversation = getConversationChannelWrapper(
+                SHORTCUT_ID + 2,
+                true, 1);
+        when(mNotificationManager.getConversations(anyBoolean())).thenReturn(
+                new ParceledListSlice(Arrays.asList(
+                        newerNonImportantConversation, newerImportantConversation,
+                        olderImportantConversation)));
+        ConversationChannel recentConversation =
+                getConversationChannel(
+                        SHORTCUT_ID + 3, 4);
+        when(mIPeopleManager.getRecentConversations()).thenReturn(
+                new ParceledListSlice(Arrays.asList(recentConversation)));
+
+        when(mUserManager.isQuietModeEnabled(any())).thenReturn(true);
+
+        // Check nothing returned.
+        assertThat(mManager.getPriorityTiles()).isEmpty();
+        assertThat(mManager.getRecentTiles()).isEmpty();
     }
 
     @Test
@@ -1207,5 +1312,31 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         storedWidgetIdsByUri.add(String.valueOf(widgetId));
         editor.putStringSet(contactUri.toString(), storedWidgetIdsByUri);
         editor.apply();
+    }
+
+    private ConversationChannelWrapper getConversationChannelWrapper(String shortcutId,
+            boolean importantConversation, long lastInteractionTimestamp) throws Exception {
+        ConversationChannelWrapper convo = new ConversationChannelWrapper();
+        NotificationChannel notificationChannel = new NotificationChannel(shortcutId,
+                "channel" + shortcutId,
+                NotificationManager.IMPORTANCE_DEFAULT);
+        notificationChannel.setImportantConversation(importantConversation);
+        convo.setNotificationChannel(notificationChannel);
+        convo.setShortcutInfo(new ShortcutInfo.Builder(mContext, shortcutId).setLongLabel(
+                "name").build());
+        when(mIPeopleManager.getLastInteraction(anyString(), anyInt(),
+                eq(shortcutId))).thenReturn(lastInteractionTimestamp);
+        return convo;
+    }
+
+    private ConversationChannel getConversationChannel(String shortcutId,
+            long lastInteractionTimestamp) throws Exception {
+        ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext, shortcutId).setLongLabel(
+                "name").build();
+        ConversationChannel convo = new ConversationChannel(shortcutInfo, 0, null, null,
+                lastInteractionTimestamp, false);
+        when(mIPeopleManager.getLastInteraction(anyString(), anyInt(),
+                eq(shortcutId))).thenReturn(lastInteractionTimestamp);
+        return convo;
     }
 }

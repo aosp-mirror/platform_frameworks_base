@@ -22,8 +22,6 @@ import static com.android.systemui.people.widget.AppWidgetOptionsHelper.OPTIONS_
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -35,10 +33,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.Person;
-import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
@@ -47,7 +42,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
-import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -57,7 +51,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.ContactsContract;
-import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
@@ -81,10 +74,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
@@ -185,8 +176,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     @Mock
     private IPeopleManager mPeopleManager;
     @Mock
-    private LauncherApps mLauncherApps;
-    @Mock
     private IAppWidgetService mIAppWidgetService;
     @Mock
     private AppWidgetManager mAppWidgetManager;
@@ -236,84 +225,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         when(mPackageManager.getApplicationIcon(anyString())).thenReturn(null);
         when(mNotificationEntryManager.getVisibleNotifications())
                 .thenReturn(List.of(mNotificationEntry1, mNotificationEntry2, mNotificationEntry3));
-    }
-
-    @Test
-    public void testGetRecentTilesReturnsSortedListWithOnlyRecentConversations() throws Exception {
-        // Ensure the less-recent Important conversation is before more recent conversations.
-        ConversationChannelWrapper newerNonImportantConversation = getConversationChannelWrapper(
-                SHORTCUT_ID_1, false, 3);
-        ConversationChannelWrapper newerImportantConversation = getConversationChannelWrapper(
-                SHORTCUT_ID_1 + 1, true, 3);
-        ConversationChannelWrapper olderImportantConversation = getConversationChannelWrapper(
-                SHORTCUT_ID_1 + 2,
-                true, 1);
-        when(mNotificationManager.getConversations(anyBoolean())).thenReturn(
-                new ParceledListSlice(Arrays.asList(
-                        newerNonImportantConversation, newerImportantConversation,
-                        olderImportantConversation)));
-
-        // Ensure the non-Important conversation is sorted between these recent conversations.
-        ConversationChannel recentConversationBeforeNonImportantConversation =
-                getConversationChannel(
-                        SHORTCUT_ID_1 + 3, 4);
-        ConversationChannel recentConversationAfterNonImportantConversation =
-                getConversationChannel(SHORTCUT_ID_1 + 4,
-                        2);
-        when(mPeopleManager.getRecentConversations()).thenReturn(
-                new ParceledListSlice(Arrays.asList(recentConversationAfterNonImportantConversation,
-                        recentConversationBeforeNonImportantConversation)));
-
-        List<String> orderedShortcutIds = PeopleSpaceUtils.getRecentTiles(
-                mContext, mNotificationManager, mPeopleManager,
-                mLauncherApps, mNotificationEntryManager)
-                .stream().map(tile -> tile.getId()).collect(Collectors.toList());
-
-        // Check for sorted recent conversations.
-        assertThat(orderedShortcutIds).containsExactly(
-                recentConversationBeforeNonImportantConversation.getShortcutInfo().getId(),
-                newerNonImportantConversation.getShortcutInfo().getId(),
-                recentConversationAfterNonImportantConversation.getShortcutInfo().getId())
-                .inOrder();
-    }
-
-    @Test
-    public void testGetPriorityTilesReturnsSortedListWithOnlyImportantConversations()
-            throws Exception {
-        // Ensure the less-recent Important conversation is before more recent conversations.
-        ConversationChannelWrapper newerNonImportantConversation = getConversationChannelWrapper(
-                SHORTCUT_ID_1, false, 3);
-        ConversationChannelWrapper newerImportantConversation = getConversationChannelWrapper(
-                SHORTCUT_ID_1 + 1, true, 3);
-        ConversationChannelWrapper olderImportantConversation = getConversationChannelWrapper(
-                SHORTCUT_ID_1 + 2,
-                true, 1);
-        when(mNotificationManager.getConversations(anyBoolean())).thenReturn(
-                new ParceledListSlice(Arrays.asList(
-                        newerNonImportantConversation, newerImportantConversation,
-                        olderImportantConversation)));
-
-        // Ensure the non-Important conversation is sorted between these recent conversations.
-        ConversationChannel recentConversationBeforeNonImportantConversation =
-                getConversationChannel(
-                        SHORTCUT_ID_1 + 3, 4);
-        ConversationChannel recentConversationAfterNonImportantConversation =
-                getConversationChannel(SHORTCUT_ID_1 + 4,
-                        2);
-        when(mPeopleManager.getRecentConversations()).thenReturn(
-                new ParceledListSlice(Arrays.asList(recentConversationAfterNonImportantConversation,
-                        recentConversationBeforeNonImportantConversation)));
-
-        List<String> orderedShortcutIds = PeopleSpaceUtils.getPriorityTiles(
-                mContext, mNotificationManager, mPeopleManager,
-                mLauncherApps, mNotificationEntryManager)
-                .stream().map(tile -> tile.getId()).collect(Collectors.toList());
-
-        // Check for sorted priority conversations.
-        assertThat(orderedShortcutIds).containsExactly(
-                newerImportantConversation.getShortcutInfo().getId(),
-                olderImportantConversation.getShortcutInfo().getId())
-                .inOrder();
     }
 
     @Test
@@ -569,31 +480,5 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
 
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
-    }
-
-    private ConversationChannelWrapper getConversationChannelWrapper(String shortcutId,
-            boolean importantConversation, long lastInteractionTimestamp) throws Exception {
-        ConversationChannelWrapper convo = new ConversationChannelWrapper();
-        NotificationChannel notificationChannel = new NotificationChannel(shortcutId,
-                "channel" + shortcutId,
-                NotificationManager.IMPORTANCE_DEFAULT);
-        notificationChannel.setImportantConversation(importantConversation);
-        convo.setNotificationChannel(notificationChannel);
-        convo.setShortcutInfo(new ShortcutInfo.Builder(mContext, shortcutId).setLongLabel(
-                "name").build());
-        when(mPeopleManager.getLastInteraction(anyString(), anyInt(),
-                eq(shortcutId))).thenReturn(lastInteractionTimestamp);
-        return convo;
-    }
-
-    private ConversationChannel getConversationChannel(String shortcutId,
-            long lastInteractionTimestamp) throws Exception {
-        ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext, shortcutId).setLongLabel(
-                "name").build();
-        ConversationChannel convo = new ConversationChannel(shortcutInfo, 0, null, null,
-                lastInteractionTimestamp, false);
-        when(mPeopleManager.getLastInteraction(anyString(), anyInt(),
-                eq(shortcutId))).thenReturn(lastInteractionTimestamp);
-        return convo;
     }
 }
