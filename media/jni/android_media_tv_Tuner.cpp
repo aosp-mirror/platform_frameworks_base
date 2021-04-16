@@ -3029,7 +3029,8 @@ static FrontendSettings getFrontendSettings(JNIEnv *env, int type, jobject setti
     }
 }
 
-static FrontendSettingsExt1_1 getFrontendSettingsExt1_1(JNIEnv *env, int type, jobject settings) {
+static FrontendSettingsExt1_1 getFrontendSettingsExt1_1(
+        JNIEnv *env, int type, jobject settings, int tunerVersion) {
     ALOGD("getFrontendSettingsExt1_1 %d", type);
 
     FrontendSettingsExt1_1 settingsExt1_1 {
@@ -3037,6 +3038,10 @@ static FrontendSettingsExt1_1 getFrontendSettingsExt1_1(JNIEnv *env, int type, j
         .inversion = FrontendSpectralInversion::UNDEFINED,
     };
     settingsExt1_1.settingExt.noinit();
+
+    if (tunerVersion < TUNER_VERSION_1_1) {
+        return settingsExt1_1;
+    }
 
     if (type == static_cast<int>(::android::hardware::tv::tuner::V1_1::FrontendType::DTMB)) {
         getDtmbFrontendSettings(env, settings, settingsExt1_1);
@@ -3220,7 +3225,8 @@ static jobject android_media_tv_Tuner_open_frontend_by_handle(
 static int android_media_tv_Tuner_tune(JNIEnv *env, jobject thiz, jint type, jobject settings) {
     sp<JTuner> tuner = getTuner(env, thiz);
     FrontendSettings setting = getFrontendSettings(env, type, settings);
-    FrontendSettingsExt1_1 settingExt = getFrontendSettingsExt1_1(env, type, settings);
+    FrontendSettingsExt1_1 settingExt = getFrontendSettingsExt1_1(
+            env, type, settings, tuner->getTunerVersion());
     return tuner->tune(setting, settingExt);
 }
 
@@ -3233,7 +3239,8 @@ static int android_media_tv_Tuner_scan(
         JNIEnv *env, jobject thiz, jint settingsType, jobject settings, jint scanType) {
     sp<JTuner> tuner = getTuner(env, thiz);
     FrontendSettings setting = getFrontendSettings(env, settingsType, settings);
-    FrontendSettingsExt1_1 settingExt = getFrontendSettingsExt1_1(env, settingsType, settings);
+    FrontendSettingsExt1_1 settingExt = getFrontendSettingsExt1_1(
+            env, settingsType, settings, tuner->getTunerVersion());
     return tuner->scan(setting, static_cast<FrontendScanType>(scanType), settingExt);
 }
 
