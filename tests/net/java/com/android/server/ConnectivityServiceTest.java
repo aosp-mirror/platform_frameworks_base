@@ -2668,25 +2668,6 @@ public class ConnectivityServiceTest {
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
 
-        // Bring up wifi with a score of 70.
-        // Cell is lingered because it would not satisfy any request, even if it validated.
-        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
-        mWiFiNetworkAgent.adjustScore(50);
-        mWiFiNetworkAgent.connect(false);   // Score: 70
-        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
-        callback.expectCallback(CallbackEntry.LOSING, mCellNetworkAgent);
-        defaultCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
-        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
-        assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
-
-        // Tear down wifi.
-        mWiFiNetworkAgent.disconnect();
-        callback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
-        defaultCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
-        defaultCallback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
-        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
-        assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
-
         // Bring up wifi, then validate it. Previous versions would immediately tear down cell, but
         // it's arguably correct to linger it, since it was the default network before it validated.
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
@@ -2991,11 +2972,17 @@ public class ConnectivityServiceTest {
         callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
 
-        // BUG: the network will no longer linger, even though it's validated and outscored.
-        // TODO: fix this.
         mEthernetNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_ETHERNET);
         mEthernetNetworkAgent.connect(true);
+        // BUG: with the legacy int-based scoring code, the network will no longer linger, even
+        // though it's validated and outscored.
+        // The new policy-based scoring code fixes this.
+        // TODO: remove the line below and replace with the three commented lines when
+        // the policy-based scoring code is turned on.
         callback.expectAvailableThenValidatedCallbacks(mEthernetNetworkAgent);
+        // callback.expectAvailableCallbacksUnvalidated(mEthernetNetworkAgent);
+        // callback.expectCallback(CallbackEntry.LOSING, mWiFiNetworkAgent);
+        // callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mEthernetNetworkAgent);
         assertEquals(mEthernetNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         callback.assertNoCallback();
 
