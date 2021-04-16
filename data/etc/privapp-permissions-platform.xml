@@ -520,6 +520,8 @@ applications that come with the platform
         <permission name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
         <permission name="android.permission.SET_MEDIA_KEY_LISTENER" />
         <permission name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
+        <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
+        <permission name="android.permission.UPDATE_DEVICE_STATS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
