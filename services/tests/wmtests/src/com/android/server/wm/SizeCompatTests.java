@@ -335,11 +335,11 @@ public class SizeCompatTests extends WindowTestsBase {
         final WindowState window = createWindow(null, TYPE_BASE_APPLICATION, mActivity, "window");
 
         assertEquals(window, mActivity.findMainWindow());
-        assertTrue(mActivity.isLetterboxed(mActivity.findMainWindow()));
+        assertTrue(mActivity.mLetterboxUiController.isLetterboxed(mActivity.findMainWindow()));
 
         window.mAttrs.flags |= FLAG_SHOW_WALLPAPER;
 
-        assertFalse(mActivity.isLetterboxed(mActivity.findMainWindow()));
+        assertFalse(mActivity.mLetterboxUiController.isLetterboxed(mActivity.findMainWindow()));
     }
 
     @Test
@@ -1023,7 +1023,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Portrait fixed app with min aspect ratio higher that aspect ratio override for fixed
         // orientation letterbox.
-        mActivity.mWmService.setFixedOrientationLetterboxAspectRatio(1.1f);
+        mActivity.mWmService.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(1.1f);
         mActivity.info.setMinAspectRatio(3);
         prepareUnresizable(mActivity, /* maxAspect= */ 0, SCREEN_ORIENTATION_PORTRAIT);
 
@@ -1054,7 +1054,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Portrait fixed app with max aspect ratio lower that aspect ratio override for fixed
         // orientation letterbox.
-        mActivity.mWmService.setFixedOrientationLetterboxAspectRatio(3);
+        mActivity.mWmService.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(3);
         prepareUnresizable(mActivity, /* maxAspect= */ 2, SCREEN_ORIENTATION_PORTRAIT);
 
         final Rect displayBounds = new Rect(mActivity.mDisplayContent.getBounds());
@@ -1085,7 +1085,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Portrait fixed app with min aspect ratio higher that aspect ratio override for fixed
         // orientation letterbox.
         final float fixedOrientationLetterboxAspectRatio = 1.1f;
-        mActivity.mWmService.setFixedOrientationLetterboxAspectRatio(
+        mActivity.mWmService.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(
                 fixedOrientationLetterboxAspectRatio);
         prepareUnresizable(mActivity, 0, SCREEN_ORIENTATION_PORTRAIT);
 
@@ -1586,7 +1586,7 @@ public class SizeCompatTests extends WindowTestsBase {
         setUpDisplaySizeWithApp(2800, 1400);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
 
-        mActivity.mWmService.setLetterboxHorizontalPositionMultiplier(
+        mActivity.mWmService.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
                 letterboxHorizontalPositionMultiplier);
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
 
@@ -1624,7 +1624,7 @@ public class SizeCompatTests extends WindowTestsBase {
         setUpDisplaySizeWithApp(2800, 1400);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
 
-        mActivity.mWmService.setLetterboxHorizontalPositionMultiplier(
+        mActivity.mWmService.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
                 letterboxHorizontalPositionMultiplier);
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
 
