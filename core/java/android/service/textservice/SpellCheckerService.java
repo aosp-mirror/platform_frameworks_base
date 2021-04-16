@@ -421,7 +421,8 @@ public abstract class SpellCheckerService extends Service {
             final ArrayList<SentenceWordItem> wordItems = new ArrayList<SentenceWordItem>();
             wordIterator.setCharSequence(originalText, 0, originalText.length());
             int wordEnd = wordIterator.following(start);
-            int wordStart = wordIterator.getBeginning(wordEnd);
+            int wordStart = wordEnd == BreakIterator.DONE ? BreakIterator.DONE
+                    : wordIterator.getBeginning(wordEnd);
             if (DBG) {
                 Log.d(TAG, "iterator: break: ---- 1st word start = " + wordStart + ", end = "
                         + wordEnd + "\n" + originalText);
