@@ -80,11 +80,11 @@ public final class StorageSessionController {
     public int getConnectionUserIdForVolume(VolumeInfo vol) {
         final Context volumeUserContext = mContext.createContextAsUser(
                 UserHandle.of(vol.mountUserId), 0);
-        boolean sharesMediaWithParent = volumeUserContext.getSystemService(
-                UserManager.class).sharesMediaWithParent();
+        boolean isMediaSharedWithParent = volumeUserContext.getSystemService(
+                UserManager.class).isMediaSharedWithParent();
 
         UserInfo userInfo = mUserManager.getUserInfo(vol.mountUserId);
-        if (userInfo != null && sharesMediaWithParent) {
+        if (userInfo != null && isMediaSharedWithParent) {
             // Clones use the same connection as their parent
             return userInfo.profileGroupId;
         } else {

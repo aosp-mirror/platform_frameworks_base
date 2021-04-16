@@ -121,7 +121,7 @@ public final class UserTypeFactory {
                 .setMaxAllowedPerParent(1)
                 .setLabel(0)
                 .setDefaultRestrictions(null)
-                .setSharesMediaWithParent(true);
+                .setIsMediaSharedWithParent(true);
     }
 
     /**

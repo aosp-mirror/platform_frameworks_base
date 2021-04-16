@@ -1516,13 +1516,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean sharesMediaWithParent(@UserIdInt int userId) {
+    public boolean isMediaSharedWithParent(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
-                "sharesMediaWithParent");
+                "isMediaSharedWithParent");
         synchronized (mUsersLock) {
             UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
             return userTypeDetails != null ? userTypeDetails.isProfile()
-                    && userTypeDetails.sharesMediaWithParent() : false;
+                    && userTypeDetails.isMediaSharedWithParent() : false;
         }
     }
 
