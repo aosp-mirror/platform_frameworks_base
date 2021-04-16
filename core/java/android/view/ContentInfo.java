@@ -164,6 +164,7 @@ public final class ContentInfo {
      *
      * @hide
      */
+    @TestApi
     public void releasePermissions() {
         if (mInputContentInfo != null) {
             mInputContentInfo.releasePermission();
@@ -388,6 +389,8 @@ public final class ContentInfo {
          *
          * @hide
          */
+        @TestApi
+        @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
         public Builder setInputContentInfo(@Nullable InputContentInfo inputContentInfo) {
             mInputContentInfo = inputContentInfo;
@@ -400,6 +403,8 @@ public final class ContentInfo {
          *
          * @hide
          */
+        @TestApi
+        @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
         public Builder setDragAndDropPermissions(@Nullable DragAndDropPermissions permissions) {
             mDragAndDropPermissions = permissions;
