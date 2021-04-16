@@ -625,6 +625,7 @@ public class PipTouchHandler {
             }
 
             mMenuController.handlePointerEvent(cloneEvent);
+            cloneEvent.recycle();
         }
 
         return true;
