@@ -164,6 +164,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final boolean DEBUG = false; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
     static final boolean DEBUG_PROCSTATE = false; // STOPSHIP if true
+    static final boolean DEBUG_REBOOT = true;
 
     @VisibleForTesting
     static final long DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day
@@ -659,7 +660,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     /** lifecycle event */
     void onBootPhase(int phase) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "onBootPhase: " + phase);
         }
         switch (phase) {
@@ -674,7 +675,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     /** lifecycle event */
     void handleUnlockUser(int userId) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "handleUnlockUser: user=" + userId);
         }
         synchronized (mUnlockedUsers) {
@@ -699,7 +700,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     /** lifecycle event */
     void handleStopUser(int userId) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "handleStopUser: user=" + userId);
         }
         synchronized (mLock) {
@@ -713,7 +714,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @GuardedBy("mLock")
     private void unloadUserLocked(int userId) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "unloadUserLocked: user=" + userId);
         }
         // Save all dirty information.
@@ -945,7 +946,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     void saveBaseStateLocked() {
         final AtomicFile file = getBaseStateFile();
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "Saving to " + file.getBaseFile());
         }
 
@@ -978,7 +979,7 @@ public class ShortcutService extends IShortcutService.Stub {
         mRawLastResetTime = 0;
 
         final AtomicFile file = getBaseStateFile();
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "Loading from " + file.getBaseFile());
         }
         try (FileInputStream in = file.openRead()) {
@@ -1028,7 +1029,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mLock")
     private void saveUserLocked(@UserIdInt int userId) {
         final File path = getUserFile(userId);
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "Saving to " + path);
         }
 
@@ -1086,7 +1087,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Nullable
     private ShortcutUser loadUserLocked(@UserIdInt int userId) {
         final File path = getUserFile(userId);
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "Loading from " + path);
         }
         final AtomicFile file = new AtomicFile(path);
@@ -1095,7 +1096,7 @@ public class ShortcutService extends IShortcutService.Stub {
         try {
             in = file.openRead();
         } catch (FileNotFoundException e) {
-            if (DEBUG) {
+            if (DEBUG || DEBUG_REBOOT) {
                 Slog.d(TAG, "Not found " + path);
             }
             return null;
@@ -1132,7 +1133,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final int depth = parser.getDepth();
 
             final String tag = parser.getName();
-            if (DEBUG_LOAD) {
+            if (DEBUG_LOAD || DEBUG_REBOOT) {
                 Slog.d(TAG, String.format("depth=%d type=%d name=%s",
                         depth, type, tag));
             }
@@ -1157,7 +1158,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private final Runnable mSaveDirtyInfoRunner = this::saveDirtyInfo;
 
     private void scheduleSaveInner(@UserIdInt int userId) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "Scheduling to save for " + userId);
         }
         synchronized (mLock) {
@@ -1172,7 +1173,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     void saveDirtyInfo() {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "saveDirtyInfo");
         }
         if (mShutdown.get()) {
@@ -2942,6 +2943,10 @@ public class ShortcutService extends IShortcutService.Stub {
                 @Nullable String packageName, @Nullable List<String> shortcutIds,
                 @Nullable List<LocusId> locusIds, @Nullable ComponentName componentName,
                 int queryFlags, int userId, int callingPid, int callingUid) {
+            if (DEBUG_REBOOT) {
+                Slog.d(TAG, "Getting shortcuts for launcher= " + callingPackage
+                        + "user=" + userId + " pkg=" + packageName);
+            }
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
             int flags = ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER;
@@ -3639,7 +3644,7 @@ public class ShortcutService extends IShortcutService.Stub {
      */
     @VisibleForTesting
     void checkPackageChanges(@UserIdInt int ownerUserId) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "checkPackageChanges() ownerUserId=" + ownerUserId);
         }
         if (injectIsSafeModeEnabled()) {
@@ -3685,6 +3690,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @GuardedBy("mLock")
     private void rescanUpdatedPackagesLocked(@UserIdInt int userId, long lastScanTime) {
+        if (DEBUG_REBOOT) {
+            Slog.d(TAG, "rescan updated package user=" + userId + " last scanned=" + lastScanTime);
+        }
         final ShortcutUser user = getUserShortcutsLocked(userId);
 
         // Note after each OTA, we'll need to rescan all system apps, as their lastUpdateTime
@@ -3708,7 +3716,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void handlePackageAdded(String packageName, @UserIdInt int userId) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, String.format("handlePackageAdded: %s user=%d", packageName, userId));
         }
         synchronized (mLock) {
@@ -3720,7 +3728,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void handlePackageUpdateFinished(String packageName, @UserIdInt int userId) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, String.format("handlePackageUpdateFinished: %s user=%d",
                     packageName, userId));
         }
@@ -3736,7 +3744,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void handlePackageRemoved(String packageName, @UserIdInt int packageUserId) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, String.format("handlePackageRemoved: %s user=%d", packageName,
                     packageUserId));
         }
@@ -3746,7 +3754,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void handlePackageDataCleared(String packageName, int packageUserId) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, String.format("handlePackageDataCleared: %s user=%d", packageName,
                     packageUserId));
         }
@@ -3761,7 +3769,7 @@ public class ShortcutService extends IShortcutService.Stub {
             handlePackageRemoved(packageName, packageUserId);
             return;
         }
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, String.format("handlePackageChanged: %s user=%d", packageName,
                     packageUserId));
         }
@@ -3948,7 +3956,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private void forUpdatedPackages(@UserIdInt int userId, long lastScanTime, boolean afterOta,
             Consumer<ApplicationInfo> callback) {
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "forUpdatedPackages for user " + userId + ", lastScanTime=" + lastScanTime
                     + " afterOta=" + afterOta);
         }
@@ -3960,7 +3968,7 @@ public class ShortcutService extends IShortcutService.Stub {
             // Also if it's right after an OTA, always re-scan all apps anyway, since the
             // shortcut parser might have changed.
             if (afterOta || (pi.lastUpdateTime >= lastScanTime)) {
-                if (DEBUG) {
+                if (DEBUG || DEBUG_REBOOT) {
                     Slog.d(TAG, "Found updated package " + pi.packageName
                             + " updateTime=" + pi.lastUpdateTime);
                 }
@@ -4313,7 +4321,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public void applyRestore(byte[] payload, @UserIdInt int userId) {
         enforceSystem();
-        if (DEBUG) {
+        if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "Restoring user " + userId);
         }
         synchronized (mLock) {
