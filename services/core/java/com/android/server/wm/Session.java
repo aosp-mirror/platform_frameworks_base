@@ -640,9 +640,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
-    void windowAddedLocked(String packageName) {
-        mPackageName = packageName;
-        mRelayoutTag = "relayoutWindow: " + mPackageName;
+    void windowAddedLocked() {
+        if (mPackageName == null) {
+            final WindowProcessController wpc = mService.mAtmService.mProcessMap.getProcess(mPid);
+            if (wpc != null) {
+                mPackageName = wpc.mInfo.packageName;
+                mRelayoutTag = "relayoutWindow: " + mPackageName;
+            } else {
+                Slog.e(TAG_WM, "Unknown process pid=" + mPid);
+            }
+        }
         if (mSurfaceSession == null) {
             if (DEBUG) {
                 Slog.v(TAG_WM, "First window added to " + this + ", creating SurfaceSession");
