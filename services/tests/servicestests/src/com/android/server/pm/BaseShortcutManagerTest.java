@@ -125,6 +125,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -2596,6 +2597,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             ((List) inv.getArguments()[0]).addAll(candidates);
             return preferred;
         }).when(mMockPackageManagerInternal).getHomeActivitiesAsUser(any(List.class), eq(userId));
+    }
+
+    protected void prepareIntentActivities(ComponentName cn) {
+        when(mMockPackageManagerInternal.queryIntentActivities(
+                anyOrNull(Intent.class), anyStringOrNull(), anyInt(), anyInt(), anyInt()))
+                .thenReturn(Collections.singletonList(
+                        ri(cn.getPackageName(), cn.getClassName(), false, 0)));
     }
 
     protected static ComponentName cn(String packageName, String name) {

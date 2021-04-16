@@ -663,12 +663,14 @@ class ShortcutPackage extends ShortcutPackageItem {
         });
         // Then, update the pinned state if necessary.
         final List<ShortcutInfo> pinned = getShortcutById(pinnedShortcuts);
-        pinned.forEach(si -> {
-            if (!si.isPinned()) {
-                si.addFlags(ShortcutInfo.FLAG_PINNED);
-            }
-        });
-        saveShortcut(pinned);
+        if (pinned != null) {
+            pinned.forEach(si -> {
+                if (!si.isPinned()) {
+                    si.addFlags(ShortcutInfo.FLAG_PINNED);
+                }
+            });
+            saveShortcut(pinned);
+        }
         forEachShortcutMutateIf(AppSearchShortcutInfo.QUERY_IS_PINNED, si -> {
             if (!pinnedShortcuts.contains(si.getId()) && si.isPinned()) {
                 si.clearFlags(ShortcutInfo.FLAG_PINNED);
@@ -826,9 +828,11 @@ class ShortcutPackage extends ShortcutPackageItem {
                 : s.getLauncherShortcutsLocked(callingLauncher, getPackageUserId(), launcherUserId)
                         .getPinnedShortcutIds(getPackageName(), getPackageUserId());
         final List<ShortcutInfo> shortcuts = getShortcutById(ids);
-        for (ShortcutInfo si : shortcuts) {
-            filter(result, query, cloneFlag, callingLauncher, pinnedByCallerSet,
-                    getPinnedByAnyLauncher, si);
+        if (shortcuts != null) {
+            for (ShortcutInfo si : shortcuts) {
+                filter(result, query, cloneFlag, callingLauncher, pinnedByCallerSet,
+                        getPinnedByAnyLauncher, si);
+            }
         }
     }
 
@@ -1903,7 +1907,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         final ShortcutPackage ret = new ShortcutPackage(shortcutUser,
                 shortcutUser.getUserId(), packageName);
 
-        ret.mIsInitilized = ShortcutService.parseIntAttribute(parser, ATTR_SCHEMA_VERSON, 0) > 0;
+        ret.mIsInitilized = ShortcutService.parseIntAttribute(parser, ATTR_SCHEMA_VERSON, 0)
+                == AppSearchShortcutInfo.SCHEMA_VERSION;
         ret.mApiCallCount =
                 ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
         ret.mLastResetTime =
