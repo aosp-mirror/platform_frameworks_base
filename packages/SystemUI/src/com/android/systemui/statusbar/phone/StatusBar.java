@@ -4622,9 +4622,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             options = ActivityOptions.makeBasic();
         }
-        // Anything launched from the notification shade should always go into the secondary
-        // split-screen windowing mode.
-        options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
         return options;
     }
 
