@@ -3409,8 +3409,11 @@
   <java-symbol type="drawable" name="ic_accessibility_color_correction" />
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
   <java-symbol type="drawable" name="ic_accessibility_reduce_bright_colors" />
+  <java-symbol type="drawable" name="ic_accessibility_one_handed" />
 
   <java-symbol type="string" name="reduce_bright_colors_feature_name" />
+
+  <java-symbol type="string" name="one_handed_mode_feature_name" />
 
   <!-- com.android.internal.widget.RecyclerView -->
   <java-symbol type="id" name="item_touch_helper_previous_elevation"/>
