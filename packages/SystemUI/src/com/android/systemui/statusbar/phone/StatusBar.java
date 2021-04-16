@@ -1799,7 +1799,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade) {
-        startActivityDismissingKeyguard(intent, false, dismissShade);
+        startActivityDismissingKeyguard(intent, false /* onlyProvisioned */, dismissShade);
+    }
+
+    @Override
+    public void startActivity(Intent intent, boolean dismissShade,
+            ActivityLaunchAnimator.Controller animationController) {
+        startActivityDismissingKeyguard(intent, false, dismissShade,
+                false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
+                0 /* flags */, animationController);
     }
 
     @Override
