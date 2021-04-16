@@ -16,6 +16,7 @@
 
 package android.bluetooth.le;
 
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -163,11 +164,13 @@ public final class BluetoothLeAdvertiser {
         }
     }
 
-    @SuppressLint("AndroidFrameworkRequiresPermission")
+    @SuppressLint({
+            "AndroidFrameworkBluetoothPermission",
+            "AndroidFrameworkRequiresPermission",
+    })
     AdvertisingSetCallback wrapOldCallback(AdvertiseCallback callback, AdvertiseSettings settings) {
         return new AdvertisingSetCallback() {
             @Override
-            @SuppressLint("AndroidFrameworkRequiresPermission")
             public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower,
                     int status) {
                 if (status != AdvertisingSetCallback.ADVERTISE_SUCCESS) {
@@ -180,7 +183,6 @@ public final class BluetoothLeAdvertiser {
 
             /* Legacy advertiser is disabled on timeout */
             @Override
-            @SuppressLint("AndroidFrameworkRequiresPermission")
             public void onAdvertisingEnabled(AdvertisingSet advertisingSet, boolean enabled,
                     int status) {
                 if (enabled) {
@@ -491,6 +493,7 @@ public final class BluetoothLeAdvertiser {
      *
      * @hide
      */
+    @RequiresNoPermission
     public void cleanup() {
         mLegacyAdvertisers.clear();
         mCallbackWrappers.clear();
@@ -498,6 +501,7 @@ public final class BluetoothLeAdvertiser {
     }
 
     // Compute the size of advertisement data or scan resp
+    @RequiresBluetoothAdvertisePermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     private int totalBytes(AdvertiseData data, boolean isFlagsIncluded) {
         if (data == null) return 0;
@@ -582,6 +586,7 @@ public final class BluetoothLeAdvertiser {
         return array == null ? 0 : array.length;
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     IAdvertisingSetCallback wrap(AdvertisingSetCallback callback, Handler handler) {
         return new IAdvertisingSetCallback.Stub() {
             @Override
@@ -706,6 +711,7 @@ public final class BluetoothLeAdvertiser {
         };
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private void postStartSetFailure(Handler handler, final AdvertisingSetCallback callback,
             final int error) {
         handler.post(new Runnable() {
@@ -716,6 +722,7 @@ public final class BluetoothLeAdvertiser {
         });
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private void postStartFailure(final AdvertiseCallback callback, final int error) {
         mHandler.post(new Runnable() {
             @Override
@@ -725,6 +732,7 @@ public final class BluetoothLeAdvertiser {
         });
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private void postStartSuccess(final AdvertiseCallback callback,
             final AdvertiseSettings settings) {
         mHandler.post(new Runnable() {

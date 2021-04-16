@@ -16,7 +16,9 @@
 
 package android.bluetooth.le;
 
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
@@ -216,6 +218,7 @@ public final class AdvertisingSet {
      *
      * @hide
      */
+    @RequiresNoPermission
     public int getAdvertiserId() {
         return mAdvertiserId;
     }

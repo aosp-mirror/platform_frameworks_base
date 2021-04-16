@@ -21,6 +21,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -716,6 +717,7 @@ public final class BluetoothAdapter {
      * Bluetooth metadata listener. Overrides the default BluetoothMetadataListener
      * implementation.
      */
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private static final IBluetoothMetadataListener sBluetoothMetadataListener =
             new IBluetoothMetadataListener.Stub() {
         @Override
@@ -747,6 +749,7 @@ public final class BluetoothAdapter {
      * @return the default local adapter, or null if Bluetooth is not supported on this hardware
      * platform
      */
+    @RequiresNoPermission
     public static synchronized BluetoothAdapter getDefaultAdapter() {
         if (sAdapter == null) {
             IBinder b = ServiceManager.getService(BLUETOOTH_MANAGER_SERVICE);
@@ -792,6 +795,7 @@ public final class BluetoothAdapter {
      * @param address valid Bluetooth MAC address
      * @throws IllegalArgumentException if address is invalid
      */
+    @RequiresNoPermission
     public BluetoothDevice getRemoteDevice(String address) {
         return new BluetoothDevice(address);
     }
@@ -807,6 +811,7 @@ public final class BluetoothAdapter {
      * @param address Bluetooth MAC address (6 bytes)
      * @throws IllegalArgumentException if address is invalid
      */
+    @RequiresNoPermission
     public BluetoothDevice getRemoteDevice(byte[] address) {
         if (address == null || address.length != 6) {
             throw new IllegalArgumentException("Bluetooth address must have 6 bytes");
@@ -824,6 +829,7 @@ public final class BluetoothAdapter {
      * Use {@link #isMultipleAdvertisementSupported()} to check whether LE Advertising is supported
      * on this device before calling this method.
      */
+    @RequiresNoPermission
     public BluetoothLeAdvertiser getBluetoothLeAdvertiser() {
         if (!getLeAccess()) {
             return null;
@@ -846,6 +852,7 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
+    @RequiresNoPermission
     public PeriodicAdvertisingManager getPeriodicAdvertisingManager() {
         if (!getLeAccess()) {
             return null;
@@ -866,6 +873,7 @@ public final class BluetoothAdapter {
     /**
      * Returns a {@link BluetoothLeScanner} object for Bluetooth LE scan operations.
      */
+    @RequiresNoPermission
     public BluetoothLeScanner getBluetoothLeScanner() {
         if (!getLeAccess()) {
             return null;
@@ -887,6 +895,7 @@ public final class BluetoothAdapter {
      * @return true if the local adapter is turned on
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public boolean isEnabled() {
         return getState() == BluetoothAdapter.STATE_ON;
     }
@@ -900,6 +909,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
+    @RequiresNoPermission
     public boolean isLeEnabled() {
         final int state = getLeState();
         if (DBG) {
@@ -937,6 +947,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disableBLE() {
         if (!isBleScanAlwaysAvailable()) {
@@ -983,6 +994,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean enableBLE() {
         if (!isBleScanAlwaysAvailable()) {
@@ -1015,6 +1027,7 @@ public final class BluetoothAdapter {
             };
 
     /** @hide */
+    @RequiresNoPermission
     public void disableBluetoothGetStateCache() {
         mBluetoothGetStateCache.disableLocal();
     }
@@ -1059,6 +1072,7 @@ public final class BluetoothAdapter {
      * @return current state of Bluetooth adapter
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     @AdapterState
     public int getState() {
         int state = getStateInternal();
@@ -1095,6 +1109,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     @AdapterState
     @UnsupportedAppUsage(publicAlternatives = "Use {@link #getState()} instead to determine "
             + "whether you can use BLE & BT classic.")
@@ -1649,6 +1664,7 @@ public final class BluetoothAdapter {
 
     /** @hide */
     @UnsupportedAppUsage
+    @RequiresBluetoothScanPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public int getDiscoverableTimeout() {
         if (getState() != STATE_ON) {
@@ -1669,6 +1685,7 @@ public final class BluetoothAdapter {
 
     /** @hide */
     @UnsupportedAppUsage
+    @RequiresBluetoothScanPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void setDiscoverableTimeout(int timeout) {
         if (getState() != STATE_ON) {
@@ -1714,6 +1731,7 @@ public final class BluetoothAdapter {
      * Set the context for this BluetoothAdapter (only called from BluetoothManager)
      * @hide
      */
+    @RequiresNoPermission
     public void setContext(Context context) {
         mContext = context;
     }
@@ -1872,6 +1890,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -1916,6 +1935,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -1964,6 +1984,7 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -1996,6 +2017,7 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -2021,6 +2043,7 @@ public final class BluetoothAdapter {
      * @return true if Multiple Advertisement feature is supported
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public boolean isMultipleAdvertisementSupported() {
         if (getState() != STATE_ON) {
             return false;
@@ -2049,6 +2072,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
+    @RequiresNoPermission
     public boolean isBleScanAlwaysAvailable() {
         try {
             return mManagerService.isBleScanAlwaysAvailable();
@@ -2082,6 +2106,7 @@ public final class BluetoothAdapter {
             };
 
     /** @hide */
+    @RequiresNoPermission
     public void disableIsOffloadedFilteringSupportedCache() {
         mBluetoothFilteringCache.disableLocal();
     }
@@ -2097,6 +2122,7 @@ public final class BluetoothAdapter {
      * @return true if chipset supports on-chip filtering
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public boolean isOffloadedFilteringSupported() {
         if (!getLeAccess()) {
             return false;
@@ -2110,6 +2136,7 @@ public final class BluetoothAdapter {
      * @return true if chipset supports on-chip scan batching
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public boolean isOffloadedScanBatchingSupported() {
         if (!getLeAccess()) {
             return false;
@@ -2133,6 +2160,7 @@ public final class BluetoothAdapter {
      * @return true if chipset supports LE 2M PHY feature
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public boolean isLe2MPhySupported() {
         if (!getLeAccess()) {
             return false;
@@ -2156,6 +2184,7 @@ public final class BluetoothAdapter {
      * @return true if chipset supports LE Coded PHY feature
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public boolean isLeCodedPhySupported() {
         if (!getLeAccess()) {
             return false;
@@ -2179,6 +2208,7 @@ public final class BluetoothAdapter {
      * @return true if chipset supports LE Extended Advertising feature
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public boolean isLeExtendedAdvertisingSupported() {
         if (!getLeAccess()) {
             return false;
@@ -2202,6 +2232,7 @@ public final class BluetoothAdapter {
      * @return true if chipset supports LE Periodic Advertising feature
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public boolean isLePeriodicAdvertisingSupported() {
         if (!getLeAccess()) {
             return false;
@@ -2226,6 +2257,7 @@ public final class BluetoothAdapter {
      * @return the maximum LE advertising data length.
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public int getLeMaximumAdvertisingDataLength() {
         if (!getLeAccess()) {
             return 0;
@@ -2248,6 +2280,7 @@ public final class BluetoothAdapter {
      *
      * @return true if phone supports Hearing Aid Profile
      */
+    @RequiresNoPermission
     private boolean isHearingAidProfileSupported() {
         try {
             return mManagerService.isHearingAidProfileSupported();
@@ -2286,6 +2319,7 @@ public final class BluetoothAdapter {
      * @return true if there are hw entries available for matching beacons
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean isHardwareTrackingFiltersAvailable() {
         if (!getLeAccess()) {
@@ -2432,6 +2466,7 @@ public final class BluetoothAdapter {
      * BluetoothProfile}.
      * @hide
      */
+    @RequiresNoPermission
     public @NonNull List<Integer> getSupportedProfiles() {
         final ArrayList<Integer> supportedProfiles = new ArrayList<Integer>();
 
@@ -2479,6 +2514,7 @@ public final class BluetoothAdapter {
             };
 
     /** @hide */
+    @RequiresNoPermission
     public void disableGetAdapterConnectionStateCache() {
         mBluetoothGetAdapterConnectionStateCache.disableLocal();
     }
@@ -2503,6 +2539,7 @@ public final class BluetoothAdapter {
      */
     @UnsupportedAppUsage
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public int getConnectionState() {
         if (getState() != STATE_ON) {
             return BluetoothAdapter.STATE_DISCONNECTED;
@@ -2553,6 +2590,7 @@ public final class BluetoothAdapter {
             };
 
     /** @hide */
+    @RequiresNoPermission
     public void disableGetProfileConnectionStateCache() {
         mGetProfileConnectionStateCache.disableLocal();
     }
@@ -2753,6 +2791,7 @@ public final class BluetoothAdapter {
         return createNewRfcommSocketAndRecord(name, uuid, false, true);
     }
 
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     private BluetoothServerSocket createNewRfcommSocketAndRecord(String name, UUID uuid,
             boolean auth, boolean encrypt) throws IOException {
@@ -2779,6 +2818,7 @@ public final class BluetoothAdapter {
      * permissions.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingInsecureRfcommOn(int port) throws IOException {
         BluetoothServerSocket socket =
@@ -2811,6 +2851,7 @@ public final class BluetoothAdapter {
      * permissions.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingL2capOn(int port, boolean mitm, boolean min16DigitPin)
             throws IOException {
@@ -2844,6 +2885,7 @@ public final class BluetoothAdapter {
      * permissions.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingL2capOn(int port) throws IOException {
         return listenUsingL2capOn(port, false, false);
@@ -2861,6 +2903,7 @@ public final class BluetoothAdapter {
      * permissions.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingInsecureL2capOn(int port) throws IOException {
         Log.d(TAG, "listenUsingInsecureL2capOn: port=" + port);
@@ -2916,6 +2959,10 @@ public final class BluetoothAdapter {
      * BluetoothProfile#HEARING_AID} or {@link BluetoothProfile#GATT_SERVER}.
      * @return true on success, false on error
      */
+    @SuppressLint({
+        "AndroidFrameworkRequiresPermission",
+        "AndroidFrameworkBluetoothPermission"
+    })
     public boolean getProfileProxy(Context context, BluetoothProfile.ServiceListener listener,
             int profile) {
         if (context == null || listener == null) {
@@ -2985,7 +3032,10 @@ public final class BluetoothAdapter {
      * @param profile
      * @param proxy Profile proxy object
      */
-    @SuppressLint("AndroidFrameworkRequiresPermission")
+    @SuppressLint({
+            "AndroidFrameworkRequiresPermission",
+            "AndroidFrameworkBluetoothPermission"
+    })
     public void closeProfileProxy(int profile, BluetoothProfile proxy) {
         if (proxy == null) {
             return;
@@ -3058,6 +3108,7 @@ public final class BluetoothAdapter {
         }
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final IBluetoothManagerCallback mManagerCallback =
             new IBluetoothManagerCallback.Stub() {
                 @SuppressLint("AndroidFrameworkRequiresPermission")
@@ -3380,7 +3431,6 @@ public final class BluetoothAdapter {
     /**
      * @hide
      */
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     public class StateChangeCallbackWrapper extends IBluetoothStateChangeCallback.Stub {
         private BluetoothStateChangeCallback mCallback;
 
@@ -3631,6 +3681,7 @@ public final class BluetoothAdapter {
                     return false;
                 }
 
+                @SuppressLint("AndroidFrameworkBluetoothPermission")
                 ScanCallback scanCallback = new ScanCallback() {
                     @Override
                     public void onScanResult(int callbackType, ScanResult result) {
@@ -3961,6 +4012,7 @@ public final class BluetoothAdapter {
                 @Nullable byte[] value);
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final IBluetoothConnectionCallback mConnectionCallback =
             new IBluetoothConnectionCallback.Stub() {
         @Override
