@@ -342,7 +342,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Facer captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pode facer capturas de pantalla."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar ou modificar a barra de estado"</string>
-    <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite á aplicación desactivar a barra de estado ou engadir e eliminar as iconas do sistema."</string>
+    <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite á aplicación desactivar a barra de estado ou engadir e quitar as iconas do sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"actuar como a barra de estado"</string>
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Permite á aplicación ser a barra de estado."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"ampliar/contraer a barra de estado"</string>
@@ -352,7 +352,7 @@
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"instalar atallos"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Permite a unha aplicación engadir atallos na pantalla de inicio sen intervención do usuario."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"desinstalar atallos"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite á aplicación eliminar atallos da pantalla de inicio sen a intervención do usuario."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite á aplicación quitar atallos da pantalla de inicio sen a intervención do usuario."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"redirixir as chamadas saíntes"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Permite á aplicación ver o número que se está marcando durante unha chamada saínte coa opción de redirixir a chamada a un número diferente ou abortar a chamada."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"responder chamadas telefónicas"</string>
@@ -709,8 +709,8 @@
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"Permite a unha aplicación fornecer e utilizar certificados DRM. Non se deberían precisar nunca para as aplicacións normais."</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"recibir o estado das transferencias de Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Permite a esta aplicación recibir información acerca das transferencias actuais de Android Beam"</string>
-    <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"eliminar certificados DRM"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Permite a unha aplicación eliminar os certificados DRM. As aplicacións normais non o deberían precisar nunca."</string>
+    <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"quitar certificados DRM"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Permite a unha aplicación quitar os certificados DRM. As aplicacións normais non o deberían precisar nunca."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"vincular a un servizo de mensaxaría"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permite ao propietario vincularse á interface de nivel superior dun servizo de mensaxaría. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"vincular aos servizos do operador"</string>
@@ -1582,7 +1582,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="1622359254521960508">"Límite de datos wifi superado"</string>
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Pasácheste <xliff:g id="SIZE">%s</xliff:g> do límite establecido"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Datos en segundo plano limitados"</string>
-    <string name="data_usage_restricted_body" msgid="5338694433686077733">"Toca para eliminar a restrición."</string>
+    <string name="data_usage_restricted_body" msgid="5338694433686077733">"Toca para quitar a restrición."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"Uso elevado de datos móbiles"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"As aplicacións utilizaron máis datos do normal"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"A aplicación <xliff:g id="APP">%s</xliff:g> utilizou máis datos do normal"</string>
@@ -1677,7 +1677,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"Debuxaches incorrectamente o padrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, terás que desbloquear o dispositivo Android TV a través dunha conta de correo electrónico.\n\n Téntao de novo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Debuxaches o padrón de desbloqueo incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, terás que desbloquear o teléfono a través dunha conta de correo electrónico.\n\n Téntao de novo dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Eliminar"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Quitar"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Queres subir o volume máis do nivel recomendado?\n\nA reprodución de son a un volume elevado durante moito tempo pode provocar danos nos oídos."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Queres utilizar o atallo de accesibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Cando o atallo está activado, podes premer os dous botóns de volume durante 3 segundos para iniciar unha función de accesibilidade."</string>
@@ -1833,7 +1833,7 @@
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Téntao de novo máis tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Vendo pantalla completa"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para saír, pasa o dedo cara abaixo desde a parte superior."</string>
-    <string name="immersive_cling_positive" msgid="7047498036346489883">"De acordo"</string>
+    <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendido"</string>
     <string name="done_label" msgid="7283767013231718521">"Feito"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Control desprazable circular das horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Control desprazable circular dos minutos"</string>
@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado polo teu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado polo teu administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Coa función Aforro de batería actívase o tema escuro e restrínxense ou desactívanse a actividade en segundo plano, algúns efectos visuais e outras funcións, como “Hey Google”\n\n"<annotation id="url">"Máis información"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Coa función Aforro de batería actívase o tema escuro e restrínxense ou desactívanse a actividade en segundo plano, algúns efectos visuais e outras funcións, como “Hey Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o aforro de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, poida que as imaxes non se mostren ata que as toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Queres activar o aforro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Pechar"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Resposta"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Rexeitar"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Colgar"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Chamada entrante"</string>
@@ -1948,7 +1948,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Engadir un idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferencia de rexión"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Nome do idioma"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Escribe o nome do idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Suxeridos"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Todos os idiomas"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Todas as rexións"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"O nivel desta notificación diminuíu a Silenciosa. Toca para compartir a túa opinión."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificación clasificouse nun nivel superior. Toca para compartir a túa opinión."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificación clasificouse nun nivel inferior. Toca para compartir a túa opinión."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Proba notificacións melloradas"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Para seguir recibindo accións suxeridas, respostas e moito máis, activa as notificacións melloradas. As notificacións intelixentes de Android xa non son compatibles."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Activar"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Agora non"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Máis información"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Coas notificacións melloradas pódese ler todo o contido das notificacións, mesmo a información persoal (por exemplo, os nomes dos contactos e as mensaxes). Con esta función tamén se poden ignorar as notificacións ou realizar accións nos botóns que aparecen nelas, como responder chamadas telefónicas.\n\nAdemais, permite activar e desactivar o modo de prioridade e cambiar a configuración relacionada."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación da información do modo de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A batería pode esgotarse antes do habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Para ampliar a duración da batería activouse a función Aforro de batería"</string>

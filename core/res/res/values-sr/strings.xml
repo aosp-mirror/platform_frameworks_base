@@ -1875,10 +1875,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избрисао је администратор"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Потврди"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Уштеда батерије укључује Тамну тему и ограничава или искључује активности у позадини, неке визуелне ефекте и функције, на пример, „Хеј Google“.\n\n"<annotation id="url">"Сазнајте више"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Уштеда батерије укључује Тамну тему и ограничава или искључује активности у позадини, неке визуелне ефекте и функције, на пример, „Хеј Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Да би се смањила потрошња података, Уштеда података спречава неке апликације да шаљу или примају податке у позадини. Апликација коју тренутно користите може да приступа подацима, али ће то чинити ређе. На пример, слике се неће приказивати док их не додирнете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Желите да укључите Уштеду података?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Укључи"</string>
@@ -1962,6 +1960,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Затвори"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Одговори"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Одбиј"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Прекини везу"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Долазни позив"</string>
@@ -2107,18 +2107,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Ово обавештење је деградирано у Нечујно. Додирните да бисте навели повратне информације."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Ово обавештење је рангирано више. Додирните да бисте навели повратне информације."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Ово обавештење је рангирано ниже. Додирните да бисте навели повратне информације."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Пробајте побољшана обавештења"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Укључите побољшана обавештења да бисте и даље добијали препоручене радње, одговоре и друго. Прилагодљива обавештења за Android више нису подржана."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Укључи"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Не сада"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Сазнајте више"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Побољшана обавештења могу да читају садржај свих обавештења, укључујући личне податке, попут имена контаката и порука. Ова функција може и да одбацује обавештења или активира дугмад у обавештењима, попут јављања на телефонске позиве.\n\nОва функција може и да укључи или искључи Приоритетни режим и да мења повезана подешавања."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Обавештење о информацијама Рутинског режима"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерија ће се можда испразнити пре уобичајеног пуњења"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Уштеда батерије је активирана да би се продужило трајање батерије"</string>

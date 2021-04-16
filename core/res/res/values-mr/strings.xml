@@ -538,10 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ॲपला जवळपासची ब्लूटूथ डिव्‍हाइस शोधण्यासाठी आणि ती पेअर करण्यासाठी अनुमती देते"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"पेअर केलेल्या ब्लूटूथ डिव्‍हाइसशी कनेक्ट करा"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"पेअर केलेल्या ब्लूटूथ डिव्‍हाइसशी कनेक्ट करण्यासाठी ॲपला अनुमती द्या"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"जवळपासच्या ब्लूटूथ डिव्‍हाइसवर जाहिरात करा"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"जवळपासच्या ब्लूटूथ डिव्‍हाइसवर जाहिरात करण्याची ॲपला परवानगी देते"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"जवळच्या अल्ट्रा-वाइडबँड डिव्हाइसदरम्यानचे संबंधित स्थान निर्धारित करा"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ॲपला जवळच्या अल्ट्रा-वाइडबँड डिव्हाइसदरम्यानचे संबंधित स्थान निर्धारित करण्याची अनुमती द्या"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"प्राधान्यकृत NFC पेमेंट सेवा माहिती"</string>
@@ -1933,6 +1931,8 @@
     <string name="close_button_text" msgid="10603510034455258">"बंद करा"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"उत्तर द्या"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"नकार द्या"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"कॉल बंद करा"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"इनकमिंग कॉल"</string>
@@ -2275,14 +2275,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"आता तुम्ही तुमच्या स्क्रीनचा एखादा भाग मॅग्निफाय करू शकता"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"सेटिंग्ज मध्ये सुरू करा"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"डिसमिस करा"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"डिव्हाइसचा मायक्रोफोन अनब्लॉक करा"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"डिव्हाइसचा कॅमेरा अनब्लॉक करा"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"सर्व &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; आणि सर्व ॲप्स व सेवांसाठी"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"अनब्लॉक करा"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"सेन्सरशी संबंधित गोपनीयतेबाबत सूचना"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ॲप्लिकेशन आयकन"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"अ‍ॅप्लिकेशन ब्रॅंडिंग इमेज"</string>

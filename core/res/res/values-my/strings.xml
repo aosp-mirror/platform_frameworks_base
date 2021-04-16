@@ -1108,8 +1108,8 @@
       <item quantity="one">ပြီးခဲ့သည့် <xliff:g id="COUNT_0">%d</xliff:g> မိနစ်က</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other">ပြီးခဲ့သည့် <xliff:g id="COUNT_1">%d</xliff:g> နာရီက</item>
-      <item quantity="one">ပြီးခဲ့သည့် <xliff:g id="COUNT_0">%d</xliff:g> နာရီက</item>
+      <item quantity="other">ပြီးခဲ့သည့် <xliff:g id="COUNT_1">%d</xliff:g> နာရီ</item>
+      <item quantity="one">ပြီးခဲ့သည့် <xliff:g id="COUNT_0">%d</xliff:g> နာရီ</item>
     </plurals>
     <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
       <item quantity="other">ပြီးခဲ့သည့် <xliff:g id="COUNT_1">%d</xliff:g> ရက်က</item>
@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့နှင့် “Ok Google” ကဲ့သို့ ဝန်ဆောင်မှုများကို ကန့်သတ်သည် (သို့) ပိတ်သည်\n\n"<annotation id="url">"ပိုမိုလေ့လာရန်"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့နှင့် “Ok Google” ကဲ့သို့ ဝန်ဆောင်မှုများကို ကန့်သတ်သည် (သို့) ပိတ်သည်။"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ပါ"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"ပိတ်ရန်"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>− <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"ဖုန်းကိုင်ရန်"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"ငြင်းပယ်ရန်"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ဖုန်းချရန်"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"အဝင်ခေါ်ဆိုမှု"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ဤအကြောင်းကြားချက်ကို \'အသံတိတ်ခြင်း\' သို့ ပြန်ချိန်ညှိထားသည်။ အကြံပြုချက်ပေးရန် တို့ပါ။"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ဤအကြောင်းကြားချက်ကို အဆင့်တိုးထားသည်။ အကြံပြုချက်ပေးရန် တို့ပါ။"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ဤအကြောင်းကြားချက်ကို အဆင့်လျှော့ထားသည်။ အကြံပြုချက်ပေးရန် တို့ပါ။"</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"အဆင့်မြင့် အကြောင်းကြားချက်များ စမ်းသုံးကြည့်ခြင်း"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"အကြံပြုထားသော လုပ်ဆောင်ချက်များ၊ ပြန်စာများ စသည်တို့ကို ဆက်လက်ရယူရန် အဆင့်မြင့် အကြောင်းကြားချက်များကို ဖွင့်ပါ။ ‘Android အလိုက်သင့် အကြောင်းကြားချက်များ’ ကို ပံ့ပိုးမထားတော့ပါ။"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ဖွင့်ရန်"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"ယခုမလုပ်ပါ"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ပိုမိုလေ့လာရန်"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"အဆင့်မြင့် အကြောင်းကြားချက်များသည် အဆက်အသွယ်အမည်နှင့် မက်ဆေ့ဂျ်များကဲ့သို့ ကိုယ်ရေးကိုယ်တာအချက်လက်များ အပါအဝင် အကြောင်းကြားချက် အကြောင်းအရာအားလုံးကို ဖတ်နိုင်သည်။ ဤဝန်ဆောင်မှုသည် အကြောင်းကြားချက်များကို ပယ်ခြင်း (သို့) ဖုန်းခေါ်ဆိုမှုများ ဖြေခြင်းကဲ့သို့ အကြောင်းကြားချက်များရှိ ခလုတ်များ နှိပ်ခြင်းကိုလည်း ပြုလုပ်နိုင်သည်။\n\nဤဝန်ဆောင်မှုသည် ‘ဦးစားပေးမုဒ်’ ကို ဖွင့်ခြင်း (သို့) ပိတ်ခြင်း ပြုလုပ်နိုင်ပြီး ဆက်စပ်နေသော ဆက်တင်များကိုလည်း ပြောင်းနိုင်သည်။"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ပုံမှန်မုဒ်အတွက် အချက်အလက်ပြသည့် အကြောင်းကြားချက်"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ပုံမှန်အားသွင်းမှုမပြုလုပ်မီ ဘက်ထရီကုန်သွားနိုင်သည်"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ဘက်ထရီသက်တမ်းကို တိုးမြှင့်ရန် \'ဘက်ထရီအားထိန်း\' စတင်ပြီးပါပြီ"</string>

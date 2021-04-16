@@ -566,8 +566,8 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Tillader, at appen kan ændre din billedsamling."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"læse placeringer fra din mediesamling"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tillader, at appen kan læse placeringer fra din mediesamling."</string>
-    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Brug biometriske systemer"</string>
-    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Brug biometriske systemer eller skærmlås"</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Brug biometri"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Brug biometri eller skærmlås"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Bekræft, at det er dig"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Brug dine biometriske data for at fortsætte"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Brug dine biometriske data eller din skærmlås for at fortsætte"</string>
@@ -1854,10 +1854,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Opdateret af din administrator"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Slettet af din administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Batterisparefunktionen aktiverer Mørkt tema og deaktiverer eller begrænser aktivitet i baggrunden, visse visuelle effekter og funktioner som f.eks. \"Hey Google\"\n\n"<annotation id="url">"Få flere oplysninger"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Batterisparefunktionen aktiverer Mørkt tema og deaktiverer eller begrænser aktivitet i baggrunden, visse visuelle effekter og funktioner som f.eks. \"Hey Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datasparefunktionen forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vil du aktivere Datasparefunktion?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivér"</string>
@@ -1933,6 +1931,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Luk"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Besvar"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Afvis"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Læg på"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Indgående opkald"</string>
@@ -2076,18 +2076,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Denne notifikation blev angivet som Lydløs. Tryk for at give feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Denne notifikation blev placeret højere. Tryk for at give feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Denne notifikation blev placeret lavere. Tryk for at give feedback."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Prøv forbedrede notifikationer"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Aktivér forbedrede notifikationer for at fortsætte med at få forslag til handlinger, svar og meget mere. Tilpassede Android-notifikationer understøttes ikke længere."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Aktivér"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Ikke nu"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Få flere oplysninger"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Forbedrede notifikationer kan læse alt indhold i notifikationer, bl.a. personlige oplysninger som f.eks. beskeder og navne på kontakter. Denne funktion kan også afvise notifikationer eller aktivere knapper i notifikationer, herunder besvare opkald.\n\nDenne funktion kan også aktivere og deaktivere tilstanden Prioritet samt ændre relaterede indstillinger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifikation med oplysninger om rutinetilstand"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Enheden løber muligvis tør for batteri, inden du normalt oplader den"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparefunktion er aktiveret for at forlænge batteritiden"</string>
