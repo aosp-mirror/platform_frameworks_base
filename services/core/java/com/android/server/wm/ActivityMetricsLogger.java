@@ -167,7 +167,6 @@ class ActivityMetricsLogger {
     @VisibleForTesting static final int LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE = 512;
     private final ArrayMap<String, Boolean> mLastHibernationStates = new ArrayMap<>();
     private AppHibernationManagerInternal mAppHibernationManagerInternal;
-    private boolean mIsAppHibernationEnabled;
 
     /**
      * The information created when an intent is incoming but we do not yet know whether it will be
@@ -796,8 +795,8 @@ class ActivityMetricsLogger {
 
     @Nullable
     private AppHibernationManagerInternal getAppHibernationManagerInternal() {
+        if (!AppHibernationService.isAppHibernationEnabled()) return null;
         if (mAppHibernationManagerInternal == null) {
-            mIsAppHibernationEnabled = AppHibernationService.isAppHibernationEnabled();
             mAppHibernationManagerInternal =
                     LocalServices.getService(AppHibernationManagerInternal.class);
         }
@@ -810,7 +809,7 @@ class ActivityMetricsLogger {
      */
     void notifyBeforePackageUnstopped(@NonNull String packageName) {
         final AppHibernationManagerInternal ahmInternal = getAppHibernationManagerInternal();
-        if (ahmInternal != null && mIsAppHibernationEnabled) {
+        if (ahmInternal != null) {
             mLastHibernationStates.put(packageName, ahmInternal.isHibernatingGlobally(packageName));
         }
     }
