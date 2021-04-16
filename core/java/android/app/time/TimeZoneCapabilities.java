@@ -207,6 +207,17 @@ public final class TimeZoneCapabilities implements Parcelable {
             mUserHandle = Objects.requireNonNull(userHandle);
         }
 
+        public Builder(@NonNull TimeZoneCapabilities capabilitiesToCopy) {
+            Objects.requireNonNull(capabilitiesToCopy);
+            mUserHandle = capabilitiesToCopy.mUserHandle;
+            mConfigureAutoDetectionEnabledCapability =
+                capabilitiesToCopy.mConfigureAutoDetectionEnabledCapability;
+            mConfigureGeoDetectionEnabledCapability =
+                capabilitiesToCopy.mConfigureGeoDetectionEnabledCapability;
+            mSuggestManualTimeZoneCapability =
+                capabilitiesToCopy.mSuggestManualTimeZoneCapability;
+        }
+
         /** Sets the state for the automatic time zone detection enabled config. */
         public Builder setConfigureAutoDetectionEnabledCapability(@CapabilityState int value) {
             this.mConfigureAutoDetectionEnabledCapability = value;
