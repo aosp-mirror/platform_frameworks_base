@@ -91,7 +91,7 @@ interface ITelephonyRegistry {
     void notifyRegistrationFailed(int slotIndex, int subId, in CellIdentity cellIdentity,
             String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
     void notifyBarringInfoChanged(int slotIndex, int subId, in BarringInfo barringInfo);
-    void notifyPhysicalChannelConfigForSubscriber(in int subId,
+    void notifyPhysicalChannelConfigForSubscriber(in int phoneId, in int subId,
             in List<PhysicalChannelConfig> configs);
     void notifyDataEnabled(in int phoneId, int subId, boolean enabled, int reason);
     void notifyAllowedNetworkTypesChanged(in int phoneId, in int subId, in int reason, in long allowedNetworkType);
