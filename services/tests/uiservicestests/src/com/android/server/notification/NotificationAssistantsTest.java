@@ -213,7 +213,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         mAssistants.loadDefaultsFromConfig();
         assertEquals(new ArraySet<>(Arrays.asList(oldDefaultComponent)),
                 mAssistants.getDefaultComponents());
-        assertNull(mAssistants.getDefaultFromConfig());
+        assertNull(mAssistants.mDefaultFromConfig);
 
         // Test loadDefaultFromConfig(false) only updates the mDefaultFromConfig
         when(mContext.getResources().getString(
