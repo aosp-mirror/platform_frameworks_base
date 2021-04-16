@@ -2750,6 +2750,7 @@ package android.view {
   public interface WindowManager extends android.view.ViewManager {
     method public default int getDisplayImePolicy(int);
     method public default void holdLock(android.os.IBinder, int);
+    method public default boolean isTaskSnapshotSupported();
     method public default void setDisplayImePolicy(int, int);
     method public default void setForceCrossWindowBlurDisabled(boolean);
     method public default void setShouldShowSystemDecors(int, boolean);
