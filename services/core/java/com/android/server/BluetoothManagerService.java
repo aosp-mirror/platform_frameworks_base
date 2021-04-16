@@ -714,9 +714,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Slog.w(TAG, "Callback is null in unregisterAdapter");
             return;
         }
-        if (!checkConnectPermissionForPreflight(mContext)) {
-            return;
-        }
         synchronized (mCallbacks) {
             mCallbacks.unregister(callback);
         }
