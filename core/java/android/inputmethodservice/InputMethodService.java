@@ -1628,7 +1628,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void reportFullscreenMode() {
-        mPrivOps.reportFullscreenMode(mIsFullscreen);
+        mPrivOps.reportFullscreenModeAsync(mIsFullscreen);
     }
 
     /**

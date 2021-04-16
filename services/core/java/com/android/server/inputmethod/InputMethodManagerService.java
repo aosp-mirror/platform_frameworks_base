@@ -6007,9 +6007,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void reportFullscreenMode(boolean fullscreen, IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.reportFullscreenMode(mToken, fullscreen));
+        public void reportFullscreenModeAsync(boolean fullscreen) {
+            mImms.reportFullscreenMode(mToken, fullscreen);
         }
 
         @BinderThread
