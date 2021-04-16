@@ -1580,6 +1580,10 @@ package android.net {
     method public static void setServiceForTest(@Nullable android.os.IBinder);
   }
 
+  public class NetworkWatchlistManager {
+    method @Nullable public byte[] getWatchlistConfigHash();
+  }
+
   public class TrafficStats {
     method public static long getLoopbackRxBytes();
     method public static long getLoopbackRxPackets();
