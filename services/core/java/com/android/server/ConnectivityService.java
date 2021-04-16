@@ -1926,7 +1926,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         newNc.setAdministratorUids(new int[0]);
         if (!checkAnyPermissionOf(
                 callerPid, callerUid, android.Manifest.permission.NETWORK_FACTORY)) {
-            newNc.setSubIds(Collections.emptySet());
+            newNc.setSubscriptionIds(Collections.emptySet());
         }
 
         return newNc;
@@ -5727,7 +5727,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         mAppOpsManager.checkPackage(callerUid, callerPackageName);
 
-        if (!nc.getSubIds().isEmpty()) {
+        if (!nc.getSubscriptionIds().isEmpty()) {
             enforceNetworkFactoryPermission();
         }
     }
