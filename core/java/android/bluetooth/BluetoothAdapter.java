@@ -1251,6 +1251,18 @@ public final class BluetoothAdapter {
         return null;
     }
 
+    /** {@hide} */
+    @RequiresBluetoothAdvertisePermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
+    public int getNameLengthForAdvertise() {
+        try {
+            return mService.getNameLengthForAdvertise();
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return -1;
+    }
+
     /**
      * Factory reset bluetooth settings.
      *
