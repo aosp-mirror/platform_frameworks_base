@@ -19,8 +19,6 @@ package com.android.systemui.people;
 import static android.app.Notification.CATEGORY_MISSED_CALL;
 import static android.app.Notification.EXTRA_MESSAGES;
 
-import android.annotation.NonNull;
-import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
@@ -36,16 +34,13 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.icu.text.MeasureFormat;
-import android.icu.util.Measure;
-import android.icu.util.MeasureUnit;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.ContactsContract;
-import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
@@ -65,7 +60,6 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -73,7 +67,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -85,9 +78,6 @@ public class PeopleSpaceUtils {
     /** Turns on debugging information about People Space. */
     public static final boolean DEBUG = true;
     private static final String TAG = "PeopleSpaceUtils";
-    private static final int DAYS_IN_A_WEEK = 7;
-    private static final int MIN_HOUR = 1;
-    private static final int ONE_DAY = 1;
     public static final String PACKAGE_NAME = "package_name";
     public static final String USER_ID = "user_id";
     public static final String SHORTCUT_ID = "shortcut_id";
@@ -125,58 +115,6 @@ public class PeopleSpaceUtils {
         public int getId() {
             return mId;
         }
-    }
-
-    /** Returns a list of map entries corresponding to user's priority conversations. */
-    @NonNull
-    public static List<PeopleSpaceTile> getPriorityTiles(
-            Context context, INotificationManager notificationManager, IPeopleManager peopleManager,
-            LauncherApps launcherApps, NotificationEntryManager notificationEntryManager)
-            throws Exception {
-        List<ConversationChannelWrapper> conversations =
-                notificationManager.getConversations(
-                        false).getList();
-        // Add priority conversations to tiles list.
-        Stream<ShortcutInfo> priorityConversations = conversations.stream()
-                .filter(c -> c.getNotificationChannel() != null
-                        && c.getNotificationChannel().isImportantConversation())
-                .map(c -> c.getShortcutInfo());
-        List<PeopleSpaceTile> priorityTiles = getSortedTiles(peopleManager, launcherApps,
-                priorityConversations);
-        priorityTiles = augmentTilesFromVisibleNotifications(
-                context, priorityTiles, notificationEntryManager);
-        return priorityTiles;
-    }
-
-    /** Returns a list of map entries corresponding to user's recent conversations. */
-    @NonNull
-    public static List<PeopleSpaceTile> getRecentTiles(
-            Context context, INotificationManager notificationManager, IPeopleManager peopleManager,
-            LauncherApps launcherApps, NotificationEntryManager notificationEntryManager)
-            throws Exception {
-        if (DEBUG) Log.d(TAG, "Add recent conversations");
-        List<ConversationChannelWrapper> conversations =
-                notificationManager.getConversations(
-                        false).getList();
-        Stream<ShortcutInfo> nonPriorityConversations = conversations.stream()
-                .filter(c -> c.getNotificationChannel() == null
-                        || !c.getNotificationChannel().isImportantConversation())
-                .map(c -> c.getShortcutInfo());
-
-        List<ConversationChannel> recentConversationsList =
-                peopleManager.getRecentConversations().getList();
-        Stream<ShortcutInfo> recentConversations = recentConversationsList
-                .stream()
-                .map(c -> c.getShortcutInfo());
-
-        Stream<ShortcutInfo> mergedStream = Stream.concat(nonPriorityConversations,
-                recentConversations);
-        List<PeopleSpaceTile> recentTiles =
-                getSortedTiles(peopleManager, launcherApps, mergedStream);
-
-        recentTiles = augmentTilesFromVisibleNotifications(
-                context, recentTiles, notificationEntryManager);
-        return recentTiles;
     }
 
     /** Returns stored widgets for the conversation specified. */
@@ -255,7 +193,8 @@ public class PeopleSpaceUtils {
         return augmentedTile.get(0);
     }
 
-    static List<PeopleSpaceTile> augmentTilesFromVisibleNotifications(Context context,
+    /** Adds to {@code tiles} any visible notifications. */
+    public static List<PeopleSpaceTile> augmentTilesFromVisibleNotifications(Context context,
             List<PeopleSpaceTile> tiles, NotificationEntryManager notificationEntryManager) {
         if (notificationEntryManager == null) {
             Log.w(TAG, "NotificationEntryManager is null");
@@ -356,11 +295,12 @@ public class PeopleSpaceUtils {
     }
 
     /** Returns a list sorted by ascending last interaction time from {@code stream}. */
-    private static List<PeopleSpaceTile> getSortedTiles(IPeopleManager peopleManager,
-            LauncherApps launcherApps,
+    public static List<PeopleSpaceTile> getSortedTiles(IPeopleManager peopleManager,
+            LauncherApps launcherApps, UserManager userManager,
             Stream<ShortcutInfo> stream) {
         return stream
                 .filter(Objects::nonNull)
+                .filter(c -> !userManager.isQuietModeEnabled(c.getUserHandle()))
                 .map(c -> new PeopleSpaceTile.Builder(c, launcherApps).build())
                 .filter(c -> shouldKeepConversation(c))
                 .map(c -> c.toBuilder().setLastInteractionTimestamp(
@@ -424,36 +364,6 @@ public class PeopleSpaceUtils {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
-    }
-
-    /** Returns a readable status describing the {@code lastInteraction}. */
-    public static String getLastInteractionString(Context context, long lastInteraction) {
-        if (lastInteraction == 0L) {
-            Log.e(TAG, "Could not get valid last interaction");
-            return context.getString(R.string.basic_status);
-        }
-        long now = System.currentTimeMillis();
-        Duration durationSinceLastInteraction = Duration.ofMillis(now - lastInteraction);
-        MeasureFormat formatter = MeasureFormat.getInstance(Locale.getDefault(),
-                MeasureFormat.FormatWidth.WIDE);
-        if (durationSinceLastInteraction.toHours() < MIN_HOUR) {
-            return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toMinutes(), MeasureUnit.MINUTE)));
-        } else if (durationSinceLastInteraction.toDays() < ONE_DAY) {
-            return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toHours(),
-                            MeasureUnit.HOUR)));
-        } else if (durationSinceLastInteraction.toDays() < DAYS_IN_A_WEEK) {
-            return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toHours(),
-                            MeasureUnit.DAY)));
-        } else {
-            return context.getString(durationSinceLastInteraction.toDays() == DAYS_IN_A_WEEK
-                            ? R.string.timestamp : R.string.over_timestamp,
-                    formatter.formatMeasures(
-                            new Measure(durationSinceLastInteraction.toDays() / DAYS_IN_A_WEEK,
-                                    MeasureUnit.WEEK)));
-        }
     }
 
     /**

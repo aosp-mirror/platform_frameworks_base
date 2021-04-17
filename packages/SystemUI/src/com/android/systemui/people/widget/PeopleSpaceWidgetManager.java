@@ -31,7 +31,9 @@ import static com.android.systemui.people.PeopleSpaceUtils.getStoredWidgetIds;
 import static com.android.systemui.people.PeopleSpaceUtils.updateAppWidgetOptionsAndView;
 import static com.android.systemui.people.PeopleSpaceUtils.updateAppWidgetViews;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
@@ -51,7 +53,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.preference.PreferenceManager;
+import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -76,6 +80,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -96,6 +101,8 @@ public class PeopleSpaceWidgetManager {
     private NotificationEntryManager mNotificationEntryManager;
     private PackageManager mPackageManager;
     private PeopleSpaceWidgetProvider mPeopleSpaceWidgetProvider;
+    private INotificationManager mINotificationManager;
+    private UserManager mUserManager;
     public UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
     @GuardedBy("mLock")
     public static Map<PeopleTileKey, PeopleSpaceWidgetProvider.TileConversationListener>
@@ -121,17 +128,21 @@ public class PeopleSpaceWidgetManager {
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mPackageManager = mContext.getPackageManager();
         mPeopleSpaceWidgetProvider = new PeopleSpaceWidgetProvider();
+        mINotificationManager = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mUserManager = context.getSystemService(UserManager.class);
     }
 
     /**
      * AppWidgetManager setter used for testing.
      */
     @VisibleForTesting
-    protected void setAppWidgetManager(
+    public void setAppWidgetManager(
             AppWidgetManager appWidgetManager, IPeopleManager iPeopleManager,
             PeopleManager peopleManager, LauncherApps launcherApps,
             NotificationEntryManager notificationEntryManager, PackageManager packageManager,
-            boolean isForTesting, PeopleSpaceWidgetProvider peopleSpaceWidgetProvider) {
+            boolean isForTesting, PeopleSpaceWidgetProvider peopleSpaceWidgetProvider,
+            UserManager userManager, INotificationManager notificationManager) {
         mAppWidgetManager = appWidgetManager;
         mIPeopleManager = iPeopleManager;
         mPeopleManager = peopleManager;
@@ -140,6 +151,8 @@ public class PeopleSpaceWidgetManager {
         mPackageManager = packageManager;
         mIsForTesting = isForTesting;
         mPeopleSpaceWidgetProvider = peopleSpaceWidgetProvider;
+        mUserManager = userManager;
+        mINotificationManager = notificationManager;
     }
 
     /**
@@ -782,5 +795,53 @@ public class PeopleSpaceWidgetManager {
 
         ComponentName componentName = new ComponentName(mContext, PeopleSpaceWidgetProvider.class);
         return mAppWidgetManager.requestPinAppWidget(componentName, extras, successCallback);
+    }
+
+    /** Returns a list of map entries corresponding to user's priority conversations. */
+    @NonNull
+    public List<PeopleSpaceTile> getPriorityTiles()
+            throws Exception {
+        List<ConversationChannelWrapper> conversations =
+                mINotificationManager.getConversations(true).getList();
+        // Add priority conversations to tiles list.
+        Stream<ShortcutInfo> priorityConversations = conversations.stream()
+                .filter(c -> c.getNotificationChannel() != null
+                        && c.getNotificationChannel().isImportantConversation())
+                .map(c -> c.getShortcutInfo());
+        List<PeopleSpaceTile> priorityTiles = PeopleSpaceUtils.getSortedTiles(mIPeopleManager,
+                mLauncherApps, mUserManager,
+                priorityConversations);
+        priorityTiles = PeopleSpaceUtils.augmentTilesFromVisibleNotifications(
+                mContext, priorityTiles, mNotificationEntryManager);
+        return priorityTiles;
+    }
+
+    /** Returns a list of map entries corresponding to user's recent conversations. */
+    @NonNull
+    public List<PeopleSpaceTile> getRecentTiles()
+            throws Exception {
+        if (DEBUG) Log.d(TAG, "Add recent conversations");
+        List<ConversationChannelWrapper> conversations =
+                mINotificationManager.getConversations(false).getList();
+        Stream<ShortcutInfo> nonPriorityConversations = conversations.stream()
+                .filter(c -> c.getNotificationChannel() == null
+                        || !c.getNotificationChannel().isImportantConversation())
+                .map(c -> c.getShortcutInfo());
+
+        List<ConversationChannel> recentConversationsList =
+                mIPeopleManager.getRecentConversations().getList();
+        Stream<ShortcutInfo> recentConversations = recentConversationsList
+                .stream()
+                .map(c -> c.getShortcutInfo());
+
+        Stream<ShortcutInfo> mergedStream = Stream.concat(nonPriorityConversations,
+                recentConversations);
+        List<PeopleSpaceTile> recentTiles =
+                PeopleSpaceUtils.getSortedTiles(mIPeopleManager, mLauncherApps, mUserManager,
+                        mergedStream);
+
+        recentTiles = PeopleSpaceUtils.augmentTilesFromVisibleNotifications(
+                mContext, recentTiles, mNotificationEntryManager);
+        return recentTiles;
     }
 }

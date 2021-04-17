@@ -190,6 +190,30 @@ public class WallpaperManager {
     public static final String COMMAND_DROP = "android.home.drop";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: reported by System UI when the device is waking
+     * up. The x and y arguments are a location (possibly very roughly) corresponding to the action
+     * that caused the device to wake up. For example, if the power button was pressed, this will be
+     * the location on the screen nearest the power button.
+     *
+     * If the location is unknown or not applicable, x and y will be -1.
+     *
+     * @hide
+     */
+    public static final String COMMAND_WAKING_UP = "android.wallpaper.wakingup";
+
+    /**
+     * Command for {@link #sendWallpaperCommand}: reported by System UI when the device is going to
+     * sleep. The x and y arguments are a location (possibly very roughly) corresponding to the
+     * action that caused the device to go to sleep. For example, if the power button was pressed,
+     * this will be the location on the screen nearest the power button.
+     *
+     * If the location is unknown or not applicable, x and y will be -1.
+     *
+     * @hide
+     */
+    public static final String COMMAND_GOING_TO_SLEEP = "android.wallpaper.goingtosleep";
+
+    /**
      * Command for {@link #sendWallpaperCommand}: reported when the wallpaper that was already
      * set is re-applied by the user.
      * @hide

@@ -39,6 +39,7 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.EventLog;
+import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -462,7 +463,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mActivityStarter.dismissKeyguardThenExecute(() -> {
             AsyncTask.execute(() -> {
                 ActivityLaunchAnimator.Controller animationController = null;
-                if (!mStatusBar.isOccluded() && mStatusBar.areLaunchAnimationsEnabled()) {
+                if (mStatusBar.areLaunchAnimationsEnabled()) {
                     animationController = new StatusBarLaunchAnimatorController(
                             mNotificationAnimationProvider.getAnimatorController(row), mStatusBar,
                             true /* isActivityIntent */);
@@ -495,7 +496,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     }
 
     @Override
-    public void startHistoryIntent(boolean showHistory) {
+    public void startHistoryIntent(View view, boolean showHistory) {
         mActivityStarter.dismissKeyguardThenExecute(() -> {
             AsyncTask.execute(() -> {
                 Intent intent = showHistory ? new Intent(
@@ -506,11 +507,27 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 if (showHistory) {
                     tsb.addNextIntent(intent);
                 }
-                tsb.startActivities(null, UserHandle.CURRENT);
 
-                // Putting it back on the main thread, since we're touching views
-                mMainThreadHandler.post(() -> mCommandQueue.animateCollapsePanels(
-                        CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */));
+                ActivityLaunchAnimator.Controller animationController = null;
+                if (mStatusBar.areLaunchAnimationsEnabled()) {
+                    animationController = new StatusBarLaunchAnimatorController(
+                            ActivityLaunchAnimator.Controller.fromView(view), mStatusBar,
+                            true /* isActivityIntent */);
+                }
+
+                mActivityLaunchAnimator.startIntentWithAnimation(animationController,
+                        (adapter) -> tsb.startActivities(
+                                getActivityOptions(mStatusBar.getDisplayId(), adapter),
+                                UserHandle.CURRENT));
+
+                // Note that other cases when we should still collapse (like activity already on
+                // top) is handled by the StatusBarLaunchAnimatorController.
+                boolean shouldCollapse = animationController == null;
+                if (shouldCollapse) {
+                    // Putting it back on the main thread, since we're touching views
+                    mMainThreadHandler.post(() -> mCommandQueue.animateCollapsePanels(
+                            CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */));
+                }
             });
             return true;
         }, null, false /* afterKeyguardGone */);

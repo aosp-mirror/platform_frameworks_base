@@ -71,14 +71,16 @@ import java.util.Collections;
 public class WalletScreenControllerTest extends SysuiTestCase {
 
     private static final int MAX_CARDS = 10;
+    private static final int CARD_CAROUSEL_WIDTH = 10;
     private static final String CARD_ID = "card_id";
     private static final CharSequence SHORTCUT_SHORT_LABEL = "View all";
     private static final CharSequence SHORTCUT_LONG_LABEL = "Add a payment method";
     private static final CharSequence SERVICE_LABEL = "Wallet app";
-    private final WalletView mWalletView = new WalletView(mContext);
     private final Drawable mWalletLogo = mContext.getDrawable(android.R.drawable.ic_lock_lock);
     private final Intent mWalletIntent = new Intent(QuickAccessWalletService.ACTION_VIEW_WALLET)
             .setComponent(new ComponentName(mContext.getPackageName(), "WalletActivity"));
+
+    private WalletView mWalletView;
 
     @Mock
     QuickAccessWalletClient mWalletClient;
@@ -104,6 +106,8 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
         when(mUserTracker.getUserContext()).thenReturn(mContext);
+        mWalletView = new WalletView(mContext);
+        mWalletView.getCardCarousel().setExpectedViewWidth(CARD_CAROUSEL_WIDTH);
         when(mWalletClient.getLogo()).thenReturn(mWalletLogo);
         when(mWalletClient.getShortcutLongLabel()).thenReturn(SHORTCUT_LONG_LABEL);
         when(mWalletClient.getShortcutShortLabel()).thenReturn(SHORTCUT_SHORT_LABEL);
@@ -132,7 +136,12 @@ public class WalletScreenControllerTest extends SysuiTestCase {
 
         verify(mWalletClient).getWalletCards(any(), any(), mCallbackCaptor.capture());
 
-        mCallbackCaptor.getValue().onWalletCardsRetrieved(response);
+        QuickAccessWalletClient.OnWalletCardsRetrievedCallback callback =
+                mCallbackCaptor.getValue();
+
+        assertEquals(mController, callback);
+
+        callback.onWalletCardsRetrieved(response);
         mTestableLooper.processAllMessages();
 
         assertEquals(VISIBLE, mWalletView.getCardCarouselContainer().getVisibility());

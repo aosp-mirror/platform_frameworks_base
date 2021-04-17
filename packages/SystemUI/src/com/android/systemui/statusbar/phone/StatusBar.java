@@ -208,6 +208,8 @@ import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.charging.WiredChargingRippleController;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -426,6 +428,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final DemoModeController mDemoModeController;
     private NotificationsController mNotificationsController;
     private final OngoingCallController mOngoingCallController;
+    private final SystemStatusAnimationScheduler mAnimationScheduler;
+    private final PrivacyDotViewController mDotViewController;
 
     // expanded notifications
     // the sliding/resizing panel within the notification window
@@ -794,6 +798,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             BrightnessSlider.Factory brightnessSliderFactory,
             WiredChargingRippleController chargingRippleAnimationController,
             OngoingCallController ongoingCallController,
+            SystemStatusAnimationScheduler animationScheduler,
+            PrivacyDotViewController dotViewController,
             TunerService tunerService,
             FeatureFlags featureFlags) {
         super(context);
@@ -875,6 +881,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBrightnessSliderFactory = brightnessSliderFactory;
         mChargingRippleAnimationController = chargingRippleAnimationController;
         mOngoingCallController = ongoingCallController;
+        mAnimationScheduler = animationScheduler;
+        mDotViewController = dotViewController;
         mFeatureFlags = featureFlags;
 
         tunerService.addTunable(
@@ -1171,7 +1179,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }).getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.status_bar_container,
-                        new CollapsedStatusBarFragment(mOngoingCallController),
+                        new CollapsedStatusBarFragment(
+                                mOngoingCallController,
+                                mAnimationScheduler,
+                                mDotViewController),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
 
@@ -1788,7 +1799,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade) {
-        startActivityDismissingKeyguard(intent, false, dismissShade);
+        startActivityDismissingKeyguard(intent, false /* onlyProvisioned */, dismissShade);
+    }
+
+    @Override
+    public void startActivity(Intent intent, boolean dismissShade,
+            ActivityLaunchAnimator.Controller animationController) {
+        startActivityDismissingKeyguard(intent, false, dismissShade,
+                false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
+                0 /* flags */, animationController);
     }
 
     @Override
@@ -4603,9 +4622,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             options = ActivityOptions.makeBasic();
         }
-        // Anything launched from the notification shade should always go into the secondary
-        // split-screen windowing mode.
-        options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
         return options;
     }
 

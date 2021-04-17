@@ -9,6 +9,7 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
 import android.view.GhostView
 import android.view.View
@@ -186,6 +187,10 @@ open class GhostedViewLaunchAnimatorController(
                 return drawable
             }
 
+            if (drawable is InsetDrawable) {
+                return drawable.drawable?.let { findGradientDrawable(it) }
+            }
+
             if (drawable is LayerDrawable) {
                 for (i in 0 until drawable.numberOfLayers) {
                     val maybeGradient = drawable.getDrawable(i)
@@ -255,6 +260,11 @@ open class GhostedViewLaunchAnimatorController(
         }
 
         private fun setXfermode(background: Drawable, mode: PorterDuffXfermode?) {
+            if (background is InsetDrawable) {
+                background.drawable?.let { setXfermode(it, mode) }
+                return
+            }
+
             if (background !is LayerDrawable) {
                 background.setXfermode(mode)
                 return
@@ -320,6 +330,11 @@ open class GhostedViewLaunchAnimatorController(
         private fun applyBackgroundRadii(drawable: Drawable, radii: FloatArray) {
             if (drawable is GradientDrawable) {
                 drawable.cornerRadii = radii
+                return
+            }
+
+            if (drawable is InsetDrawable) {
+                drawable.drawable?.let { applyBackgroundRadii(it, radii) }
                 return
             }
 

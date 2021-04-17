@@ -208,4 +208,9 @@ public class LockSettingsServiceTestable extends LockSettingsService {
             parcel.recycle();
         }
     }
+
+    @Override
+    void setKeystorePassword(byte[] password, int userHandle) {
+
+    }
 }

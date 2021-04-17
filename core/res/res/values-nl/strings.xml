@@ -1386,7 +1386,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DELEN"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"WEIGEREN"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Invoermethode selecteren"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Op het scherm tonen terwijl het fysieke toetsenbord actief is"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Toon op het scherm terwijl het fysieke toetsenbord actief is"</string>
     <string name="hardware" msgid="1800597768237606953">"Virtueel toetsenbord tonen"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Fysiek toetsenbord instellen"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tik om een taal en indeling te selecteren"</string>
@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Geüpdatet door je beheerder"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Verwijderd door je beheerder"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Batterijbesparing zet het donkere thema aan en beperkt achtergrondactiviteit, bepaalde visuele effecten en functies zoals Hey Google of zet dit uit\n\n"<annotation id="url">"Meer informatie"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Batterijbesparing zet het donkere thema aan en beperkt achtergrondactiviteit, bepaalde visuele effecten en functies zoals Hey Google of zet dit uit."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens sturen of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet weergegeven totdat je erop tikt."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Databesparing aanzetten?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aanzetten"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Sluiten"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Beantwoorden"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Weigeren"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Ophangen"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Inkomend gesprek"</string>
@@ -1946,9 +1946,9 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Aangepaste app-melding"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Toestaan dat <xliff:g id="APP">%1$s</xliff:g> een nieuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> maakt (er is al een gebruiker met dit account)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Toestaan dat <xliff:g id="APP">%1$s</xliff:g> een nieuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> maakt?"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"Een taal toevoegen"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"Taal toevoegen"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Regiovoorkeur"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Typ een taalnaam"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Typ de naam van een taal"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Voorgesteld"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Alle talen"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Alle regio\'s"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Deze melding is verlaagd naar Stil. Tik om feedback te geven."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Deze melding is hoger geclassificeerd. Tik om feedback te geven."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Deze melding is lager geclassificeerd. Tik om feedback te geven."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Probeer verbeterde meldingen"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Activeer verbeterde meldingen om voorgestelde acties, antwoorden en meer te blijven ontvangen. Aanpasbare Android-meldingen worden niet meer ondersteund."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Aanzetten"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Niet nu"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Meer informatie"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Verbeterde meldingen kunnen alle meldingscontent lezen, waaronder persoonlijke informatie zoals contactnamen en berichten. Deze functie kan ook meldingen sluiten of acties uitvoeren voor knoppen in meldingen, zoals telefoongesprekken aannemen.\n\nDeze functie kan ook de prioriteitsmodus aan- of uitzetten en gerelateerde instellingen wijzigen."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatiemelding voor routinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"De batterij raakt mogelijk leeg voordat deze normaal gesproken wordt opgeladen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterijbesparing is geactiveerd om de batterijduur te verlengen"</string>

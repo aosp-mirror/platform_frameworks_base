@@ -4885,8 +4885,9 @@ public class TelephonyManager {
      * Return the set of IMSIs that should be considered "merged together" for data usage
      * purposes. This API merges IMSIs based on subscription grouping: IMSI of those in the same
      * group will all be returned.
-     * Return the current IMSI if there is no subscription group. See
-     * {@link SubscriptionManager#createSubscriptionGroup(List)} for the definition of a group.
+     * Return the current IMSI if there is no subscription group, see
+     * {@link SubscriptionManager#createSubscriptionGroup(List)} for the definition of a group,
+     * otherwise return an empty array if there is a failure.
      *
      * @hide
      */

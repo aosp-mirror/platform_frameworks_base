@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.BLASTBufferQueue;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -208,8 +209,8 @@ public abstract class WallpaperService extends Service {
         int mCurHeight;
         float mZoom = 0f;
         int mWindowFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-        int mWindowPrivateFlags =
-                WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS;
+        int mWindowPrivateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS
+                | WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
         int mCurWindowFlags = mWindowFlags;
         int mCurWindowPrivateFlags = mWindowPrivateFlags;
         Rect mPreviewSurfacePosition;
@@ -253,6 +254,7 @@ public abstract class WallpaperService extends Service {
         private int mDisplayState;
 
         SurfaceControl mSurfaceControl = new SurfaceControl();
+        BLASTBufferQueue mBlastBufferQueue;
 
         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
             {
@@ -974,7 +976,14 @@ public abstract class WallpaperService extends Service {
                             View.VISIBLE, 0, -1, mWinFrames, mMergedConfiguration, mSurfaceControl,
                             mInsetsState, mTempControls, mSurfaceSize);
                     if (mSurfaceControl.isValid()) {
-                        mSurfaceHolder.mSurface.copyFrom(mSurfaceControl);
+                        Surface blastSurface = getOrCreateBLASTSurface(mSurfaceSize.x,
+                                mSurfaceSize.y, mFormat);
+                        // If blastSurface == null that means it hasn't changed since the last
+                        // time we called. In this situation, avoid calling transferFrom as we
+                        // would then inc the generation ID and cause EGL resources to be recreated.
+                        if (blastSurface != null) {
+                            mSurfaceHolder.mSurface.transferFrom(blastSurface);
+                        }
                     }
                     if (!mLastSurfaceSize.equals(mSurfaceSize)) {
                         mLastSurfaceSize.set(mSurfaceSize.x, mSurfaceSize.y);
@@ -1455,13 +1464,12 @@ public abstract class WallpaperService extends Service {
                 return;
             }
             Surface surface = mSurfaceHolder.getSurface();
-            boolean widthIsLarger =
-                    mSurfaceControl.getWidth() > mSurfaceControl.getHeight();
-            int smaller = widthIsLarger ? mSurfaceControl.getWidth()
-                    : mSurfaceControl.getHeight();
+            boolean widthIsLarger = mSurfaceSize.x > mSurfaceSize.y;
+            int smaller = widthIsLarger ? mSurfaceSize.x
+                    : mSurfaceSize.y;
             float ratio = (float) MIN_BITMAP_SCREENSHOT_WIDTH / (float) smaller;
-            int width = (int) (ratio * mSurfaceControl.getWidth());
-            int height = (int) (ratio * mSurfaceControl.getHeight());
+            int width = (int) (ratio * mSurfaceSize.x);
+            int height = (int) (ratio * mSurfaceSize.y);
             if (width <= 0 || height <= 0) {
                 Log.e(TAG, "wrong width and height values of bitmap " + width + " " + height);
                 return;
@@ -1842,6 +1850,21 @@ public abstract class WallpaperService extends Service {
             public void onDisplayAdded(int displayId) {
             }
         };
+
+        private Surface getOrCreateBLASTSurface(int width, int height, int format) {
+            Surface ret = null;
+            if (mBlastBufferQueue == null) {
+                mBlastBufferQueue = new BLASTBufferQueue("Wallpaper", mSurfaceControl, width,
+                        height, format);
+                // We only return the Surface the first time, as otherwise
+                // it hasn't changed and there is no need to update.
+                ret = mBlastBufferQueue.createSurface();
+            } else {
+                mBlastBufferQueue.update(mSurfaceControl, width, height, format);
+            }
+
+            return ret;
+        }
     }
 
     private boolean isValid(RectF area) {

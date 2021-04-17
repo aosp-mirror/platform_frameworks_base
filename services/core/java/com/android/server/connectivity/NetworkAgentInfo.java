@@ -950,6 +950,26 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
     }
 
     /**
+     * Returns a Scoreable identical to this NAI, but validated.
+     *
+     * This is useful to probe what scoring would be if this network validated, to know
+     * whether to provisionally keep a network that may or may not validate.
+     *
+     * @return a Scoreable identical to this NAI, but validated.
+     */
+    public NetworkRanker.Scoreable getValidatedScoreable() {
+        return new NetworkRanker.Scoreable() {
+            @Override public FullScore getScore() {
+                return mScore.asValidated();
+            }
+
+            @Override public NetworkCapabilities getCapsNoCopy() {
+                return networkCapabilities;
+            }
+        };
+    }
+
+    /**
      * Return a {@link NetworkStateSnapshot} for this network.
      */
     @NonNull

@@ -375,12 +375,12 @@ public class Sensor {
         }
 
         @Override
-        public void onFeaturesRetrieved(byte[] features, int enrollmentId) {
+        public void onFeaturesRetrieved(byte[] features) {
 
         }
 
         @Override
-        public void onFeatureSet(int enrollmentId, byte feature) {
+        public void onFeatureSet(byte feature) {
 
         }
 

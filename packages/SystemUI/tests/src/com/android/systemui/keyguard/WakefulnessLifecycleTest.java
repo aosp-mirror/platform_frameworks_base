@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.app.IWallpaperManager;
 import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
 
@@ -43,9 +44,12 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
     private WakefulnessLifecycle mWakefulness;
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
 
+    private IWallpaperManager mWallpaperManager;
+
     @Before
     public void setUp() throws Exception {
-        mWakefulness = new WakefulnessLifecycle();
+        mWallpaperManager = mock(IWallpaperManager.class);
+        mWakefulness = new WakefulnessLifecycle(mContext, mWallpaperManager);
         mWakefulnessObserver = mock(WakefulnessLifecycle.Observer.class);
         mWakefulness.addObserver(mWakefulnessObserver);
     }

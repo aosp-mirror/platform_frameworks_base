@@ -2018,7 +2018,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 right = getView().getRight();
             } else {
                 top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
-                bottom = getExpandedHeight() - mSplitShadeNotificationsTopPadding;
+                bottom = mNotificationStackScrollLayoutController.getHeight();
                 left = mNotificationStackScrollLayoutController.getLeft();
                 right = mNotificationStackScrollLayoutController.getRight();
             }

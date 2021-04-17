@@ -315,14 +315,12 @@
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"మైక్రోఫోన్"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ఆడియోను రికార్డ్ చేయడానికి"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"భౌతిక కార్యకలాపం"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ఫిజికల్ యాక్టివిటీ"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"భౌతిక కార్యకలాపాన్ని యాక్సెస్ చేయండి"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"కెమెరా"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"చిత్రాలను తీయడానికి మరియు వీడియోను రికార్డ్ చేయడానికి"</string>
-    <!-- no translation found for permgrouplab_nearby_devices (5529147543651181991) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_nearby_devices (3213561597116913508) -->
-    <skip />
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"సమీపంలోని పరికరాలు"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"సమీప పరికరాలను కనుగొనండి అలాగే కనెక్ట్ చేయండి"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"కాల్ లాగ్‌లు"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ఫోన్ కాల్ లాగ్‌ని చదవండి మరియు రాయండి"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ఫోన్"</string>
@@ -540,14 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"సమీపంలోని బ్లూటూత్ పరికరాలను కనుగొనడానికి, పెయిర్ చేయడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"పెయిర్ చేసిన బ్లూటూత్ పరికరాలకు కనెక్ట్ అవ్వండి"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"పెయిర్ చేసిన బ్లూటూత్ పరికరాలకు కనెక్ట్ అవ్వడానికి యాప్‌ను అనుమతిస్తుంది"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"సమీపంలోని బ్లూటూత్ పరికరాలలో అడ్వర్టయిజ్ చేయండి"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"సమీపంలోని బ్లూటూత్ పరికరాలలో అడ్వర్టయిజ్ చేయడానికి యాప్‌కు అనుమతిని ఇస్తుంది"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించండి"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించడానికి యాప్‌ను అనుమతించండి"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారం"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారాన్ని, అంటే రిజిస్టర్ చేయబడిన సహాయక సాధనాలు, మార్గం, గమ్యస్థానం వంటి వాటిని పొందేందుకు యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"సమీప క్షేత్ర కమ్యూనికేషన్‌ను నియంత్రించడం"</string>
@@ -1485,7 +1479,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"మీరు మీ కార్యాలయ ప్రొఫైల్‌లో ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"సమకాలీకరణ"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"యాక్సెస్ సామర్థ్యం"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"యాక్సెసిబిలిటీ"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"వాల్‌పేపర్"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"వాల్‌పేపర్‌ను మార్చండి"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"నోటిఫికేషన్ పరిశీలన"</string>
@@ -1937,6 +1931,8 @@
     <string name="close_button_text" msgid="10603510034455258">"మూసివేయి"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"సమాధానం ఇవ్వు"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"తిరస్కరించండి"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"కాల్ ముగించు"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ఇన్‌కమింగ్ కాల్"</string>
@@ -2279,14 +2275,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"మీరు ఇప్పుడు మీ స్క్రీన్ కొంత భాగాన్ని మాగ్నిఫై చేయవచ్చు"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"సెట్టింగ్‌లలో ఆన్ చేయండి"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"విస్మరించు"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"పరికరం మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయండి"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"పరికరం కెమెరాను అన్‌బ్లాక్ చేయండి"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; యాప్, ఇతర యాప్‌లు, సర్వీస్‌ల కోసం"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"అన్‌బ్లాక్ చేయండి"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"సెన్సార్ గోప్యత"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"యాప్ చిహ్నం"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"యాప్ బ్రాండింగ్ ఇమేజ్"</string>

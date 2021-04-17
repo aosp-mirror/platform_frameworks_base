@@ -22,7 +22,7 @@ using namespace android::uirenderer::skiapipeline;
 
 void TransformCanvas::onDrawAnnotation(const SkRect& rect, const char* key, SkData* value) {
     if (HOLE_PUNCH_ANNOTATION == key) {
-        auto* rectParams = static_cast<const float*>(value->data());
+        auto* rectParams = reinterpret_cast<const float*>(value->data());
         float radiusX = rectParams[0];
         float radiusY = rectParams[1];
         SkRRect roundRect = SkRRect::MakeRectXY(rect, radiusX, radiusY);

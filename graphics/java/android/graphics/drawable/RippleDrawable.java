@@ -858,15 +858,6 @@ public class RippleDrawable extends LayerDrawable {
         }
         for (int i = 0; i < mRunningAnimations.size(); i++) {
             RippleAnimationSession s = mRunningAnimations.get(i);
-            if (s.shouldAnimateSparkle()) {
-                final float phase = s.getSparklePhase();
-                if (useCanvasProps) {
-                    s.getCanvasProperties().getShader().setNoisePhase(phase);
-                } else {
-                    s.getProperties().getShader().setNoisePhase(phase);
-                }
-                invalidateSelf();
-            }
             if (useCanvasProps) {
                 RippleAnimationSession.AnimationProperties<CanvasProperty<Float>,
                         CanvasProperty<Paint>>
@@ -883,7 +874,7 @@ public class RippleDrawable extends LayerDrawable {
                     yProp = p.getY();
                 }
                 can.drawRipple(xProp, yProp, p.getMaxRadius(), p.getPaint(),
-                        p.getProgress(), p.getShader());
+                        p.getProgress(), p.getNoisePhase(), p.getShader());
             } else {
                 RippleAnimationSession.AnimationProperties<Float, Paint> p =
                         s.getProperties();
@@ -953,7 +944,7 @@ public class RippleDrawable extends LayerDrawable {
         shader.setRadius(radius);
         shader.setProgress(.0f);
         properties = new RippleAnimationSession.AnimationProperties<>(
-                cx, cy, radius, p, 0f, shader);
+                cx, cy, radius, 0f, p, 0f, shader);
         if (mMaskShader == null) {
             shader.setShader(null);
         } else {

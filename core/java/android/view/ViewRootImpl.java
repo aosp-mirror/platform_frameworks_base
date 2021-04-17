@@ -9309,11 +9309,11 @@ public final class ViewRootImpl implements ViewParent,
      * Handles an inbound request for scroll capture from the system. A search will be
      * dispatched through the view tree to locate scrolling content.
      * <p>
-     * A call to {@link IScrollCaptureCallbacks#onScrollCaptureResponse(ScrollCaptureResponse)}
-     * will follow.
+     * A call to
+     * {@link IScrollCaptureResponseListener#onScrollCaptureResponse} will follow.
      *
      * @param listener to receive responses
-     * @see ScrollCaptureTargetSelector
+     * @see ScrollCaptureSearchResults
      */
     public void handleScrollCaptureRequest(@NonNull IScrollCaptureResponseListener listener) {
         ScrollCaptureSearchResults results =
