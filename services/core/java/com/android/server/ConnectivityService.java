@@ -630,7 +630,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private static IDnsResolver getDnsResolver(Context context) {
-        return IDnsResolver.Stub.asInterface(DnsResolverServiceManager.getService(context));
+        final DnsResolverServiceManager dsm = context.getSystemService(
+                DnsResolverServiceManager.class);
+        return IDnsResolver.Stub.asInterface(dsm.getService());
     }
 
     /** Handler thread used for all of the handlers below. */
@@ -1924,7 +1926,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         newNc.setAdministratorUids(new int[0]);
         if (!checkAnyPermissionOf(
                 callerPid, callerUid, android.Manifest.permission.NETWORK_FACTORY)) {
-            newNc.setSubIds(Collections.emptySet());
+            newNc.setSubscriptionIds(Collections.emptySet());
         }
 
         return newNc;
@@ -3969,17 +3971,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // multilayer requests, returning as soon as a NetworkAgentInfo satisfies a request
                 // is important so as to not evaluate lower priority requests further in
                 // nri.mRequests.
-                final boolean isNetworkNeeded = candidate.isSatisfyingRequest(req.requestId)
-                        // Note that this catches two important cases:
-                        // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
-                        //    is currently satisfying the request.  This is desirable when
-                        //    cellular ends up validating but WiFi does not.
-                        // 2. Unvalidated WiFi will not be reaped when validated cellular
-                        //    is currently satisfying the request.  This is desirable when
-                        //    WiFi ends up validating and out scoring cellular.
-                        || nri.getSatisfier().getCurrentScore()
-                        < candidate.getCurrentScoreAsValidated();
-                return isNetworkNeeded;
+                final NetworkAgentInfo champion = req.equals(nri.getActiveRequest())
+                        ? nri.getSatisfier() : null;
+                // Note that this catches two important cases:
+                // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
+                //    is currently satisfying the request.  This is desirable when
+                //    cellular ends up validating but WiFi does not.
+                // 2. Unvalidated WiFi will not be reaped when validated cellular
+                //    is currently satisfying the request.  This is desirable when
+                //    WiFi ends up validating and out scoring cellular.
+                return mNetworkRanker.mightBeat(req, champion, candidate.getValidatedScoreable());
             }
         }
 
@@ -5726,7 +5727,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         mAppOpsManager.checkPackage(callerUid, callerPackageName);
 
-        if (!nc.getSubIds().isEmpty()) {
+        if (!nc.getSubscriptionIds().isEmpty()) {
             enforceNetworkFactoryPermission();
         }
     }
@@ -6148,6 +6149,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public int registerNetworkProvider(Messenger messenger, String name) {
         enforceNetworkFactoryOrSettingsPermission();
+        Objects.requireNonNull(messenger, "messenger must be non-null");
         NetworkProviderInfo npi = new NetworkProviderInfo(name, messenger,
                 nextNetworkProviderId(), () -> unregisterNetworkProvider(messenger));
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_PROVIDER, npi));
@@ -7811,7 +7813,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull final Collection<NetworkRequestInfo> networkRequests) {
         final NetworkReassignment changes = new NetworkReassignment();
 
-        // Gather the list of all relevant agents and sort them by score.
+        // Gather the list of all relevant agents.
         final ArrayList<NetworkAgentInfo> nais = new ArrayList<>();
         for (final NetworkAgentInfo nai : mNetworkAgentInfos) {
             if (!nai.everConnected) {
@@ -9186,6 +9188,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public void unregisterConnectivityDiagnosticsCallback(
             @NonNull IConnectivityDiagnosticsCallback callback) {
+        Objects.requireNonNull(callback, "callback must be non-null");
         mConnectivityDiagnosticsHandler.sendMessage(
                 mConnectivityDiagnosticsHandler.obtainMessage(
                         ConnectivityDiagnosticsHandler
@@ -9556,6 +9559,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     @Override
     public void unregisterQosCallback(@NonNull final IQosCallback callback) {
+        Objects.requireNonNull(callback, "callback must be non-null");
         mQosCallbackTracker.unregisterCallback(callback);
     }
 

@@ -23,18 +23,14 @@ import static com.android.systemui.people.PeopleTileViewHelper.getPersonIconBitm
 import static com.android.systemui.people.PeopleTileViewHelper.getSizeInDp;
 
 import android.app.Activity;
-import android.app.INotificationManager;
-import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.LauncherApps;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.os.ServiceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +39,6 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,19 +51,13 @@ public class PeopleSpaceActivity extends Activity {
     private static final String TAG = "PeopleSpaceActivity";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
 
-    private IPeopleManager mPeopleManager;
     private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
-    private INotificationManager mNotificationManager;
-    private LauncherApps mLauncherApps;
     private Context mContext;
-    private NotificationEntryManager mNotificationEntryManager;
     private int mAppWidgetId;
 
     @Inject
-    public PeopleSpaceActivity(NotificationEntryManager notificationEntryManager,
-            PeopleSpaceWidgetManager peopleSpaceWidgetManager) {
+    public PeopleSpaceActivity(PeopleSpaceWidgetManager peopleSpaceWidgetManager) {
         super();
-        mNotificationEntryManager = notificationEntryManager;
         mPeopleSpaceWidgetManager = peopleSpaceWidgetManager;
 
     }
@@ -77,11 +66,6 @@ public class PeopleSpaceActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = getApplicationContext();
-        mNotificationManager = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-        mPeopleManager = IPeopleManager.Stub.asInterface(
-                ServiceManager.getService(Context.PEOPLE_SERVICE));
-        mLauncherApps = mContext.getSystemService(LauncherApps.class);
         mAppWidgetId = getIntent().getIntExtra(EXTRA_APPWIDGET_ID,
                 INVALID_APPWIDGET_ID);
         setResult(RESULT_CANCELED);
@@ -92,10 +76,8 @@ public class PeopleSpaceActivity extends Activity {
         List<PeopleSpaceTile> priorityTiles = new ArrayList<>();
         List<PeopleSpaceTile> recentTiles = new ArrayList<>();
         try {
-            priorityTiles = PeopleSpaceUtils.getPriorityTiles(mContext, mNotificationManager,
-                    mPeopleManager, mLauncherApps, mNotificationEntryManager);
-            recentTiles = PeopleSpaceUtils.getRecentTiles(mContext, mNotificationManager,
-                    mPeopleManager, mLauncherApps, mNotificationEntryManager);
+            priorityTiles = mPeopleSpaceWidgetManager.getPriorityTiles();
+            recentTiles = mPeopleSpaceWidgetManager.getRecentTiles();
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve conversations", e);
         }

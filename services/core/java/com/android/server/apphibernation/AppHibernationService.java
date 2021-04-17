@@ -109,7 +109,7 @@ public final class AppHibernationService extends SystemService {
     private final boolean mOatArtifactDeletionEnabled;
 
     @VisibleForTesting
-    boolean mIsServiceEnabled;
+    static boolean sIsServiceEnabled;
 
     /**
      * Initializes the system service.
@@ -165,7 +165,7 @@ public final class AppHibernationService extends SystemService {
             });
         }
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
-            mIsServiceEnabled = isAppHibernationEnabled();
+            sIsServiceEnabled = isDeviceConfigAppHibernationEnabled();
             DeviceConfig.addOnPropertiesChangedListener(
                     NAMESPACE_APP_HIBERNATION,
                     ActivityThread.currentApplication().getMainExecutor(),
@@ -536,7 +536,7 @@ public final class AppHibernationService extends SystemService {
     private void onDeviceConfigChanged(Properties properties) {
         for (String key : properties.getKeyset()) {
             if (TextUtils.equals(KEY_APP_HIBERNATION_ENABLED, key)) {
-                mIsServiceEnabled = isAppHibernationEnabled();
+                sIsServiceEnabled = isDeviceConfigAppHibernationEnabled();
                 break;
             }
         }
@@ -574,10 +574,10 @@ public final class AppHibernationService extends SystemService {
     }
 
     private boolean checkHibernationEnabled(String methodName) {
-        if (!mIsServiceEnabled) {
+        if (!sIsServiceEnabled) {
             Slog.w(TAG, String.format("Attempted to call %s on unsupported device.", methodName));
         }
-        return mIsServiceEnabled;
+        return sIsServiceEnabled;
     }
 
     private void dump(PrintWriter pw) {
@@ -725,6 +725,10 @@ public final class AppHibernationService extends SystemService {
      * @return true if enabled, false otherwise
      */
     public static boolean isAppHibernationEnabled() {
+        return sIsServiceEnabled;
+    }
+
+    private static boolean isDeviceConfigAppHibernationEnabled() {
         return DeviceConfig.getBoolean(
                 NAMESPACE_APP_HIBERNATION,
                 KEY_APP_HIBERNATION_ENABLED,

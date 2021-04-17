@@ -189,6 +189,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
+import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
@@ -215,14 +216,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
-import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
-import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_SOLID_COLOR;
-import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_WALLPAPER;
-import static com.android.server.wm.WindowManagerService.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
-import static com.android.server.wm.WindowManagerService.letterboxBackgroundTypeToString;
 import static com.android.server.wm.WindowState.LEGACY_POLICY_VISIBILITY;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_BEFORE_ANIM;
@@ -268,7 +263,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -344,7 +338,6 @@ import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.Task.ActivityState;
 import com.android.server.wm.WindowManagerService.H;
-import com.android.server.wm.WindowManagerService.LetterboxBackgroundType;
 import com.android.server.wm.utils.InsetUtils;
 
 import com.google.android.collect.Sets;
@@ -587,10 +580,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     AnimatingActivityRegistry mAnimatingActivityRegistry;
 
-    // Set whenever the ActivityRecord gets reparented to a Task so we can know the last known
-    // parent was when the ActivityRecord is detached from the hierarchy
-    private Task mLastKnownParent;
-
     // Set to the previous Task parent of the ActivityRecord when it is reparented to a new Task
     // due to picture-in-picture. This gets cleared whenever this activity or the Task
     // it references to gets removed. This should also be cleared when we move out of pip.
@@ -649,7 +638,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean mWillCloseOrEnterPip;
 
-    private Letterbox mLetterbox;
+    @VisibleForTesting
+    final LetterboxUiController mLetterboxUiController;
 
     /**
      * The scale to fit at least one side of the activity to its parent. If the activity uses
@@ -677,8 +667,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // WindowManagerService#getFixedToUserRotation for more context.
     @Nullable
     private Rect mLetterboxBoundsForFixedOrientationAndAspectRatio;
-
-    private boolean mShowWallpaperForLetterboxBackground;
 
     // activity is not displayed?
     // TODO: rename to mNoDisplay
@@ -1107,61 +1095,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.println(prefix + "lastParentTaskIdBeforePip=" + mLastParentBeforePip.mTaskId);
         }
 
-        dumpLetterboxInfo(pw, prefix);
-    }
-
-    private void dumpLetterboxInfo(PrintWriter pw, String prefix) {
-        final WindowState mainWin = findMainWindow();
-        if (mainWin == null) {
-            return;
-        }
-
-        boolean areBoundsLetterboxed = mainWin.isLetterboxedAppWindow();
-        pw.println(prefix + "areBoundsLetterboxed=" + areBoundsLetterboxed);
-        if (!areBoundsLetterboxed) {
-            return;
-        }
-
-        pw.println(prefix + "  letterboxReason=" + getLetterboxReasonString(mainWin));
-        pw.println(prefix + "  letterboxAspectRatio=" + computeAspectRatio(getBounds()));
-
-        boolean isLetterboxUiShown = isLetterboxed(mainWin);
-        pw.println(prefix + "isLetterboxUiShown=" + isLetterboxUiShown);
-
-        if (!isLetterboxUiShown) {
-            return;
-        }
-        pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
-                getLetterboxBackgroundColor().toArgb()));
-        pw.println(prefix + "  letterboxBackgroundType="
-                + letterboxBackgroundTypeToString(mWmService.getLetterboxBackgroundType()));
-        if (mWmService.getLetterboxBackgroundType() == LETTERBOX_BACKGROUND_WALLPAPER) {
-            pw.println(prefix + "  isLetterboxWallpaperBlurSupported="
-                    + isLetterboxWallpaperBlurSupported());
-            pw.println(prefix + "  letterboxBackgroundWallpaperDarkScrimAlpha="
-                    + getLetterboxWallpaperDarkScrimAlpha());
-            pw.println(prefix + "  letterboxBackgroundWallpaperBlurRadius="
-                    + getLetterboxWallpaperBlurRadius());
-        }
-        pw.println(prefix + "  letterboxHorizontalPositionMultiplier="
-                + mWmService.getLetterboxHorizontalPositionMultiplier());
-    }
-
-    /**
-     * Returns a string representing the reason for letterboxing. This method assumes the activity
-     * is letterboxed.
-     */
-    private String getLetterboxReasonString(WindowState mainWin) {
-        if (inSizeCompatMode()) {
-            return "SIZE_COMPAT_MODE";
-        }
-        if (isLetterboxedForFixedOrientationAndAspectRatio()) {
-            return "FIXED_ORIENTATION";
-        }
-        if (mainWin.isLetterboxedForDisplayCutout()) {
-            return "DISPLAY_CUTOUT";
-        }
-        return "UNKNOWN_REASON";
+        mLetterboxUiController.dump(pw, prefix);
     }
 
     void setAppTimeTracker(AppTimeTracker att) {
@@ -1361,7 +1295,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (getDisplayContent() != null) {
                 getDisplayContent().mClosingApps.remove(this);
             }
-        } else if (mLastKnownParent != null && mLastKnownParent.getRootTask() != null) {
+        } else if (oldTask != null && oldTask.getRootTask() != null) {
             task.getRootTask().mExitingActivities.remove(this);
         }
         final Task rootTask = getRootTask();
@@ -1374,8 +1308,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ? rootTask.getAnimatingActivityRegistry()
                 : null;
 
-        mLastKnownParent = task;
-        if (mLastKnownParent == mLastParentBeforePip) {
+        if (task == mLastParentBeforePip) {
             // Activity's reparented back from pip, clear the links once established
             clearLastParentBeforePip();
         }
@@ -1451,183 +1384,29 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
-        if (mLetterbox != null) {
-            mLetterbox.onMovedToDisplay(mDisplayContent.getDisplayId());
-        }
+        mLetterboxUiController.onMovedToDisplay(mDisplayContent.getDisplayId());
     }
 
-    // TODO(b/183754168): Move letterbox UI logic into a separate class.
     void layoutLetterbox(WindowState winHint) {
-        final WindowState w = findMainWindow();
-        if (w == null || winHint != null && w != winHint) {
-            return;
-        }
-        final boolean surfaceReady = w.isDrawn()  // Regular case
-                || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
-        final boolean needsLetterbox = surfaceReady && isLetterboxed(w);
-        updateRoundedCorners(w);
-        updateWallpaperForLetterbox(w);
-        if (needsLetterbox) {
-            if (mLetterbox == null) {
-                mLetterbox = new Letterbox(() -> makeChildSurface(null),
-                        mWmService.mTransactionFactory,
-                        mWmService::isLetterboxActivityCornersRounded,
-                        this::getLetterboxBackgroundColor,
-                        this::hasWallpaperBackgroudForLetterbox,
-                        this::getLetterboxWallpaperBlurRadius,
-                        this::getLetterboxWallpaperDarkScrimAlpha);
-                mLetterbox.attachInput(w);
-            }
-            getPosition(mTmpPoint);
-            // Get the bounds of the "space-to-fill". The transformed bounds have the highest
-            // priority because the activity is launched in a rotated environment. In multi-window
-            // mode, the task-level represents this. In fullscreen-mode, the task container does
-            // (since the orientation letterbox is also applied to the task).
-            final Rect transformedBounds = getFixedRotationTransformDisplayBounds();
-            final Rect spaceToFill = transformedBounds != null
-                    ? transformedBounds
-                    : inMultiWindowMode()
-                            ? getRootTask().getBounds()
-                            : getRootTask().getParent().getBounds();
-            mLetterbox.layout(spaceToFill, w.getFrame(), mTmpPoint);
-        } else if (mLetterbox != null) {
-            mLetterbox.hide();
-        }
-    }
-
-    private Color getLetterboxBackgroundColor() {
-        final WindowState w = findMainWindow();
-        if (w == null || w.isLetterboxedForDisplayCutout()) {
-            return Color.valueOf(Color.BLACK);
-        }
-        @LetterboxBackgroundType int letterboxBackgroundType =
-                mWmService.getLetterboxBackgroundType();
-        switch (letterboxBackgroundType) {
-            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
-                if (taskDescription != null && taskDescription.getBackgroundColorFloating() != 0) {
-                    return Color.valueOf(taskDescription.getBackgroundColorFloating());
-                }
-                break;
-            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND:
-                if (taskDescription != null && taskDescription.getBackgroundColor() != 0) {
-                    return Color.valueOf(taskDescription.getBackgroundColor());
-                }
-                break;
-            case LETTERBOX_BACKGROUND_WALLPAPER:
-                if (hasWallpaperBackgroudForLetterbox()) {
-                    // Color is used for translucent scrim that dims wallpaper.
-                    return Color.valueOf(Color.BLACK);
-                }
-                Slog.w(TAG, "Wallpaper option is selected for letterbox background but "
-                        + "blur is not supported by a device or not supported in the current "
-                        + "window configuration or both alpha scrim and blur radius aren't "
-                        + "provided so using solid color background");
-                break;
-            case LETTERBOX_BACKGROUND_SOLID_COLOR:
-                return mWmService.getLetterboxBackgroundColor();
-            default:
-                throw new AssertionError(
-                    "Unexpected letterbox background type: " + letterboxBackgroundType);
-        }
-        // If picked option configured incorrectly or not supported then default to a solid color
-        // background.
-        return mWmService.getLetterboxBackgroundColor();
-    }
-
-    /**
-     * @return {@code true} when the main window is letterboxed, this activity isn't transparent
-     * and doesn't show a wallpaper.
-     */
-    @VisibleForTesting
-    boolean isLetterboxed(WindowState mainWindow) {
-        return mainWindow.isLetterboxedAppWindow() && fillsParent()
-                // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
-                // WindowContainer#showWallpaper because the later will return true when this
-                // activity is using blurred wallpaper for letterbox backgroud.
-                && (mainWindow.mAttrs.flags & FLAG_SHOW_WALLPAPER) == 0;
-    }
-
-    private void updateRoundedCorners(WindowState mainWindow) {
-        int cornersRadius =
-                // Don't round corners if letterboxed only for display cutout.
-                isLetterboxed(mainWindow) && !mainWindow.isLetterboxedForDisplayCutout()
-                        ? Math.max(0, mWmService.getLetterboxActivityCornersRadius()) : 0;
-        setCornersRadius(mainWindow, cornersRadius);
-    }
-
-    private void setCornersRadius(WindowState mainWindow, int cornersRadius) {
-        final SurfaceControl windowSurface = mainWindow.getClientViewRootSurface();
-        if (windowSurface != null && windowSurface.isValid()) {
-            Transaction transaction = getSyncTransaction();
-            transaction.setCornerRadius(windowSurface, cornersRadius);
-        }
+        mLetterboxUiController.layoutLetterbox(winHint);
     }
 
     boolean hasWallpaperBackgroudForLetterbox() {
-        return mShowWallpaperForLetterboxBackground;
-    }
-
-    private void updateWallpaperForLetterbox(WindowState mainWindow) {
-        @LetterboxBackgroundType int letterboxBackgroundType =
-                mWmService.getLetterboxBackgroundType();
-        boolean wallpaperShouldBeShown =
-                letterboxBackgroundType == LETTERBOX_BACKGROUND_WALLPAPER
-                        && isLetterboxed(mainWindow)
-                        // Don't use wallpaper as a background if letterboxed for display cutout.
-                        && !mainWindow.isLetterboxedForDisplayCutout()
-                        // Check that dark scrim alpha or blur radius are provided
-                        && (getLetterboxWallpaperBlurRadius() > 0
-                                || getLetterboxWallpaperDarkScrimAlpha() > 0)
-                        // Check that blur is supported by a device if blur radius is provided.
-                        && (getLetterboxWallpaperBlurRadius() <= 0
-                                || isLetterboxWallpaperBlurSupported());
-        if (mShowWallpaperForLetterboxBackground != wallpaperShouldBeShown) {
-            mShowWallpaperForLetterboxBackground = wallpaperShouldBeShown;
-            requestUpdateWallpaperIfNeeded();
-        }
-    }
-
-    private int getLetterboxWallpaperBlurRadius() {
-        int blurRadius = mWmService.getLetterboxBackgroundWallpaperBlurRadius();
-        return blurRadius < 0 ? 0 : blurRadius;
-    }
-
-    private float getLetterboxWallpaperDarkScrimAlpha() {
-        float alpha = mWmService.getLetterboxBackgroundWallpaperDarkScrimAlpha();
-        // No scrim by default.
-        return (alpha < 0 || alpha >= 1) ? 0.0f : alpha;
-    }
-
-    private boolean isLetterboxWallpaperBlurSupported() {
-        return mWmService.mContext.getSystemService(WindowManager.class).isCrossWindowBlurEnabled();
+        return mLetterboxUiController.hasWallpaperBackgroudForLetterbox();
     }
 
     void updateLetterboxSurface(WindowState winHint) {
-        final WindowState w = findMainWindow();
-        if (w != winHint && winHint != null && w != null) {
-            return;
-        }
-        layoutLetterbox(winHint);
-        if (mLetterbox != null && mLetterbox.needsApplySurfaceChanges()) {
-            mLetterbox.applySurfaceChanges(getSyncTransaction());
-        }
+        mLetterboxUiController.updateLetterboxSurface(winHint);
     }
 
+    /** Gets the letterbox insets. The insets will be empty if there is no letterbox. */
     Rect getLetterboxInsets() {
-        if (mLetterbox != null) {
-            return mLetterbox.getInsets();
-        } else {
-            return new Rect();
-        }
+        return mLetterboxUiController.getLetterboxInsets();
     }
 
     /** Gets the inner bounds of letterbox. The bounds will be empty if there is no letterbox. */
     void getLetterboxInnerBounds(Rect outBounds) {
-        if (mLetterbox != null) {
-            outBounds.set(mLetterbox.getInnerFrame());
-        } else {
-            outBounds.setEmpty();
-        }
+        mLetterboxUiController.getLetterboxInnerBounds(outBounds);
     }
 
     /**
@@ -1635,7 +1414,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *     when the current activity is displayed.
      */
     boolean isFullyTransparentBarAllowed(Rect rect) {
-        return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect);
+        return mLetterboxUiController.isFullyTransparentBarAllowed(rect);
     }
 
     /**
@@ -1643,7 +1422,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * the given {@code rect}.
      */
     boolean isLetterboxOverlappingWith(Rect rect) {
-        return mLetterbox != null && mLetterbox.isOverlappingWith(rect);
+        return mLetterboxUiController.isLetterboxOverlappingWith(rect);
     }
 
     static class Token extends IApplicationToken.Stub {
@@ -1892,6 +1671,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mPersistentState = persistentState;
         taskDescription = _taskDescription;
+
+        mLetterboxUiController = new LetterboxUiController(mWmService, this);
+
         if (_createTime > 0) {
             createTime = _createTime;
         }
@@ -2175,7 +1957,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Add starting %s: startingData=%s",
                     this, startingData);
-
 
             WindowManagerPolicy.StartingSurface surface = null;
             try {
@@ -3724,10 +3505,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             dc.setFocusedApp(null);
             mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
         }
-        if (mLetterbox != null) {
-            mLetterbox.destroy();
-            mLetterbox = null;
-        }
+
+        mLetterboxUiController.destroy();
 
         if (!delayed) {
             updateReportedVisibilityLocked();
@@ -7155,7 +6934,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             offsetX = getHorizontalCenterOffset(
                     parentAppBounds.width(), screenResolvedBounds.width());
         } else {
-            float positionMultiplier = mWmService.getLetterboxHorizontalPositionMultiplier();
+            float positionMultiplier =
+                    mWmService.mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier();
             positionMultiplier =
                     (positionMultiplier < 0.0f || positionMultiplier > 1.0f)
                             // Default to central position if invalid value is provided.
@@ -7228,7 +7008,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Override from config_fixedOrientationLetterboxAspectRatio or via ADB with
         // set-fixed-orientation-letterbox-aspect-ratio.
         final float letterboxAspectRatioOverride =
-                mWmService.getFixedOrientationLetterboxAspectRatio();
+                mWmService.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
         aspect = letterboxAspectRatioOverride > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
                 ? letterboxAspectRatioOverride : aspect;
 
@@ -7746,7 +7526,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Returns the aspect ratio of the given {@code rect}.
      */
-    private static float computeAspectRatio(Rect rect) {
+    static float computeAspectRatio(Rect rect) {
         final int width = rect.width();
         final int height = rect.height();
         if (width == 0 || height == 0) {

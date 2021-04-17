@@ -4705,10 +4705,9 @@ public abstract class Context {
      * @hide
      * @see #getSystemService(String)
      */
-    // TODO(b/176208267): change it back to translation before S release.
     @SystemApi
     @SuppressLint("ServiceName")
-    public static final String TRANSLATION_MANAGER_SERVICE = "transformer";
+    public static final String TRANSLATION_MANAGER_SERVICE = "translation";
 
     /**
      * Official published name of the translation service which supports ui translation function.

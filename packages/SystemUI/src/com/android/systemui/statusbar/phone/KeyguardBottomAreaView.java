@@ -183,6 +183,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private String mLeftButtonStr;
     private boolean mDozing;
     private int mIndicationBottomMargin;
+    private int mIndicationPadding;
     private float mDarkAmount;
     private int mBurnInXOffset;
     private int mBurnInYOffset;
@@ -276,6 +277,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mAccessibilityController = Dependency.get(AccessibilityController.class);
         mActivityIntentHelper = new ActivityIntentHelper(getContext());
         updateLeftAffordance();
+
+        mIndicationPadding = getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_area_padding);
+        updateWalletVisibility();
     }
 
     @Override
@@ -358,6 +363,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_width);
         lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_height);
         mWalletButton.setLayoutParams(lp);
+
+        mIndicationPadding = getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_area_padding);
+        updateWalletVisibility();
     }
 
     private void updateRightAffordanceIcon() {
@@ -433,9 +442,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private void updateWalletVisibility() {
         if (mDozing || !mWalletEnabled || !mHasCard) {
             mWalletButton.setVisibility(GONE);
+            mIndicationArea.setPadding(0, 0, 0, 0);
         } else {
             mWalletButton.setVisibility(VISIBLE);
             mWalletButton.setOnClickListener(this::onWalletClick);
+            mIndicationArea.setPadding(mIndicationPadding, 0, mIndicationPadding, 0);
         }
     }
 

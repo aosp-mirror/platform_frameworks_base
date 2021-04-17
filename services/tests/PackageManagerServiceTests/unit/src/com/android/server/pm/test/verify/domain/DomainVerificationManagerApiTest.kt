@@ -527,6 +527,7 @@ class DomainVerificationManagerApiTest {
         whenever(firstInstallTime) { 0L }
         whenever(readUserState(0)) { pkgUserState0() }
         whenever(readUserState(1)) { pkgUserState1() }
+        whenever(isSystem()) { false }
     }
 
     private fun DomainVerificationService.addPackages(vararg pkgSettings: PackageSetting) =

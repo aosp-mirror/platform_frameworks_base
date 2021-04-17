@@ -169,8 +169,6 @@ public class NotificationRemoteInputManager implements Dumpable {
             return mCallback.handleRemoteViewClick(view, pendingIntent,
                     action == null ? false : action.isAuthenticationRequired(), () -> {
                     Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
-                    options.second.setLaunchWindowingMode(
-                            WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
                     mLogger.logStartingIntentWithDefaultHandler(entry, pendingIntent);
                     return RemoteViews.startPendingIntent(view, pendingIntent, options);
             });

@@ -325,6 +325,9 @@ public class HdmiCecConfig {
         powerControlMode.registerValue(HdmiControlManager.POWER_CONTROL_MODE_TV,
                 R.bool.config_cecPowerControlModeTv_allowed,
                 R.bool.config_cecPowerControlModeTv_default);
+        powerControlMode.registerValue(HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM,
+                R.bool.config_cecPowerControlModeTvAndAudioSystem_allowed,
+                R.bool.config_cecPowerControlModeTvAndAudioSystem_default);
         powerControlMode.registerValue(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST,
                 R.bool.config_cecPowerControlModeBroadcast_allowed,
                 R.bool.config_cecPowerControlModeBroadcast_default);

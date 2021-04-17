@@ -3039,7 +3039,7 @@ public final class ActiveServices {
             try {
                 r.mRecentCallerApplicationInfo =
                         mAm.mContext.getPackageManager().getApplicationInfoAsUser(callingPackage,
-                                0, userId);
+                                0, UserHandle.getUserId(callingUid));
             } catch (PackageManager.NameNotFoundException e) {
             }
             if (!mAm.validateAssociationAllowedLocked(callingPackage, callingUid, r.packageName,

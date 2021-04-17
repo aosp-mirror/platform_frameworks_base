@@ -338,6 +338,7 @@ class DomainVerificationEnforcerTest {
             whenever(readUserState(0)) { PackageUserState() }
             whenever(readUserState(1)) { PackageUserState() }
             whenever(getInstantApp(anyInt())) { false }
+            whenever(isSystem()) { false }
         }
     }
 

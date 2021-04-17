@@ -2321,7 +2321,7 @@ package android.content {
     field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final String TETHERING_SERVICE = "tethering";
-    field public static final String TRANSLATION_MANAGER_SERVICE = "transformer";
+    field public static final String TRANSLATION_MANAGER_SERVICE = "translation";
     field public static final String UI_TRANSLATION_SERVICE = "ui_translation";
     field public static final String VR_SERVICE = "vrmanager";
     field public static final String WIFI_NL80211_SERVICE = "wifinl80211";
@@ -3350,6 +3350,7 @@ package android.hardware.hdmi {
     field public static final String POWER_CONTROL_MODE_BROADCAST = "broadcast";
     field public static final String POWER_CONTROL_MODE_NONE = "none";
     field public static final String POWER_CONTROL_MODE_TV = "to_tv";
+    field public static final String POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM = "to_tv_and_audio_system";
     field public static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE = "none";
     field public static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW = "standby_now";
     field public static final int POWER_STATUS_ON = 0; // 0x0
@@ -7298,10 +7299,6 @@ package android.metrics {
 
 package android.net {
 
-  public class DnsResolverServiceManager {
-    method @NonNull @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public static android.os.IBinder getService(@NonNull android.content.Context);
-  }
-
   public class EthernetManager {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
   }
@@ -7861,7 +7858,7 @@ package android.net.wifi.nl80211 {
     method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.TxPacketCounters getTxPacketCounters(@NonNull String);
     method @Nullable public static android.net.wifi.nl80211.WifiNl80211Manager.OemSecurityType parseOemSecurityTypeElement(int, int, @NonNull byte[]);
     method @Deprecated public boolean registerApCallback(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SoftApCallback);
-    method public boolean registerCountryCodeChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.CountryCodeChangeListener);
+    method public boolean registerCountryCodeChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.CountryCodeChangedListener);
     method public void sendMgmtFrame(@NonNull String, @NonNull byte[], int, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SendMgmtFrameCallback);
     method public void setOnServiceDeadCallback(@NonNull Runnable);
     method public boolean setupInterfaceForClientMode(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback);
@@ -7874,7 +7871,7 @@ package android.net.wifi.nl80211 {
     method public boolean tearDownClientInterface(@NonNull String);
     method public boolean tearDownInterfaces();
     method public boolean tearDownSoftApInterface(@NonNull String);
-    method public void unregisterCountryCodeChangeListener(@NonNull android.net.wifi.nl80211.WifiNl80211Manager.CountryCodeChangeListener);
+    method public void unregisterCountryCodeChangedListener(@NonNull android.net.wifi.nl80211.WifiNl80211Manager.CountryCodeChangedListener);
     field public static final String SCANNING_PARAM_ENABLE_6GHZ_RNR = "android.net.wifi.nl80211.SCANNING_PARAM_ENABLE_6GHZ_RNR";
     field public static final int SCAN_TYPE_PNO_SCAN = 1; // 0x1
     field public static final int SCAN_TYPE_SINGLE_SCAN = 0; // 0x0
@@ -7885,8 +7882,8 @@ package android.net.wifi.nl80211 {
     field public static final int SEND_MGMT_FRAME_ERROR_UNKNOWN = 1; // 0x1
   }
 
-  public static interface WifiNl80211Manager.CountryCodeChangeListener {
-    method public void onChanged(@NonNull String);
+  public static interface WifiNl80211Manager.CountryCodeChangedListener {
+    method public void onCountryCodeChanged(@NonNull String);
   }
 
   public static class WifiNl80211Manager.OemSecurityType {
@@ -10362,7 +10359,7 @@ package android.service.translation {
     method public void onDisconnected();
     method public abstract void onFinishTranslationSession(int);
     method public abstract void onTranslationCapabilitiesRequest(int, int, @NonNull java.util.function.Consumer<java.util.Set<android.view.translation.TranslationCapability>>);
-    method public abstract void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @NonNull android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
+    method public abstract void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @Nullable android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
     field public static final String SERVICE_INTERFACE = "android.service.translation.TranslationService";
     field public static final String SERVICE_META_DATA = "android.translation_service";
   }
@@ -11939,7 +11936,6 @@ package android.telephony {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isOffhook();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isOpportunisticNetworkEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isPotentialEmergencyNumber(@NonNull String);
-    method public boolean isRadioInterfaceCapabilitySupported(@NonNull String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRadioOn();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isTetheringApnRequired();

@@ -1799,7 +1799,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade) {
-        startActivityDismissingKeyguard(intent, false, dismissShade);
+        startActivityDismissingKeyguard(intent, false /* onlyProvisioned */, dismissShade);
+    }
+
+    @Override
+    public void startActivity(Intent intent, boolean dismissShade,
+            ActivityLaunchAnimator.Controller animationController) {
+        startActivityDismissingKeyguard(intent, false, dismissShade,
+                false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
+                0 /* flags */, animationController);
     }
 
     @Override
@@ -4614,9 +4622,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             options = ActivityOptions.makeBasic();
         }
-        // Anything launched from the notification shade should always go into the secondary
-        // split-screen windowing mode.
-        options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
         return options;
     }
 

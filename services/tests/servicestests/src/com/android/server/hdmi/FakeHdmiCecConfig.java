@@ -71,6 +71,10 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
         doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecPowerControlModeTv_default);
         doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerControlModeTvAndAudioSystem_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecPowerControlModeTvAndAudioSystem_default);
+        doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecPowerControlModeBroadcast_allowed);
         doReturn(false).when(resources).getBoolean(
                 R.bool.config_cecPowerControlModeBroadcast_default);

@@ -4877,7 +4877,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             clearNotifications(ROWS_ALL, true /* closeShade */);
         });
         footerView.setManageButtonClickListener(v -> {
-            mNotificationActivityStarter.startHistoryIntent(mFooterView.isHistoryShown());
+            mNotificationActivityStarter.startHistoryIntent(v, mFooterView.isHistoryShown());
         });
         setFooterView(footerView);
     }
