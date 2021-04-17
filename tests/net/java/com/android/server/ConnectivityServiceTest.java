@@ -1791,7 +1791,7 @@ public class ConnectivityServiceTest {
         assertNull(mCm.getActiveNetworkForUid(Process.myUid()));
         // Test getAllNetworks()
         assertEmpty(mCm.getAllNetworks());
-        assertEmpty(mCm.getAllNetworkStateSnapshot());
+        assertEmpty(mCm.getAllNetworkStateSnapshots());
     }
 
     /**
@@ -12029,7 +12029,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testGetAllNetworkStateSnapshot() throws Exception {
+    public void testGetAllNetworkStateSnapshots() throws Exception {
         verifyNoNetwork();
 
         // Setup test cellular network with specified LinkProperties and NetworkCapabilities,
@@ -12053,7 +12053,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, cellLp, cellNcTemplate);
         mCellNetworkAgent.connect(true);
         cellCb.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
-        List<NetworkStateSnapshot> snapshots = mCm.getAllNetworkStateSnapshot();
+        List<NetworkStateSnapshot> snapshots = mCm.getAllNetworkStateSnapshots();
         assertLength(1, snapshots);
 
         // Compose the expected cellular snapshot for verification.
@@ -12075,7 +12075,7 @@ public class ConnectivityServiceTest {
                 mWiFiNetworkAgent.getNetwork(), wifiNc, new LinkProperties(), null,
                 ConnectivityManager.TYPE_WIFI);
 
-        snapshots = mCm.getAllNetworkStateSnapshot();
+        snapshots = mCm.getAllNetworkStateSnapshots();
         assertLength(2, snapshots);
         assertContainsAll(snapshots, cellSnapshot, wifiSnapshot);
 
@@ -12084,20 +12084,20 @@ public class ConnectivityServiceTest {
         //  temporary shortage of connectivity of a connected network.
         mCellNetworkAgent.suspend();
         waitForIdle();
-        snapshots = mCm.getAllNetworkStateSnapshot();
+        snapshots = mCm.getAllNetworkStateSnapshots();
         assertLength(1, snapshots);
         assertEquals(wifiSnapshot, snapshots.get(0));
 
         // Disconnect wifi, verify the snapshots contain nothing.
         mWiFiNetworkAgent.disconnect();
         waitForIdle();
-        snapshots = mCm.getAllNetworkStateSnapshot();
+        snapshots = mCm.getAllNetworkStateSnapshots();
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertLength(0, snapshots);
 
         mCellNetworkAgent.resume();
         waitForIdle();
-        snapshots = mCm.getAllNetworkStateSnapshot();
+        snapshots = mCm.getAllNetworkStateSnapshots();
         assertLength(1, snapshots);
         assertEquals(cellSnapshot, snapshots.get(0));
 
