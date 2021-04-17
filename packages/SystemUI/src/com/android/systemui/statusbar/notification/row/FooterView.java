@@ -106,10 +106,6 @@ public class FooterView extends StackScrollerDecorView {
         showHistory(mShowHistory);
     }
 
-    public boolean isButtonVisible() {
-        return mManageButton.getAlpha() != 0.0f;
-    }
-
     @Override
     public ExpandableViewState createExpandableViewState() {
         return new FooterViewState();

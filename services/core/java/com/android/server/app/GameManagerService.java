@@ -199,13 +199,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
         @Override
         public void onPropertiesChanged(Properties properties) {
             synchronized (mDeviceConfigLock) {
-                for (String key : properties.getKeyset()) {
+                for (final String packageName : properties.getKeyset()) {
                     try {
                         // Check if the package is installed before caching it.
-                        final String packageName = keyToPackageName(key);
                         mPackageManager.getPackageInfo(packageName, 0);
                         final GamePackageConfiguration config =
-                                GamePackageConfiguration.fromProperties(key, properties);
+                                GamePackageConfiguration.fromProperties(packageName, properties);
                         if (config.isValid()) {
                             putConfig(config);
                         } else {
@@ -290,8 +289,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         private final String mPackageName;
         private final ArrayMap<Integer, GameModeConfiguration> mModeConfigs;
 
-        private GamePackageConfiguration(String keyName) {
-            mPackageName = keyToPackageName(keyName);
+        private GamePackageConfiguration(String packageName) {
+            mPackageName = packageName;
             mModeConfigs = new ArrayMap<>();
         }
 
@@ -563,9 +562,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
-    private void loadDeviceConfigLocked() {
+    void loadDeviceConfigLocked() {
         final List<PackageInfo> packages = mPackageManager.getInstalledPackages(0);
-        final String[] packageNames = packages.stream().map(e -> packageNameToKey(e.packageName))
+        final String[] packageNames = packages.stream().map(e -> e.packageName)
                 .toArray(String[]::new);
         synchronized (mDeviceConfigLock) {
             final Properties properties = DeviceConfig.getProperties(
@@ -680,8 +679,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         case ACTION_PACKAGE_CHANGED:
                             synchronized (mDeviceConfigLock) {
                                 Properties properties = DeviceConfig.getProperties(
-                                        DeviceConfig.NAMESPACE_GAME_OVERLAY,
-                                        packageNameToKey(packageName));
+                                        DeviceConfig.NAMESPACE_GAME_OVERLAY, packageName);
                                 for (String key : properties.getKeyset()) {
                                     GamePackageConfiguration config =
                                             GamePackageConfiguration.fromProperties(key,
@@ -692,7 +690,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
                             break;
                         case ACTION_PACKAGE_REMOVED:
                             disableCompatScale(packageName);
-                            mConfigs.remove(packageName);
+                            synchronized (mDeviceConfigLock) {
+                                mConfigs.remove(packageName);
+                            }
                             break;
                         default:
                             // do nothing
@@ -708,23 +708,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
     private void registerDeviceConfigListener() {
         mDeviceConfigListener = new DeviceConfigListener();
-    }
-
-    /**
-     * Valid package name characters are [a-zA-Z0-9_] with a '.' delimiter. Policy keys can only use
-     * [a-zA-Z0-9_] so we must handle periods. We do this by appending a '_' to any existing
-     * sequence of '_', then we replace all '.' chars with '_';
-     */
-    private static String packageNameToKey(String name) {
-        return name.replaceAll("(_+)", "_$1").replaceAll("\\.", "_");
-    }
-
-    /**
-     * Replace the last '_' in a sequence with '.' (this can be one or more chars), then replace the
-     * resulting special case '_.' with just '_' to get the original package name.
-     */
-    private static String keyToPackageName(String key) {
-        return key.replaceAll("(_)(?!\\1)", ".").replaceAll("_\\.", "_");
     }
 
     private String dumpDeviceConfigs() {

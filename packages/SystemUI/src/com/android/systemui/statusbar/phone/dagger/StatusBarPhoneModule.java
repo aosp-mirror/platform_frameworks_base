@@ -61,6 +61,8 @@ import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.charging.WiredChargingRippleController;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -209,6 +211,8 @@ public interface StatusBarPhoneModule {
             BrightnessSlider.Factory brightnessSliderFactory,
             WiredChargingRippleController chargingRippleAnimationController,
             OngoingCallController ongoingCallController,
+            SystemStatusAnimationScheduler animationScheduler,
+            PrivacyDotViewController dotViewController,
             TunerService tunerService,
             FeatureFlags featureFlags) {
         return new StatusBar(
@@ -293,6 +297,8 @@ public interface StatusBarPhoneModule {
                 brightnessSliderFactory,
                 chargingRippleAnimationController,
                 ongoingCallController,
+                animationScheduler,
+                dotViewController,
                 tunerService,
                 featureFlags);
     }

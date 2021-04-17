@@ -68,6 +68,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
@@ -154,6 +155,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private StatusBar mStatusBar;
     private KeyguardAffordanceHelper mAffordanceHelper;
     private FalsingManager mFalsingManager;
+    @Nullable private Executor mUiExecutor;
     private boolean mUserSetupComplete;
     private boolean mPrewarmBound;
     private Messenger mPrewarmMessenger;
@@ -181,6 +183,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private String mLeftButtonStr;
     private boolean mDozing;
     private int mIndicationBottomMargin;
+    private int mIndicationPadding;
     private float mDarkAmount;
     private int mBurnInXOffset;
     private int mBurnInYOffset;
@@ -274,6 +277,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mAccessibilityController = Dependency.get(AccessibilityController.class);
         mActivityIntentHelper = new ActivityIntentHelper(getContext());
         updateLeftAffordance();
+
+        mIndicationPadding = getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_area_padding);
+        updateWalletVisibility();
     }
 
     @Override
@@ -356,6 +363,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_width);
         lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_height);
         mWalletButton.setLayoutParams(lp);
+
+        mIndicationPadding = getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_area_padding);
+        updateWalletVisibility();
     }
 
     private void updateRightAffordanceIcon() {
@@ -429,11 +440,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private void updateWalletVisibility() {
-        if (mDozing || !mWalletEnabled) {
+        if (mDozing || !mWalletEnabled || !mHasCard) {
             mWalletButton.setVisibility(GONE);
+            mIndicationArea.setPadding(0, 0, 0, 0);
         } else {
             mWalletButton.setVisibility(VISIBLE);
             mWalletButton.setOnClickListener(this::onWalletClick);
+            mIndicationArea.setPadding(mIndicationPadding, 0, mIndicationPadding, 0);
         }
     }
 
@@ -657,6 +670,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     public void onUnlockedChanged() {
         updateCameraVisibility();
+    }
+
+    @Override
+    public void onKeyguardShowingChanged() {
+        if (mKeyguardStateController.isShowing()) {
+            queryWalletCards();
+        }
     }
 
     private void inflateCameraPreview() {
@@ -897,18 +917,20 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void initWallet(QuickAccessWalletClient client, Executor uiExecutor, boolean enabled) {
         mQuickAccessWalletClient = client;
         mWalletEnabled = enabled && client.isWalletFeatureAvailable();
+        mUiExecutor = uiExecutor;
+        queryWalletCards();
 
-        if (mWalletEnabled) {
-            queryWalletCards(uiExecutor);
-        }
         updateWalletVisibility();
     }
 
-    private void queryWalletCards(Executor uiExecutor) {
+    private void queryWalletCards() {
+        if (!mWalletEnabled || mUiExecutor == null) {
+            return;
+        }
         GetWalletCardsRequest request =
                 new GetWalletCardsRequest(1 /* cardWidth */, 1 /* cardHeight */,
                         1 /* iconSizePx */, 2 /* maxCards */);
-        mQuickAccessWalletClient.getWalletCards(uiExecutor, request, mCardRetriever);
+        mQuickAccessWalletClient.getWalletCards(mUiExecutor, request, mCardRetriever);
     }
 
     private void onWalletClick(View v) {

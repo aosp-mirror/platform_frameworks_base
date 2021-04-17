@@ -2551,11 +2551,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      * Send a notification to registrants that the configs of physical channel has changed for
      * a particular subscription.
      *
+     * @param phoneId the phone id.
      * @param subId the subId
      * @param configs a list of {@link PhysicalChannelConfig}, the configs of physical channel.
      */
-    public void notifyPhysicalChannelConfigForSubscriber(
-            int subId, List<PhysicalChannelConfig> configs) {
+    public void notifyPhysicalChannelConfigForSubscriber(int phoneId, int subId,
+            List<PhysicalChannelConfig> configs) {
         if (!checkNotifyPermission("notifyPhysicalChannelConfig()")) {
             return;
         }
@@ -2567,7 +2568,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         synchronized (mRecords) {
-            int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
                 mPhysicalChannelConfigs.set(phoneId, configs);
                 for (Record r : mRecords) {

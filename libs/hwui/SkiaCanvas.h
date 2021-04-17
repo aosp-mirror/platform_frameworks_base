@@ -153,6 +153,7 @@ public:
                             uirenderer::CanvasPropertyPrimitive* radius,
                             uirenderer::CanvasPropertyPaint* paint,
                             uirenderer::CanvasPropertyPrimitive* progress,
+                            uirenderer::CanvasPropertyPrimitive* turbulencePhase,
                             const SkRuntimeShaderBuilder& effectBuilder) override;
 
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;

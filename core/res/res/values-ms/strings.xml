@@ -538,10 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Membenarkan apl menemukan dan berganding dengan peranti Bluetooth yang berdekatan"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"sambung kepada peranti Bluetooth yang digandingkan"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Membenarkan apl untuk menyambung kepada peranti Bluetooth yang digandingkan"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"buat siaran kpd peranti Bluetooth yang berdekatan"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Membenarkan apl menyiarkan kandungan kepada peranti Bluetooth yang berdekatan"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"tentukan kedudukan relatif antara peranti Ultrajalur Lebar berdekatan"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Benarkan apl menentukan kedudukan relatif antara peranti Ultrajalur Lebar berdekatan"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maklumat Perkhidmatan Pembayaran NFC Pilihan"</string>
@@ -1854,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Dikemas kini oleh pentadbir anda"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Dipadamkan oleh pentadbir anda"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Penjimat Bateri menghidupkan Tema gelap dan mengehadkan atau mematikan aktiviti latar, sesetengah kesan visual dan ciri seperti \"Ok Google\"\n\n"<annotation id="url">"Ketahui lebih lanjut"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Penjimat Bateri menghidupkan Tema gelap dan mengehadkan atau mematikan aktiviti latar, sesetengah kesan visual dan ciri seperti \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu mengurangkan penggunaan data, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Perkara ini mungkin bermaksud bahawa imej tidak dipaparkan sehingga anda mengetik pada imej itu, contohnya."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Hidupkan Penjimat Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Hidupkan"</string>
@@ -1933,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Tutup"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Jawapan"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Tolak"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Tamatkan Panggilan"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Panggilan masuk"</string>
@@ -2076,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Pemberitahuan ini telah diturun taraf kepada Senyap. Ketik untuk memberikan maklum balas."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Pemberitahuan ini berada di kedudukan lebih tinggi. Ketik untuk memberikan maklum balas."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Pemberitahuan ini berada di kedudukan lebih rendah. Ketik untuk memberikan maklum balas."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Cuba pemberitahuan dipertingkatkan"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Untuk terus mendapatkan tindakan yang dicadangkan, balasan dan banyak lagi, hidupkan pemberitahuan yang dipertingkatkan. Pemberitahuan Boleh Suai Android tidak disokong lagi."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Hidupkan"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Bukan sekarang"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Ketahui lebih lanjut"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Pemberitahuan yang dipertingkatkan dapat membaca semua kandungan pemberitahuan, termasuk maklumat peribadi seperti nama kenalan dan mesej. Ciri ini juga dapat mengetepikan pemberitahuan atau mengambil tindakan pada butang dalam pemberitahuan, seperti menjawab panggilan telefon.\n\nCiri ini juga dapat menghidupkan atau mematikan mod Keutamaan dan menukar tetapan yang berkaitan."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Pemberitahuan maklumat Mod Rutin"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateri mungkin habis sebelum pengecasan biasa"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Penjimat Bateri diaktifkan untuk memanjangkan hayat bateri"</string>
@@ -2275,14 +2267,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Kini anda boleh membesarkan sebahagian skrin anda"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Hidupkan dalam Tetapan"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Tolak"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Nyahsekat mikrofon peranti"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Nyahsekat kamera peranti"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Untuk &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; dan semua apl serta perkhidmatan"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Nyahsekat"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privasi Penderia"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikon aplikasi"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imej jenama aplikasi"</string>

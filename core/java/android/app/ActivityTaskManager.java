@@ -469,7 +469,8 @@ public class ActivityTaskManager {
         }
     }
 
-    /** @hide */
+    /** Removes task by a given taskId */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public boolean removeTask(int taskId) {
         try {
             return getService().removeTask(taskId);

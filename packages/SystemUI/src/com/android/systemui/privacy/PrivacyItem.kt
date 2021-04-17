@@ -54,7 +54,8 @@ private const val UNKNOWN_TIMESTAMP = -1L
 data class PrivacyItem(
     val privacyType: PrivacyType,
     val application: PrivacyApplication,
-    val timeStampElapsed: Long = UNKNOWN_TIMESTAMP
+    val timeStampElapsed: Long = UNKNOWN_TIMESTAMP,
+    val paused: Boolean = false
 ) {
     val log = "(${privacyType.logName}, ${application.packageName}(${application.uid}), " +
             "$timeStampElapsed)"

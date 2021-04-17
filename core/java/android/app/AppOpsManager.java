@@ -6475,7 +6475,7 @@ public class AppOpsManager {
                     historicalDiscreteAccesses.add(other.mDiscreteAccesses.get(i++));
                 }
             }
-            mDiscreteAccesses = historicalDiscreteAccesses;
+            mDiscreteAccesses = deduplicateDiscreteEvents(historicalDiscreteAccesses);
         }
 
         private void increaseAccessCount(@UidState int uidState, @OpFlags int flags,
@@ -6996,7 +6996,7 @@ public class AppOpsManager {
             }
             result.add(entry);
         }
-        return result;
+        return deduplicateDiscreteEvents(result);
     }
 
     /**
@@ -9818,5 +9818,53 @@ public class AppOpsManager {
                 // Swallow error, only meant for logging ops, should not affect flow of the code
             }
         }
+    }
+
+    private static List<AttributedOpEntry> deduplicateDiscreteEvents(List<AttributedOpEntry> list) {
+        int n = list.size();
+        int i = 0;
+        for (int j = 0, k = 0; j < n; i++, j = k) {
+            long currentAccessTime = list.get(j).getLastAccessTime(OP_FLAGS_ALL);
+            k = j + 1;
+            while(k < n && list.get(k).getLastAccessTime(OP_FLAGS_ALL) == currentAccessTime) {
+                k++;
+            }
+            list.set(i, mergeAttributedOpEntries(list.subList(j, k)));
+        }
+        for (; i < n; i++) {
+            list.remove(list.size() - 1);
+        }
+        return list;
+    }
+
+    private static AttributedOpEntry mergeAttributedOpEntries(List<AttributedOpEntry> opEntries) {
+        if (opEntries.size() == 1) {
+            return opEntries.get(0);
+        }
+        LongSparseArray<AppOpsManager.NoteOpEvent> accessEvents = new LongSparseArray<>();
+        LongSparseArray<AppOpsManager.NoteOpEvent> rejectEvents = new LongSparseArray<>();
+        int opCount = opEntries.size();
+        for (int i = 0; i < opCount; i++) {
+            AttributedOpEntry a = opEntries.get(i);
+            ArraySet<Long> keys = a.collectKeys();
+            final int keyCount = keys.size();
+            for (int k = 0; k < keyCount; k++) {
+                final long key = keys.valueAt(k);
+
+                final int uidState = extractUidStateFromKey(key);
+                final int flags = extractFlagsFromKey(key);
+
+                NoteOpEvent access = a.getLastAccessEvent(uidState, uidState, flags);
+                NoteOpEvent reject = a.getLastRejectEvent(uidState, uidState, flags);
+
+                if (access != null) {
+                    accessEvents.append(key, access);
+                }
+                if (reject != null) {
+                    rejectEvents.append(key, reject);
+                }
+            }
+        }
+        return new AttributedOpEntry(opEntries.get(0).mOp, false, accessEvents, rejectEvents);
     }
 }

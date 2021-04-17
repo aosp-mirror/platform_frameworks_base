@@ -3177,7 +3177,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     @Override
-    public void reportPerceptible(IBinder windowToken, boolean perceptible) {
+    public void reportPerceptibleAsync(IBinder windowToken, boolean perceptible) {
         Objects.requireNonNull(windowToken, "windowToken must not be null");
         int uid = Binder.getCallingUid();
         synchronized (mMethodMap) {
@@ -5992,9 +5992,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void reportStartInput(IBinder startInputToken, IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.reportStartInput(mToken, startInputToken));
+        public void reportStartInputAsync(IBinder startInputToken) {
+            mImms.reportStartInput(mToken, startInputToken);
         }
 
         @BinderThread

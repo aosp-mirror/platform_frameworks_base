@@ -167,6 +167,9 @@ final class RippleShader extends RuntimeShader {
         final float turbulencePhase = (float) ((mProgress + mNoisePhase * 0.333f) * 5f * Math.PI);
         setUniform("in_turbulencePhase", turbulencePhase);
 
+        //
+        // Keep in sync with: frameworks/base/libs/hwui/pipeline/skia/AnimatedDrawables.h
+        //
         final float scale = 1.5f;
         setUniform("in_tCircle1", new float[]{
                 (float) (scale * 0.5 + (turbulencePhase * 0.01 * Math.cos(scale * 0.55))),

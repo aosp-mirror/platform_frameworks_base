@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Na-delete ng iyong admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, at mga feature gaya ng “Hey Google”\n\n"<annotation id="url">"Matuto pa"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Ino-on ng Pantipid ng Baterya ang Madilim na tema at nililimitahan o ino-off nito ang aktibidad sa background, ilang visual effect, at mga feature gaya ng “Hey Google.”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"I-on ang Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"I-on"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Isara"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Sagutin"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Tanggihan"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Ibaba"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Papasok na tawag"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Na-demote sa Naka-silent ang notification na ito. I-tap para magbigay ng feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Itinaas ang ranggo ng notification na ito. I-tap para magbigay ng feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Ibinaba ang ranggo ng notification na ito. I-tap para magbigay ng feedback."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Subukan ang enhanced notification"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Para patuloy na makakuha ng mga iminumungkahing pagkilos, sagot, at higit pa, i-on ang mga pinahusay na notification. Hindi na sinusuportahan ang Mga Adaptive na Notification ng Android."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"I-on"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Hindi ngayon"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Matuto pa"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Puwedeng basahin ng mga pinahusay na notification ang lahat ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mga mensahe. Magagawa ring ng feature na ito na i-dismiss ang mga notification o gumawa ng mga pagkilos sa mga button sa mga notification, gaya ng pagsagot sa mga tawag sa telepono.\n\nPuwede ring i-on o i-off ng feature na ito ang Priority mode at baguhin ang mga kaugnay na setting."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Maaaring maubos ang baterya bago ang karaniwang pag-charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pantipid ng Baterya para patagalin ang buhay ng baterya"</string>

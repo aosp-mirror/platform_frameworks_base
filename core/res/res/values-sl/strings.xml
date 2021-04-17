@@ -544,8 +544,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Aplikaciji omogoča odkrivanje naprav Bluetooth v bližini in seznanjanje z njimi."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"povezovanje s seznanjenimi napravami Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Aplikaciji omogoča povezovanje s seznanjenimi napravami Bluetooth."</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"oglaševanje v napravah Bluetooth v bližini"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Aplikaciji dovoljuje oglaševanje v napravah Bluetooth v bližini."</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"oddajanje napravam Bluetooth v bližini"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Aplikaciji dovoljuje oddajanje napravam Bluetooth v bližini."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"določanje relativne oddaljenosti med napravami UWB v bližini"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Aplikaciji dovoli, da določi relativno oddaljenost med napravami UWB v bližini."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Podatki o prednostni storitvi za plačevanje prek povezave NFC"</string>
@@ -1898,10 +1898,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Posodobil skrbnik"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisal skrbnik"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"V redu"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Varčevanje z energijo baterije vklopi temno temo in omeji ali izklopi dejavnost v ozadju, nekatere vizualne učinke in druge funkcije, kot je »Hey Google«.\n\n"<annotation id="url">"Več o tem"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Varčevanje z energijo baterije vklopi temno temo in omeji ali izklopi dejavnost v ozadju, nekatere vizualne učinke in druge funkcije, kot je »Hey Google«."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vklop varčevanja s podatki?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Vklop"</string>
@@ -1993,6 +1991,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Zapri"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Sprejmi"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Zavrni"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Prekini klic"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Dohodni klic"</string>
@@ -2140,18 +2140,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"To obvestilo je bilo uvrščeno nižje – med obvestila brez zvoka. Dotaknite se, če želite poslati povratne informacije."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"To obvestilo je bilo uvrščeno višje. Dotaknite se, če želite poslati povratne informacije."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"To obvestilo je bilo uvrščeno nižje. Dotaknite se, če želite poslati povratne informacije."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Preizkusite pametna obvestila"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Če želite še naprej prejemati predlagana dejanja, odgovore in drugo, vklopite pametna obvestila. Prilagodljiva obvestila Android niso več podprta."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Vklopi"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Ne zdaj"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Več o tem"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Pametna obvestila lahko preberejo vso vsebino obvestil, vključno z osebnimi podatki, kot so imena in sporočila stikov. Ta funkcija lahko tudi opusti obvestila in izvaja dejanja z gumbi v obvestilih, kot je sprejemanje telefonskih klicev.\n\nPoleg tega lahko ta funkcija vklopi ali izklopi prednostni način ter spremeni povezane nastavitve."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutinsko informativno obvestilo o načinu delovanja"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija se bo morda izpraznila, preden jo običajno priključite na polnjenje"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Vklopilo se je varčevanje z energijo baterije za podaljšanje časa delovanja baterije"</string>
