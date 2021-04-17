@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
@@ -339,6 +340,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     private volatile IBluetoothHeadset mService;
     private BluetoothAdapter mAdapter;
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 public void onBluetoothStateChange(boolean up) {
@@ -509,6 +511,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
@@ -529,6 +532,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
@@ -549,6 +553,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getConnectionState(" + device + ")");
@@ -620,6 +625,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -858,6 +864,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getAudioState(BluetoothDevice device) {
         if (VDBG) log("getAudioState");
@@ -885,6 +892,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @param allowed {@code true} if the profile can reroute audio, {@code false} otherwise.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void setAudioRouteAllowed(boolean allowed) {
         if (VDBG) log("setAudioRouteAllowed");
@@ -907,6 +915,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean getAudioRouteAllowed() {
         if (VDBG) log("getAudioRouteAllowed");
@@ -931,6 +940,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * False to use SCO audio in normal manner
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void setForceScoAudio(boolean forced) {
         if (VDBG) log("setForceScoAudio " + String.valueOf(forced));
@@ -991,6 +1001,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean connectAudio() {
         final IBluetoothHeadset service = mService;
@@ -1019,6 +1030,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disconnectAudio() {
         final IBluetoothHeadset service = mService;
@@ -1123,6 +1135,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.MODIFY_PHONE_STATE,
@@ -1147,6 +1160,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.MODIFY_PHONE_STATE,
@@ -1320,6 +1334,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
                 com.android.internal.R.bool.config_bluetooth_hfp_inband_ringing_support);
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final IBluetoothProfileServiceConnection mConnection =
             new IBluetoothProfileServiceConnection.Stub() {
         @Override
@@ -1356,6 +1371,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
         Log.d(TAG, msg);
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {

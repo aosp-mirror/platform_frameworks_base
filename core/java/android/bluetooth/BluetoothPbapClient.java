@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -161,6 +162,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
      * @return list of connected devices
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getConnectedDevices() {
         if (DBG) {
@@ -187,6 +189,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
      * @return list of matching devices
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (DBG) {
@@ -213,6 +216,7 @@ public final class BluetoothPbapClient implements BluetoothProfile {
      * @return device connection state
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public int getConnectionState(BluetoothDevice device) {
         if (DBG) {

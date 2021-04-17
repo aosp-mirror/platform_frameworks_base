@@ -8498,6 +8498,13 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayHashController.setDisplayHashThrottlingEnabled(enable);
     }
 
+    @Override
+    public boolean isTaskSnapshotSupported() {
+        synchronized (mGlobalLock) {
+            return !mTaskSnapshotController.shouldDisableSnapshots();
+        }
+    }
+
     void generateDisplayHash(Session session, IWindow window, Rect boundsInWindow,
             String hashAlgorithm, RemoteCallback callback) {
         final SurfaceControl displaySurfaceControl;

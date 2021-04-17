@@ -20,8 +20,10 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
@@ -512,6 +514,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -534,6 +537,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -624,6 +628,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return true if device supports absolute volume
      * @hide
      */
+    @RequiresNoPermission
     public boolean isAvrcpAbsoluteVolumeSupported() {
         if (DBG) Log.d(TAG, "isAvrcpAbsoluteVolumeSupported");
         try {
@@ -690,6 +695,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean shouldSendVolumeKeys(BluetoothDevice device) {
         if (isEnabled() && isValidDevice(device)) {

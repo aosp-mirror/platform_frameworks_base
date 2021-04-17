@@ -18,6 +18,7 @@ package android.bluetooth.le;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothUuid;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.ParcelUuid;
@@ -34,6 +35,7 @@ import java.util.function.Predicate;
 /**
  * Represents a scan record from Bluetooth LE scan.
  */
+@SuppressLint("AndroidFrameworkBluetoothPermission")
 public final class ScanRecord {
 
     private static final String TAG = "ScanRecord";
