@@ -16,4 +16,4 @@
 
 package android.telephony.data;
 
-parcelable SlicingConfig;
+parcelable NetworkSlicingConfig;
