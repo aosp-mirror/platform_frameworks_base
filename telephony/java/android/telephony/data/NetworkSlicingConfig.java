@@ -28,22 +28,22 @@ import java.util.Objects;
 /**
  * Represents a slicing configuration
  */
-public final class SlicingConfig implements Parcelable {
+public final class NetworkSlicingConfig implements Parcelable {
     private final List<UrspRule> mUrspRules;
     private final List<NetworkSliceInfo> mSliceInfo;
 
-    public SlicingConfig() {
+    public NetworkSlicingConfig() {
         mUrspRules = new ArrayList<UrspRule>();
         mSliceInfo = new ArrayList<NetworkSliceInfo>();
     }
 
     /** @hide */
-    public SlicingConfig(android.hardware.radio.V1_6.SlicingConfig sc) {
+    public NetworkSlicingConfig(android.hardware.radio.V1_6.SlicingConfig sc) {
         this(sc.urspRules, sc.sliceInfo);
     }
 
     /** @hide */
-    public SlicingConfig(List<android.hardware.radio.V1_6.UrspRule> urspRules,
+    public NetworkSlicingConfig(List<android.hardware.radio.V1_6.UrspRule> urspRules,
             List<android.hardware.radio.V1_6.SliceInfo> sliceInfo) {
         mUrspRules = new ArrayList<UrspRule>();
         for (android.hardware.radio.V1_6.UrspRule ur : urspRules) {
@@ -69,7 +69,7 @@ public final class SlicingConfig implements Parcelable {
     }
 
     /** @hide */
-    public SlicingConfig(Parcel p) {
+    public NetworkSlicingConfig(Parcel p) {
         mUrspRules = p.createTypedArrayList(UrspRule.CREATOR);
         mSliceInfo = p.createTypedArrayList(NetworkSliceInfo.CREATOR);
     }
@@ -96,16 +96,16 @@ public final class SlicingConfig implements Parcelable {
         dest.writeTypedList(mSliceInfo, flags);
     }
 
-    public static final @NonNull Parcelable.Creator<SlicingConfig> CREATOR =
-            new Parcelable.Creator<SlicingConfig>() {
+    public static final @NonNull Parcelable.Creator<NetworkSlicingConfig> CREATOR =
+            new Parcelable.Creator<NetworkSlicingConfig>() {
                 @Override
-                public SlicingConfig createFromParcel(Parcel source) {
-                    return new SlicingConfig(source);
+                public NetworkSlicingConfig createFromParcel(Parcel source) {
+                    return new NetworkSlicingConfig(source);
                 }
 
                 @Override
-                public SlicingConfig[] newArray(int size) {
-                    return new SlicingConfig[size];
+                public NetworkSlicingConfig[] newArray(int size) {
+                    return new NetworkSlicingConfig[size];
                 }
             };
 
@@ -118,7 +118,7 @@ public final class SlicingConfig implements Parcelable {
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SlicingConfig that = (SlicingConfig) o;
+        NetworkSlicingConfig that = (NetworkSlicingConfig) o;
         return mUrspRules.size() == that.mUrspRules.size()
                 && mUrspRules.containsAll(that.mUrspRules)
                 && mSliceInfo.size() == that.mSliceInfo.size()
