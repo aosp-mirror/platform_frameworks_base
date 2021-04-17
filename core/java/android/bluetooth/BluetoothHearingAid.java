@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
@@ -170,6 +171,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -231,6 +233,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
@@ -251,6 +254,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull List<BluetoothDevice> getDevicesMatchingConnectionStates(
     @NonNull int[] states) {
@@ -272,6 +276,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @BluetoothProfile.BtProfileState int getConnectionState(
     @NonNull BluetoothDevice device) {
@@ -368,6 +373,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -390,6 +396,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,

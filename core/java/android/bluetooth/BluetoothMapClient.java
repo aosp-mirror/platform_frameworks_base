@@ -20,8 +20,10 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.Uri;
@@ -192,6 +194,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * currently connected to the Map service.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean isConnected(BluetoothDevice device) {
         if (VDBG) Log.d(TAG, "isConnected(" + device + ")");
@@ -215,6 +218,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -243,6 +247,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -268,6 +273,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @hide
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getConnectedDevices() {
         if (DBG) Log.d(TAG, "getConnectedDevices()");
@@ -291,6 +297,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @hide
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (DBG) Log.d(TAG, "getDevicesMatchingStates()");
@@ -314,6 +321,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @hide
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public int getConnectionState(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "getConnectionState(" + device + ")");
@@ -341,6 +349,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -362,6 +371,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @return true if connectionPolicy is set, false on error
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -396,6 +406,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -416,6 +427,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @return connection policy of the device
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -449,6 +461,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.SEND_SMS,
@@ -484,6 +497,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.SEND_SMS,
@@ -510,6 +524,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @return true if the message is enqueued, false on error
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.READ_SMS,
@@ -536,6 +551,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      *         MapSupportedFeatures field is set. False is returned otherwise.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean isUploadingSupported(BluetoothDevice device) {
         final IBluetoothMapClient service = getService();
@@ -564,6 +580,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @return <code>true</code> if request has been sent, <code>false</code> on error
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.READ_SMS,

@@ -70,6 +70,7 @@ filegroup {
         "android/annotation/Nullable.java",
         "android/annotation/PluralsRes.java",
         "android/annotation/RawRes.java",
+        "android/annotation/RequiresNoPermission.java",
         "android/annotation/RequiresPermission.java",
         "android/annotation/SdkConstant.java",
         "android/annotation/Size.java",
