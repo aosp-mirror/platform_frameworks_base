@@ -105,6 +105,14 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
         int prevAnchorTop = anchor.getTop();
         // Note: requestChildRectangleOnScreen may modify rectangle, must pass pass in a copy here
         Rect input = new Rect(requestedContentBounds);
+        // Expand input rect to get the requested rect to be in the center
+        int remainingHeight = recyclerView.getHeight() - recyclerView.getPaddingTop()
+                - recyclerView.getPaddingBottom() - input.height();
+        if (remainingHeight > 0) {
+            input.inset(0, -remainingHeight / 2);
+        }
+        Log.d(TAG, "input (post center adjustment) = " + input);
+
         if (recyclerView.requestChildRectangleOnScreen(anchor, input, true)) {
             int scrolled = prevAnchorTop - anchor.getTop(); // inverse of movement
             Log.d(TAG, "RecyclerView scrolled by " + scrolled + " px");
