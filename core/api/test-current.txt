@@ -2498,6 +2498,7 @@ package android.text {
     method @NonNull public java.io.File getFile();
     method @Nullable public String getFontFamilyName();
     method @NonNull public String getFontVariationSettings();
+    method @NonNull public String getPostScriptName();
     method @NonNull public android.graphics.fonts.FontStyle getStyle();
     method public int getTtcIndex();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
