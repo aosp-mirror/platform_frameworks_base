@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.ParcelUuid;
@@ -70,6 +71,7 @@ import java.io.IOException;
  *
  * {@see BluetoothSocket}
  */
+@SuppressLint("AndroidFrameworkBluetoothPermission")
 public final class BluetoothServerSocket implements Closeable {
 
     private static final String TAG = "BluetoothServerSocket";

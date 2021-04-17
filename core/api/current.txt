@@ -9607,12 +9607,12 @@ package android.bluetooth.le {
   }
 
   public final class BluetoothLeAdvertiser {
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_ADVERTISE, android.Manifest.permission.BLUETOOTH_CONNECT}) public void startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_ADVERTISE, android.Manifest.permission.BLUETOOTH_CONNECT}) public void startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_ADVERTISE, android.Manifest.permission.BLUETOOTH_CONNECT}) public void startAdvertisingSet(android.bluetooth.le.AdvertisingSetParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.PeriodicAdvertisingParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertisingSetCallback);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_ADVERTISE, android.Manifest.permission.BLUETOOTH_CONNECT}) public void startAdvertisingSet(android.bluetooth.le.AdvertisingSetParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.PeriodicAdvertisingParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertisingSetCallback, android.os.Handler);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_ADVERTISE, android.Manifest.permission.BLUETOOTH_CONNECT}) public void startAdvertisingSet(android.bluetooth.le.AdvertisingSetParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.PeriodicAdvertisingParameters, android.bluetooth.le.AdvertiseData, int, int, android.bluetooth.le.AdvertisingSetCallback);
-    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_ADVERTISE, android.Manifest.permission.BLUETOOTH_CONNECT}) public void startAdvertisingSet(android.bluetooth.le.AdvertisingSetParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.PeriodicAdvertisingParameters, android.bluetooth.le.AdvertiseData, int, int, android.bluetooth.le.AdvertisingSetCallback, android.os.Handler);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE) public void startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE) public void startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE) public void startAdvertisingSet(android.bluetooth.le.AdvertisingSetParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.PeriodicAdvertisingParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertisingSetCallback);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE) public void startAdvertisingSet(android.bluetooth.le.AdvertisingSetParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.PeriodicAdvertisingParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertisingSetCallback, android.os.Handler);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE) public void startAdvertisingSet(android.bluetooth.le.AdvertisingSetParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.PeriodicAdvertisingParameters, android.bluetooth.le.AdvertiseData, int, int, android.bluetooth.le.AdvertisingSetCallback);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE) public void startAdvertisingSet(android.bluetooth.le.AdvertisingSetParameters, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseData, android.bluetooth.le.PeriodicAdvertisingParameters, android.bluetooth.le.AdvertiseData, int, int, android.bluetooth.le.AdvertisingSetCallback, android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE) public void stopAdvertising(android.bluetooth.le.AdvertiseCallback);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE) public void stopAdvertisingSet(android.bluetooth.le.AdvertisingSetCallback);
   }
@@ -42609,7 +42609,7 @@ package android.telephony {
     method public String getNetworkOperator();
     method public String getNetworkOperatorName();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public int getNetworkSelectionMode();
-    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public void getNetworkSlicingConfiguration(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.data.SlicingConfig,android.telephony.TelephonyManager.SlicingException>);
+    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public void getNetworkSlicingConfiguration(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.data.NetworkSlicingConfig,android.telephony.TelephonyManager.NetworkSlicingException>);
     method public String getNetworkSpecifier();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int getNetworkType();
     method @Nullable @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
@@ -42660,6 +42660,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isModemEnabledForSlot(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int isMultiSimSupported();
     method public boolean isNetworkRoaming();
+    method public boolean isRadioInterfaceCapabilitySupported(@NonNull String);
     method public boolean isRttSupported();
     method public boolean isSmsCapable();
     method @Deprecated public boolean isTtyModeSupported();
@@ -42859,11 +42860,13 @@ package android.telephony {
     field public static final int ERROR_TIMEOUT = 1; // 0x1
   }
 
-  public static class TelephonyManager.SlicingException extends java.lang.Exception {
-    ctor public TelephonyManager.SlicingException(int);
-    method public int getErrorCode();
-    field public static final int ERROR_MODEM_ERROR = 2; // 0x2
-    field public static final int ERROR_TIMEOUT = 1; // 0x1
+  public class TelephonyManager.ModemErrorException extends android.telephony.TelephonyManager.NetworkSlicingException {
+  }
+
+  public static class TelephonyManager.NetworkSlicingException extends java.lang.Exception {
+  }
+
+  public class TelephonyManager.TimeoutException extends android.telephony.TelephonyManager.NetworkSlicingException {
   }
 
   public abstract static class TelephonyManager.UssdResponseCallback {
@@ -43073,6 +43076,15 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setStatus(int);
   }
 
+  public final class NetworkSlicingConfig implements android.os.Parcelable {
+    ctor public NetworkSlicingConfig();
+    method public int describeContents();
+    method @NonNull public java.util.List<android.telephony.data.NetworkSliceInfo> getSliceInfo();
+    method @NonNull public java.util.List<android.telephony.data.UrspRule> getUrspRules();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.NetworkSlicingConfig> CREATOR;
+  }
+
   public final class RouteSelectionDescriptor implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.List<java.lang.String> getDataNetworkName();
@@ -43088,15 +43100,6 @@ package android.telephony.data {
     field public static final int SESSION_TYPE_IPV4 = 0; // 0x0
     field public static final int SESSION_TYPE_IPV4V6 = 2; // 0x2
     field public static final int SESSION_TYPE_IPV6 = 1; // 0x1
-  }
-
-  public final class SlicingConfig implements android.os.Parcelable {
-    ctor public SlicingConfig();
-    method public int describeContents();
-    method @NonNull public java.util.List<android.telephony.data.NetworkSliceInfo> getSliceInfo();
-    method @NonNull public java.util.List<android.telephony.data.UrspRule> getUrspRules();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.SlicingConfig> CREATOR;
   }
 
   public final class TrafficDescriptor implements android.os.Parcelable {

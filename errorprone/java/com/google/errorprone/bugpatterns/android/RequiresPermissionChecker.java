@@ -143,8 +143,11 @@ public final class RequiresPermissionChecker extends BugChecker implements Metho
                     final ParsedRequiresPermission nodePerm = parseRequiresPermissionRecursively(
                             node, state);
                     if (!expectedPerm.containsAll(nodePerm)) {
-                        return buildDescription(node).setMessage("Annotated " + expectedPerm
-                                + " but too narrow; invokes method requiring " + nodePerm).build();
+                        return buildDescription(node)
+                                .setMessage("Method " + method.name.toString() + "() annotated "
+                                        + expectedPerm
+                                        + " but too narrow; invokes method requiring " + nodePerm)
+                                .build();
                     } else {
                         actualPerm.addAll(nodePerm);
                     }
@@ -162,8 +165,10 @@ public final class RequiresPermissionChecker extends BugChecker implements Metho
         // Second, determine if we actually used all permissions that we claim
         // to require; yell if we're too broad
         if (!actualPerm.containsAll(expectedPerm)) {
-            return buildDescription(tree).setMessage("Annotated " + expectedPerm
-                    + " but too wide; only invokes methods requiring " + actualPerm).build();
+            return buildDescription(tree)
+                    .setMessage("Method  " + method.name.toString() + "() annotated " + expectedPerm
+                            + " but too wide; only invokes methods requiring " + actualPerm)
+                    .build();
         }
 
         return Description.NO_MATCH;
@@ -316,7 +321,7 @@ public final class RequiresPermissionChecker extends BugChecker implements Metho
         return (anno != null) && !Collections.disjoint(Arrays.asList(anno.value()), allNames());
     }
 
-    private static Matcher<ClassTree> simpleNameMatches(Pattern pattern) {
+    static Matcher<ClassTree> simpleNameMatches(Pattern pattern) {
         return new Matcher<ClassTree>() {
             @Override
             public boolean matches(ClassTree tree, VisitorState state) {

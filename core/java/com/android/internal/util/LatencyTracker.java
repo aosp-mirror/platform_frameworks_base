@@ -95,6 +95,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_START_RECENTS_ANIMATION = 8;
 
+    /**
+     * Time it takes the sensor to detect rotation.
+     */
+    public static final int ACTION_ROTATE_SCREEN_SENSOR = 9;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -104,7 +109,8 @@ public class LatencyTracker {
         ACTION_TURN_ON_SCREEN,
         ACTION_ROTATE_SCREEN,
         ACTION_FACE_WAKE_AND_UNLOCK,
-        ACTION_START_RECENTS_ANIMATION
+        ACTION_START_RECENTS_ANIMATION,
+        ACTION_ROTATE_SCREEN_SENSOR
     };
 
     /** @hide */
@@ -117,7 +123,8 @@ public class LatencyTracker {
         ACTION_TURN_ON_SCREEN,
         ACTION_ROTATE_SCREEN,
         ACTION_FACE_WAKE_AND_UNLOCK,
-        ACTION_START_RECENTS_ANIMATION
+        ACTION_START_RECENTS_ANIMATION,
+        ACTION_ROTATE_SCREEN_SENSOR
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -133,6 +140,7 @@ public class LatencyTracker {
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FACE_WAKE_AND_UNLOCK,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_START_RECENTS_ANIMATION,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -209,6 +217,8 @@ public class LatencyTracker {
                 return "ACTION_FACE_WAKE_AND_UNLOCK";
             case 9:
                 return "ACTION_START_RECENTS_ANIMATION";
+            case 11:
+                return "ACTION_ROTATE_SCREEN_SENSOR";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }

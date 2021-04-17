@@ -230,7 +230,6 @@ public final class AccessibilityTargetHelper {
                 context.getDrawable(R.drawable.ic_accessibility_color_inversion),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
 
-        // TODO: Update with shortcut icon
         final ToggleAllowListingFeatureTarget reduceBrightColors =
                 new ToggleAllowListingFeatureTarget(context,
                         shortcutType,
@@ -238,7 +237,7 @@ public final class AccessibilityTargetHelper {
                                 REDUCE_BRIGHT_COLORS_COMPONENT_NAME.flattenToString()),
                         REDUCE_BRIGHT_COLORS_COMPONENT_NAME.flattenToString(),
                         context.getString(R.string.reduce_bright_colors_feature_name),
-                        null,
+                        context.getDrawable(R.drawable.ic_accessibility_reduce_bright_colors),
                         Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED);
 
         targets.add(magnification);
