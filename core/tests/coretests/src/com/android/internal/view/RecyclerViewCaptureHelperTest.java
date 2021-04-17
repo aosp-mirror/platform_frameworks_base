@@ -145,7 +145,9 @@ public class RecyclerViewCaptureHelperTest {
         ScrollResult scrollResult = rvc.onScrollRequested(mTarget, scrollBounds, request);
         assertThat(request).isEqualTo(scrollResult.requestedArea);
         assertThat(request).isEqualTo(scrollResult.availableArea);
-        assertThat(scrollResult.scrollDelta).isEqualTo(CAPTURE_HEIGHT);
+        // Capture height centered in the window
+        assertThat(scrollResult.scrollDelta).isEqualTo(
+                CAPTURE_HEIGHT + (WINDOW_HEIGHT - CAPTURE_HEIGHT) / 2);
         assertAvailableAreaCompletelyVisible(scrollResult, mTarget);
     }
 
@@ -163,7 +165,8 @@ public class RecyclerViewCaptureHelperTest {
         ScrollResult scrollResult = helper.onScrollRequested(mTarget, scrollBounds, request);
         assertThat(request).isEqualTo(scrollResult.requestedArea);
         assertThat(request).isEqualTo(scrollResult.availableArea);
-        assertThat(scrollResult.scrollDelta).isEqualTo(-CAPTURE_HEIGHT);
+        assertThat(scrollResult.scrollDelta).isEqualTo(
+                -CAPTURE_HEIGHT - (WINDOW_HEIGHT - CAPTURE_HEIGHT) / 2);
         assertAvailableAreaCompletelyVisible(scrollResult, mTarget);
     }
 
@@ -182,7 +185,8 @@ public class RecyclerViewCaptureHelperTest {
         ScrollResult scrollResult = helper.onScrollRequested(mTarget, scrollBounds, request);
         assertThat(request).isEqualTo(scrollResult.requestedArea);
         assertThat(request).isEqualTo(scrollResult.availableArea);
-        assertThat(scrollResult.scrollDelta).isEqualTo(CAPTURE_HEIGHT);
+        assertThat(scrollResult.scrollDelta).isEqualTo(
+                CAPTURE_HEIGHT + (WINDOW_HEIGHT - CAPTURE_HEIGHT) / 2);
         assertAvailableAreaCompletelyVisible(scrollResult, mTarget);
     }
 
@@ -200,7 +204,8 @@ public class RecyclerViewCaptureHelperTest {
         ScrollResult scrollResult = helper.onScrollRequested(mTarget, scrollBounds, request);
         assertThat(request).isEqualTo(scrollResult.requestedArea);
         assertThat(request).isEqualTo(scrollResult.availableArea);
-        assertThat(scrollResult.scrollDelta).isEqualTo(-CAPTURE_HEIGHT);
+        assertThat(scrollResult.scrollDelta).isEqualTo(
+                -CAPTURE_HEIGHT - (WINDOW_HEIGHT - CAPTURE_HEIGHT) / 2);
         assertAvailableAreaCompletelyVisible(scrollResult, mTarget);
     }
 
