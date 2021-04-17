@@ -62,10 +62,8 @@ public class AndroidKeyStoreProvider extends Provider {
      */
     @UnsupportedAppUsage
     public static long getKeyStoreOperationHandle(Object cryptoPrimitive) {
-        if (cryptoPrimitive == null) {
-            throw new NullPointerException();
-        }
-        return 0;
+        return android.security.keystore2.AndroidKeyStoreProvider
+                .getKeyStoreOperationHandle(cryptoPrimitive);
     }
 
     /**
