@@ -16,8 +16,10 @@
 
 package android.bluetooth;
 
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.LocalSocket;
 import android.os.Build;
@@ -198,7 +200,6 @@ public final class BluetoothSocket implements Closeable {
      * @throws IOException On error, for example Bluetooth not available, or insufficient
      * privileges
      */
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt,
             BluetoothDevice device, int port, ParcelUuid uuid, boolean mitm, boolean min16DigitPin)
             throws IOException {
@@ -326,6 +327,7 @@ public final class BluetoothSocket implements Closeable {
      *
      * @return remote device
      */
+    @RequiresNoPermission
     public BluetoothDevice getRemoteDevice() {
         return mDevice;
     }
@@ -338,6 +340,7 @@ public final class BluetoothSocket implements Closeable {
      *
      * @return InputStream
      */
+    @RequiresNoPermission
     public InputStream getInputStream() throws IOException {
         return mInputStream;
     }
@@ -350,6 +353,7 @@ public final class BluetoothSocket implements Closeable {
      *
      * @return OutputStream
      */
+    @RequiresNoPermission
     public OutputStream getOutputStream() throws IOException {
         return mOutputStream;
     }
@@ -360,6 +364,7 @@ public final class BluetoothSocket implements Closeable {
      *
      * @return true if connected false if not connected
      */
+    @RequiresNoPermission
     public boolean isConnected() {
         return mSocketState == SocketState.CONNECTED;
     }
@@ -386,6 +391,7 @@ public final class BluetoothSocket implements Closeable {
      *
      * @throws IOException on error, for example connection failure
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void connect() throws IOException {
         if (mDevice == null) throw new IOException("Connect is called on null device");
@@ -637,6 +643,7 @@ public final class BluetoothSocket implements Closeable {
      *
      * @return the maximum supported Transmit packet size for the underlying transport.
      */
+    @RequiresNoPermission
     public int getMaxTransmitPacketSize() {
         return mMaxTxPacketSize;
     }
@@ -649,6 +656,7 @@ public final class BluetoothSocket implements Closeable {
      *
      * @return the maximum supported Receive packet size for the underlying transport.
      */
+    @RequiresNoPermission
     public int getMaxReceivePacketSize() {
         return mMaxRxPacketSize;
     }
@@ -658,6 +666,7 @@ public final class BluetoothSocket implements Closeable {
      *
      * @return one of {@link #TYPE_RFCOMM}, {@link #TYPE_SCO} or {@link #TYPE_L2CAP}
      */
+    @RequiresNoPermission
     public int getConnectionType() {
         if (mType == TYPE_L2CAP_LE) {
             // Treat the LE CoC to be the same type as L2CAP.
@@ -674,6 +683,7 @@ public final class BluetoothSocket implements Closeable {
      * generate SPP SDP record.
      * @hide
      */
+    @RequiresNoPermission
     public void setExcludeSdp(boolean excludeSdp) {
         mExcludeSdp = excludeSdp;
     }
@@ -684,6 +694,7 @@ public final class BluetoothSocket implements Closeable {
      * connection. This function is currently used for testing only.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void requestMaximumTxDataLength() throws IOException {
         if (mDevice == null) {
