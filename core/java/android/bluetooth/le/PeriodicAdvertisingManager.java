@@ -17,6 +17,7 @@
 package android.bluetooth.le;
 
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.IBluetoothGatt;
@@ -208,6 +209,7 @@ public final class PeriodicAdvertisingManager {
         }
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private IPeriodicAdvertisingCallback wrap(PeriodicAdvertisingCallback callback,
             Handler handler) {
         return new IPeriodicAdvertisingCallback.Stub() {
