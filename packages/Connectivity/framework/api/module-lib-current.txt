@@ -7,7 +7,7 @@ package android.net {
 
   public class ConnectivityManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void factoryReset();
-    method @NonNull @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public java.util.List<android.net.NetworkStateSnapshot> getAllNetworkStateSnapshot();
+    method @NonNull @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public java.util.List<android.net.NetworkStateSnapshot> getAllNetworkStateSnapshots();
     method @Nullable public android.net.ProxyInfo getGlobalProxy();
     method @NonNull public static android.util.Range<java.lang.Integer> getIpSecNetIdRange();
     method @NonNull public static String getPrivateDnsMode(@NonNull android.content.Context);

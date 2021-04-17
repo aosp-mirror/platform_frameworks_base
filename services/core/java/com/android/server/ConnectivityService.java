@@ -2171,7 +2171,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         PermissionUtils.enforceNetworkStackPermission(mContext);
 
         final ArrayList<NetworkState> result = new ArrayList<>();
-        for (NetworkStateSnapshot snapshot : getAllNetworkStateSnapshot()) {
+        for (NetworkStateSnapshot snapshot : getAllNetworkStateSnapshots()) {
             // NetworkStateSnapshot doesn't contain NetworkInfo, so need to fetch it from the
             // NetworkAgentInfo.
             final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(snapshot.network);
@@ -2186,7 +2186,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     @NonNull
-    public List<NetworkStateSnapshot> getAllNetworkStateSnapshot() {
+    public List<NetworkStateSnapshot> getAllNetworkStateSnapshots() {
         // This contains IMSI details, so make sure the caller is privileged.
         PermissionUtils.enforceNetworkStackPermission(mContext);
 

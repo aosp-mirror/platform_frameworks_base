@@ -1995,7 +1995,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "updateNetworkRulesNL()");
         Trace.traceBegin(TRACE_TAG_NETWORK, "updateNetworkRulesNL");
 
-        final List<NetworkStateSnapshot> snapshots = mConnManager.getAllNetworkStateSnapshot();
+        final List<NetworkStateSnapshot> snapshots = mConnManager.getAllNetworkStateSnapshots();
 
         // First, generate identities of all connected networks so we can
         // quickly compare them against all defined policies below.
