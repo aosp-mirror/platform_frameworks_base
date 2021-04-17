@@ -159,6 +159,7 @@ public class ShortcutManagerTest10 extends BaseShortcutManagerTest {
 
     public void testStartConfigActivity_defaultLauncher() {
         LauncherActivityInfo info = setupMockActivityInfo();
+        prepareIntentActivities(info.getComponentName());
         setDefaultLauncher(USER_0, LAUNCHER_1);
         runWithCaller(LAUNCHER_1, USER_0, () ->
             assertNotNull(mLauncherApps.getShortcutConfigActivityIntent(info))

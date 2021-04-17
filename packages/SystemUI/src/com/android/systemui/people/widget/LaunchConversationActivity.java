@@ -23,11 +23,13 @@ import android.content.pm.LauncherApps;
 import android.os.Bundle;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.notification.NotificationStats;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.statusbar.IStatusBarService;
@@ -48,15 +50,17 @@ public class LaunchConversationActivity extends Activity {
     private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
     private NotificationEntryManager mNotificationEntryManager;
     private final Optional<BubblesManager> mBubblesManagerOptional;
+    private final UserManager mUserManager;
     private boolean mIsForTesting;
     private IStatusBarService mIStatusBarService;
 
     @Inject
     public LaunchConversationActivity(NotificationEntryManager notificationEntryManager,
-            Optional<BubblesManager> bubblesManagerOptional) {
+            Optional<BubblesManager> bubblesManagerOptional, UserManager userManager) {
         super();
         mNotificationEntryManager = notificationEntryManager;
         mBubblesManagerOptional = bubblesManagerOptional;
+        mUserManager = userManager;
     }
 
     @Override
@@ -80,12 +84,24 @@ public class LaunchConversationActivity extends Activity {
             }
             mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_CLICKED);
             try {
+
+                if (mUserManager.isQuietModeEnabled(userHandle)) {
+                    if (DEBUG) Log.d(TAG, "Cannot launch app when quieted");
+                    final Intent dialogIntent =
+                            UnlaunchableAppActivity.createInQuietModeDialogIntent(
+                                    userHandle.getIdentifier());
+                    this.getApplicationContext().startActivity(dialogIntent);
+                    finish();
+                    return;
+                }
+
                 NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
                         notificationKey);
                 if (entry != null && entry.canBubble() && mBubblesManagerOptional.isPresent()) {
                     if (DEBUG) Log.d(TAG, "Open bubble for conversation");
                     mBubblesManagerOptional.get().expandStackAndSelectBubble(entry);
                     // Just opt-out and don't cancel the notification for bubbles.
+                    finish();
                     return;
                 }
 

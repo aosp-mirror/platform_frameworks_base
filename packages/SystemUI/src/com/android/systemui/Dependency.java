@@ -79,6 +79,8 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.NotificationFilter;
@@ -352,6 +354,8 @@ public class Dependency {
     @Inject Lazy<DeviceConfigProxy> mDeviceConfigProxy;
     @Inject Lazy<NavigationBarOverlayController> mNavbarButtonsControllerLazy;
     @Inject Lazy<TelephonyListenerManager> mTelephonyListenerManager;
+    @Inject Lazy<SystemStatusAnimationScheduler> mSystemStatusAnimationSchedulerLazy;
+    @Inject Lazy<PrivacyDotViewController> mPrivacyDotViewControllerLazy;
 
     @Inject
     public Dependency() {
@@ -560,6 +564,10 @@ public class Dependency {
         mProviders.put(MediaOutputDialogFactory.class, mMediaOutputDialogFactory::get);
 
         mProviders.put(NavigationBarOverlayController.class, mNavbarButtonsControllerLazy::get);
+
+        mProviders.put(SystemStatusAnimationScheduler.class,
+                mSystemStatusAnimationSchedulerLazy::get);
+        mProviders.put(PrivacyDotViewController.class, mPrivacyDotViewControllerLazy::get);
 
         Dependency.setInstance(this);
     }

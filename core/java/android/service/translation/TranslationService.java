@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -149,18 +150,15 @@ public abstract class TranslationService extends Service {
      */
     private final ITranslationDirectManager mClientInterface =
             new ITranslationDirectManager.Stub() {
-                // TODO: Implement cancellation signal
-                @NonNull
-                private final CancellationSignal mCancellationSignal = new CancellationSignal();
-
                 @Override
                 public void onTranslationRequest(TranslationRequest request, int sessionId,
-                        ITranslationCallback callback)
+                        ICancellationSignal transport, ITranslationCallback callback)
                         throws RemoteException {
                     final OnTranslationResultCallback translationResultCallback =
                             new OnTranslationResultCallbackWrapper(callback);
                     mHandler.sendMessage(obtainMessage(TranslationService::onTranslationRequest,
-                            TranslationService.this, request, sessionId, mCancellationSignal,
+                            TranslationService.this, request, sessionId,
+                            CancellationSignal.fromTransport(transport),
                             translationResultCallback));
                 }
 
@@ -235,7 +233,7 @@ public abstract class TranslationService extends Service {
      * @param cancellationSignal
      */
     public abstract void onTranslationRequest(@NonNull TranslationRequest request, int sessionId,
-            @NonNull CancellationSignal cancellationSignal,
+            @Nullable CancellationSignal cancellationSignal,
             @NonNull OnTranslationResultCallback callback);
 
     /**

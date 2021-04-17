@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.annotation.UiThread;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.HardwareRenderer;
@@ -26,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.RenderNode;
 import android.os.CancellationSignal;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display.ColorMode;
@@ -53,11 +55,14 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
 
     private static final String TAG = "ScrollCaptureViewSupport";
 
-    private static final boolean WAIT_FOR_ANIMATION = true;
+    private static final String SETTING_CAPTURE_DELAY = "screenshot.scroll_capture_delay";
+    private static final long SETTING_CAPTURE_DELAY_DEFAULT = 60L; // millis
 
     private final WeakReference<V> mWeakView;
     private final ScrollCaptureViewHelper<V> mViewHelper;
     private final ViewRenderer mRenderer;
+    private final long mPostScrollDelayMillis;
+
     private boolean mStarted;
     private boolean mEnded;
 
@@ -66,6 +71,10 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         mRenderer = new ViewRenderer();
         // TODO(b/177649144): provide access to color space from android.media.Image
         mViewHelper = viewHelper;
+        Context context = containingView.getContext();
+        ContentResolver contentResolver = context.getContentResolver();
+        mPostScrollDelayMillis = Settings.Global.getLong(contentResolver,
+                SETTING_CAPTURE_DELAY, SETTING_CAPTURE_DELAY_DEFAULT);
     }
 
     /** Based on ViewRootImpl#updateColorModeIfNeeded */
@@ -120,37 +129,41 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
     public final void onScrollCaptureImageRequest(ScrollCaptureSession session,
             CancellationSignal signal, Rect requestRect, Consumer<Rect> onComplete) {
         if (signal.isCanceled()) {
+            Log.w(TAG, "onScrollCaptureImageRequest: cancelled!");
             return;
         }
+
         V view = mWeakView.get();
         if (view == null || !view.isVisibleToUser()) {
             // Signal to the controller that we have a problem and can't continue.
             onComplete.accept(new Rect());
             return;
         }
+
         // Ask the view to scroll as needed to bring this area into view.
         ScrollResult scrollResult = mViewHelper.onScrollRequested(view, session.getScrollBounds(),
                 requestRect);
+
         if (scrollResult.availableArea.isEmpty()) {
             onComplete.accept(scrollResult.availableArea);
             return;
         }
-        view.invalidate(); // don't wait for vsync
 
         // For image capture, shift back by scrollDelta to arrive at the location within the view
         // where the requested content will be drawn
         Rect viewCaptureArea = new Rect(scrollResult.availableArea);
         viewCaptureArea.offset(0, -scrollResult.scrollDelta);
 
-        if (WAIT_FOR_ANIMATION) {
-            view.postOnAnimation(() ->  {
+        Runnable captureAction = () -> {
+            if (signal.isCanceled()) {
+                Log.w(TAG, "onScrollCaptureImageRequest: cancelled! skipping render.");
+            } else {
                 mRenderer.renderView(view, viewCaptureArea);
                 onComplete.accept(new Rect(scrollResult.availableArea));
-            });
-        } else {
-            mRenderer.renderView(view, viewCaptureArea);
-            onComplete.accept(new Rect(scrollResult.availableArea));
-        }
+            }
+        };
+
+        view.postOnAnimationDelayed(captureAction, mPostScrollDelayMillis);
     }
 
     @Override

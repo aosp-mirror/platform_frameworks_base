@@ -1875,10 +1875,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atjaunināja administrators"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Dzēsa administrators"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Labi"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Akumulatora enerģijas taupīšanas režīmā tiek ieslēgts tumšais motīvs un ierobežotas vai izslēgtas darbības fonā, konkrēti vizuālie efekti un tādas funkcijas kā īsinājumvārda “Hey Google” atpazīšana.\n\n"<annotation id="url">"Uzzināt vairāk"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Akumulatora enerģijas taupīšanas režīmā tiek ieslēgts tumšais motīvs un ierobežotas vai izslēgtas darbības fonā, konkrēti vizuālie efekti un tādas funkcijas kā īsinājumvārda “Hey Google” atpazīšana."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Lai samazinātu datu lietojumu, datu lietojuma samazinātājs neļauj dažām lietotnēm fonā nosūtīt vai saņemt datus. Lietotne, kuru pašlaik izmantojat, var piekļūt datiem, bet, iespējams, piekļūs tiem retāk (piemēram, attēli tiks parādīti tikai tad, kad tiem pieskarsieties)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vai ieslēgt datu lietojuma samazinātāju?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ieslēgt"</string>
@@ -1962,6 +1960,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Aizvērt"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Atbildēt"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Noraidīt"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Pārtraukt"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Ienākošais zvans"</string>
@@ -2107,18 +2107,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Šī paziņojuma svarīgums tika pazemināts, un paziņojums tiks rādīts bez skaņas. Lai sniegtu atsauksmes, pieskarieties."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Šī paziņojuma rangs tika paaugstināts. Lai sniegtu atsauksmes, pieskarieties."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Šī paziņojuma rangs tika pazemināts. Lai sniegtu atsauksmes, pieskarieties."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Uzlabotie paziņojumi"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Lai arī turpmāk saņemtu darbību un atbilžu ieteikumus un citu saturu, ieslēdziet uzlabotos paziņojumus. Android adaptīvie paziņojumi vairs netiek atbalstīti."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Ieslēgt"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Vēlāk"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Uzzināt vairāk"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Funkcija “Uzlabotie paziņojumi” var lasīt visu paziņojumu saturu, tostarp personas informāciju, piemēram, kontaktpersonu vārdus un ziņojumus. Šī funkcija var arī noraidīt paziņojumus un izmantot paziņojumos esošās pogas darbību veikšanai, piemēram, atbildēt uz tālruņa zvaniem.\n\nTurklāt šī funkcija var ieslēgt un izslēgt režīmu Prioritāte un mainīt ar to saistītos iestatījumus."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatīvs paziņojums par akumulatoru"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulators var izlādēties pirms parastā uzlādes laika"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Aktivizēts akumulatora enerģijas taupīšanas režīms, lai palielinātu akumulatora darbības ilgumu"</string>

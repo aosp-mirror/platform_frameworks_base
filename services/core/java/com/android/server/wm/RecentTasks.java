@@ -1415,6 +1415,9 @@ class RecentTasks {
             return true;
         }
 
+        // The given task if always treated as in visible range if it is the origin of pinned task.
+        if (task.mChildPipActivity != null) return true;
+
         if (mMaxNumVisibleTasks >= 0) {
             // Always keep up to the max number of recent tasks, but return false afterwards
             return numVisibleTasks <= mMaxNumVisibleTasks;

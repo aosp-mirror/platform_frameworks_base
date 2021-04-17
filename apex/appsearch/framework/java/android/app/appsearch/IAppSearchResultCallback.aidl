@@ -16,7 +16,6 @@
 package android.app.appsearch;
 
 import android.app.appsearch.AppSearchResult;
-import android.os.ParcelableException;
 
 /** {@hide} */
 oneway interface IAppSearchResultCallback {

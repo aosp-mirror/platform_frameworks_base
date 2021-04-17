@@ -40,11 +40,11 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -81,8 +81,8 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
 
     private AppSearchSessionShimImpl(
             @NonNull AppSearchSession session, @NonNull ExecutorService executor) {
-        mAppSearchSession = Preconditions.checkNotNull(session);
-        mExecutor = Preconditions.checkNotNull(executor);
+        mAppSearchSession = Objects.requireNonNull(session);
+        mExecutor = Objects.requireNonNull(executor);
     }
 
     @Override

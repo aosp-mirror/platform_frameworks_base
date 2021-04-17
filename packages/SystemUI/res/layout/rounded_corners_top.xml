@@ -26,6 +26,24 @@
         android:layout_gravity="left|top"
         android:tint="#ff000000"
         android:src="@drawable/rounded_corner_top"/>
+
+    <FrameLayout
+        android:id="@+id/privacy_dot_left_container"
+        android:layout_height="@*android:dimen/status_bar_height_portrait"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="@dimen/status_bar_padding_top"
+        android:layout_marginLeft="0dp"
+        android:layout_gravity="left|top"
+        android:visibility="invisible" >
+        <ImageView
+            android:id="@+id/privacy_dot"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_vertical|right"
+            android:src="@drawable/system_animation_ongoing_dot"
+            android:visibility="visible" />
+    </FrameLayout>
+
     <ImageView
         android:id="@+id/right"
         android:layout_width="12dp"
@@ -33,4 +51,24 @@
         android:tint="#ff000000"
         android:layout_gravity="right|top"
         android:src="@drawable/rounded_corner_top"/>
+
+    <FrameLayout
+        android:id="@+id/privacy_dot_right_container"
+        android:layout_height="@*android:dimen/status_bar_height_portrait"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="@dimen/status_bar_padding_top"
+        android:layout_marginRight="0dp"
+        android:layout_gravity="right|top"
+        android:visibility="invisible" >
+        <ImageView
+            android:id="@+id/privacy_dot"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_vertical|left"
+            android:src="@drawable/system_animation_ongoing_dot"
+            android:visibility="visible" />
+
+    </FrameLayout>
+
+
 </com.android.systemui.RegionInterceptingFrameLayout>

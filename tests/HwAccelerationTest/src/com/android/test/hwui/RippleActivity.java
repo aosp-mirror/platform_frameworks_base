@@ -56,6 +56,7 @@ public class RippleActivity extends Activity {
         CanvasProperty<Float> mY;
         CanvasProperty<Float> mRadius;
         CanvasProperty<Float> mProgress;
+        CanvasProperty<Float> mNoisePhase;
         CanvasProperty<Paint> mPaint;
         RuntimeShader mRuntimeShader;
 
@@ -99,6 +100,7 @@ public class RippleActivity extends Activity {
             mY = CanvasProperty.createFloat(200.0f);
             mRadius = CanvasProperty.createFloat(150.0f);
             mProgress = CanvasProperty.createFloat(0.0f);
+            mNoisePhase = CanvasProperty.createFloat(0.0f);
 
             Paint p = new Paint();
             p.setAntiAlias(true);
@@ -115,7 +117,8 @@ public class RippleActivity extends Activity {
 
             if (canvas.isHardwareAccelerated()) {
                 RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
-                recordingCanvas.drawRipple(mX, mY, mRadius, mPaint, mProgress, mRuntimeShader);
+                recordingCanvas.drawRipple(mX, mY, mRadius, mPaint, mProgress, mNoisePhase,
+                        mRuntimeShader);
             }
         }
 
@@ -139,6 +142,9 @@ public class RippleActivity extends Activity {
 
             mRunningAnimations.add(new RenderNodeAnimator(
                     mProgress, mToggle ? 1.0f : 0.0f));
+
+            mRunningAnimations.add(new RenderNodeAnimator(
+                    mNoisePhase, DURATION));
 
             mRunningAnimations.add(new RenderNodeAnimator(
                     mPaint, RenderNodeAnimator.PAINT_ALPHA, 64.0f));

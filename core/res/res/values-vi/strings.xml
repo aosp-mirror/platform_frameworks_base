@@ -531,17 +531,15 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Cho phép ứng dụng kết nối và ngắt kết nối thiết bị Android TV khỏi mạng WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Cho phép ứng dụng kết nối điện thoại và ngắt kết nối điện thoại khỏi mạng WiMAX."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"ghép nối với thiết bị Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Cho phép ứng dụng xem cấu hình của Bluetooth trên máy tính bảng và tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Cho phép ứng dụng xem cấu hình của Bluetooth trên thiết bị Android TV, đồng thời tạo và chấp nhận các kết nối với thiết bị được ghép nối."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Cho phép ứng dụng xem cấu hình của Bluetooth trên điện thoại, tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Cho phép ứng dụng xem cấu hình của Bluetooth trên máy tính bảng và tạo và chấp nhận các kết nối với các thiết bị đã ghép nối."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Cho phép ứng dụng xem cấu hình của Bluetooth trên thiết bị Android TV, đồng thời tạo và chấp nhận các kết nối với thiết bị đã ghép nối."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Cho phép ứng dụng xem cấu hình của Bluetooth trên điện thoại, tạo và chấp nhận các kết nối với các thiết bị đã ghép nối."</string>
     <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"khám phá và ghép nối với thiết bị Bluetooth ở gần"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Cho phép ứng dụng khám phá và ghép nối với các thiết bị Bluetooth ở gần"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"kết nối với các thiết bị Bluetooth đã ghép nối"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Cho phép ứng dụng kết nối với thiết bị Bluetooth đã ghép nối"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"quảng cáo trên các thiết bị Bluetooth ở gần"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Cho phép ứng dụng quảng cáo trên các thiết bị Bluetooth ở gần"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Cho phép ứng dụng xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
@@ -1388,8 +1386,8 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"CHIA SẺ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"TỪ CHỐI"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Chọn phương thức nhập"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Hiển thị bàn phím ảo trên màn hình trong khi bàn phím vật lý đang hoạt động"</string>
-    <string name="hardware" msgid="1800597768237606953">"Hiển thị bàn phím ảo"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Hiện bàn phím ảo trên màn hình trong khi bàn phím vật lý đang hoạt động"</string>
+    <string name="hardware" msgid="1800597768237606953">"Hiện bàn phím ảo"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Định cấu hình bàn phím vật lý"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Nhấn để chọn ngôn ngữ và bố cục"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1854,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Do quản trị viên của bạn xóa"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Tính năng Tiết kiệm pin sẽ bật Giao diện tối, đồng thời tắt hoặc hạn chế hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng như lệnh “Ok Google”\n\n"<annotation id="url">"Tìm hiểu thêm"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Tính năng Tiết kiệm pin sẽ bật Giao diện tối, đồng thời tắt hoặc hạn chế hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng như lệnh “Ok Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể dùng dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bật"</string>
@@ -1933,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Đóng"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Trả lời"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Từ chối"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Kết thúc"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Cuộc gọi đến"</string>
@@ -2076,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Hệ thống đã hạ mức ưu tiên của thông báo này xuống thành Im lặng. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Hệ thống đã nâng mức ưu tiên của thông báo này. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Hệ thống đã hạ mức ưu tiên của thông báo này. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Dùng thử thông báo nâng cao"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Để tiếp tục nhận các thao tác đề xuất, câu trả lời và nhiều nội dung khác, hãy bật thông báo nâng cao. Thông báo thích ứng trên Android không được hỗ trợ nữa."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Bật"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Để sau"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Tìm hiểu thêm"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Thông báo nâng cao có thể đọc mọi nội dung thông báo, bao gồm cả thông tin cá nhân như tên liên hệ và tin nhắn. Tính năng này cũng có thể đóng các thông báo hoặc thực hiện thao tác đối với các nút trong thông báo, chẳng hạn như trả lời cuộc gọi điện thoại.\n\nTính năng này cũng có thể bật hoặc tắt Chế độ ưu tiên và thay đổi các chế độ cài đặt liên quan."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pin có thể hết trước khi sạc bình thường"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>
@@ -2275,14 +2267,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Giờ đây, bạn có thể phóng to một phần màn hình"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Bật trong phần Cài đặt"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Đóng"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Bỏ chặn micrô của thiết bị"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Bỏ chặn máy ảnh của thiết bị"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Cho &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; cũng như mọi ứng dụng và dịch vụ"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Bỏ chặn"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Quyền riêng tư khi sử dụng cảm biến"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Biểu tượng ứng dụng"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Hình ảnh thương hiệu của ứng dụng"</string>

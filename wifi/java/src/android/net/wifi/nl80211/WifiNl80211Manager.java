@@ -117,13 +117,13 @@ public class WifiNl80211Manager {
     /**
      * Interface used to listen country code event
      */
-    public interface CountryCodeChangeListener {
+    public interface CountryCodeChangedListener {
         /**
          * Called when country code changed.
          *
-         * @param countryCode A new country code which is 2-Character alphanumeric.
+         * @param countryCode An ISO-3166-alpha2 country code which is 2-Character alphanumeric.
          */
-        void onChanged(@NonNull String countryCode);
+        void onCountryCodeChanged(@NonNull String countryCode);
     }
 
     /**
@@ -163,27 +163,27 @@ public class WifiNl80211Manager {
     /** @hide */
     @VisibleForTesting
     public class WificondEventHandler extends IWificondEventCallback.Stub {
-        private Map<CountryCodeChangeListener, Executor> mCountryCodeChangeListenerHolder =
+        private Map<CountryCodeChangedListener, Executor> mCountryCodeChangedListenerHolder =
                 new HashMap<>();
 
         /**
-         * Register CountryCodeChangeListener with pid.
+         * Register CountryCodeChangedListener with pid.
          *
          * @param executor The Executor on which to execute the callbacks.
          * @param listener listener for country code changed events.
          */
-        public void registerCountryCodeChangeListener(Executor executor,
-                CountryCodeChangeListener listener) {
-            mCountryCodeChangeListenerHolder.put(listener, executor);
+        public void registerCountryCodeChangedListener(Executor executor,
+                CountryCodeChangedListener listener) {
+            mCountryCodeChangedListenerHolder.put(listener, executor);
         }
 
         /**
-         * Unregister CountryCodeChangeListener with pid.
+         * Unregister CountryCodeChangedListener with pid.
          *
          * @param listener listener which registered country code changed events.
          */
-        public void unregisterCountryCodeChangeListener(CountryCodeChangeListener listener) {
-            mCountryCodeChangeListenerHolder.remove(listener);
+        public void unregisterCountryCodeChangedListener(CountryCodeChangedListener listener) {
+            mCountryCodeChangedListenerHolder.remove(listener);
         }
 
         @Override
@@ -191,8 +191,8 @@ public class WifiNl80211Manager {
             Log.d(TAG, "OnRegDomainChanged " + countryCode);
             final long token = Binder.clearCallingIdentity();
             try {
-                mCountryCodeChangeListenerHolder.forEach((listener, executor) -> {
-                    executor.execute(() -> listener.onChanged(countryCode));
+                mCountryCodeChangedListenerHolder.forEach((listener, executor) -> {
+                    executor.execute(() -> listener.onCountryCodeChanged(countryCode));
                 });
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -1240,25 +1240,25 @@ public class WifiNl80211Manager {
      * @param listener listener for country code changed events.
      * @return true on success, false on failure.
      */
-    public boolean registerCountryCodeChangeListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull CountryCodeChangeListener listener) {
+    public boolean registerCountryCodeChangedListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull CountryCodeChangedListener listener) {
         if (!retrieveWificondAndRegisterForDeath()) {
             return false;
         }
         Log.d(TAG, "registerCountryCodeEventListener called");
-        mWificondEventHandler.registerCountryCodeChangeListener(executor, listener);
+        mWificondEventHandler.registerCountryCodeChangedListener(executor, listener);
         return true;
     }
 
 
     /**
-     * Unregister CountryCodeChangeListener with pid.
+     * Unregister CountryCodeChangedListener with pid.
      *
      * @param listener listener which registered country code changed events.
      */
-    public void unregisterCountryCodeChangeListener(@NonNull CountryCodeChangeListener listener) {
+    public void unregisterCountryCodeChangedListener(@NonNull CountryCodeChangedListener listener) {
         Log.d(TAG, "unregisterCountryCodeEventListener called");
-        mWificondEventHandler.unregisterCountryCodeChangeListener(listener);
+        mWificondEventHandler.unregisterCountryCodeChangedListener(listener);
     }
 
     /**
