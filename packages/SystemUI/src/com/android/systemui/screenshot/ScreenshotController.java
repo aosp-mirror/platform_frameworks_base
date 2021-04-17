@@ -191,6 +191,8 @@ public class ScreenshotController {
     private final ScrollCaptureClient mScrollCaptureClient;
     private final PhoneWindow mWindow;
     private final DisplayManager mDisplayManager;
+    private final ScrollCaptureController mScrollCaptureController;
+    private final LongScreenshotHolder mLongScreenshotHolder;
 
     private ScreenshotView mScreenshotView;
     private Bitmap mScreenBitmap;
@@ -233,13 +235,17 @@ public class ScreenshotController {
             ScrollCaptureClient scrollCaptureClient,
             UiEventLogger uiEventLogger,
             ImageExporter imageExporter,
-            @Main Executor mainExecutor) {
+            @Main Executor mainExecutor,
+            ScrollCaptureController scrollCaptureController,
+            LongScreenshotHolder longScreenshotHolder) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
         mScrollCaptureClient = scrollCaptureClient;
         mUiEventLogger = uiEventLogger;
         mImageExporter = imageExporter;
         mMainExecutor = mainExecutor;
+        mScrollCaptureController = scrollCaptureController;
+        mLongScreenshotHolder = longScreenshotHolder;
         mBgExecutor = Executors.newSingleThreadExecutor();
 
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
@@ -569,15 +575,30 @@ public class ScreenshotController {
             }
             Log.d(TAG, "ScrollCapture: connected to window ["
                     + mLastScrollCaptureResponse.getWindowTitle() + "]");
-            final Intent intent = new Intent(mContext, LongScreenshotActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra(LongScreenshotActivity.EXTRA_CAPTURE_RESPONSE,
-                    mLastScrollCaptureResponse);
+
+            final ScrollCaptureResponse response = mLastScrollCaptureResponse;
             mScreenshotView.showScrollChip(/* onClick */ () -> {
                 // Clear the reference to prevent close() in dismissScreenshot
                 mLastScrollCaptureResponse = null;
-                mContext.startActivity(intent);
-                dismissScreenshot(false);
+                final ListenableFuture<ScrollCaptureController.LongScreenshot> future =
+                        mScrollCaptureController.run(response);
+                future.addListener(() -> {
+                    ScrollCaptureController.LongScreenshot longScreenshot;
+                    try {
+                        longScreenshot = future.get();
+                    } catch (CancellationException | InterruptedException | ExecutionException e) {
+                        Log.e(TAG, "Exception", e);
+                        return;
+                    }
+
+                    mLongScreenshotHolder.setLongScreenshot(longScreenshot);
+
+                    final Intent intent = new Intent(mContext, LongScreenshotActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    mContext.startActivity(intent);
+
+                    dismissScreenshot(false);
+                }, mMainExecutor);
             });
         } catch (CancellationException e) {
             // Ignore

@@ -16,15 +16,12 @@
 
 package android.bluetooth;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
-import android.annotation.RequiresPermission;
-import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
-import android.bluetooth.annotations.RequiresBluetoothLocationPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
-import android.bluetooth.annotations.RequiresBluetoothScanPermission;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
@@ -158,6 +155,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     /**
      * Bluetooth GATT callbacks. Overrides the default BluetoothGattCallback implementation.
      */
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final IBluetoothGattCallback mBluetoothGattCallback =
             new IBluetoothGattCallback.Stub() {
                 /**
@@ -747,6 +745,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Application should call this method as early as possible after it is done with
      * this GATT client.
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void close() {
         if (DBG) Log.d(TAG, "close()");
@@ -881,6 +880,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Unregister the current application and callbacks.
      */
     @UnsupportedAppUsage
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     private void unregisterApp() {
         if (DBG) Log.d(TAG, "unregisterApp() - mClientIf=" + mClientIf);
@@ -973,6 +973,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      *
      * @return true, if the connection attempt was initiated successfully
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean connect() {
         try {
@@ -1003,6 +1004,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * of {@link BluetoothDevice#PHY_OPTION_NO_PREFERRED}, {@link BluetoothDevice#PHY_OPTION_S2} or
      * {@link BluetoothDevice#PHY_OPTION_S8}
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void setPreferredPhy(int txPhy, int rxPhy, int phyOptions) {
         try {
@@ -1017,6 +1019,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Read the current transmitter PHY and receiver PHY of the connection. The values are returned
      * in {@link BluetoothGattCallback#onPhyRead}
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void readPhy() {
         try {
@@ -1031,6 +1034,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      *
      * @return remote bluetooth device
      */
+    @RequiresNoPermission
     public BluetoothDevice getDevice() {
         return mDevice;
     }
@@ -1101,6 +1105,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * not yet been performed.
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public List<BluetoothGattService> getServices() {
         List<BluetoothGattService> result =
                 new ArrayList<BluetoothGattService>();
@@ -1129,6 +1134,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * the remote device.
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public BluetoothGattService getService(UUID uuid) {
         for (BluetoothGattService service : mServices) {
             if (service.getDevice().equals(mDevice) && service.getUuid().equals(uuid)) {
@@ -1444,6 +1450,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @deprecated Use {@link #abortReliableWrite()}
      */
     @Deprecated
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void abortReliableWrite(BluetoothDevice mDevice) {
         abortReliableWrite();
@@ -1496,6 +1503,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean refresh() {
         if (DBG) Log.d(TAG, "refresh() - device: " + mDevice.getAddress());
@@ -1579,6 +1587,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * or {@link BluetoothGatt#CONNECTION_PRIORITY_LOW_POWER}.
      * @throws IllegalArgumentException If the parameters are outside of their specified range.
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean requestConnectionPriority(int connectionPriority) {
         if (connectionPriority < CONNECTION_PRIORITY_BALANCED
@@ -1607,6 +1616,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @return true, if the request is send to the Bluetooth stack.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean requestLeConnectionUpdate(int minConnectionInterval, int maxConnectionInterval,
                                              int slaveLatency, int supervisionTimeout,
@@ -1641,6 +1651,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @throws UnsupportedOperationException
      */
     @Override
+    @RequiresNoPermission
     public int getConnectionState(BluetoothDevice device) {
         throw new UnsupportedOperationException("Use BluetoothManager#getConnectionState instead.");
     }
@@ -1652,6 +1663,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @throws UnsupportedOperationException
      */
     @Override
+    @RequiresNoPermission
     public List<BluetoothDevice> getConnectedDevices() {
         throw new UnsupportedOperationException(
                 "Use BluetoothManager#getConnectedDevices instead.");
@@ -1665,6 +1677,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @throws UnsupportedOperationException
      */
     @Override
+    @RequiresNoPermission
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         throw new UnsupportedOperationException(
                 "Use BluetoothManager#getDevicesMatchingConnectionStates instead.");

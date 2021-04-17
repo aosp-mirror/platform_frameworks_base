@@ -155,6 +155,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean connect(@Nullable BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
@@ -194,6 +195,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disconnect(@Nullable BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
@@ -214,6 +216,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
@@ -234,6 +237,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull List<BluetoothDevice> getDevicesMatchingConnectionStates(
             @NonNull int[] states) {
@@ -294,6 +298,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean setActiveDevice(@Nullable BluetoothDevice device) {
         if (DBG) log("setActiveDevice(" + device + ")");
@@ -370,6 +375,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @return true if connectionPolicy is set, false on error
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -406,6 +412,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @return connection policy of the device
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @ConnectionPolicy int getConnectionPolicy(@Nullable BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");

@@ -90,7 +90,7 @@ import android.telephony.CallForwardingInfo.CallForwardingReason;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import android.telephony.data.ApnSetting;
 import android.telephony.data.ApnSetting.MvnoType;
-import android.telephony.data.SlicingConfig;
+import android.telephony.data.NetworkSlicingConfig;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
@@ -15065,13 +15065,20 @@ public class TelephonyManager {
     public static final String CAPABILITY_SLICING_CONFIG_SUPPORTED =
             "CAPABILITY_SLICING_CONFIG_SUPPORTED";
 
-    /** @hide */
+    /**
+     * A list of the radio interface capability values with public valid constants.
+     *
+     * Here is a related list for the systemapi-only valid constants:
+     *     CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE
+     *     CAPABILITY_ALLOWED_NETWORK_TYPES_USED
+     *     CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE
+     *     CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING
+     *
+     * @hide
+     * TODO(b/185508047): Doc generation for mixed public/systemapi StringDefs formats badly.
+     */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = "CAPABILITY_", value = {
-            CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE,
-            CAPABILITY_ALLOWED_NETWORK_TYPES_USED,
-            CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE,
-            CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING,
             CAPABILITY_SLICING_CONFIG_SUPPORTED,
     })
     public @interface RadioInterfaceCapability {}
@@ -15083,10 +15090,7 @@ public class TelephonyManager {
      *
      * @param capability the name of the capability to check for
      * @return the availability of the capability
-     *
-     * @hide
      */
-    @SystemApi
     public boolean isRadioInterfaceCapabilitySupported(
             @NonNull @RadioInterfaceCapability String capability) {
         try {
@@ -15670,7 +15674,7 @@ public class TelephonyManager {
      * Exception that may be supplied to the callback in {@link #getNetworkSlicingConfiguration} if
      * something goes awry.
      */
-    public static class SlicingException extends Exception {
+    public static class NetworkSlicingException extends Exception {
         /**
          * Getting the current slicing configuration successfully. Used internally only.
          * @hide
@@ -15679,11 +15683,13 @@ public class TelephonyManager {
 
         /**
          * The system timed out waiting for a response from the Radio.
+         * @hide
          */
         public static final int ERROR_TIMEOUT = 1;
 
         /**
          * The modem returned a failure.
+         * @hide
          */
         public static final int ERROR_MODEM_ERROR = 2;
 
@@ -15693,20 +15699,44 @@ public class TelephonyManager {
                 ERROR_MODEM_ERROR,
         })
         @Retention(RetentionPolicy.SOURCE)
-        public @interface SlicingError {}
+        public @interface NetworkSlicingError {}
 
         private final int mErrorCode;
 
-        public SlicingException(@SlicingError int errorCode) {
+        /** @hide */
+        public NetworkSlicingException(@NetworkSlicingError int errorCode) {
             mErrorCode = errorCode;
         }
 
-        /**
-         * Fetches the error code associated with this exception.
-         * @return An error code.
-         */
-        public @SlicingError int getErrorCode() {
-            return mErrorCode;
+        @Override
+        public String toString() {
+            switch (mErrorCode) {
+                case ERROR_TIMEOUT: return "ERROR_TIMEOUT";
+                case ERROR_MODEM_ERROR: return "ERROR_MODEM_ERROR";
+                default: return "UNDEFINED";
+            }
+        }
+    }
+
+    /**
+     * Exception that is supplied to the callback in {@link #getNetworkSlicingConfiguration} if the
+     * system timed out waiting for a response from the Radio.
+     */
+    public class TimeoutException extends NetworkSlicingException {
+        /** @hide */
+        public TimeoutException(int errorCode) {
+            super(errorCode);
+        }
+    }
+
+    /**
+     * Exception that is supplied to the callback in {@link #getNetworkSlicingConfiguration} if the
+     * modem returned a failure.
+     */
+    public class ModemErrorException extends NetworkSlicingException {
+        /** @hide */
+        public ModemErrorException(int errorCode) {
+            super(errorCode);
         }
     }
 
@@ -15737,7 +15767,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getNetworkSlicingConfiguration(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OutcomeReceiver<SlicingConfig, SlicingException> callback) {
+            @NonNull OutcomeReceiver<NetworkSlicingConfig, NetworkSlicingException> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
@@ -15749,12 +15779,17 @@ public class TelephonyManager {
             telephony.getSlicingConfig(new ResultReceiver(null) {
                     @Override
                     protected void onReceiveResult(int resultCode, Bundle result) {
-                        if (resultCode != SlicingException.SUCCESS) {
+                        if (resultCode == NetworkSlicingException.ERROR_TIMEOUT) {
                             executor.execute(() -> callback.onError(
-                                    new SlicingException(resultCode)));
+                                    new TimeoutException(resultCode)));
+                            return;
+                        } else if (resultCode == NetworkSlicingException.ERROR_MODEM_ERROR) {
+                            executor.execute(() -> callback.onError(
+                                    new ModemErrorException(resultCode)));
                             return;
                         }
-                        SlicingConfig slicingConfig =
+
+                        NetworkSlicingConfig slicingConfig =
                                 result.getParcelable(KEY_SLICING_CONFIG_HANDLE);
                         executor.execute(() -> callback.onResult(slicingConfig));
                     }
