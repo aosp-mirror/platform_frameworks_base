@@ -999,7 +999,7 @@ package android.graphics {
   }
 
   public class Typeface {
-    method @NonNull public static java.util.Map<java.lang.String,android.graphics.Typeface> deserializeFontMap(@NonNull java.nio.ByteBuffer) throws java.io.IOException;
+    method @NonNull public static long[] deserializeFontMap(@NonNull java.nio.ByteBuffer, @NonNull java.util.Map<java.lang.String,android.graphics.Typeface>) throws java.io.IOException;
     method @Nullable public static android.os.SharedMemory getSystemFontMapSharedMemory();
     method @NonNull public static android.os.SharedMemory serializeFontMap(@NonNull java.util.Map<java.lang.String,android.graphics.Typeface>) throws android.system.ErrnoException, java.io.IOException;
   }
