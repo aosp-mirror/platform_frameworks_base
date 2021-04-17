@@ -110,6 +110,7 @@ public class BluetoothPbap implements BluetoothProfile {
      */
     public static final int RESULT_CANCELED = 2;
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
                 public void onBluetoothStateChange(boolean up) {
@@ -217,6 +218,7 @@ public class BluetoothPbap implements BluetoothProfile {
      * @hide
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getConnectedDevices() {
         log("getConnectedDevices()");
@@ -264,6 +266,7 @@ public class BluetoothPbap implements BluetoothProfile {
      * @hide
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         log("getDevicesMatchingConnectionStates: states=" + Arrays.toString(states));
@@ -297,6 +300,7 @@ public class BluetoothPbap implements BluetoothProfile {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -330,6 +334,7 @@ public class BluetoothPbap implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disconnect(BluetoothDevice device) {
         log("disconnect()");
@@ -347,6 +352,7 @@ public class BluetoothPbap implements BluetoothProfile {
         return false;
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             log("Proxy object connected");

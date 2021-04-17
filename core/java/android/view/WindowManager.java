@@ -4568,4 +4568,13 @@ public interface WindowManager extends ViewManager {
     default void holdLock(IBinder token, int durationMs) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * Used for testing to check if the system supports TaskSnapshot mechanism.
+     * @hide
+     */
+    @TestApi
+    default boolean isTaskSnapshotSupported() {
+        return false;
+    }
 }

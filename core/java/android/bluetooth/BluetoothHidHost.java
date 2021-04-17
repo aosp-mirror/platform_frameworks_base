@@ -331,6 +331,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      */
     @SystemApi
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
@@ -353,6 +354,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @hide
      */
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
@@ -376,6 +378,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      */
     @SystemApi
     @Override
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public int getConnectionState(@NonNull BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
