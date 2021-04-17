@@ -16,9 +16,9 @@
 
 package android.bluetooth.le;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -357,6 +357,7 @@ public final class BluetoothLeScanner {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothScanPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void startTruncatedScan(List<TruncatedFilter> truncatedFilters, ScanSettings settings,
             final ScanCallback callback) {
@@ -376,6 +377,7 @@ public final class BluetoothLeScanner {
      *
      * @hide
      */
+    @RequiresNoPermission
     public void cleanup() {
         mLeScanClients.clear();
     }
@@ -383,6 +385,7 @@ public final class BluetoothLeScanner {
     /**
      * Bluetooth GATT interface callbacks
      */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     private class BleScanCallbackWrapper extends IScannerCallback.Stub {
         private static final int REGISTRATION_CALLBACK_TIMEOUT_MILLIS = 2000;
 
@@ -412,8 +415,6 @@ public final class BluetoothLeScanner {
             mResultStorages = resultStorages;
         }
 
-        @SuppressLint("AndroidFrameworkRequiresPermission")
-        @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
         public void startRegistration() {
             synchronized (this) {
                 // Scan stopped.
@@ -441,8 +442,6 @@ public final class BluetoothLeScanner {
             }
         }
 
-        @SuppressLint("AndroidFrameworkRequiresPermission")
-        @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
         public void stopLeScan() {
             synchronized (this) {
                 if (mScannerId <= 0) {
@@ -459,8 +458,6 @@ public final class BluetoothLeScanner {
             }
         }
 
-        @SuppressLint("AndroidFrameworkRequiresPermission")
-        @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
         void flushPendingBatchResults() {
             synchronized (this) {
                 if (mScannerId <= 0) {
@@ -479,7 +476,6 @@ public final class BluetoothLeScanner {
          * Application interface registered - app is ready to go
          */
         @Override
-        @SuppressLint("AndroidFrameworkRequiresPermission")
         public void onScannerRegistered(int status, int scannerId) {
             Log.d(TAG, "onScannerRegistered() - status=" + status
                     + " scannerId=" + scannerId + " mScannerId=" + mScannerId);

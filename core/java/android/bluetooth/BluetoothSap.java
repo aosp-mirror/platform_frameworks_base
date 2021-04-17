@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.Manifest;
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
@@ -143,6 +144,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * connected to the Sap service.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getState() {
         if (VDBG) log("getState()");
@@ -167,6 +169,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * this proxy object is not connected to the Sap service.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothDevice getClient() {
         if (VDBG) log("getClient()");
@@ -191,6 +194,7 @@ public final class BluetoothSap implements BluetoothProfile {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean isConnected(BluetoothDevice device) {
         if (VDBG) log("isConnected(" + device + ")");
@@ -214,6 +218,7 @@ public final class BluetoothSap implements BluetoothProfile {
      *
      * @hide
      */
+    @RequiresNoPermission
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")" + "not supported for SAPS");
         return false;
@@ -227,6 +232,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
@@ -249,6 +255,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return list of connected devices
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getConnectedDevices() {
         if (DBG) log("getConnectedDevices()");
@@ -271,6 +278,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return list of matching devices
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (DBG) log("getDevicesMatchingStates()");
@@ -293,6 +301,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return device connection state
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     public int getConnectionState(BluetoothDevice device) {
         if (DBG) log("getConnectionState(" + device + ")");
@@ -320,6 +329,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -341,6 +351,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return true if connectionPolicy is set, false on error
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -375,6 +386,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
@@ -395,6 +407,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return connection policy of the device
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(allOf = {
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_PRIVILEGED,
