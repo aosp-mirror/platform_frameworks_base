@@ -29,6 +29,7 @@ import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -61,7 +62,8 @@ import java.io.PrintWriter;
 /**
  * Manages and manipulates the one handed states, transitions, and gesture for phones.
  */
-public class OneHandedController implements RemoteCallable<OneHandedController> {
+public class OneHandedController implements RemoteCallable<OneHandedController>,
+        OneHandedTransitionCallback {
     private static final String TAG = "OneHandedController";
 
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
@@ -73,6 +75,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     private volatile boolean mIsOneHandedEnabled;
     private volatile boolean mIsSwipeToNotificationEnabled;
+    private volatile boolean mIsTransitioning;
     private boolean mTaskChangeToExit;
     private boolean mLockedDisabled;
     private int mUserId;
@@ -327,7 +330,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     void startOneHanded() {
-        if (isLockedDisabled()) {
+        if (isLockedDisabled() || mIsTransitioning) {
             Slog.d(TAG, "Temporary lock disabled");
             return;
         }
@@ -337,6 +340,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             return;
         }
         if (!mDisplayAreaOrganizer.isInOneHanded()) {
+            mIsTransitioning = true;
             final int yOffSet = Math.round(
                     mDisplayAreaOrganizer.getDisplayLayout().height() * mOffSetFraction);
             mOneHandedAccessibilityUtil.announcementForScreenReader(
@@ -362,7 +366,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     }
 
     private void stopOneHanded(int uiEvent) {
-        if (mDisplayAreaOrganizer.isInOneHanded()) {
+        if (mDisplayAreaOrganizer.isInOneHanded() && !mIsTransitioning) {
+            mIsTransitioning = true;
             mOneHandedAccessibilityUtil.announcementForScreenReader(
                     mOneHandedAccessibilityUtil.getOneHandedStopDescription());
             mDisplayAreaOrganizer.scheduleOffset(0, 0);
@@ -391,6 +396,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mDisplayAreaOrganizer.registerTransitionCallback(mGestureHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mTutorialHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mBackgroundPanelOrganizer);
+        mDisplayAreaOrganizer.registerTransitionCallback(this);
         if (mTaskChangeToExit) {
             mTaskStackListener.addListener(mTaskStackListenerCallback);
         }
@@ -617,6 +623,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         pw.println(mLockedDisabled);
         pw.print(innerPrefix + "mUserId=");
         pw.println(mUserId);
+        pw.print(innerPrefix + "mIsTransitioning=");
+        pw.println(mIsTransitioning);
 
         if (mBackgroundPanelOrganizer != null) {
             mBackgroundPanelOrganizer.dump(pw);
@@ -660,6 +668,26 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 pw.println(info);
             }
         }
+    }
+
+    /**
+     * TODO(b/185558765) To implement a state machine for One-Handed transition state machine.
+     * ONE_HANDDE_STATE_TRANSITION {
+     * STATE_DEFAULT,
+     * STATE_TRANSITIONING,
+     * STATE_ENTER_ONE_HANED,
+     * STATE_EXIT_ONE_HANDED
+     * }
+     * and we need to align the state to launcher3 quick steps through SysuiProxy.
+     */
+    @Override
+    public void onStartFinished(Rect bounds) {
+        mIsTransitioning = false;
+    }
+
+    @Override
+    public void onStopFinished(Rect bounds) {
+        mIsTransitioning = false;
     }
 
     /**
