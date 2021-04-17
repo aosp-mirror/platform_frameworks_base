@@ -319,10 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"jismoniy harakatlar axborotiga ruxsat"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"suratga olish va video yozib olish"</string>
-    <!-- no translation found for permgrouplab_nearby_devices (5529147543651181991) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_nearby_devices (3213561597116913508) -->
-    <skip />
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Yaqin-atrofdagi qurilmalar"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"yaqin-atrofdagi qurilmalarni aniqlash va ulanish"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Chaqiruvlar jurnali"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"telefon chaqiruvlari jurnalini o‘qish va unga yozish"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
@@ -542,10 +540,8 @@
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Ilovaga juftlangan Bluetooth qurilmalariga ulanish uchun ruxsat beradi"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"atrofdagi Bluetooth qurilmalariga reklama berish"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Ilovaga yaqin-atrofdagi Bluetooth qurilmalariga reklama yuborish imkonini beradi"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"yaqin atrofdagi ultra keng polosali qurilmalarining nisbiy joylashishini aniqlash"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Ilovaga yaqin atrofdagi ultra keng polosali qurilmalarining nisbiy joylashishini aniqlashga ruxsat beradi"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Asosiy NFC toʻlov xizmati haqidagi axborot"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Bu ilovaga asosiy NFC toʻlov xizmati haqidagi axborotni olish imkonini beradi (masalan, qayd qilingan AID identifikatorlari va marshrutning yakuniy manzili)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC modulini boshqarish"</string>
@@ -1856,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administrator tomonidan yangilangan"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administrator tomonidan o‘chirilgan"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi va fondagi harakatlar, vizual effektlar va “Ok Google” kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi.\n\n"<annotation id="url">"Batafsil"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi va fondagi harakatlar, vizual effektlar va “Ok Google” kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Yoqish"</string>
@@ -1935,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Yopish"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Javob berish"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Rad etish"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Tugatish"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Kiruvchi chaqiruv"</string>
@@ -2078,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Bu bildirishnoma darajasi Tovushsiz darajaga tushirildi Fikr-mulohaza bildirish uchun bosing."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildirishnoma darajasi oshirildi. Fikr-mulohaza bildirish uchun bosing."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildirishnoma darajasi pasaytirildi. Fikr-mulohaza bildirish uchun bosing."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Yangicha bildirishnomalar"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Amallar, javoblar va boshqa takliflarni olishda davom etish uchun yaxshilangan bildirishnomalarni yoqing. Android moslashuvchan bildirishnomalari endi ishlamaydi."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Yoqish"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Hozir emas"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Batafsil"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Yangicha bildirishnomalar funksiyasi barcha bildirishnomalarni, jumladan, shaxsiy maʼlumotlarni (kontakt nomlari va xabarlar) oʻqiy oladi. Shuningdek, bu funksiya bildirishnomalarni yopishi yoki telefon chaqiruvlariga javob berish kabi bildirishnomalarda tugmalar bilan amallar bajarishi mumkin.\n\nBu funksiya Faqat muhim rejimini yoqishi va faolsizlantirishi yoki unga aloqador sozlamalarni oʻzgartirishi ham mumkin."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Kun tartibi rejimi haqidagi bildirishnoma"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya quvvati odatdagidan ertaroq tugashi mumkin"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash rejimi yoqildi"</string>

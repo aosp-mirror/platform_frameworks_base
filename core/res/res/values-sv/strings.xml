@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratören uppdaterade paketet"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratören raderade paketet"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"I batterisparläget aktiveras mörkt tema och bakgrundsaktivitet som vissa visuella effekter och funktioner som ”Hey Google” begränsas eller inaktiveras\n\n"<annotation id="url">"Läs mer"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"I batterisparläget aktiveras mörkt tema och bakgrundsaktivitet som vissa visuella effekter och funktioner som ”Hey Google” begränsas eller inaktiveras."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vill du aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivera"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Stäng"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Svara"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Avvisa"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Lägg på"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Inkommande samtal"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Den här aviseringen har ändrats till Tyst. Tryck för att lämna feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Den här aviseringen har fått högre rankning. Tryck för att lämna feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Den här aviseringen har fått lägre rankning. Tryck för att lämna feedback."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Testa förbättrade aviseringar"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Aktivera förbättrade aviseringar om du vill fortsätta att få rekommenderade åtgärder, svar och annat. Anpassade aviseringar för Android stöds inte längre."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Aktivera"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Inte nu"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Läs mer"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Förbättrade aviseringar kan läsa allt innehåll i aviseringar, inklusive personliga uppgifter som namn på kontakter och meddelanden. Funktionen kan även stänga aviseringar eller använda åtgärdsknappar i aviseringar, till exempel för att svara på telefonsamtal.\n\nFunktionen kan även aktivera och inaktivera prioritetsläget och ändra tillhörande inställningar."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Avisering om rutinläge"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batteriet kan ta slut innan du brukar ladda det"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparläget har aktiverats för att utöka batteritiden"</string>

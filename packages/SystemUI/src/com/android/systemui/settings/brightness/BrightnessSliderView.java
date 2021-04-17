@@ -48,7 +48,7 @@ public class BrightnessSliderView extends FrameLayout {
         super(context, attrs);
     }
 
-    // Inflated from quick_settings_brightness_dialog or quick_settings_brightness_dialog_thick
+    // Inflated from quick_settings_brightness_dialog
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();

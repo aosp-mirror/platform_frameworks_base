@@ -157,7 +157,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
                 new Object(),
                 mMockSecurityPolicy,
                 mMockSystemSupport,
-                mA11yms,
+                mA11yms.getTraceManager(),
                 mMockWindowManagerService,
                 mMockSystemActionPerformer,
                 mMockA11yWindowManager,

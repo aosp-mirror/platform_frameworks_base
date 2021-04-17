@@ -16,6 +16,7 @@
 
 package android.view.translation;
 
+import android.os.ICancellationSignal;
 import android.view.translation.TranslationRequest;
 import android.service.translation.ITranslationCallback;
 
@@ -27,6 +28,6 @@ import android.service.translation.ITranslationCallback;
   */
 oneway interface ITranslationDirectManager {
     void onTranslationRequest(in TranslationRequest request, int sessionId,
-         in ITranslationCallback callback);
+         in ICancellationSignal transport, in ITranslationCallback callback);
     void onFinishTranslationSession(int sessionId);
 }

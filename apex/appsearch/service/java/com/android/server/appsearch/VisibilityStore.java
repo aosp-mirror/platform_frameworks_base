@@ -35,7 +35,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
 
 import java.util.ArrayList;
@@ -43,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -333,9 +333,9 @@ public class VisibilityStore {
             @NonNull Set<String> schemasNotPlatformSurfaceable,
             @NonNull Map<String, List<PackageIdentifier>> schemasPackageAccessible)
             throws AppSearchException {
-        Preconditions.checkNotNull(prefix);
-        Preconditions.checkNotNull(schemasNotPlatformSurfaceable);
-        Preconditions.checkNotNull(schemasPackageAccessible);
+        Objects.requireNonNull(prefix);
+        Objects.requireNonNull(schemasNotPlatformSurfaceable);
+        Objects.requireNonNull(schemasPackageAccessible);
 
         // Persist the document
         GenericDocument.Builder<?> visibilityDocument =
@@ -383,8 +383,8 @@ public class VisibilityStore {
     /** Checks whether {@code prefixedSchema} can be searched over by the {@code callerUid}. */
     public boolean isSchemaSearchableByCaller(
             @NonNull String prefix, @NonNull String prefixedSchema, int callerUid) {
-        Preconditions.checkNotNull(prefix);
-        Preconditions.checkNotNull(prefixedSchema);
+        Objects.requireNonNull(prefix);
+        Objects.requireNonNull(prefixedSchema);
 
         // We compare appIds here rather than direct uids because the package's uid may change based
         // on the user that's running.

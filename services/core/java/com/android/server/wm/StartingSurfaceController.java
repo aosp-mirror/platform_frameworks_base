@@ -58,10 +58,12 @@ public class StartingSurfaceController {
                     overrideConfig, displayId);
         }
 
-        final Task task = activity.getTask();
-        if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
-                activity.token, theme)) {
-            return new ShellStartingSurface(task);
+        synchronized (mService.mGlobalLock) {
+            final Task task = activity.getTask();
+            if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(
+                    task, activity.token, theme)) {
+                return new ShellStartingSurface(task);
+            }
         }
         return null;
     }
@@ -124,14 +126,13 @@ public class StartingSurfaceController {
                 activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
                         topFullscreenActivity, false /* checkOpening */);
             }
+            if (DEBUG_ENABLE_SHELL_DRAWER) {
+                mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
+                        activity.token, 0 /* launchTheme */);
+                return new ShellStartingSurface(task);
+            }
         }
-        if (!DEBUG_ENABLE_SHELL_DRAWER) {
-            return mService.mTaskSnapshotController
-                    .createStartingSurface(activity, taskSnapshot);
-        }
-        mService.mAtmService.mTaskOrganizerController.addStartingWindow(task, activity.token,
-                0 /* launchTheme */);
-        return new ShellStartingSurface(task);
+        return mService.mTaskSnapshotController.createStartingSurface(activity, taskSnapshot);
     }
 
 
@@ -144,8 +145,9 @@ public class StartingSurfaceController {
 
         @Override
         public void remove(boolean animate) {
-            mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask,
-                    animate);
+            synchronized (mService.mGlobalLock) {
+                mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask, animate);
+            }
         }
     }
 }

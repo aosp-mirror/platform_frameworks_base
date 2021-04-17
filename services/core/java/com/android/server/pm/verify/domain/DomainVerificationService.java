@@ -892,7 +892,7 @@ public class DomainVerificationService extends SystemService
 
             boolean hasAutoVerifyDomains = newDomainsSize > 0;
             boolean needsBroadcast =
-                    applyImmutableState(pkgName, newStateMap, newAutoVerifyDomains);
+                    applyImmutableState(newPkgSetting, newStateMap, newAutoVerifyDomains);
 
             sendBroadcast = hasAutoVerifyDomains && needsBroadcast;
 
@@ -943,7 +943,8 @@ public class DomainVerificationService extends SystemService
             pkgState = new DomainVerificationPkgState(pkgName, domainSetId, hasAutoVerifyDomains);
         }
 
-        boolean needsBroadcast = applyImmutableState(pkgState, domains);
+        boolean needsBroadcast =
+                applyImmutableState(newPkgSetting, pkgState.getStateMap(), domains);
         if (needsBroadcast && !isPendingOrRestored) {
             // TODO(b/159952358): Test this behavior
             // Attempt to preserve user experience by automatically verifying all domains from
@@ -990,22 +991,17 @@ public class DomainVerificationService extends SystemService
         }
     }
 
-    private boolean applyImmutableState(@NonNull DomainVerificationPkgState pkgState,
-            @NonNull ArraySet<String> autoVerifyDomains) {
-        return applyImmutableState(pkgState.getPackageName(), pkgState.getStateMap(),
-                autoVerifyDomains);
-    }
-
     /**
      * Applies any immutable state as the final step when adding or migrating state. Currently only
-     * applies {@link SystemConfig#getLinkedApps()}, which approves all domains for a package.
+     * applies {@link SystemConfig#getLinkedApps()}, which approves all domains for a system app.
      *
      * @return whether or not a broadcast is necessary for this package
      */
-    private boolean applyImmutableState(@NonNull String packageName,
+    private boolean applyImmutableState(@NonNull PackageSetting pkgSetting,
             @NonNull ArrayMap<String, Integer> stateMap,
             @NonNull ArraySet<String> autoVerifyDomains) {
-        if (mSystemConfig.getLinkedApps().contains(packageName)) {
+        if (pkgSetting.isSystem()
+                && mSystemConfig.getLinkedApps().contains(pkgSetting.getName())) {
             int domainsSize = autoVerifyDomains.size();
             for (int index = 0; index < domainsSize; index++) {
                 stateMap.put(autoVerifyDomains.valueAt(index),
@@ -1318,7 +1314,7 @@ public class DomainVerificationService extends SystemService
                         if (pkgSetting == null || pkgSetting.getPkg() == null) {
                             continue;
                         }
-                        resetDomainState(pkgState, pkgSetting.getPkg());
+                        resetDomainState(pkgState.getStateMap(), pkgSetting);
                     }
                 } else {
                     int size = packageNames.size();
@@ -1329,7 +1325,7 @@ public class DomainVerificationService extends SystemService
                         if (pkgSetting == null || pkgSetting.getPkg() == null) {
                             continue;
                         }
-                        resetDomainState(pkgState, pkgSetting.getPkg());
+                        resetDomainState(pkgState.getStateMap(), pkgSetting);
                     }
                 }
             }
@@ -1341,9 +1337,8 @@ public class DomainVerificationService extends SystemService
     /**
      * Reset states that are mutable by the domain verification agent.
      */
-    private void resetDomainState(@NonNull DomainVerificationPkgState pkgState,
-            @NonNull AndroidPackage pkg) {
-        ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
+    private void resetDomainState(@NonNull ArrayMap<String, Integer> stateMap,
+            @NonNull PackageSetting pkgSetting) {
         int size = stateMap.size();
         for (int index = size - 1; index >= 0; index--) {
             Integer state = stateMap.valueAt(index);
@@ -1363,7 +1358,8 @@ public class DomainVerificationService extends SystemService
             }
         }
 
-        applyImmutableState(pkgState, mCollector.collectValidAutoVerifyDomains(pkg));
+        applyImmutableState(pkgSetting, stateMap,
+                mCollector.collectValidAutoVerifyDomains(pkgSetting.getPkg()));
     }
 
     @Override

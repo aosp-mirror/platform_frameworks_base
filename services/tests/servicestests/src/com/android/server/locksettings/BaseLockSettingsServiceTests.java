@@ -36,9 +36,7 @@ import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.authsecret.V1_0.IAuthSecret;
-import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
-import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.FileUtils;
 import android.os.IProgressListener;
@@ -261,13 +259,12 @@ public abstract class BaseLockSettingsServiceTests {
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                Fingerprint fp = (Fingerprint) invocation.getArguments()[0];
                 FingerprintManager.RemovalCallback callback =
-                        (FingerprintManager.RemovalCallback) invocation.getArguments()[2];
-                callback.onRemovalSucceeded(fp, 0);
+                        (FingerprintManager.RemovalCallback) invocation.getArguments()[1];
+                callback.onRemovalSucceeded(null, 0);
                 return null;
             }
-        }).when(mFingerprintManager).remove(any(), eq(userId), any());
+        }).when(mFingerprintManager).removeAll(eq(userId), any());
 
 
         // Hardware must be detected and templates must be enrolled
@@ -277,13 +274,12 @@ public abstract class BaseLockSettingsServiceTests {
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                Face face = (Face) invocation.getArguments()[0];
                 FaceManager.RemovalCallback callback =
-                        (FaceManager.RemovalCallback) invocation.getArguments()[2];
-                callback.onRemovalSucceeded(face, 0);
+                        (FaceManager.RemovalCallback) invocation.getArguments()[1];
+                callback.onRemovalSucceeded(null, 0);
                 return null;
             }
-        }).when(mFaceManager).remove(any(), eq(userId), any());
+        }).when(mFaceManager).removeAll(eq(userId), any());
     }
 
     @After

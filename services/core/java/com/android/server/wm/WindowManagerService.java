@@ -159,7 +159,6 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -977,52 +976,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mAnimationsDisabled = false;
     boolean mPointerLocationEnabled = false;
 
-    /**
-     * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
-     * set-fixed-orientation-letterbox-aspect-ratio or via {@link
-     * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored
-     * if it is <= this value.
-     */
-    static final float MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO = 1.0f;
-
-    /** Enum for Letterbox background type. */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({LETTERBOX_BACKGROUND_SOLID_COLOR, LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND,
-            LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING, LETTERBOX_BACKGROUND_WALLPAPER})
-    @interface LetterboxBackgroundType {};
-    /** Solid background using color specified in R.color.config_letterboxBackgroundColor. */
-    static final int LETTERBOX_BACKGROUND_SOLID_COLOR = 0;
-
-    /** Color specified in R.attr.colorBackground for the letterboxed application. */
-    static final int LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND = 1;
-
-    /** Color specified in R.attr.colorBackgroundFloating for the letterboxed application. */
-    static final int LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING = 2;
-
-    /** Using wallpaper as a background which can be blurred or dimmed with dark scrim. */
-    static final int LETTERBOX_BACKGROUND_WALLPAPER = 3;
-
-    // Aspect ratio of letterbox for fixed orientation, values <=
-    // MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO will be ignored.
-    private float mFixedOrientationLetterboxAspectRatio;
-
-    // Corners radius for activities presented in the letterbox mode, values < 0 will be ignored.
-    private int mLetterboxActivityCornersRadius;
-
-    // Color for {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} letterbox background type.
-    private Color mLetterboxBackgroundColor;
-
-    @LetterboxBackgroundType
-    private int mLetterboxBackgroundType;
-
-    // Blur radius for LETTERBOX_BACKGROUND_WALLPAPER option in mLetterboxBackgroundType.
-    // Values <= 0 are ignored and 0 is used instead.
-    private int mLetterboxBackgroundWallpaperBlurRadius;
-
-    // Alpha of a black scrim shown over wallpaper letterbox background when
-    // LETTERBOX_BACKGROUND_WALLPAPER option is selected for mLetterboxBackgroundType.
-    // Values < 0 or >= 1 are ignored and 0.0 (transparent) is used instead.
-    private float mLetterboxBackgroundWallpaperDarkScrimAlpha;
+    final LetterboxConfiguration mLetterboxConfiguration;
 
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
@@ -1254,17 +1208,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mAssistantOnTopOfDream = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
 
-        mFixedOrientationLetterboxAspectRatio = context.getResources().getFloat(
-                com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio);
-        mLetterboxActivityCornersRadius = context.getResources().getInteger(
-                com.android.internal.R.integer.config_letterboxActivityCornersRadius);
-        mLetterboxBackgroundColor = Color.valueOf(context.getResources().getColor(
-                com.android.internal.R.color.config_letterboxBackgroundColor));
-        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(context);
-        mLetterboxBackgroundWallpaperBlurRadius = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
-        mLetterboxBackgroundWallpaperDarkScrimAlpha = context.getResources().getFloat(
-                com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
+        mLetterboxConfiguration = new LetterboxConfiguration(context);
 
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
@@ -3861,201 +3805,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return display.getDisplayRotation().getFixedToUserRotationMode();
         }
-    }
-
-    /**
-     * Overrides the aspect ratio of letterbox for fixed orientation. If given value is <= {@link
-     * #MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO}, both it and a value of {@link
-     * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored and
-     * the framework implementation will be used to determine the aspect ratio.
-     */
-    void setFixedOrientationLetterboxAspectRatio(float aspectRatio) {
-        mFixedOrientationLetterboxAspectRatio = aspectRatio;
-    }
-
-    /**
-     * Resets the aspect ratio of letterbox for fixed orientation to {@link
-     * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}.
-     */
-    void resetFixedOrientationLetterboxAspectRatio() {
-        mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio);
-    }
-
-    /**
-     * Gets the aspect ratio of letterbox for fixed orientation.
-     */
-    float getFixedOrientationLetterboxAspectRatio() {
-        return mFixedOrientationLetterboxAspectRatio;
-    }
-
-    /**
-     * Overrides corners raidus for activities presented in the letterbox mode. If given value < 0,
-     * both it and a value of {@link
-     * com.android.internal.R.integer.config_letterboxActivityCornersRadius} will be ignored and
-     * and corners of the activity won't be rounded.
-     */
-    void setLetterboxActivityCornersRadius(int cornersRadius) {
-        mLetterboxActivityCornersRadius = cornersRadius;
-    }
-
-    /**
-     * Resets corners raidus for activities presented in the letterbox mode to {@link
-     * com.android.internal.R.integer.config_letterboxActivityCornersRadius}.
-     */
-    void resetLetterboxActivityCornersRadius() {
-        mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_letterboxActivityCornersRadius);
-    }
-
-    /**
-     * Whether corners of letterboxed activities are rounded.
-     */
-    boolean isLetterboxActivityCornersRounded() {
-        return getLetterboxActivityCornersRadius() > 0;
-    }
-
-    /**
-     * Gets corners raidus for activities presented in the letterbox mode.
-     */
-    int getLetterboxActivityCornersRadius() {
-        return mLetterboxActivityCornersRadius;
-    }
-
-    /**
-     * Gets color of letterbox background which is  used when {@link
-     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
-     * fallback for other backfround types.
-     */
-    Color getLetterboxBackgroundColor() {
-        return mLetterboxBackgroundColor;
-    }
-
-
-    /**
-     * Sets color of letterbox background which is used when {@link
-     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
-     * fallback for other backfround types.
-     */
-    void setLetterboxBackgroundColor(Color color) {
-        mLetterboxBackgroundColor = color;
-    }
-
-    /**
-     * Resets color of letterbox background to {@link
-     * com.android.internal.R.color.config_letterboxBackgroundColor}.
-     */
-    void resetLetterboxBackgroundColor() {
-        mLetterboxBackgroundColor = Color.valueOf(mContext.getResources().getColor(
-                com.android.internal.R.color.config_letterboxBackgroundColor));
-    }
-
-    /**
-     * Gets {@link LetterboxBackgroundType} specified in {@link
-     * com.android.internal.R.integer.config_letterboxBackgroundType} or over via ADB command.
-     */
-    @LetterboxBackgroundType
-    int getLetterboxBackgroundType() {
-        return mLetterboxBackgroundType;
-    }
-
-    /** Sets letterbox background type. */
-    void setLetterboxBackgroundType(@LetterboxBackgroundType int backgroundType) {
-        mLetterboxBackgroundType = backgroundType;
-    }
-
-    /**
-     * Resets cletterbox background type to {@link
-     * com.android.internal.R.integer.config_letterboxBackgroundType}.
-     */
-    void resetLetterboxBackgroundType() {
-        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
-    }
-
-    @LetterboxBackgroundType
-    private static int readLetterboxBackgroundTypeFromConfig(Context context) {
-        int backgroundType = context.getResources().getInteger(
-                com.android.internal.R.integer.config_letterboxBackgroundType);
-        return backgroundType == LETTERBOX_BACKGROUND_SOLID_COLOR
-                    || backgroundType == LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND
-                    || backgroundType == LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING
-                    || backgroundType == LETTERBOX_BACKGROUND_WALLPAPER
-                    ? backgroundType : LETTERBOX_BACKGROUND_SOLID_COLOR;
-    }
-
-    /** Returns a string representing the given {@link LetterboxBackgroundType}. */
-    static String letterboxBackgroundTypeToString(
-            @LetterboxBackgroundType int backgroundType) {
-        switch (backgroundType) {
-            case LETTERBOX_BACKGROUND_SOLID_COLOR:
-                return "LETTERBOX_BACKGROUND_SOLID_COLOR";
-            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND:
-                return "LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND";
-            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
-                return "LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING";
-            case LETTERBOX_BACKGROUND_WALLPAPER:
-                return "LETTERBOX_BACKGROUND_WALLPAPER";
-            default:
-                return "unknown=" + backgroundType;
-        }
-    }
-
-    /**
-     * Overrides alpha of a black scrim shown over wallpaper for {@link
-     * #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link mLetterboxBackgroundType}.
-     *
-     * <p>If given value is < 0 or >= 1, both it and a value of {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha} are ignored
-     * and 0.0 (transparent) is instead.
-     */
-    void setLetterboxBackgroundWallpaperDarkScrimAlpha(float alpha) {
-        mLetterboxBackgroundWallpaperDarkScrimAlpha = alpha;
-    }
-
-    /**
-     * Resets alpha of a black scrim shown over wallpaper letterbox background to {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha}.
-     */
-    void resetLetterboxBackgroundWallpaperDarkScrimAlpha() {
-        mLetterboxBackgroundWallpaperDarkScrimAlpha = mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
-    }
-
-    /**
-     * Gets alpha of a black scrim shown over wallpaper letterbox background.
-     */
-    float getLetterboxBackgroundWallpaperDarkScrimAlpha() {
-        return mLetterboxBackgroundWallpaperDarkScrimAlpha;
-    }
-
-    /**
-     * Overrides blur radius for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in
-     * {@link mLetterboxBackgroundType}.
-     *
-     * <p> If given value <= 0, both it and a value of {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius} are ignored
-     * and 0 is used instead.
-     */
-    void setLetterboxBackgroundWallpaperBlurRadius(int radius) {
-        mLetterboxBackgroundWallpaperBlurRadius = radius;
-    }
-
-    /**
-     * Resets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link
-     * mLetterboxBackgroundType} to {@link
-     * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius}.
-     */
-    void resetLetterboxBackgroundWallpaperBlurRadius() {
-        mLetterboxBackgroundWallpaperBlurRadius = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
-    }
-
-    /**
-     * Gets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link
-     * mLetterboxBackgroundType}.
-     */
-    int getLetterboxBackgroundWallpaperBlurRadius() {
-        return mLetterboxBackgroundWallpaperBlurRadius;
     }
 
     @Override

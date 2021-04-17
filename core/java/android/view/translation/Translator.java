@@ -26,8 +26,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.service.translation.ITranslationCallback;
 import android.util.Log;
@@ -227,11 +229,13 @@ public class Translator {
      *
      * @param request {@link TranslationRequest} request to be translate.
      *
-     * @return {@link TranslationRequest} containing translated request,
-     *         or null if translation could not be done.
-     * @throws IllegalStateException if this TextClassification session was destroyed when calls
+     * @throws IllegalStateException if this Translator session was destroyed when called.
+     *
+     * @deprecated use {@link #translate(TranslationRequest, CancellationSignal,
+     *             Executor, Consumer)} instead.
+     * @hide
      */
-    //TODO: Add cancellation signal
+    @Deprecated
     @Nullable
     public void translate(@NonNull TranslationRequest request,
             @NonNull @CallbackExecutor Executor executor,
@@ -250,7 +254,52 @@ public class Translator {
         final ITranslationCallback responseCallback =
                 new TranslationResponseCallbackImpl(callback, executor);
         try {
-            mDirectServiceBinder.onTranslationRequest(request, mId, responseCallback);
+            mDirectServiceBinder.onTranslationRequest(request, mId,
+                    CancellationSignal.createTransport(), responseCallback);
+        } catch (RemoteException e) {
+            Log.w(TAG, "RemoteException calling requestTranslate(): " + e);
+        }
+    }
+
+    /**
+     * Requests a translation for the provided {@link TranslationRequest} using the Translator's
+     * source spec and destination spec.
+     *
+     * @param request {@link TranslationRequest} request to be translate.
+     * @param cancellationSignal signal to cancel the operation in progress.
+     * @param executor Executor to run callback operations
+     * @param callback {@link Consumer} to receive the translation response. Multiple responses may
+     *                 be received if {@link TranslationRequest#FLAG_PARTIAL_RESPONSES} is set.
+     *
+     * @throws IllegalStateException if this Translator session was destroyed when called.
+     */
+    @Nullable
+    public void translate(@NonNull TranslationRequest request,
+            @Nullable CancellationSignal cancellationSignal,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<TranslationResponse> callback) {
+        Objects.requireNonNull(request, "Translation request cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
+        Objects.requireNonNull(callback, "Callback cannot be null");
+
+        if (isDestroyed()) {
+            // TODO(b/176464808): Disallow multiple Translator now, it will throw
+            //  IllegalStateException. Need to discuss if we can allow multiple Translators.
+            throw new IllegalStateException(
+                    "This translator has been destroyed");
+        }
+
+        ICancellationSignal transport = null;
+        if (cancellationSignal != null) {
+            transport = CancellationSignal.createTransport();
+            cancellationSignal.setRemote(transport);
+        }
+        final ITranslationCallback responseCallback =
+                new TranslationResponseCallbackImpl(callback, executor);
+
+        try {
+            mDirectServiceBinder.onTranslationRequest(request, mId, transport,
+                    responseCallback);
         } catch (RemoteException e) {
             Log.w(TAG, "RemoteException calling requestTranslate(): " + e);
         }
@@ -298,7 +347,8 @@ public class Translator {
         final ITranslationCallback translationCallback =
                 new TranslationResponseCallbackImpl(callback, executor);
         try {
-            mDirectServiceBinder.onTranslationRequest(request, mId, translationCallback);
+            mDirectServiceBinder.onTranslationRequest(request, mId,
+                    CancellationSignal.createTransport(), translationCallback);
         } catch (RemoteException e) {
             Log.w(TAG, "RemoteException calling flushRequest");
         }

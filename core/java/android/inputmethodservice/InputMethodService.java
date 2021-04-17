@@ -718,7 +718,7 @@ public class InputMethodService extends AbstractInputMethodService {
         public final void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
                 @NonNull EditorInfo editorInfo, boolean restarting,
                 @NonNull IBinder startInputToken) {
-            mPrivOps.reportStartInput(startInputToken);
+            mPrivOps.reportStartInputAsync(startInputToken);
 
             if (restarting) {
                 restartInput(inputConnection, editorInfo);

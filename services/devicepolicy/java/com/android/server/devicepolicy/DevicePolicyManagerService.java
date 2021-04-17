@@ -96,6 +96,7 @@ import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_REMOVE_N
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED;
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED;
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_STARTING_PROFILE_FAILED;
+import static android.app.admin.DevicePolicyManager.STATE_USER_UNMANAGED;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
@@ -8735,7 +8736,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity();
         if (userHandle != mOwners.getDeviceOwnerUserId() && !mOwners.hasProfileOwner(userHandle)
-                && getManagedUserId(userHandle) == -1) {
+                && getManagedUserId(userHandle) == -1
+                && newState != STATE_USER_UNMANAGED) {
             // No managed device, user or profile, so setting provisioning state makes no sense.
             throw new IllegalStateException("Not allowed to change provisioning state unless a "
                       + "device or profile owner is set.");
@@ -8797,6 +8799,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 break;
             case DevicePolicyManager.STATE_USER_SETUP_FINALIZED:
                 // Cannot transition out of finalized.
+                break;
+            case DevicePolicyManager.STATE_USER_PROFILE_FINALIZED:
+                // Should only move to an unmanaged state after removing the work profile.
+                if (newState == DevicePolicyManager.STATE_USER_UNMANAGED) {
+                    return;
+                }
                 break;
         }
 
