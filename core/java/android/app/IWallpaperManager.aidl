@@ -190,18 +190,4 @@ interface IWallpaperManager {
      * Called from SystemUI when it shows the AoD UI.
      */
     oneway void setInAmbientMode(boolean inAmbientMode, long animationDuration);
-
-    /**
-     * Called from SystemUI when the device is waking up.
-     *
-     * @hide
-     */
-    oneway void notifyWakingUp(int x, int y, in Bundle extras);
-
-    /**
-     * Called from SystemUI when the device is going to sleep.
-     *
-     * @hide
-     */
-    void notifyGoingToSleep(int x, int y, in Bundle extras);
 }
