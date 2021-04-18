@@ -550,7 +550,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"องค์กรของคุณติดตั้งผู้ออกใบรับรองในอุปกรณ์นี้ อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"องค์กรของคุณติดตั้งผู้ออกใบรับรองในโปรไฟล์งาน อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"มีการติดตั้งผู้ออกใบรับรองในอุปกรณ์นี้ อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ผู้ดูแลระบบได้เปิดการบันทึกเครือข่าย ซึ่งจะตรวจสอบการจราจรของข้อมูลในอุปกรณ์ของคุณ"</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในอุปกรณ์ของคุณ"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"คุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"คุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP_0">%1$s</xliff:g> และ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"โปรไฟล์งานของคุณเชื่อมต่ออยู่กับ <xliff:g id="VPN_APP">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์"</string>
@@ -565,7 +565,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"เปิดการตั้งค่า VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"เปิดข้อมูลรับรองที่เชื่อถือได้"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"ผู้ดูแลระบบได้เปิดการทำบันทึกเครือข่าย ซึ่งจะติดตามดูการรับส่งข้อมูลบนอุปกรณ์ของคุณ\n\nโปรดติดต่อผู้ดูแลระบบสำหรับข้อมูลเพิ่มเติม"</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในอุปกรณ์ของคุณ\n\nโปรดติดต่อผู้ดูแลระบบหากต้องการข้อมูลเพิ่มเติม"</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"คุณได้ให้สิทธิ์แอปในการตั้งค่าการเชื่อมต่อ VPN\n\nแอปนี้จะสามารถตรวจสอบอุปกรณ์และกิจกรรมในเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ได้"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"โปรไฟล์งานของคุณได้รับการจัดการโดย <xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ ซึ่งรวมถึงอีเมล แอป และเว็บไซต์ต่างๆ\n\nโปรดติดต่อผู้ดูแลระบบสำหรับข้อมูลเพิ่มเติม\n\nนอกจากนี้คุณยังเชื่อมต่อกับ VPN ซึ่งตรวจสอบกิจกรรมในเครือข่ายของคุณได้"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>

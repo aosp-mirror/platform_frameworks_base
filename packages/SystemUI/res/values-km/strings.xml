@@ -504,7 +504,7 @@
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"បិទ​មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> នឹងមានសិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"សេវាកម្មដែល​ផ្ដល់​មុខងារ​នេះ​នឹងមាន​សិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែល​អាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬ​ដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ចាប់ផ្ដើម​ថត ឬបញ្ជូន​មែនទេ?"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​មែនទេ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​ដោយប្រើ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ឬ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"កុំ​បង្ហាញ​ម្ដងទៀត"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"សម្អាត​ទាំងអស់"</string>
@@ -712,7 +712,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"លំនាំដើម"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"ពពុះ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"គ្មាន​សំឡេង ឬការញ័រទេ"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"គ្មានសំឡេង ឬការញ័រ និងការបង្ហាញ​កម្រិតទាបជាង​នេះនៅក្នុង​ផ្នែកសន្ទនាទេ"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"គ្មានសំឡេង​ឬការញ័រ និងបង្ហាញ​ទាបជាង​នៅក្នុង​ផ្នែកសន្ទនា"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"អាចរោទ៍ ឬញ័រ ដោយផ្អែកលើ​ការកំណត់​ទូរសព្ទ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"អាចរោទ៍ ឬញ័រ ដោយផ្អែកលើ​ការកំណត់​ទូរសព្ទ។ ការសន្ទនា​ពី​ពពុះ <xliff:g id="APP_NAME">%1$s</xliff:g> តាម​លំនាំដើម​។"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ធ្វើឱ្យអ្នក​ចាប់អារម្មណ៍​ដោយប្រើ​ផ្លូវកាត់​អណ្ដែត​សម្រាប់ខ្លឹមសារនេះ។"</string>

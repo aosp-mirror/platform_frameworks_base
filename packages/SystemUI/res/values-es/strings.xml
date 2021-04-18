@@ -224,7 +224,7 @@
     <string name="data_connection_lte" msgid="557021044282539923">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
     <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
-    <string name="data_connection_roaming" msgid="375650836665414797">"Itinerancia"</string>
+    <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Sin tarjeta SIM"</string>
@@ -384,7 +384,7 @@
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"Enviar pantalla"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Enviando"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositivo sin nombre"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Listo para enviar"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Hecho para enviar"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hay dispositivos disponibles"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi‑Fi no conectado"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
@@ -392,12 +392,12 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertir colores"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Modo de corrección de color"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Más ajustes"</string>
-    <string name="quick_settings_done" msgid="2163641301648855793">"Listo"</string>
+    <string name="quick_settings_done" msgid="2163641301648855793">"Hecho"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Conectado"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Conectado (<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería)"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Conectando..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Compartir conexión"</string>
-    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Punto de acceso"</string>
+    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Compartir Internet"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos activado"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
@@ -662,7 +662,7 @@
     <string name="alarm_template" msgid="2234991538018805736">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"el <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Ajustes rápidos, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Punto de acceso"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Compartir Internet"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión solo para algunos"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El configurador de UI del sistema te ofrece otras formas de modificar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
@@ -694,7 +694,7 @@
     <string name="notification_channel_silenced" msgid="1995937493874511359">"Estas notificaciones se mostrarán de forma silenciosa"</string>
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Estas notificaciones te avisarán con sonido"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"Normalmente ignoras estas notificaciones. \n¿Quieres seguir viéndolas?"</string>
-    <string name="inline_done_button" msgid="6043094985588909584">"Listo"</string>
+    <string name="inline_done_button" msgid="6043094985588909584">"Hecho"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Aplicar"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"¿Quieres seguir viendo estas notificaciones?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"Detener las notificaciones"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Es posible que suene o vibre según los ajustes del teléfono"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Es posible que suene o vibre según los ajustes del teléfono. Las conversaciones de <xliff:g id="APP_NAME">%1$s</xliff:g> aparecen como burbujas de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Llama tu atención con un acceso directo flotante a este contenido."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones, como burbuja flotante, y la imagen de perfil aparece en la pantalla de bloqueo"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones, aparece como burbuja flotante y la imagen de perfil se incluye en la pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ajustes"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"No se pueden usar funciones de conversación con <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -741,7 +741,7 @@
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Permite las notificaciones de este canal"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"Más ajustes"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Personalizar"</string>
-    <string name="notification_done" msgid="6215117625922713976">"Listo"</string>
+    <string name="notification_done" msgid="6215117625922713976">"Hecho"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Deshacer"</string>
     <string name="demote" msgid="6225813324237153980">"Marcar esta notificación como que no es una conversación"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"Conversación importante"</string>

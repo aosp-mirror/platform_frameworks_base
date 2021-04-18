@@ -718,13 +718,13 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Privzeto"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Mehurček"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brez zvočnega opozarjanja ali vibriranja"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brez zvočnega opozarjanja ali vibriranja, prikaz nižje v razdelku s pogovorom"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brez zvočnega opozarjanja ali vibriranja, prikaz nižje v razdelku Pogovor."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Zvonjenje ali vibriranje je omogočeno na podlagi nastavitev telefona. Pogovori v aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> so privzeto prikazani v oblačkih."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Zadrži vašo pozornost z lebdečo bližnjico do te vsebine."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Prikaz na vrhu razdelka s pogovorom in v plavajočem oblačku, prikaz profilne slike na zaklenjenem zaslonu"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Prikaz na vrhu razdelka Pogovor in v plavajočem oblačku, prikaz profilne slike na zaklenjenem zaslonu."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavitve"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prednost"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prednostno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira pogovornih funkcij"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ni nedavnih oblačkov"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Tukaj bodo prikazani tako nedavni kot tudi opuščeni oblački"</string>
