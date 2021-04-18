@@ -1693,7 +1693,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>-д таны төхөөрөмжийг бүрэн хянахыг зөвшөөрөх үү?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Хэрэв та <xliff:g id="SERVICE">%1$s</xliff:g>-г асаавал таны төхөөрөмж өгөгдлийн шифрлэлтийг сайжруулахын тулд таны дэлгэцийн түгжээг ашиглахгүй."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Бүрэн хянах нь таны хандалтын үйлчилгээний шаардлагад тусалдаг аппуудад тохиромжтой боловч ихэнх аппад тохиромжгүй байдаг."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Харах болон хянах дэлгэц"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Дэлгэцийг харах ба хянах"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Энэ нь дэлгэц дээрх бүх контентыг унших болон контентыг бусад аппад харуулах боломжтой."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Үйлдлийг харах болон гүйцэтгэх"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Энэ нь таны апп болон техник хангамжийн мэдрэгчтэй хийх харилцан үйлдлийг хянах болон таны өмнөөс апптай харилцан үйлдэл хийх боломжтой."</string>

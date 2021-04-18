@@ -1898,10 +1898,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Oszczędzanie baterii uruchamia ciemny motyw oraz wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne i inne funkcje, np. „OK Google”\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Oszczędzanie baterii uruchamia ciemny motyw oraz wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne i inne funkcje, np. „OK Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Włącz"</string>
@@ -2142,18 +2140,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"To powiadomienie zostało zmienione na Ciche. Kliknij, by przesłać opinię."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Podniesiono ważność tego powiadomienia. Kliknij, by przesłać opinię."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Obniżono ważność tego powiadomienia. Kliknij, by przesłać opinię."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Wypróbuj ulepszone powiadomienia"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Aby nadal otrzymywać sugestie działań oraz odpowiedzi i inne podpowiedzi, włącz ulepszone powiadomienia. Powiadomienia adaptacyjne w Androidzie nie są już obsługiwane."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Włącz"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Nie teraz"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Więcej informacji"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Ulepszone powiadomienia mogą czytać wszystkie powiadomienia, w tym dane osobowe takie jak nazwy kontaktów i treść wiadomości. Funkcja będzie też mogła odrzucać powiadomienia oraz używać zawartych w nich przycisków, np. odbierać połączenia telefoniczne.\n\nMoże również włączać i wyłączać tryb Priorytet oraz zmieniać powiązane ustawienia."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>
