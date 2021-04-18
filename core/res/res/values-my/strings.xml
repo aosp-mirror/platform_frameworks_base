@@ -268,7 +268,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"၉၉၉+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"အကြောင်းကြားချက်အသစ်"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"ပကတိအသွင်ကီးဘုတ်"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"ကီးဘုတ် ခလုတ်ခုံ"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"စက်၏ ကီးဘုတ်"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"လုံခြုံရေး"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"ကားမုဒ်"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"အကောင့် အခြေအနေ"</string>
@@ -314,7 +314,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"ဖုန်း"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ရန်နှင့် စီမံရန်"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"စက်၏ အာရုံခံစနစ်များ"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"သင်၏ အဓိကကျသော လက္ခဏာများအကြောင်း အာရုံခံကိရိယာဒေတာကို ရယူသုံးစွဲရန်"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"သင်၏အရေးပြီးသော ကျန်းမာရေးလက္ခဏာဆိုင်ရာ အာရုံခံကိရိယာဒေတာကို ရယူရန်"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ဝင်းဒိုးတွင် ပါရှိသည်များကို ပြန်လည်ရယူရန်"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"သင်အသုံးပြုနေသော ဝင်းဒိုးတွင် ပါရှိသည်များကို ကြည့်ရှုစစ်ဆေးသည်။"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"တို့ထိခြင်းဖြင့် ရှာဖွေမှုကို ဖွင့်ရန်"</string>
@@ -1051,8 +1051,8 @@
       <item quantity="one">ပြီးခဲ့သည့် <xliff:g id="COUNT_0">%d</xliff:g> မိနစ်က</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other">ပြီးခဲ့သည့် <xliff:g id="COUNT_1">%d</xliff:g> နာရီက</item>
-      <item quantity="one">ပြီးခဲ့သည့် <xliff:g id="COUNT_0">%d</xliff:g> နာရီက</item>
+      <item quantity="other">ပြီးခဲ့သည့် <xliff:g id="COUNT_1">%d</xliff:g> နာရီ</item>
+      <item quantity="one">ပြီးခဲ့သည့် <xliff:g id="COUNT_0">%d</xliff:g> နာရီ</item>
     </plurals>
     <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
       <item quantity="other">ပြီးခဲ့သည့် <xliff:g id="COUNT_1">%d</xliff:g> ရက်က</item>
@@ -1226,12 +1226,12 @@
     <string name="volume_unknown" msgid="4041914008166576293">"အသံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ဘလူးတုသ်သံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ဖုန်းမြည်သံအတိုးအကျယ်"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"ခေါ်ဆိုနေခြင်းအသံအတိုးအကျယ်"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"ဖုန်းခေါ်သံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"မီဒီယာအသံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"အကြောင်းကြားသံအတိုးအကျယ်"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"မူရင်းမြည်သံ"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"မူရင်း (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"တစ်ခုမျှမဟုတ်"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"မရှိ"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"မြည်သံများ"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"နှိုးစက်သံ"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"အကြောင်းကြားချက်အသံ"</string>
@@ -1327,9 +1327,9 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"မျှဝေပါ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ငြင်းပယ်ပါ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ထည့်သွင်းရေး နည်းကို ရွေးရန်"</string>
-    <string name="show_ime" msgid="6406112007347443383">"စက်၏ကီးဘုတ်ကိုအသုံးပြုနေစဉ် ၎င်းကိုမျက်နှာပြင်ပေါ်တွင် ထားပါ"</string>
+    <string name="show_ime" msgid="6406112007347443383">"စက်၏ကီးဘုတ် ဖွင့်ထားစဉ်တွင် ၎င်းကို ဖန်သားပြင်ပေါ်တွင် ဆက်ထားပါ"</string>
     <string name="hardware" msgid="1800597768237606953">"ပကတိအသွင်ကီးဘုတ်ပြရန်"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ရုပ်ပိုင်းဆိုင်ရာ အသွင်အပြင်ကို ပြင်ဆင်သတ်မှတ်ပါ"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"စက်၏ ကီးဘုတ်ကို ပြင်ဆင်သတ်မှတ်ပါ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ဘာသာစကားနှင့် အသွင်အပြင်ရွေးချယ်ရန် တို့ပါ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1633,12 +1633,12 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ပိတ်ထားသည်"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> ကို သင့်စက်အား အပြည့်အဝထိန်းချုပ်ခွင့် ပေးလိုပါသလား။"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> ဖွင့်လိုက်ပါက သင်၏စက်သည် ဒေတာအသွင်ဝှက်ခြင်း ပိုကောင်းမွန်စေရန် သင့်ဖန်သားပြင်လော့ခ်ကို သုံးမည်မဟုတ်ပါ။"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"အများသုံးစွဲနိုင်မှု လိုအပ်ချက်များအတွက် အထောက်အကူပြုသည့် အက်ပ်များကို အပြည့်အဝထိန်းချုပ်ခြင်းသည် သင့်လျော်သော်လည်း အက်ပ်အများစုအတွက် မသင့်လျော်ပါ။"</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"မျက်နှာပြင်ကို ကြည့်ရှုပြီး ထိန်းချုပ်ပါ"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"အများသုံးစွဲနိုင်မှု လိုအပ်ချက်များအတွက် အထောက်အကူပြုသည့် အက်ပ်များအား အပြည့်အဝ ထိန်းချုပ်ခွင့်ပေးခြင်းသည် သင့်လျော်သော်လည်း အက်ပ်အများစုအတွက် မသင့်လျော်ပါ။"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ဖန်သားပြင်ကို ကြည့်ရှုထိန်းချုပ်ခြင်း"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"၎င်းသည် မျက်နှာပြင်ပေါ်ရှိ အကြောင်းအရာများအားလုံးကို ဖတ်နိုင်ပြီး အခြားအက်ပ်များအပေါ်တွင် ထိုအကြောင်းအရာကို ဖော်ပြနိုင်သည်။"</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"လုပ်ဆောင်ချက်များကို ကြည့်ရှုလုပ်ဆောင်ပါ"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"လုပ်ဆောင်ချက်များကို ကြည့်ရှုဆောင်ရွက်ခြင်း"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"၎င်းသည် အက်ပ်တစ်ခု သို့မဟုတ် အာရုံခံကိရိယာကို အသုံးပြု၍ သင့်ပြန်လှန်တုံ့ပြန်မှုများကို မှတ်သားနိုင်ပြီး သင့်ကိုယ်စား အက်ပ်များနှင့် ပြန်လှန်တုံ့ပြန်နိုင်သည်။"</string>
-    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ခွင့်ပြု"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ခွင့်ပြုရန်"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ပယ်ရန်"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ဝန်ဆောင်မှုကို စတင်အသုံးပြုရန် တို့ပါ−"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"အများသုံးစွဲနိုင်မှု ခလုတ်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုများကို ရွေးပါ"</string>
@@ -1956,7 +1956,7 @@
     <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"ဒက်ဘစ် ကတ်"</string>
     <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"ငွေပေးချေမှုကတ်"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"ကတ်"</string>
-    <string name="autofill_save_type_username" msgid="1018816929884640882">"အသုံးပြုသူအမည်"</string>
+    <string name="autofill_save_type_username" msgid="1018816929884640882">"သုံးသူအမည်"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"အီးမေးလ်လိပ်စာ"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"စိတ်ငြိမ်ငြိမ်ထားပြီး အနီးအနားတဝိုက်တွင် ခိုနားစရာ နေရာရှာပါ။"</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"ကမ်းရိုးတန်းနှင့် မြစ်ကမ်းရိုးတစ်လျှောက်ရှိ နေရာဒေသတို့မှ ချက်ချင်းထွက်ခွာပြီး ဘေးကင်းရာကုန်းမြင့်ဒေသသို့ ပြောင်းရွှေ့ပါ။"</string>

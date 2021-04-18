@@ -1347,10 +1347,10 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bylo zjištěno analogové zvukové příslušenství"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Připojené zařízení není s tímto telefonem kompatibilní. Klepnutím zobrazíte další informace."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Ladění přes USB připojeno"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Klepnutím vypnete ladění přes USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Klepnutím ladění přes USB vypnete"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Vyberte, chcete-li zakázat ladění přes USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Bezdrátové ladění je připojeno"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Klepnutím vypnete bezdrátové ladění"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Klepnutím bezdrátové ladění vypnete"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Vyberte, chcete-li zakázat bezdrátové ladění."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Režim správce testů je aktivní"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Chcete-li deaktivovat režim správce testů, restartujte zařízení do továrního nastavení."</string>

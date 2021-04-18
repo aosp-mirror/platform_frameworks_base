@@ -295,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Жұмыс профиліне ауысу"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контактілер"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"контактілерге кіру"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Геодерек"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Локация"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"бұл құрылғының орналасқан жерін көру"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Күнтізбе"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"күнтізбеге кіру"</string>
@@ -1514,7 +1514,7 @@
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB дискі"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB жады"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Өзгерту"</string>
-    <string name="data_usage_warning_title" msgid="9034893717078325845">"Деректердің пайдаланылуы туралы ескерту"</string>
+    <string name="data_usage_warning_title" msgid="9034893717078325845">"Дерек шығыны туралы ескерту"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"Деректің <xliff:g id="APP">%s</xliff:g> пайдаландыңыз"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Мобильдік деректер шегіне жетті"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Wi-Fi деректер шегіне жеттіңіз"</string>

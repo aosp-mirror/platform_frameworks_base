@@ -1336,14 +1336,14 @@
     <string name="perm_costs_money" msgid="749054595022779685">"to może generować dodatkowe koszty"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
     <string name="usb_charging_notification_title" msgid="1674124518282666955">"Ładowanie urządzenia przez USB"</string>
-    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Ładowanie podłączonego urządzenia przez USB"</string>
+    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Ładowanie połączonego urządzenia przez USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Przesyłanie plików przez USB włączone"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Tryb PTP przez USB włączony"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Tethering USB włączony"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Tryb MIDI przez USB włączony"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Podłączono akcesorium USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Kliknij, by wyświetlić więcej opcji."</string>
-    <string name="usb_power_notification_message" msgid="7284765627437897702">"Ładowanie podłączonego urządzenia. Kliknij, by wyświetlić więcej opcji."</string>
+    <string name="usb_power_notification_message" msgid="7284765627437897702">"Ładowanie połączonego urządzenia. Kliknij, by wyświetlić więcej opcji."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Wykryto analogowe urządzenie audio"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Podłączone urządzenie nie jest zgodne z tym telefonem. Kliknij, by dowiedzieć się więcej."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Podłączono moduł debugowania USB"</string>

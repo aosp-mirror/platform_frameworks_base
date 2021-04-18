@@ -309,7 +309,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"acceder a tu actividad física"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"tomar fotografías y grabar videos"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Llamadas"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registros de llamadas"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"leer y escribir el registro de llamadas telefónicas"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Teléfono"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"hacer y administrar llamadas telefónicas"</string>

@@ -201,7 +201,7 @@
     <string name="factory_reset_message" msgid="2657049595153992213">"Yönetim uygulaması kullanılamıyor. Cihazınız şimdi silinecek.\n\nSorularınız varsa kuruluşunuzun yöneticisine başvurun."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Yazdırma işlemi <xliff:g id="OWNER_APP">%s</xliff:g> tarafından devre dışı bırakıldı."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"İş profilinizi açın"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"İş profilinizi açana kadar kişisel uygulamalarınız engellendi"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"İş profilinizi açana kadar kişisel uygulamalarınız engelleniyor"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Kişisel uygulamalar <xliff:g id="DATE">%1$s</xliff:g> tarihinde saat <xliff:g id="TIME">%2$s</xliff:g> itibarıyla engellenecektir. BT yöneticiniz, iş profilinizin <xliff:g id="NUMBER">%3$d</xliff:g> günden fazla kapalı kalmasına izin vermiyor."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aç"</string>
     <string name="me" msgid="6207584824693813140">"Ben"</string>
@@ -312,7 +312,7 @@
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Arama kayıtları"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"telefon arama kaydını okuma ve yazma"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
-    <string name="permgroupdesc_phone" msgid="270048070781478204">"telefon çağrıları yapma ve yönetme"</string>
+    <string name="permgroupdesc_phone" msgid="270048070781478204">"telefon aramaları yapma ve yönetme"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Vücut sensörleri"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"hayati belirtilerinizle ilgili sensör verilerine erişme"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Pencere içeriğini alma"</string>
@@ -339,9 +339,9 @@
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Uygulamaya, kullanıcı müdahalesi olmadan kısayolları Ana Ekrana ekleme izni verir."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"kısayolların yüklemesini kaldırma"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Uygulamaya, kullanıcının müdahalesi olmadan kısayolları Ana Ekrandan kaldırma izni verir."</string>
-    <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"giden çağrıları yeniden yönlendirme"</string>
+    <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"giden aramaları yeniden yönlendirme"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Uygulamaya, giden bir çağrının numarası çevrilirken çağrıyı farklı bir numaraya yönlendirme ya da tamamen kapatma seçeneğiyle birlikte numarayı görme izni verir."</string>
-    <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"telefon çağrılarını yanıtla"</string>
+    <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"telefon aramalarını yanıtla"</string>
     <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Uygulamanın gelen bir telefon çağrısına yanıt vermesine olanak tanır."</string>
     <string name="permlab_receiveSms" msgid="505961632050451881">"kısa mesajları al (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="1797345626687832285">"Uygulamaya SMS iletilerini alma ve işleme izni verir. Bu izin, uygulamanın cihazınıza gönderilen iletileri takip edip size göstermeden silebileceği anlamına gelir."</string>
@@ -407,8 +407,8 @@
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Bu uygulama, çağrı geçmişinizi okuyabilir."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"çağrı günlüğüne yaz"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Uygulamaya tabletinizin çağrı günlüğünde (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak çağrı günlüğünüzü silebilir veya değiştirebilir."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Uygulamaya, Android TV cihazınızın çağrı günlüğünde (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak çağrı günlüğünüzü silebilir veya değiştirebilir."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Uygulamaya telefonunuzun çağrı günlüğünde (gelen ve giden çağrılarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak çağrı günlüğünüzü silebilir veya değiştirebilir."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Uygulamaya, Android TV cihazınızın arama günlüğünde (gelen ve giden aramalarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak arama günlüğünüzü silebilir veya değiştirebilir."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Uygulamaya telefonunuzun arama günlüğünde (gelen ve giden aramalarla ilgili veriler dahil olmak üzere) değişiklik yapma izni verir. Kötü amaçlı uygulamalar bu izni kullanarak arama günlüğünüzü silebilir veya değiştirebilir."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"vücut sensörlerine erişme (nabız takip cihazları gibi)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Uygulamanın, nabzınız gibi fiziksel durumunuzu izleyen sensörlerin gönderdiği verilere erişmesine izin verir."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Takvim etkinlikleri ve ayrıntılarını okuma"</string>
@@ -445,12 +445,12 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Uygulamaya, titreşimi denetleme izni verir."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Uygulamanın titreşim durumuna erişimesine izni verir."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon numaralarına doğrudan çağrı yap"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Uygulamaya sizin müdahaleniz olmadan telefon numaralarına çağrı yapma izni verir. Bu durum beklenmeyen ödemelere veya çağrılara neden olabilir. Ancak bu iznin, uygulamanın acil numaralara çağrı yapmasına olanak sağlamadığını unutmayın. Kötü amaçlı uygulamalar onayınız olmadan çağrılar yaparak sizi zarara sokabilir."</string>
+    <string name="permdesc_callPhone" msgid="5439809516131609109">"Uygulamaya sizin müdahaleniz olmadan telefon numaralarını arama izni verir. Bu durum beklenmeyen ödemelere veya aramalara neden olabilir. Ancak bu iznin, uygulamanın acil numaraları aramasına olanak sağlamadığını unutmayın. Kötü amaçlı uygulamalar onayınız olmadan aramalar yaparak sizi zarara sokabilir."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS çağrı hizmetine erişme"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Uygulamanın, sizin müdahaleniz olmadan telefon etmek için IMS hizmetini kullanmasına izin verir."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefonun durumunu ve kimliğini okuma"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"Uygulamaya cihazdaki telefon özelliklerine erişme izni verir. Bu izin, uygulamanın telefon numarasını ve cihaz kimliğini, etkin bir çağrı olup olmadığını ve çağrıda bağlanılan karşı tarafın numarasını öğrenmesine olanak sağlar."</string>
-    <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"çağrıları sistem üzerinden yönlendir"</string>
+    <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"aramaları sistem üzerinden yönlendir"</string>
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Uygulamanın, çağrı deneyimini iyileştirmek için çağrılarını sistem üzerinden yönlendirmesine olanak tanır."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"aramaları sistemde görüp denetleme."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Uygulamanın cihazda devam eden aramaları görmesini ve denetlemesini sağlar. Bu bilgiler arasında aramaların yapıldığı numaralar ve aramaların durumu gibi bilgiler yer alır."</string>
@@ -621,8 +621,8 @@
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Uygulamaya, paylaşılan depolama alanınızın içeriğini okuma izni verir."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"paylaşılan depolama alanımın içeriğini değiştir veya sil"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Uygulamanın paylaşılan depolama alanınıza içerik yazmasına izin verir."</string>
-    <string name="permlab_use_sip" msgid="8250774565189337477">"SIP çağrıları yapma/alma"</string>
-    <string name="permdesc_use_sip" msgid="3590270893253204451">"Uygulamanın SIP çağrıları yapmasına ve almasına izin verir."</string>
+    <string name="permlab_use_sip" msgid="8250774565189337477">"SIP aramaları yapma/alma"</string>
+    <string name="permdesc_use_sip" msgid="3590270893253204451">"Uygulamanın SIP aramaları yapmasına ve almasına izin verir."</string>
     <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"yeni telekomünikasyon SIM bağlantılarını kaydettir"</string>
     <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"Uygulamanın yeni telekomünikasyon SIM bağlantıları kaydettirmesine izin verir."</string>
     <string name="permlab_register_call_provider" msgid="6135073566140050702">"yeni telekomünikasyon bağlantıları kaydettir"</string>
@@ -851,7 +851,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Durdur"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Geri sar"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"İleri sar"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"Yalnızca acil çağrılar için"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"Yalnızca acil aramalar için"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Ağ kilitli"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM kart PUK kilidi devrede."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Kullanıcı Rehberi\'ne bakın veya Müşteri Hizmetleri\'ne başvurun."</string>
@@ -1984,8 +1984,8 @@
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zararlı uygulama tespit edildi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> uygulaması, <xliff:g id="APP_2">%2$s</xliff:g> dilimlerini göstermek istiyor"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Düzenle"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Çağrılar ve bildirimler titreşim yapacak"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Çağrılar ve bildirimlerin sesi kapalı olacak"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Aramalar ve bildirimler titreşim yapacak"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Aramalar ve bildirimlerin sesi kapalı olacak"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistem değişiklikleri"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Rahatsız Etmeyin"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Yeni: Rahatsız Etmeyin ayarı bildirimleri gizliyor"</string>
