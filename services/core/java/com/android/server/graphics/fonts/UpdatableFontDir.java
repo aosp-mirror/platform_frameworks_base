@@ -502,8 +502,8 @@ final class UpdatableFontDir {
                 Slog.e(TAG, "Failed to lookup font file that has " + font.getPostScriptName());
                 return null;
             }
-            resolvedFonts.add(new FontConfig.Font(info.mFile, null, font.getFontStyle(),
-                    font.getIndex(), font.getFontVariationSettings(), null));
+            resolvedFonts.add(new FontConfig.Font(info.mFile, null, info.getPostScriptName(),
+                    font.getFontStyle(), font.getIndex(), font.getFontVariationSettings(), null));
         }
         return new FontConfig.FontFamily(resolvedFonts, fontFamily.getName(),
                 null, FontConfig.FontFamily.VARIANT_DEFAULT);

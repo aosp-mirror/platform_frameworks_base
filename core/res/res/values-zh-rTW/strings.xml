@@ -2263,7 +2263,7 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"放大功能推出新設定"</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"支援新的放大功能"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"你現在可以放大局部畫面了"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"在「設定」中開啟"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"關閉"</string>

@@ -1988,7 +1988,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"Լուսանկարներ և պատկերներ"</string>
     <string name="app_category_social" msgid="2278269325488344054">"Սոցցանցեր և հաղորդակցություն"</string>
     <string name="app_category_news" msgid="1172762719574964544">"Նորություններ և ամսագրեր"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"Քարտեզներ և նավարկում"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"Քարտեզներ և նավիգացիա"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Արդյունավետություն"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Հատուկ գործառույթներ"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Սարքի հիշողություն"</string>
