@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.annotation.IntDef;
+import android.annotation.RequiresNoPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -333,6 +334,7 @@ public interface BluetoothProfile {
          * @param profile - One of {@link #HEADSET} or {@link #A2DP}
          * @param proxy - One of {@link BluetoothHeadset} or {@link BluetoothA2dp}
          */
+        @RequiresNoPermission
         public void onServiceConnected(int profile, BluetoothProfile proxy);
 
         /**
@@ -341,6 +343,7 @@ public interface BluetoothProfile {
          *
          * @param profile - One of {@link #HEADSET} or {@link #A2DP}
          */
+        @RequiresNoPermission
         public void onServiceDisconnected(int profile);
     }
 

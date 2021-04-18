@@ -16,7 +16,9 @@
 
 package android.bluetooth;
 
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.os.ParcelUuid;
@@ -58,6 +60,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Bluetooth GATT interface callbacks
      */
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final IBluetoothGattServerCallback mBluetoothGattServerCallback =
             new IBluetoothGattServerCallback.Stub() {
                 /**
@@ -428,6 +431,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * Application should call this method as early as possible after it is done with
      * this GATT server.
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void close() {
         if (DBG) Log.d(TAG, "close()");
@@ -510,6 +514,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Unregister the current application and callbacks.
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     private void unregisterCallback() {
         if (DBG) Log.d(TAG, "unregisterCallback() - mServerIf=" + mServerIf);
@@ -618,6 +623,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * of {@link BluetoothDevice#PHY_OPTION_NO_PREFERRED}, {@link BluetoothDevice#PHY_OPTION_S2} or
      * {@link BluetoothDevice#PHY_OPTION_S8}
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void setPreferredPhy(BluetoothDevice device, int txPhy, int rxPhy, int phyOptions) {
         try {
@@ -634,6 +640,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      *
      * @param device The remote device to send this response to
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void readPhy(BluetoothDevice device) {
         try {
@@ -814,6 +821,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * @return List of services. Returns an empty list if no services have been added yet.
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public List<BluetoothGattService> getServices() {
         return mServices;
     }
@@ -830,6 +838,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * this device.
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public BluetoothGattService getService(UUID uuid) {
         for (BluetoothGattService service : mServices) {
             if (service.getUuid().equals(uuid)) {
@@ -848,6 +857,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * @throws UnsupportedOperationException
      */
     @Override
+    @RequiresNoPermission
     public int getConnectionState(BluetoothDevice device) {
         throw new UnsupportedOperationException("Use BluetoothManager#getConnectionState instead.");
     }
@@ -859,6 +869,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * @throws UnsupportedOperationException
      */
     @Override
+    @RequiresNoPermission
     public List<BluetoothDevice> getConnectedDevices() {
         throw new UnsupportedOperationException(
                 "Use BluetoothManager#getConnectedDevices instead.");
@@ -872,6 +883,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * @throws UnsupportedOperationException
      */
     @Override
+    @RequiresNoPermission
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         throw new UnsupportedOperationException(
                 "Use BluetoothManager#getDevicesMatchingConnectionStates instead.");

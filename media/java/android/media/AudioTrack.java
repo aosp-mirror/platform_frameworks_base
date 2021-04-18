@@ -1676,13 +1676,11 @@ public class AudioTrack extends PlayerBase
         }
         mSampleRate = sampleRateInHz;
 
-        // IEC61937 is based on stereo. We could coerce it to stereo.
-        // But the application needs to know the stream is stereo so that
-        // it is encoded and played correctly. So better to just reject it.
         if (audioFormat == AudioFormat.ENCODING_IEC61937
-                && channelConfig != AudioFormat.CHANNEL_OUT_STEREO) {
-            throw new IllegalArgumentException(
-                    "ENCODING_IEC61937 must be configured as CHANNEL_OUT_STEREO");
+                && channelConfig != AudioFormat.CHANNEL_OUT_STEREO
+                && AudioFormat.channelCountFromOutChannelMask(channelConfig) != 8) {
+            Log.w(TAG, "ENCODING_IEC61937 is configured with channel mask as " + channelConfig
+                    + ", which is not 2 or 8 channels");
         }
 
         //--------------

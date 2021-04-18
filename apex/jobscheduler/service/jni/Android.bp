@@ -24,21 +24,10 @@ cc_library_shared {
     ],
 
     shared_libs: [
-         "libnativehelper",
-         "liblog",
-         "libbase",
+        "libnativehelper",
+        "liblog",
+        "libbase",
     ],
-
-    product_variables: {
-        arc: {
-            exclude_srcs: [
-                "com_android_server_alarm_AlarmManagerService.cpp",
-            ],
-            srcs: [
-                ":arctimersrcs",
-            ],
-        }
-    },
 }
 
 filegroup {

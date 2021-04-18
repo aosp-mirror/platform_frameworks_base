@@ -194,6 +194,7 @@ public final class FontConfig implements Parcelable {
     public static final class Font implements Parcelable {
         private final @NonNull File mFile;
         private final @Nullable File mOriginalFile;
+        private final @NonNull String mPostScriptName;
         private final @NonNull FontStyle mStyle;
         private final @IntRange(from = 0) int mIndex;
         private final @NonNull String mFontVariationSettings;
@@ -204,11 +205,12 @@ public final class FontConfig implements Parcelable {
          *
          * @hide Only system server can create this instance and passed via IPC.
          */
-        public Font(@NonNull File file, @Nullable File originalFile, @NonNull FontStyle style,
-                @IntRange(from = 0) int index, @NonNull String fontVariationSettings,
-                @Nullable String fontFamilyName) {
+        public Font(@NonNull File file, @Nullable File originalFile, @NonNull String postScriptName,
+                @NonNull FontStyle style, @IntRange(from = 0) int index,
+                @NonNull String fontVariationSettings, @Nullable String fontFamilyName) {
             mFile = file;
             mOriginalFile = originalFile;
+            mPostScriptName = postScriptName;
             mStyle = style;
             mIndex = index;
             mFontVariationSettings = fontVariationSettings;
@@ -224,6 +226,7 @@ public final class FontConfig implements Parcelable {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString8(mFile.getAbsolutePath());
             dest.writeString8(mOriginalFile == null ? null : mOriginalFile.getAbsolutePath());
+            dest.writeString8(mPostScriptName);
             dest.writeInt(mStyle.getWeight());
             dest.writeInt(mStyle.getSlant());
             dest.writeInt(mIndex);
@@ -238,14 +241,15 @@ public final class FontConfig implements Parcelable {
                 File path = new File(source.readString8());
                 String originalPathStr = source.readString8();
                 File originalPath = originalPathStr == null ? null : new File(originalPathStr);
+                String postScriptName = source.readString8();
                 int weight = source.readInt();
                 int slant = source.readInt();
                 int index = source.readInt();
                 String varSettings = source.readString8();
                 String fallback = source.readString8();
 
-                return new Font(path, originalPath, new FontStyle(weight, slant), index,
-                        varSettings, fallback);
+                return new Font(path, originalPath, postScriptName, new FontStyle(weight, slant),
+                        index, varSettings, fallback);
             }
 
             @Override
@@ -311,6 +315,13 @@ public final class FontConfig implements Parcelable {
          */
         public int getTtcIndex() {
             return mIndex;
+        }
+
+        /**
+         * Returns the PostScript name of this font.
+         */
+        public @NonNull String getPostScriptName() {
+            return mPostScriptName;
         }
 
         /**

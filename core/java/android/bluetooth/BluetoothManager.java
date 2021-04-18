@@ -18,7 +18,9 @@ package android.bluetooth;
 
 import android.Manifest;
 import android.annotation.RequiresFeature;
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemService;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
@@ -93,6 +95,7 @@ public final class BluetoothManager {
      *
      * @return the BLUETOOTH Adapter
      */
+    @RequiresNoPermission
     public BluetoothAdapter getAdapter() {
         return mAdapter;
     }
@@ -218,6 +221,7 @@ public final class BluetoothManager {
      * @param callback GATT server callback handler that will receive asynchronous callbacks.
      * @return BluetoothGattServer instance
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothGattServer openGattServer(Context context,
             BluetoothGattServerCallback callback) {
@@ -238,6 +242,7 @@ public final class BluetoothManager {
      * @return BluetoothGattServer instance
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothGattServer openGattServer(Context context,
             BluetoothGattServerCallback callback, boolean eatt_support) {
@@ -259,6 +264,7 @@ public final class BluetoothManager {
      * @return BluetoothGattServer instance
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothGattServer openGattServer(Context context,
             BluetoothGattServerCallback callback, int transport) {
@@ -281,6 +287,7 @@ public final class BluetoothManager {
      * @return BluetoothGattServer instance
      * @hide
      */
+    @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothGattServer openGattServer(Context context,
             BluetoothGattServerCallback callback, int transport, boolean eatt_support) {
