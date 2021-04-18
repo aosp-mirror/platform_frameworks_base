@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Se ha producido un problema de conexión o el código MMI no es válido."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"La operación solo es válida para números de marcación fija."</string>
-    <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"No se puede cambiar la configuración de desvío de llamadas desde tu teléfono mientras estás en itinerancia."</string>
+    <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"No se puede cambiar la configuración de desvío de llamadas desde tu teléfono mientras estás en roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"El servicio se ha habilitado."</string>
     <string name="serviceEnabledFor" msgid="1463104778656711613">"Se ha habilitado el servicio para:"</string>
     <string name="serviceDisabled" msgid="641878791205871379">"El servicio se ha inhabilitado."</string>
@@ -108,19 +108,19 @@
     <string name="serviceClassDataSync" msgid="7895071363569133704">"Sincronización"</string>
     <string name="serviceClassPacket" msgid="1430642951399303804">"Paquete"</string>
     <string name="serviceClassPAD" msgid="6850244583416306321">"PAD"</string>
-    <string name="roamingText0" msgid="7793257871609854208">"Indicador de itinerancia activado"</string>
-    <string name="roamingText1" msgid="5073028598334616445">"Indicador de itinerancia desactivado"</string>
-    <string name="roamingText2" msgid="2834048284153110598">"Indicador de itinerancia parpadeante"</string>
+    <string name="roamingText0" msgid="7793257871609854208">"Indicador de roaming activado"</string>
+    <string name="roamingText1" msgid="5073028598334616445">"Indicador de roaming desactivado"</string>
+    <string name="roamingText2" msgid="2834048284153110598">"Indicador de roaming parpadeante"</string>
     <string name="roamingText3" msgid="831690234035748988">"Fuera del vecindario"</string>
     <string name="roamingText4" msgid="2171252529065590728">"Fuera del edificio"</string>
-    <string name="roamingText5" msgid="4294671587635796641">"Itinerancia: sistema preferido"</string>
-    <string name="roamingText6" msgid="5536156746637992029">"Itinerancia: sistema disponible"</string>
-    <string name="roamingText7" msgid="1783303085512907706">"Itinerancia: partner de alianza"</string>
-    <string name="roamingText8" msgid="7774800704373721973">"Itinerancia: partner de gran calidad"</string>
-    <string name="roamingText9" msgid="1933460020190244004">"Itinerancia: funcionalidad de servicio completa"</string>
-    <string name="roamingText10" msgid="7434767033595769499">"Itinerancia: funcionalidad de servicio parcial"</string>
-    <string name="roamingText11" msgid="5245687407203281407">"Banner de itinerancia activado"</string>
-    <string name="roamingText12" msgid="673537506362152640">"Banner de itinerancia desactivado"</string>
+    <string name="roamingText5" msgid="4294671587635796641">"Roaming: sistema preferido"</string>
+    <string name="roamingText6" msgid="5536156746637992029">"Roaming: sistema disponible"</string>
+    <string name="roamingText7" msgid="1783303085512907706">"Roaming: partner de alianza"</string>
+    <string name="roamingText8" msgid="7774800704373721973">"Roaming: partner de gran calidad"</string>
+    <string name="roamingText9" msgid="1933460020190244004">"Roaming: funcionalidad de servicio completa"</string>
+    <string name="roamingText10" msgid="7434767033595769499">"Roaming: funcionalidad de servicio parcial"</string>
+    <string name="roamingText11" msgid="5245687407203281407">"Banner de roaming activado"</string>
+    <string name="roamingText12" msgid="673537506362152640">"Banner de roaming desactivado"</string>
     <string name="roamingTextSearching" msgid="5323235489657753486">"Buscando servicio"</string>
     <string name="wfcRegErrorTitle" msgid="3193072971584858020">"No se ha podido configurar la llamada por Wi‑Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
@@ -521,21 +521,21 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Permite que la aplicación reciba paquetes enviados a través de una red Wi-Fi y mediante direcciones de multidifusión a todos los dispositivos, no solo a tu dispositivo Android TV. Consume más batería que el modo sin multidifusión."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Permite que la aplicación reciba paquetes enviados a todos los dispositivos de una red Wi-Fi que utilicen direcciones de multidifusión, no solo al teléfono. Utiliza más batería que el modo de no multidifusión."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"acceder a los ajustes de Bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Permite que la aplicación configure el tablet Bluetooth local y que detecte dispositivos remotos y se vincule con ellos."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Permite que la aplicación configure el Bluetooth en tu dispositivo Android TV, detecte dispositivos remotos y se vincule con ellos."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Permite que la aplicación configure el teléfono Bluetooth local y que detecte dispositivos remotos y se vincule con ellos."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Permite que la aplicación configure el tablet Bluetooth local y que detecte dispositivos remotos y se empareje con ellos."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Permite que la aplicación configure el Bluetooth en tu dispositivo Android TV, detecte dispositivos remotos y se empareje con ellos."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Permite que la aplicación configure el teléfono Bluetooth local y que detecte dispositivos remotos y se empareje con ellos."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"conectarse a WiMAX y desconectarse de esta red"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Permite que la aplicación determine si está habilitada la conexión WiMAX y obtenga información sobre las redes WiMAX que están conectadas."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"cambiar estado de WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Permite que la aplicación conecte el tablet a redes WiMAX y lo desconecte de ellas."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Permite que la aplicación active y desactive la conexión entre tu dispositivo Android TV y las redes WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Permite que la aplicación conecte el teléfono a redes WiMAX y lo desconecte de ellas."</string>
-    <string name="permlab_bluetooth" msgid="586333280736937209">"vincular con dispositivos Bluetooth"</string>
+    <string name="permlab_bluetooth" msgid="586333280736937209">"emparejar con dispositivos Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite que la aplicación acceda a la configuración de Bluetooth del tablet y que establezca y acepte conexiones con los dispositivos sincronizados."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite que la aplicación vea la configuración de Bluetooth de tu dispositivo Android TV y que cree y acepte conexiones con los dispositivos vinculados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite que la aplicación acceda a la configuración de Bluetooth del teléfono y que establezca y acepte conexiones con los dispositivos sincronizados."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"detectar y vincular dispositivos Bluetooth cercanos"</string>
-    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que la aplicación detecte y vincule dispositivos Bluetooth cercanos"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"detectar y emparejar dispositivos Bluetooth cercanos"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que la aplicación detecte y empareje dispositivos Bluetooth cercanos"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conectarse a dispositivos Bluetooth vinculados"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que la aplicación se conecte a dispositivos Bluetooth vinculados"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"emitir a dispositivos Bluetooth cercanos"</string>
@@ -1335,7 +1335,7 @@
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"No permitir nunca"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"Tarjeta SIM retirada"</string>
     <string name="sim_removed_message" msgid="9051174064474904617">"La red móvil no estará disponible hasta que reinicies el dispositivo con una tarjeta SIM válida."</string>
-    <string name="sim_done_button" msgid="6464250841528410598">"Listo"</string>
+    <string name="sim_done_button" msgid="6464250841528410598">"Hecho"</string>
     <string name="sim_added_title" msgid="7930779986759414595">"Tarjeta SIM añadida"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Reinicia el dispositivo para acceder a la red móvil."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Reiniciar"</string>
@@ -1348,7 +1348,7 @@
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Establecer hora"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Establecer fecha"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Establecer"</string>
-    <string name="date_time_done" msgid="8363155889402873463">"Listo"</string>
+    <string name="date_time_done" msgid="8363155889402873463">"Hecho"</string>
     <string name="perms_new_perm_prefix" msgid="6984556020395757087"><font size="12" fgcolor="#ff33b5e5">"NUEVO:"</font></string>
     <string name="perms_description_app" msgid="2747752389870161996">"Proporcionado por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="no_permissions" msgid="5729199278862516390">"No es necesario ningún permiso"</string>
@@ -1438,7 +1438,7 @@
     <string name="ext_media_status_removed" msgid="241223931135751691">"Extraído"</string>
     <string name="ext_media_status_unmounted" msgid="8145812017295835941">"Expulsado"</string>
     <string name="ext_media_status_checking" msgid="159013362442090347">"Comprobando..."</string>
-    <string name="ext_media_status_mounted" msgid="3459448555811203459">"Listo"</string>
+    <string name="ext_media_status_mounted" msgid="3459448555811203459">"Hecho"</string>
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"Solo lectura"</string>
     <string name="ext_media_status_bad_removal" msgid="508448566481406245">"Extraído de forma no segura"</string>
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"Dañado"</string>
@@ -1463,7 +1463,7 @@
     <string name="ime_action_search" msgid="4501435960587287668">"Buscar"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"Enviar"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"Siguiente"</string>
-    <string name="ime_action_done" msgid="6299921014822891569">"Listo"</string>
+    <string name="ime_action_done" msgid="6299921014822891569">"Hecho"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"Anterior"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Ejecutar"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Marcar número\ncon <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1510,7 +1510,7 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="one">1 coincidencia</item>
     </plurals>
-    <string name="action_mode_done" msgid="2536182504764803222">"Listo"</string>
+    <string name="action_mode_done" msgid="2536182504764803222">"Hecho"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Borrando almacenamiento compartido…"</string>
     <string name="share" msgid="4157615043345227321">"Compartir"</string>
     <string name="find" msgid="5015737188624767706">"Buscar"</string>
@@ -1551,7 +1551,7 @@
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Cancelar"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Eliminar"</string>
-    <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Listo"</string>
+    <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Hecho"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Cambio de modo"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Mayús"</string>
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Intro"</string>
@@ -1704,7 +1704,7 @@
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Selecciona qué funciones usar con la tecla de volumen"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Se ha desactivado <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar accesos directos"</string>
-    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Listo"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Hecho"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactivar acceso directo"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar acceso directo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de color"</string>
@@ -1834,7 +1834,7 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Modo de pantalla completa"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para salir, desliza el dedo de arriba abajo."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendido"</string>
-    <string name="done_label" msgid="7283767013231718521">"Listo"</string>
+    <string name="done_label" msgid="7283767013231718521">"Hecho"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Control deslizante circular de horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Control deslizante circular de minutos"</string>
     <string name="select_hours" msgid="5982889657313147347">"Seleccionar horas"</string>

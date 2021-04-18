@@ -325,7 +325,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"גישה לפעילות הגופנית שלך"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"מצלמה"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"צילום תמונות והקלטת וידאו"</string>
-    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"מכשירים קרובים"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"מכשירים בקרבת מקום"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"איתור מכשירים שנמצאים בקרבת מקום והתחברות אליהם"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"יומני שיחות"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"קריאה וכתיבה של יומן השיחות של הטלפון"</string>
@@ -1734,13 +1734,13 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"לא להפעיל"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"מופעל"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"כבוי"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ברצונך להעניק לשירות <xliff:g id="SERVICE">%1$s</xliff:g> שליטה מלאה במכשיר?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"להעניק לשירות <xliff:g id="SERVICE">%1$s</xliff:g> שליטה מלאה במכשיר?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"אם השירות <xliff:g id="SERVICE">%1$s</xliff:g> יופעל, המכשיר לא ישתמש בנעילת המסך כדי לשפר את הצפנת הנתונים."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"שליטה מלאה מתאימה לאפליקציות שעוזרות עם צורכי הנגישות שלך, אבל לא לרוב האפליקציות."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"האפשרות לשליטה מלאה במכשיר לא מתאימה לכל האפליקציות, אלא רק לאפליקציות שעוזרות עם צורכי הנגישות שלך."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"הצגת המסך ושליטה בו"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"אפשרות לקריאת כל התוכן במסך ולהצגת התוכן מעל אפליקציות אחרות."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"הצגה וביצוע של פעולות"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"זוהי אפשרות למעקב אחר האינטראקציות שלך עם אפליקציה או חיישן חומרה כלשהם, ולביצוע אינטראקציה בשמך."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"אפשרות למעקב אחר האינטראקציה שלך עם אפליקציות או חיישני חומרה, וביצוע אינטראקציה בשמך."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"אישור"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"עדיף שלא"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"יש להקיש על תכונה כדי להתחיל להשתמש בה:"</string>
@@ -2140,7 +2140,7 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ההתראה הזו הורדה בדרגה ל\'שקטה\'. יש להקיש כדי לשלוח משוב."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"דירוג ההתראה הזו הוגבה. יש להקיש כדי לשלוח משוב."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ההתראה הזו דורגה נמוך יותר. יש להקיש כדי לשלוח משוב."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"רוצה לנסות את התראות המשופרות?"</string>
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"רוצה לנסות את ההתראות המשופרות?"</string>
     <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"‏כדי להמשיך לקבל הצעות לפעולות, לתשובות ועוד, יש להפעיל את ההתראות המשופרות. אין יותר תמיכה בהתראות מותאמות ל-Android."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"הפעלה"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"לא עכשיו"</string>
@@ -2331,7 +2331,7 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"הגדרות חדשות להגדלה"</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"הגדרות חדשות לתכונה \'הגדלה\'"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"עכשיו אפשר להגדיל חלק מהמסך"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"הפעלה בהגדרות"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"סגירה"</string>
@@ -2343,5 +2343,5 @@
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"סמל האפליקציה"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"תדמית המותג של האפליקציה"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"בדיקה של הגדרות הגישה"</string>
-    <string name="view_and_control_notification_content" msgid="8003766498562604034">"לשירות <xliff:g id="SERVICE_NAME">%s</xliff:g> יהיו הרשאות לצפייה ולשליטה במסך. יש להקיש כדי לבדוק."</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"לשירות <xliff:g id="SERVICE_NAME">%s</xliff:g> יש הרשאה להצגת המסך ושליטה בו. אפשר להקיש כדי לבדוק."</string>
 </resources>

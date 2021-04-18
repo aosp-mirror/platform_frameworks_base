@@ -1440,6 +1440,8 @@ public final class DataFailCause {
         sFailCauseMap.put(IPV6_PREFIX_UNAVAILABLE, "IPV6_PREFIX_UNAVAILABLE");
         sFailCauseMap.put(HANDOFF_PREFERENCE_CHANGED, "HANDOFF_PREFERENCE_CHANGED");
         sFailCauseMap.put(SLICE_REJECTED, "SLICE_REJECTED");
+        sFailCauseMap.put(MATCH_ALL_RULE_NOT_ALLOWED, "MATCH_ALL_RULE_NOT_ALLOWED");
+        sFailCauseMap.put(ALL_MATCHING_RULES_FAILED, "ALL_MATCHING_RULES_FAILED");
         sFailCauseMap.put(IWLAN_PDN_CONNECTION_REJECTION, "IWLAN_PDN_CONNECTION_REJECTION");
         sFailCauseMap.put(IWLAN_MAX_CONNECTION_REACHED, "IWLAN_MAX_CONNECTION_REACHED");
         sFailCauseMap.put(IWLAN_SEMANTIC_ERROR_IN_THE_TFT_OPERATION,
@@ -1598,6 +1600,8 @@ public final class DataFailCause {
                             add(UNACCEPTABLE_NETWORK_PARAMETER);
                             add(SIGNAL_LOST);
                             add(DUPLICATE_CID);
+                            add(MATCH_ALL_RULE_NOT_ALLOWED);
+                            add(ALL_MATCHING_RULES_FAILED);
                         }
                     };
                 }

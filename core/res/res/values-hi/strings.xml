@@ -1719,7 +1719,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"एक सुविधा से दूसरी सुविधा पर जाने के लिए, सुलभता बटन दबाकर रखें."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"एक सुविधा से दूसरी सुविधा पर जाने के लिए, स्क्रीन पर दो उंगलियों से ऊपर की ओर स्वाइप करें और थोड़ी देर तक उंगलियां स्क्रीन पर रखे रहें."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"एक सुविधा से दूसरी सुविधा पर जाने के लिए, स्क्रीन पर तीन उंगलियों से ऊपर की ओर स्वाइप करें और थोड़ी देर तक उंगलियां स्क्रीन पर रखे रहें."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"बड़ा करना"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ज़ूम करने की सुविधा"</string>
     <string name="user_switched" msgid="7249833311585228097">"मौजूदा उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> पर स्विच किया जा रहा है…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> द्वारा प्रस्‍थान किया जा रहा है…"</string>
@@ -1992,7 +1992,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादकता"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"सुलभता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"डिवाइस में जगह"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB डीबग करना"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करना"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"घंटा"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"मिनट"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"समय सेट करें"</string>
@@ -2075,11 +2075,11 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"इस सूचना को रैंकिंग में ऊपर किया गया था. सुझाव/शिकायत/राय देने के लिए टैप करें."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"इस सूचना को रैंकिंग में नीचे किया गया था. सुझाव/शिकायत/राय देने के लिए टैप करें."</string>
     <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"\'बेहतर सूचनाएं\' सुविधा आज़माएं"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"सुझाई गई कार्रवाइयां, जवाब, और दूसरे सुझाव पाने के लिए, बेहतर सूचनाएं चालू करें. ज़रूरत के हिसाब से सूचनाएं पाने की Android की सुविधा अब काम नहीं करती है."</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"कार्रवाई और जवाब वगैरह के लिए सुझाव पाना चाहते हैं, तो सूचनाएं पाने की सुविधा बेहतर करें. Android की, ज़रूरत के हिसाब से सूचनाएं पाने की सुविधा अब काम नहीं करती है."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"चालू करें"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"अभी नहीं"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ज़्यादा जानें"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"\'बेहतर सूचनाएं\' सुविधा, डिवाइस पर मिलने वाली सभी सूचनाओं का कॉन्टेंट पढ़ सकती है. इसमें आपकी निजी जानकारी, जैसे कि संपर्कों के नाम और मैसेज भी शामिल हैं. यह सुविधा, सूचनाओं को रद्द कर सकती है या सूचनाओं में दिखने वाले बटन से कार्रवाइयां भी कर सकती है, जैसे कि फ़ोन कॉल का जवाब देना.\n\nयह सुविधा, प्राथमिकता मोड को चालू या बंद कर सकती है और इससे जुड़ी सेटिंग में बदलाव भी कर सकती है."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"\'बेहतर सूचनाएं\' सुविधा, डिवाइस पर मिलने वाली सभी सूचनाओं का कॉन्टेंट पढ़ सकती है. इसमें आपकी निजी जानकारी, जैसे कि संपर्कों के नाम और मैसेज भी शामिल हैं. यह सुविधा, डिवाइस पर आने वाली सूचनाओं को रद्द कर सकती है या सूचनाओं में दिखने वाले बटन से कार्रवाइयां भी कर सकती है, जैसे कि फ़ोन कॉल का जवाब देना.\n\nयह सुविधा, प्राथमिकता मोड को चालू या बंद कर सकती है और इससे जुड़ी सेटिंग में बदलाव भी कर सकती है."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"रूटीन मोड जानकारी की सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"बैटरी आम तौर पर जितने समय चलती है, उससे पहले खत्म हो सकती है"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बैटरी लाइफ़ बढ़ाने के लिए \'बैटरी सेवर\' चालू हो गया है"</string>

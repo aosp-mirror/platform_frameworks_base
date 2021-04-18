@@ -59,7 +59,7 @@ public final class FontListParserTest {
                 + "</family>";
         FontConfig.FontFamily expected = new FontConfig.FontFamily(
                 Arrays.asList(
-                        new FontConfig.Font(new File("test.ttf"), null,
+                        new FontConfig.Font(new File("test.ttf"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
                                 0, "", null)),
                 "sans-serif", LocaleList.getEmptyLocaleList(), VARIANT_DEFAULT);
@@ -77,10 +77,10 @@ public final class FontListParserTest {
                 + "</family>";
         FontConfig.FontFamily expected = new FontConfig.FontFamily(
                 Arrays.asList(
-                        new FontConfig.Font(new File("test.ttf"), null,
+                        new FontConfig.Font(new File("test.ttf"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
                                 0, "", null),
-                        new FontConfig.Font(new File("test.ttf"), null,
+                        new FontConfig.Font(new File("test.ttf"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
                                 0, "", "serif")),
                 null, LocaleList.forLanguageTags("en"), VARIANT_DEFAULT);
@@ -97,7 +97,7 @@ public final class FontListParserTest {
                 + "</family>";
         FontConfig.FontFamily expected = new FontConfig.FontFamily(
                 Arrays.asList(
-                        new FontConfig.Font(new File("test.ttf"), null,
+                        new FontConfig.Font(new File("test.ttf"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
                                 0, "", null)),
                 null, LocaleList.forLanguageTags("en"), VARIANT_COMPACT);
@@ -114,7 +114,7 @@ public final class FontListParserTest {
                 + "</family>";
         FontConfig.FontFamily expected = new FontConfig.FontFamily(
                 Arrays.asList(
-                        new FontConfig.Font(new File("test.ttf"), null,
+                        new FontConfig.Font(new File("test.ttf"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
                                 0, "", null)),
                 null, LocaleList.forLanguageTags("en"), VARIANT_ELEGANT);
@@ -133,13 +133,13 @@ public final class FontListParserTest {
                 + "</family>";
         FontConfig.FontFamily expected = new FontConfig.FontFamily(
                 Arrays.asList(
-                        new FontConfig.Font(new File("normal.ttf"), null,
+                        new FontConfig.Font(new File("normal.ttf"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
                                 0, "", null),
-                        new FontConfig.Font(new File("weight.ttf"), null,
+                        new FontConfig.Font(new File("weight.ttf"), null, "test",
                                 new FontStyle(100, FONT_SLANT_UPRIGHT),
                                 0, "", null),
-                        new FontConfig.Font(new File("italic.ttf"), null,
+                        new FontConfig.Font(new File("italic.ttf"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_ITALIC),
                                 0, "", null)),
                 "sans-serif", LocaleList.getEmptyLocaleList(), VARIANT_DEFAULT);
@@ -162,10 +162,10 @@ public final class FontListParserTest {
                 + "</family>";
         FontConfig.FontFamily expected = new FontConfig.FontFamily(
                 Arrays.asList(
-                        new FontConfig.Font(new File("test-VF.ttf"), null,
+                        new FontConfig.Font(new File("test-VF.ttf"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
                                 0, "'wdth' 100.0,'wght' 200.0", null),
-                        new FontConfig.Font(new File("test-VF.ttf"), null,
+                        new FontConfig.Font(new File("test-VF.ttf"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
                                 0, "'wdth' 400.0,'wght' 700.0", null)),
                 "sans-serif", LocaleList.getEmptyLocaleList(), VARIANT_DEFAULT);
@@ -182,10 +182,30 @@ public final class FontListParserTest {
                 + "</family>";
         FontConfig.FontFamily expected = new FontConfig.FontFamily(
                 Arrays.asList(
-                        new FontConfig.Font(new File("test.ttc"), null,
+                        new FontConfig.Font(new File("test.ttc"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
                                 0, "", null),
-                        new FontConfig.Font(new File("test.ttc"), null,
+                        new FontConfig.Font(new File("test.ttc"), null, "test",
+                                new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
+                                1, "", null)),
+                "sans-serif", LocaleList.getEmptyLocaleList(), VARIANT_DEFAULT);
+        FontConfig.FontFamily family = readFamily(xml);
+        assertThat(family).isEqualTo(expected);
+    }
+
+    @Test
+    public void psName() throws Exception {
+        String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<family name='sans-serif'>"
+                + "  <font index='0' postScriptName='foo'>test.ttc</font>"
+                + "  <font index='1'>test.ttc</font>"
+                + "</family>";
+        FontConfig.FontFamily expected = new FontConfig.FontFamily(
+                Arrays.asList(
+                        new FontConfig.Font(new File("test.ttc"), null, "foo",
+                                new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
+                                0, "", null),
+                        new FontConfig.Font(new File("test.ttc"), null, "test",
                                 new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT),
                                 1, "", null)),
                 "sans-serif", LocaleList.getEmptyLocaleList(), VARIANT_DEFAULT);
