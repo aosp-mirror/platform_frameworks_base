@@ -250,10 +250,10 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"Uključi"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Ponovo pokreni"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Hitne službe"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Izvješće o bugovima"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Izvješće o programskim pogreškama"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Završi sesiju"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snimka zaslona"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Izvješće o bugovima"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Izvješće o programskim pogreškama"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Time će se prikupiti podaci o trenutačnom stanju vašeg uređaja koje ćete nam poslati u e-poruci. Za pripremu izvješća o programskoj pogrešci potrebno je nešto vremena pa vas molimo za strpljenje."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktivno izvješće"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"To možete upotrebljavati u većini slučajeva. Moći ćete pratiti izradu izvješća, unijeti više pojedinosti o problemu i izraditi snimke zaslona. Mogu se izostaviti neki odjeljci koji se upotrebljavaju rjeđe i produljuju izradu izvješća."</string>
@@ -1180,7 +1180,7 @@
     <string name="redo" msgid="7231448494008532233">"Ponovi"</string>
     <string name="autofill" msgid="511224882647795296">"Automatsko popunjavanje"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Odabir teksta"</string>
-    <string name="addToDictionary" msgid="8041821113480950096">"Dodaj u rječnik"</string>
+    <string name="addToDictionary" msgid="8041821113480950096">"Dodavanje u rječnik"</string>
     <string name="deleteText" msgid="4200807474529938112">"Izbriši"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Način unosa"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Radnje s tekstom"</string>
@@ -1406,7 +1406,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DIJELI"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODBIJ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Odabir načina unosa"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Zadržava se na zaslonu dok je fizička tipkovnica aktivna"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Zadrži na zaslonu dok je fizička tipkovnica aktivna"</string>
     <string name="hardware" msgid="1800597768237606953">"Prikaži virtualnu tipkovnicu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurirajte fizičku tipkovnicu"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dodirnite da biste odabrali jezik i raspored"</string>
@@ -1712,12 +1712,12 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Nemoj uključiti"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"UKLJUČENO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ISKLJUČENO"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Želite li dopustiti usluzi <xliff:g id="SERVICE">%1$s</xliff:g> potpunu kontrolu nad uređajem?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Želite li usluzi <xliff:g id="SERVICE">%1$s</xliff:g> dopustiti potpunu kontrolu nad uređajem?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ako uključite <xliff:g id="SERVICE">%1$s</xliff:g>, vaš uređaj neće upotrebljavati zaključavanje zaslona za bolju enkripciju podataka."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Potpuna kontrola prikladna je za aplikacije koje vam pomažu s potrebama pristupačnosti, ali ne i za većinu aplikacija."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Prikaz zaslona i upravljanje njime"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Pregled zaslona i upravljanje njime"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Može čitati sav sadržaj na zaslonu i prikazati sadržaj povrh drugih aplikacija."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Prikaz i izvršavanje radnji"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Pregled i izvršavanje radnji"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Može pratiti vaše interakcije s aplikacijama ili senzorom uređaja i stupati u interakciju s aplikacijama u vaše ime."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Dopusti"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Odbij"</string>
@@ -1730,7 +1730,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Isključi prečac"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Upotrijebi prečac"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija boja"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcija boje"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcija boja"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Dodatno zatamnjenje"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Držali ste tipke za glasnoću. Uključila se usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Držali ste tipke za glasnoću. Isključila se usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -1875,10 +1875,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ažurirao administrator"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"U redu"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Štednja baterije uključuje tamnu temu i ograničava ili isključuje aktivnosti u pozadini, neke vizualne efekte i značajke kao što je Hey Google\n\n"<annotation id="url">"Saznajte više"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Štednja baterije uključuje tamnu temu i ograničava ili isključuje aktivnosti u pozadini, neke vizualne efekte i značajke kao što je Hey Google."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjio podatkovni promet, značajka Štednja podatkovnog prometa onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Štednju podatkovnog prometa?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
@@ -1962,6 +1960,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Zatvori"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Odgovori"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Odbij"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Prekini"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Dolazni poziv"</string>
@@ -2107,18 +2107,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Obavijest je degradirana u bešumnu. Dodirnite da biste poslali povratne informacije."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Obavijest je više rangirana. Dodirnite da biste poslali povratne informacije."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Obavijest je niže rangirana. Dodirnite da biste poslali povratne informacije."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Proba poboljšanih obavijesti"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Da biste i dalje primali prijedloge za radnje, odgovore i druge informacije, uključite poboljšane obavijesti. Prilagodljive obavijesti za Android više nisu podržane."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Uključi"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Ne sad"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saznajte više"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Poboljšane obavijesti mogu čitati sadržaj svih obavijesti, uključujući osobne podatke kao što su imena kontakata i poruke. Ta značajka može i odbacivati obavijesti ili poduzimati radnje povezane s gumbima u obavijestima kao što je odgovaranje na telefonske pozive.\n\nZnačajka također može uključiti ili isključiti način prioritetnih obavijesti i promijeniti povezane postavke."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Obavještavanje o informacijama u Rutinskom načinu rada"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija se može isprazniti prije uobičajenog vremena punjenja"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Štednja baterije aktivirana je kako bi se produljilo trajanje baterije"</string>

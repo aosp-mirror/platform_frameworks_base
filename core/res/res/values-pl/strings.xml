@@ -544,10 +544,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Zezwala na wykrywanie i parowanie przez aplikację urządzeń Bluetooth w pobliżu"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"łączenie ze sparowanymi urządzeniami Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Zezwala na łączenie aplikacji ze sparowanymi urządzeniami Bluetooth"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"kierowanie informacji do urządzeń Bluetooth w pobliżu"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Zezwala na kierowanie przez aplikację informacji do urządzeń Bluetooth w pobliżu"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"określanie względnego położenia urządzeń ultraszerokopasmowych w pobliżu"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Zezwól na określanie przez aplikację względnego położenia urządzeń ultraszerokopasmowych w pobliżu"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacje o preferowanych usługach płatniczych NFC"</string>
@@ -1900,10 +1898,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Oszczędzanie baterii uruchamia ciemny motyw oraz wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne i inne funkcje, np. „OK Google”\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Oszczędzanie baterii uruchamia ciemny motyw oraz wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne i inne funkcje, np. „OK Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Włącz"</string>
@@ -1995,6 +1991,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Zamknij"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Odbierz"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Odrzuć"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Rozłącz"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Połączenie przychodzące"</string>
@@ -2142,18 +2140,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"To powiadomienie zostało zmienione na Ciche. Kliknij, by przesłać opinię."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Podniesiono ważność tego powiadomienia. Kliknij, by przesłać opinię."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Obniżono ważność tego powiadomienia. Kliknij, by przesłać opinię."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Wypróbuj ulepszone powiadomienia"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Aby nadal otrzymywać sugestie działań oraz odpowiedzi i inne podpowiedzi, włącz ulepszone powiadomienia. Powiadomienia adaptacyjne w Androidzie nie są już obsługiwane."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Włącz"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Nie teraz"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Więcej informacji"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Ulepszone powiadomienia mogą czytać wszystkie powiadomienia, w tym dane osobowe takie jak nazwy kontaktów i treść wiadomości. Funkcja będzie też mogła odrzucać powiadomienia oraz używać zawartych w nich przycisków, np. odbierać połączenia telefoniczne.\n\nMoże również włączać i wyłączać tryb Priorytet oraz zmieniać powiązane ustawienia."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>
@@ -2343,14 +2335,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Możesz teraz powiększyć część ekranu"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Włącz w Ustawieniach"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Odrzuć"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Odblokuj mikrofon urządzenia"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Odblokuj aparat urządzenia"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Dla aplikacji „<xliff:g id="APP">%s</xliff:g>” i wszystkich aplikacji oraz usług"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Odblokuj"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Poufność danych z czujników"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikona aplikacji"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Wizerunek marki aplikacji"</string>

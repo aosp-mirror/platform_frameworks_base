@@ -321,7 +321,7 @@
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"tomar fotografías y grabar videos"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Dispositivos cercanos"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"descubrir y conectarse a dispositivos cercanos"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Llamadas"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registros de llamadas"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"leer y escribir el registro de llamadas telefónicas"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Teléfono"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"hacer y administrar llamadas telefónicas"</string>
@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Tu administrador actualizó este paquete"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Tu administrador borró este paquete"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"El Ahorro de batería activa el Tema oscuro y limita o desactiva la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Hey Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"El Ahorro de batería activa el Tema oscuro y limita o desactiva la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Hey Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, el modo Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Deseas activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
@@ -1931,6 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Cerrar"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Responder"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Rechazar"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Colgar"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Llamada entrante"</string>
@@ -2074,18 +2073,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificación descendió de a Silenciada. Presiona para enviar comentarios."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificación recibió una clasificación superior. Presiona para enviar comentarios."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificación recibió una clasificación inferior. Presiona para enviar comentarios."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Prueba las notif. mejoradas"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Activa las notificaciones mejoradas para seguir recibiendo acciones sugeridas, respuestas y mucho más. Ya no se admiten las notificaciones adaptables de Android."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Activar"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Ahora no"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Más información"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Las notificaciones mejoradas pueden leer todo el contenido de notificaciones, incluido el que contenga información personal, como nombres de contactos y mensajes. Esta función también podrá descartar notificaciones o realizar acciones en botones de notificaciones, como responder llamadas.\n\nTambién puede activar o desactivar el Modo prioridad y cambiar la configuración relacionada."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación de información del modo de Rutinas"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Es posible que la batería se agote antes de la carga habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Se activó el Ahorro de batería para extender la duración de la batería"</string>

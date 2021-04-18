@@ -538,10 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Tətbiqə yaxınlıqdakı Bluetooth cihazlarını aşkarlamaq və birləşdirməyə icazə verir"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"birləşdirilmiş Bluetooth cihazlarına qoşulmaq"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Tətbiqə birləşdirilmiş Bluetooth cihazlarına qoşulmağa icazə verir"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"yaxınlıqdakı Bluetooth cihazlarında reklam etmək"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Tətbiqə yaxınlıqdakı Bluetooth cihazlarında reklam etmək imkanı verir"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"yaxınlıqdakı Ultra Genişzolaqlı cihazları arasında nisbi mövqeyi təyin etmək"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Tətbiqə yaxınlıqdakı Ultra Genişzolaqlı cihazları arasında nisbi mövqeyi təyin etməyə icazə verin"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Tərcih edilən NFC ödəniş xidməti məlumatı"</string>
@@ -1244,7 +1242,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Həmişə göstərin"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> Android OS sisteminin uyğunsuz versiyası üçün hazırlandı və gözlənilməz şəkildə davrana bilər. Tətbiqin güncəllənmiş versiyası əlçatan ola bilər."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Həmişə göstərin"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Güncəlləməni yoxlayın"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Güncəllənmə olmasını yoxlayın"</string>
     <string name="smv_application" msgid="3775183542777792638">"Tətbiq <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) StrictMode siyasətini pozdu."</string>
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> prosesi StrictMode siyasətini pozdu."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefon yenilənir…"</string>
@@ -1575,7 +1573,7 @@
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB drayv"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB yaddaş"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Düzəliş edin"</string>
-    <string name="data_usage_warning_title" msgid="9034893717078325845">"Data xəbərdarlığı"</string>
+    <string name="data_usage_warning_title" msgid="9034893717078325845">"Trafik xəbərdarlığı"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"<xliff:g id="APP">%s</xliff:g> data istifadə etdiniz"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Mobil data limitinə çatdı"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Wi-Fi data limitinə çatdı"</string>
@@ -1854,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Admin tərəfindən yeniləndi"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Admin tərəfindən silindi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Enerjiyə Qənaət funksiyası Qaranlıq temanı aktiv edir və arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər funksiyaları məhdudlaşdırır və ya deaktiv edir\n\n"<annotation id="url">"Ətraflı məlumat"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Enerjiyə Qənaət funksiyası Qaranlıq temanı aktiv edir və arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər funksiyaları məhdudlaşdırır və ya deaktiv edir."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Mobil interneti qənaətlə işlətmək məqsədilə Data Qanaəti bəzi tətbiqlərin fonda data göndərməsinin və qəbulunun qarşısını alır. Hazırda işlətdiyiniz tətbiq nisbətən az müntəzəmliklə data istifadə edə bilər. Örnək olaraq bu, o deməkdir ki, şəkil fayllarına toxunmadıqca onlar açılmayacaq."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafikə qənaət edilsin?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivləşdirin"</string>
@@ -1933,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Qapadın"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Cavab verin"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"İmtina edin"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Dəstəyi asın"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Gələn zəng"</string>
@@ -1965,7 +1963,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Tətbiq əlçatan deyil"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> hazırda əlçatan deyil."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Bu tətbiq köhnə Android versiyası üçün hazırlanıb və düzgün işləməyə bilər. Güncəlləməni yoxlayın və ya developer ilə əlaqə saxlayın."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Güncəlləməni yoxlayın"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Güncəllənmə olmasını yoxlayın"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Yeni mesajlarınız var"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Baxmaq üçün SMS tətbiqini açın"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Bəzi funksiyalar məhdudlaşdırıla bilər"</string>
@@ -2076,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Bu bildiriş Səssiz rejimə keçirilib. Rəy bildirmək üçün toxunun."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildiriş yuxarı sıraya keçirilib. Rəy bildirmək üçün toxunun."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildiriş aşağı sıraya keçirilib. Rəy bildirmək üçün toxunun."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Genişləndirilmiş bildirişləri sınayın"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Təklif olunan əməliyyatlar, cavablar və daha çoxunu almağa davam etmək üçün genişləndirilmiş bildirişləri aktiv edin. Android Adaptiv Bildirişləri artıq dəstəklənmir."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Aktiv edin"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"İndi yox"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Ətraflı məlumat"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Genişləndirilmiş bildirişlər, kontakt adları və mesajlar kimi şəxsi məlumatlar daxil olmaqla bütün bildiriş məzmununu oxuya bilər. Bu funksiya həmçinin bildirişləri qapada və ya telefon zənglərinə cavab vermək kimi bildirişlərdəki düymələr üzərində əməliyyatlar edə bilər.\n\nBu funksiya həmçinin Prioritet rejimini aktiv və ya deaktiv edə və əlaqəli ayarları dəyişdirə bilər."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rejim üçün məlumat bildirişi"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya həmişəki vaxtdan əvvəl bitə bilər"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Enerjiyə Qənaət rejimi batareya istifadəsinin müddətini artırmaq üçün aktiv edilir"</string>
@@ -2275,14 +2267,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"İndi ekranınızın bir hissəsini böyüdə bilərsiniz"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Ayarlarda aktiv edin"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Qapadın"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Cihaz mikrofonunu blokdan çıxarın"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Cihaz kamerasını blokdan çıxarın"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; və bütün tətbiqlər və cihazlar üçün"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Blokdan çıxarın"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensor Məxfiliyi"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Tətbiq ikonası"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Tətbiqin brend şəkli"</string>
