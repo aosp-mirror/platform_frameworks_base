@@ -3467,11 +3467,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         @Override
-        public void prepareRebootEscrow() {
+        public boolean prepareRebootEscrow() {
             if (!mRebootEscrowManager.prepareRebootEscrow()) {
-                return;
+                return false;
             }
             mStrongAuth.requireStrongAuth(STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE, USER_ALL);
+            return true;
         }
 
         @Override
@@ -3480,12 +3481,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         @Override
-        public void clearRebootEscrow() {
+        public boolean clearRebootEscrow() {
             if (!mRebootEscrowManager.clearRebootEscrow()) {
-                return;
+                return false;
             }
             mStrongAuth.noLongerRequireStrongAuth(STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE,
                     USER_ALL);
+            return true;
         }
 
         @Override
