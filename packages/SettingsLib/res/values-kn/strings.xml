@@ -161,7 +161,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"ಪಿಚ್"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"ಸಂಯೋಜಿತ ಧ್ವನಿಯ ಟೋನ್ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುತ್ತದೆ"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"ಭಾಷೆ"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"ಸಿಸ್ಟಂ ಭಾಷೆಯನ್ನು ಬಳಸು"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"ಸಿಸ್ಟಂ ಭಾಷೆ ಬಳಸಿ"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಲಾಗಿಲ್ಲ"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"ಮಾತಿನ ಪಠ್ಯಕ್ಕೆ ಭಾಷಾ-ನಿರ್ದಿಷ್ಟ ಧ್ವನಿಯನ್ನು ಹೊಂದಿಸುತ್ತದೆ"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"ಉದಾಹರಣೆಯೊಂದನ್ನು ಆಲಿಸಿ"</string>
@@ -206,10 +206,10 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB ಸಂಪರ್ಕಗೊಂಡಾಗ ಡೀಬಗ್ ಮೋಡ್"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯ ಅಧಿಕೃತಗೊಳಿಸುವಿಕೆಗಳನ್ನು ಹಿಂತೆಗೆದುಕೊಳ್ಳಿ"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗಿಂಗ್"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ವೈ-ಫೈ ಕನೆಕ್ಟ್ ಆದಾಗ ಡೀಬಗ್ ಮೋಡ್"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ದೋಷ"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗಿಂಗ್"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ಲಭ್ಯವಿರುವ ಸಾಧನಗಳನ್ನು ನೋಡಲು ಮತ್ತು ಬಳಸಲು, ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR ಕೋಡ್ ಬಳಸಿ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR ಕೋಡ್ ಸ್ಕ್ಯಾನರ್ ಬಳಸಿ ಹೊಸ ಸಾಧನಗಳನ್ನು ಜೋಡಿಸಿ"</string>
@@ -225,7 +225,7 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"ಸಾಧನದ ಜೊತೆಗೆ ಜೋಡಿಸಿ"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"ವೈ-ಫೈ ಜೋಡಿಸುವಿಕೆ ಕೋಡ್"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"ಜೋಡಿಸುವಿಕೆ ವಿಫಲವಾಗಿದೆ"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"ಸಾಧನವು ಒಂದೇ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆಯೇ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ."</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"ಸಾಧನವು ಒಂದೇ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡುವ ಮೂಲಕ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"ಸಾಧನವನ್ನು ಜೋಡಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ಸಾಧನವನ್ನು ಜೋಡಿಸಲು ವಿಫಲವಾಗಿದೆ. QR ಕೋಡ್ ತಪ್ಪಾಗಿದೆ ಅಥವಾ ಸಾಧನವು ಒಂದೇ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಆಗಿಲ್ಲ."</string>
@@ -240,7 +240,7 @@
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"ಚಾರ್ಜ್ ಮಾಡುವಾಗ ಪರದೆಯು ಎಂದಿಗೂ ನಿದ್ರಾವಸ್ಥೆಗೆ ಹೋಗುವುದಿಲ್ಲ"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ಬ್ಲೂಟೂತ್‌‌ HCI ಸ್ನೂಪ್‌ ಲಾಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ಬ್ಲೂಟೂತ್ ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್‌ ಮಾಡಿ. (ಈ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬದಲಾಯಿಸಿದ ನಂತರ ಬ್ಲೂಟೂತ್ ಟಾಗಲ್ ಮಾಡಿ)"</string>
-    <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡುವಿಕೆ"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"ಬೂಟ್‌ಲೋಡರ್‌ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ಅನುಮತಿಸಿ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ಎಚ್ಚರಿಕೆ: ಈ ಸೆಟ್ಟಿಂಗ್‌ ಆನ್‌ ಇರುವಾಗ ಈ ಸಾಧನದಲ್ಲಿ ಸಾಧನ ಸಂರಕ್ಷಣಾ ವೈಶಿಷ್ಟ್ಯಗಳು ಕಾರ್ಯ ನಿರ್ವಹಿಸುವುದಿಲ್ಲ."</string>
@@ -336,7 +336,7 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"ಪ್ರಸ್ತುತ ಸ್ಪರ್ಶ ಡೇಟಾ ತೋರಿಸುವ ಪರದೆಯ ಓವರ್‌ಲೇ"</string>
     <string name="show_touches" msgid="8437666942161289025">"ಟ್ಯಾಪ್‌ಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"ಟ್ಯಾಪ್‌ಗಳಿಗೆ ದೃಶ್ಯ ಪ್ರತಿಕ್ರಿಯೆ ತೋರಿಸು"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"ಸರ್ಫೇಸ್‌‌ ಅಪ್‌ಡೇಟ್‌"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"ಸರ್ಫೇಸ್‌‌ ಅಪ್‌ಡೇಟ್ ತೋರಿಸಿ‌"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"ಅಪ್‌ಡೇಟ್‌ ಆಗುವಾಗ ವಿಂಡೋದ ಸರ್ಫೇಸ್‌ ಫ್ಲ್ಯಾಶ್ ಆಗುತ್ತದೆ"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"\'ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ\' ತೋರಿಸಿ"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"ಡ್ರಾ ಮಾಡಿದಾಗ ವಿಂಡೊದಲ್ಲಿ ವೀಕ್ಷಣೆ ಫ್ಲ್ಯಾಶ್‌"</string>
@@ -351,9 +351,9 @@
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ಆಡಿಯೊ ಸಲಕರಣೆಗಳಿಗೆ ಸ್ವಯಂ ರೂಟಿಂಗ್ ನಿಷ್ಕ್ರಿಯ."</string>
     <string name="debug_layout" msgid="1659216803043339741">"ಲೇಔಟ್ ಪರಿಮಿತಿಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ಕ್ಲಿಪ್‌ನ ಗಡಿಗಳು, ಅಂಚುಗಳು, ಇತ್ಯಾದಿ ತೋರಿಸು."</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL ಲೇಔಟ್‌ ಪರಿಮಿತಿ ಬಲಗೊಳಿಸಿ"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ಎಲ್ಲ ಸ್ಥಳಗಳಿಗಾಗಿ RTL ಗೆ ಸ್ಕ್ರೀನ್‌ ಲೇಔಟ್‌ ದಿಕ್ಕನ್ನು ಪ್ರಬಲಗೊಳಿಸಿ"</string>
-    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ಪ್ರಬಲಗೊಳಿಸಿ"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL ಲೇಔಟ್‌ ಡೈರೆಕ್ಷನ್ ಫೋರ್ಸ್ ಮಾಡುವಿಕೆ"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ಎಲ್ಲ ಭಾಷೆಗಳಿಗಾಗಿ, RTL ಗೆ ಸ್ಕ್ರೀನ್‌ ಲೇಔಟ್‌ ಡೈರೆಕ್ಷನ್ ಅನ್ನು ಫೋರ್ಸ್ ಮಾಡಿ"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ಫೋರ್ಸ್ ಮಾಡಿ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ಅಪ್ಲಿಕೇಶನ್‌ಗಳಲ್ಲಿ 4x MSAA ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ಆಯತಾಕಾರವಲ್ಲದ ಕ್ಲಿಪ್ ಕಾರ್ಯಾಚರಣೆ ಡೀಬಗ್"</string>
     <string name="track_frame_time" msgid="522674651937771106">"ಪ್ರೊಫೈಲ್ HWUI ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ"</string>
@@ -366,7 +366,7 @@
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ಅನಿಮೇಟರ್ ಅವಧಿಯ ಪ್ರಮಾಣ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ಮಾಧ್ಯಮಿಕ ಡಿಸ್‌ಪ್ಲೇ ಸಿಮ್ಯುಲೇಟ್‌"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
-    <string name="immediately_destroy_activities" msgid="1826287490705167403">"ಚಟುವಟಿಕೆಗಳನ್ನು ಇರಿಸದಿರು"</string>
+    <string name="immediately_destroy_activities" msgid="1826287490705167403">"ಚಟುವಟಿಕೆಗಳನ್ನು ಇರಿಸಬೇಡಿ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ಬಳಕೆದಾರರು ಹೊರಹೋಗುತ್ತಿದ್ದಂತೆಯೇ ಚಟುವಟಿಕೆ ನಾಶಪಡಿಸು"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"ಹಿನ್ನೆಲೆ ಪ್ರಕ್ರಿಯೆ ಮಿತಿ"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"ಹಿನ್ನೆಲೆ ANR ಗಳನ್ನು ತೋರಿಸಿ"</string>

@@ -358,8 +358,8 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operações de clipe não retangulares"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Renderização HWUI do perfil"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Ativar cam. depuração GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permitir carreg. cam. depuração GPU p/ dep. app"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativ. regist. verbo. forneced."</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permitir carregamento de camadas de depuração de GPU p/ apps de depuração"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativ. registo do fornecedor"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclua registos adicionais de fornecedores específicos de dispositivos em relatórios de erros, que podem conter informações privadas, utilizar mais bateria e/ou utilizar mais armazenamento."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animação de transição"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala de animação de transição"</string>

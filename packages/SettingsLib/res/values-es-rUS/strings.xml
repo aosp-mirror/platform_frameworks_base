@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"La sincronización te permite acceder a los contactos y al historial de llamadas cuando el dispositivo está conectado."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"No se pudo vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No se pudo vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> debido a que el PIN o la clave de acceso son incorrectos."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"No se pudo vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> porque la clave de acceso o el PIN son incorrectos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"No se puede establecer la comunicación con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Vínculo rechazado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computadora"</string>
@@ -331,7 +331,7 @@
     <string name="media_category" msgid="8122076702526144053">"Multimedia"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Supervisión"</string>
     <string name="strict_mode" msgid="889864762140862437">"Modo estricto"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Destello por op. de apps en el subproceso principal"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Parpadear si aplicaciones tardan en proceso principal"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Ubicación del puntero"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Superponer capa en pant. para mostrar puntos tocados"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostrar presiones"</string>
@@ -369,7 +369,7 @@
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Eliminar actividades"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Descartar todas las actividades en cuanto el usuario las abandona"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Límite de procesos en segundo plano"</string>
-    <string name="show_all_anrs" msgid="9160563836616468726">"Mostrar ANR en 2.° plano"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"Mostrar ANR en segundo plano"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostrar diálogo cuando las apps en segundo plano no responden"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Alertas de notificaciones"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Advertencia en pantalla cuando una app publica una notificación sin canal válido"</string>
