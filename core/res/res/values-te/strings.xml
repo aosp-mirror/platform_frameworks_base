@@ -251,7 +251,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"బగ్ నివేదిక"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"సెషన్‌ను ముగించు"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"స్క్రీన్‌షాట్"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"బగ్ నివేదిక"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"బగ్ రిపోర్ట్‌"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ఇది ఇ-మెయిల్ సందేశం రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ నివేదికను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ప్రభావశీల నివేదిక"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"చాలా సందర్భాల్లో దీన్ని ఉపయోగించండి. ఇది నివేదిక ప్రోగ్రెస్‌ను ట్రాక్ చేయడానికి, సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి మరియు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతిస్తుంది. ఇది నివేదించడానికి ఎక్కువ సమయం పట్టే తక్కువ వినియోగ విభాగాలను విడిచిపెట్టవచ్చు."</string>
@@ -1563,7 +1563,7 @@
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"అన్‌లాక్ చేయడానికి స్వైప్ చేయండి."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"హోమ్‌కు నావిగేట్ చేయండి"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"పైకి నావిగేట్ చేయండి"</string>
-    <string name="action_menu_overflow_description" msgid="4579536843510088170">"మరిన్ని ఎంపికలు"</string>
+    <string name="action_menu_overflow_description" msgid="4579536843510088170">"మరిన్ని ఆప్షన్‌లు"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"షేర్ చేయబడిన అంతర్గత నిల్వ"</string>
@@ -1709,7 +1709,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"సత్వరమార్గాన్ని ఉపయోగించు"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"కలర్ మార్పిడి"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"కలర్ సరిచేయడం"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"కాంతిని మరింత డిమ్ చేసే"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"కాంతిని మరింత డిమ్ చేయడం"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ని ఉపయోగించడానికి వాల్యూమ్ కీలు రెండింటినీ 3 సెకన్లు నొక్కి ఉంచండి"</string>
@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"సరే"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"బ్యాటరీ సేవర్ ముదురు రంగు రూపంను ఆన్ చేస్తుంది అలాగే బ్యాక్‌గ్రౌండ్ యాక్టివిటీని, కొన్ని విజువల్ ఎఫెక్ట్‌లు, అలాగే “Ok Google” వంటి ఫీచర్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"బ్యాటరీ సేవర్ ముదురు రంగు రూపంను ఆన్ చేస్తుంది అలాగే బ్యాక్‌గ్రౌండ్ యాక్టివిటీని, కొన్ని విజువల్ ఎఫెక్ట్‌లు, అలాగే “Ok Google” వంటి ఫీచర్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు నొక్కే వరకు ఫోటోలు ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ఆన్ చేయి"</string>
@@ -1925,7 +1923,7 @@
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB పెరిఫెరల్ పోర్ట్"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"USB పెరిఫెరల్ పోర్ట్"</string>
-    <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"మరిన్ని ఎంపికలు"</string>
+    <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"మరిన్ని ఆప్షన్‌లు"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"అతివ్యాప్తిని మూసివేస్తుంది"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"గరిష్టీకరించు"</string>
     <string name="close_button_text" msgid="10603510034455258">"మూసివేయి"</string>
@@ -1981,7 +1979,7 @@
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"డెమోను ప్రారంభిస్తోంది..."</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"పరికరాన్ని రీసెట్ చేస్తోంది..."</string>
-    <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> నిలిపివేయబడింది"</string>
+    <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> డిజేబుల్ చేయబడింది"</string>
     <string name="conference_call" msgid="5731633152336490471">"కాన్ఫరెన్స్ కాల్"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"సాధనం చిట్కా"</string>
     <string name="app_category_game" msgid="4534216074910244790">"గేమ్‌లు"</string>
@@ -2076,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ఈ నోటిఫికేషన్ స్థాయి నిశ్శబ్దంగా ఉండేలా తగ్గించబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ఈ నోటిఫికేషన్‌కు ఎక్కువ ర్యాంక్ ఇవ్వబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ఈ నోటిఫికేషన్‌కు తక్కువ ర్యాంక్ ఇవ్వబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"మెరుగైన నోటిఫికేషన్‌ల ట్రై"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"సూచించిన చర్యలు, రిప్లయిలు, అలాగే మరిన్ని పొందడం కొనసాగించడానికి మెరుగైన నోటిఫికేషన్‌లను ఆన్ చేయండి. Android అనుకూల నోటిఫికేషన్‌లు ఇకపై సపోర్ట్ చేయవు."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ఆన్ చేయి"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"ఇప్పుడు కాదు"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"మరింత తెలుసుకోండి"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"కాంటాక్ట్ పేర్లు, మెసేజ్‌లు వంటి వ్యక్తిగత సమాచారంతో సహా మెరుగైన నోటిఫికేషన్‌లు అన్ని నోటిఫికేషన్ కంటెంట్‌ను చదవగలవు. ఈ ఫీచర్ నోటిఫికేషన్‌లను తీసివేయవచ్చు లేదా ఫోన్ కాల్‌లకు సమాధానం ఇవ్వడం వంటి నోటిఫికేషన్‌లలోని బటన్‌లపై చర్యలు తీసుకోవచ్చు.\n\nఈ ఫీచర్ ప్రాధాన్యత మోడ్‌ను కూడా ఆన్ లేదా ఆఫ్ చేయవచ్చు, ఇది సంబంధిత సెట్టింగ్‌లను మార్చగలదు."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"రొటీన్ మోడ్ సమాచార నోటిఫికేషన్"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"మామూలుగా ఛార్జ్ చేసేలోపు బ్యాటరీ ఖాళీ కావచ్చు"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి బ్యాటరీ సేవర్ యాక్టివేట్ చేయబడింది"</string>
