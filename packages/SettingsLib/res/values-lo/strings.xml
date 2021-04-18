@@ -204,7 +204,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"​ຜູ່​ໃຊ້​ນີ້​ບໍ່​ສາ​ມາດ​ຕັ້ງ​ຄ່າ​ການ​ປ່ອຍ​ສັນ​ຍານ​ໄດ້"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ຜູ່​ໃຊ້​ນີ້ບໍ່​ສາ​ມາດ​ຕັ້ງ​ຄ່າ​ຊື່​ເອດ​ເຊ​ສ​ພອຍ​​​​ໄ​ດ້"</string>
     <string name="enable_adb" msgid="8072776357237289039">"ການດີບັກຜ່ານ USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"ເປີດໃຊ້ໂໝດດີບັ໊ກເມື່ອເຊື່ອມຕໍ່ USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"ເປີດໃຊ້ໂໝດດີບັກເມື່ອເຊື່ອມຕໍ່ USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"ຖອດຖອນການອະນຸຍາດການດີບັກຜ່ານ USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ການດີບັກໄຮ້ສາຍ"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ໂໝດດີບັກເມື່ອເຊື່ອມຕໍ່ Wi‑Fi"</string>
@@ -317,23 +317,23 @@
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ເປີດນຳໃຊ້ແອັບຯ Terminal ທີ່ໃຫ້ການເຂົ້າເຖິງ shell ໃນໂຕເຄື່ອງໄດ້"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"ການກວດສອບ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"ຕັ້ງວິທີການກວດສອບ HDCP"</string>
-    <string name="debug_debugging_category" msgid="535341063709248842">"ການດີບັ໊ກ"</string>
-    <string name="debug_app" msgid="8903350241392391766">"ເລືອກແອັບສຳລັບດີບັ໊ກ"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"ບໍ່ໄດ້ຕັ້ງການດີບັ໊ກແອັບພລິເຄຊັນ"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"ການດີບັກ"</string>
+    <string name="debug_app" msgid="8903350241392391766">"ເລືອກແອັບສຳລັບດີບັກ"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"ບໍ່ໄດ້ຕັ້ງການດີບັກແອັບພລິເຄຊັນ"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"ແອັບພລິເຄຊັນສຳລັບການດີບັ໊ກ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"ເລືອກແອັບພລິເຄຊັນ"</string>
     <string name="no_application" msgid="9038334538870247690">"ບໍ່ມີຫຍັງ"</string>
-    <string name="wait_for_debugger" msgid="7461199843335409809">"ລໍຖ້າໂຕດີບັ໊ກ"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ແອັບພລິເຄຊັນທີ່ດີບັ໊ກແລ້ວ ຈະຖ້າໂຕດີບັ໊ກກ່ອນການເຮັດວຽກ"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"ລໍຖ້າໂຕດີບັກ"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ແອັບພລິເຄຊັນທີ່ດີບັກແລ້ວ ຈະຖ້າໂຕດີບັກກ່ອນການເຮັດວຽກ"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"ການປ້ອນຂໍ້ມູນ"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"ການແຕ້ມ"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ການສະແດງຜົນໂດຍໃຊ້ຮາດແວຊ່ວຍ"</string>
     <string name="media_category" msgid="8122076702526144053">"ມີເດຍ"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"ກຳລັງກວດສອບ"</string>
-    <string name="strict_mode" msgid="889864762140862437">"ເປີດໃຊ້ໂໝດເຂັ່ງຂັດ"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"ກະພິບໜ້າຈໍເມື່ອມີແອັບຯ ເຮັດວຽກດົນເກີນໄປໃນເທຣດຫຼັກ"</string>
+    <string name="strict_mode" msgid="889864762140862437">"ເປີດໃຊ້ໂໝດເຄັ່ງຄັດ"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"ກະພິບໜ້າຈໍເມື່ອມີແອັບ ເຮັດວຽກດົນເກີນໄປໃນເທຣດຫຼັກ"</string>
     <string name="pointer_location" msgid="7516929526199520173">"ຕຳແໜ່ງໂຕຊີ້"</string>
-    <string name="pointer_location_summary" msgid="957120116989798464">"ການວາງຊ້ອນໜ້າຈໍກຳລັງ ສະແດງຂໍ້ມູນການສຳພັດໃນປັດຈຸບັນ"</string>
+    <string name="pointer_location_summary" msgid="957120116989798464">"ການວາງຊ້ອນໜ້າຈໍກຳລັງສະແດງຂໍ້ມູນການສຳຜັດໃນປັດຈຸບັນ"</string>
     <string name="show_touches" msgid="8437666942161289025">"ສະແດງການແຕະ"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"ສະແດງຄໍາຕິຊົມທາງຮູບພາບສຳລັບການແຕະ"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"ສະແດງການອັບເດດພື້ນຜິວ"</string>
@@ -355,14 +355,14 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ບັງຄັບໃຫ້ຮູບຮ່າງໜ້າຈໍ ຂຽນຈາກຂວາໄປຊ້າຍ ສຳລັບທຸກພາສາ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"ບັງຄັບໃຊ້ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"ເປິດໃຊ້ 4x MSAA ໃນແອັບ OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"ດີບັ໊ກການເຮັດວຽກຂອງຄລິບທີ່ບໍ່ແມ່ນສີ່ຫຼ່ຽມ"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"ດີບັກການເຮັດວຽກຂອງຄລິບທີ່ບໍ່ແມ່ນສີ່ຫຼ່ຽມ"</string>
     <string name="track_frame_time" msgid="522674651937771106">"ການປະມວນຜົນໂປຣໄຟລ໌ HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"ເປີດໃຊ້ຊັ້ນຂໍ້ມູນດີບັກ GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ອະນຸຍາດການໂຫລດຊັ້ນຂໍ້ມູນດີບັກ GPU ສຳລັບແອັບດີບັກ"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ເປີດໃຊ້ການບັນທຶກຜູ້ຂາຍແບບລະອຽດ"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ຮວມທັງການລາຍງານຂໍ້ຜິດພາດການເຂົ້າສູ່ລະບົບຂອງຜູ້ຂາຍສະເພາະອຸປະກອນເພີ່ມເຕີມ, ເຊິ່ງອາດມີຂໍ້ມູນສ່ວນຕົວ, ໃຊ້ແບັດເຕີຣີຫຼາຍຂຶ້ນ ແລະ/ຫຼື ໃຊ້ບ່ອນຈັດເກັບຂໍ້ມູນເພີ່ມເຕີມ."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ຂະໜາດໜ້າ​ຈໍ​ຂອງອະນິເມຊັນ"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"ຂະໜາດອະນິເມຊັນ"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"ຂະໜາດສະຫຼັບອະນິເມຊັນ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ໄລຍະເວລາອະນິເມຊັນ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ຈຳລອງຈໍສະແດງຜົນທີ່ສອງ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ແອັບ"</string>
@@ -401,7 +401,7 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"ນຳໃຊ້ຢູ່. ແຕະເພື່ອສັບປ່ຽນ."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ສະຖານະສະແຕນບາຍແອັບ:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ບໍລິການທີ່ເຮັດວຽກຢູ່"</string>
-    <string name="runningservices_settings_summary" msgid="1046080643262665743">"ເບິ່ງ ແລະຈັດການບໍລິການທີ່ກຳລັງເຮັດວຽກຢູ່ໃນປັດຈຸບັນ"</string>
+    <string name="runningservices_settings_summary" msgid="1046080643262665743">"ເບິ່ງ ແລະ ຈັດການບໍລິການທີ່ກຳລັງເຮັດວຽກຢູ່ໃນປັດຈຸບັນ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ການຈັດຕັ້ງປະຕິບັດ WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"ຕັ້ງການຈັດຕັ້ງປະຕິບັດ WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ບໍ່ສາມາດໃຊ້ການເລືອກນີ້ໄດ້ອີກຕໍ່ໄປແລ້ວ. ກະລຸນາລອງໃໝ່."</string>

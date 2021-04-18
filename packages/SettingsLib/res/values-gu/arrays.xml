@@ -185,7 +185,7 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"બંધ"</item>
-    <item msgid="7126170197336963369">"તમામ લૉગ બફર્સ"</item>
+    <item msgid="7126170197336963369">"તમામ લૉગ બફર"</item>
     <item msgid="7167543126036181392">"તમામ પરંતુ રેડિઓ લૉગ બફર્સ"</item>
     <item msgid="5135340178556563979">"ફક્ત કર્નલ લૉગ બફર"</item>
   </string-array>
@@ -210,7 +210,7 @@
   <string-array name="animator_duration_scale_entries">
     <item msgid="6416998593844817378">"એનિમેશન બંધ"</item>
     <item msgid="875345630014338616">"એનિમેશન સ્કેલ .5x"</item>
-    <item msgid="2753729231187104962">"એનિમેશન સ્કેલ 1x"</item>
+    <item msgid="2753729231187104962">"ઍનિમેશન સ્કેલ 1x"</item>
     <item msgid="1368370459723665338">"એનિમેશન સ્કેલ 1.5x"</item>
     <item msgid="5768005350534383389">"એનિમેશન સ્કેલ 2x"</item>
     <item msgid="3728265127284005444">"એનિમેશન સ્કેલ 5x"</item>
