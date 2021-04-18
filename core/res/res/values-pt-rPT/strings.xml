@@ -538,8 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que a app descubra e sincronize com dispositivos Bluetooth próximos"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ligar-se a dispositivos Bluetooth sincronizados"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que a app se ligue a dispositivos Bluetooth sincronizados"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"mostrar anúncios a dispositivos Bluetooth próximos"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permite que a app apresente anúncios a dispositivos Bluetooth próximos"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"transmitir para dispositivos Bluetooth próximos"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permite que a app transmita para dispositivos Bluetooth próximos"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"determinar posição relativa dispos. de banda ultralarga próximos"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permita que a app determine a posição relativa entre os dispositivos de banda ultralarga próximos"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informações de serviços de pagamento com NFC preferenciais"</string>
@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atualizado pelo seu gestor"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado pelo seu gestor"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"A Poupança de bateria ativa o tema escuro e limita ou desativa a atividade em segundo plano, alguns efeitos visuais e funcionalidades como \"Ok Google\".\n\n"<annotation id="url">"Saiba mais"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"A Poupança de bateria ativa o tema escuro e limita ou desativa a atividade em segundo plano, alguns efeitos visuais e funcionalidades como \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas aplicações enviem ou recebam dados em segundo plano. Uma determinada app que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Pretende ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
@@ -1931,6 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Fechar"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Atender"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Vídeo"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Recusar"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Desligar"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Chamada recebida"</string>
@@ -2074,18 +2073,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificação foi despromovida para Silenciosa. Toque para fornecer feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificação passou para uma classificação superior. Toque para fornecer feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificação passou para uma classificação inferior. Toque para fornecer feedback."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Experimente as not. melhoradas"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Para continuar a obter sugestões de ações, respostas e muito mais, ative as notificações melhoradas. As notificações adaptáveis do Android já não são suportadas."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Ativar"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Agora não"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saber mais"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"As notificações melhoradas podem ler todo o conteúdo das notificações, incluindo informações pessoais como nomes de contactos e mensagens. Esta funcionalidade também pode ignorar notificações ou acionar botões em notificações, como atender chamadas telefónicas.\n\nAlém disso, esta funcionalidades pode ativar ou desativar o modo Prioridade e alterar as definições relacionadas."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informações do Modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pode ficar sem bateria antes do carregamento habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Poupança de bateria ativada para prolongar a duração da bateria"</string>

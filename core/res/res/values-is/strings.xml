@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Kerfisstjóri uppfærði"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Kerfisstjóri eyddi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Í lagi"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Rafhlöðusparnaður kveikir á dökku þema og takmarkar eða slekkur á bakgrunnsvirkni, tilteknum myndbrellum og eiginleikum eins og „Ok Google“.\n\n"<annotation id="url">"Nánar"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Rafhlöðusparnaður kveikir á dökku þema og takmarkar eða slekkur á bakgrunnsvirkni, tilteknum myndbrellum og eiginleikum eins og „Ok Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan getur verið að myndir eru ekki birtar fyrr en þú ýtir á þær, svo dæmi sé tekið."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Kveikja á gagnasparnaði?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Kveikja"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Loka"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Svara"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Hafna"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Leggja á"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Símtal berst"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Þessi tilkynning var gerð þögul. Ýttu til að senda ábendingu."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Þessi tilkynning fékk hærri stöðu. Ýttu til að senda ábendingu."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Þessi tilkynning fékk lægri stöðu. Ýttu til að senda ábendingu."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Prófa auknar tilkynningar"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Kveiktu á auknum tilkynningum til að halda áfram að fá tillögur að aðgerðum, svörum og fleira. Breytilegar tilkynningar í Android eru ekki lengur studdar."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Kveikja"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Ekki núna"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Nánar"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Auknar tilkynningar geta lesið allt efni tilkynninga, þar á meðal persónuupplýsingar á borð við nöfn tengiliða og skilaboð. Þessi eiginleiki getur einnig hunsað tilkynningar eða notað hnappa í tilkynningum eins og að svara símtölum.\n\nÞessi eiginleiki getur einnig kveikt og slökkt á forgangsstillingu og breytt tengdum stillingum."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Upplýsingatilkynning aðgerðastillingar"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Rafhlaðan kann að tæmast áður en hún kemst í hleðslu"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Kveikt á rafhlöðusparnaði til að lengja endingu rafhlöðunnar"</string>

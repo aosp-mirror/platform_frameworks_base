@@ -538,8 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Consente all\'app di rilevare e accoppiare dispositivi Bluetooth nelle vicinanze"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Connessione a dispositivi Bluetooth accoppiati"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Consente all\'app di connettersi ai dispositivi Bluetooth accoppiati"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Pubblicità su dispositivi Bluetooth vicini"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Consente all\'app di fare pubblicità sui dispositivi Bluetooth nelle vicinanze"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"trasmettere annunci a dispositivi Bluetooth vicini"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Consente all\'app di trasmettere annunci ai dispositivi Bluetooth nelle vicinanze"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"Possibilità di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Consenti all\'app di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informazioni del servizio di pagamento NFC preferito"</string>
@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminato dall\'amministratore"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"L\'opzione Risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, alcuni effetti visivi e funzionalità come \"Hey Google\"\n\n"<annotation id="url">"Scopri di più"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"L\'opzione Risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, alcuni effetti visivi e funzionalità come \"Hey Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Attiva"</string>
@@ -1931,6 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Chiudi"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Rispondi"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Rifiuta"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Riaggancia"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Chiamata in arrivo"</string>
@@ -1955,7 +1954,7 @@
     <string name="locale_search_menu" msgid="6258090710176422934">"Cerca"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"App non disponibile"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> non è al momento disponibile. Viene gestita tramite <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
-    <string name="app_suspended_more_details" msgid="211260942831587014">"Ulteriori informazioni"</string>
+    <string name="app_suspended_more_details" msgid="211260942831587014">"Scopri di più"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Riattiva app"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Attivare il profilo di lavoro?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Le tue app di lavoro, le notifiche, i dati e altri elementi del profilo di lavoro saranno attivati."</string>
@@ -2074,18 +2073,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Questa notifica è stata retrocessa a Silenziosa. Tocca per dare un feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Questa notifica è stata posizionata più in alto. Tocca per dare un feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Questa notifica è stata posizionata più in basso. Tocca per dare un feedback."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Prova le notifiche avanzate"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Per continuare a ricevere suggerimenti di azioni, risposte e altro, attiva le notifiche avanzate. Le notifiche adattive Android non sono più supportate."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Attiva"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Non ora"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Scopri di più"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Le notifiche avanzate possono accedere all\'intero contenuto di una notifica, incluse le informazioni personali, come i nomi dei contatti e i messaggi. Questa funzionalità può anche ignorare le notifiche o svolgere azioni sui pulsanti nelle notifiche, come rispondere alle telefonate.\n\nQuesta funzionalità può anche attivare o disattivare la modalità Priorità e modificare le relative impostazioni."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifica di informazioni sulla modalità Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La batteria potrebbe esaurirsi prima della ricarica abituale"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Risparmio energetico attivo per far durare di più la batteria"</string>

@@ -319,10 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"শাৰীৰিক কাৰ্যকলাপ এক্সেছ কৰা"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"কেমেৰা"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ফট\' তুলিব আৰু ভিডিঅ\' ৰেকৰ্ড কৰিব পাৰে"</string>
-    <!-- no translation found for permgrouplab_nearby_devices (5529147543651181991) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_nearby_devices (3213561597116913508) -->
-    <skip />
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"নিকটৱৰ্তী ডিভাইচ"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"নিকটৱৰ্তী ডিভাইচসমূহ বিচাৰি পাওক আৰু সেইবোৰৰ সৈতে সংযোগ কৰক"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"কল লগসমূহ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ফ\'নৰ কল লগ পঢ়ক আৰু লিখক"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ফ’ন"</string>
@@ -540,14 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"এপ্‌টোক নিকটৱৰ্তী ব্লুটুথ ডিভাইচ বিচাৰি উলিয়াবলৈ আৰু সেইসমূহৰ সৈতে পেয়াৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"পেয়াৰ কৰা ব্লুটুথ ডিভাইচৰ সৈতে সংযোগ কৰক"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"এপ্‌টোক পেয়াৰ কৰা ব্লুটুথ ডিভাইচৰ সৈতে সংযোগ কৰিবলৈ অনুমতি দিয়ে"</string>
-    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
-    <skip />
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"নিকটৱৰ্তী ব্লুটুথ ডিভাইচত বিজ্ঞাপন প্ৰচাৰ কৰা"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"এপ্‌টোক নিকটৱৰ্তী ব্লুটুথ ডিভাইচত বিজ্ঞাপন প্ৰচাৰ কৰিবলৈ দিয়ে"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"নিকটৱৰ্তী আল্ট্ৰা-ৱাইডবেণ্ড ডিভাইচৰ মাজৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰক"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"এপ্‌টোক নিকটৱৰ্তী আল্ট্ৰা-ৱাইডবেণ্ড ডিভাইচসমূহৰ মাজৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ক"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"অগ্ৰাধিকাৰ দিয়া NFC পৰিশোধ সেৱাৰ তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"এপ্‌টোক অগ্ৰাধিকাৰ দিয়া nfc পৰিশোধ সেৱাৰ পঞ্জীকৃত সহায়কসমূহ আৰু পৰিশোধ কৰিব লগা লক্ষ্যস্থান দৰে তথ্য পাবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়েৰ ফিল্ড কমিউনিকেশ্বন নিয়ন্ত্ৰণ কৰক"</string>
@@ -1858,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"আপোনাৰ প্ৰশাসকে আপেডট কৰিছে"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"আপোনাৰ প্ৰশাসকে মচিছে"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ঠিক আছে"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"বেটাৰী সঞ্চয়কাৰীয়ে গাঢ় থীম অন কৰে আৰু নেপথ্যৰ কাৰ্যকলাপ, কিছুমান ভিজুৱেল ইফেক্ট আৰু “Hey Google”ৰ দৰে সুবিধাসমূহ অফ কৰে অথবা সীমাবদ্ধ কৰে\n\n"<annotation id="url">"অধিক জানক"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"বেটাৰী সঞ্চয়কাৰীয়ে গাঢ় থীম অন কৰে আৰু নেপথ্যৰ কাৰ্যকলাপ, কিছুমান ভিজুৱেল ইফেক্ট আৰু “Hey Google”ৰ দৰে সুবিধাসমূহ অফ কৰে অথবা সীমাবদ্ধ কৰে।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ডেটা ব্য়ৱহাৰ মাত্ৰা কম কৰিবৰ বাবে ডেটা সঞ্চয়কাৰীয়ে কিছুমান এপক নেপথ্য়ত ডেটা প্ৰেৰণ বা সংগ্ৰহ কৰাত বাধা প্ৰদান কৰে। আপুনি বৰ্তমান ব্য়ৱহাৰ কৰি থকা এটা এপে ডেটা ব্য়ৱহাৰ কৰিব পাৰে, কিন্তু সঘনাই এই কার্য কৰিব নোৱাৰিব পাৰে। ইয়াৰ অৰ্থ এইয়ে হ\'ব পাৰে যে, উদাহৰণস্বৰূপে, আপুনি নিটিপা পর্যন্ত প্ৰতিচ্ছবিসমূহ দেখুওৱা নহ’ব।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ডেটা সঞ্চয়কাৰী অন কৰিবনে?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"অন কৰক"</string>
@@ -1937,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"বন্ধ কৰক"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"উত্তৰ দিয়ক"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"প্ৰত্যাখ্যান কৰক"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"কল কাটি দিয়ক"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"অন্তৰ্গামী কল"</string>
@@ -2080,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"এই জাননীটোৰ গুৰুত্ব নীৰৱলৈ হ্ৰাস কৰা হৈছে। মতামত দিবলৈ টিপক।"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"এই জাননীটোৰ স্থান ওপৰলৈ কৰা হৈছে। মতামত দিবলৈ টিপক।"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"এই জাননীটোৰ স্থান তললৈ কৰা হৈছে। মতামত দিবলৈ টিপক।"</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"উন্নত জাননী ব্যৱহাৰ কৰি চাওক"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"পৰামৰ্শ দিয়া কাৰ্য, প্ৰত্যুত্তৰ আৰু বহুতো সুবিধা পাই থাকিবলৈ উন্নত জাননী অন কৰক। Androidৰ অভিযোজিত জাননী আৰু সমৰ্থিত নহয়।"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"অন কৰক"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"এতিয়া নহয়"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"অধিক জানক"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"উন্নত প্ৰত্যুত্তৰে সম্পৰ্কৰ নাম আৰু বাৰ্তাৰ দৰে ব্যক্তিগত তথ্যৰ লগতে আটাইবোৰ জাননীৰ সমল পঢ়িব পাৰে। এই সুবিধাটোৱে জাননী অগ্ৰাহ্য কৰাৰ লগতে জাননীত থকা ফ’ন কলৰ উত্তৰ দিয়াৰ দৰে কাৰ্য বুটামৰ ওপৰত কাৰ্যব্যৱস্থা ল’ব পাৰে।\n\nলগতে, এই সুবিধাটোৱে অগ্ৰাধিকাৰ দিয়া ম’ড অন অথবা অফ কৰিব পাৰে আৰু সম্পৰ্কিত ছেটিং সলনি কৰিব পাৰে।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ৰুটিন ম’ডৰ তথ্য জাননী"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"চ্চাৰ্জ কৰাৰ সচৰাচৰ সময়ৰ আগতেই বেটাৰি শেষ হ’ব পাৰে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"বেটাৰিৰ খৰচ কমাবলৈ বেটাৰি সঞ্চয়কাৰী অন কৰা হৈছে"</string>
@@ -2279,14 +2267,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"আপুনি এতিয়া আপোনাৰ স্ক্ৰীনখনৰ কিছু অংশ বিবৰ্ধন কৰিব পাৰে"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ছেটিঙত অন কৰক"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"অগ্ৰাহ্য কৰক"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ডিভাইচৰ মাইক্ৰ\'ফ\'ন অৱৰোধৰ পৰা আঁতৰাওক"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ডিভাইচৰ কেমেৰ অৱৰোধৰ পৰা আঁতৰাওক"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; আৰু আটাইবোৰ এপ আৰু সেৱাৰ বাবে"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"অৱৰোধৰ পৰা আঁতৰাওক"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ছেন্সৰ সম্পৰ্কীয় গোপনীয়তাৰ নীতি"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"এপ্লিকেশ্বনৰ চিহ্ন"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"এপ্লিকেশ্বনৰ ব্ৰেণ্ডৰ প্ৰতিচ্ছবি"</string>

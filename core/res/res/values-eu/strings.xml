@@ -315,7 +315,7 @@
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"atzitu gailuko argazkiak, multimedia-edukia eta fitxategiak"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofonoa"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"grabatu audioa"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Jarduera fisiko"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Jarduera fisikoa"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"jarduera fisikoa atzitu"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"atera argazkiak eta grabatu bideoak"</string>
@@ -362,11 +362,11 @@
     <string name="permlab_receiveMms" msgid="4000650116674380275">"jaso testu-mezuak (MMSak)"</string>
     <string name="permdesc_receiveMms" msgid="958102423732219710">"MMS mezuak jasotzeko eta prozesatzeko baimena ematen die aplikazioei. Horrela, aplikazioak gailura bidalitako mezuak kontrola eta ezaba ditzake zuri erakutsi gabe."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"desbideratu sare mugikor bidezko igorpen-mezuak"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Sare mugikor bidezko igorpen-modulura lotzeko baimena ematen die aplikazioei, sare mugikor bidezko igorpen-mezuak jaso ahala desbideratu ahal izateko. Sare mugikor bidezko igorpen-alertak kokapen batzuetan entregatzen dira larrialdi-egoeren berri emateko. Sare mugikor bidezko larrialdi-igorpenak jasotzean, asmo txarreko aplikazioek gailuaren errendimenduari edota funtzionamenduari eragin diezaiokete."</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Sare mugikor bidezko iragarpen-modulura lotzeko baimena ematen die aplikazioei, sare mugikor bidezko iragarpen-mezuak jaso ahala desbideratu ahal izateko. Sare mugikor bidezko iragarpen-alertak kokapen batzuetan entregatzen dira larrialdi-egoeren berri emateko. Sare mugikor bidezko larrialdi-iragarpenak jasotzean, asmo txarreko aplikazioek gailuaren errendimenduari edota funtzionamenduari eragin diezaiokete."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Kudeatu abian dauden deiak"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Gailuak jasotzen dituen deiei buruzko xehetasunak ikusteko eta dei horiek kontrolatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"irakurri sare mugikor bidezko igorpen-mezuak"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Gailuak jasotako sare mugikor bidezko igorpenen mezuak irakurtzeko baimena ematen die aplikazioei. Sare mugikor bidezko igorpen-alertak kokapen batzuetan ematen dira larrialdi-egoeren berri emateko. Asmo txarreko aplikazioek gailuaren errendimendua edo funtzionamendua oztopa dezakete larrialdi-igorpen horietako bat jasotzen denean."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Gailuak jasotako sare mugikor bidezko igorpen-mezuak irakurtzeko baimena ematen die aplikazioei. Sare mugikor bidezko igorpen-alertak kokapen batzuetan ematen dira larrialdi-egoeren berri emateko. Asmo txarreko aplikazioek gailuaren errendimendua edo funtzionamendua oztopa dezakete larrialdi-igorpen horietako bat jasotzen denean."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"irakurri harpidetutako jarioak"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"Une horretan sinkronizatutako jarioei buruzko xehetasunak lortzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"bidali eta ikusi SMS mezuak"</string>
@@ -451,8 +451,8 @@
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Aplikazioak edonoiz erabil dezake mikrofonoa audioa grabatzeko."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"bidali aginduak SIM txartelera"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"SIM txartelera aginduak bidaltzeko aukera ematen die aplikazioei. Oso arriskutsua da."</string>
-    <string name="permlab_activityRecognition" msgid="1782303296053990884">"hauteman jarduera fisiko"</string>
-    <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Aplikazioak jarduera fisiko hauteman dezake."</string>
+    <string name="permlab_activityRecognition" msgid="1782303296053990884">"hauteman jarduera fisikoa"</string>
+    <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Aplikazioak jarduera fisikoa hauteman dezake."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permdesc_camera" msgid="5240801376168647151">"Aplikazioak abian den bitartean erabil dezake kamera argazkiak ateratzeko eta bideoak grabatzeko."</string>
     <string name="permlab_backgroundCamera" msgid="7549917926079731681">"Argazkiak atera eta bideoak grabatu atzeko planoan."</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Inguruko Bluetooth bidezko gailuak hautemateko eta haiekin parekatzeko baimena ematen die aplikazioei"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"parekatutako Bluetooth bidezko gailuetara konektatu"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Parekatutako Bluetooth bidezko gailuetara konektatzeko baimena ematen die aplikazioei"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"inguruko Bluetooth bidezko gailuei publizitatea erakutsi"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Inguruko Bluetooth bidezko gailuei publizitatea erakusteko baimena ematen die aplikazioei"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"inguruko Bluetooth bidezko gailuetan informazioa iragarri"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Inguruko Bluetooth bidezko gailuetan informazioa iragartzeko baimena ematen die aplikazioei"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"banda ultrazabala darabilten inguruko gailuen arteko distantzia erlatiboa zehaztu"</string>
-    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Banda ultrazabala darabilten inguruko gailuen arteko distantzia erlatiboa zehazteko baimena ematen die aplikazioei"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Banda ultrazabala darabilten inguruko gailuen arteko distantzia erlatiboa zehazteko baimena ematen dio aplikazioari"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Aplikazioari baimena ematen dio NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa jasotzeko, hala nola erregistratutako laguntzaileak eta ibilbidearen helmuga."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolatu Near Field Communication komunikazioa"</string>
@@ -1852,11 +1852,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
-    <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Bateria-aurrezleak gai iluna aktibatzen du, eta murriztu edo desaktibatu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\".\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Bateria-aurrezleak gai iluna aktibatzen du, eta murriztu edo desaktibatu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\"."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazio batek datuak atzitu ahal izango ditu, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Itxi"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Erantzun"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Baztertu"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Amaitu deia"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Jasotako deia"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Isilarazi da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Mailaz igo da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Mailaz jaitsi da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Probatu jakinarazpen hobetuak"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Iradokitako ekintzak, erantzunak eta abar jasotzen jarraitzeko, aktibatu jakinarazpen hobetuak. Android-en jakinarazpen egokituak ez dira onartzen jada."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Aktibatu"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Orain ez"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lortu informazio gehiago"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Jakinarazpen hobetuek jakinarazpenen eduki osoa irakur dezakete, informazio pertsonala barne (esaterako, kontaktuen izenak eta mezuak). Halaber, jakinarazpenak baztertu edo jakinarazpenetako botoiak erabil ditzake eginbideak; adibidez, telefono-deiak erantzun.\n\nHorretaz gain, lehentasunezko modua aktibatu edo desaktiba dezake, eta erlazionatutako ezarpenak aldatu."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohitura moduaren informazio-jakinarazpena"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baliteke bateria ohi baino lehenago agortzea"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bateria-aurrezlea aktibatuta dago bateriaren iraupena luzatzeko"</string>

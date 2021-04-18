@@ -325,7 +325,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"גישה לפעילות הגופנית שלך"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"מצלמה"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"צילום תמונות והקלטת וידאו"</string>
-    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"מכשירים קרובים"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"מכשירים בקרבת מקום"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"איתור מכשירים שנמצאים בקרבת מקום והתחברות אליהם"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"יומני שיחות"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"קריאה וכתיבה של יומן השיחות של הטלפון"</string>
@@ -1734,13 +1734,13 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"לא להפעיל"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"מופעל"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"כבוי"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ברצונך להעניק לשירות <xliff:g id="SERVICE">%1$s</xliff:g> שליטה מלאה במכשיר?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"להעניק לשירות <xliff:g id="SERVICE">%1$s</xliff:g> שליטה מלאה במכשיר?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"אם השירות <xliff:g id="SERVICE">%1$s</xliff:g> יופעל, המכשיר לא ישתמש בנעילת המסך כדי לשפר את הצפנת הנתונים."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"שליטה מלאה מתאימה לאפליקציות שעוזרות עם צורכי הנגישות שלך, אבל לא לרוב האפליקציות."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"האפשרות לשליטה מלאה במכשיר לא מתאימה לכל האפליקציות, אלא רק לאפליקציות שעוזרות עם צורכי הנגישות שלך."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"הצגת המסך ושליטה בו"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"אפשרות לקריאת כל התוכן במסך ולהצגת התוכן מעל אפליקציות אחרות."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"הצגה וביצוע של פעולות"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"זוהי אפשרות למעקב אחר האינטראקציות שלך עם אפליקציה או חיישן חומרה כלשהם, ולביצוע אינטראקציה בשמך."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"אפשרות למעקב אחר האינטראקציה שלך עם אפליקציות או חיישני חומרה, וביצוע אינטראקציה בשמך."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"אישור"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"עדיף שלא"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"יש להקיש על תכונה כדי להתחיל להשתמש בה:"</string>
@@ -1898,10 +1898,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"עודכנה על ידי מנהל המערכת"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"נמחקה על ידי מנהל המערכת"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"אישור"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"‏התכונה \'חיסכון בסוללה\' מפעילה עיצוב כהה ומגבילה או מכבה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות כמו \"Hey Google\"\n\n"<annotation id="url">"מידע נוסף"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"‏התכונה \'חיסכון בסוללה\' מפעילה עיצוב כהה ומגבילה או מכבה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות כמו \"Hey Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה נעשה שימוש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"להפעיל את חוסך הנתונים?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"הפעלה"</string>
@@ -1993,6 +1991,8 @@
     <string name="close_button_text" msgid="10603510034455258">"סגירה"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"תשובה"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"דחייה"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ניתוק"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"שיחה נכנסת"</string>
@@ -2012,7 +2012,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"לאפשר לאפליקציה <xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש באמצעות <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"הוספת שפה"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"העדפת אזור"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"צריך להקליד את שם השפה"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"הקלדת שם השפה"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"הצעות"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"כל השפות"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"כל האזורים"</string>
@@ -2140,18 +2140,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ההתראה הזו הורדה בדרגה ל\'שקטה\'. יש להקיש כדי לשלוח משוב."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"דירוג ההתראה הזו הוגבה. יש להקיש כדי לשלוח משוב."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ההתראה הזו דורגה נמוך יותר. יש להקיש כדי לשלוח משוב."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"רוצה לנסות את ההתראות המשופרות?"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"‏כדי להמשיך לקבל הצעות לפעולות, לתשובות ועוד, יש להפעיל את ההתראות המשופרות. אין יותר תמיכה בהתראות מותאמות ל-Android."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"הפעלה"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"לא עכשיו"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"מידע נוסף"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"כשתכונת ההתראות המשופרות פועלת, המערכת יכולה לקרוא את כל תוכן ההתראות, כולל מידע אישי כמו שמות של אנשי קשר והודעות. כמו כן, התכונה תוכל לסגור התראות או לבצע פעולות שהן כוללות, כמו מענה לשיחות טלפון.\n\nהתכונה תוכל גם להפעיל או להשבית את מצב העדיפות ולשנות את ההגדרות הקשורות."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"התראת מידע לגבי מצב שגרתי"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"הסוללה עלולה להתרוקן לפני המועד הרגיל של הטעינה"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"תכונת החיסכון בסוללה הופעלה כדי להאריך את חיי הסוללה"</string>
@@ -2337,7 +2331,7 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"הגדרות חדשות להגדלה"</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"הגדרות חדשות לתכונה \'הגדלה\'"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"עכשיו אפשר להגדיל חלק מהמסך"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"הפעלה בהגדרות"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"סגירה"</string>
@@ -2349,5 +2343,5 @@
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"סמל האפליקציה"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"תדמית המותג של האפליקציה"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"בדיקה של הגדרות הגישה"</string>
-    <string name="view_and_control_notification_content" msgid="8003766498562604034">"לשירות <xliff:g id="SERVICE_NAME">%s</xliff:g> יהיו הרשאות לצפייה ולשליטה במסך. יש להקיש כדי לבדוק."</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"לשירות <xliff:g id="SERVICE_NAME">%s</xliff:g> יש הרשאה להצגת המסך ושליטה בו. אפשר להקיש כדי לבדוק."</string>
 </resources>
