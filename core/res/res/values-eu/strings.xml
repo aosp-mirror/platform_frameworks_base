@@ -2075,11 +2075,11 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Mailaz igo da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Mailaz jaitsi da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
     <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Probatu jakinarazpen hobetuak"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Iradokitako ekintzak, erantzunak eta abar jasotzen jarraitzeko, aktibatu jakinarazpen hobetuak. Android-en jakinarazpen doigarriak ez dira onartzen jada."</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Iradokitako ekintzak, erantzunak eta abar jasotzen jarraitzeko, aktibatu jakinarazpen hobetuak. Android-en jakinarazpen egokituak ez dira onartzen jada."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Aktibatu"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Orain ez"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lortu informazio gehiago"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Jakinarazpen hobetuek jakinarazpenen eduki osoa irakur dezakete, informazio pertsonala barne (esaterako, kontaktuen izenak eta mezuak). Halaber, eginbideak jakinarazpenak baztertu edo jakinarazpen-botoiak erabil ditzake; adibidez, telefono-deiak erantzutea.\n\nHorretaz gain, lehentasunezko modua aktibatu edo desaktibatu dezake, eta erlazionatutako ezarpenak aldatu."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Jakinarazpen hobetuek jakinarazpenen eduki osoa irakur dezakete, informazio pertsonala barne (esaterako, kontaktuen izenak eta mezuak). Halaber, jakinarazpenak baztertu edo jakinarazpenetako botoiak erabil ditzake eginbideak; adibidez, telefono-deiak erantzun.\n\nHorretaz gain, lehentasunezko modua aktibatu edo desaktiba dezake, eta erlazionatutako ezarpenak aldatu."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohitura moduaren informazio-jakinarazpena"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baliteke bateria ohi baino lehenago agortzea"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bateria-aurrezlea aktibatuta dago bateriaren iraupena luzatzeko"</string>

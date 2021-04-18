@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"બૅટરી સેવર ઘેરી થીમની સુવિધા ચાલુ કરે છે અને બૅકગ્રાઉન્ડમાં થતી પ્રવૃત્તિ, કેટલીક વિઝ્યુઅલ ઇફેક્ટ અને “Ok Google” જેવી સુવિધાઓને મર્યાદિત કે બંધ કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"બૅટરી સેવર ઘેરી થીમની સુવિધા ચાલુ કરે છે અને બૅકગ્રાઉન્ડમાં થતી પ્રવૃત્તિ, કેટલીક વિઝ્યુઅલ ઇફેક્ટ અને “Ok Google” જેવી સુવિધાઓને મર્યાદિત કે બંધ કરે છે."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપને બૅકગ્રાઉન્ડમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ચાલુ કરો"</string>
@@ -2076,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"નોટિફિકેશનને સાઇલન્ટ પર અવનત કરવામાં આવ્યું. પ્રતિસાદ આપવા માટે ટૅપ કરો."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"આ નોટિફિકેશનને ઉપલી રેંક આપવામાં આવી. પ્રતિસાદ આપવા માટે ટૅપ કરો."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"આ નોટિફિકેશનને નીચલી રેંક આપવામાં આવી. પ્રતિસાદ આપવા માટે ટૅપ કરો."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"વધારાના નોટિફિકેશન અજમાવી જુઓ"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"સૂચવેલી ક્રિયાઓ, જવાબો અને બીજું ઘણું મેળવવા માટે, વધારાના નોટિફિકેશન ચાલુ કરો. Android માટે અનુકૂળ નોટિફિકેશનને હવેથી સપોર્ટ કરવામાં આવતો નથી."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ચાલુ કરો"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"હમણાં નહીં"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"વધુ જાણો"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"વધારાના નોટિફિકેશન સંપર્કનું નામ અને સંદેશા જેવી વ્યક્તિગત માહિતી સહિત નોટિફિકેશનનું બધું કન્ટેન્ટ વાંચી શકે છે. આ સુવિધા નોટિફિકેશન છોડી પણ શકે છે અથવા નોટિફિકેશનમાં બટન પર ફોન કૉલનો જવાબ આપવા જેવી ક્રિયાઓ પણ કરી શકે છે.\n\nઆ સુવિધા પ્રાધાન્યતા મોડ ચાલુ કે બંધ પણ કરી શકે છે અને સંબંધિત સેટિંગ બદલી પણ શકે છે."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"રૂટિન મોડની માહિતીનું નોટિફિકેશન"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"સામાન્ય રીતે ચાર્જ કરવાના સમય પહેલાં બૅટરી સમાપ્ત થઈ શકે છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"બૅટરી આવરદા વધારવા માટે બૅટરી સેવર ચાલુ કર્યું"</string>

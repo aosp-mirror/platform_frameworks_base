@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"আপনার প্রশাসক আপডেট করেছেন"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ঠিক আছে"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"ব্যাটারি সেভার ডার্ক থিম চালু করে এবং ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট এবং “Ok Google”-এর মতো ফিচার সীমিত করে বা বন্ধ করে দেয়\n\n"<annotation id="url">"আরও জানুন"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"ব্যাটারি সেভার ডার্ক থিম চালু করে এবং ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট এবং “Ok Google”-এর মতো ফিচার সীমিত করে বা বন্ধ করে দেয়।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার ব্যাকগ্রাউন্ডে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবির উপর ট্যাপ না করা পর্যন্ত সেগুলি দেখানো হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"চালু করুন"</string>
@@ -2076,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"এই বিজ্ঞপ্তির গুরুত্ব কমিয়ে মিউট হিসেবে সেট করা হয়েছে। মতামত জানাতে ট্যাপ করুন।"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"এই বিজ্ঞপ্তির গুরুত্ব বাড়ানো হয়েছে। মতামত জানাতে ট্যাপ করুন।"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"এই বিজ্ঞপ্তির গুরুত্ব কমানো হয়েছে। মতামত জানাতে ট্যাপ করুন।"</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"উন্নত নোটিফিকেশন ব্যবহার করুন"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"সাজেস্ট করা অ্যাকশন, উত্তর এবং আরও অনেক কিছু পাওয়া চালিয়ে যেতে, উন্নত নোটিফিকেশন পাওয়ার সুবিধা চালু করুন। Android অ্যাডাপ্টিভ নোটিফিকেশন আর কাজ করবে না।"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"চালু করুন"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"এখন নয়"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"আরও জানুন"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"উন্নত নোটিফিকেশন পরিচিতির নাম এবং মেসেজের মতো ব্যক্তিগত তথ্য ছাড়াও নোটিফিকেশনের সবকটি কন্টেন্ট পড়তে পারবে। এছাড়াও, এই ফিচার নোটিফিকেশন বাতিল করতে পারবে এবং নোটিফিকেশনে থাকা বোতামের সাহায্যে অ্যাকশন নিতে পারবে, যেমন ফোন কলের উত্তর দেওয়া।\n\nএই ফিচার প্রায়োরিটি মোড চালু বা বন্ধ করতে এবং সেই সম্পর্কিত সেটিংস পরিবর্তনও করতে পারবে।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"রুটিন মোডের তথ্য সংক্রান্ত বিজ্ঞপ্তি"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"সাধারণত যখন চার্জ দেন, তার আগে চার্জ শেষ হয়ে যেতে পারে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ডিভাইস বেশিক্ষণ চালু রাখতে ব্যাটারি সেভার চালু করা হয়েছে"</string>

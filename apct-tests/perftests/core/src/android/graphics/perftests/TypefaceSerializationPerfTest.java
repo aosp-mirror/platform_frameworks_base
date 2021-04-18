@@ -20,6 +20,7 @@ import android.graphics.Typeface;
 import android.os.SharedMemory;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
+import android.util.ArrayMap;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -55,9 +56,10 @@ public class TypefaceSerializationPerfTest {
         ByteBuffer buffer = memory.mapReadOnly().order(ByteOrder.BIG_ENDIAN);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
 
+        ArrayMap<String, Typeface> out = new ArrayMap<>();
         while (state.keepRunning()) {
             buffer.position(0);
-            Typeface.deserializeFontMap(buffer);
+            Typeface.deserializeFontMap(buffer, out);
         }
     }
 
