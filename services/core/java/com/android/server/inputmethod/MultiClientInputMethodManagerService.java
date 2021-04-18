@@ -241,6 +241,10 @@ public final class MultiClientInputMethodManagerService {
                         public void removeImeSurface() {
                             reportNotSupported();
                         }
+
+                        @Override
+                        public void updateImeWindowStatus() {
+                        }
                     });
         }
 
