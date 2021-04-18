@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ایپ یا آپ کی تنظیم کی جانب سے اسکرین شاٹس لینے کی اجازت نہیں ہے"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"اسکرین شاٹ برخاست کریں"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"اسکرین شاٹ کا پیش منظر"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"سکرین ریکارڈر"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"اسکرین ریکارڈر"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"سکرین ریکارڈنگ پروسیس ہورہی ہے"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اسکرین ریکارڈ سیشن کیلئے جاری اطلاع"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ریکارڈنگ شروع کریں؟"</string>

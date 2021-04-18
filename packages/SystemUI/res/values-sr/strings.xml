@@ -118,7 +118,7 @@
     <string name="usb_preference_title" msgid="1439924437558480718">"Опције USB преноса датотека"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"Прикључи као медија плејер (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Прикључи као камеру (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="5499998592841984743">"Инсталирај Android пребацивање датотека за Mac"</string>
+    <string name="installer_cd_button_title" msgid="5499998592841984743">"Инсталирај Android пребацивање фајлова за Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Назад"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Почетна"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Мени"</string>

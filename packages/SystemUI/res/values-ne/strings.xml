@@ -65,7 +65,7 @@
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"हाल यस डिभाइसमा साइन इन हुनुभएको प्रयोगकर्ताले USB डिबग सक्रिय गर्न सक्नुहुन्न। यो सुविधाको प्रयोग गर्न प्राथमिक प्रयोगकर्तामा बदल्नुहोस्‌।"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"यस नेटवर्कमा वायरलेस डिबगिङ सेवा प्रयोग गर्न दिने हो?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्कको नाम (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi ठेगाना (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"यस नेटवर्कमा सधैँ अनुमति दिनुहोस्"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"यस नेटवर्कमा सधैँ अनुमति दिइयोस्"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"अनुमति दिनुहोस्"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"वायरलेस डिबगिङ सेवालाई अनुमति दिइएको छैन"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"हाल यस डिभाइसमा साइन इन हुनुभएका प्रयोगकर्ता वायरलेस डिबगिङ सक्रिय गर्न सक्नुहुन्न। यो सुविधाको प्रयोग गर्न प्राथमिक प्रयोगकर्ताको खातामार्फत साइन इन गर्नुहोस्।"</string>
@@ -343,7 +343,7 @@
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"थप विकल्पहरूका लागि आइकनहरूमा टच एण्ड होल्ड गर्नुहोस्"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"बाधा नपुऱ्याउनुहोस्"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"प्राथमिकता मात्र"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"प्राथमिकता दिइएको मात्र"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"अलार्महरू मात्र"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"पूरै शान्त"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ब्लुटुथ"</string>
@@ -375,7 +375,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"प्रयोगकर्ता"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"नयाँ प्रयोगकर्ता"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"जोडिएको छैन"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"कनेक्ट गरिएको छैन"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"नेटवर्क छैन"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi बन्द"</string>
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi सक्रिय छ"</string>
@@ -415,7 +415,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> सीमा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी दिँदै"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"कार्य प्रोफाइल"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"रात्रिको प्रकाश"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Night Light"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"सूर्यास्तमा सक्रिय"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सूर्योदयसम्म"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> मा सक्रिय"</string>
@@ -461,7 +461,7 @@
     <string name="camera_hint" msgid="4519495795000658637">"क्यामेराको लागि आइकनबाट स्वाइप गर्नुहोस्"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"पूर्ण शान्त। यसले पनि स्क्रिन बाचकलाई शान्त गराउँछ।"</string>
     <string name="interruption_level_none" msgid="219484038314193379">"पूरै शान्त"</string>
-    <string name="interruption_level_priority" msgid="661294280016622209">"प्राथमिकता मात्र"</string>
+    <string name="interruption_level_priority" msgid="661294280016622209">"प्राथमिकता दिइएको मात्र"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"अलार्महरू मात्र"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"पूरै\nशान्त"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"प्राथमिकता \nमात्र"</string>
@@ -540,13 +540,13 @@
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"प्रोफाइल अनुगमन गर्दै"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"सञ्जाल अनुगमन"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"नेटवर्क लग गर्ने प्रक्रिया"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"नेटवर्क लगिङ"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA का प्रमाणपत्रहरू"</string>
     <string name="disable_vpn" msgid="482685974985502922">"VPN असक्षम गर्नुहोस्"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"विच्छेद VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"नीतिहरू हेर्नुहोस्"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"यो डिभाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> को स्वामित्वमा छ।\n\nतपाईंका IT एड्मिन सेटिङ, संस्थागत पहुँच, एप, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको डिभाइसको स्थानसम्बन्धी जानकारीको निगरानी र व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्ना IT एड्मिनसँग सम्पर्क गर्नुहोस्।"</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"यो डिभाइस तपाईंको सङ्गठनको स्वामित्वमा छ।\n\nतपाईंका IT एड्मिन सेटिङ, संस्थागत पहुँच, एप, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको डिभाइसको स्थानसम्बन्धी जानकारीको निगरानी र व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्ना IT एड्मिनसँग सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"यो डिभाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> को स्वामित्वमा छ।\n\nतपाईंका IT एड्मिन सेटिङ, संस्थागत पहुँच, एप, तपाईंको डिभाइससँग सम्बन्धित डेटा र तपाईंको डिभाइसको स्थानसम्बन्धी जानकारीको अनुगमन गर्न र व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्ना IT एड्मिनसँग सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"यो डिभाइस ORGANIZATION_NAME को स्वामित्वमा छ।\n\nतपाईंका IT एड्मिन सेटिङ, संस्थागत पहुँच, एप, तपाईंको डिभाइससँग सम्बन्धित डेटा र तपाईंको डिभाइसको स्थानसम्बन्धी जानकारीको अनुगमन गर्न र व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्ना IT एड्मिनसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापित गऱ्यो। तपाईंको सुरक्षित नेटवर्क ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापना गरेको छ। तपाईंको सुरक्षित नेटवर्क ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"यस डिभाइसमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापना गरिएको छ। तपाईंको सुरक्षित नेटवर्कको ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
@@ -648,7 +648,7 @@
     <string name="quick_settings" msgid="6211774484997470203">"द्रुत सेटिङहरू"</string>
     <string name="status_bar" msgid="4357390266055077437">"स्थिति पट्टी"</string>
     <string name="overview" msgid="3522318590458536816">"परिदृश्य"</string>
-    <string name="demo_mode" msgid="263484519766901593">"प्रणालीको UI को प्रदर्शन मोड"</string>
+    <string name="demo_mode" msgid="263484519766901593">"सिस्टम UI को डेमो मोड"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"डेमो मोड सक्षम गर्नुहोस्"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"डेमो मोड देखाउनुहोस्"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"इथरनेट"</string>
@@ -709,12 +709,12 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"सूचनाहरू निष्क्रिय पार्नुहोस्"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"यो एपका सूचनाहरू देखाउने क्रम जारी राख्ने हो?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"साइलेन्ट"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"पूर्वनिर्धारित"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"डिफल्ट"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"बबल"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"न घन्टी बज्छ न त कम्पन नै हुन्छ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"न घन्टी बज्छ न त कम्पन नै हुन्छ र वार्तालाप खण्डको तलतिर देखा पर्छ"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"फोनको सेटिङका आधारमा घन्टी बज्न वा भाइब्रेट हुन सक्छ"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फोनको सेटिङका आधारमा घन्टी बज्न वा भाइब्रेट हुन सक्छ। <xliff:g id="APP_NAME">%1$s</xliff:g> का वार्तालापहरू पूर्वनिर्धारित रूपमा बबलमा देखाइन्छन्।"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फोनको सेटिङका आधारमा घन्टी बज्न वा भाइब्रेट हुन सक्छ। <xliff:g id="APP_NAME">%1$s</xliff:g> का वार्तालापहरू डिफल्ट रूपमा बबलमा देखाइन्छन्।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ्लोटिङ सर्टकटमार्फत यो सामग्रीतर्फ तपाईंको ध्यान आकर्षित गर्दछ।"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"वार्तालाप खण्डको सिरानमा देखा पर्छ, तैरने बबलका रूपमा देखा पर्छ, लक स्क्रिनमा प्रोफाइल फोटो देखिन्छ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिङ"</string>
@@ -832,7 +832,7 @@
     <string name="nav_bar_layout" msgid="4716392484772899544">"लेआउट"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"अतिरिक्त बायाँतिरको बटनको प्रकार"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"अतिरिक्त दायाँतिरको बटनको प्रकार"</string>
-    <string name="nav_bar_default" msgid="8386559913240761526">"(पूर्वनिर्धारित)"</string>
+    <string name="nav_bar_default" msgid="8386559913240761526">"(डिफल्ट)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="2681220472659720036">"क्लिपबोर्ड"</item>
     <item msgid="4795049793625565683">"किकोड"</item>
@@ -863,12 +863,12 @@
     <string name="tuner_time" msgid="2450785840990529997">"समय"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"घन्टा, मिनेट, र सेकेन्ड देखाउनुहोस्"</item>
-    <item msgid="1271006222031257266">"घन्टा र मिनेट (पूर्वनिर्धारित) देखाउनुहोस्"</item>
+    <item msgid="1271006222031257266">"घन्टा र मिनेट (डिफल्ट) देखाउनुहोस्"</item>
     <item msgid="6135970080453877218">"यो आइकन नदेखाउनुहोस्"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"सधैं प्रतिशत देखाउनुहोस्"</item>
-    <item msgid="3805744470661798712">"चार्ज गर्दा प्रतिशत देखाउनुहोस् (पूर्वनिर्धारित)"</item>
+    <item msgid="3805744470661798712">"चार्ज गर्दा प्रतिशत देखाउनुहोस् (डिफल्ट)"</item>
     <item msgid="8619482474544321778">"यो आइकन नदेखाउनुहोस्"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"कम प्राथमिकताका सूचना आइकनहरू देखाउनुहोस्"</string>
@@ -1011,8 +1011,8 @@
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"यो एपबाट आएका बबलहरू अफ गर्न \"व्यवस्थापन गर्नुहोस्\" बटनमा ट्याप गर्नुहोस्"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"बुझेँ"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> का सेटिङहरू"</string>
-    <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"प्रणालीको नेभिगेसन अद्यावधिक गरियो। परिवर्तन गर्न सेटिङमा जानुहोस्।"</string>
-    <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"प्रणालीको नेभिगेसन अद्यावधिक गर्न सेटिङमा जानुहोस्"</string>
+    <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेभिगेसन अद्यावधिक गरियो। परिवर्तन गर्न सेटिङमा जानुहोस्।"</string>
+    <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेभिगेसन अद्यावधिक गर्न सेटिङमा जानुहोस्"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्ट्यान्डबाई"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"वार्तालापको प्राथमिकता निर्धारण गरी \"महत्त्वपूर्ण\" बनाइयो"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"महत्वपूर्ण वार्तालापहरू:"</string>
@@ -1025,9 +1025,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"म्याग्निफिकेसन ओभरले विन्डो"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"म्याग्निफिकेसन विन्डो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"म्याग्निफिकेसन विन्डोका नियन्त्रणहरू"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"यन्त्र नियन्त्रण गर्ने विजेटहरू"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"डिभाइस नियन्त्रण गर्ने विजेटहरू"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"आफ्ना जोडिएका यन्त्रहरूका लागि नियन्त्रण सुविधाहरू थप्नुहोस्"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"यन्त्र नियन्त्रण गर्ने विजेटहरू सेटअप गर्नुहोस्"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिभाइस नियन्त्रण गर्ने विजेटहरू सेटअप गर्नुहोस्"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"आफ्ना नियन्त्रणहरूमाथि पहुँच राख्न पावर बटन थिचिराख्नुहोस्"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"नियन्त्रणहरू थप्न एप छनौट गर्नुहोस्"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1050,7 +1050,7 @@
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"नियन्त्रण सुविधाहरू लोड गर्न सकिएन। <xliff:g id="APP">%s</xliff:g> एपका सेटिङ परिवर्तन गरिएका छैनन् भन्ने कुरा सुनिश्चित गर्न उक्त एप जाँच्नुहोस्।"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"मिल्दा नियन्त्रण सुविधाहरू उपलब्ध छैनन्"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"यन्त्र नियन्त्रण गर्ने विजेटहरूको सूचीमा थप्नुहोस्"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"डिभाइस नियन्त्रण गर्ने विजेटहरूको सूचीमा थप्नुहोस्"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"थप्नुहोस्"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ले सिफारिस गरेको"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"नियन्त्रण सुविधाहरू अद्यावधिक गरिए"</string>

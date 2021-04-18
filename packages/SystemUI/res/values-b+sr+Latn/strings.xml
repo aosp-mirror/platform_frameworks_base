@@ -118,7 +118,7 @@
     <string name="usb_preference_title" msgid="1439924437558480718">"Opcije USB prenosa datoteka"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"Priključi kao medija plejer (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Priključi kao kameru (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="5499998592841984743">"Instaliraj Android prebacivanje datoteka za Mac"</string>
+    <string name="installer_cd_button_title" msgid="5499998592841984743">"Instaliraj Android prebacivanje fajlova za Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Nazad"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Početna"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Meni"</string>

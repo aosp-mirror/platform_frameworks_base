@@ -65,7 +65,7 @@
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění přes USB. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Povolit v této síti bezdrátové ladění?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Název sítě (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"Vždy povolit v této síti"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"V této síti vždy povolit"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Povolit"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Bezdrátové ladění není povoleno"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout bezdrátové ladění. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
@@ -718,11 +718,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Výchozí"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bublina"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Žádný zvuk ani vibrace"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Žádný zvuk ani vibrace a zobrazovat níže v sekci konverzací"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Žádný zvuk ani vibrace a zobrazuje se níže v sekci konverzací"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Vyzvání nebo vibruje podle nastavení telefonu"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu. Konverzace z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> ve výchozím nastavení bublají."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Přitahuje pozornost pomocí plovoucí zkratky k tomuto obsahu."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzací, má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Najdete ji v horní části sekce konverzací jako plovoucí bublinu, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>

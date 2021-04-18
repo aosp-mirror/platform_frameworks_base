@@ -711,12 +711,12 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Үнсіз"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Әдепкі"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Көпіршік"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Дыбыс не діріл қолданылмайды"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Дыбыс не діріл қолданылмайды, әңгімелер бөлімінің төмен жағында шығады"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефон параметрлеріне байланысты шылдырлауы не дірілдеуі мүмкін"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефон параметрлеріне байланысты шылдырлауы не дірілдеуі мүмкін. <xliff:g id="APP_NAME">%1$s</xliff:g> чаттары әдепкісінше қалқымалы етіп көрсетіледі."</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Дыбыс не діріл болмайды."</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Дыбыс не діріл болмайды, әңгімелер бөлімінің төмен жағында тұрады."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефон параметрлеріне байланысты дыбыстық сигнал не діріл болуы мүмкін."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефон параметрлеріне байланысты дыбыстық сигнал не діріл болуы мүмкін. <xliff:g id="APP_NAME">%1$s</xliff:g> әңгімелері әдепкісінше қалқып шығады."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Осы мазмұнға бекітілген қалқымалы таңбашамен назарыңызды өзіне тартады."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Әңгімелер бөлімінің жоғарғы жағында тұрады, қалқыма хабар түрінде шығады, құлыптаулы экранда профиль суретін көрсетеді"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Әңгімелер бөлімінің жоғарғы жағында тұрады, қалқыма хабар түрінде шығады, құлыптаулы экранда профиль суретін көрсетеді."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Параметрлер"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маңызды"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгімелесу функцияларын қолдамайды."</string>
@@ -837,7 +837,7 @@
     <item msgid="2681220472659720036">"Буфер"</item>
     <item msgid="4795049793625565683">"Перне коды"</item>
     <item msgid="80697951177515644">"Айналдыруды растау, пернетақта ауыстырғыш"</item>
-    <item msgid="7626977989589303588">"Ешқандай"</item>
+    <item msgid="7626977989589303588">"Жоқ"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="9156773083127904112">"Орташа"</item>
@@ -934,7 +934,7 @@
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Оң жақ таңбаша"</string>
     <string name="lockscreen_unlock_left" msgid="1417801334370269374">"Сол жақ таңбаша құлыпты ашады"</string>
     <string name="lockscreen_unlock_right" msgid="4658008735541075346">"Оң жақ таңбаша құлыпты ашады"</string>
-    <string name="lockscreen_none" msgid="4710862479308909198">"Ешқандай"</string>
+    <string name="lockscreen_none" msgid="4710862479308909198">"Жоқ"</string>
     <string name="tuner_launch_app" msgid="3906265365971743305">"<xliff:g id="APP">%1$s</xliff:g> қолданбасын іске қосу"</string>
     <string name="tuner_other_apps" msgid="7767462881742291204">"Басқа қолданбалар"</string>
     <string name="tuner_circle" msgid="5270591778160525693">"Шеңбер"</string>

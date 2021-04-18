@@ -73,7 +73,7 @@
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Per proteggere il dispositivo da liquidi o detriti, la porta USB è stata disattivata e non rileverà gli accessori.\n\nTi avviseremo quando sarà di nuovo possibile utilizzarla."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Porta USB attivata per rilevare caricabatterie e accessori"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Attiva USB"</string>
-    <string name="learn_more" msgid="4690632085667273811">"Ulteriori informazioni"</string>
+    <string name="learn_more" msgid="4690632085667273811">"Scopri di più"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom per riempire schermo"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estendi per riemp. schermo"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
@@ -559,7 +559,7 @@
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> utilizza l\'app <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> per gestire il dispositivo."</string>
     <string name="monitoring_description_do_body" msgid="7700878065625769970">"L\'amministratore può monitorare e gestire impostazioni, accesso aziendale, app, dati associati al dispositivo e informazioni sulla posizione del dispositivo."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
-    <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Ulteriori informazioni"</string>
+    <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Scopri di più"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Sei connesso a <xliff:g id="VPN_APP">%1$s</xliff:g>, che consente di monitorare le attività di rete, inclusi siti web, email e app."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Apri impostazioni VPN"</string>

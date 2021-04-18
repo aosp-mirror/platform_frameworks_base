@@ -368,7 +368,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Konum Bilgisi Kapalı"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Medya cihazı"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Yalnızca Acil Çağrılar İçin"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Yalnızca Acil Aramalar İçin"</string>
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"Ayarlar"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"Saat"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"Ben"</string>
@@ -545,8 +545,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN\'yi devre dışı bırak"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN bağlantısını kes"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Politikaları Göster"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> adlı kuruluşa ait.\n\nBT yöneticiniz cihazınızın ayarlarını, şirket erişimini, uygulamaları, cihazınızla ilişkilendirilen verileri, cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Bu cihaz kuruluşunuza ait.\n\nBT yöneticiniz cihazın ayarlarını, şirket erişimini, uygulamaları, cihazınızla ilişkilendirilen verileri, cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> adlı kuruluşa ait.\n\nBT yöneticiniz cihazınızın ayarlarını, kurumsal erişimi, uygulamaları, cihazınızla ilişkilendirilen verileri ve cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Bu cihaz kuruluşunuza ait.\n\nBT yöneticiniz cihazın ayarlarını, kurumsal erişimi, uygulamaları, cihazınızla ilişkilendirilen verileri ve cihazınızın konum bilgilerini izleyip yönetebilir.\n\nDaha fazla bilgi için BT yöneticinize başvurun."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Kuruluşunuz bu cihaza bir sertifika yetkilisi yükledi. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Kuruluşunuz iş profilinize bir sertifika yetkilisi yükledi. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Bu cihazda bir sertifika yetkilisi yüklü. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
@@ -557,7 +557,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Kişisel profiliniz; e-postalar, uygulamalar ve web siteleri de dahil olmak üzere ağ etkinliğinizi izleyebilen <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Cihazınız <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> tarafından yönetiliyor."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, cihazınızı yönetmek için <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> kullanıyor."</string>
-    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Yöneticiniz ayarları, kurumsal erişimi, uygulamaları, cihazınızla ilişkilendirilen verileri ve cihazınızın konum bilgilerini takip edip yönetebilir."</string>
+    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Yöneticiniz ayarları, kurumsal erişimi, uygulamaları, cihazınızla ilişkilendirilen verileri ve cihazınızın konum bilgilerini izleyip yönetebilir."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Daha fazla bilgi"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"E-postalarınız, uygulamalarınız ve web siteleriniz de dahil olmak üzere ağ etkinliğinizi takip edebilen <xliff:g id="VPN_APP">%1$s</xliff:g> ağına bağlısınız."</string>
@@ -619,7 +619,7 @@
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Çift ton çoklu frekans"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Erişilebilirlik"</string>
-    <string name="ring_toggle_title" msgid="5973120187287633224">"Çağrılar"</string>
+    <string name="ring_toggle_title" msgid="5973120187287633224">"Aramalar"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Zili çaldır"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Titreşim"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Sesi kapat"</string>
@@ -634,7 +634,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"sesi aç"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"titreşim"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ses denetimleri"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Çağrılar ve bildirimler telefonun zilini çaldıracak (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Aramalar ve bildirimler telefonun zilini çaldıracak (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="3938776561655668350">"Medya çıkışı"</string>
     <string name="output_calls_title" msgid="7085583034267889109">"Telefon çağrısı çıkışı"</string>
     <string name="output_none_found" msgid="5488087293120982770">"Cihaz bulunamadı"</string>

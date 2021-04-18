@@ -546,7 +546,7 @@
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Відстеження профілю"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Відстеження дій у мережі"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"Мережа VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Реєстрація в мережі"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Журнал мережі"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Сертифікати центру сертифікації"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Вимкнути VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Від’єднатися від мережі VPN"</string>
@@ -556,7 +556,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Адміністратор організації встановив центр сертифікації на цьому пристрої. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Адміністратор організації встановив центр сертифікації у вашому робочому профілі. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На цьому пристрої встановлено центр сертифікації. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ваш адміністратор увімкнув журнал мережі, щоб відстежувати трафік на вашому пристрої."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Під’єднано додаток <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, як-от відкривання електронних листів, додатків і веб-сайтів."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Під’єднано додатки <xliff:g id="VPN_APP_1">%2$s</xliff:g> та <xliff:g id="VPN_APP_0">%1$s</xliff:g>, які можуть відстежувати вашу активність у мережі, як-от відкривання електронних листів, додатків і веб-сайтів."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Ваш робочий профіль під’єднано до додатка <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
@@ -571,7 +571,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Відкрити налаштування мережі VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Відкрити надійні облікові дані"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Ваш адміністратор увімкнув журнал мережі, щоб відстежувати трафік на вашому пристрої.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Ви дозволили додатку під’єднуватися до мережі VPN.\n\nЦей додаток може відстежувати вашу активність на пристрої та в мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Вашим робочим профілем керує адміністратор організації <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nВін може відстежувати ваші дії в мережі, зокрема електронні листи, додатки та веб-сайти.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором.\n\nВаш пристрій також під’єднано до мережі VPN, у якій можна відстежувати ваші дії в мережі."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>

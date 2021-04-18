@@ -545,8 +545,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"Poista VPN käytöstä"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Katkaise VPN-yhteys"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Näytä säännöt"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja muuttaa asetuksia, yrityskäyttöä, sovelluksia sekä laitteeseen yhdistettyjä tietoja ja sen sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Organisaatiosi omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja muuttaa asetuksia, yrityskäyttöä, sovelluksia sekä laitteeseen yhdistettyjä tietoja ja sen sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja hallita asetuksia, pääsyoikeuksia, sovelluksia, laitteen käyttödataa ja sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Organisaatiosi omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja hallita asetuksia, pääsyoikeuksia, sovelluksia, laitteen käyttödataa ja sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organisaatiosi asensi laitteeseen varmenteen myöntäjän. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisaatiosi lisäsi työprofiiliin varmenteen myöntäjän. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Laitteeseen on asennettu varmenteen myöntäjä. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
@@ -557,7 +557,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Henkilökohtainen profiilisi on yhteydessä sovellukseen <xliff:g id="VPN_APP">%1$s</xliff:g>, joka voi valvoa verkkotoimintaasi, esimerkiksi sähköposteja, sovelluksia ja verkkosivustoja."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Laitettasi hallinnoi <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> hallinnoi laitettasi sovelluksen <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> avulla."</string>
-    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Järjestelmänvalvoja voi valvoa ja hallita asetuksia, yrityskäyttöä, sovelluksia sekä laitteeseen yhdistettyjä tietoja ja sen sijaintitietoja."</string>
+    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Järjestelmänvalvoja voi valvoa ja hallita asetuksia, pääsyoikeuksia, sovelluksia, laitteen käyttödataa ja sijaintitietoja."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Lisätietoja"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Olet yhteydessä sovellukseen <xliff:g id="VPN_APP">%1$s</xliff:g>, joka voi valvoa verkkotoimintaasi, esimerkiksi sähköposteja, sovelluksia ja verkkosivustoja."</string>
