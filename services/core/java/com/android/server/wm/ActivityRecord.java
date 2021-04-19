@@ -5160,6 +5160,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Task#ensureActivitiesVisible will bring the activity to a proper
         // active state.
         if (!isState(STARTED, RESUMED, PAUSED, STOPPED, STOPPING)
+                // TODO (b/185876784) Check could we remove the check condition
+                //  mTranslucentActivityWaiting != null here
                 || getRootTask().mTranslucentActivityWaiting != null) {
             return false;
         }
@@ -7800,7 +7802,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             configChangeFlags = 0;
             return;
         }
-
+        // Do not waiting for translucent activity if it is going to relaunch.
+        final Task rootTask = getRootTask();
+        if (rootTask != null && rootTask.mTranslucentActivityWaiting == this) {
+            rootTask.checkTranslucentActivityWaiting(null);
+        }
         final boolean andResume = shouldBeResumed(null /*activeActivity*/);
         List<ResultInfo> pendingResults = null;
         List<ReferrerIntent> pendingNewIntents = null;
