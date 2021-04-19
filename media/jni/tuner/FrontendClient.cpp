@@ -982,7 +982,7 @@ TunerFrontendAtsc3Settings FrontendClient::getAidlAtsc3Settings(const FrontendSe
 TunerFrontendIsdbsSettings FrontendClient::getAidlIsdbsSettings(const FrontendSettings& settings) {
     TunerFrontendIsdbsSettings isdbsSettings{
         .frequency = (int)settings.isdbs().frequency,
-        .streamId = (int)settings.isdbs().streamId,
+        .streamId = (char16_t)settings.isdbs().streamId,
         .streamIdType = (int)settings.isdbs().streamIdType,
         .modulation = (int)settings.isdbs().modulation,
         .codeRate = (int)settings.isdbs().coderate,
@@ -996,7 +996,7 @@ TunerFrontendIsdbs3Settings FrontendClient::getAidlIsdbs3Settings(
         const FrontendSettings& settings) {
     TunerFrontendIsdbs3Settings isdbs3Settings{
         .frequency = (int)settings.isdbs3().frequency,
-        .streamId = (int)settings.isdbs3().streamId,
+        .streamId = (char16_t)settings.isdbs3().streamId,
         .streamIdType = (int)settings.isdbs3().streamIdType,
         .modulation = (int)settings.isdbs3().modulation,
         .codeRate = (int)settings.isdbs3().coderate,
