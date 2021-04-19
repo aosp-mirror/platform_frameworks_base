@@ -458,6 +458,7 @@
 
     <!-- Permission required for CTS test - CtsUwbTestCases -->
     <uses-permission android:name="android.permission.UWB_PRIVILEGED" />
+    <uses-permission android:name="android.permission.UWB_RANGING" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
