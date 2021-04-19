@@ -1447,13 +1447,7 @@ public class ActivityOptions {
     }
 
     /**
-     * Sets the windowing mode the activity should launch into. If the input windowing mode is
-     * {@link android.app.WindowConfiguration#WINDOWING_MODE_SPLIT_SCREEN_SECONDARY} and the device
-     * isn't currently in split-screen windowing mode, then the activity will be launched in
-     * {@link android.app.WindowConfiguration#WINDOWING_MODE_FULLSCREEN} windowing mode. For clarity
-     * on this you can use
-     * {@link android.app.WindowConfiguration#WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY}
-     *
+     * Sets the windowing mode the activity should launch into.
      * @hide
      */
     @TestApi
