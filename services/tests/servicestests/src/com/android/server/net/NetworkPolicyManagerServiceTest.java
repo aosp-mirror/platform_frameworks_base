@@ -1093,7 +1093,7 @@ public class NetworkPolicyManagerServiceTest {
         // first, pretend that wifi network comes online. no policy active,
         // which means we shouldn't push limit to interface.
         snapshots = List.of(buildWifi());
-        when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
+        when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
 
         mPolicyListener.expect().onMeteredIfacesChanged(any());
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
@@ -1101,7 +1101,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // now change cycle to be on 15th, and test in early march, to verify we
         // pick cycle day in previous month.
-        when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
+        when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
 
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(getElapsedRealtime(), 1)
@@ -1362,7 +1362,7 @@ public class NetworkPolicyManagerServiceTest {
                 .insertEntry(TEST_IFACE, 0L, 0L, 0L, 0L);
 
         {
-            when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
+            when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
             when(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15,
                     currentTimeMillis())).thenReturn(stats.getTotalBytes());
 
@@ -1485,7 +1485,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private PersistableBundle setupUpdateMobilePolicyCycleTests() throws RemoteException {
-        when(mConnManager.getAllNetworkStateSnapshot())
+        when(mConnManager.getAllNetworkStateSnapshots())
                 .thenReturn(new ArrayList<NetworkStateSnapshot>());
 
         setupTelephonySubscriptionManagers(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
@@ -1498,7 +1498,7 @@ public class NetworkPolicyManagerServiceTest {
 
     @Test
     public void testUpdateMobilePolicyCycleWithNullConfig() throws RemoteException {
-        when(mConnManager.getAllNetworkStateSnapshot())
+        when(mConnManager.getAllNetworkStateSnapshots())
                 .thenReturn(new ArrayList<NetworkStateSnapshot>());
 
         setupTelephonySubscriptionManagers(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
@@ -2089,7 +2089,7 @@ public class NetworkPolicyManagerServiceTest {
                 TEST_NETWORK,
                 buildNetworkCapabilities(TEST_SUB_ID, roaming),
                 buildLinkProperties(TEST_IFACE), TEST_IMSI, TYPE_MOBILE));
-        when(mConnManager.getAllNetworkStateSnapshot()).thenReturn(snapshots);
+        when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
     }
 
     private void expectDefaultCarrierConfig() throws Exception {
