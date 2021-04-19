@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -31,11 +32,11 @@ import java.util.Objects;
  */
 public final class TrafficDescriptor implements Parcelable {
     private final String mDnn;
-    private final String mOsAppId;
+    private final byte[] mOsAppId;
 
     private TrafficDescriptor(@NonNull Parcel in) {
         mDnn = in.readString();
-        mOsAppId = in.readString();
+        mOsAppId = in.createByteArray();
     }
 
     /**
@@ -45,14 +46,15 @@ public final class TrafficDescriptor implements Parcelable {
      *
      * @hide
      */
-    public TrafficDescriptor(String dnn, String osAppId) {
+    public TrafficDescriptor(String dnn, byte[] osAppId) {
         mDnn = dnn;
         mOsAppId = osAppId;
     }
 
     /**
      * DNN stands for Data Network Name and represents an APN as defined in 3GPP TS 23.003.
-     * @return the DNN of this traffic descriptor.
+     * @return the DNN of this traffic descriptor if one is included by the network, null
+     * otherwise.
      */
     public @Nullable String getDataNetworkName() {
         return mDnn;
@@ -60,10 +62,11 @@ public final class TrafficDescriptor implements Parcelable {
 
     /**
      * OsAppId is the app id as defined in 3GPP TS 24.526 Section 5.2, and it identifies a traffic
-     * category.
-     * @return the OS App ID of this traffic descriptor.
+     * category. It includes the OS Id component of the field as defined in the specs.
+     * @return the OS App ID of this traffic descriptor if one is included by the network, null
+     * otherwise.
      */
-    public @Nullable String getOsAppId() {
+    public @Nullable byte[] getOsAppId() {
         return mOsAppId;
     }
 
@@ -80,7 +83,7 @@ public final class TrafficDescriptor implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mDnn);
-        dest.writeString(mOsAppId);
+        dest.writeByteArray(mOsAppId);
     }
 
     public static final @NonNull Parcelable.Creator<TrafficDescriptor> CREATOR =
@@ -101,7 +104,7 @@ public final class TrafficDescriptor implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TrafficDescriptor that = (TrafficDescriptor) o;
-        return Objects.equals(mDnn, that.mDnn) && Objects.equals(mOsAppId, that.mOsAppId);
+        return Objects.equals(mDnn, that.mDnn) && Arrays.equals(mOsAppId, that.mOsAppId);
     }
 
     @Override
@@ -121,10 +124,12 @@ public final class TrafficDescriptor implements Parcelable {
      *     .setDnn("")
      *     .build();
      * </code></pre>
+     *
+     * @hide
      */
     public static final class Builder {
         private String mDnn = null;
-        private String mOsAppId = null;
+        private byte[] mOsAppId = null;
 
         /**
          * Default constructor for Builder.
@@ -144,12 +149,12 @@ public final class TrafficDescriptor implements Parcelable {
         }
 
         /**
-         * Set the OS App ID.
+         * Set the OS App ID (including OS Id as defind in the specs).
          *
          * @return The same instance of the builder.
          */
         @NonNull
-        public Builder setOsAppId(@NonNull String osAppId) {
+        public Builder setOsAppId(@NonNull byte[] osAppId) {
             this.mOsAppId = osAppId;
             return this;
         }
