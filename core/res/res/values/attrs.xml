@@ -9577,7 +9577,7 @@
     <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
     <attr name="lStar" format="float"/>
 
-    <declare-styleable name="DisplayHasherService">
+    <declare-styleable name="DisplayHashingService">
         <!-- The throttle duration for display hash requests
              @hide @SystemApi -->
         <attr name="throttleDurationMillis" format="integer" />

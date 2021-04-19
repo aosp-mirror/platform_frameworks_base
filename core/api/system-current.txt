@@ -40,6 +40,7 @@ package android {
     field public static final String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
     field public static final String BIND_CONTENT_SUGGESTIONS_SERVICE = "android.permission.BIND_CONTENT_SUGGESTIONS_SERVICE";
     field public static final String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
+    field public static final String BIND_DISPLAY_HASHING_SERVICE = "android.permission.BIND_DISPLAY_HASHING_SERVICE";
     field public static final String BIND_DOMAIN_VERIFICATION_AGENT = "android.permission.BIND_DOMAIN_VERIFICATION_AGENT";
     field public static final String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
@@ -9862,7 +9863,7 @@ package android.service.displayhash {
   public final class DisplayHashParams implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.util.Size getBufferSize();
-    method public boolean isGrayscaleBuffer();
+    method public boolean isUseGrayscale();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.displayhash.DisplayHashParams> CREATOR;
   }
@@ -9871,17 +9872,17 @@ package android.service.displayhash {
     ctor public DisplayHashParams.Builder();
     method @NonNull public android.service.displayhash.DisplayHashParams build();
     method @NonNull public android.service.displayhash.DisplayHashParams.Builder setBufferSize(int, int);
-    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setGrayscaleBuffer(boolean);
+    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setUseGrayscale(boolean);
   }
 
-  public abstract class DisplayHasherService extends android.app.Service {
-    ctor public DisplayHasherService();
+  public abstract class DisplayHashingService extends android.app.Service {
+    ctor public DisplayHashingService();
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @Nullable public abstract void onGenerateDisplayHash(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String, @NonNull android.view.displayhash.DisplayHashResultCallback);
+    method public abstract void onGenerateDisplayHash(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String, @NonNull android.view.displayhash.DisplayHashResultCallback);
     method @NonNull public abstract java.util.Map<java.lang.String,android.service.displayhash.DisplayHashParams> onGetDisplayHashAlgorithms();
     method @Nullable public abstract android.view.displayhash.VerifiedDisplayHash onVerifyDisplayHash(@NonNull byte[], @NonNull android.view.displayhash.DisplayHash);
-    field public static final String SERVICE_INTERFACE = "android.service.displayhash.DisplayHasherService";
-    field public static final String SERVICE_META_DATA = "android.displayhash.display_hasher_service";
+    field public static final String SERVICE_INTERFACE = "android.service.displayhash.DisplayHashingService";
+    field public static final String SERVICE_META_DATA = "android.displayhash.display_hashing_service";
   }
 
 }
