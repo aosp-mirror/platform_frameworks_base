@@ -1038,6 +1038,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * #EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT}. This method invocation will fail silently when
      * feature is not supported.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean getLastVoiceTagNumber(BluetoothDevice device) {
         if (DBG) log("getLastVoiceTagNumber()");
         final IBluetoothHeadsetClient service =
@@ -1059,6 +1061,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * Note: This is an internal function and shouldn't be exposed
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getAudioState(BluetoothDevice device) {
         if (VDBG) log("getAudioState");
         final IBluetoothHeadsetClient service =
@@ -1083,6 +1087,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @param allowed if routing is allowed to the device Note: This is an internal function and
      * shouldn't be exposed
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void setAudioRouteAllowed(BluetoothDevice device, boolean allowed) {
         if (VDBG) log("setAudioRouteAllowed");
         final IBluetoothHeadsetClient service =
@@ -1106,6 +1112,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return whether the command succeeded Note: This is an internal function and shouldn't be
      * exposed
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean getAudioRouteAllowed(BluetoothDevice device) {
         if (VDBG) log("getAudioRouteAllowed");
         final IBluetoothHeadsetClient service =
