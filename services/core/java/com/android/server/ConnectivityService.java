@@ -2789,6 +2789,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer,
             @Nullable String[] args) {
+        if (!checkDumpPermission(mContext, TAG, writer)) return;
+
         mPriorityDumper.dump(fd, writer, args);
     }
 
@@ -2806,7 +2808,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void doDump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-        if (!checkDumpPermission(mContext, TAG, pw)) return;
 
         if (CollectionUtils.contains(args, DIAG_ARG)) {
             dumpNetworkDiagnostics(pw);
