@@ -184,7 +184,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         Mockito.verify(mOngoingCallController).addCallback(ongoingCallListenerCaptor.capture());
         OngoingCallListener listener = Objects.requireNonNull(ongoingCallListenerCaptor.getValue());
 
-        when(mOngoingCallController.getHasOngoingCall()).thenReturn(true);
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
         listener.onOngoingCallStarted(/* animate= */ false);
 
         assertEquals(View.VISIBLE,
@@ -205,7 +205,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         Mockito.verify(mOngoingCallController).addCallback(ongoingCallListenerCaptor.capture());
         OngoingCallListener listener = Objects.requireNonNull(ongoingCallListenerCaptor.getValue());
 
-        when(mOngoingCallController.getHasOngoingCall()).thenReturn(false);
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(false);
         listener.onOngoingCallEnded(/* animate= */ false);
 
         assertEquals(View.GONE,
