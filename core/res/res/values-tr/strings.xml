@@ -1635,8 +1635,8 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> hizmetini açarsanız cihazınız veri şifrelemeyi geliştirmek için ekran kilidinizi kullanmaz."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Erişebilirlik ihtiyaçlarınıza yardımcı olan uygulamalara tam kontrol verilmesi uygundur ancak diğer pek çok uygulama için uygun değildir."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekranı görüntüleme ve kontrol etme"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ekrandaki tüm içeriği okuyabilir ve içeriği diğer uygulamaların üzerinde gösterebilir"</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"İşlemleri görüntüleyin ve gerçekleştirin"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ekrandaki tüm içeriği okuyabilir ve içeriği diğer uygulamaların üzerinde gösterebilir."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"İşlemleri görüntüleme ve gerçekleştirme"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Bir uygulama veya donanım sensörüyle etkileşimlerinizi takip edebilir ve sizin adınıza uygulamalarla etkileşimde bulunabilir."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"İzin ver"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Reddet"</string>

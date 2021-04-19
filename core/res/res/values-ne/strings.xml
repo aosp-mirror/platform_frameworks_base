@@ -1633,7 +1633,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"निष्क्रिय"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> लाई तपाईंको यन्त्र पूर्ण रूपमा नियन्त्रण गर्न दिने हो?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"तपाईंले <xliff:g id="SERVICE">%1$s</xliff:g> सक्रिय गर्नुभयो भने तपाईंको यन्त्रले डेटा इन्क्रिप्ट गर्ने सुविधाको स्तरोन्नति गर्न तपाईंको स्क्रिन लक सुविधाको प्रयोग गर्ने छैन।"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"तपाईंलाई पहुँच राख्न आवश्यक पर्ने कुरामा सहयोग गर्ने एपमाथि पूर्ण नियन्त्रण गर्नु उपयुक्त हुन्छ तर अधिकांश अनुप्रयोगहरूका हकमा यस्तो नियन्त्रण उपयुक्त हुँदैन।"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"एक्सेसिबिलिटीसम्बन्धी आवश्यकतामा सहयोग गर्ने एपको पूर्ण नियन्त्रण गर्नु उपयुक्त हुन्छ तर अधिकांश एपका हकमा यस्तो नियन्त्रण उपयुक्त हुँदैन।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रिन हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यसले स्क्रिनमा देखिने सबै सामग्री पढ्न सक्छ र अन्य एपहरूमा उक्त सामग्री देखाउन सक्छ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"कारबाहीहरू हेर्नुहोस् र तिनमा कार्य गर्नुहोस्"</string>

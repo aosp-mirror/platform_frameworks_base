@@ -1631,7 +1631,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Қосылмасын"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ҚОСУЛЫ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ӨШІРУЛІ"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> қызметі құрылғыңызды толық басқаруына рұқсат етілсін бе?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> қызметіне құрылғыны толық басқаруға рұқсат етілсін бе?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> қоссаңыз, құрылғыңыз деректерді шифрлау үшін экранды бекітуді пайдаланбайды."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Арнайы мүмкіндіктер бойынша көмектесетін қолданбаларға ғана құрылғыны толық басқару рұқсатын берген дұрыс."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Экранды көру және басқару"</string>
@@ -1639,7 +1639,7 @@
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Әрекеттерді көру және орындау"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ол қолданбамен немесе жабдық датчигімен істеген тапсырмаларыңызды бақылайды және қолданбаларды сіздің атыңыздан пайдаланады."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Рұқсат ету"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Қабылдамау"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Тыйым салу"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Функцияны пайдалана бастау үшін түртіңіз:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"\"Арнайы мүмкіндіктер\" түймесімен қолданылатын функцияларды таңдаңыз"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Дыбыс деңгейі пернелері тіркесімімен қолданылатын функцияларды таңдаңыз"</string>
