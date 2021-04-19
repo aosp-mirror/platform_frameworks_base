@@ -24,7 +24,9 @@
     },
     {
       "name": "CtsIncrementalInstallHostTestCases"
-    },
+    }
+  ],
+  "presubmit-large": [
     {
       "name": "CtsInstalledLoadingProgressHostTests"
     }
