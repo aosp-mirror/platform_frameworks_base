@@ -9,7 +9,6 @@
   ~      http://www.apache.org/licenses/LICENSE-2.0
   ~
   ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
@@ -19,38 +18,24 @@
      and a bottom-aligned icon) and a progress layer (with an accent-colored round rect and icon)
      that moves up and down with the progress value. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
-            android:paddingMode="stack" >
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:paddingMode="stack" >
     <item android:id="@android:id/background"
         android:gravity="center_vertical|fill_horizontal">
-        <layer-list>
-            <item android:id="@+id/volume_seekbar_background_solid">
-                <shape>
-                    <size android:height="@dimen/volume_dialog_slider_width" />
-                    <solid android:color="?android:attr/colorBackgroundFloating" />
-                    <corners android:radius="@dimen/volume_dialog_slider_corner_radius" />
-                </shape>
-            </item>
-            <item
-                android:id="@+id/volume_seekbar_background_icon"
-                android:gravity="center_vertical|left"
-                android:height="@dimen/rounded_slider_icon_size"
-                android:width="@dimen/rounded_slider_icon_size"
-                android:left="@dimen/rounded_slider_icon_inset">
-                <rotate
-                    android:fromDegrees="-270"
-                    android:toDegrees="-270">
-                    <!-- A placeholder drawable is required here - it'll be replaced in code. -->
-                    <com.android.systemui.util.AlphaTintDrawableWrapper
-                        android:drawable="@drawable/ic_volume_media"
-                        android:tint="?android:attr/colorAccent" />
-                </rotate>
-            </item>
-        </layer-list>
+        <inset
+            android:insetLeft="@dimen/rounded_slider_track_inset"
+            android:insetRight="@dimen/rounded_slider_track_inset" >
+            <shape>
+                <size android:height="@dimen/volume_dialog_track_width" />
+                <corners android:radius="@dimen/volume_dialog_track_corner_radius" />
+                <solid android:color="?androidprv:attr/colorAccentSecondaryVariant" />
+            </shape>
+        </inset>
     </item>
     <item android:id="@android:id/progress"
-          android:gravity="center_vertical|fill_horizontal">
-            <com.android.systemui.util.RoundedCornerProgressDrawable
-                android:drawable="@drawable/volume_row_seekbar_progress"
+        android:gravity="center_vertical|fill_horizontal">
+        <com.android.systemui.util.RoundedCornerProgressDrawable
+            android:drawable="@drawable/volume_row_seekbar_progress"
             />
     </item>
 </layer-list>
