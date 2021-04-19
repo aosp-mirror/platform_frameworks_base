@@ -229,12 +229,15 @@ public class PackageInstaller {
 
     /**
      * Type of DataLoader for this session. Will be one of
-     * {@link #DATA_LOADER_TYPE_NONE}, {@link #DATA_LOADER_TYPE_STREAMING}.
+     * {@link #DATA_LOADER_TYPE_NONE}, {@link #DATA_LOADER_TYPE_STREAMING},
+     * {@link #DATA_LOADER_TYPE_INCREMENTAL}.
      * <p>
      * See the individual types documentation for details.
      *
      * @see Intent#getIntExtra(String, int)
+     * {@hide}
      */
+    @SystemApi
     public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
 
     /**
@@ -242,6 +245,7 @@ public class PackageInstaller {
      * Caller should make sure DataLoader is able to prepare image and reinitiate the operation.
      *
      * @see #EXTRA_SESSION_ID
+     * {@hide}
      */
     public static final int STATUS_PENDING_STREAMING = -2;
 
@@ -344,21 +348,25 @@ public class PackageInstaller {
      * Default value, non-streaming installation session.
      *
      * @see #EXTRA_DATA_LOADER_TYPE
+     * {@hide}
      */
+    @SystemApi
     public static final int DATA_LOADER_TYPE_NONE = DataLoaderType.NONE;
 
     /**
      * Streaming installation using data loader.
      *
      * @see #EXTRA_DATA_LOADER_TYPE
+     * {@hide}
      */
+    @SystemApi
     public static final int DATA_LOADER_TYPE_STREAMING = DataLoaderType.STREAMING;
 
     /**
      * Streaming installation using Incremental FileSystem.
      *
      * @see #EXTRA_DATA_LOADER_TYPE
-     * @hide
+     * {@hide}
      */
     @SystemApi
     public static final int DATA_LOADER_TYPE_INCREMENTAL = DataLoaderType.INCREMENTAL;
@@ -366,13 +374,18 @@ public class PackageInstaller {
     /**
      * Target location for the file in installation session is /data/app/<packageName>-<id>.
      * This is the intended location for APKs.
+     * Requires permission to install packages.
+     * {@hide}
      */
+    @SystemApi
     public static final int LOCATION_DATA_APP = InstallationFileLocation.DATA_APP;
 
     /**
      * Target location for the file in installation session is
      * /data/media/<userid>/Android/obb/<packageName>. This is the intended location for OBBs.
+     * {@hide}
      */
+    @SystemApi
     public static final int LOCATION_MEDIA_OBB = InstallationFileLocation.MEDIA_OBB;
 
     /**
@@ -380,7 +393,9 @@ public class PackageInstaller {
      * /data/media/<userid>/Android/data/<packageName>.
      * This is the intended location for application data.
      * Can only be used by an app itself running under specific user.
+     * {@hide}
      */
+    @SystemApi
     public static final int LOCATION_MEDIA_DATA = InstallationFileLocation.MEDIA_DATA;
 
     /** @hide */
@@ -1152,7 +1167,10 @@ public class PackageInstaller {
 
         /**
          * @return data loader params or null if the session is not using one.
+         * {@hide}
          */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.USE_INSTALLER_V2)
         public @Nullable DataLoaderParams getDataLoaderParams() {
             try {
                 DataLoaderParamsParcel data = mSession.getDataLoaderParams();
@@ -1189,7 +1207,11 @@ public class PackageInstaller {
          * @throws IllegalStateException if called for non-streaming session
          *
          * @see android.content.pm.InstallationFile
+         *
+         * {@hide}
          */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.USE_INSTALLER_V2)
         public void addFile(@FileLocation int location, @NonNull String name, long lengthBytes,
                 @NonNull byte[] metadata, @Nullable byte[] signature) {
             try {
@@ -1209,8 +1231,11 @@ public class PackageInstaller {
          * @param name name of a file, e.g. split.
          * @throws SecurityException if called after the session has been
          *             sealed or abandoned
-         * @throws IllegalStateException if called for non-streaming session
+         * @throws IllegalStateException if called for non-DataLoader session
+         * {@hide}
          */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.USE_INSTALLER_V2)
         public void removeFile(@FileLocation int location, @NonNull String name) {
             try {
                 mSession.removeFile(location, name);
@@ -2026,7 +2051,13 @@ public class PackageInstaller {
          * staging folder.
          *
          * @see android.service.dataloader.DataLoaderService.DataLoader
+         *
+         * {@hide}
          */
+        @SystemApi
+        @RequiresPermission(allOf = {
+                Manifest.permission.INSTALL_PACKAGES,
+                Manifest.permission.USE_INSTALLER_V2})
         public void setDataLoaderParams(@NonNull DataLoaderParams dataLoaderParams) {
             this.dataLoaderParams = dataLoaderParams;
         }
