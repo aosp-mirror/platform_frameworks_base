@@ -325,6 +325,8 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      */
     @NonNull
     @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getActiveDevices() {
         if (VDBG) log("getActiveDevices()");
         try {
@@ -348,6 +350,8 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @hide
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getGroupId(@NonNull BluetoothDevice device) {
         if (VDBG) log("getGroupId()");
         try {
