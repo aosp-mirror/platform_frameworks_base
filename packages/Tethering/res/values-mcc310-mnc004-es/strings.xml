@@ -20,5 +20,5 @@
     <string name="no_upstream_notification_message" msgid="3843613362272973447">"Los dispositivos no se pueden conectar"</string>
     <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"Desactivar conexión compartida"</string>
     <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"Punto de acceso o conexión compartida activados"</string>
-    <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"Puede que se apliquen cargos adicionales en itinerancia"</string>
+    <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"Puede que se apliquen cargos adicionales en roaming"</string>
 </resources>

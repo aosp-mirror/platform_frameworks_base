@@ -20,5 +20,5 @@
     <string name="no_upstream_notification_message" msgid="3843613362272973447">"למכשירים אין אפשרות להתחבר"</string>
     <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"השבתה של שיתוף האינטרנט בין מכשירים"</string>
     <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"‏שיתוף האינטרנט (hotspot או tethering) פעיל"</string>
-    <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"ייתכנו חיובים נוספים בעת נדידה"</string>
+    <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"ייתכנו חיובים נוספים במהלך נדידה"</string>
 </resources>

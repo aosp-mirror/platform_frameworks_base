@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5030042590486713460">"Modemin internetə girişi yoxdur"</string>
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"Modem internetsizdir"</string>
     <string name="no_upstream_notification_message" msgid="3843613362272973447">"Cihazları qoşmaq mümkün deyil"</string>
     <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"Modemi deaktiv edin"</string>
     <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"Hotspot və ya modem aktivdir"</string>
