@@ -1497,6 +1497,9 @@ public class PackageManagerService extends IPackageManager.Stub
     // List of packages names to keep cached, even if they are uninstalled for all users
     private List<String> mKeepUninstalledPackages;
 
+    // Cached reference to IDevicePolicyManager.
+    private IDevicePolicyManager mDevicePolicyManager = null;
+
     private File mCacheDir;
 
     private Future<?> mPrepareAppDataFuture;
@@ -20809,8 +20812,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private boolean isPackageDeviceAdmin(String packageName, int userId) {
-        IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
-                ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
+        final IDevicePolicyManager dpm = getDevicePolicyManager();
         try {
             if (dpm != null) {
                 final ComponentName deviceOwnerComponentName = dpm.getDeviceOwnerComponent(
@@ -20840,6 +20842,16 @@ public class PackageManagerService extends IPackageManager.Stub
         } catch (RemoteException e) {
         }
         return false;
+    }
+
+    /** Returns the device policy manager interface. */
+    private IDevicePolicyManager getDevicePolicyManager() {
+        if (mDevicePolicyManager == null) {
+            // No need to synchronize; worst-case scenario it will be fetched twice.
+            mDevicePolicyManager = IDevicePolicyManager.Stub.asInterface(
+                            ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
+        }
+        return mDevicePolicyManager;
     }
 
     private boolean shouldKeepUninstalledPackageLPr(String packageName) {
