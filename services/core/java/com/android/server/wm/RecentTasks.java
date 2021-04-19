@@ -1436,20 +1436,18 @@ class RecentTasks {
 
     /** @return whether the given task can be trimmed even if it is outside the visible range. */
     protected boolean isTrimmable(Task task) {
-        final Task rootTask = task.getRootTask();
-
-        // No stack for task, just trim it
-        if (rootTask == null) {
+        // The task was detached, just trim it.
+        if (!task.isAttached()) {
             return true;
         }
 
         // Ignore tasks from different displays
         // TODO (b/115289124): No Recents on non-default displays.
-        if (!rootTask.isOnHomeDisplay()) {
+        if (!task.isOnHomeDisplay()) {
             return false;
         }
 
-        final Task rootHomeTask = rootTask.getDisplayArea().getRootHomeTask();
+        final Task rootHomeTask = task.getDisplayArea().getRootHomeTask();
         // Home task does not exist. Don't trim the task.
         if (rootHomeTask == null) {
             return false;
