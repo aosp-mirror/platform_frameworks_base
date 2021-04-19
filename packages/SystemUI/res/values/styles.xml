@@ -388,7 +388,7 @@
     </style>
 
     <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
-        <item name="android:dialogCornerRadius">8dp</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="Theme.SystemUI.QuickSettings.Dialog" parent="@android:style/Theme.DeviceDefault.Dialog">
