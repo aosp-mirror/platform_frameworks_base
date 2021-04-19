@@ -242,10 +242,10 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"Uključi"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Ponovo pokreni"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Hitne službe"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Izvješće o bugovima"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Izvješće o programskim pogreškama"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Završi sesiju"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snimka zaslona"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Izvješće o bugovima"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Izvješće o programskim pogreškama"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Time će se prikupiti podaci o trenutačnom stanju vašeg uređaja koje ćete nam poslati u e-poruci. Za pripremu izvješća o programskoj pogrešci potrebno je nešto vremena pa vas molimo za strpljenje."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktivno izvješće"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"To možete upotrebljavati u većini slučajeva. Moći ćete pratiti izradu izvješća, unijeti više pojedinosti o problemu i izraditi snimke zaslona. Mogu se izostaviti neki odjeljci koji se upotrebljavaju rjeđe i produljuju izradu izvješća."</string>
@@ -1123,7 +1123,7 @@
     <string name="redo" msgid="7231448494008532233">"Ponovi"</string>
     <string name="autofill" msgid="511224882647795296">"Automatsko popunjavanje"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Odabir teksta"</string>
-    <string name="addToDictionary" msgid="8041821113480950096">"Dodaj u rječnik"</string>
+    <string name="addToDictionary" msgid="8041821113480950096">"Dodavanje u rječnik"</string>
     <string name="deleteText" msgid="4200807474529938112">"Izbriši"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Način unosa"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Radnje s tekstom"</string>
@@ -1347,7 +1347,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DIJELI"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODBIJ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Odabir načina unosa"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Zadržava se na zaslonu dok je fizička tipkovnica aktivna"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Zadrži na zaslonu dok je fizička tipkovnica aktivna"</string>
     <string name="hardware" msgid="1800597768237606953">"Prikaži virtualnu tipkovnicu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurirajte fizičku tipkovnicu"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dodirnite da biste odabrali jezik i raspored"</string>
@@ -1653,12 +1653,12 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Nemoj uključiti"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"UKLJUČENO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ISKLJUČENO"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Želite li dopustiti usluzi <xliff:g id="SERVICE">%1$s</xliff:g> potpunu kontrolu nad uređajem?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Želite li usluzi <xliff:g id="SERVICE">%1$s</xliff:g> dopustiti potpunu kontrolu nad uređajem?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ako uključite <xliff:g id="SERVICE">%1$s</xliff:g>, vaš uređaj neće upotrebljavati zaključavanje zaslona za bolju enkripciju podataka."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Potpuna kontrola prikladna je za aplikacije koje vam pomažu s potrebama pristupačnosti, ali ne i za većinu aplikacija."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Prikaz zaslona i upravljanje njime"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Pregled zaslona i upravljanje njime"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Može čitati sav sadržaj na zaslonu i prikazati sadržaj povrh drugih aplikacija."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Prikaz i izvršavanje radnji"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Pregled i izvršavanje radnji"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Može pratiti vaše interakcije s aplikacijama ili senzorom uređaja i stupati u interakciju s aplikacijama u vaše ime."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Dopusti"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Odbij"</string>
@@ -1671,7 +1671,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Isključi prečac"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Upotrijebi prečac"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija boja"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcija boje"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcija boja"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Držali ste tipke za glasnoću. Uključila se usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Držali ste tipke za glasnoću. Isključila se usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Pritisnite i zadržite tipke za glasnoću na tri sekunde da biste koristili uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>

@@ -1875,7 +1875,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Isaziso sohlelo lokusebenza olungokwezifiso"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukuthi idale umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> (Umsebenzisi onale akhawunti usevele ukhona) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Vumela i-<xliff:g id="APP">%1$s</xliff:g> ukuthi idale umsebenzisi omusha nge-<xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"Engeza ulwimi"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"Engeza ulimi"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Okuncamelayo kwesifunda"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Thayipha igama lolimi"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Okuphakanyisiwe"</string>

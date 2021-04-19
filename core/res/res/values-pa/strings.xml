@@ -1635,7 +1635,7 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ਜੇਕਰ ਤੁਸੀਂ <xliff:g id="SERVICE">%1$s</xliff:g> ਚਾਲੂ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਇਨਕ੍ਰਿਪਸ਼ਨ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰੇਗਾ।"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ਪੂਰਾ ਕੰਟਰੋਲ ਉਹਨਾਂ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਹੈ ਜੋ ਪਹੁੰਚਯੋਗਤਾ ਸੰਬੰਧੀ ਲੋੜਾਂ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕਰਦੀਆਂ ਹਨ, ਪਰ ਜ਼ਿਆਦਾਤਰ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਨਹੀਂ ਹੁੰਦਾ।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ਸਕ੍ਰੀਨ ਨੂੰ ਦੇਖੋ ਅਤੇ ਕੰਟਰੋਲ ਕਰੋ"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ਇਹ ਸਕ੍ਰੀਨ \'ਤੇ ਸਾਰੀ ਸਮੱਗਰੀ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਪਰ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ਇਹ ਸਕ੍ਰੀਨ \'ਤੇ ਸਾਰੀ ਸਮੱਗਰੀ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਪਰ ਦਿਖਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ਕਾਰਵਾਈਆਂ ਦੇਖੋ ਅਤੇ ਕਰੋ"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ਇਹ ਕਿਸੇ ਐਪ ਜਾਂ ਹਾਰਡਵੇਅਰ ਸੈਂਸਰ ਦੇ ਨਾਲ ਤੁਹਾਡੀਆਂ ਅੰਤਰਕਿਰਿਆਵਾਂ ਨੂੰ ਟਰੈਕ ਕਰ ਸਕਦੀ ਹੈ, ਅਤੇ ਤੁਹਾਡੀ ਤਰਫ਼ੋਂ ਐਪਾਂ ਦੇ ਨਾਲ ਅੰਤਰਕਿਰਿਆ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ਕਰਨ ਦਿਓ"</string>
@@ -1877,7 +1877,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"ਕੀ <xliff:g id="APP">%1$s</xliff:g> ਨੂੰ <xliff:g id="ACCOUNT">%2$s</xliff:g> ਨਾਲ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਬਣਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਦੇਣੀ ਹੈ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ਇੱਕ ਭਾਸ਼ਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ਖੇਤਰ ਤਰਜੀਹ"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"ਭਾਸ਼ਾ ਨਾਮ ਟਾਈਪ ਕਰੋ"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"ਭਾਸ਼ਾ ਦਾ ਨਾਮ ਟਾਈਪ ਕਰੋ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ਸੁਝਾਈਆਂ ਗਈਆਂ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ਸਾਰੇ ਖੇਤਰ"</string>

@@ -665,8 +665,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mobilfunkanbieter-Messaging-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"An Mobilfunkanbieter-Dienste binden"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Ermöglicht dem Inhaber die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Auf \"Bitte nicht stören\" zugreifen"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ermöglicht der App Lese- und Schreibzugriff auf die \"Bitte nicht stören\"-Konfiguration"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Auf „Bitte nicht stören“ zugreifen"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ermöglicht der App Lese- und Schreibzugriff auf die „Bitte nicht stören“-Konfiguration"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Mit der Verwendung der Anzeigeberechtigung beginnen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Ermöglicht dem Inhaber, die Berechtigungsnutzung für eine App zu beginnen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Passwortregeln festlegen"</string>
@@ -1458,7 +1458,7 @@
     <string name="gpsNotifTicker" msgid="3207361857637620780">"Standortabfrage von <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="1590033371665669570">"Standortabfrage"</string>
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Angefordert von <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
-    <string name="gpsVerifYes" msgid="3719843080744112940">"\"Ja\""</string>
+    <string name="gpsVerifYes" msgid="3719843080744112940">"„Ja“"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nein"</string>
     <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Zugriff auf Gerätestandort bei Notfall"</string>
     <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Dein Gerätehersteller hat vor Kurzem während eines Notfalls auf deinen Standort zugegriffen"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie „Hey Google“ werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie „Hey Google“ werden abgeschaltet oder eingeschränkt"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
@@ -1832,7 +1832,7 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nächste Weckzeit)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Bis zur Deaktivierung"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Bis zur Deaktivierung von \"Bitte nicht stören\""</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Bis zur Deaktivierung von „Bitte nicht stören“"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Minimieren"</string>
     <string name="zen_mode_feature_name" msgid="3785547207263754500">"Bitte nicht stören"</string>
@@ -1929,7 +1929,7 @@
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"In den Texteingabemodus wechseln, um die Uhrzeit einzugeben."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"In den Uhrzeitmodus wechseln, um die Uhrzeit einzugeben."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Optionen für automatisches Ausfüllen"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Für \"Automatisches Ausfüllen\" speichern"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Für „Automatisches Ausfüllen“ speichern"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Inhalte können nicht automatisch ausgefüllt werden"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Keine Vorschläge für automatisches Ausfüllen"</string>
     <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
@@ -1988,9 +1988,9 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Anrufe und Benachrichtigungen stummgeschaltet"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Systemänderungen"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Bitte nicht stören"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Neu: Durch \"Bitte nicht stören\" werden Benachrichtigungen nicht mehr angezeigt"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Neu: Durch „Bitte nicht stören“ werden Benachrichtigungen nicht mehr angezeigt"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Für weitere Informationen und zum Ändern tippen."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Bitte nicht stören\" wurde geändert"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„Bitte nicht stören“ wurde geändert"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tippe, um zu überprüfen, welche Inhalte blockiert werden."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Einstellungen"</string>

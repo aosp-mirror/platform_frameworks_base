@@ -990,8 +990,8 @@
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Aktifkan Menjelajah dengan Sentuhan?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mengaktifkan Menjelajah dengan Sentuhan. Saat Menjelajah dengan Sentuhan diaktifkan, Anda dapat melihat atau mendengar deskripsi dari apa yang ada di bawah jari Anda atau melakukan gerakan untuk berinteraksi dengan tablet."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mengaktifkan Menjelajah dengan Sentuhan. Saat Menjelajah dengan Sentuhan diaktifkan, Anda dapat mendengar atau melihat deskripsi dari apa yang ada di bawah jari Anda atau melakukan gerakan untuk berinteraksi dengan ponsel."</string>
-    <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 bulan yang lalu"</string>
-    <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Sebelum 1 bulan yang lalu"</string>
+    <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 bulan lalu"</string>
+    <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Sebelum 1 bulan lalu"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
       <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g> hari terakhir</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g> hari terakhir</item>

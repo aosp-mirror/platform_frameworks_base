@@ -1327,7 +1327,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"拒绝"</string>
     <string name="select_input_method" msgid="3971267998568587025">"选择输入法"</string>
-    <string name="show_ime" msgid="6406112007347443383">"在连接到实体键盘时保持显示"</string>
+    <string name="show_ime" msgid="6406112007347443383">"开启后，连接到实体键盘时，它会一直显示在屏幕上"</string>
     <string name="hardware" msgid="1800597768237606953">"显示虚拟键盘"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"配置实体键盘"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"点按即可选择语言和布局"</string>

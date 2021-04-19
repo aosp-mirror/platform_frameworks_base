@@ -1183,7 +1183,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Həmişə göstərin"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> Android OS sisteminin uyğunsuz versiyası üçün hazırlandı və gözlənilməz şəkildə davrana bilər. Tətbiqin güncəllənmiş versiyası əlçatan ola bilər."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Həmişə göstərin"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Güncəlləməni yoxlayın"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Güncəllənmə olmasını yoxlayın"</string>
     <string name="smv_application" msgid="3775183542777792638">"Tətbiq <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) StrictMode siyasətini pozdu."</string>
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> prosesi StrictMode siyasətini pozdu."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefon yenilənir…"</string>
@@ -1514,7 +1514,7 @@
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB drayv"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB yaddaş"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Düzəliş edin"</string>
-    <string name="data_usage_warning_title" msgid="9034893717078325845">"Data xəbərdarlığı"</string>
+    <string name="data_usage_warning_title" msgid="9034893717078325845">"Trafik xəbərdarlığı"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"<xliff:g id="APP">%s</xliff:g> data istifadə etdiniz"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Mobil data limitinə çatdı"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Wi-Fi data limitinə çatdı"</string>
@@ -1892,7 +1892,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Tətbiq əlçatan deyil"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> hazırda əlçatan deyil."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Bu tətbiq köhnə Android versiyası üçün hazırlanıb və düzgün işləməyə bilər. Güncəlləməni yoxlayın və ya developer ilə əlaqə saxlayın."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Güncəlləməni yoxlayın"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Güncəllənmə olmasını yoxlayın"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Yeni mesajlarınız var"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Baxmaq üçün SMS tətbiqini açın"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Bəzi funksiyalar məhdudlaşdırıla bilər"</string>
