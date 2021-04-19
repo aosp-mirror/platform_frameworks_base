@@ -1772,7 +1772,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     public void logContextCommitted() {
         mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this,
-                Event.NO_SAVE_REASON_NONE));
+                Event.NO_SAVE_UI_REASON_NONE));
     }
 
     /**
@@ -2161,7 +2161,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Slog.w(TAG, "Call to Session#showSaveLocked() rejected - session: "
                     + id + " destroyed");
             return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ false,
-                    Event.NO_SAVE_REASON_NONE);
+                    Event.NO_SAVE_UI_REASON_NONE);
         }
         mSessionState = STATE_FINISHED;
         final FillResponse response = getLastResponseLocked("showSaveLocked(%s)");
@@ -2180,14 +2180,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (saveInfo == null) {
             if (sVerbose) Slog.v(TAG, "showSaveLocked(" + this.id + "): no saveInfo from service");
             return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
-                    Event.NO_SAVE_REASON_NO_SAVE_INFO);
+                    Event.NO_SAVE_UI_REASON_NO_SAVE_INFO);
         }
 
         if ((saveInfo.getFlags() & SaveInfo.FLAG_DELAY_SAVE) != 0) {
             // TODO(b/113281366): log metrics
             if (sDebug) Slog.v(TAG, "showSaveLocked(" + this.id + "): service asked to delay save");
             return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ false,
-                    Event.NO_SAVE_REASON_WITH_DELAY_SAVE_FLAG);
+                    Event.NO_SAVE_UI_REASON_WITH_DELAY_SAVE_FLAG);
         }
 
         final ArrayMap<AutofillId, InternalSanitizer> sanitizers = createSanitizers(saveInfo);
@@ -2281,7 +2281,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         int saveDialogNotShowReason;
         if (!allRequiredAreNotEmpty) {
-            saveDialogNotShowReason = Event.NO_SAVE_REASON_HAS_EMPTY_REQUIRED;
+            saveDialogNotShowReason = Event.NO_SAVE_UI_REASON_HAS_EMPTY_REQUIRED;
         } else {
             // Must look up all optional ids in 2 scenarios:
             // - if no required id changed but an optional id did, it should trigger save / update
@@ -2334,7 +2334,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
             if (!atLeastOneChanged) {
-                saveDialogNotShowReason = Event.NO_SAVE_REASON_NO_VALUE_CHANGED;
+                saveDialogNotShowReason = Event.NO_SAVE_UI_REASON_NO_VALUE_CHANGED;
             } else {
                 if (sDebug) {
                     Slog.d(TAG, "at least one field changed, validate fields for save UI");
@@ -2354,14 +2354,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         log.setType(MetricsEvent.TYPE_FAILURE);
                         mMetricsLogger.write(log);
                         return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
-                                Event.NO_SAVE_REASON_FIELD_VALIDATION_FAILED);
+                                Event.NO_SAVE_UI_REASON_FIELD_VALIDATION_FAILED);
                     }
 
                     mMetricsLogger.write(log);
                     if (!isValid) {
                         Slog.i(TAG, "not showing save UI because fields failed validation");
                         return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
-                                Event.NO_SAVE_REASON_FIELD_VALIDATION_FAILED);
+                                Event.NO_SAVE_UI_REASON_FIELD_VALIDATION_FAILED);
                     }
                 }
 
@@ -2401,7 +2401,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                     + "dataset #" + i + ": " + dataset);
                         }
                         return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
-                                Event.NO_SAVE_REASON_DATASET_MATCH);
+                                Event.NO_SAVE_UI_REASON_DATASET_MATCH);
                     }
                 }
 
@@ -2422,7 +2422,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (serviceLabel == null || serviceIcon == null) {
                     wtf(null, "showSaveLocked(): no service label or icon");
                     return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
-                            Event.NO_SAVE_REASON_NONE);
+                            Event.NO_SAVE_UI_REASON_NONE);
                 }
 
                 getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
@@ -2437,7 +2437,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 mSessionFlags.mShowingSaveUi = true;
                 return new SaveResult(/* logSaveShown= */ true, /* removeSession= */ false,
-                        Event.NO_SAVE_REASON_NONE);
+                        Event.NO_SAVE_UI_REASON_NONE);
             }
         }
         // Nothing changed...
@@ -3880,7 +3880,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
          * @return The reason why a save dialog was not shown.
          */
         @NoSaveReason
-        public int getNoSaveReason() {
+        public int getNoSaveUiReason() {
             return mSaveDialogNotShowReason;
         }
 

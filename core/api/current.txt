@@ -37754,16 +37754,16 @@ package android.service.autofill {
     method @NonNull public java.util.Map<android.view.autofill.AutofillId,android.service.autofill.FieldClassification> getFieldsClassification();
     method @NonNull public java.util.Set<java.lang.String> getIgnoredDatasetIds();
     method @NonNull public java.util.Map<android.view.autofill.AutofillId,java.util.Set<java.lang.String>> getManuallyEnteredField();
-    method public int getNoSaveReason();
+    method public int getNoSaveUiReason();
     method @NonNull public java.util.Set<java.lang.String> getSelectedDatasetIds();
     method public int getType();
-    field public static final int NO_SAVE_REASON_DATASET_MATCH = 6; // 0x6
-    field public static final int NO_SAVE_REASON_FIELD_VALIDATION_FAILED = 5; // 0x5
-    field public static final int NO_SAVE_REASON_HAS_EMPTY_REQUIRED = 3; // 0x3
-    field public static final int NO_SAVE_REASON_NONE = 0; // 0x0
-    field public static final int NO_SAVE_REASON_NO_SAVE_INFO = 1; // 0x1
-    field public static final int NO_SAVE_REASON_NO_VALUE_CHANGED = 4; // 0x4
-    field public static final int NO_SAVE_REASON_WITH_DELAY_SAVE_FLAG = 2; // 0x2
+    field public static final int NO_SAVE_UI_REASON_DATASET_MATCH = 6; // 0x6
+    field public static final int NO_SAVE_UI_REASON_FIELD_VALIDATION_FAILED = 5; // 0x5
+    field public static final int NO_SAVE_UI_REASON_HAS_EMPTY_REQUIRED = 3; // 0x3
+    field public static final int NO_SAVE_UI_REASON_NONE = 0; // 0x0
+    field public static final int NO_SAVE_UI_REASON_NO_SAVE_INFO = 1; // 0x1
+    field public static final int NO_SAVE_UI_REASON_NO_VALUE_CHANGED = 4; // 0x4
+    field public static final int NO_SAVE_UI_REASON_WITH_DELAY_SAVE_FLAG = 2; // 0x2
     field public static final int TYPE_AUTHENTICATION_SELECTED = 2; // 0x2
     field public static final int TYPE_CONTEXT_COMMITTED = 4; // 0x4
     field public static final int TYPE_DATASETS_SHOWN = 5; // 0x5
