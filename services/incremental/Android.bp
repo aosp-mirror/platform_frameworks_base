@@ -76,6 +76,7 @@ cc_defaults {
         "libcutils",
         "libincfs",
         "liblog",
+        "libpermission",
         "libz",
         "libziparchive",
     ],
