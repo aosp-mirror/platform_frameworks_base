@@ -59,11 +59,9 @@ import java.io.IOException;
  *     &lt;/service&gt;
  * </pre>
  *
- * //TODO: Replace this with public link when available.
- *
  * @hide
  * @see
- * <a href="https://goto.google.com/server-based-ror">https://goto.google.com/server-based-ror</a>
+ * <a href="https://source.android.com/devices/tech/ota/resume-on-reboot">https://source.android.com/devices/tech/ota/resume-on-reboot</a>
  */
 @SystemApi
 public abstract class ResumeOnRebootService extends Service {
