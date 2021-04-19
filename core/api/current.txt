@@ -592,6 +592,7 @@ package android {
     field public static final int editTextStyle = 16842862; // 0x101006e
     field @Deprecated public static final int editable = 16843115; // 0x101016b
     field public static final int editorExtras = 16843300; // 0x1010224
+    field public static final int effectColor;
     field public static final int elegantTextHeight = 16843869; // 0x101045d
     field public static final int elevation = 16843840; // 0x1010440
     field public static final int ellipsize = 16842923; // 0x10100ab
@@ -16791,8 +16792,10 @@ package android.graphics.drawable {
 
   public class RippleDrawable extends android.graphics.drawable.LayerDrawable {
     ctor public RippleDrawable(@NonNull android.content.res.ColorStateList, @Nullable android.graphics.drawable.Drawable, @Nullable android.graphics.drawable.Drawable);
+    method @NonNull public android.content.res.ColorStateList getEffectColor();
     method public int getRadius();
-    method public void setColor(android.content.res.ColorStateList);
+    method public void setColor(@NonNull android.content.res.ColorStateList);
+    method public void setEffectColor(@NonNull android.content.res.ColorStateList);
     method public void setRadius(int);
     field public static final int RADIUS_AUTO = -1; // 0xffffffff
   }
