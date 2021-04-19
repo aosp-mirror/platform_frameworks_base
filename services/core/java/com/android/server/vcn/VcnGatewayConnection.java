@@ -2106,7 +2106,7 @@ public class VcnGatewayConnection extends StateMachine {
                 (VcnControlPlaneIkeConfig) mConnectionConfig.getControlPlaneConfig();
         final IkeSessionParams.Builder builder =
                 new IkeSessionParams.Builder(controlPlaneConfig.getIkeSessionParams());
-        builder.setConfiguredNetwork(network);
+        builder.setNetwork(network);
 
         return builder.build();
     }
