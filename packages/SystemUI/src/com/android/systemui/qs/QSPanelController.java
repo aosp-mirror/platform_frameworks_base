@@ -16,12 +16,14 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.classifier.Classifier.QS_SWIPE;
 import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import android.annotation.NonNull;
 import android.content.res.Configuration;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -31,6 +33,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
@@ -58,6 +61,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final TunerService mTunerService;
     private final QSCustomizerController mQsCustomizerController;
     private final QSTileRevealController.Factory mQsTileRevealControllerFactory;
+    private final FalsingManager mFalsingManager;
     private final BrightnessController mBrightnessController;
     private final BrightnessSlider.Factory mBrightnessSliderFactory;
     private final BrightnessSlider mBrightnessSlider;
@@ -81,6 +85,16 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final BrightnessMirrorController.BrightnessMirrorListener mBrightnessMirrorListener =
             mirror -> updateBrightnessMirror();
 
+    private View.OnTouchListener mTileLayoutTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                mFalsingManager.isFalseTouch(QS_SWIPE);
+            }
+            return false;
+        }
+    };
+
     @Inject
     QSPanelController(QSPanel view, QSSecurityFooter qsSecurityFooter, TunerService tunerService,
             QSTileHost qstileHost, QSCustomizerController qsCustomizerController,
@@ -89,7 +103,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             QSTileRevealController.Factory qsTileRevealControllerFactory,
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
-            BrightnessSlider.Factory brightnessSliderFactory,
+            BrightnessSlider.Factory brightnessSliderFactory, FalsingManager falsingManager,
             FeatureFlags featureFlags) {
         super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager, featureFlags);
@@ -97,6 +111,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
         mQsTileRevealControllerFactory = qsTileRevealControllerFactory;
+        mFalsingManager = falsingManager;
         mQsSecurityFooter.setHostEnvironment(qstileHost);
         mBrightnessSliderFactory = brightnessSliderFactory;
 
@@ -133,6 +148,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.addCallback(mBrightnessMirrorListener);
         }
+
+        ((PagedTileLayout) mView.createRegularTileLayout())
+                .setOnTouchListener(mTileLayoutTouchListener);
     }
 
     @Override
