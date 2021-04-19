@@ -157,7 +157,10 @@ public class BinderLatencyObserver {
                 FrameworkStatsLog.BINDER_LATENCY_REPORTED,
                 atom.getBytes(),
                 mPeriodicSamplingInterval,
-                1);
+                1,
+                mBucketCount,
+                mFirstBucketSize,
+                mBucketScaleFactor);
     }
 
     private void noteLatencyDelayed() {
