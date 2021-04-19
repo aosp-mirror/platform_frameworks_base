@@ -142,6 +142,12 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public boolean isKeyguardOccluded = false;
 
+    /**
+     * TaskSnapshot.
+     * @hide
+     */
+    public TaskSnapshot mTaskSnapshot;
+
     public StartingWindowInfo() {
 
     }
@@ -164,6 +170,7 @@ public final class StartingWindowInfo implements Parcelable {
         dest.writeTypedObject(mainWindowLayoutParams, flags);
         dest.writeInt(splashScreenThemeResId);
         dest.writeBoolean(isKeyguardOccluded);
+        dest.writeTypedObject(mTaskSnapshot, flags);
     }
 
     void readFromParcel(@NonNull Parcel source) {
@@ -175,6 +182,7 @@ public final class StartingWindowInfo implements Parcelable {
         mainWindowLayoutParams = source.readTypedObject(WindowManager.LayoutParams.CREATOR);
         splashScreenThemeResId = source.readInt();
         isKeyguardOccluded = source.readBoolean();
+        mTaskSnapshot = source.readTypedObject(TaskSnapshot.CREATOR);
     }
 
     @Override

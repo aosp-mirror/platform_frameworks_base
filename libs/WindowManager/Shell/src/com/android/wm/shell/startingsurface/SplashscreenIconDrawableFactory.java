@@ -37,6 +37,7 @@ import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.os.Trace;
 import android.util.PathParser;
 import android.window.SplashScreenView;
@@ -50,42 +51,61 @@ import com.android.internal.R;
 public class SplashscreenIconDrawableFactory {
 
     static Drawable makeIconDrawable(@ColorInt int backgroundColor,
-            @NonNull Drawable foregroundDrawable, int iconSize) {
+            @NonNull Drawable foregroundDrawable, int iconSize,
+            Handler splashscreenWorkerHandler) {
         if (foregroundDrawable instanceof Animatable) {
             return new AnimatableIconDrawable(backgroundColor, foregroundDrawable);
         } else if (foregroundDrawable instanceof AdaptiveIconDrawable) {
-            return new ImmobileIconDrawable((AdaptiveIconDrawable) foregroundDrawable, iconSize);
+            return new ImmobileIconDrawable((AdaptiveIconDrawable) foregroundDrawable, iconSize,
+                    splashscreenWorkerHandler);
         } else {
             return new ImmobileIconDrawable(new AdaptiveIconDrawable(
-                    new ColorDrawable(backgroundColor), foregroundDrawable), iconSize);
+                    new ColorDrawable(backgroundColor), foregroundDrawable), iconSize,
+                    splashscreenWorkerHandler);
         }
     }
 
     private static class ImmobileIconDrawable extends Drawable {
-        private Shader mLayersShader;
+        private boolean mCacheComplete;
         private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG
                 | Paint.FILTER_BITMAP_FLAG);
 
-        ImmobileIconDrawable(AdaptiveIconDrawable drawable, int iconSize) {
-            cachePaint(drawable, iconSize, iconSize);
+        ImmobileIconDrawable(AdaptiveIconDrawable drawable, int iconSize,
+                Handler splashscreenWorkerHandler) {
+            splashscreenWorkerHandler.post(() -> cachePaint(drawable, iconSize, iconSize));
         }
 
         private void cachePaint(AdaptiveIconDrawable drawable, int width, int height) {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "cachePaint");
-            final Bitmap layersBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            final Canvas canvas = new Canvas(layersBitmap);
-            drawable.setBounds(0, 0, width, height);
-            drawable.draw(canvas);
-            mLayersShader = new BitmapShader(layersBitmap, Shader.TileMode.CLAMP,
-                    Shader.TileMode.CLAMP);
-            mPaint.setShader(mLayersShader);
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            synchronized (mPaint) {
+                if (mCacheComplete) {
+                    return;
+                }
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "cachePaint");
+                final Bitmap layersBitmap = Bitmap.createBitmap(width, height,
+                        Bitmap.Config.ARGB_8888);
+                final Canvas canvas = new Canvas(layersBitmap);
+                drawable.setBounds(0, 0, width, height);
+                drawable.draw(canvas);
+                final Shader layersShader = new BitmapShader(layersBitmap, Shader.TileMode.CLAMP,
+                        Shader.TileMode.CLAMP);
+                mPaint.setShader(layersShader);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                mCacheComplete = true;
+            }
         }
 
         @Override
         public void draw(Canvas canvas) {
-            final Rect bounds = getBounds();
-            canvas.drawRect(bounds, mPaint);
+            synchronized (mPaint) {
+                if (mCacheComplete) {
+                    final Rect bounds = getBounds();
+                    canvas.drawRect(bounds, mPaint);
+                } else {
+                    // this shouldn't happen, but if it really happen, invalidate self to wait
+                    // for cachePaint finish.
+                    invalidateSelf();
+                }
+            }
         }
 
         @Override
