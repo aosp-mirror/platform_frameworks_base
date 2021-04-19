@@ -44,6 +44,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -181,7 +182,7 @@ public class NotificationConversationInfo extends LinearLayout implements
             showPriorityOnboarding();
         } else if (mSelectedAction == ACTION_FAVORITE && getPriority() != mSelectedAction) {
             mShadeController.animateCollapsePanels();
-            mPeopleSpaceWidgetManager.requestPinAppWidget(mShortcutInfo);
+            mPeopleSpaceWidgetManager.requestPinAppWidget(mShortcutInfo, new Bundle());
         }
         mGutsContainer.closeControls(v, true);
     };

@@ -529,7 +529,7 @@ public class PeopleSpaceUtils {
      */
     public static RemoteViews getPreview(Context context, IPeopleManager peopleManager,
             LauncherApps launcherApps, NotificationEntryManager notificationEntryManager,
-            String shortcutId, UserHandle userHandle, String packageName) {
+            String shortcutId, UserHandle userHandle, String packageName, Bundle options) {
         peopleManager = (peopleManager != null) ? peopleManager : IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
         launcherApps = (launcherApps != null) ? launcherApps
@@ -556,8 +556,7 @@ public class PeopleSpaceUtils {
                 context, tile, notificationEntryManager);
 
         if (DEBUG) Log.i(TAG, "Returning tile preview for shortcutId: " + shortcutId);
-        Bundle bundle = new Bundle();
-        return new PeopleTileViewHelper(context, augmentedTile, 0, bundle).getViews();
+        return new PeopleTileViewHelper(context, augmentedTile, 0, options).getViews();
     }
 
     /** Returns the userId associated with a {@link PeopleSpaceTile} */
