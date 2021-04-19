@@ -4043,7 +4043,6 @@ public class CarrierConfigManager {
          * it will override the framework default.
          * @hide
          */
-        @SystemApi
         public static final String KEY_PUBLISH_SERVICE_DESC_FEATURE_TAG_MAP_OVERRIDE_STRING_ARRAY =
                 KEY_PREFIX + "publish_service_desc_feature_tag_map_override_string_array";
 
