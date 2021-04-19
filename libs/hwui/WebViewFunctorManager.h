@@ -91,6 +91,7 @@ private:
     RenderMode mMode;
     bool mHasContext = false;
     bool mCreatedHandle = false;
+    ASurfaceControl* mSurfaceControl = nullptr;
 };
 
 class WebViewFunctorManager {

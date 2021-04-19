@@ -295,6 +295,12 @@ void RenderProxy::setPictureCapturedCallback(
             [this, cb = callback]() { mContext->setPictureCapturedCallback(cb); });
 }
 
+void RenderProxy::setASurfaceTransactionCallback(
+        const std::function<void(int64_t, int64_t, int64_t)>& callback) {
+    mRenderThread.queue().post(
+            [this, cb = callback]() { mContext->setASurfaceTransactionCallback(cb); });
+}
+
 void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
