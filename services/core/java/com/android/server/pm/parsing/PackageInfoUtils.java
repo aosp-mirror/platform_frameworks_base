@@ -400,7 +400,7 @@ public class PackageInfoUtils {
             retProcs.put(proc.getName(),
                     new ProcessInfo(proc.getName(), new ArraySet<>(proc.getDeniedPermissions()),
                             proc.getGwpAsanMode(), proc.getMemtagMode(),
-                            proc.getNativeHeapZeroInit()));
+                            proc.getNativeHeapZeroInitialized()));
         }
         return retProcs;
     }

@@ -1722,12 +1722,13 @@ public final class ProcessList {
 
     private boolean enableNativeHeapZeroInit(ProcessRecord app) {
         // Look at the process attribute first.
-        if (app.processInfo != null && app.processInfo.nativeHeapZeroInit != null) {
-            return app.processInfo.nativeHeapZeroInit;
+        if (app.processInfo != null
+                && app.processInfo.nativeHeapZeroInitialized != ApplicationInfo.ZEROINIT_DEFAULT) {
+            return app.processInfo.nativeHeapZeroInitialized == ApplicationInfo.ZEROINIT_ENABLED;
         }
         // Then at the application attribute.
-        if (app.info.isNativeHeapZeroInit() != null) {
-            return app.info.isNativeHeapZeroInit();
+        if (app.info.getNativeHeapZeroInitialized() != ApplicationInfo.ZEROINIT_DEFAULT) {
+            return app.info.getNativeHeapZeroInitialized() == ApplicationInfo.ZEROINIT_ENABLED;
         }
         // Compat feature last.
         if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_ZERO_INIT, app.info)) {
