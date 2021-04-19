@@ -1425,9 +1425,9 @@ public class ConnectivityManager {
             android.Manifest.permission.NETWORK_STACK,
             android.Manifest.permission.NETWORK_SETTINGS})
     @NonNull
-    public List<NetworkStateSnapshot> getAllNetworkStateSnapshot() {
+    public List<NetworkStateSnapshot> getAllNetworkStateSnapshots() {
         try {
-            return mService.getAllNetworkStateSnapshot();
+            return mService.getAllNetworkStateSnapshots();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
