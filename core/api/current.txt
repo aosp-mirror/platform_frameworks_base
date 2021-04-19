@@ -43064,6 +43064,13 @@ package android.telephony.data {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.TrafficDescriptor> CREATOR;
   }
 
+  public static final class TrafficDescriptor.Builder {
+    ctor public TrafficDescriptor.Builder();
+    method @NonNull public android.telephony.data.TrafficDescriptor build();
+    method @NonNull public android.telephony.data.TrafficDescriptor.Builder setDataNetworkName(@NonNull String);
+    method @NonNull public android.telephony.data.TrafficDescriptor.Builder setOsAppId(@NonNull byte[]);
+  }
+
   public final class UrspRule implements android.os.Parcelable {
     method public int describeContents();
     method @IntRange(from=0x0, to=0xff) public int getPrecedence();

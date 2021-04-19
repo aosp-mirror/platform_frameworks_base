@@ -125,7 +125,6 @@ public final class TrafficDescriptor implements Parcelable {
      *     .build();
      * </code></pre>
      *
-     * @hide
      */
     public static final class Builder {
         private String mDnn = null;
