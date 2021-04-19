@@ -798,7 +798,8 @@ class JobConcurrencyManager {
     private void startJobLocked(@NonNull JobServiceContext worker, @NonNull JobStatus jobStatus,
             @WorkType final int workType) {
         final List<StateController> controllers = mService.mControllers;
-        for (int ic = 0; ic < controllers.size(); ic++) {
+        final int numControllers = controllers.size();
+        for (int ic = 0; ic < numControllers; ic++) {
             controllers.get(ic).prepareForExecutionLocked(jobStatus);
         }
         final PackageStats packageStats =
@@ -807,6 +808,9 @@ class JobConcurrencyManager {
         if (!worker.executeRunnableJob(jobStatus, workType)) {
             Slog.e(TAG, "Error executing " + jobStatus);
             mWorkCountTracker.onStagedJobFailed(workType);
+            for (int ic = 0; ic < numControllers; ic++) {
+                controllers.get(ic).unprepareFromExecutionLocked(jobStatus);
+            }
         } else {
             mRunningJobs.add(jobStatus);
             mWorkCountTracker.onJobStarted(workType);

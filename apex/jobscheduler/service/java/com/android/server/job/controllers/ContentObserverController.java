@@ -136,6 +136,29 @@ public final class ContentObserverController extends StateController {
     }
 
     @Override
+    public void unprepareFromExecutionLocked(JobStatus taskStatus) {
+        if (taskStatus.hasContentTriggerConstraint()) {
+            if (taskStatus.contentObserverJobInstance != null) {
+                if (taskStatus.contentObserverJobInstance.mChangedUris == null) {
+                    taskStatus.contentObserverJobInstance.mChangedUris = taskStatus.changedUris;
+                } else {
+                    taskStatus.contentObserverJobInstance.mChangedUris
+                            .addAll(taskStatus.changedUris);
+                }
+                if (taskStatus.contentObserverJobInstance.mChangedAuthorities == null) {
+                    taskStatus.contentObserverJobInstance.mChangedAuthorities =
+                            taskStatus.changedAuthorities;
+                } else {
+                    taskStatus.contentObserverJobInstance.mChangedAuthorities
+                            .addAll(taskStatus.changedAuthorities);
+                }
+                taskStatus.changedUris = null;
+                taskStatus.changedAuthorities = null;
+            }
+        }
+    }
+
+    @Override
     public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob,
             boolean forUpdate) {
         if (taskStatus.clearTrackingController(JobStatus.TRACKING_CONTENT)) {
