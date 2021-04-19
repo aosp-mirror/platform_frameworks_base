@@ -272,13 +272,15 @@ public class StackScrollAlgorithm {
                 currentY += mGapHeight;
             }
 
-            // Save index of first view in the shelf
-            final float shelfStart = ambientState.getStackEndHeight()
-                    - ambientState.getShelf().getIntrinsicHeight();
-            if (currentY >= shelfStart
-                    && !(view instanceof FooterView)
-                    && state.firstViewInShelf == null) {
-                state.firstViewInShelf = view;
+            if (ambientState.getShelf() != null) {
+                // Save index of first view in the shelf
+                final float shelfStart = ambientState.getStackEndHeight()
+                        - ambientState.getShelf().getIntrinsicHeight();
+                if (currentY >= shelfStart
+                        && !(view instanceof FooterView)
+                        && state.firstViewInShelf == null) {
+                    state.firstViewInShelf = view;
+                }
             }
 
             // Record y position when fully expanded
@@ -298,10 +300,14 @@ public class StackScrollAlgorithm {
                 float sectionEnd = state.expansionData.get(sectionEndView).fullyExpandedY
                         + sectionEndView.getIntrinsicHeight();
 
-                // If we show the shelf, trim section end to shelf start
-                // This means section end > start for views in the shelf
-                if (state.firstViewInShelf != null && sectionEnd > shelfStart) {
-                    sectionEnd = shelfStart;
+                if (ambientState.getShelf() != null) {
+                    // If we show the shelf, trim section end to shelf start
+                    // This means section end > start for views in the shelf
+                    final float shelfStart = ambientState.getStackEndHeight()
+                            - ambientState.getShelf().getIntrinsicHeight();
+                    if (state.firstViewInShelf != null && sectionEnd > shelfStart) {
+                        sectionEnd = shelfStart;
+                    }
                 }
 
                 // Update section bounds of every view in the previous section
@@ -460,7 +466,7 @@ public class StackScrollAlgorithm {
                         && i >= algorithmState.visibleChildren.indexOf(
                                 algorithmState.firstViewInShelf)
                         && !(view instanceof FooterView);
-            } else {
+            } else if (ambientState.getShelf() != null) {
                 // When pulsing (incoming notification on AOD), innerHeight is 0; clamp all
                 // to shelf start, thereby hiding all notifications (except the first one, which we
                 // later unhide in updatePulsingState)
