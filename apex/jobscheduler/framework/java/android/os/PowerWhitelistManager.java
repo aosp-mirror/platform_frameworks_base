@@ -284,9 +284,10 @@ public class PowerWhitelistManager {
      */
     public static final int REASON_PACKAGE_REPLACED = PowerExemptionManager.REASON_PACKAGE_REPLACED;
     /**
-     * LocationProviderManager.
+     * LocationProvider.
      * @hide
      */
+    @SystemApi
     public static final int REASON_LOCATION_PROVIDER =
             PowerExemptionManager.REASON_LOCATION_PROVIDER;
     /**
