@@ -19,6 +19,7 @@ package android.service.dataloader;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.DataLoaderParams;
@@ -48,14 +49,19 @@ import java.util.Collection;
  *
  * @see android.content.pm.DataLoaderParams
  * @see android.content.pm.PackageInstaller.SessionParams#setDataLoaderParams
+ *
+ * @hide
  */
+@SystemApi
 public abstract class DataLoaderService extends Service {
     private static final String TAG = "DataLoaderService";
     private final DataLoaderBinderService mBinder = new DataLoaderBinderService();
 
     /**
      * DataLoader interface. Each instance corresponds to a single installation session.
+     * @hide
      */
+    @SystemApi
     public interface DataLoader {
         /**
          * A virtual constructor.
@@ -112,7 +118,9 @@ public abstract class DataLoaderService extends Service {
     /**
      * DataLoader factory method.
      * An installation session uses it to create an instance of DataLoader.
+     * @hide
      */
+    @SystemApi
     public @Nullable DataLoader onCreateDataLoader(@NonNull DataLoaderParams dataLoaderParams) {
         return null;
     }
@@ -178,7 +186,10 @@ public abstract class DataLoaderService extends Service {
 
     /**
      * Provides access to the installation image.
+     *
+     * @hide
      */
+    @SystemApi
     public static final class FileSystemConnector {
         /**
          * Create a wrapper for a native instance.
