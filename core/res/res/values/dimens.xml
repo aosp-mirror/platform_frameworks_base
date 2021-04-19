@@ -809,8 +809,8 @@
     <!-- The top padding of the conversation icon container when the avatar is small-->
     <dimen name="conversation_icon_container_top_padding_small_avatar">8dp</dimen>
 
-    <!-- The padding of the conversation header when expanded. This is calculated from the expand button size + notification_content_margin_end -->
-    <dimen name="conversation_header_expanded_padding_end">38dp</dimen>
+    <!-- The padding of the conversation header when expanded. This is calculated from the expand button size (56dp) - notification_content_margin_end (16dp) -->
+    <dimen name="conversation_header_expanded_padding_end">40dp</dimen>
 
     <!-- extra padding at the start of the icons when not conversations to keep them horizontally aligned with the notification icon -->
     <dimen name="messaging_layout_icon_padding_start">4dp</dimen>
