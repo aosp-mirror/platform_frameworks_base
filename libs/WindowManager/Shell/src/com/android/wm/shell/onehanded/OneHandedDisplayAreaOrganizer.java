@@ -65,6 +65,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private final Rect mDefaultDisplayBounds = new Rect();
     private final OneHandedSettingsUtil mOneHandedSettingsUtil;
 
+    // TODO(b/185558765) Remove after OneHandedTransitionState.java merged
     private boolean mIsInOneHanded;
     private int mEnterExitAnimationDurationMs;
 
@@ -262,6 +263,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             @OneHandedAnimationController.TransitionDirection int direction) {
         // Only finishOffset() can update mIsInOneHanded to ensure the state is handle in sequence,
         // the flag *MUST* be updated before dispatch mTransitionCallbacks
+        // TODO(b/185558765) Remove after OneHandedTransitionState.java merged
         mIsInOneHanded = (offset > 0 || direction == TRANSITION_DIRECTION_TRIGGER);
         mLastVisualDisplayBounds.offsetTo(0,
                 direction == TRANSITION_DIRECTION_TRIGGER ? offset : 0);
@@ -276,6 +278,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     }
 
     /**
+     * TODO(b/185558765) Remove after OneHandedTransitionState.java merged
      * The latest state of one handed mode
      *
      * @return true Currently is in one handed mode, otherwise is not in one handed mode
