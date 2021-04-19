@@ -26,7 +26,7 @@ import android.view.displayhash.DisplayHash;
  *
  * @hide
  */
-oneway interface IDisplayHasherService {
+oneway interface IDisplayHashingService {
     /**
      * Generates the DisplayHash that can be used to validate that the system generated the token.
      *
