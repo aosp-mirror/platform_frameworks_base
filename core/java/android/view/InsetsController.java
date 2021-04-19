@@ -541,9 +541,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private final SparseArray<InsetsSourceControl> mTmpControlArray = new SparseArray<>();
     private final ArrayList<RunningAnimation> mRunningAnimations = new ArrayList<>();
-    private final ArrayList<WindowInsetsAnimation> mTmpRunningAnims = new ArrayList<>();
-    private final List<WindowInsetsAnimation> mUnmodifiableTmpRunningAnims =
-            Collections.unmodifiableList(mTmpRunningAnims);
     private final ArrayList<InsetsAnimationControlImpl> mTmpFinishedControls = new ArrayList<>();
     private final ArraySet<InsetsSourceConsumer> mRequestedVisibilityChanged = new ArraySet<>();
     private WindowInsets mLastInsets;
@@ -601,9 +598,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 return;
             }
 
-            mTmpFinishedControls.clear();
-            mTmpRunningAnims.clear();
-            InsetsState state = new InsetsState(mState, true /* copySources */);
+            final List<WindowInsetsAnimation> runningAnimations = new ArrayList<>();
+            final InsetsState state = new InsetsState(mState, true /* copySources */);
             for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
                 RunningAnimation runningAnimation = mRunningAnimations.get(i);
                 if (DEBUG) Log.d(TAG, "Running animation type: " + runningAnimation.type);
@@ -615,7 +611,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     // if it gets finished within applyChangeInsets we still dispatch it to
                     // onProgress.
                     if (runningAnimation.startDispatched) {
-                        mTmpRunningAnims.add(control.getAnimation());
+                        runningAnimations.add(control.getAnimation());
                     }
 
                     if (control.applyChangeInsets(state)) {
@@ -628,9 +624,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     mLastInsets.isRound(), mLastInsets.shouldAlwaysConsumeSystemBars(),
                     mLastLegacySoftInputMode, mLastLegacyWindowFlags, mLastLegacySystemUiFlags,
                     mWindowType, mLastWindowingMode, null /* typeSideMap */);
-            mHost.dispatchWindowInsetsAnimationProgress(insets, mUnmodifiableTmpRunningAnims);
+            mHost.dispatchWindowInsetsAnimationProgress(insets,
+                    Collections.unmodifiableList(runningAnimations));
             if (DEBUG) {
-                for (WindowInsetsAnimation anim : mUnmodifiableTmpRunningAnims) {
+                for (WindowInsetsAnimation anim : runningAnimations) {
                     Log.d(TAG, String.format("Running animation type: %d, progress: %f",
                             anim.getTypeMask(), anim.getInterpolatedFraction()));
                 }
@@ -639,6 +636,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             for (int i = mTmpFinishedControls.size() - 1; i >= 0; i--) {
                 dispatchAnimationEnd(mTmpFinishedControls.get(i).getAnimation());
             }
+            mTmpFinishedControls.clear();
         };
     }
 
