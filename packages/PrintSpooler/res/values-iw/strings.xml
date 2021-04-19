@@ -28,13 +28,13 @@
     <string name="label_orientation" msgid="2853142581990496477">"כיוון"</string>
     <string name="label_pages" msgid="7768589729282182230">"עמודים"</string>
     <string name="destination_default_text" msgid="5422708056807065710">"בחירת מדפסת"</string>
-    <string name="template_all_pages" msgid="3322235982020148762">"הכל <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"כל <xliff:g id="PAGE_COUNT">%1$s</xliff:g> הדפים"</string>
     <string name="template_page_range" msgid="428638530038286328">"טווח של <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"למשל 1–5‏,8,‏11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"תצוגה מקדימה של הדפסה"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"‏התקנה של PDF viewer‏ ליצירת תצוגה מקדימה"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"אפליקציית ההדפסה קרסה"</string>
-    <string name="generating_print_job" msgid="3119608742651698916">"יוצר עבודת הדפסה"</string>
+    <string name="generating_print_job" msgid="3119608742651698916">"בתהליך יצירה של עבודת הדפסה"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"‏שמירה כ-PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"כל המדפסות…"</string>
     <string name="print_dialog" msgid="32628687461331979">"תיבת דו שיח של מדפסת"</string>
@@ -42,8 +42,8 @@
     <string name="page_description_template" msgid="6831239682256197161">"עמוד <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> מתוך <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="summary_template" msgid="8899734908625669193">"סיכום, עותקים <xliff:g id="COPIES">%1$s</xliff:g>, גודל נייר <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"נקודת אחיזה להרחבה"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"ידית כיווץ"</string>
-    <string name="print_button" msgid="645164566271246268">"הדפס"</string>
+    <string name="collapse_handle" msgid="6886637989442507451">"נקודת אחיזה לכיווץ"</string>
+    <string name="print_button" msgid="645164566271246268">"הדפסה"</string>
     <string name="savetopdf_button" msgid="2976186791686924743">"‏שמירה כ-PDF"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"אפשרויות ההדפסה הורחבו"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"אפשרויות ההדפסה כווצו"</string>
@@ -52,9 +52,9 @@
     <string name="add_print_service_label" msgid="5356702546188981940">"הוספת שירות"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"תיבת החיפוש מוצגת"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"תיבת החיפוש מוסתרת"</string>
-    <string name="print_add_printer" msgid="1088656468360653455">"הוסף מדפסת"</string>
-    <string name="print_select_printer" msgid="7388760939873368698">"בחר מדפסת"</string>
-    <string name="print_forget_printer" msgid="5035287497291910766">"שכח את המדפסת"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"הוספת מדפסת"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"בחירת מדפסת"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"לשכוח את המדפסת"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
       <item quantity="two">נמצאו <xliff:g id="COUNT_1">%1$s</xliff:g> מדפסות</item>
       <item quantity="many">נמצאו <xliff:g id="COUNT_1">%1$s</xliff:g> מדפסות</item>
@@ -62,28 +62,28 @@
       <item quantity="one">נמצאה מדפסת <xliff:g id="COUNT_0">%1$s</xliff:g></item>
     </plurals>
     <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="printer_info_desc" msgid="7181988788991581654">"מידע נוסף על מדפסת זו"</string>
+    <string name="printer_info_desc" msgid="7181988788991581654">"מידע נוסף על המדפסת הזו"</string>
     <string name="notification_channel_progress" msgid="872788690775721436">"עבודות הדפסה פועלות"</string>
     <string name="notification_channel_failure" msgid="9042250774797916414">"עבודות הדפסה שנכשלו"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"לא ניתן היה ליצור קובץ"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"שירותי הדפסה מסוימים מושבתים"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"מחפש מדפסות"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"המערכת מחפשת מדפסות"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"לא הופעלו שירותי הדפסה"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"לא נמצאו מדפסות"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"לא ניתן להוסיף מדפסות"</string>
-    <string name="select_to_add_printers" msgid="3800709038689830974">"בחר כדי להוסיף מדפסת"</string>
+    <string name="select_to_add_printers" msgid="3800709038689830974">"יש להקיש כדי להוסיף מדפסת"</string>
     <string name="enable_print_service" msgid="3482815747043533842">"צריך לבחור כדי להפעיל"</string>
     <string name="enabled_services_title" msgid="7036986099096582296">"שירותים מופעלים"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"שירותים מומלצים"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"שירותים מושבתים"</string>
     <string name="all_services_title" msgid="5578662754874906455">"כל השירותים"</string>
     <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
-      <item quantity="two">התקן כדי לגלות <xliff:g id="COUNT_1">%1$s</xliff:g> מדפסות</item>
-      <item quantity="many">התקן כדי לגלות <xliff:g id="COUNT_1">%1$s</xliff:g> מדפסות</item>
-      <item quantity="other">התקן כדי לגלות <xliff:g id="COUNT_1">%1$s</xliff:g> מדפסות</item>
-      <item quantity="one">התקן כדי לגלות מדפסת <xliff:g id="COUNT_0">%1$s</xliff:g></item>
+      <item quantity="two">יש להתקין כדי לגלות <xliff:g id="COUNT_1">%1$s</xliff:g> מדפסות</item>
+      <item quantity="many">יש להתקין כדי לגלות <xliff:g id="COUNT_1">%1$s</xliff:g> מדפסות</item>
+      <item quantity="other">יש להתקין כדי לגלות <xliff:g id="COUNT_1">%1$s</xliff:g> מדפסות</item>
+      <item quantity="one">יש להתקין כדי לגלות מדפסת אחת (<xliff:g id="COUNT_0">%1$s</xliff:g>)‏</item>
     </plurals>
-    <string name="printing_notification_title_template" msgid="295903957762447362">"מדפיס את <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="printing_notification_title_template" msgid="295903957762447362">"בתהליך הדפסה של <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"המערכת מבטלת את <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"שגיאת מדפסת ב-<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"המדפסת חסמה את <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
@@ -108,8 +108,8 @@
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"לא ניתן היה לכתוב לקובץ"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"מצטערים, הפעולה לא בוצעה. אפשר לנסות שוב."</string>
-    <string name="print_error_retry" msgid="1426421728784259538">"כדאי לנסות שוב"</string>
-    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"המדפסת הזו אינה זמינה כעת."</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"ניסיון נוסף"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"המדפסת הזו לא זמינה כרגע."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"לא ניתן להציג תצוגה מקדימה"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"בתהליך יצירת תצוגה מקדימה…"</string>
 </resources>
