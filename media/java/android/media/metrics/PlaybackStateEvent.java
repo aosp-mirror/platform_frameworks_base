@@ -132,10 +132,8 @@ public final class PlaybackStateEvent extends Event implements Parcelable {
 
     /**
      * Creates a new PlaybackStateEvent.
-     *
-     * @hide
      */
-    public PlaybackStateEvent(
+    private PlaybackStateEvent(
             int state,
             long timeSinceCreatedMillis,
             @NonNull Bundle extras) {
@@ -147,13 +145,16 @@ public final class PlaybackStateEvent extends Event implements Parcelable {
     /**
      * Gets playback state.
      */
+    @State
     public int getState() {
         return mState;
     }
 
     /**
-     * Gets time since the corresponding playback is created in millisecond.
+     * Gets time since the corresponding playback session is created in millisecond.
      * @return the timestamp since the playback is created, or -1 if unknown.
+     * @see LogSessionId
+     * @see PlaybackSession
      */
     @Override
     @IntRange(from = -1)
@@ -197,8 +198,7 @@ public final class PlaybackStateEvent extends Event implements Parcelable {
         return 0;
     }
 
-    /** @hide */
-    /* package-private */ PlaybackStateEvent(@NonNull Parcel in) {
+    private PlaybackStateEvent(@NonNull Parcel in) {
         int state = in.readInt();
         long timeSinceCreatedMillis = in.readLong();
         Bundle extras = in.readBundle();
@@ -247,6 +247,7 @@ public final class PlaybackStateEvent extends Event implements Parcelable {
          * Sets timestamp since the creation in milliseconds.
          * @param value the timestamp since the creation in milliseconds.
          *              -1 indicates the value is unknown.
+         * @see #getTimeSinceCreatedMillis()
          */
         public @NonNull Builder setTimeSinceCreatedMillis(@IntRange(from = -1) long value) {
             mTimeSinceCreatedMillis = value;

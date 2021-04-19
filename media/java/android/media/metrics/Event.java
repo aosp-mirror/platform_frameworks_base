@@ -32,19 +32,17 @@ public abstract class Event {
         mTimeSinceCreatedMillis = MediaMetricsManager.INVALID_TIMESTAMP;
     }
 
-    // TODO: remove
-    protected Event(long timeSinceCreatedMillis) {
-        mTimeSinceCreatedMillis = timeSinceCreatedMillis;
-    }
-
     /* package */ Event(long timeSinceCreatedMillis, Bundle extras) {
         mTimeSinceCreatedMillis = timeSinceCreatedMillis;
         mMetricsBundle = extras;
     }
 
     /**
-     * Gets time since the corresponding instance is created in millisecond.
+     * Gets time since the corresponding log session is created in millisecond.
      * @return the timestamp since the instance is created, or -1 if unknown.
+     * @see LogSessionId
+     * @see PlaybackSession
+     * @see RecordingSession
      */
     @IntRange(from = -1)
     public long getTimeSinceCreatedMillis() {

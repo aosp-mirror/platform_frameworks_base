@@ -25,7 +25,7 @@ import android.os.RemoteException;
  * This class gives information about, and interacts with media metrics.
  */
 @SystemService(Context.MEDIA_METRICS_SERVICE)
-public class MediaMetricsManager {
+public final class MediaMetricsManager {
     public static final long INVALID_TIMESTAMP = -1;
 
     private static final String TAG = "MediaMetricsManager";

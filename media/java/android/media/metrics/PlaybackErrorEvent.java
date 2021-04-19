@@ -150,10 +150,8 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
 
     /**
      * Creates a new PlaybackErrorEvent.
-     *
-     * @hide
      */
-    public PlaybackErrorEvent(
+    private PlaybackErrorEvent(
             @Nullable String exceptionStack,
             int errorCode,
             int subErrorCode,
@@ -191,8 +189,10 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
     }
 
     /**
-     * Gets the timestamp since creation in milliseconds.
+     * Gets the timestamp since creation of the playback session in milliseconds.
      * @return the timestamp since the playback is created, or -1 if unknown.
+     * @see LogSessionId
+     * @see PlaybackSession
      */
     @Override
     @IntRange(from = -1)
@@ -254,8 +254,7 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
         return 0;
     }
 
-    /** @hide */
-    /* package-private */ PlaybackErrorEvent(@NonNull Parcel in) {
+    private PlaybackErrorEvent(@NonNull Parcel in) {
         byte flg = in.readByte();
         String exceptionStack = (flg & 0x1) == 0 ? null : in.readString();
         int errorCode = in.readInt();
@@ -330,6 +329,7 @@ public final class PlaybackErrorEvent extends Event implements Parcelable {
          * Set the timestamp since creation in milliseconds.
          * @param value the timestamp since the creation in milliseconds.
          *              -1 indicates the value is unknown.
+         * @see #getTimeSinceCreatedMillis()
          */
         public @NonNull Builder setTimeSinceCreatedMillis(@IntRange(from = -1) long value) {
             mTimeSinceCreatedMillis = value;
