@@ -505,7 +505,7 @@
     <string name="alarm_template" msgid="3346777418136233330">"<xliff:g id="WHEN">%1$s</xliff:g> တွင်"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"<xliff:g id="WHEN">%1$s</xliff:g> တွင်"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"ကြာချိန်"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"အမြဲမေးပါ"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"အမြဲမေးရန်"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"သင်ပိတ်လိုက်သည် အထိ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ယခုလေးတင်"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ဖုန်းစပီကာ"</string>
