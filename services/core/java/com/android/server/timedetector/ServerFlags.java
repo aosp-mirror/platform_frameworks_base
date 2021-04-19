@@ -30,7 +30,9 @@ import com.android.server.timezonedetector.ServiceConfigAccessor;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.DateTimeException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -62,6 +64,8 @@ public final class ServerFlags {
             KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS,
             KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
             KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
+            KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE,
+            KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface DeviceConfigKey {}
@@ -143,6 +147,14 @@ public final class ServerFlags {
     @DeviceConfigKey
     public static final String KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE =
             "time_detector_origin_priorities_override";
+
+    /**
+     * The key to override the time detector lower bound configuration. The values is the number of
+     * milliseconds since the beginning of the Unix epoch.
+     */
+    @DeviceConfigKey
+    public static final String KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE =
+            "time_detector_lower_bound_millis_override";
 
     @GuardedBy("mListeners")
     private final ArrayMap<ConfigurationChangeListener, Set<String>> mListeners = new ArrayMap<>();
@@ -228,6 +240,25 @@ public final class ServerFlags {
             return Optional.empty();
         }
         return Optional.of(string.get().split(","));
+    }
+
+    /**
+     * Returns an {@link Instant} from {@link DeviceConfig} from the system_time
+     * namespace, returns the {@code defaultValue} if the value is missing or invalid.
+     */
+    @NonNull
+    public Optional<Instant> getOptionalInstant(@DeviceConfigKey String key) {
+        String value = DeviceConfig.getProperty(NAMESPACE_SYSTEM_TIME, key);
+        if (value == null) {
+            return Optional.empty();
+        }
+
+        try {
+            long millis = Long.parseLong(value);
+            return Optional.of(Instant.ofEpochMilli(millis));
+        } catch (DateTimeException | NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     /**
