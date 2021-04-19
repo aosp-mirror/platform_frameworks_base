@@ -42,6 +42,7 @@ public abstract class Classifier {
     public static final int QS_COLLAPSE = 12;
     public static final int UDFPS_AUTHENTICATION = 13;
     public static final int DISABLED_UDFPS_AFFORDANCE = 14;
+    public static final int QS_SWIPE = 15;
 
     @IntDef({
             QUICK_SETTINGS,
@@ -59,7 +60,8 @@ public abstract class Classifier {
             QS_COLLAPSE,
             BRIGHTNESS_SLIDER,
             UDFPS_AUTHENTICATION,
-            DISABLED_UDFPS_AFFORDANCE
+            DISABLED_UDFPS_AFFORDANCE,
+            QS_SWIPE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InteractionType {}
