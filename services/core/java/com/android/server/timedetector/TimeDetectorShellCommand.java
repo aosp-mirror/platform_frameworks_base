@@ -18,6 +18,7 @@ package com.android.server.timedetector;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
 
+import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE;
 import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE;
 
 import android.os.ShellCommand;
@@ -68,6 +69,9 @@ class TimeDetectorShellCommand extends ShellCommand {
         pw.println();
         pw.printf("This service is also affected by the following device_config flags in the"
                 + " %s namespace:\n", NAMESPACE_SYSTEM_TIME);
+        pw.printf("    %s - the lower bound used to validate time suggestions when they are"
+                        + " received.\n", KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE);
+        pw.println("         Specified in milliseconds since the start of the Unix epoch.");
         pw.printf("    %s - [default=null], a comma separated list of origins. See"
                 + " TimeDetectorStrategy for details\n",
                 KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE);
