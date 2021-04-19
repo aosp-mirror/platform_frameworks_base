@@ -1355,6 +1355,16 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    private void addASurfaceTransactionCallback() {
+        HardwareRenderer.ASurfaceTransactionCallback callback = (nativeTransactionObj,
+                                                                 nativeSurfaceControlObj,
+                                                                 frameNr) -> {
+            Transaction t = new Transaction(nativeTransactionObj);
+            mergeWithNextTransaction(t, frameNr);
+        };
+        mAttachInfo.mThreadedRenderer.setASurfaceTransactionCallback(callback);
+    }
+
     @UnsupportedAppUsage
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
         mAttachInfo.mHardwareAccelerated = false;
@@ -1391,6 +1401,7 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE || hasSurfaceInsets;
                 mAttachInfo.mThreadedRenderer = ThreadedRenderer.create(mContext, translucent,
                         attrs.getTitle().toString());
+                addASurfaceTransactionCallback();
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 updateColorModeIfNeeded(attrs.getColorMode());
                 updateForceDarkMode();
