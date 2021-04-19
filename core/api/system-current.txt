@@ -8390,6 +8390,7 @@ package android.os {
     field public static final int REASON_ACCOUNT_TRANSFER = 104; // 0x68
     field public static final int REASON_ACTIVITY_RECOGNITION = 103; // 0x67
     field public static final int REASON_GEOFENCING = 100; // 0x64
+    field public static final int REASON_LOCATION_PROVIDER = 312; // 0x138
     field public static final int REASON_OTHER = 1; // 0x1
     field public static final int REASON_PUSH_MESSAGING = 101; // 0x65
     field public static final int REASON_PUSH_MESSAGING_OVER_QUOTA = 102; // 0x66
@@ -8442,6 +8443,7 @@ package android.os {
     field @Deprecated public static final int EVENT_UNSPECIFIED = 0; // 0x0
     field @Deprecated public static final int REASON_ACTIVITY_RECOGNITION = 103; // 0x67
     field @Deprecated public static final int REASON_GEOFENCING = 100; // 0x64
+    field @Deprecated public static final int REASON_LOCATION_PROVIDER = 312; // 0x138
     field @Deprecated public static final int REASON_OTHER = 1; // 0x1
     field @Deprecated public static final int REASON_PUSH_MESSAGING = 101; // 0x65
     field @Deprecated public static final int REASON_PUSH_MESSAGING_OVER_QUOTA = 102; // 0x66
