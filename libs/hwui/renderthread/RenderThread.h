@@ -79,25 +79,39 @@ struct VsyncSource {
     virtual ~VsyncSource() {}
 };
 
+typedef ASurfaceControl* (*ASC_create)(ASurfaceControl* parent, const char* debug_name);
 typedef void (*ASC_acquire)(ASurfaceControl* control);
 typedef void (*ASC_release)(ASurfaceControl* control);
 
 typedef void (*ASC_registerSurfaceStatsListener)(ASurfaceControl* control, void* context,
         ASurfaceControl_SurfaceStatsListener func);
 typedef void (*ASC_unregisterSurfaceStatsListener)(void* context,
-                                       ASurfaceControl_SurfaceStatsListener func);
+                                                   ASurfaceControl_SurfaceStatsListener func);
 
 typedef int64_t (*ASCStats_getAcquireTime)(ASurfaceControlStats* stats);
 typedef uint64_t (*ASCStats_getFrameNumber)(ASurfaceControlStats* stats);
 
+typedef ASurfaceTransaction* (*AST_create)();
+typedef void (*AST_delete)(ASurfaceTransaction* transaction);
+typedef void (*AST_apply)(ASurfaceTransaction* transaction);
+typedef void (*AST_setVisibility)(ASurfaceTransaction* transaction,
+                                  ASurfaceControl* surface_control, int8_t visibility);
+
 struct ASurfaceControlFunctions {
     ASurfaceControlFunctions();
+
+    ASC_create createFunc;
     ASC_acquire acquireFunc;
     ASC_release releaseFunc;
     ASC_registerSurfaceStatsListener registerListenerFunc;
     ASC_unregisterSurfaceStatsListener unregisterListenerFunc;
     ASCStats_getAcquireTime getAcquireTimeFunc;
     ASCStats_getFrameNumber getFrameNumberFunc;
+
+    AST_create transactionCreateFunc;
+    AST_delete transactionDeleteFunc;
+    AST_apply transactionApplyFunc;
+    AST_setVisibility transactionSetVisibilityFunc;
 };
 
 class ChoreographerSource;
