@@ -2861,7 +2861,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, phoneId);
         intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, phoneId);
+        // Send the broadcast twice -- once for all apps with READ_PHONE_STATE, then again
+        // for all apps with READ_PRIV but not READ_PHONE_STATE. This ensures that any app holding
+        // either READ_PRIV or READ_PHONE get this broadcast exactly once.
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL, Manifest.permission.READ_PHONE_STATE);
+        mContext.createContextAsUser(UserHandle.ALL, 0)
+                .sendBroadcastMultiplePermissions(intent,
+                        new String[] { Manifest.permission.READ_PRIVILEGED_PHONE_STATE },
+                        new String[] { Manifest.permission.READ_PHONE_STATE });
     }
 
     private void broadcastSignalStrengthChanged(SignalStrength signalStrength, int phoneId,
@@ -2988,7 +2995,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 getApnTypesStringFromBitmask(pdcs.getApnSetting().getApnTypeBitmask()));
         intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, slotIndex);
         intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
+        // Send the broadcast twice -- once for all apps with READ_PHONE_STATE, then again
+        // for all apps with READ_PRIV but not READ_PHONE_STATE. This ensures that any app holding
+        // either READ_PRIV or READ_PHONE get this broadcast exactly once.
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL, Manifest.permission.READ_PHONE_STATE);
+        mContext.createContextAsUser(UserHandle.ALL, 0)
+                .sendBroadcastMultiplePermissions(intent,
+                        new String[] { Manifest.permission.READ_PRIVILEGED_PHONE_STATE },
+                        new String[] { Manifest.permission.READ_PHONE_STATE });
     }
 
     /**
