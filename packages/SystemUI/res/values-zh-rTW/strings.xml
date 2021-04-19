@@ -118,7 +118,7 @@
     <string name="use_ptp_button_title" msgid="7676427598943446826">"掛接為相機 (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"安裝 Mac 版 Android 檔案傳輸應用程式"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"返回"</string>
-    <string name="accessibility_home" msgid="5430449841237966217">"主螢幕"</string>
+    <string name="accessibility_home" msgid="5430449841237966217">"主畫面"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"選單"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"無障礙設定"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"旋轉螢幕"</string>
@@ -231,7 +231,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"行動數據已開啟"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"行動數據已關閉"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"並未設為使用行動數據"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"已關閉"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"關閉"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"藍牙網路共用"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"飛行模式。"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN 已開啟。"</string>
@@ -420,7 +420,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> 開啟"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> 關閉"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"深色主題"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"節約耗電量"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"省電模式"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"於日落時開啟"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"於日出時關閉"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"開啟時間：<xliff:g id="TIME">%s</xliff:g>"</string>
@@ -593,10 +593,10 @@
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"切換輸出裝置"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"應用程式已固定"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住 [返回] 按鈕和主螢幕按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住 [返回] 按鈕和主畫面按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"這會讓目前的螢幕畫面保持顯示，直到取消固定為止。向上滑動並按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [總覽] 按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住主螢幕按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住主畫面按鈕即可取消固定。"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人資料 (例如聯絡人和電子郵件內容) 可能會遭存取。"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"已設為固定的應用程式仍可開啟其他應用程式。"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"如要取消固定這個應用程式，請按住「返回」按鈕和「總覽」按鈕"</string>
@@ -715,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"根據手機的設定響鈴或震動"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機的設定響鈴或震動。根據預設，來自「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會以對話框形式顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"利用浮動式捷徑快速存取這項內容。"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以浮動對話框的形式顯示在對話部分的頂端。如果裝置處於鎖定狀態，則在螢幕鎖定畫面上顯示個人資料相片"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以浮動對話框的形式顯示在對話區的頂端。如果裝置處於鎖定狀態，則在螢幕鎖定畫面上顯示個人資料相片"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話功能"</string>
@@ -749,7 +749,7 @@
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"解除略過"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"以泡泡形式顯示"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除對話框"</string>
-    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"新增至主螢幕"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"新增至主畫面"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"通知控制項"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知延後選項"</string>
@@ -767,7 +767,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"電池用量"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"充電時無法使用省電模式"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"節約耗電量"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"省電模式"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"降低效能並限制背景資料傳輸"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> 按鈕"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home 鍵"</string>
@@ -796,7 +796,7 @@
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock 鍵"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"數字鍵 <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"系統"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"主螢幕"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"主畫面"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"最近"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"返回"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"通知"</string>
@@ -1025,7 +1025,7 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"對話已設為優先"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"優先對話會："</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"顯示在對話部分的頂端"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"顯示在對話區的頂端"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"在螢幕鎖定畫面上顯示個人資料相片"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"以浮動對話框形式顯示在應用程式最上層"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"中斷零打擾模式"</string>
@@ -1036,7 +1036,7 @@
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大視窗控制項"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"裝置控制"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"新增已連結裝置的控制項"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"設定裝置控制"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"設定裝置控制項"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"按住電源按鈕即可存取控制項"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"選擇應用程式以新增控制項"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1059,7 +1059,7 @@
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"無法載入控制項。請查看「<xliff:g id="APP">%s</xliff:g>」應用程式，確認應用程式設定沒有任何異動。"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"找不到相容的控制項"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"新增至裝置控制"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"新增至裝置控制項"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"新增"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"來自「<xliff:g id="APP">%s</xliff:g>」的建議"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"已更新控制項"</string>

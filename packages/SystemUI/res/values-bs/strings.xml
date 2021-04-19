@@ -114,7 +114,7 @@
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Dobijanje odobrenja nije uspjelo"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Greška pri pokretanju snimanja ekrana"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opcije USB prijenosa fajlova"</string>
-    <string name="use_mtp_button_title" msgid="5036082897886518086">"Reproduciranje medijskih sadržaja (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="5036082897886518086">"Učitaj kao plejer medija (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Priključiti kao kameru (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Instalirajte Android File Transfer za Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Nazad"</string>

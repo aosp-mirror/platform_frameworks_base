@@ -106,7 +106,7 @@
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Lopeta"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Keskeytä"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Jatka"</string>
-    <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Peruuta"</string>
+    <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Peru"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Jaa"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Näytön tallennus peruutettu"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Näyttötallenne tallennettu, katso napauttamalla"</string>
@@ -136,10 +136,10 @@
     <string name="phone_label" msgid="5715229948920451352">"avaa puhelin"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"Avaa ääniapuri"</string>
     <string name="camera_label" msgid="8253821920931143699">"avaa kamera"</string>
-    <string name="cancel" msgid="1089011503403416730">"Peruuta"</string>
+    <string name="cancel" msgid="1089011503403416730">"Peru"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Vahvista"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Yritä uudelleen"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Peruuta todennus napauttamalla"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Peru todennus napauttamalla"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Yritä uudelleen"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"Kasvojasi katsotaan"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Kasvot tunnistettu"</string>
@@ -544,8 +544,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"Poista VPN käytöstä"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Katkaise VPN-yhteys"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Näytä säännöt"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja muuttaa asetuksia, yrityskäyttöä, sovelluksia sekä laitteeseen yhdistettyjä tietoja ja sen sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Organisaatiosi omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja muuttaa asetuksia, yrityskäyttöä, sovelluksia sekä laitteeseen yhdistettyjä tietoja ja sen sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja hallita asetuksia, pääsyoikeuksia, sovelluksia, laitteen käyttödataa ja sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Organisaatiosi omistaa tämän laitteen.\n\nJärjestelmänvalvoja voi valvoa ja hallita asetuksia, pääsyoikeuksia, sovelluksia, laitteen käyttödataa ja sijaintitietoja.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organisaatiosi asensi laitteeseen varmenteen myöntäjän. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisaatiosi lisäsi työprofiiliin varmenteen myöntäjän. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Laitteeseen on asennettu varmenteen myöntäjä. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
@@ -556,7 +556,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Henkilökohtainen profiilisi on yhteydessä sovellukseen <xliff:g id="VPN_APP">%1$s</xliff:g>, joka voi valvoa verkkotoimintaasi, esimerkiksi sähköposteja, sovelluksia ja verkkosivustoja."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Laitettasi hallinnoi <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> hallinnoi laitettasi sovelluksen <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> avulla."</string>
-    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Järjestelmänvalvoja voi valvoa ja hallita asetuksia, yrityskäyttöä, sovelluksia sekä laitteeseen yhdistettyjä tietoja ja sen sijaintitietoja."</string>
+    <string name="monitoring_description_do_body" msgid="7700878065625769970">"Järjestelmänvalvoja voi valvoa ja hallita asetuksia, pääsyoikeuksia, sovelluksia, laitteen käyttödataa ja sijaintitietoja."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Lisätietoja"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Olet yhteydessä sovellukseen <xliff:g id="VPN_APP">%1$s</xliff:g>, joka voi valvoa verkkotoimintaasi, esimerkiksi sähköposteja, sovelluksia ja verkkosivustoja."</string>

@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"अनुमति दें"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB डीबगिंग की अनुमति नहीं है"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन किया है, वो USB डीबगिंग चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, प्राथमिक उपयोगकर्ता में बदलें."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"क्या आप इस नेटवर्क पर वॉयरलेस डीबगिंग की सुविधा के इस्तेमाल की अनुमति देना चाहते हैं?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"क्या आप इस नेटवर्क पर वॉयरलेस डीबगिंग के इस्तेमाल की अनुमति देना चाहते हैं?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्क का नाम (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nवाई-फ़ाई का पता (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"इस नेटवर्क पर हमेशा अनुमति दें"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"अनुमति दें"</string>
@@ -220,7 +220,7 @@
     <string name="data_connection_3_5g_plus" msgid="8938598386721354697">"H+"</string>
     <string name="data_connection_4g" msgid="5770196771037980730">"4G"</string>
     <string name="data_connection_4g_plus" msgid="780615287092000279">"4G+"</string>
-    <string name="data_connection_lte" msgid="557021044282539923">"एलटीई"</string>
+    <string name="data_connection_lte" msgid="557021044282539923">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
     <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"रोमिंग"</string>
@@ -507,7 +507,7 @@
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> का इस्तेमाल करके रिकॉर्ड और कास्ट करना शुरू करें?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"फिर से न दिखाएं"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सभी को हटाएं"</string>
-    <string name="manage_notifications_text" msgid="6885645344647733116">"प्रबंधित करें"</string>
+    <string name="manage_notifications_text" msgid="6885645344647733116">"मैनेज करें"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"नई सूचनाएं"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"बिना आवाज़ किए मिलने वाली सूचनाएं"</string>
@@ -535,7 +535,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"आपकी वर्क प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट की गई है"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"आपकी निजी प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट की गई है"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"इस डिवाइस को <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट किया गया है"</string>
-    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"डिवाइस प्रबंधन"</string>
+    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"डिवाइस मैनेजमेंट"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"प्रोफ़ाइल को मॉनीटर करना"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"नेटवर्क को मॉनीटर करना"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"वीपीएन"</string>
@@ -545,7 +545,7 @@
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN डिस्‍कनेक्‍ट करें"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"नीतियां देखें"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है.\n\nआपके संगठन का आईटी एडमिन कुछ चीज़ों की निगरानी और उन्हें प्रबंधित कर सकता है, जैसे कि सेटिंग, कॉर्पोरेट ऐक्सेस, ऐप्लिकेशन, आपके डिवाइस से जुड़ा डेटा, और आपके डिवाइस की जगह की जानकारी.\n\nज़्यादा जानकारी के लिए, अपने आईटी एडमिन से संपर्क करें."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है.\n\nआपके संगठन का आईटी एडमिन कुछ चीज़ों की निगरानी और उन्हें प्रबंधित कर सकता है, जैसे कि सेटिंग, कॉर्पोरेट ऐक्सेस, ऐप्लिकेशन, आपके डिवाइस से जुड़ा डेटा, और आपके डिवाइस की जगह की जानकारी.\n\nज़्यादा जानकारी के लिए, अपने आईटी एडमिन से संपर्क करें."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है.\n\nआपके संगठन का आईटी एडमिन कुछ चीज़ों की निगरानी और उन्हें मैनेज कर सकता है, जैसे कि सेटिंग, कॉरपोरेट ऐक्सेस, ऐप्लिकेशन, आपके डिवाइस से जुड़ा डेटा, और आपके डिवाइस की जगह की जानकारी.\n\nज़्यादा जानकारी के लिए, अपने आईटी एडमिन से संपर्क करें."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"आपके संगठन ने इस डिवाइस पर एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क पर ट्रेफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"आपके संगठन ने आपकी वर्क प्रोफ़ाइल में एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"इस डिवाइस पर एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
@@ -955,7 +955,7 @@
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> चल रहा है"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है."</string>
-    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है. ज़्यादा जानने के लिए टैप करें."</string>
+    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"इस ऐप्लिकेशन को इंस्टॉल करने की ज़रूरत नहीं पड़ती. ज़्यादा जानकारी के लिए इस लिंक पर टैप करें."</string>
     <string name="app_info" msgid="5153758994129963243">"ऐप्लिकेशन की जानकारी"</string>
     <string name="go_to_web" msgid="636673528981366511">"ब्राउज़र पर जाएं"</string>
     <string name="mobile_data" msgid="4564407557775397216">"मोबाइल डेटा"</string>
@@ -1004,7 +1004,7 @@
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल्स की सेटिंग"</string>
     <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"ओवरफ़्लो"</string>
     <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"स्टैक में वापस जोड़ें"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"प्रबंधित करें"</string>
+    <string name="manage_bubbles_text" msgid="6856830436329494850">"मैनेज करें"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> से <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> और <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> अन्य ऐप्लिकेशन से <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ले जाएं"</string>

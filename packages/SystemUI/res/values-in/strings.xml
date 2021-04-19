@@ -549,7 +549,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organisasi Anda menginstal otoritas sertifikat di perangkat ini. Traffic jaringan aman Anda mungkin dipantau atau diubah."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisasi Anda menginstal otoritas sertifikat di profil kerja. Traffic jaringan aman Anda mungkin dipantau atau diubah."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Otoritas sertifikat diinstal di perangkat. Traffic jaringan aman Anda mungkin dipantau atau diubah."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Admin telah mengaktifkan pencatatan jaringan, yang memantau traffic di perangkat."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Admin telah mengaktifkan pencatatan log jaringan, yang memantau traffic di perangkat."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Anda tersambung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Anda tersambung ke <xliff:g id="VPN_APP_0">%1$s</xliff:g> dan <xliff:g id="VPN_APP_1">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Profil kerja Anda tersambung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs."</string>
@@ -715,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Dapat berdering atau bergetar berdasarkan setelan ponsel"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Dapat berdering atau bergetar berdasarkan setelan ponsel. Percakapan dari balon <xliff:g id="APP_NAME">%1$s</xliff:g> secara default."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Menjaga perhatian dengan pintasan floating ke konten ini."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Muncul di atas bagian percakapan, ditampilkan sebagai balon yang mengambang, menampilkan gambar profil di layar kunci"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Muncul di atas bagian percakapan, ditampilkan sebagai balon yang mengambang, menampilkan foto profil di layar kunci"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Setelan"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung fitur percakapan"</string>
@@ -953,7 +953,7 @@
     <string name="notification_channel_storage" msgid="2720725707628094977">"Penyimpanan"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Petunjuk"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Aplikasi Instan"</string>
-    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> berjalan"</string>
+    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> sedang berjalan"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Aplikasi dapat dibuka tanpa perlu diinstal."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Aplikasi dapat dibuka tanpa perlu diinstal. Ketuk untuk mempelajari lebih lanjut."</string>
     <string name="app_info" msgid="5153758994129963243">"Info aplikasi"</string>
@@ -1026,7 +1026,7 @@
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Percakapan ditetapkan jadi prioritas"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Percakapan prioritas akan:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Muncul di atas bagian percakapan"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Menampilkan gambar profil di layar kunci"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Menampilkan foto profil di layar kunci"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Muncul sebagai balon mengambang di atas aplikasi"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Mengganggu fitur Jangan Ganggu"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Oke"</string>
