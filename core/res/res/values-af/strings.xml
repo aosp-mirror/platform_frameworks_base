@@ -1852,10 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Uitgevee deur jou administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (7963058670863485450) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (7695751399533397741) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Batterybespaarder skakel Donkertema aan en beperk of skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Ok Google\", af\n\n"<annotation id="url">"Kom meer te wete"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Batterybespaarder skakel Donkertema aan en beperk of skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Ok Google\", af."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys totdat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Skakel Databespaarder aan?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Skakel aan"</string>
@@ -1931,6 +1929,8 @@
     <string name="close_button_text" msgid="10603510034455258">"Maak toe"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Antwoord"</string>
+    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
+    <skip />
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Wys af"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Lui af"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Inkomende oproep"</string>
@@ -2074,18 +2074,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Hierdie kennisgewing is gedegradeer na Stil. Tik om terugvoer te gee."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Hierdie kennisgewing is hoër gegradeer. Tik om terugvoer te gee."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Hierdie kennisgewing is laer gegradeer. Tik om terugvoer te gee."</string>
-    <!-- no translation found for nas_upgrade_notification_title (4224351129445073051) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (7036860187157134706) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (4823652531622744798) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (7561210256700811433) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_action (7011130656195423947) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (6276343083934111208) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Probeer verbeterde kennisgewings"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Skakel verbeterde kennisgewings aan sodat jy aanhou om voorgestelde handelinge, antwoorde en meer te ontvang. Android se aanpasbare kennisgewings word nie meer gesteun nie."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Skakel aan"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Nie nou nie"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Kom meer te wete"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Verbeterde kennisgewings kan alle kennisgewinginhoud lees, insluitend persoonlike inligting soos kontakname en boodskappe. Hierdie kenmerk kan ook kennisgewings toemaak of handelingknoppies in kennisgewings gebruik, soos om foonoproepe te beantwoord.\n\nHierdie kenmerk kan ook Prioriteitmodus aan- of afskakel en soortgelyke instellings verander."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Roetinemodus-inligtingkennisgewing"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Battery kan afloop voordat dit normaalweg gelaai word"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterybespaarder is geaktiveer om batterylewe te verleng"</string>
