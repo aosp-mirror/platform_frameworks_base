@@ -231,9 +231,8 @@ public class Translator {
      *
      * @throws IllegalStateException if this Translator session was destroyed when called.
      *
-     * @deprecated use {@link #translate(TranslationRequest, CancellationSignal,
+     * @removed use {@link #translate(TranslationRequest, CancellationSignal,
      *             Executor, Consumer)} instead.
-     * @hide
      */
     @Deprecated
     @Nullable
