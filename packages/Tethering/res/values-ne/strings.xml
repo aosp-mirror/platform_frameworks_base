@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="6426563586025792944">"टेदरिङ वा हटस्पट सक्रिय छ"</string>
+    <string name="tethered_notification_title" msgid="6426563586025792944">"टेदरिङ वा हटस्पट अन छ"</string>
     <string name="tethered_notification_message" msgid="64800879503420696">"सेटअप गर्न ट्याप गर्नुहोस्।"</string>
     <string name="disable_tether_notification_title" msgid="3004509127903564191">"टेदरिङ सुविधा असक्षम पारिएको छ"</string>
     <string name="disable_tether_notification_message" msgid="6717523799293901476">"विवरणहरूका लागि आफ्ना प्रशासकलाई सम्पर्क गर्नुहोस्"</string>
