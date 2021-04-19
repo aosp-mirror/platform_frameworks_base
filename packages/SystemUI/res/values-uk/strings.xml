@@ -346,7 +346,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не турбувати"</string>
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"Лише пріоритетні"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"Лише будильник"</string>
-    <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"Без сигналів"</string>
+    <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"Повна тиша"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"Bluetooth (пристроїв: <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"Bluetooth вимкнено"</string>
@@ -463,7 +463,7 @@
     <string name="voice_hint" msgid="7476017460191291417">"Голосові підказки: проведіть пальцем від значка"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Камера: проведіть пальцем від значка"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Без звуку. Звук також буде вимкнено в програмах зчитування з екрана."</string>
-    <string name="interruption_level_none" msgid="219484038314193379">"Без сигналів"</string>
+    <string name="interruption_level_none" msgid="219484038314193379">"Повна тиша"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"Лише пріоритетні"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"Лише будильник"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Без\nсигналів"</string>
@@ -545,7 +545,7 @@
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Відстеження профілю"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Відстеження дій у мережі"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"Мережа VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Реєстрація в мережі"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Журнал мережі"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Сертифікати центру сертифікації"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Вимкнути VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Від’єднатися від мережі VPN"</string>
@@ -555,7 +555,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Адміністратор організації встановив центр сертифікації на цьому пристрої. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Адміністратор організації встановив центр сертифікації у вашому робочому профілі. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На цьому пристрої встановлено центр сертифікації. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ваш адміністратор увімкнув журнал мережі, щоб відстежувати трафік на вашому пристрої."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Під’єднано додаток <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, як-от відкривання електронних листів, додатків і веб-сайтів."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Під’єднано додатки <xliff:g id="VPN_APP_1">%2$s</xliff:g> та <xliff:g id="VPN_APP_0">%1$s</xliff:g>, які можуть відстежувати вашу активність у мережі, як-от відкривання електронних листів, додатків і веб-сайтів."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Ваш робочий профіль під’єднано до додатка <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
@@ -570,7 +570,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Відкрити налаштування мережі VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Відкрити надійні облікові дані"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"Ваш адміністратор увімкнув журнал мережі, щоб відстежувати трафік на вашому пристрої.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Ви дозволили додатку під’єднуватися до мережі VPN.\n\nЦей додаток може відстежувати вашу активність на пристрої та в мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Вашим робочим профілем керує адміністратор організації <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nВін може відстежувати ваші дії в мережі, зокрема електронні листи, додатки та веб-сайти.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором.\n\nВаш пристрій також під’єднано до мережі VPN, у якій можна відстежувати ваші дії в мережі."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
@@ -718,8 +718,8 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Спливаюче сповіщення"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звуку чи вібрації"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звуку чи вібрації, з\'являється нижче в розділі розмов"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може дзвонити або вібрувати залежно від налаштувань телефона"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може дзвонити або вібрувати залежно від налаштувань телефона. Показує спливаючі розмови з додатка <xliff:g id="APP_NAME">%1$s</xliff:g> за умовчанням."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Дзвінок або вібрація залежно від налаштувань телефона"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Дзвінок або вібрація залежно від налаштувань телефона. Розмови з додатка <xliff:g id="APP_NAME">%1$s</xliff:g> за умовчанням з\'являються як спливаючий чат."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Привертає увагу до контенту плаваючим ярликом."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"З\'являється вгорі розділу розмов у спливаючому сповіщенні та показує зображення профілю на заблокованому екрані"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налаштування"</string>
@@ -1004,7 +1004,7 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Додатки використовують <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" і "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"камеру"</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"камера"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"місце"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"мікрофон"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Датчики вимкнено"</string>

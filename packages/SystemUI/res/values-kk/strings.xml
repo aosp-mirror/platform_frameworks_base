@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Жүйе интерфейсі"</string>
-    <string name="status_bar_clear_all_button" msgid="2491321682873657397">"Тазалау"</string>
+    <string name="status_bar_clear_all_button" msgid="2491321682873657397">"Өшіру"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"Хабарлар жоқ"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"Ағымдағы"</string>
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"Хабарлар"</string>
@@ -363,7 +363,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Портрет"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Пейзаж"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Енгізу әдісі"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"Орналасу"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"Локация"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Орын өшірулі"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Meдиа құрылғысы"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI (алынған сигнал қуатының көрсеткіші)"</string>
@@ -443,7 +443,7 @@
     <string name="description_target_search" msgid="3875069993128855865">"Іздеу"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін жоғары сырғыту."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін солға сырғыту."</string>
-    <string name="zen_priority_introduction" msgid="3159291973383796646">"Дабылдар, еске салғыштар, оқиғалар мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндарды ести алатын боласыз."</string>
+    <string name="zen_priority_introduction" msgid="3159291973383796646">"Оятқыш, еске салғыш, іс-шара мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойын сияқты медиафайлдарды қоссаңыз, оларды естисіз."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Дабылдардан басқа ешқандай дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндарды ести алатын боласыз."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Реттеу"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Дабыл, музыка, бейнелер мен ойындарды қоса алғанда, барлық дыбыстар мен дірілдер бөгелетін болады. Қоңырау шала беруіңізге болады."</string>
@@ -513,7 +513,7 @@
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Үнсіз"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Хабарландырулар"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Әңгімелер"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Барлық дыбыссыз хабарландыруларды өшіру"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Барлық үнсіз хабарландыруларды өшіру"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Хабарландырулар Мазаламау режимінде кідіртілді"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Қазір бастау"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Хабарландырулар жоқ"</string>
@@ -690,7 +690,7 @@
     <string name="notification_header_default_channel" msgid="225454696914642444">"Хабарландырулар"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Хабарландырулар бұдан былай көрсетілмейді"</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"Хабарландырулар жасырылады"</string>
-    <string name="notification_channel_silenced" msgid="1995937493874511359">"Бұл хабарландырулар дыбыссыз көрсетіледі"</string>
+    <string name="notification_channel_silenced" msgid="1995937493874511359">"Бұл хабарландырулар үнсіз көрсетіледі"</string>
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Бұл хабарландырулар сізді ескертеді"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"Әдетте хабарландыруларды көрмейсіз. \nОлар көрсетілсін бе?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Дайын"</string>
@@ -701,21 +701,21 @@
     <string name="inline_block_button" msgid="479892866568378793">"Бөгеу"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Көрсету"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Жасыру"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Дыбыссыз"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Үнсіз"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Хабарландырулар алғым келмейді"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Ескерту"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Хабарландырулар келе берсін"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Хабарландыруларды өшіру"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Осы қолданбаның хабарландырулары көрсетілсін бе?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Дыбыссыз"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Үнсіз"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Әдепкі"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Көпіршік"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Дыбыс не діріл қолданылмайды"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Дыбыс не діріл қолданылмайды, әңгімелер бөлімінің төмен жағында шығады"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефон параметрлеріне байланысты шылдырлауы не дірілдеуі мүмкін"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефон параметрлеріне байланысты шылдырлауы не дірілдеуі мүмкін. <xliff:g id="APP_NAME">%1$s</xliff:g> чаттары әдепкісінше қалқымалы етіп көрсетіледі."</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Дыбыс не діріл болмайды."</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Дыбыс не діріл болмайды, әңгімелер бөлімінің төмен жағында тұрады."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефон параметрлеріне байланысты дыбыстық сигнал не діріл болуы мүмкін."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефон параметрлеріне байланысты дыбыстық сигнал не діріл болуы мүмкін. <xliff:g id="APP_NAME">%1$s</xliff:g> әңгімелері әдепкісінше қалқып шығады."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Осы мазмұнға бекітілген қалқымалы таңбашамен назарыңызды өзіне тартады."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Әңгімелер бөлімінің жоғарғы жағында тұрады, қалқыма хабар түрінде шығады, құлыптаулы экранда профиль суретін көрсетеді"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Әңгімелер бөлімінің жоғарғы жағында тұрады, қалқыма хабар түрінде шығады, құлыптаулы экранда профиль суретін көрсетеді."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Параметрлер"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маңызды"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгімелесу функцияларын қолдамайды."</string>
@@ -836,7 +836,7 @@
     <item msgid="2681220472659720036">"Буфер"</item>
     <item msgid="4795049793625565683">"Перне коды"</item>
     <item msgid="80697951177515644">"Айналдыруды растау, пернетақта ауыстырғыш"</item>
-    <item msgid="7626977989589303588">"Ешқандай"</item>
+    <item msgid="7626977989589303588">"Жоқ"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="9156773083127904112">"Орташа"</item>
@@ -936,7 +936,7 @@
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Оң жақ таңбаша"</string>
     <string name="lockscreen_unlock_left" msgid="1417801334370269374">"Сол жақ таңбаша құлыпты ашады"</string>
     <string name="lockscreen_unlock_right" msgid="4658008735541075346">"Оң жақ таңбаша құлыпты ашады"</string>
-    <string name="lockscreen_none" msgid="4710862479308909198">"Ешқандай"</string>
+    <string name="lockscreen_none" msgid="4710862479308909198">"Жоқ"</string>
     <string name="tuner_launch_app" msgid="3906265365971743305">"<xliff:g id="APP">%1$s</xliff:g> қолданбасын іске қосу"</string>
     <string name="tuner_other_apps" msgid="7767462881742291204">"Басқа қолданбалар"</string>
     <string name="tuner_circle" msgid="5270591778160525693">"Шеңбер"</string>

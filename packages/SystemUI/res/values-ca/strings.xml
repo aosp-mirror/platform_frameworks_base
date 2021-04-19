@@ -543,7 +543,7 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Certificats de CA"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Desactiva la VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Desconnecta la VPN"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Consulta les polítiques"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Mostra les polítiques"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"El dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nL\'administrador de TI pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions, les dades associades al dispositiu i la informació d\'ubicació.\n\nPer obtenir més informació, contacta amb l\'administrador de TI."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"El dispositiu pertany a la teva organització.\n\nL\'administrador de TI pot supervisar i gestionar la configuració, l\'accés corporatiu, les aplicacions, les dades associades al dispositiu i la informació d\'ubicació.\n\nPer obtenir més informació, contacta amb l\'administrador de TI."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"La teva organització ha instal·lat una autoritat de certificació en aquest dispositiu. És possible que el trànsit a la xarxa segura se supervisi o es modifiqui."</string>
@@ -810,7 +810,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Música"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendari"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"Mostra amb els controls de volum"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"No molestis"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Drecera per als botons de volum"</string>

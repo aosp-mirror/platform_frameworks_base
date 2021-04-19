@@ -954,7 +954,7 @@
     <string name="notification_channel_hints" msgid="7703783206000346876">"ইংগিতবোৰ"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> চলি আছে"</string>
-    <string name="instant_apps_message" msgid="6112428971833011754">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে।"</string>
+    <string name="instant_apps_message" msgid="6112428971833011754">"এপ্‌টো ইনষ্ট\'ল নকৰাকৈ খোলা হৈছে।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে। অধিক জানিবলৈ টিপক।"</string>
     <string name="app_info" msgid="5153758994129963243">"এপৰ তথ্য"</string>
     <string name="go_to_web" msgid="636673528981366511">"ব্ৰাউজাৰলৈ যাওক"</string>

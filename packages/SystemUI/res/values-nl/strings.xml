@@ -637,7 +637,7 @@
     <string name="output_title" msgid="3938776561655668350">"Media-uitvoer"</string>
     <string name="output_calls_title" msgid="7085583034267889109">"Uitvoer van telefoongesprek"</string>
     <string name="output_none_found" msgid="5488087293120982770">"Geen apparaten gevonden"</string>
-    <string name="output_none_found_service_off" msgid="935667567681386368">"Geen apparaten gevonden. Probeer <xliff:g id="SERVICE">%1$s</xliff:g> in te schakelen."</string>
+    <string name="output_none_found_service_off" msgid="935667567681386368">"Geen apparaten gevonden. Probeer <xliff:g id="SERVICE">%1$s</xliff:g> aan te zetten."</string>
     <string name="output_service_bt" msgid="4315362133973911687">"Bluetooth"</string>
     <string name="output_service_wifi" msgid="9003667810868222134">"Wifi"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth en wifi"</string>
@@ -656,7 +656,7 @@
     <string name="status_bar_airplane" msgid="4848702508684541009">"Vliegtuigmodus"</string>
     <string name="add_tile" msgid="6239678623873086686">"Tegel toevoegen"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"Tegel \'Uitzenden\'"</string>
-    <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"Je hoort je volgende wekker niet <xliff:g id="WHEN">%1$s</xliff:g> tenzij je dit voor die tijd uitschakelt"</string>
+    <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"Je hoort je volgende wekker niet <xliff:g id="WHEN">%1$s</xliff:g> tenzij je dit voor die tijd uitzet"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Je hoort je volgende wekker niet <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"om <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -915,7 +915,7 @@
     <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Sleep omlaag om te sluiten"</string>
     <string name="pip_menu_title" msgid="6365909306215631910">"Menu"</string>
     <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> is in scherm-in-scherm"</string>
-    <string name="pip_notification_message" msgid="4991831338795022227">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en schakel je de functie uit."</string>
+    <string name="pip_notification_message" msgid="4991831338795022227">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en zet je de functie uit."</string>
     <string name="pip_play" msgid="333995977693142810">"Afspelen"</string>
     <string name="pip_pause" msgid="1139598607050555845">"Onderbreken"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Doorgaan naar volgende"</string>
@@ -982,7 +982,7 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g> toestaan om segmenten van apps te tonen"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Toestaan"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Weigeren"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Tikken om Batterijbesparing in te schakelen"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Tikken om Batterijbesparing aan te zetten"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aanzetten als de batterij waarschijnlijk leeg raakt"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nee"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Batterijbesparing staat aan"</string>
@@ -1017,7 +1017,7 @@
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatten met bubbels"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nieuwe gesprekken worden als zwevende iconen of bubbels getoond. Tik om een bubbel te openen. Sleep om een bubbel te verplaatsen."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Beheer bubbels wanneer je wilt"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tik op Beheren om bubbels van deze app uit te schakelen"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tik op Beheren om bubbels van deze app uit te zetten"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Instellingen voor <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systeemnavigatie geüpdatet. Als je wijzigingen wilt aanbrengen, ga je naar Instellingen."</string>
@@ -1035,7 +1035,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrotingsvenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Bediening van vergrotingsvenster"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Apparaatbediening"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Bedieningselementen voor je gekoppelde apparaten toevoegen"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Voeg bedieningselementen voor je gekoppelde apparaten toe"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Apparaatbediening instellen"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Houd de aan/uit-knop ingedrukt voor toegang tot de bedieningselementen"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Kies de app waaraan je bedieningselementen wilt toevoegen"</string>

@@ -168,7 +168,7 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"間違えた回数が上限を超えました。このユーザーが削除されます。"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"間違えた回数が上限を超えました。この仕事用プロファイルと関連データが削除されます。"</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"閉じる"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"指紋認証センサーをタップ"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"指紋認証センサーをタッチ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"指紋アイコン"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"顔を認証しています…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"顔アイコン"</string>

@@ -120,7 +120,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"వెనుకకు"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"హోమ్"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"మెనూ"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"యాక్సెస్ సామర్థ్యం"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"యాక్సెసిబిలిటీ"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"స్క్రీన్‌ను తిప్పండి"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ఓవర్‌వ్యూ"</string>
     <string name="accessibility_search_light" msgid="524741790416076988">"సెర్చ్"</string>
@@ -413,7 +413,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> వినియోగించబడింది"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> పరిమితి"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> హెచ్చరిక"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"కార్యాలయ ప్రొఫైల్"</string>
+    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"ఆఫీస్ ప్రొఫైల్"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"రాత్రి కాంతి"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"సూర్యాస్తమయానికి"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"సూర్యోదయం వరకు"</string>
@@ -502,7 +502,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"పనితీరుని మరియు నేపథ్య డేటాను తగ్గిస్తుంది"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"బ్యాటరీ సేవర్‌ను ఆఫ్ చేయండి"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"రికార్డ్ చేస్తున్నప్పుడు లేదా ప్రసారం చేస్తున్నప్పుడు, మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన సమాచారం మొత్తాన్ని, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> యాక్సెస్ చేయగలుగుతుంది. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, చెల్లింపు వివరాలు, ఫోటోలు, సందేశాలు, మీరు ప్లే చేసే ఆడియో వంటివి ఉంటాయి."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"రికార్డ్ చేస్తున్నప్పుడు లేదా ప్రసారం చేస్తున్నప్పుడు మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన సమాచారం మొత్తాన్ని, ఈ ఫంక్షన్‌ను అందిస్తున్న సర్వీసు యాక్సెస్ చేయగలదు. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, చెల్లింపు వివరాలు, ఫోటోలు, సందేశాలు, మీరు ప్లే చేసే ఆడియో వంటివి ఉంటాయి."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"రికార్డ్ చేస్తున్నప్పుడు లేదా ప్రసారం చేస్తున్నప్పుడు మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన సమాచారం మొత్తాన్ని, ఈ ఫంక్షన్‌ను అందిస్తున్న సర్వీసు యాక్సెస్ చేయగలదు. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు,  మెసేజ్‌లు, మీరు ప్లే చేసే ఆడియో వంటివి ఉంటాయి."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"రికార్డ్ చేయడం లేదా ప్రసారం చేయడం ప్రారంభించాలా?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>తో రికార్డ్ చేయడం లేదా ప్రసారం చేయడం ప్రారంభించాలా?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"మళ్లీ చూపవద్దు"</string>
@@ -617,7 +617,7 @@
     <string name="stream_notification" msgid="7930294049046243939">"నోటిఫికేషన్"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"బ్లూటూత్"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"డ్యూయల్ మల్టీ టోన్ ఫ్రీక్వెన్సీ"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"యాక్సెస్ సామర్థ్యం"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"యాక్సెసిబిలిటీ"</string>
     <string name="ring_toggle_title" msgid="5973120187287633224">"కాల్‌లు"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"రింగ్"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"వైబ్రేట్"</string>
@@ -652,7 +652,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"డెమో మోడ్ చూపు"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ఈథర్‌నెట్"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"అలారం"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"కార్యాలయ ప్రొఫైల్‌"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ఎయిర్‌ప్లేన్ మోడ్"</string>
     <string name="add_tile" msgid="6239678623873086686">"టైల్‌ను జోడించండి"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"ప్రసార టైల్"</string>
@@ -662,7 +662,7 @@
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"శీఘ్ర సెట్టింగ్‌లు, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"హాట్‌స్పాట్"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"కార్యాలయ ప్రొఫైల్‌"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"కొందరికి సరదాగా ఉంటుంది కానీ అందరికీ అలాగే ఉండదు"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"సిస్టమ్ UI ట్యూనర్ Android వినియోగదారు ఇంటర్‌ఫేస్‌ను మెరుగుపరచడానికి మరియు అనుకూలీకరించడానికి మీకు మరిన్ని మార్గాలను అందిస్తుంది. ఈ ప్రయోగాత్మక లక్షణాలు భవిష్యత్తు విడుదలల్లో మార్పుకు లోనవ్వచ్చు, తాత్కాలికంగా లేదా పూర్తిగా నిలిపివేయవచ్చు. జాగ్రత్తగా కొనసాగండి."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ఈ ప్రయోగాత్మక లక్షణాలు భవిష్యత్తు విడుదలల్లో మార్పుకు లోనవ్వచ్చు, తాత్కాలికంగా లేదా పూర్తిగా నిలిపివేయవచ్చు. జాగ్రత్తగా కొనసాగండి."</string>
@@ -808,7 +808,7 @@
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"కాంటాక్ట్‌లు"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ఇమెయిల్"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
-    <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"సంగీతం"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"మ్యూజిక్"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"వాల్యూమ్ నియంత్రణలతో చూపు"</string>
@@ -950,9 +950,9 @@
     <string name="notification_channel_battery" msgid="9219995638046695106">"బ్యాటరీ"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"స్క్రీన్‌షాట్‌లు"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"సాధారణ సందేశాలు"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"నిల్వ"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"స్టోరేజ్"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"సూచనలు"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"తక్షణ యాప్‌లు"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"ఇన్‌స్టంట్ యాప్‌లు"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> అమలవుతోంది"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ఇన్‌స్టాల్ చేయకుండా యాప్ తెరవబడింది."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ఇన్‌స్టాల్ చేయకుండా యాప్ తెరవబడింది. మరింత తెలుసుకోవడానికి నొక్కండి."</string>

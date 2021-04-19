@@ -953,7 +953,7 @@
     <string name="notification_channel_storage" msgid="2720725707628094977">"Hifadhi"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Vidokezo"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Programu Zinazofunguka Papo Hapo"</string>
-    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> inaendelea kutumika"</string>
+    <string name="instant_apps_title" msgid="8942706782103036910">"Programu ya <xliff:g id="APP">%1$s</xliff:g> inatumika"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Programu inafunguka bila kusakinishwa."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Programu inafunguka bila kusakinishwa. Gusa ili upate maelezo zaidi."</string>
     <string name="app_info" msgid="5153758994129963243">"Maelezo ya programu"</string>

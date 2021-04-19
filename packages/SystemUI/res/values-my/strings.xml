@@ -45,7 +45,7 @@
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"အကြောင်းကြားချက်များ"</string>
     <string name="bluetooth_tethered" msgid="4171071193052799041">"ဘလူးတုသ်မှတဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"ထည့်သွင်းနည်းများ သတ်မှတ်ခြင်း"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"ခလုတ်ပါဝင်သော ကီးဘုတ်"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"စက်၏ ကီးဘုတ်"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> အား ဝင်သုံးရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ခွင့်ပြုပါသလား။"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> အား <xliff:g id="USB_DEVICE">%2$s</xliff:g> ကို သုံးခွင့်ပြုမလား။\nဤအက်ပ်ကို အသံဖမ်းခွင့် ပေးမထားသော်လည်း ၎င်းသည် ဤ USB စက်ပစ္စည်းမှတစ်ဆင့် အသံများကို ဖမ်းယူနိုင်ပါသည်။"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> အား ဝင်သုံးရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ခွင့်ပြုပါသလား။"</string>
@@ -395,7 +395,7 @@
     <string name="quick_settings_connected" msgid="3873605509184830379">"ချိတ်ဆက်ထား"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"ချိတ်ဆက်ပြီးပါပြီ၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"ဆက်သွယ်နေ..."</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"တွဲချီပေးခြင်း"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"မိုဘိုင်းသုံးတွဲချိတ်ခြင်း"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"ဟော့စပေါ့"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"ဖွင့်နေသည်…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"\'ဒေတာချွေတာမှု\' ဖွင့်ထားသည်"</string>
@@ -502,7 +502,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"လုပ်ကိုင်မှုကို လျှော့ချလျက် နောက်ခံ ဒေတာကို ကန့်သတ်သည်"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ဘက်ထရီ အားထိန်းကို ပိတ်ရန်"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> သည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်ဖန်သားပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်နိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ဤလုပ်ရပ်အတွက် ဝန်ဆောင်မှုသည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ် သင့်ဖန်သားပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်မှန်သမျှကို သုံးနိုင်ပြီး သင့်စက်မှ ဖွင့်နိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ဤဝန်ဆောင်မှုသည် အသံဖမ်းနေစဉ် (သို့) ကာစ်လုပ်နေစဉ်အတွင်း သင့်ဖန်သားပြင်တွင် မြင်ရသော (သို့) သင့်စက်တွင် ဖွင့်ထားသော အချက်အလက်အားလုံးကို ကြည့်နိုင်ပါမည်။ ၎င်းတွင် စကားဝှက်များ၊ ငွေပေးချေမှုအသေးစိတ်များ၊ ဓာတ်ပုံများ၊ မက်ဆေ့ဂျ်များနှင့် သင်ဖွင့်သည့်အသံကဲ့သို့သော အချက်အလက်များ ပါဝင်သည်။"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ဖမ်းယူခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> နှင့် ဖမ်းယူခြင်း သို့မဟုတ် ကာစ်လုပ်ခြင်း စတင်မလား။"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"နောက်ထပ် မပြပါနှင့်"</string>
@@ -578,7 +578,7 @@
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"အကြောင်းကြားချက်များ မြန်မြန်ရရန်"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"မဖွင့်ခင် ၎င်းတို့ကို ကြည့်ပါ"</string>
-    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"မလိုအပ်ပါ"</string>
+    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"မလိုပါ"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"သတ်မှတ်ရန်"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>။ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="5901885672973736563">"ပိတ်ရန်"</string>
@@ -603,7 +603,7 @@
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ဤအက်ပ်ကိုပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို ထိ၍နှိပ်ထားပါ"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ဤအက်ပ်ကိုပင်ဖြုတ်ရန် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ရပါပြီ"</string>
-    <string name="screen_pinning_negative" msgid="6882816864569211666">"မလိုတော့ပါ"</string>
+    <string name="screen_pinning_negative" msgid="6882816864569211666">"မလိုပါ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"အက်ပ်ကို ပင်ထိုးလိုက်သည်"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"အက်ပ်ကို ပင်ဖြုတ်လိုက်သည်"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ဝှက်မည်လား?"</string>
