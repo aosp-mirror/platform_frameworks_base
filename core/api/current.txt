@@ -43060,16 +43060,9 @@ package android.telephony.data {
   public final class TrafficDescriptor implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public String getDataNetworkName();
-    method @Nullable public String getOsAppId();
+    method @Nullable public byte[] getOsAppId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.TrafficDescriptor> CREATOR;
-  }
-
-  public static final class TrafficDescriptor.Builder {
-    ctor public TrafficDescriptor.Builder();
-    method @NonNull public android.telephony.data.TrafficDescriptor build();
-    method @NonNull public android.telephony.data.TrafficDescriptor.Builder setDataNetworkName(@NonNull String);
-    method @NonNull public android.telephony.data.TrafficDescriptor.Builder setOsAppId(@NonNull String);
   }
 
   public final class UrspRule implements android.os.Parcelable {
