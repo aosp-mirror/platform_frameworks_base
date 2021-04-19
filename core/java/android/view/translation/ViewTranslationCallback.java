@@ -48,4 +48,16 @@ public interface ViewTranslationCallback {
      * @return {@code true} if the View handles clearing the translation.
      */
     boolean onClearTranslation(@NonNull View view);
+
+    /**
+     * Enables padding on the view's original content.
+     * <p>
+     * This is useful when we do not modify the content directly, rather use a mechanism like
+     * {@link android.text.method.TransformationMethod}. If the app misbehaves when the displayed
+     * translation and the underlying content have different sizes, the platform intelligence can
+     * request that the original content be padded to make the sizes match.
+     *
+     * @hide
+     */
+    default void enableContentPadding() {}
 }
