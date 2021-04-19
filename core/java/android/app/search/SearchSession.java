@@ -37,7 +37,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
- * Client API to share information about the search UI state and execute query.
+ * Client needs to create {@link SearchSession} object from in order to execute
+ * {@link #query(Query, Executor, Consumer)} method and share client side signals
+ * back to the service using {@link #notifyEvent(Query, SearchTargetEvent)}.
  *
  * <p>
  * Usage: <pre> {@code
@@ -60,7 +62,7 @@ import java.util.function.Consumer;
  *    }
  *
  *    void onDestroy() {
- *        mSearchSession.destroy();
+ *        mSearchSession.close();
  *    }
  *
  * }</pre>
@@ -108,7 +110,10 @@ public final class SearchSession implements AutoCloseable{
     }
 
     /**
-     * Notifies the search service of an search target event.
+     * Notifies the search service of an search target event (e.g., user interaction
+     * and lifecycle event of the search surface).
+     *
+     * {@see SearchTargetEvent}
      *
      * @param query input object associated with the event.
      * @param event The {@link SearchTargetEvent} that represents the search target event.
@@ -153,7 +158,11 @@ public final class SearchSession implements AutoCloseable{
     /**
      * Destroys the client and unregisters the callback. Any method on this class after this call
      * will throw {@link IllegalStateException}.
+     *
+     * @deprecated
+     * @removed
      */
+    @Deprecated
     public void destroy() {
         if (!mIsClosed.getAndSet(true)) {
             mCloseGuard.close();
@@ -188,6 +197,11 @@ public final class SearchSession implements AutoCloseable{
         }
     }
 
+    /**
+     * Destroys the client and unregisters the callback. Any method on this class after this call
+     * will throw {@link IllegalStateException}.
+     *
+     */
     @Override
     public void close() {
         try {

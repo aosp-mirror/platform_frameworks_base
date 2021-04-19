@@ -16,63 +16,108 @@
 package android.app.search;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * Query object is sent over from client to the service.
+ *
+ * Inside the query object, there is a timestamp that trackes when the query string was typed.
+ *
+ * If this object was created for the {@link SearchSession#query},
+ * the client expects first consumer to be returned
+ * within {@link #getTimestampMillis()} + {@link SearchContext#getTimeoutMillis()}
+ * Base of the timestamp should be SystemClock.elasedRealTime()
+ *
  * @hide
  */
 @SystemApi
 public final class Query implements Parcelable {
 
     /**
-     * Query string typed from the client.
+     * string typed from the client.
      */
     @NonNull
     private final String mInput;
 
-    /**
-     * The timestamp that the query string was typed. If this object was created for the
-     * {@link SearchSession#query}, the client expects first consumer to be returned
-     * within mTimestamp + {@link SearchContext#mTimeoutMillis}
-     */
-    private final long mTimestamp;
+    private final long mTimestampMillis;
 
-    @Nullable
+    /**
+     * Contains other client UI constraints related data
+     */
+    @NonNull
     private final Bundle mExtras;
 
+    /**
+     * Query object used to pass search box input from client to service.
+     *
+     * @param input string typed from the client
+     * @param timestampMillis timestamp that query string was typed.
+     * @param extras bundle that contains other client UI constraints data
+     */
     public Query(@NonNull String input,
-            long timestamp,
-            @SuppressLint("NullableCollection")
-            @Nullable Bundle extras) {
+            long timestampMillis,
+            @NonNull Bundle extras) {
         mInput = input;
-        mTimestamp = timestamp;
-        mExtras = extras;
+        mTimestampMillis = timestampMillis;
+        mExtras = extras == null ? extras : new Bundle();
+    }
+
+    /**
+     * Query object used to pass search box input from client to service.
+     *
+     * @param input string typed from the client
+     * @param timestampMillis timestamp that query string was typed
+     */
+    public Query(@NonNull String input, long timestampMillis) {
+        this(input, timestampMillis, new Bundle());
     }
 
     private Query(Parcel parcel) {
         mInput = parcel.readString();
-        mTimestamp = parcel.readLong();
+        mTimestampMillis = parcel.readLong();
         mExtras = parcel.readBundle();
     }
 
+    /**
+     * @return string typed from the client
+     */
     @NonNull
     public String getInput() {
         return mInput;
     }
 
+    /**
+     * @deprecated Will be replaced by {@link #getTimestampMillis()} as soon as
+     * new SDK is adopted.
+     *
+     * @removed
+     */
+    @Deprecated
     @NonNull
     public long getTimestamp() {
-        return mTimestamp;
+        return mTimestampMillis;
     }
 
-    @Nullable
-    @SuppressLint("NullableCollection")
+    /**
+     * Base of the timestamp should be SystemClock.elasedRealTime()
+     *
+     * @return timestamp that query string was typed
+     */
+    public long getTimestampMillis() {
+        return mTimestampMillis;
+    }
+
+    /**
+     * @return bundle that contains other client constraints related to the query
+     */
+    @NonNull
     public Bundle getExtras() {
+        if (mExtras == null) {
+            return new Bundle();
+        }
         return mExtras;
     }
 
@@ -84,7 +129,7 @@ public final class Query implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mInput);
-        dest.writeLong(mTimestamp);
+        dest.writeLong(mTimestampMillis);
         dest.writeBundle(mExtras);
     }
 

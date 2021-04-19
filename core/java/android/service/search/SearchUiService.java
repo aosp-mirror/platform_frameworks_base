@@ -45,6 +45,9 @@ import java.util.function.Consumer;
  * A service used to share the lifecycle of search UI (open, close, interaction)
  * and also to return search result on a query.
  *
+ * To understand the lifecycle of search session and how a query get issued,
+ * {@see SearchSession}
+ *
  * @hide
  */
 @SystemApi
@@ -70,6 +73,10 @@ public abstract class SearchUiService extends Service {
 
         @Override
         public void onCreateSearchSession(SearchContext context, SearchSessionId sessionId) {
+            mHandler.sendMessage(
+                    obtainMessage(SearchUiService::onSearchSessionCreated,
+                            SearchUiService.this, context, sessionId));
+            // to be removed
             mHandler.sendMessage(
                     obtainMessage(SearchUiService::onCreateSearchSession,
                             SearchUiService.this, context, sessionId));
@@ -119,8 +126,21 @@ public abstract class SearchUiService extends Service {
 
     /**
      * Creates a new search session.
+     *
+     * @deprecated this is method will be removed as soon as
+     * {@link #onSearchSessionCreated(SearchContext, SearchSessionId)}
+     * is adopted by the service.
+     *
+     * @removed
      */
+    @Deprecated
     public void onCreateSearchSession(@NonNull SearchContext context,
+            @NonNull SearchSessionId sessionId) {}
+
+    /**
+     * A new search session is created.
+     */
+    public void onSearchSessionCreated(@NonNull SearchContext context,
             @NonNull SearchSessionId sessionId) {}
 
     /**
@@ -132,7 +152,10 @@ public abstract class SearchUiService extends Service {
             @NonNull Consumer<List<SearchTarget>> callback);
 
     /**
-     * Called by a client to indicate an interaction (tap, long press, drag, etc) on target(s).
+     * Called by a client to indicate an interaction (tap, long press, drag, etc) on target(s)
+     * and lifecycle event on the search surface (e.g., visibility change).
+     *
+     * {@see SearchTargetEvent}
      */
     @MainThread
     public abstract void onNotifyEvent(@NonNull SearchSessionId sessionId,

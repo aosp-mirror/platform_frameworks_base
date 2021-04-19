@@ -17,13 +17,20 @@ package android.app.search;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+
 /**
+ * When {@link SearchSession} is created, {@link SearchContext} object is created
+ * to pass the result types from the {@link SearchSession#query(Query, Executor, Consumer)}
+ * method that the client wants.
+ *
  * @hide
  */
 @SystemApi
@@ -51,12 +58,25 @@ public final class SearchContext implements Parcelable {
     @Nullable
     private String mPackageName;
 
+    /**
+     * @param resultTypes {@link SearchTarget.SearchResultType}s combined using bit OR operation
+     * @param timeoutMillis timeout before client renders its own fallback result
+     */
+    public SearchContext(int resultTypes, int timeoutMillis) {
+        this(resultTypes, timeoutMillis, new Bundle());
+    }
+
+    /**
+     * @param resultTypes {@link SearchTarget.SearchResultType}s combined using bit OR operation
+     * @param timeoutMillis timeout before client renders its own fallback result
+     * @param extras other client constraints (e.g., height of the search surface)
+     */
     public SearchContext(int resultTypes,
-            int queryTimeoutMillis,
-            @SuppressLint("NullableCollection") @Nullable Bundle extras) {
+            int timeoutMillis,
+            @NonNull Bundle extras) {
         mResultTypes = resultTypes;
-        mTimeoutMillis = queryTimeoutMillis;
-        mExtras = extras;
+        mTimeoutMillis = timeoutMillis;
+        mExtras = Objects.requireNonNull(extras);
     }
 
     private SearchContext(Parcel parcel) {
@@ -74,7 +94,7 @@ public final class SearchContext implements Parcelable {
     /**
      * @hide
      */
-    public void setPackageName(@Nullable String packageName) {
+    void setPackageName(@Nullable String packageName) {
         mPackageName = packageName;
     }
 
@@ -83,8 +103,7 @@ public final class SearchContext implements Parcelable {
         return mTimeoutMillis;
     }
 
-    @Nullable
-    @SuppressLint("NullableCollection")
+    @NonNull
     public Bundle getExtras() {
         return mExtras;
     }
