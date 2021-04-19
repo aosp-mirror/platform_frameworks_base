@@ -42,10 +42,12 @@ public class ParsedProcess implements Parcelable {
     @DataClass.ParcelWith(Parcelling.BuiltIn.ForInternedStringSet.class)
     protected Set<String> deniedPermissions = emptySet();
 
+    @ApplicationInfo.GwpAsanMode
     protected int gwpAsanMode = ApplicationInfo.GWP_ASAN_DEFAULT;
+    @ApplicationInfo.MemtagMode
     protected int memtagMode = ApplicationInfo.MEMTAG_DEFAULT;
-    @Nullable
-    protected Boolean nativeHeapZeroInit = null;
+    @ApplicationInfo.NativeHeapZeroInitialized
+    protected int nativeHeapZeroInitialized = ApplicationInfo.ZEROINIT_DEFAULT;
 
     public ParsedProcess() {
     }
@@ -78,9 +80,9 @@ public class ParsedProcess implements Parcelable {
     public ParsedProcess(
             @NonNull String name,
             @NonNull Set<String> deniedPermissions,
-            int gwpAsanMode,
-            int memtagMode,
-            @Nullable Boolean nativeHeapZeroInit) {
+            @ApplicationInfo.GwpAsanMode int gwpAsanMode,
+            @ApplicationInfo.MemtagMode int memtagMode,
+            @ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized) {
         this.name = name;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, name);
@@ -88,8 +90,14 @@ public class ParsedProcess implements Parcelable {
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, deniedPermissions);
         this.gwpAsanMode = gwpAsanMode;
+        com.android.internal.util.AnnotationValidations.validate(
+                ApplicationInfo.GwpAsanMode.class, null, gwpAsanMode);
         this.memtagMode = memtagMode;
-        this.nativeHeapZeroInit = nativeHeapZeroInit;
+        com.android.internal.util.AnnotationValidations.validate(
+                ApplicationInfo.MemtagMode.class, null, memtagMode);
+        this.nativeHeapZeroInitialized = nativeHeapZeroInitialized;
+        com.android.internal.util.AnnotationValidations.validate(
+                ApplicationInfo.NativeHeapZeroInitialized.class, null, nativeHeapZeroInitialized);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -105,18 +113,18 @@ public class ParsedProcess implements Parcelable {
     }
 
     @DataClass.Generated.Member
-    public int getGwpAsanMode() {
+    public @ApplicationInfo.GwpAsanMode int getGwpAsanMode() {
         return gwpAsanMode;
     }
 
     @DataClass.Generated.Member
-    public int getMemtagMode() {
+    public @ApplicationInfo.MemtagMode int getMemtagMode() {
         return memtagMode;
     }
 
     @DataClass.Generated.Member
-    public @Nullable Boolean getNativeHeapZeroInit() {
-        return nativeHeapZeroInit;
+    public @ApplicationInfo.NativeHeapZeroInitialized int getNativeHeapZeroInitialized() {
+        return nativeHeapZeroInitialized;
     }
 
     @DataClass.Generated.Member
@@ -136,14 +144,11 @@ public class ParsedProcess implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
-        byte flg = 0;
-        if (nativeHeapZeroInit != null) flg |= 0x10;
-        dest.writeByte(flg);
         dest.writeString(name);
         sParcellingForDeniedPermissions.parcel(deniedPermissions, dest, flags);
         dest.writeInt(gwpAsanMode);
         dest.writeInt(memtagMode);
-        if (nativeHeapZeroInit != null) dest.writeBoolean(nativeHeapZeroInit);
+        dest.writeInt(nativeHeapZeroInitialized);
     }
 
     @Override
@@ -157,12 +162,11 @@ public class ParsedProcess implements Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
-        byte flg = in.readByte();
         String _name = in.readString();
         Set<String> _deniedPermissions = sParcellingForDeniedPermissions.unparcel(in);
         int _gwpAsanMode = in.readInt();
         int _memtagMode = in.readInt();
-        Boolean _nativeHeapZeroInit = (flg & 0x10) == 0 ? null : (Boolean) in.readBoolean();
+        int _nativeHeapZeroInitialized = in.readInt();
 
         this.name = _name;
         com.android.internal.util.AnnotationValidations.validate(
@@ -171,8 +175,14 @@ public class ParsedProcess implements Parcelable {
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, deniedPermissions);
         this.gwpAsanMode = _gwpAsanMode;
+        com.android.internal.util.AnnotationValidations.validate(
+                ApplicationInfo.GwpAsanMode.class, null, gwpAsanMode);
         this.memtagMode = _memtagMode;
-        this.nativeHeapZeroInit = _nativeHeapZeroInit;
+        com.android.internal.util.AnnotationValidations.validate(
+                ApplicationInfo.MemtagMode.class, null, memtagMode);
+        this.nativeHeapZeroInitialized = _nativeHeapZeroInitialized;
+        com.android.internal.util.AnnotationValidations.validate(
+                ApplicationInfo.NativeHeapZeroInitialized.class, null, nativeHeapZeroInitialized);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -192,10 +202,10 @@ public class ParsedProcess implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1611615591258L,
+            time = 1615850515058L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedProcess.java",
-            inputSignatures = "protected @android.annotation.NonNull java.lang.String name\nprotected @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet.class) java.util.Set<java.lang.String> deniedPermissions\nprotected  int gwpAsanMode\nprotected  int memtagMode\nprotected @android.annotation.Nullable java.lang.Boolean nativeHeapZeroInit\npublic  void addStateFrom(android.content.pm.parsing.component.ParsedProcess)\nclass ParsedProcess extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=false, genParcelable=true, genAidl=false, genBuilder=false)")
+            inputSignatures = "protected @android.annotation.NonNull java.lang.String name\nprotected @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet.class) java.util.Set<java.lang.String> deniedPermissions\nprotected @android.content.pm.ApplicationInfo.GwpAsanMode int gwpAsanMode\nprotected @android.content.pm.ApplicationInfo.MemtagMode int memtagMode\nprotected @android.content.pm.ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized\npublic  void addStateFrom(android.content.pm.parsing.component.ParsedProcess)\nclass ParsedProcess extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=false, genParcelable=true, genAidl=false, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 
