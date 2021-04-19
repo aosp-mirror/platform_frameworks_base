@@ -24,8 +24,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
+import android.content.ContentCaptureOptions;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.os.Bundle;
@@ -38,6 +41,8 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.util.Log;
+import android.view.contentcapture.ContentCaptureManager;
+import android.view.contentcapture.IContentCaptureManager;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -122,6 +127,9 @@ public abstract class HotwordDetectionService extends Service {
 
     private Handler mHandler;
 
+    @Nullable
+    private ContentCaptureManager mContentCaptureManager;
+
     private final IHotwordDetectionService mInterface = new IHotwordDetectionService.Stub() {
         @Override
         public void detectFromDspSource(
@@ -187,6 +195,13 @@ public abstract class HotwordDetectionService extends Service {
                     Log.i(TAG, "Unsupported audio source " + audioSource);
             }
         }
+
+        @Override
+        public void updateContentCaptureManager(IContentCaptureManager manager,
+                ContentCaptureOptions options) {
+            mContentCaptureManager = new ContentCaptureManager(
+                    HotwordDetectionService.this, manager, options);
+        }
     };
 
     @CallSuper
@@ -205,6 +220,16 @@ public abstract class HotwordDetectionService extends Service {
         Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": "
                 + intent);
         return null;
+    }
+
+    @Override
+    @SuppressLint("OnNameExpected")
+    public @Nullable Object getSystemService(@ServiceName @NonNull String name) {
+        if (Context.CONTENT_CAPTURE_MANAGER_SERVICE.equals(name)) {
+            return mContentCaptureManager;
+        } else {
+            return super.getSystemService(name);
+        }
     }
 
     /**
