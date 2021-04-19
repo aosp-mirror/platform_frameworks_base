@@ -1208,12 +1208,12 @@
     <string name="new_app_action" msgid="547772182913269801">"Hap <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> do të mbyllet pa u ruajtur"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> e ka kaluar kufirin e memories"</string>
-    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"Stiva e skedarëve fiktivë të <xliff:g id="PROC">%1$s</xliff:g> është gati"</string>
-    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Stiva e skedarëve fiktivë është mbledhur. Trokit për t\'i ndarë."</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"Të ndahet stiva e skedarëve fiktivë?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"Procesi <xliff:g id="PROC">%1$s</xliff:g> ka kaluar kufirin e tij të memories prej <xliff:g id="SIZE">%2$s</xliff:g>. Ke një stivë të skedarësh fiktivë që mund ta ndash me zhvilluesin e tij. Ki kujdes pasi kjo stivë skedarësh fiktivë mund të përmbajë çdo informacion personal ku ka qasje aplikacioni."</string>
-    <string name="dump_heap_system_text" msgid="6805155514925350849">"Procesi <xliff:g id="PROC">%1$s</xliff:g> e ka kaluar kufirin e tij të memories prej <xliff:g id="SIZE">%2$s</xliff:g>. Ke një stivë skedarësh fiktivë që mund ta ndash. Ki kujdes pasi kjo stivë skedarësh fiktivë mund të përmbajë çdo informacion personal delikat ku ka qasje procesi dhe mund të përfshijë gjërat që ke shkruar ti."</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"Ke një stivë skedarësh fiktivë të procesit <xliff:g id="PROC">%1$s</xliff:g> që mund ta ndash. Ki kujdes pasi kjo stivë skedarësh fiktivë mund të përmbajë çdo informacion personal delikat ku ka qasje procesi dhe mund të përfshijë gjërat që ke shkruar ti."</string>
+    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"Grumbulli i skedarëve fiktivë të <xliff:g id="PROC">%1$s</xliff:g> është gati"</string>
+    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Grumbulli i skedarëve fiktivë është mbledhur. Trokit për t\'i ndarë."</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"Të ndahet grumbulli i skedarëve fiktivë?"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"Procesi <xliff:g id="PROC">%1$s</xliff:g> ka kaluar kufirin e tij të memories prej <xliff:g id="SIZE">%2$s</xliff:g>. Ke një grumbull skedarësh fiktivë që mund ta ndash me zhvilluesin e tij. Ki kujdes pasi ky grumbull skedarësh fiktivë mund të përmbajë çdo informacion personal tëndin ku ka qasje aplikacioni."</string>
+    <string name="dump_heap_system_text" msgid="6805155514925350849">"Procesi <xliff:g id="PROC">%1$s</xliff:g> e ka kaluar kufirin e tij të memories prej <xliff:g id="SIZE">%2$s</xliff:g>. Ke një grumbull skedarësh fiktivë që mund ta ndash. Ki kujdes pasi ky grumbull skedarësh fiktivë mund të përmbajë çdo informacion personal delikat ku ka qasje procesi dhe mund të përfshijë gjërat që ke shkruar ti."</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"Ke një grumbull skedarësh fiktivë të procesit <xliff:g id="PROC">%1$s</xliff:g> që mund ta ndash. Ki kujdes pasi ky grumbull skedarësh fiktivë mund të përmbajë çdo informacion personal delikat ku ka qasje procesi dhe mund të përfshijë gjërat që ke shkruar ti."</string>
     <string name="sendText" msgid="493003724401350724">"Zgjidh një veprim për tekstin"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Volumi i ziles"</string>
     <string name="volume_music" msgid="7727274216734955095">"Volumi i medias"</string>
@@ -1648,7 +1648,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"U krye"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Çaktivizo shkurtoren"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Përdor shkurtoren"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Kthimi i ngjyrës"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Anasjellja e ngjyrës"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korrigjimi i ngjyrës"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i aktivizuar."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. U çaktivizua \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>

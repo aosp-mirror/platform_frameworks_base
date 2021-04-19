@@ -103,7 +103,7 @@
     <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"डेटा"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"फ़ैक्स"</string>
-    <string name="serviceClassSMS" msgid="1547664561704509004">"मैसेज (एसएमएस)"</string>
+    <string name="serviceClassSMS" msgid="1547664561704509004">"एसएमएस"</string>
     <string name="serviceClassDataAsync" msgid="2029856900898545984">"Async"</string>
     <string name="serviceClassDataSync" msgid="7895071363569133704">"समन्वयन"</string>
     <string name="serviceClassPacket" msgid="1430642951399303804">"पैकेट"</string>
@@ -299,7 +299,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"इस डिवाइस की जगह तक पहुंचने दें"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"कैलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"अपने कैलेंडर को ऐक्सेस करने"</string>
-    <string name="permgrouplab_sms" msgid="795737735126084874">"मैसेज (एसएमएस)"</string>
+    <string name="permgrouplab_sms" msgid="795737735126084874">"एसएमएस"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"मैसेज (एसएमएस) भेजें और देखें"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"फ़ाइलें और मीडिया"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"अपने डिवाइस पर मौजूद फ़ोटो, मीडिया और फ़ाइलें ऐक्सेस करने की"</string>
@@ -1659,7 +1659,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"एक सुविधा से दूसरी सुविधा पर जाने के लिए, सुलभता बटन दबाकर रखें."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"एक सुविधा से दूसरी सुविधा पर जाने के लिए, स्क्रीन पर दो उंगलियों से ऊपर की ओर स्वाइप करें और थोड़ी देर तक उंगलियां स्क्रीन पर रखे रहें."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"एक सुविधा से दूसरी सुविधा पर जाने के लिए, स्क्रीन पर तीन उंगलियों से ऊपर की ओर स्वाइप करें और थोड़ी देर तक उंगलियां स्क्रीन पर रखे रहें."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"बड़ा करना"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ज़ूम करने की सुविधा"</string>
     <string name="user_switched" msgid="7249833311585228097">"मौजूदा उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> पर स्विच किया जा रहा है…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> द्वारा प्रस्‍थान किया जा रहा है…"</string>
@@ -1920,7 +1920,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"Maps और नेविगेशन ऐप्लिकेशन"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादकता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"डिवाइस में जगह"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB डीबग करना"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करना"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"घंटा"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"मिनट"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"समय सेट करें"</string>

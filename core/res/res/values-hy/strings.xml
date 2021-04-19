@@ -1831,8 +1831,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="2250286190237669079">"Մինչև <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Մինչև ժ. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-ը (հաջորդ զարթուցիչը)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Մինչև չանջատեք"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Մինչև չանջատեք «Չանհանգստացնել» գործառույթը"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Մինչև անջատեք"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Մինչև անջատեք «Չանհանգստացնել» գործառույթը"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Թաքցնել"</string>
     <string name="zen_mode_feature_name" msgid="3785547207263754500">"Չանհանգստացնել"</string>
@@ -1917,7 +1917,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"Լուսանկարներ և պատկերներ"</string>
     <string name="app_category_social" msgid="2278269325488344054">"Սոցցանցեր և հաղորդակցություն"</string>
     <string name="app_category_news" msgid="1172762719574964544">"Նորություններ և ամսագրեր"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"Քարտեզներ և նավարկում"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"Քարտեզներ և նավիգացիա"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Արդյունավետություն"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Սարքի հիշողություն"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-ով վրիպազերծում"</string>
@@ -1985,7 +1985,7 @@
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> հավելվածն ուզում է ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Փոփոխել"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Զանգերի և ծանուցումների համար թրթռոցը միացված է"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Զանգերի և ծանուցումների համար ձայնն անջատած է"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Զանգերի և ծանուցումների համար ձայնն անջատված է"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Համակարգի փոփոխություններ"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Չանհանգստացնել"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Այժմ «Չանհանգստացնել» ռեժիմում ծանուցումները թաքցվում են"</string>

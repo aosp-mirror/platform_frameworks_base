@@ -429,7 +429,7 @@
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"即使您不使用此應用程式，它仍可隨時存取位置。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"更改音效設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"允許應用程式修改全域音頻設定，例如音量和用於輸出的喇叭。"</string>
-    <string name="permlab_recordAudio" msgid="1208457423054219147">"錄製音效"</string>
+    <string name="permlab_recordAudio" msgid="1208457423054219147">"錄音"</string>
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"此應用程式可以隨時使用麥克風錄音。"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"發送指令至 SIM 卡"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"允許應用程式傳送指令到 SIM 卡。這項操作具有高危險性。"</string>
