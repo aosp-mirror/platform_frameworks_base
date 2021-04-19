@@ -675,6 +675,8 @@ public class RecentsAnimationController implements DeathRecipient {
         }
         final SurfaceControl.Transaction t = mDisplayContent.getPendingTransaction();
         final WindowContainer parent = navToken.getParent();
+        t.setLayer(navToken.getSurfaceControl(), navToken.getLastLayer());
+
         if (animate) {
             final NavBarFadeAnimationController navBarFadeAnimationController =
                     mDisplayContent.getDisplayPolicy().getNavBarFadeAnimationController();
