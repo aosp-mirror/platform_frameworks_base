@@ -1026,7 +1026,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrotingsvenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Bediening van vergrotingsvenster"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Apparaatbediening"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Bedieningselementen voor je gekoppelde apparaten toevoegen"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Voeg bedieningselementen voor je gekoppelde apparaten toe"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Apparaatbediening instellen"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Houd de aan/uit-knop ingedrukt voor toegang tot de bedieningselementen"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Kies de app waaraan je bedieningselementen wilt toevoegen"</string>

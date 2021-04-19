@@ -429,7 +429,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ਨੂੰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ਨੂੰ ਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਰ"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ਰੋਕੋ"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ਡੀਵਾਈਸ"</string>
@@ -594,8 +594,8 @@
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ਆਊਟਪੁੱਟ ਡੀਵਾਈਸ ਵਰਤੋ"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ਐਪ ਨੂੰ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ ਅਤੇ ਫੜ ਕੇ ਰੱਖੋ।"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ ਰੱਖੋ।"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ਨਿੱਜੀ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ (ਜਿਵੇਂ ਕਿ ਸੰਪਰਕ ਅਤੇ ਈਮੇਲ ਸਮੱਗਰੀ)।"</string>
@@ -702,7 +702,7 @@
     <string name="inline_block_button" msgid="479892866568378793">"ਬਲਾਕ ਕਰੋ"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"ਛੋਟਾ ਕਰੋ"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"ਖਾਮੋਸ਼"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"ਸ਼ਾਂਤ"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"ਚੁੱਪ ਰਹੋ"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"ਸੁਚੇਤਨਾ"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"ਸੁਚੇਤ ਰਖੋ"</string>
