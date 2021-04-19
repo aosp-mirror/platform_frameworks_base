@@ -2085,7 +2085,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             contentView.animate()
                     .alpha(0f)
                     .setDuration(ActivityLaunchAnimator.ANIMATION_DURATION_FADE_OUT_CONTENT)
-                    .setInterpolator(Interpolators.ALPHA_OUT);
+                    .setInterpolator(ActivityLaunchAnimator.CONTENT_FADE_OUT_INTERPOLATOR);
             setAboveShelf(true);
             mExpandAnimationRunning = true;
             getViewState().cancelAnimations(this);
