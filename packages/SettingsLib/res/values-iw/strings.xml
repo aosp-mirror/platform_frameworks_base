@@ -285,7 +285,7 @@
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏העלאת רמת הרישום של Wi‑Fi ביומן, הצגה לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"אפשרות זו מפחיתה את קצב התרוקנות הסוללה ומשפרת את ביצועי הרשת"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"‏כשמצב זה מופעל, כתובת ה-MAC של המכשיר הזה עשויה להשתנות בכל פעם שהוא מתחבר לרשת שפועלת בה רנדומיזציה של כתובות MAC."</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"נמדדת"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"חיוב לפי שימוש בנתונים"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"לא נמדדת"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"גודלי מאגר של יומן רישום"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"יש לבחור גדלים של יוצר יומן לכל מאגר יומן"</string>

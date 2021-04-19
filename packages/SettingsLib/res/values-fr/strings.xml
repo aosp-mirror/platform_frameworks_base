@@ -155,7 +155,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Certains paramètres par défaut définis"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Aucun paramètre par défaut défini"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Paramètres de la synthèse vocale"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Synthèse vocale"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Sortie de la synthèse vocale"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Cadence"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Vitesse à laquelle le texte est énoncé"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ton"</string>
@@ -194,8 +194,8 @@
     <item msgid="581904787661470707">"La plus rapide"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Sélectionner un profil"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Personnel"</string>
-    <string name="category_work" msgid="4014193632325996115">"Professionnel"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Perso"</string>
+    <string name="category_work" msgid="4014193632325996115">"Pro"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Options pour les développeurs"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Activer les options pour les développeurs"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Définir les options pour le développement de l\'application"</string>
