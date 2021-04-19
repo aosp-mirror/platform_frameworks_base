@@ -28,7 +28,7 @@ import android.view.displayhash.DisplayHashResultCallback;
 import com.android.internal.util.DataClass;
 
 /**
- * Information passed from the {@link DisplayHasherService} to system server about how to get the
+ * Information passed from the {@link DisplayHashingService} to system server about how to get the
  * display data that will be used to generate the {@link android.view.displayhash.DisplayHash}
  *
  * @hide
@@ -38,9 +38,9 @@ import com.android.internal.util.DataClass;
 public final class DisplayHashParams implements Parcelable {
     /**
      * The size to scale the buffer to so the hash algorithm can properly generate the hash. The
-     * buffer given to the {@link DisplayHasherService#onGenerateDisplayHash(byte[], HardwareBuffer,
-     * Rect, String, DisplayHashResultCallback)} will be stretched based on the value set here.
-     * If {@code null}, the buffer size will not be changed.
+     * buffer given to the {@link DisplayHashingService#onGenerateDisplayHash(byte[],
+     * HardwareBuffer, Rect, String, DisplayHashResultCallback)} will be stretched based on the
+     * value set here. If {@code null}, the buffer size will not be changed.
      */
     @Nullable
     private final Size mBufferSize;
@@ -48,7 +48,7 @@ public final class DisplayHashParams implements Parcelable {
     /**
      * Whether the content will be captured in grayscale or color.
      */
-    private final boolean mGrayscaleBuffer;
+    private final boolean mUseGrayscale;
 
     /**
      * A builder for {@link DisplayHashParams}
@@ -56,7 +56,7 @@ public final class DisplayHashParams implements Parcelable {
     public static final class Builder {
         @Nullable
         private Size mBufferSize;
-        private boolean mGrayscaleBuffer;
+        private boolean mUseGrayscale;
 
         /**
          * Creates a new Builder.
@@ -68,8 +68,8 @@ public final class DisplayHashParams implements Parcelable {
          * The size to scale the buffer to so the hash algorithm can properly generate the hash.
          */
         @NonNull
-        public Builder setBufferSize(int w, int h) {
-            mBufferSize = new Size(w, h);
+        public Builder setBufferSize(int width, int height) {
+            mBufferSize = new Size(width, height);
             return this;
         }
 
@@ -77,15 +77,15 @@ public final class DisplayHashParams implements Parcelable {
          * Whether the content will be captured in grayscale or color.
          */
         @NonNull
-        public Builder setGrayscaleBuffer(boolean value) {
-            mGrayscaleBuffer = value;
+        public Builder setUseGrayscale(boolean useGrayscale) {
+            mUseGrayscale = useGrayscale;
             return this;
         }
 
         /** Builds the instance. This builder should not be touched after calling this! */
         @NonNull
         public DisplayHashParams build() {
-            return new DisplayHashParams(mBufferSize, mGrayscaleBuffer);
+            return new DisplayHashParams(mBufferSize, mUseGrayscale);
         }
     }
 
@@ -109,28 +109,28 @@ public final class DisplayHashParams implements Parcelable {
      *
      * @param bufferSize
      *   The size to scale the buffer to so the hash algorithm can properly generate the hash. The
-     *   buffer given to the {@link DisplayHasherService#onGenerateDisplayHash(byte[], HardwareBuffer,
-     *   Rect, String, DisplayHashResultCallback)} will be stretched based on the value set here.
-     *   If {@code null}, the buffer size will not be changed.
-     * @param grayscaleBuffer
+     *   buffer given to the {@link DisplayHashingService#onGenerateDisplayHash(byte[],
+     *   HardwareBuffer, Rect, String, DisplayHashResultCallback)} will be stretched based on the
+     *   value set here. If {@code null}, the buffer size will not be changed.
+     * @param useGrayscale
      *   Whether the content will be captured in grayscale or color.
      * @hide
      */
     @DataClass.Generated.Member
     public DisplayHashParams(
             @Nullable Size bufferSize,
-            boolean grayscaleBuffer) {
+            boolean useGrayscale) {
         this.mBufferSize = bufferSize;
-        this.mGrayscaleBuffer = grayscaleBuffer;
+        this.mUseGrayscale = useGrayscale;
 
         // onConstructed(); // You can define this method to get a callback
     }
 
     /**
      * The size to scale the buffer to so the hash algorithm can properly generate the hash. The
-     * buffer given to the {@link DisplayHasherService#onGenerateDisplayHash(byte[], HardwareBuffer,
-     * Rect, String, DisplayHashResultCallback)} will be stretched based on the value set here.
-     * If {@code null}, the buffer size will not be changed.
+     * buffer given to the {@link DisplayHashingService#onGenerateDisplayHash(byte[],
+     * HardwareBuffer, Rect, String, DisplayHashResultCallback)} will be stretched based on the
+     * value set here. If {@code null}, the buffer size will not be changed.
      */
     @DataClass.Generated.Member
     public @Nullable Size getBufferSize() {
@@ -141,8 +141,8 @@ public final class DisplayHashParams implements Parcelable {
      * Whether the content will be captured in grayscale or color.
      */
     @DataClass.Generated.Member
-    public boolean isGrayscaleBuffer() {
-        return mGrayscaleBuffer;
+    public boolean isUseGrayscale() {
+        return mUseGrayscale;
     }
 
     @Override
@@ -153,7 +153,7 @@ public final class DisplayHashParams implements Parcelable {
 
         return "DisplayHashParams { " +
                 "bufferSize = " + mBufferSize + ", " +
-                "grayscaleBuffer = " + mGrayscaleBuffer +
+                "useGrayscale = " + mUseGrayscale +
         " }";
     }
 
@@ -164,7 +164,7 @@ public final class DisplayHashParams implements Parcelable {
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         byte flg = 0;
-        if (mGrayscaleBuffer) flg |= 0x2;
+        if (mUseGrayscale) flg |= 0x2;
         if (mBufferSize != null) flg |= 0x1;
         dest.writeByte(flg);
         if (mBufferSize != null) dest.writeSize(mBufferSize);
@@ -182,11 +182,11 @@ public final class DisplayHashParams implements Parcelable {
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         byte flg = in.readByte();
-        boolean grayscaleBuffer = (flg & 0x2) != 0;
+        boolean useGrayscale = (flg & 0x2) != 0;
         Size bufferSize = (flg & 0x1) == 0 ? null : (Size) in.readSize();
 
         this.mBufferSize = bufferSize;
-        this.mGrayscaleBuffer = grayscaleBuffer;
+        this.mUseGrayscale = useGrayscale;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -206,10 +206,10 @@ public final class DisplayHashParams implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1617735166254L,
+            time = 1618436855096L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/displayhash/DisplayHashParams.java",
-            inputSignatures = "private final @android.annotation.Nullable android.util.Size mBufferSize\nprivate final  boolean mGrayscaleBuffer\nclass DisplayHashParams extends java.lang.Object implements [android.os.Parcelable]\nprivate @android.annotation.Nullable android.util.Size mBufferSize\nprivate  boolean mGrayscaleBuffer\npublic @android.annotation.NonNull android.service.displayhash.DisplayHashParams.Builder setBufferSize(int,int)\npublic @android.annotation.NonNull android.service.displayhash.DisplayHashParams.Builder setGrayscaleBuffer(boolean)\npublic @android.annotation.NonNull android.service.displayhash.DisplayHashParams build()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genAidl=true, genToString=true, genParcelable=true, genHiddenConstructor=true)")
+            inputSignatures = "private final @android.annotation.Nullable android.util.Size mBufferSize\nprivate final  boolean mUseGrayscale\nclass DisplayHashParams extends java.lang.Object implements [android.os.Parcelable]\nprivate @android.annotation.Nullable android.util.Size mBufferSize\nprivate  boolean mUseGrayscale\npublic @android.annotation.NonNull android.service.displayhash.DisplayHashParams.Builder setBufferSize(int,int)\npublic @android.annotation.NonNull android.service.displayhash.DisplayHashParams.Builder setUseGrayscale(boolean)\npublic @android.annotation.NonNull android.service.displayhash.DisplayHashParams build()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genAidl=true, genToString=true, genParcelable=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 

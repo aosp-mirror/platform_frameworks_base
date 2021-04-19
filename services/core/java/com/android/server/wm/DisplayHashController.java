@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.service.displayhash.DisplayHasherService.EXTRA_VERIFIED_DISPLAY_HASH;
-import static android.service.displayhash.DisplayHasherService.SERVICE_META_DATA;
+import static android.service.displayhash.DisplayHashingService.EXTRA_VERIFIED_DISPLAY_HASH;
+import static android.service.displayhash.DisplayHashingService.SERVICE_META_DATA;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_HASH_ALGORITHM;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_TOO_MANY_REQUESTS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_UNKNOWN;
@@ -52,8 +52,8 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.displayhash.DisplayHashParams;
-import android.service.displayhash.DisplayHasherService;
-import android.service.displayhash.IDisplayHasherService;
+import android.service.displayhash.DisplayHashingService;
+import android.service.displayhash.IDisplayHashingService;
 import android.util.AttributeSet;
 import android.util.Size;
 import android.util.Slog;
@@ -79,7 +79,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 /**
- * Handles requests into {@link android.service.displayhash.DisplayHasherService}
+ * Handles requests into {@link DisplayHashingService}
  *
  * Do not hold the {@link WindowManagerService#mGlobalLock} when calling methods since they are
  * blocking calls into another service.
@@ -91,7 +91,7 @@ public class DisplayHashController {
     private final Object mServiceConnectionLock = new Object();
 
     @GuardedBy("mServiceConnectionLock")
-    private DisplayHasherServiceConnection mServiceConnection;
+    private DisplayHashingServiceConnection mServiceConnection;
 
     private final Context mContext;
 
@@ -150,7 +150,7 @@ public class DisplayHashController {
     private boolean mDisplayHashThrottlingEnabled = true;
 
     private interface Command {
-        void run(IDisplayHasherService service) throws RemoteException;
+        void run(IDisplayHashingService service) throws RemoteException;
     }
 
     DisplayHashController(Context context) {
@@ -233,7 +233,7 @@ public class DisplayHashController {
                     (float) size.getHeight() / boundsInWindow.height());
         }
 
-        args.setGrayscale(displayHashParams.isGrayscaleBuffer());
+        args.setGrayscale(displayHashParams.isUseGrayscale());
 
         SurfaceControl.ScreenshotHardwareBuffer screenshotHardwareBuffer =
                 SurfaceControl.captureLayers(args.build());
@@ -405,9 +405,9 @@ public class DisplayHashController {
                 }
             }
 
-            TypedArray sa = res.obtainAttributes(attrs, R.styleable.DisplayHasherService);
+            TypedArray sa = res.obtainAttributes(attrs, R.styleable.DisplayHashingService);
             mThrottleDurationMillis = sa.getInt(
-                    R.styleable.DisplayHasherService_throttleDurationMillis, 0);
+                    R.styleable.DisplayHashingService_throttleDurationMillis, 0);
             sa.recycle();
             mParsedXml = true;
             return true;
@@ -424,7 +424,7 @@ public class DisplayHashController {
                 if (DEBUG) Slog.v(TAG, "creating connection");
 
                 // Create the connection
-                mServiceConnection = new DisplayHasherServiceConnection();
+                mServiceConnection = new DisplayHashingServiceConnection();
 
                 final ComponentName component = getServiceComponentName();
                 if (DEBUG) Slog.v(TAG, "binding to: " + component);
@@ -455,7 +455,7 @@ public class DisplayHashController {
             return null;
         }
 
-        final Intent intent = new Intent(DisplayHasherService.SERVICE_INTERFACE);
+        final Intent intent = new Intent(DisplayHashingService.SERVICE_INTERFACE);
         intent.setPackage(packageName);
         final ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent,
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
@@ -472,10 +472,10 @@ public class DisplayHashController {
         if (serviceInfo == null) return null;
 
         final ComponentName name = new ComponentName(serviceInfo.packageName, serviceInfo.name);
-        if (!Manifest.permission.BIND_DISPLAY_HASHER_SERVICE
+        if (!Manifest.permission.BIND_DISPLAY_HASHING_SERVICE
                 .equals(serviceInfo.permission)) {
             Slog.w(TAG, name.flattenToShortString() + " requires permission "
-                    + Manifest.permission.BIND_DISPLAY_HASHER_SERVICE);
+                    + Manifest.permission.BIND_DISPLAY_HASHING_SERVICE);
             return null;
         }
 
@@ -488,7 +488,7 @@ public class DisplayHashController {
         private Bundle mResult;
         private final CountDownLatch mCountDownLatch = new CountDownLatch(1);
 
-        public Bundle run(BiConsumer<IDisplayHasherService, RemoteCallback> func) {
+        public Bundle run(BiConsumer<IDisplayHashingService, RemoteCallback> func) {
             connectAndRun(service -> {
                 RemoteCallback callback = new RemoteCallback(result -> {
                     mResult = result;
@@ -507,9 +507,9 @@ public class DisplayHashController {
         }
     }
 
-    private class DisplayHasherServiceConnection implements ServiceConnection {
+    private class DisplayHashingServiceConnection implements ServiceConnection {
         @GuardedBy("mServiceConnectionLock")
-        private IDisplayHasherService mRemoteService;
+        private IDisplayHashingService mRemoteService;
 
         @GuardedBy("mServiceConnectionLock")
         private ArrayList<Command> mQueuedCommands;
@@ -518,7 +518,7 @@ public class DisplayHashController {
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Slog.v(TAG, "onServiceConnected(): " + name);
             synchronized (mServiceConnectionLock) {
-                mRemoteService = IDisplayHasherService.Stub.asInterface(service);
+                mRemoteService = IDisplayHashingService.Stub.asInterface(service);
                 if (mQueuedCommands != null) {
                     final int size = mQueuedCommands.size();
                     if (DEBUG) Slog.d(TAG, "running " + size + " queued commands");
