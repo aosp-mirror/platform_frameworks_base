@@ -1926,12 +1926,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void scheduleAddStartingWindow() {
-        // Note: we really want to do sendMessageAtFrontOfQueue() because we
-        // want to process the message ASAP, before any other queued
-        // messages.
-        if (!mWmService.mAnimationHandler.hasCallbacks(mAddStartingWindow)) {
-            ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Enqueueing ADD_STARTING");
-            mWmService.mAnimationHandler.postAtFrontOfQueue(mAddStartingWindow);
+        if (StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
+            mAddStartingWindow.run();
+        } else {
+            // Note: we really want to do sendMessageAtFrontOfQueue() because we
+            // want to process the message ASAP, before any other queued
+            // messages.
+            if (!mWmService.mAnimationHandler.hasCallbacks(mAddStartingWindow)) {
+                ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Enqueueing ADD_STARTING");
+                mWmService.mAnimationHandler.postAtFrontOfQueue(mAddStartingWindow);
+            }
         }
     }
 
@@ -1943,7 +1947,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final StartingData startingData;
             synchronized (mWmService.mGlobalLock) {
                 // There can only be one adding request, silly caller!
-                mWmService.mAnimationHandler.removeCallbacks(this);
+                if (!StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
+                    mWmService.mAnimationHandler.removeCallbacks(this);
+                }
 
                 if (mStartingData == null) {
                     // Animation has been canceled... do nothing.
@@ -2192,17 +2198,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 + " startingView=%s Callers=%s", this, mStartingWindow, mStartingSurface,
                 Debug.getCallers(5));
 
-
-        // Use the same thread to remove the window as we used to add it, as otherwise we end up
-        // with things in the view hierarchy being called from different threads.
-        mWmService.mAnimationHandler.post(() -> {
+        final Runnable removeSurface = () -> {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Removing startingView=%s", surface);
             try {
                 surface.remove(prepareAnimation);
             } catch (Exception e) {
                 Slog.w(TAG_WM, "Exception when removing starting window", e);
             }
-        });
+        };
+
+        if (StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
+            removeSurface.run();
+        } else {
+            // Use the same thread to remove the window as we used to add it, as otherwise we end up
+            // with things in the view hierarchy being called from different threads.
+            mWmService.mAnimationHandler.post(removeSurface);
+        }
     }
 
     private void removeAppTokenFromDisplay() {

@@ -61,7 +61,7 @@ public class StartingSurfaceController {
         synchronized (mService.mGlobalLock) {
             final Task task = activity.getTask();
             if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(
-                    task, activity.token, theme)) {
+                    task, activity.token, theme, null /* taskSnapshot */)) {
                 return new ShellStartingSurface(task);
             }
         }
@@ -128,7 +128,7 @@ public class StartingSurfaceController {
             }
             if (DEBUG_ENABLE_SHELL_DRAWER) {
                 mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
-                        activity.token, 0 /* launchTheme */);
+                        activity.token, 0 /* launchTheme */, taskSnapshot);
                 return new ShellStartingSurface(task);
             }
         }

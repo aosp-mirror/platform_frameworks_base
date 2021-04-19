@@ -19,6 +19,7 @@ package com.android.wm.shell.startingsurface;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -60,6 +61,7 @@ import android.hardware.HardwareBuffer;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.IWindowSession;
@@ -222,8 +224,10 @@ public class TaskSnapshotWindow {
         final InputChannel tmpInputChannel = new InputChannel();
         mainExecutor.execute(() -> {
             try {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#addToDisplay");
                 final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
                         mTmpInsetsState, tmpInputChannel, mTmpInsetsState, mTempControls);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 if (res < 0) {
                     Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                     return;
@@ -233,9 +237,11 @@ public class TaskSnapshotWindow {
             }
             window.setOuter(snapshotSurface);
             try {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
                 session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, -1,
                         tmpFrames, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
                         mTempControls, TMP_SURFACE_SIZE);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             } catch (RemoteException e) {
                 snapshotSurface.clearWindowSynced();
             }

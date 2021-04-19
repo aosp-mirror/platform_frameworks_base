@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.os.UserHandle.getUserHandleForUid;
 
@@ -35,6 +36,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.SurfaceControl;
@@ -48,10 +51,11 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.TransactionPool;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Util class to create the view for a splash screen content.
- *
+ * Everything execute in this class should be post to mSplashscreenWorkerHandler.
  * @hide
  */
 public class SplashscreenContentDrawer {
@@ -78,6 +82,7 @@ public class SplashscreenContentDrawer {
     private int mIconEarlyExitDistance;
     private final TransactionPool mTransactionPool;
     private final SplashScreenWindowAttrs mTmpAttrs = new SplashScreenWindowAttrs();
+    private final Handler mSplashscreenWorkerHandler;
 
     SplashscreenContentDrawer(Context context, int maxAnimatableIconDuration,
             int iconExitAnimDuration, int appRevealAnimDuration, TransactionPool pool) {
@@ -87,6 +92,45 @@ public class SplashscreenContentDrawer {
         mAppRevealDuration = appRevealAnimDuration;
         mIconExitDuration = iconExitAnimDuration;
         mTransactionPool = pool;
+
+        // Initialize Splashscreen worker thread
+        // TODO(b/185288910) move it into WMShellConcurrencyModule and provide an executor to make
+        //  it easier to test stuff that happens on that thread later.
+        final HandlerThread shellSplashscreenWorkerThread =
+                new HandlerThread("wmshell.splashworker", THREAD_PRIORITY_TOP_APP_BOOST);
+        shellSplashscreenWorkerThread.start();
+        mSplashscreenWorkerHandler = shellSplashscreenWorkerThread.getThreadHandler();
+    }
+
+    /**
+     * Create a SplashScreenView object.
+     *
+     * In order to speed up the splash screen view to show on first frame, preparing the
+     * view on background thread so the view and the drawable can be create and pre-draw in
+     * parallel.
+     *
+     * @param consumer Receiving the SplashScreenView object, which will also be executed
+     *                 on splash screen thread. Note that the view can be null if failed.
+     */
+    void createContentView(Context context, int splashScreenResId, ActivityInfo info,
+            int taskId, Consumer<SplashScreenView> consumer) {
+        mSplashscreenWorkerHandler.post(() -> {
+            SplashScreenView contentView;
+            try {
+                contentView = SplashscreenContentDrawer.makeSplashscreenContent(
+                        context, splashScreenResId);
+                if (contentView == null) {
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "makeSplashScreenContentView");
+                    contentView = makeSplashScreenContentView(context, info);
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                }
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "failed creating starting window content at taskId: "
+                        + taskId, e);
+                contentView = null;
+            }
+            consumer.accept(contentView);
+        });
     }
 
     private void updateDensity() {
@@ -146,7 +190,7 @@ public class SplashscreenContentDrawer {
         }
     }
 
-    SplashScreenView makeSplashScreenContentView(Context context, ActivityInfo ai) {
+    private SplashScreenView makeSplashScreenContentView(Context context, ActivityInfo ai) {
         updateDensity();
 
         getWindowAttrs(context, mTmpAttrs);
@@ -199,7 +243,7 @@ public class SplashscreenContentDrawer {
         }
     }
 
-    static class SplashScreenWindowAttrs {
+    private static class SplashScreenWindowAttrs {
         private int mWindowBgResId = 0;
         private int mWindowBgColor = Color.TRANSPARENT;
         private Drawable mReplaceIcon = null;
@@ -271,9 +315,7 @@ public class SplashscreenContentDrawer {
                 if (DEBUG) {
                     Slog.d(TAG, "The icon is not an AdaptiveIconDrawable");
                 }
-                mFinalIconDrawable = SplashscreenIconDrawableFactory.makeIconDrawable(
-                        mIconBackground != Color.TRANSPARENT
-                        ? mIconBackground : mThemeColor, mIconDrawable, mIconSize);
+                createIconDrawable(mIconDrawable, mIconSize);
             }
             final int iconSize = mFinalIconDrawable != null ? (int) (mIconSize * mScale) : 0;
             mCachedResult = fillViewWithIcon(mContext, iconSize, mFinalIconDrawable);
@@ -283,8 +325,8 @@ public class SplashscreenContentDrawer {
 
         private void createIconDrawable(Drawable iconDrawable, int iconSize) {
             mFinalIconDrawable = SplashscreenIconDrawableFactory.makeIconDrawable(
-                    mIconBackground != Color.TRANSPARENT
-                    ? mIconBackground : mThemeColor, iconDrawable, iconSize);
+                    mIconBackground != Color.TRANSPARENT ? mIconBackground : mThemeColor,
+                    iconDrawable, iconSize, mSplashscreenWorkerHandler);
         }
 
         private boolean processAdaptiveIcon() {
@@ -399,7 +441,7 @@ public class SplashscreenContentDrawer {
         return root < 0.1;
     }
 
-    static SplashScreenView makeSplashscreenContent(Context ctx,
+    private static SplashScreenView makeSplashscreenContent(Context ctx,
             int splashscreenContentResId) {
         // doesn't support windowSplashscreenContent after S
         // TODO add an allowlist to skip some packages if needed
