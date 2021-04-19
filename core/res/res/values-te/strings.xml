@@ -1690,13 +1690,13 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ఆన్ చేయకండి"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ఆన్"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ఆఫ్"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>కి మీ పరికరంపై పూర్తి నియంత్రణను ఇవ్వాలనుకుంటున్నారా?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>కి మీ పరికరంపై పూర్తి కంట్రోల్‌ను ఇవ్వాలనుకుంటున్నారా?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"మీరు <xliff:g id="SERVICE">%1$s</xliff:g>ని ఆన్ చేస్తే, డేటా ఎన్‌క్రిప్షన్‌ను మెరుగుపరచడానికి మీ పరికరం మీ స్క్రీన్ లాక్‌ను ఉపయోగించదు."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"అవసరమైన యాక్సెస్ సామర్ధ్యం కోసం యాప్‌లకు పూర్తి నియంత్రణ ఇవ్వడం తగిన పనే అయినా, అన్ని యాప్‌లకు అలా ఇవ్వడం సరికాదు."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"స్క్రీన్‌ను చూసి, నియంత్రించండి"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"అవసరమైన యాక్సెసిబిలిటీ కోసం యాప్‌లకు పూర్తి కంట్రోల్ ఇవ్వడం తగిన పనే అయినా, అన్ని యాప్‌లకు అలా ఇవ్వడం సరికాదు."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"స్క్రీన్‌ను చూసి, కంట్రోల్ చేయడం"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది మరియు ఇతర యాప్‌లలో కూడా ఈ కంటెంట్‌ను ప్రదర్శిస్తుంది."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"చర్యలను చూసి, అమలు చేయండి"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"మీరు యాప్‌‌తో చేసే పరస్పర చర్యల‌ను లేదా హార్డ్‌వేర్ సెన్సార్‌ను ట్రాక్ చేస్తూ మీ త‌ర‌ఫున యాప్‌లతో పరస్పరం సమన్వయం చేస్తుంది."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"మీరు ఒక యాప్‌‌తో చేసే ఇంటరాక్షన్‌లను లేదా హార్డ్‌వేర్ సెన్సార్‌ను ట్రాక్ చేస్తూ మీ త‌ర‌ఫున యాప్‌లతో ఇంటరాక్ట్ చేయగలదు."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"అనుమతించు"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"నిరాకరించు"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ఫీచర్‌ని ఉపయోగించడం ప్రారంభించడానికి, దాన్ని ట్యాప్ చేయండి:"</string>
@@ -2275,5 +2275,5 @@
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"యాప్ చిహ్నం"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"యాప్ బ్రాండింగ్ ఇమేజ్"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"యాక్సెస్ సెట్టింగ్‌లను చెక్ చేయండి"</string>
-    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> మీ స్క్రీన్‌ను చూడవచ్చు, నియంత్రించవచ్చు. రివ్యూ చేయడానికి ట్యాప్ చేయండి."</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> మీ స్క్రీన్‌ను చూడవచ్చు, కంట్రోల్ చేయవచ్చు. రివ్యూ చేయడానికి ట్యాప్ చేయండి."</string>
 </resources>
