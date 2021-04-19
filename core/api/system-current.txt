@@ -14311,12 +14311,15 @@ package android.uwb {
   }
 
   public static interface UwbManager.AdapterStateCallback {
-    method public void onStateChanged(boolean, int);
+    method public void onStateChanged(int, int);
     field public static final int STATE_CHANGED_REASON_ALL_SESSIONS_CLOSED = 1; // 0x1
     field public static final int STATE_CHANGED_REASON_ERROR_UNKNOWN = 4; // 0x4
     field public static final int STATE_CHANGED_REASON_SESSION_STARTED = 0; // 0x0
     field public static final int STATE_CHANGED_REASON_SYSTEM_BOOT = 3; // 0x3
     field public static final int STATE_CHANGED_REASON_SYSTEM_POLICY = 2; // 0x2
+    field public static final int STATE_DISABLED = 0; // 0x0
+    field public static final int STATE_ENABLED_ACTIVE = 2; // 0x2
+    field public static final int STATE_ENABLED_INACTIVE = 1; // 0x1
   }
 
 }

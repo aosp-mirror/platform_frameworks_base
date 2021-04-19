@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,23 @@
 
 package android.uwb;
 
-import android.uwb.StateChangeReason;
-import android.uwb.AdapterState;
-
 /**
  * @hide
  */
-interface IUwbAdapterStateCallbacks {
+@Backing(type="int")
+enum AdapterState {
+ /**
+   * The state when UWB is disabled.
+   */
+  STATE_DISABLED,
+
   /**
-     * Called whenever the adapter state changes
-     *
-     * @param state UWB state; enabled_active, enabled_inactive, or disabled.
-     * @param reason the reason that the state has changed
-     */
-    void onAdapterStateChanged(AdapterState state, StateChangeReason reason);
+   * The state when UWB is enabled but has no active sessions.
+   */
+  STATE_ENABLED_INACTIVE,
+
+  /**
+   * The state when UWB is enabled and has active sessions.
+   */
+  STATE_ENABLED_ACTIVE,
 }
