@@ -83,7 +83,7 @@ public final class IkeSessionParamsUtils {
     /** Serializes an IkeSessionParams to a PersistableBundle. */
     @NonNull
     public static PersistableBundle toPersistableBundle(@NonNull IkeSessionParams params) {
-        if (params.getConfiguredNetwork() != null || params.getIke3gppExtension() != null) {
+        if (params.getNetwork() != null || params.getIke3gppExtension() != null) {
             throw new IllegalStateException(
                     "Cannot convert a IkeSessionParams with a caller configured network or with"
                             + " 3GPP extension enabled");
