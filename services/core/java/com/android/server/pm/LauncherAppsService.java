@@ -1043,22 +1043,24 @@ public class LauncherAppsService extends SystemService {
                 return false;
             }
 
+            final PackageManagerInternal pmInt =
+                    LocalServices.getService(PackageManagerInternal.class);
             final int callingUid = injectBinderCallingUid();
+            final int state = pmInt.getComponentEnabledSetting(component, callingUid,
+                    user.getIdentifier());
+            switch (state) {
+                case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                    break; // Need to check the manifest's enabled state.
+                case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+                    return true;
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                    return false;
+            }
+
             final long ident = Binder.clearCallingIdentity();
             try {
-                final int state = mIPM.getComponentEnabledSetting(component, user.getIdentifier());
-                switch (state) {
-                    case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
-                        break; // Need to check the manifest's enabled state.
-                    case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
-                        return true;
-                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
-                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
-                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
-                        return false;
-                }
-                final PackageManagerInternal pmInt =
-                        LocalServices.getService(PackageManagerInternal.class);
                 ActivityInfo info = pmInt.getActivityInfo(component,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
