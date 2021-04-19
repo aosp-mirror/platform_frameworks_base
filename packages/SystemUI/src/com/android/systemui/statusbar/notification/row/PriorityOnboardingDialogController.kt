@@ -28,6 +28,7 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.style.BulletSpan
 import android.view.Gravity
@@ -86,7 +87,7 @@ class PriorityOnboardingDialogController @Inject constructor(
         Prefs.putBoolean(context, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true)
         dialog.dismiss()
         shadeController.animateCollapsePanels()
-        peopleSpaceWidgetManager.requestPinAppWidget(shortcutInfo)
+        peopleSpaceWidgetManager.requestPinAppWidget(shortcutInfo, Bundle())
     }
 
     private fun settings() {
