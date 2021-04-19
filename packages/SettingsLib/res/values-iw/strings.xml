@@ -155,7 +155,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"הוגדרו כמה ברירות מחדל"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"לא הוגדרו ברירות מחדל"</string>
     <string name="tts_settings" msgid="8130616705989351312">"הגדרות טקסט לדיבור"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"פלט טקסט לדיבור"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"המרת טקסט לדיבור"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"קצב דיבור"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"המהירות שבה הטקסט נאמר"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"גובה צליל"</string>
@@ -196,10 +196,10 @@
     <string name="choose_profile" msgid="343803890897657450">"בחירת פרופיל"</string>
     <string name="category_personal" msgid="6236798763159385225">"אישי"</string>
     <string name="category_work" msgid="4014193632325996115">"עבודה"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"אפשרויות מפתח"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"הפעלת אפשרויות מפתח"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"אפשרויות למפתחים"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"הפעלת אפשרויות למפתחים"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"הגדרת אפשרויות לפיתוח אפליקציות"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"אפשרויות מפתח אינן זמינות עבור משתמש זה"</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"אפשרויות למפתחים אינן זמינות עבור משתמש זה"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"‏הגדרות VPN אינן זמינות עבור המשתמש הזה."</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"הגדרות עבור שיתוף של חיבור אינטרנט אינן זמינות עבור המשתמש הזה"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"‏הגדרות עבור שם נקודת גישה (APN) אינן זמינות עבור המשתמש הזה"</string>
@@ -218,7 +218,7 @@
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"מכשירים מותאמים"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"מחובר עכשיו"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"פרטי מכשיר"</string>
-    <string name="adb_device_forget" msgid="193072400783068417">"אפשר לשכוח"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"הסרה"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"המזהה הייחודי של המכשיר: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"החיבור נכשל"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"עליך לוודא שהמכשיר <xliff:g id="DEVICE_NAME">%1$s</xliff:g> מחובר לרשת הנכונה"</string>
@@ -266,7 +266,7 @@
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"‏קצב דגימה של אודיו ל-Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: קצב דגימה"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"כשזה מופיע באפור, אין לזה תמיכה בטלפון או באוזניות"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"‏מספר סיביות לדגימה באודיו ל-Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"‏מספר ביטים לדגימה באודיו ל-Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: ביטים לדגימה"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"‏מצב של ערוץ אודיו ל-Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: מצב ערוץ"</string>
@@ -274,9 +274,9 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"‏הפעלת Codec אודיו LDAC ל-Bluetooth\nבחירה: איכות נגינה"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"סטרימינג: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"‏DNS פרטי"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"‏יש לבחור במצב DNS פרטי"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"‏בחירת מצב של DNS פרטי"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"מושבת"</string>
-    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"באופן אוטומטי"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"אוטומטי"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"‏שם מארח של ספק DNS פרטי"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"‏צריך להזין את שם המארח של ספק DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"לא ניתן היה להתחבר"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏העלאת רמת הרישום של Wi‑Fi ביומן, הצגה לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"אפשרות זו מפחיתה את קצב התרוקנות הסוללה ומשפרת את ביצועי הרשת"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"‏כשמצב זה מופעל, כתובת ה-MAC של המכשיר הזה עשויה להשתנות בכל פעם שהוא מתחבר לרשת שפועלת בה רנדומיזציה של כתובות MAC."</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"נמדדת"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"חיוב לפי שימוש בנתונים"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"לא נמדדת"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"גודלי מאגר של יומן רישום"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"יש לבחור גדלים של יוצר יומן לכל מאגר יומן"</string>
@@ -458,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"מושבת"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"מורשה"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"לא מורשה"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"להתקין גם אם לא מוכר לך?"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"התקנת אפליקציות לא מוכרות"</string>
     <string name="home" msgid="973834627243661438">"דף הבית של ההגדרות"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

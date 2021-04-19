@@ -360,7 +360,7 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ለስህተት ማረሚያ መተግበሪያዎች የጂፒዩ ንብርብሮችን መስቀልን ፍቀድ"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"የዝርክርክ ቃላት አቅራቢ ምዝግብ ማስታወሻን መያዝ አንቃ"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"በሳንካ ሪፖርቶች ውስጥ ተጨማሪ መሣሪያ-ተኮር የአቅራቢ ምዝግብ ማስታወሻዎችን ያካትቱ፣ ይህም የግል መረጃን ሊይዝ፣ ተጨማሪ ባትሪ ሊፈጅ እና/ወይም ተጨማሪ ማከማቻ ሊጠቀም ይችላል።"</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"የዊንዶው እነማ ልኬት ለውጥ"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"የ Window እነማ ልኬት ለውጥ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"የእነማ ልኬት ለውጥ ሽግግር"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"እነማ አድራጊ ቆይታ መለኪያ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ሁለተኛ ማሳያዎችን አስመስለህ ስራ"</string>
