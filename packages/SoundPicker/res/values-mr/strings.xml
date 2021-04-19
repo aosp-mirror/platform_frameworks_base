@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ringtone_default" msgid="798836092118824500">"डीफॉल्ट रिंगटोन"</string>
     <string name="notification_sound_default" msgid="8133121186242636840">"डीफॉल्ट सूचना आवाज"</string>
-    <string name="alarm_sound_default" msgid="4787646764557462649">"डीफॉल्ट अलार्म ध्वनी"</string>
+    <string name="alarm_sound_default" msgid="4787646764557462649">"डीफॉल्ट अलार्म आवाज"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"रिंगटोन जोडा"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"अलार्म जोडा"</string>
     <string name="add_notification_text" msgid="4431129543300614788">"सूचना जोडा"</string>
