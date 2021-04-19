@@ -162,6 +162,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mClockView = mStatusBar.findViewById(R.id.clock);
+        mOngoingCallChip = mStatusBar.findViewById(R.id.ongoing_call_chip);
         showSystemIconArea(false);
         showClock(false);
         initEmergencyCryptkeeperText();
@@ -182,7 +183,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         super.onResume();
         mCommandQueue.addCallback(this);
         mStatusBarStateController.addCallback(this);
-        mOngoingCallController.addCallback(mOngoingCallListener);
+        initOngoingCallChip();
     }
 
     @Override
@@ -220,8 +221,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                     .removeView(mCenteredIconArea);
         }
         statusBarCenteredIconArea.addView(mCenteredIconArea);
-
-        initOngoingCallChip();
 
         // Default to showing until we know otherwise.
         showNotificationIconArea(false);
@@ -273,7 +272,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             state |= DISABLE_CLOCK;
         }
 
-        if (mOngoingCallController.getHasOngoingCall()) {
+        if (mOngoingCallController.hasOngoingCall()) {
             state |= DISABLE_NOTIFICATION_ICONS;
         }
 
@@ -448,7 +447,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void initOngoingCallChip() {
-        mOngoingCallChip = mStatusBar.findViewById(R.id.ongoing_call_chip);
+        mOngoingCallController.addCallback(mOngoingCallListener);
         mOngoingCallController.setChipView(mOngoingCallChip);
     }
 
