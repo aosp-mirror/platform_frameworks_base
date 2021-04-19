@@ -21,8 +21,8 @@ import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 import static android.service.rotationresolver.RotationResolverService.ROTATION_RESULT_FAILURE_CANCELLED;
 import static android.service.rotationresolver.RotationResolverService.ROTATION_RESULT_FAILURE_TIMED_OUT;
 
-import static com.android.server.rotationresolver.RotationResolverManagerService.RESOLUTION_FAILURE;
-import static com.android.server.rotationresolver.RotationResolverManagerService.logRotationStats;
+import static com.android.server.rotationresolver.RotationResolverManagerService.errorCodeToProto;
+import static com.android.server.rotationresolver.RotationResolverManagerService.surfaceRotationToProto;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
@@ -173,8 +173,10 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                     request.mCallbackInternal.onSuccess(rotation);
                     final long timeToCalculate =
                             SystemClock.elapsedRealtime() - request.mRequestStartTimeMillis;
-                    logRotationStats(request.mRemoteRequest.getProposedRotation(),
-                            request.mRemoteRequest.getCurrentRotation(), rotation, timeToCalculate);
+                    RotationResolverManagerService.logRotationStatsWithTimeToCalculate(
+                            request.mRemoteRequest.getProposedRotation(),
+                            request.mRemoteRequest.getCurrentRotation(),
+                            surfaceRotationToProto(rotation), timeToCalculate);
                     Slog.d(TAG, "onSuccess:" + rotation);
                     Slog.d(TAG, "timeToCalculate:" + timeToCalculate);
                 }
@@ -192,8 +194,9 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                     request.mCallbackInternal.onFailure(error);
                     final long timeToCalculate =
                             SystemClock.elapsedRealtime() - request.mRequestStartTimeMillis;
-                    logRotationStats(request.mRemoteRequest.getProposedRotation(),
-                            request.mRemoteRequest.getCurrentRotation(), RESOLUTION_FAILURE,
+                    RotationResolverManagerService.logRotationStatsWithTimeToCalculate(
+                            request.mRemoteRequest.getProposedRotation(),
+                            request.mRemoteRequest.getCurrentRotation(), errorCodeToProto(error),
                             timeToCalculate);
                     Slog.d(TAG, "onFailure:" + error);
                     Slog.d(TAG, "timeToCalculate:" + timeToCalculate);
