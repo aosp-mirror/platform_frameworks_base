@@ -283,9 +283,10 @@ public class PowerExemptionManager {
      */
     public static final int REASON_PACKAGE_REPLACED = 311;
     /**
-     * LocationProviderManager.
+     * LocationProvider.
      * @hide
      */
+    @SystemApi
     public static final int REASON_LOCATION_PROVIDER = 312;
     /**
      * MediaButtonReceiver.
