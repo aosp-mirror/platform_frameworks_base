@@ -15,6 +15,7 @@
  */
 package com.android.server.timedetector;
 
+import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE;
 import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_TELEPHONY;
@@ -65,6 +66,7 @@ final class ServiceConfigAccessor {
 
     private static final Set<String> SERVER_FLAGS_KEYS_TO_WATCH = Collections.unmodifiableSet(
             new ArraySet<>(new String[] {
+                    KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE,
                     KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE,
             }));
 
@@ -137,8 +139,10 @@ final class ServiceConfigAccessor {
         return mSystemClockUpdateThresholdMillis;
     }
 
+    @NonNull
     Instant autoTimeLowerBound() {
-        return TIME_LOWER_BOUND_DEFAULT;
+        return mServerFlags.getOptionalInstant(KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE)
+                .orElse(TIME_LOWER_BOUND_DEFAULT);
     }
 
     /**
