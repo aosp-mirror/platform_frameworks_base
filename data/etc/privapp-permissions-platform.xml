@@ -417,6 +417,8 @@ applications that come with the platform
         <permission name="android.permission.SET_WALLPAPER" />
         <permission name="android.permission.SET_WALLPAPER_COMPONENT" />
         <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
+        <!-- Permissions required for Incremental CTS tests -->
+        <permission name="com.android.permission.USE_INSTALLER_V2"/>
         <permission name="android.permission.LOADER_USAGE_STATS"/>
         <!-- Permission required to test system only camera devices. -->
         <permission name="android.permission.SYSTEM_CAMERA" />

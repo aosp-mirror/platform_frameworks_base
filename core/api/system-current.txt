@@ -2527,6 +2527,18 @@ package android.content.pm {
 
   public class DataLoaderParams {
     method @NonNull public static final android.content.pm.DataLoaderParams forIncremental(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public static final android.content.pm.DataLoaderParams forStreaming(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public final String getArguments();
+    method @NonNull public final android.content.ComponentName getComponentName();
+    method @NonNull public final int getType();
+  }
+
+  public final class InstallationFile {
+    method public long getLengthBytes();
+    method public int getLocation();
+    method @Nullable public byte[] getMetadata();
+    method @NonNull public String getName();
+    method @Nullable public byte[] getSignature();
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {
@@ -2620,10 +2632,19 @@ package android.content.pm {
   public class PackageInstaller {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
     field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
+    field public static final int DATA_LOADER_TYPE_NONE = 0; // 0x0
+    field public static final int DATA_LOADER_TYPE_STREAMING = 1; // 0x1
+    field public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
+    field public static final int LOCATION_DATA_APP = 0; // 0x0
+    field public static final int LOCATION_MEDIA_DATA = 2; // 0x2
+    field public static final int LOCATION_MEDIA_OBB = 1; // 0x1
   }
 
   public static class PackageInstaller.Session implements java.io.Closeable {
+    method @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public void addFile(int, @NonNull String, long, @NonNull byte[], @Nullable byte[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void commitTransferred(@NonNull android.content.IntentSender);
+    method @Nullable @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public android.content.pm.DataLoaderParams getDataLoaderParams();
+    method @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public void removeFile(int, @NonNull String);
   }
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
@@ -2644,6 +2665,7 @@ package android.content.pm {
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public void setAllocateAggressive(boolean);
     method @Deprecated public void setAllowDowngrade(boolean);
+    method @RequiresPermission(allOf={android.Manifest.permission.INSTALL_PACKAGES, "com.android.permission.USE_INSTALLER_V2"}) public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
     method public void setDontKillApp(boolean);
     method public void setEnableRollback(boolean);
     method public void setEnableRollback(boolean, int);
@@ -9811,6 +9833,24 @@ package android.service.contentsuggestions {
     method public abstract void onProcessContextImage(int, @Nullable android.graphics.Bitmap, @NonNull android.os.Bundle);
     method public abstract void onSuggestContentSelections(@NonNull android.app.contentsuggestions.SelectionsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
     field public static final String SERVICE_INTERFACE = "android.service.contentsuggestions.ContentSuggestionsService";
+  }
+
+}
+
+package android.service.dataloader {
+
+  public abstract class DataLoaderService extends android.app.Service {
+    ctor public DataLoaderService();
+    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader(@NonNull android.content.pm.DataLoaderParams);
+  }
+
+  public static interface DataLoaderService.DataLoader {
+    method public boolean onCreate(@NonNull android.content.pm.DataLoaderParams, @NonNull android.service.dataloader.DataLoaderService.FileSystemConnector);
+    method public boolean onPrepareImage(@NonNull java.util.Collection<android.content.pm.InstallationFile>, @NonNull java.util.Collection<java.lang.String>);
+  }
+
+  public static final class DataLoaderService.FileSystemConnector {
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void writeData(@NonNull String, long, long, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
   }
 
 }
