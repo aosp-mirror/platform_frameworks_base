@@ -1693,7 +1693,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ನಿಮ್ಮ ಸಾಧನದ ಪೂರ್ಣ ನಿಯಂತ್ರಣ ಹೊಂದಲು <xliff:g id="SERVICE">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸಬೇಕೆ?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ನೀವು <xliff:g id="SERVICE">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಮಾಡಿದರೆ, ನಿಮ್ಮ ಸಾಧನವು ಡೇಟಾ ಎನ್‌ಕ್ರಿಪ್ಶನ್ ಅನ್ನು ವರ್ಧಿಸಲು ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ಲಾಕ್ ಅನ್ನು ಬಳಸುವುದಿಲ್ಲ."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ಪ್ರವೇಶಿಸುವಿಕೆಯ ಅವಶ್ಯಕತೆಗಳಿಗೆ ಸಹಾಯ ಮಾಡುವ ಆ್ಯಪ್‌ಗಳಿಗೆ ಪೂರ್ಣ ನಿಯಂತ್ರಣ ನೀಡುವುದು ಸೂಕ್ತವಾಗಿರುತ್ತದೆ, ಆದರೆ ಬಹುತೇಕ ಆ್ಯಪ್‌ಗಳಿಗೆ ಇದು ಸೂಕ್ತವಲ್ಲ."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ಪರದೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ಸ್ಕ್ರೀನ್ ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ಇದು ಪರದೆಯ ಮೇಲಿನ ಎಲ್ಲಾ ವಿಷಯವನ್ನು ಓದಬಹುದು ಮತ್ತು ಇತರ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ವಿಷಯವನ್ನು ಪ್ರದರ್ಶಿಸಬಹುದು."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ಕ್ರಿಯೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ಇದು ಆ್ಯಪ್ ಅಥವಾ ಹಾರ್ಡ್‌ವೇರ್ ಸೆನ್ಸರ್‌ನ ಜೊತೆಗಿನ ನಿಮ್ಮ ಸಂವಹನಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಬಹುದು, ಮತ್ತು ನಿಮ್ಮ ಪರವಾಗಿ ಆ್ಯಪ್‌ಗಳ ಜೊತೆ ಸಂವಹನ ನಡೆಸಬಹುದು."</string>
