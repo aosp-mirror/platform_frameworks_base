@@ -7775,6 +7775,9 @@ public abstract class PackageManager {
      * {@link #SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE} or its installation state (via
      * {@link #SYSTEM_APP_STATE_INSTALLED} and {@link #SYSTEM_APP_STATE_UNINSTALLED}.
      *
+     * This API may only be called from {@link android.os.Process#SYSTEM_UID} or
+     * {@link android.os.Process#PHONE_UID}.
+     *
      * @param packageName Package name of the app.
      * @param state State of the app.
      * @hide
