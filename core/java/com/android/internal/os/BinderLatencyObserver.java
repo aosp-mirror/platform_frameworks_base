@@ -16,8 +16,6 @@
 
 package com.android.internal.os;
 
-import static com.android.internal.os.BinderLatencyProto.Dims.SYSTEM_SERVER;
-
 import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Handler;
@@ -68,9 +66,10 @@ public class BinderLatencyObserver {
     private int mStatsdPushIntervalMinutes = STATSD_PUSH_INTERVAL_MINUTES_DEFAULT;
 
     private final Random mRandom;
-    private BinderLatencyBuckets mLatencyBuckets;
-
     private final Handler mLatencyObserverHandler;
+    private final int mProcessSource;
+
+    private BinderLatencyBuckets mLatencyBuckets;
 
     private Runnable mLatencyObserverRunnable = new Runnable() {
         @Override
@@ -134,7 +133,7 @@ public class BinderLatencyObserver {
 
         // Write the dims.
         long dimsToken = proto.start(ApiStats.DIMS);
-        proto.write(Dims.PROCESS_SOURCE, SYSTEM_SERVER);
+        proto.write(Dims.PROCESS_SOURCE, mProcessSource);
         proto.write(Dims.SERVICE_CLASS_NAME, dims.getBinderClass().getName());
         proto.write(Dims.SERVICE_METHOD_NAME, transactionName);
         proto.end(dimsToken);
@@ -180,11 +179,12 @@ public class BinderLatencyObserver {
         }
     }
 
-    public BinderLatencyObserver(Injector injector) {
+    public BinderLatencyObserver(Injector injector, int processSource) {
         mRandom = injector.getRandomGenerator();
         mLatencyObserverHandler = injector.getHandler();
         mLatencyBuckets = new BinderLatencyBuckets(
             mBucketCount, mFirstBucketSize, mBucketScaleFactor);
+        mProcessSource = processSource;
         noteLatencyDelayed();
     }
 
