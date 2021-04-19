@@ -30,8 +30,6 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.view.ICrossWindowBlurEnabledListener;
 
-import com.android.internal.annotations.GuardedBy;
-
 /**
  * Keeps track of the different factors that determine whether cross-window blur is enabled
  * or disabled. Also keeps a list of all interested listeners and notifies them when the
@@ -44,8 +42,7 @@ final class BlurController {
     // We don't use the WM global lock, because the BlurController is not involved in window
     // drawing and only receives binder calls that don't need synchronization with the rest of WM
     private final Object mLock = new Object();
-    @GuardedBy("mLock")
-    boolean mBlurEnabled;
+    private volatile boolean mBlurEnabled;
     private boolean mInPowerSaveMode;
     private boolean mBlurDisabledSetting;
 
@@ -87,14 +84,16 @@ final class BlurController {
     boolean registerCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener) {
         if (listener == null) return false;
         mBlurEnabledListeners.register(listener);
-        synchronized (mLock) {
-            return mBlurEnabled;
-        }
+        return getBlurEnabled();
     }
 
     void unregisterCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener) {
         if (listener == null) return;
         mBlurEnabledListeners.unregister(listener);
+    }
+
+    boolean getBlurEnabled() {
+        return mBlurEnabled;
     }
 
     private void updateBlurEnabled() {
