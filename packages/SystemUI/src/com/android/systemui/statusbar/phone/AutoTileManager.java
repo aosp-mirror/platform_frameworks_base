@@ -16,6 +16,7 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.display.ColorDisplayManager;
@@ -294,9 +295,11 @@ public class AutoTileManager implements UserAwareController {
     private final DeviceControlsController.Callback mDeviceControlsCallback =
             new DeviceControlsController.Callback() {
         @Override
-        public void onControlsAvailable(int position) {
+        public void onControlsUpdate(@Nullable Integer position) {
             if (mAutoTracker.isAdded(DEVICE_CONTROLS)) return;
-            mHost.addTile(DEVICE_CONTROLS, position);
+            if (position != null) {
+                mHost.addTile(DEVICE_CONTROLS, position);
+            }
             mAutoTracker.setTileAdded(DEVICE_CONTROLS);
             mHandler.post(() -> mDeviceControlsController.removeCallback());
         }
