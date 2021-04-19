@@ -362,17 +362,20 @@ public class UiTranslationController {
                     continue;
                 }
                 mActivity.runOnUiThread(() -> {
-                    if (view.getViewTranslationCallback() == null) {
+                    final ViewTranslationCallback callback = view.getViewTranslationCallback();
+                    if (callback == null) {
                         if (DEBUG) {
                             Log.d(TAG, view + " doesn't support showing translation because of "
                                     + "null ViewTranslationCallback.");
                         }
                         return;
                     }
+
+                    // TODO: Do this for specific views on request only.
+                    callback.enableContentPadding();
+
                     view.onTranslationResponse(response);
-                    if (view.getViewTranslationCallback() != null) {
-                        view.getViewTranslationCallback().onShowTranslation(view);
-                    }
+                    callback.onShowTranslation(view);
                 });
             }
         }

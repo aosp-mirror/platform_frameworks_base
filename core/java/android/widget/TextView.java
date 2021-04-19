@@ -770,6 +770,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private final boolean mUseInternationalizedInput;
     // True if fallback fonts that end up getting used should be allowed to affect line spacing.
     /* package */ boolean mUseFallbackLineSpacing;
+    // True if the view text can be padded for compat reasons, when the view is translated.
+    private final boolean mUseTextPaddingForUiTranslation;
 
     @ViewDebug.ExportedProperty(category = "text")
     @UnsupportedAppUsage
@@ -1480,6 +1482,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
         mUseInternationalizedInput = targetSdkVersion >= VERSION_CODES.O;
         mUseFallbackLineSpacing = targetSdkVersion >= VERSION_CODES.P;
+        // TODO(b/179693024): Use a ChangeId instead.
+        mUseTextPaddingForUiTranslation = targetSdkVersion <= Build.VERSION_CODES.R;
 
         if (inputMethod != null) {
             Class<?> c;
@@ -2372,6 +2376,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @ViewDebug.CapturedViewProperty
     @InspectableProperty
     public CharSequence getText() {
+        if (mUseTextPaddingForUiTranslation
+                && mDefaultTranslationCallback != null
+                && mDefaultTranslationCallback.isTextPaddingEnabled()
+                && mDefaultTranslationCallback.isShowingTranslation()) {
+            return mDefaultTranslationCallback.getPaddedText(mText, mTransformed);
+        }
         return mText;
     }
 
