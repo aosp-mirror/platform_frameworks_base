@@ -1011,6 +1011,7 @@ public class TelecomManager {
      * Enable READ_PHONE_STATE protection on APIs querying and notifying call state, such as
      * {@code TelecomManager#getCallState}, {@link TelephonyManager#getCallStateForSubscription()},
      * and {@link android.telephony.TelephonyCallback.CallStateListener}.
+     * @hide
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
