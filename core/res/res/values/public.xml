@@ -3099,6 +3099,7 @@
     <!-- @hide @SystemApi -->
     <public name="throttleDurationMillis" />
     <public name="showInInputMethodPicker" />
+    <public name="effectColor" />
   </staging-public-group>
 
   <staging-public-group type="drawable" first-id="0x010800b5">
