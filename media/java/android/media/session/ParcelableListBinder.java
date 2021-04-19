@@ -109,7 +109,7 @@ public class ParcelableListBinder<T extends Parcelable> extends Binder {
             throws RemoteException {
         int count = list.size();
         int i = 0;
-        while (i < count) {
+        do {
             Parcel data = Parcel.obtain();
             Parcel reply = Parcel.obtain();
             if (i == 0) {
@@ -126,6 +126,6 @@ public class ParcelableListBinder<T extends Parcelable> extends Binder {
             binder.transact(FIRST_CALL_TRANSACTION, data, reply, 0);
             reply.recycle();
             data.recycle();
-        }
+        } while (i < count);
     }
 }
