@@ -102,7 +102,7 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Grabando pantalla"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Grabando pantalla y audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostrar toques en la pantalla"</string>
-    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Toca aquí para detener"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Toca para detener"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Detener"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Pausar"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Seguir"</string>
@@ -592,21 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activar"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desactivar"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Cambiar dispositivo de salida"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"La aplicación está fijada"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás y Aplicaciones recientes."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás e Inicio."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, desliza el dedo hacia arriba y mantenlo pulsado."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsado el botón Aplicaciones recientes."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La pantalla se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsado el botón Inicio."</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplicación fijada"</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás y Aplicaciones recientes."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsados los botones Atrás e Inicio."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, desliza el dedo hacia arriba y mantenlo pulsado."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsado el botón Aplicaciones recientes."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La aplicación se mantendrá visible hasta que dejes de fijarla. Para dejar de fijarla, mantén pulsado el botón Inicio."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Es posible que se pueda acceder a datos personales, como contactos o el contenido de correos."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Se pueden abrir otras aplicaciones desde aplicaciones fijadas."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Las aplicaciones fijadas pueden abrir otras aplicaciones."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Para dejar de fijar esta aplicación, mantén pulsados los botones Atrás y Aplicaciones recientes"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para dejar de fijar esta aplicación, mantén pulsados los botones Atrás e Inicio"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para dejar de fijar esta aplicación, desliza el dedo hacia arriba y no lo separes de la pantalla."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para dejar de fijar esta aplicación, desliza el dedo hacia arriba y mantenlo pulsado"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Entendido"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"No, gracias"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplicación fijada"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplicación no fijada"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Se ha dejado de fijar la aplicación"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"¿Ocultar <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Volverá a aparecer la próxima vez que actives esta opción en Ajustes."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Ocultar"</string>
@@ -719,7 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones, aparece como burbuja flotante y la imagen de perfil se incluye en la pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ajustes"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"No se pueden usar funciones de conversación con <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hay burbujas recientes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Las burbujas recientes y las cerradas aparecerán aquí"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Estas notificaciones no se pueden modificar."</string>
@@ -1042,7 +1042,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"quitar de favoritos"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover a la posición <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Elige los controles a los que acceder desde el menú de encendido"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Elige los controles a los que quieras acceder desde el menú de encendido"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén pulsado y arrastra un control para reubicarlo"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos los controles quitados"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"No se han guardado los cambios"</string>
