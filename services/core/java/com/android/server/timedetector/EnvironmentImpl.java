@@ -82,6 +82,9 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
                         handleAutoTimeDetectionChangedOnHandlerThread();
                     }
                 });
+        mServiceConfigAccessor.addListener(
+                () -> mHandler.post(
+                        EnvironmentImpl.this::handleAutoTimeDetectionChangedOnHandlerThread));
     }
 
     /** Internal method for handling the auto time setting being changed. */

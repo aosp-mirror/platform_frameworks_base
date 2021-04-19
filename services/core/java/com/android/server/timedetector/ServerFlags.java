@@ -135,6 +135,15 @@ public final class ServerFlags {
     public static final String KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT =
             "location_time_zone_detection_setting_enabled_default";
 
+    /**
+     * The key to override the time detector origin priorities configuration. A comma-separated list
+     * of strings that will be passed to {@link TimeDetectorStrategy#stringToOrigin(String)}.
+     * All values must be recognized or the override value will be ignored.
+     */
+    @DeviceConfigKey
+    public static final String KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE =
+            "time_detector_origin_priorities_override";
+
     @GuardedBy("mListeners")
     private final ArrayMap<ConfigurationChangeListener, Set<String>> mListeners = new ArrayMap<>();
 
@@ -206,6 +215,19 @@ public final class ServerFlags {
     public Optional<String> getOptionalString(@DeviceConfigKey String key) {
         String value = DeviceConfig.getProperty(NAMESPACE_SYSTEM_TIME, key);
         return Optional.ofNullable(value);
+    }
+
+    /**
+     * Returns an optional string array value from {@link DeviceConfig} from the system_time
+     * namespace, returns {@link Optional#empty()} if there is no explicit value set.
+     */
+    @NonNull
+    public Optional<String[]> getOptionalStringArray(@DeviceConfigKey String key) {
+        Optional<String> string = getOptionalString(key);
+        if (!string.isPresent()) {
+            return Optional.empty();
+        }
+        return Optional.of(string.get().split(","));
     }
 
     /**

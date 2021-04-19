@@ -30,6 +30,8 @@ import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -100,6 +102,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     @Override
+    @NonNull
     public TimeCapabilitiesAndConfig getCapabilitiesAndConfig() {
         int userId = mCallerIdentityInjector.getCallingUserId();
         return getTimeCapabilitiesAndConfig(userId);
@@ -119,7 +122,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     @Override
-    public boolean updateConfiguration(TimeConfiguration timeConfiguration) {
+    public boolean updateConfiguration(@NonNull TimeConfiguration timeConfiguration) {
         enforceManageTimeDetectorPermission();
         // TODO(b/172891783) Add actual logic
         return false;
@@ -178,6 +181,13 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         mTimeDetectorStrategy.dump(ipw, args);
         ipw.flush();
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+        new TimeDetectorShellCommand(this).exec(
+                this, in, out, err, args, callback, resultReceiver);
     }
 
     private void enforceSuggestTelephonyTimePermission() {
