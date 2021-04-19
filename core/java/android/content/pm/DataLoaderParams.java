@@ -24,7 +24,9 @@ import android.content.ComponentName;
  * This class represents the parameters used to configure a DataLoader.
  *
  * {@see android.service.dataloader.DataLoaderService.DataLoader}
+ * @hide
  */
+@SystemApi
 public class DataLoaderParams {
     @NonNull
     private final DataLoaderParamsParcel mData;
