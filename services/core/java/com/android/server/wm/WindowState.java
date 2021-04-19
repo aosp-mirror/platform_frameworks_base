@@ -132,6 +132,7 @@ import static com.android.server.wm.MoveAnimationSpecProto.FROM;
 import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -516,6 +517,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * in layout if mLayoutNeeded is set until surface placement is done.
      */
     boolean mSurfacePlacementNeeded;
+
+    /**
+     * The animation types that will call {@link #onExitAnimationDone} so {@link #mAnimatingExit}
+     * is guaranteed to be cleared.
+     */
+    static final int EXIT_ANIMATING_TYPES = ANIMATION_TYPE_APP_TRANSITION
+            | ANIMATION_TYPE_WINDOW_ANIMATION | ANIMATION_TYPE_RECENTS;
 
     /** Currently running an exit animation? */
     boolean mAnimatingExit;
@@ -2456,8 +2464,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController.onWindowTransition(this, transit);
                     }
                 }
-                final boolean isAnimating = mAnimatingExit || isAnimating(TRANSITION | PARENTS,
-                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION)
+                final boolean isAnimating = mAnimatingExit
+                        || isAnimating(TRANSITION | PARENTS, EXIT_ANIMATING_TYPES)
                         && (mActivityRecord == null || !mActivityRecord.isWaitingForTransitionStart());
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
