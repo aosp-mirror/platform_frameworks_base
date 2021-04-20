@@ -952,14 +952,8 @@ public class ClipboardService extends SystemService {
             try {
                 CharSequence callingAppLabel = mPm.getApplicationLabel(
                         mPm.getApplicationInfoAsUser(callingPackage, 0, userId));
-                String message;
-                if (isText(clipboard.primaryClip)) {
-                    message = getContext().getString(
-                            R.string.pasted_text, callingAppLabel);
-                } else {
-                    message = getContext().getString(
-                            R.string.pasted_content, callingAppLabel);
-                }
+                String message =
+                        getContext().getString(R.string.pasted_from_clipboard, callingAppLabel);
                 Slog.i(TAG, message);
                 Toast.makeText(
                         getContext(), UiThread.get().getLooper(), message, Toast.LENGTH_SHORT)
