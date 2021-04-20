@@ -2130,6 +2130,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
+    @SuppressWarnings("AutoBoxing")
     @SystemApi
     @Nullable
     public Boolean hasRequestRawExternalStorageAccess() {

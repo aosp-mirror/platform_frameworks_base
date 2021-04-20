@@ -42,7 +42,7 @@ import com.android.internal.util.DataClass;
 )
 public final class RotationResolutionRequest implements Parcelable {
     /** The Name of the package of the current fore-ground activity. */
-    @NonNull private final String mPackageName;
+    @NonNull private final String mForegroundPackageName;
 
     /** The current rotation of the screen. */
     @Surface.Rotation private final int mCurrentRotation;
@@ -75,7 +75,7 @@ public final class RotationResolutionRequest implements Parcelable {
     /**
      * Creates a new RotationResolutionRequest.
      *
-     * @param packageName
+     * @param foregroundPackageName
      *   The Name of the package of the current fore-ground activity.
      * @param currentRotation
      *   The current rotation of the screen.
@@ -88,14 +88,14 @@ public final class RotationResolutionRequest implements Parcelable {
      */
     @DataClass.Generated.Member
     public RotationResolutionRequest(
-            @NonNull String packageName,
+            @NonNull String foregroundPackageName,
             @Surface.Rotation int currentRotation,
             @Surface.Rotation int proposedRotation,
             boolean shouldUseCamera,
             @DurationMillisLong long timeoutMillis) {
-        this.mPackageName = packageName;
+        this.mForegroundPackageName = foregroundPackageName;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mPackageName);
+                NonNull.class, null, mForegroundPackageName);
         this.mCurrentRotation = currentRotation;
         com.android.internal.util.AnnotationValidations.validate(
                 Surface.Rotation.class, null, mCurrentRotation);
@@ -114,8 +114,8 @@ public final class RotationResolutionRequest implements Parcelable {
      * The Name of the package of the current fore-ground activity.
      */
     @DataClass.Generated.Member
-    public @NonNull String getPackageName() {
-        return mPackageName;
+    public @NonNull String getForegroundPackageName() {
+        return mForegroundPackageName;
     }
 
     /**
@@ -157,7 +157,7 @@ public final class RotationResolutionRequest implements Parcelable {
         // String fieldNameToString() { ... }
 
         return "RotationResolutionRequest { " +
-                "packageName = " + mPackageName + ", " +
+                "foregroundPackageName = " + mForegroundPackageName + ", " +
                 "currentRotation = " + mCurrentRotation + ", " +
                 "proposedRotation = " + mProposedRotation + ", " +
                 "shouldUseCamera = " + mShouldUseCamera + ", " +
@@ -174,7 +174,7 @@ public final class RotationResolutionRequest implements Parcelable {
         byte flg = 0;
         if (mShouldUseCamera) flg |= 0x8;
         dest.writeByte(flg);
-        dest.writeString(mPackageName);
+        dest.writeString(mForegroundPackageName);
         dest.writeInt(mCurrentRotation);
         dest.writeInt(mProposedRotation);
         dest.writeLong(mTimeoutMillis);
@@ -193,14 +193,14 @@ public final class RotationResolutionRequest implements Parcelable {
 
         byte flg = in.readByte();
         boolean shouldUseCamera = (flg & 0x8) != 0;
-        String packageName = in.readString();
+        String foregroundPackageName = in.readString();
         int currentRotation = in.readInt();
         int proposedRotation = in.readInt();
         long timeoutMillis = in.readLong();
 
-        this.mPackageName = packageName;
+        this.mForegroundPackageName = foregroundPackageName;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mPackageName);
+                NonNull.class, null, mForegroundPackageName);
         this.mCurrentRotation = currentRotation;
         com.android.internal.util.AnnotationValidations.validate(
                 Surface.Rotation.class, null, mCurrentRotation);
@@ -230,10 +230,10 @@ public final class RotationResolutionRequest implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1617213094231L,
+            time = 1618447759819L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/rotationresolver/RotationResolutionRequest.java",
-            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.view.Surface.Rotation int mCurrentRotation\nprivate final @android.view.Surface.Rotation int mProposedRotation\nprivate final  boolean mShouldUseCamera\nprivate final @android.annotation.DurationMillisLong long mTimeoutMillis\nclass RotationResolutionRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genToString=true)")
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mForegroundPackageName\nprivate final @android.view.Surface.Rotation int mCurrentRotation\nprivate final @android.view.Surface.Rotation int mProposedRotation\nprivate final  boolean mShouldUseCamera\nprivate final @android.annotation.DurationMillisLong long mTimeoutMillis\nclass RotationResolutionRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

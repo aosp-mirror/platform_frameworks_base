@@ -16,6 +16,7 @@
 package com.android.wm.shell.startingsurface;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_NONE;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SNAPSHOT;
@@ -30,11 +31,11 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.StartingWindowInfo;
@@ -109,17 +110,9 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     }
 
     private static class StartingTypeChecker {
-        TaskSnapshot mSnapshot;
-
-        StartingTypeChecker() { }
-
-        private void reset() {
-            mSnapshot = null;
-        }
 
         private @StartingWindowInfo.StartingWindowType int
                 estimateStartingWindowType(StartingWindowInfo windowInfo) {
-            reset();
             final int parameter = windowInfo.startingWindowTypeParameter;
             final boolean newTask = (parameter & TYPE_PARAMETER_NEW_TASK) != 0;
             final boolean taskSwitch = (parameter & TYPE_PARAMETER_TASK_SWITCH) != 0;
@@ -159,7 +152,7 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
                 }
             }
             if (taskSwitch && allowTaskSnapshot) {
-                final TaskSnapshot snapshot = getTaskSnapshot(windowInfo.taskInfo.taskId);
+                final TaskSnapshot snapshot = windowInfo.mTaskSnapshot;
                 if (isSnapshotCompatible(windowInfo, snapshot)) {
                     return STARTING_WINDOW_TYPE_SNAPSHOT;
                 }
@@ -198,20 +191,6 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
             }
             return taskRotation == snapshotRotation;
         }
-
-        private TaskSnapshot getTaskSnapshot(int taskId) {
-            if (mSnapshot != null) {
-                return mSnapshot;
-            }
-            try {
-                mSnapshot = ActivityTaskManager.getService().getTaskSnapshot(taskId,
-                        false/* isLowResolution */);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to get snapshot for task: " + taskId + ", from: " + e);
-                return null;
-            }
-            return mSnapshot;
-        }
     }
 
     /*
@@ -232,7 +211,9 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
      */
     public void addStartingWindow(StartingWindowInfo windowInfo, IBinder appToken) {
         mSplashScreenExecutor.execute(() -> {
-            final int suggestionType = mStartingTypeChecker.estimateStartingWindowType(windowInfo);
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "addStartingWindow");
+            final int suggestionType = mStartingTypeChecker.estimateStartingWindowType(
+                    windowInfo);
             final RunningTaskInfo runningTaskInfo = windowInfo.taskInfo;
             if (mTaskLaunchingCallback != null && shouldSendToListener(suggestionType)) {
                 mTaskLaunchingCallback.accept(runningTaskInfo.taskId, suggestionType);
@@ -244,10 +225,12 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
                 mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, appToken,
                         true /* emptyView */);
             } else if (suggestionType == STARTING_WINDOW_TYPE_SNAPSHOT) {
-                final TaskSnapshot snapshot = mStartingTypeChecker.mSnapshot;
-                mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, appToken, snapshot);
+                final TaskSnapshot snapshot = windowInfo.mTaskSnapshot;
+                mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, appToken,
+                        snapshot);
             }
             // If prefer don't show, then don't show!
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         });
     }
 

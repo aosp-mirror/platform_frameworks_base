@@ -497,6 +497,8 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @param volume Absolute volume to be set on remote
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void setVolume(int volume) {
         if (DBG) Log.d(TAG, "setVolume(" + volume + ")");
 
@@ -556,6 +558,8 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @hide
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getDeviceSide(BluetoothDevice device) {
         if (VDBG) {
             log("getDeviceSide(" + device + ")");
@@ -582,6 +586,8 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @hide
      */
     @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getDeviceMode(BluetoothDevice device) {
         if (VDBG) {
             log("getDeviceMode(" + device + ")");

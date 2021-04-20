@@ -18,8 +18,10 @@ package com.android.wm.shell.startingsurface;
 
 import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.content.res.Configuration.EMPTY;
+import static android.view.Choreographer.CALLBACK_INSETS_ANIMATION;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
@@ -29,16 +31,15 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -54,9 +55,44 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * A class which able to draw splash screen or snapshot as the starting window for a task.
+ *
+ * In order to speed up, there will use two threads to creating a splash screen in parallel.
+ * Right now we are still using PhoneWindow to create splash screen window, so the view is added to
+ * the ViewRootImpl, and those view won't be draw immediately because the ViewRootImpl will call
+ * scheduleTraversal to register a callback from Choreographer, so the drawing result of the view
+ * can synchronize on each frame.
+ *
+ * The bad thing is that we cannot decide when would Choreographer#doFrame happen, and drawing
+ * the AdaptiveIconDrawable object can be time consuming, so we use the splash-screen background
+ * thread to draw the AdaptiveIconDrawable object to a Bitmap and cache it to a BitmapShader after
+ * the SplashScreenView just created, once we get the BitmapShader then the #draw call can be very
+ * quickly.
+ *
+ * So basically we are using the spare time to prepare the SplashScreenView while splash screen
+ * thread is waiting for
+ * 1. WindowManager#addView(binder call to WM),
+ * 2. Choreographer#doFrame happen(uncertain time for next frame, depends on device),
+ * 3. Session#relayout(another binder call to WM which under Choreographer#doFrame, but will
+ * always happen before #draw).
+ * Because above steps are running on splash-screen thread, so pre-draw the BitmapShader on
+ * splash-screen background tread can make they execute in parallel, which ensure it is faster then
+ * to draw the AdaptiveIconDrawable when receive callback from Choreographer#doFrame.
+ *
+ * Here is the sequence to compare the difference between using single and two thread.
+ *
+ * Single thread:
+ * => makeSplashScreenContentView -> WM#addView .. waiting for Choreographer#doFrame -> relayout
+ * -> draw -> AdaptiveIconDrawable#draw
+ *
+ * Two threads:
+ * => makeSplashScreenContentView -> cachePaint(=AdaptiveIconDrawable#draw)
+ * => WM#addView -> .. waiting for Choreographer#doFrame -> relayout -> draw -> (draw the Paint
+ * directly).
+ *
  * @hide
  */
 public class StartingSurfaceDrawer {
@@ -68,7 +104,11 @@ public class StartingSurfaceDrawer {
     private final DisplayManager mDisplayManager;
     private final ShellExecutor mSplashScreenExecutor;
     private final SplashscreenContentDrawer mSplashscreenContentDrawer;
+    private Choreographer mChoreographer;
 
+    /**
+     * @param splashScreenExecutor The thread used to control add and remove starting window.
+     */
     public StartingSurfaceDrawer(Context context, ShellExecutor splashScreenExecutor,
             TransactionPool pool) {
         mContext = context;
@@ -82,6 +122,7 @@ public class StartingSurfaceDrawer {
                 com.android.wm.shell.R.integer.starting_window_app_reveal_anim_duration);
         mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext,
                 maxAnimatableIconDuration, iconExitAnimDuration, appRevealAnimDuration, pool);
+        mSplashScreenExecutor.execute(() -> mChoreographer = Choreographer.getInstance());
     }
 
     private final SparseArray<StartingWindowRecord> mStartingWindowRecords = new SparseArray<>();
@@ -267,36 +308,91 @@ public class StartingSurfaceDrawer {
         params.setTitle("Splash Screen " + activityInfo.packageName);
 
         // TODO(b/173975965) tracking performance
-        SplashScreenView sView = null;
+        // Prepare the splash screen content view on splash screen worker thread in parallel, so the
+        // content view won't be blocked by binder call like addWindow and relayout.
+        // 1. Trigger splash screen worker thread to create SplashScreenView before/while
+        // Session#addWindow.
+        // 2. Synchronize the SplashscreenView to splash screen thread before Choreographer start
+        // traversal, which will call Session#relayout on splash screen thread.
+        // 3. Pre-draw the BitmapShader if the icon is immobile on splash screen worker thread, at
+        // the same time the splash screen thread should be executing Session#relayout. Blocking the
+        // traversal -> draw on splash screen thread until the BitmapShader of the icon is ready.
+        final Runnable setViewSynchronized;
+        if (!emptyView) {
+            // Record whether create splash screen view success, notify to current thread after
+            // create splash screen view finished.
+            final SplashScreenViewSupplier viewSupplier = new SplashScreenViewSupplier();
+            setViewSynchronized = () -> {
+                // waiting for setContentView before relayoutWindow
+                SplashScreenView contentView = viewSupplier.get();
+                final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
+                // if record == null, either the starting window added fail or removed already.
+                if (record != null) {
+                    // if view == null then creation of content view was failed.
+                    if (contentView != null) {
+                        try {
+                            win.setContentView(contentView);
+                            contentView.cacheRootWindow(win);
+                        } catch (RuntimeException e) {
+                            Slog.w(TAG, "failed set content view to starting window "
+                                    + "at taskId: " + taskId, e);
+                            contentView = null;
+                        }
+                    }
+                    record.setSplashScreenView(contentView);
+                }
+            };
+            mSplashscreenContentDrawer.createContentView(context,
+                    splashscreenContentResId[0], activityInfo, taskId, viewSupplier::setView);
+        } else {
+            setViewSynchronized = null;
+        }
+
         try {
             final View view = win.getDecorView();
             final WindowManager wm = mContext.getSystemService(WindowManager.class);
-            if (!emptyView) {
-                // splash screen content will be deprecated after S.
-                sView = SplashscreenContentDrawer.makeSplashscreenContent(
-                        context, splashscreenContentResId[0]);
-                final boolean splashscreenContentCompatible = sView != null;
-                if (splashscreenContentCompatible) {
-                    win.setContentView(sView);
-                } else {
-                    sView = mSplashscreenContentDrawer
-                            .makeSplashScreenContentView(context, activityInfo);
-                    win.setContentView(sView);
-                    win.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                    sView.cacheRootWindow(win);
-                }
-            }
             postAddWindow(taskId, appToken, view, wm, params);
+
+            // all done
+            if (emptyView) {
+                return;
+            }
+            // We use the splash screen worker thread to create SplashScreenView while adding the
+            // window, as otherwise Choreographer#doFrame might be delayed on this thread.
+            // And since Choreographer#doFrame won't happen immediately after adding the window, if
+            // the view is not added to the PhoneWindow on the first #doFrame, the view will not be
+            // rendered on the first frame. So here we need to synchronize the view on the window
+            // before first round relayoutWindow, which will happen after insets animation.
+            mChoreographer.postCallback(CALLBACK_INSETS_ANIMATION, setViewSynchronized, null);
         } catch (RuntimeException e) {
             // don't crash if something else bad happens, for example a
             // failure loading resources because we are loading from an app
             // on external storage that has been unmounted.
-            Slog.w(TAG, " failed creating starting window at taskId: " + taskId, e);
-            sView = null;
-        } finally {
-            final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
-            if (record != null) {
-                record.setSplashScreenView(sView);
+            Slog.w(TAG, "failed creating starting window at taskId: " + taskId, e);
+        }
+    }
+
+    private static class SplashScreenViewSupplier implements Supplier<SplashScreenView> {
+        private SplashScreenView mView;
+        private boolean mIsViewSet;
+        void setView(SplashScreenView view) {
+            synchronized (this) {
+                mView = view;
+                mIsViewSet = true;
+                notify();
+            }
+        }
+
+        @Override
+        public @Nullable SplashScreenView get() {
+            synchronized (this) {
+                while (!mIsViewSet) {
+                    try {
+                        wait();
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+                return mView;
             }
         }
     }

@@ -30927,7 +30927,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param executor The executor that the callback should be invoked on.
      * @param callback The callback to handle the results of generating the display hash
      */
-    @Nullable
     public void generateDisplayHash(@NonNull String hashAlgorithm,
             @Nullable Rect bounds, @NonNull Executor executor,
             @NonNull DisplayHashResultCallback callback) {

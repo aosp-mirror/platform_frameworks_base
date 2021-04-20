@@ -6951,7 +6951,8 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Returns the names of custom power components.
      */
-    public @NonNull String[] getCustomPowerComponentNames() {
+    @Override
+    public @NonNull String[] getCustomEnergyConsumerNames() {
         if (mGlobalMeasuredEnergyStats == null) {
             return new String[0];
         }

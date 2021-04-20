@@ -1009,7 +1009,6 @@ public final class HdmiControlManager {
      *
      * @return {@link HdmiAudioSystemClient} instance. {@code null} on failure.
      *
-     * TODO(b/110094868): unhide for Q
      * @hide
      */
     @Nullable

@@ -18,16 +18,18 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 
 /**
  * Definition of a file in a streaming installation session.
  * You can use this class to retrieve the information of such a file, such as its name, size and
  * metadata. These file attributes will be consistent with those used in:
- * {@code android.content.pm.PackageInstaller.Session#addFile}, when the file was first added
- * into the session.
+ * {@code PackageInstaller.Session#addFile}, when the file was first added into the session.
  *
  * @see android.content.pm.PackageInstaller.Session#addFile
+ * @hide
  */
+@SystemApi
 public final class InstallationFile {
     private final @NonNull InstallationFileParcel mParcel;
 

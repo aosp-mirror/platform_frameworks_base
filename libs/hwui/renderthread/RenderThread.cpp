@@ -54,6 +54,10 @@ static JVMAttachHook gOnStartHook = nullptr;
 
 ASurfaceControlFunctions::ASurfaceControlFunctions() {
     void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
+    createFunc = (ASC_create)dlsym(handle_, "ASurfaceControl_create");
+    LOG_ALWAYS_FATAL_IF(createFunc == nullptr,
+                        "Failed to find required symbol ASurfaceControl_create!");
+
     acquireFunc = (ASC_acquire) dlsym(handle_, "ASurfaceControl_acquire");
     LOG_ALWAYS_FATAL_IF(acquireFunc == nullptr,
             "Failed to find required symbol ASurfaceControl_acquire!");
@@ -81,6 +85,23 @@ ASurfaceControlFunctions::ASurfaceControlFunctions() {
             "ASurfaceControlStats_getFrameNumber");
     LOG_ALWAYS_FATAL_IF(getFrameNumberFunc == nullptr,
             "Failed to find required symbol ASurfaceControlStats_getFrameNumber!");
+
+    transactionCreateFunc = (AST_create)dlsym(handle_, "ASurfaceTransaction_create");
+    LOG_ALWAYS_FATAL_IF(transactionCreateFunc == nullptr,
+                        "Failed to find required symbol ASurfaceTransaction_create!");
+
+    transactionDeleteFunc = (AST_delete)dlsym(handle_, "ASurfaceTransaction_delete");
+    LOG_ALWAYS_FATAL_IF(transactionDeleteFunc == nullptr,
+                        "Failed to find required symbol ASurfaceTransaction_delete!");
+
+    transactionApplyFunc = (AST_apply)dlsym(handle_, "ASurfaceTransaction_apply");
+    LOG_ALWAYS_FATAL_IF(transactionApplyFunc == nullptr,
+                        "Failed to find required symbol ASurfaceTransaction_apply!");
+
+    transactionSetVisibilityFunc =
+            (AST_setVisibility)dlsym(handle_, "ASurfaceTransaction_setVisibility");
+    LOG_ALWAYS_FATAL_IF(transactionSetVisibilityFunc == nullptr,
+                        "Failed to find required symbol ASurfaceTransaction_setVisibility!");
 }
 
 void RenderThread::frameCallback(int64_t frameTimeNanos, void* data) {
