@@ -20,7 +20,6 @@ import android.annotation.SystemApi;
 import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.DeviceConfig;
 
 /**
  * Bluetooth LE scan settings are passed to {@link BluetoothLeScanner#startScan} to define the
@@ -141,12 +140,6 @@ public final class ScanSettings implements Parcelable {
      * the 1Mbit PHY only.
      */
     public static final int PHY_LE_ALL_SUPPORTED = 255;
-
-    /**
-     * The default floor value for report delays greater than 0 in
-     * {@link Builder#setReportDelay(long)}.
-     */
-    private static final long DEFAULT_REPORT_DELAY_FLOOR = 5000;
 
     // Bluetooth LE scan mode.
     private int mScanMode;
@@ -352,28 +345,18 @@ public final class ScanSettings implements Parcelable {
         }
 
         /**
-         * Set report delay timestamp for Bluetooth LE scan. If set to 0, you will be notified of
-         * scan results immediately. If &gt; 0, scan results are queued up and delivered after the
-         * requested delay or 5000 milliseconds (whichever is higher). Note scan results may be
-         * delivered sooner if the internal buffers fill up.
+         * Set report delay timestamp for Bluetooth LE scan.
          *
-         * @param reportDelayMillis         how frequently scan results should be delivered in
-         *                                  milliseconds
-         * @throws IllegalArgumentException if {@code reportDelayMillis} &lt; 0
+         * @param reportDelayMillis Delay of report in milliseconds. Set to 0 to be notified of
+         * results immediately. Values &gt; 0 causes the scan results to be queued up and delivered
+         * after the requested delay or when the internal buffers fill up.
+         * @throws IllegalArgumentException If {@code reportDelayMillis} &lt; 0.
          */
         public Builder setReportDelay(long reportDelayMillis) {
             if (reportDelayMillis < 0) {
                 throw new IllegalArgumentException("reportDelay must be > 0");
             }
-
-            long floor = DeviceConfig.getLong(DeviceConfig.NAMESPACE_BLUETOOTH, "report_delay",
-                    DEFAULT_REPORT_DELAY_FLOOR);
-
-            if (reportDelayMillis > 0 && reportDelayMillis < floor) {
-                mReportDelayMillis = floor;
-            } else {
-                mReportDelayMillis = reportDelayMillis;
-            }
+            mReportDelayMillis = reportDelayMillis;
             return this;
         }
 
