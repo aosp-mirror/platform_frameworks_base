@@ -510,7 +510,8 @@ public class BubbleData {
                         || reason == Bubbles.DISMISS_NO_LONGER_BUBBLE
                         || reason == Bubbles.DISMISS_BLOCKED
                         || reason == Bubbles.DISMISS_SHORTCUT_REMOVED
-                        || reason == Bubbles.DISMISS_PACKAGE_REMOVED)) {
+                        || reason == Bubbles.DISMISS_PACKAGE_REMOVED
+                        || reason == Bubbles.DISMISS_USER_CHANGED)) {
 
                 Bubble b = getOverflowBubbleWithKey(key);
                 if (DEBUG_BUBBLE_DATA) {
@@ -640,6 +641,16 @@ public class BubbleData {
             }
             dispatchPendingChanges();
         }
+    }
+
+    /**
+     * Removes all bubbles from the overflow, called when the user changes.
+     */
+    public void clearOverflow() {
+        while (!mOverflowBubbles.isEmpty()) {
+            doRemove(mOverflowBubbles.get(0).getKey(), Bubbles.DISMISS_USER_CHANGED);
+        }
+        dispatchPendingChanges();
     }
 
     private void dispatchPendingChanges() {

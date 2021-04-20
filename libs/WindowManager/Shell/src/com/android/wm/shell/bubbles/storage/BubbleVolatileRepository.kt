@@ -17,6 +17,7 @@ package com.android.wm.shell.bubbles.storage
 
 import android.content.pm.LauncherApps
 import android.os.UserHandle
+import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
 import com.android.wm.shell.bubbles.ShortcutKey
 
@@ -27,10 +28,11 @@ private const val CAPACITY = 16
  * manipulation.
  */
 class BubbleVolatileRepository(private val launcherApps: LauncherApps) {
+
     /**
-     * An ordered set of bubbles based on their natural ordering.
+     * Set of bubbles per user. Each set of bubbles is ordered by recency.
      */
-    private var entities = mutableSetOf<BubbleEntity>()
+    private var entitiesByUser = SparseArray<MutableList<BubbleEntity>>()
 
     /**
      * The capacity of the cache.
@@ -39,19 +41,43 @@ class BubbleVolatileRepository(private val launcherApps: LauncherApps) {
     var capacity = CAPACITY
 
     /**
-     * Returns a snapshot of all the bubbles.
+     * Returns a snapshot of all the bubbles, a map of the userId to bubble list.
      */
-    val bubbles: List<BubbleEntity>
+    val bubbles: SparseArray<List<BubbleEntity>>
         @Synchronized
-        get() = entities.toList()
+        get() {
+            val map = SparseArray<List<BubbleEntity>>()
+            for (i in 0 until entitiesByUser.size()) {
+                val k = entitiesByUser.keyAt(i)
+                val v = entitiesByUser.valueAt(i)
+                map.put(k, v.toList())
+            }
+            return map
+        }
+
+    /**
+     * Returns the entity list of the provided user's bubbles or creates one if it doesn't exist.
+     */
+    @Synchronized
+    fun getEntities(userId: Int): MutableList<BubbleEntity> {
+        val entities = entitiesByUser.get(userId)
+        return when (entities) {
+            null -> mutableListOf<BubbleEntity>().also {
+                entitiesByUser.put(userId, it)
+            }
+            else -> entities
+        }
+    }
 
     /**
      * Add the bubbles to memory and perform a de-duplication. In case a bubble already exists,
      * it will be moved to the last.
      */
     @Synchronized
-    fun addBubbles(bubbles: List<BubbleEntity>) {
+    fun addBubbles(userId: Int, bubbles: List<BubbleEntity>) {
         if (bubbles.isEmpty()) return
+        // Get the list for this user
+        var entities = getEntities(userId)
         // Verify the size of given bubbles is within capacity, otherwise trim down to capacity
         val bubblesInRange = bubbles.takeLast(capacity)
         // To ensure natural ordering of the bubbles, removes bubbles which already exist
@@ -61,16 +87,17 @@ class BubbleVolatileRepository(private val launcherApps: LauncherApps) {
         if (overflowCount > 0) {
             // Uncache ShortcutInfo of bubbles that will be removed due to capacity
             uncache(entities.take(overflowCount))
-            entities = entities.drop(overflowCount).toMutableSet()
+            entities = entities.drop(overflowCount).toMutableList()
         }
         entities.addAll(bubblesInRange)
+        entitiesByUser.put(userId, entities)
         cache(uniqueBubbles)
     }
 
     @Synchronized
-    fun removeBubbles(bubbles: List<BubbleEntity>) =
+    fun removeBubbles(userId: Int, bubbles: List<BubbleEntity>) =
             uncache(bubbles.filter { b: BubbleEntity ->
-                entities.removeIf { e: BubbleEntity -> b.key == e.key } })
+                getEntities(userId).removeIf { e: BubbleEntity -> b.key == e.key } })
 
     private fun cache(bubbles: List<BubbleEntity>) {
         bubbles.groupBy { ShortcutKey(it.userId, it.packageName) }.forEach { (key, bubbles) ->
