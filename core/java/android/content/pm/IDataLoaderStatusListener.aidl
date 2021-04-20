@@ -52,30 +52,7 @@ oneway interface IDataLoaderStatusListener {
     *            fail and all retry limits are exceeded. */
     const int DATA_LOADER_UNRECOVERABLE = 9;
 
-    /** There are no known issues with the data stream. */
-    const int STREAM_HEALTHY = 0;
-
-    /** There are issues with the current transport layer (network, adb connection, etc.) that may
-     * recover automatically or could eventually require user intervention. */
-    const int STREAM_TRANSPORT_ERROR = 1;
-
-    /** Integrity failures in the data stream, this could be due to file corruption, decompression
-     * issues or similar. This indicates a likely unrecoverable error. */
-    const int STREAM_INTEGRITY_ERROR = 2;
-
-    /** There are issues with the source of the data, e.g., backend availability issues, account
-     * issues. This indicates a potentially recoverable error, but one that may take a long time to
-     * resolve. */
-    const int STREAM_SOURCE_ERROR = 3;
-
-    /** The device or app is low on storage and cannot complete the stream as a result.
-      * A subsequent page miss resulting in app failure will transition app to unstartable state. */
-    const int STREAM_STORAGE_ERROR = 4;
-
     /** Data loader status callback */
     void onStatusChanged(in int dataLoaderId, in int status);
-
-    /** Callback to report streaming health status of a specific data loader */
-    void reportStreamHealth(in int dataLoaderId, in int streamStatus);
 }
 
