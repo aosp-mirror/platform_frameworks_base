@@ -3474,10 +3474,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     @VisibleForTesting
     void getRunningTasks(int maxNum, List<ActivityManager.RunningTaskInfo> list,
-            boolean filterOnlyVisibleRecents, int callingUid, boolean allowed, boolean crossUser,
-            ArraySet<Integer> profileIds) {
-        mTaskSupervisor.getRunningTasks().getTasks(maxNum, list, filterOnlyVisibleRecents, this,
-                callingUid, allowed, crossUser, profileIds);
+            int flags, int callingUid, ArraySet<Integer> profileIds) {
+        mTaskSupervisor.getRunningTasks().getTasks(maxNum, list, flags, this, callingUid,
+                profileIds);
     }
 
     void startPowerModeLaunchIfNeeded(boolean forceSend, ActivityRecord targetActivity) {

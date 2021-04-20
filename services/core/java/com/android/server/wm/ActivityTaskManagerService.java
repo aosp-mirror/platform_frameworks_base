@@ -2103,8 +2103,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
-        return getTasks(maxNum, false /* filterForVisibleRecents */);
+    /**
+     * Gets info of running tasks up to the given number.
+     *
+     * @param maxNum the maximum number of task info returned by this method. If the total number of
+     *               running tasks is larger than it then there is no guarantee which task will be
+     *               left out.
+     * @return a list of {@link ActivityManager.RunningTaskInfo} with up to {@code maxNum} items
+     */
+    public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
+        return getTasks(maxNum, false /* filterForVisibleRecents */, false /* keepIntentExtra */);
     }
 
     /**
@@ -2113,10 +2121,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     @Override
     public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum,
-            boolean filterOnlyVisibleRecents) {
+            boolean filterOnlyVisibleRecents, boolean keepIntentExtra) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
+
+        int flags = filterOnlyVisibleRecents ? RunningTasks.FLAG_FILTER_ONLY_VISIBLE_RECENTS : 0;
+        flags |= (keepIntentExtra ? RunningTasks.FLAG_KEEP_INTENT_EXTRA : 0);
         final boolean crossUser = isCrossUserAllowed(callingPid, callingUid);
+        flags |= (crossUser ? RunningTasks.FLAG_CROSS_USERS : 0);
         final int[] profileIds = getUserManager().getProfileIds(
                 UserHandle.getUserId(callingUid), true);
         ArraySet<Integer> callingProfileIds = new ArraySet<>();
@@ -2129,8 +2141,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (DEBUG_ALL) Slog.v(TAG, "getTasks: max=" + maxNum);
 
             final boolean allowed = isGetTasksAllowed("getTasks", callingPid, callingUid);
-            mRootWindowContainer.getRunningTasks(maxNum, list, filterOnlyVisibleRecents, callingUid,
-                    allowed, crossUser, callingProfileIds);
+            flags |= (allowed ? RunningTasks.FLAG_ALLOWED : 0);
+            mRootWindowContainer.getRunningTasks(
+                    maxNum, list, flags, callingUid, callingProfileIds);
         }
 
         return list;
