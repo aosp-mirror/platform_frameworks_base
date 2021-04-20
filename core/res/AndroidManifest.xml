@@ -5735,7 +5735,7 @@
                 android:protectionLevel="signature|recents" />
 
     <!-- Allows an application to indicate via
-         {@link android.content.pm.PackageInstaller.SessionParams#setRequireUserAction(boolean)}
+         {@link android.content.pm.PackageInstaller.SessionParams#setRequireUserAction(int)}
          that user action should not be required for an app update.
          <p>Protection level: normal
     -->
