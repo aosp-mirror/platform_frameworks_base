@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -59,6 +58,7 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflaterKt;
 import com.android.systemui.statusbar.policy.SmartReplyView;
+import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1315,11 +1315,6 @@ public class NotificationContentView extends FrameLayout {
         applyBubbleAction(mExpandedChild, entry);
     }
 
-    private boolean isBubblesEnabled() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.NOTIFICATION_BUBBLES, 0) == 1;
-    }
-
     /**
      * Setup icon buttons provided by System UI.
      */
@@ -1340,7 +1335,7 @@ public class NotificationContentView extends FrameLayout {
         boolean isPersonWithShortcut =
                 mPeopleIdentifier.getPeopleNotificationType(entry)
                         >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
-        boolean showButton = isBubblesEnabled()
+        boolean showButton = BubblesManager.areBubblesEnabled(mContext, entry.getSbn().getUser())
                 && isPersonWithShortcut
                 && entry.getBubbleMetadata() != null;
         if (showButton) {

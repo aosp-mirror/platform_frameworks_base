@@ -18,6 +18,7 @@ package com.android.systemui.wmshell;
 
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
+import static android.provider.Settings.Secure.NOTIFICATION_BUBBLES;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
@@ -40,6 +41,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.ZenModeConfig;
 import android.util.ArraySet;
@@ -725,6 +728,17 @@ public class BubblesManager implements Dumpable {
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         mBubbles.dump(fd, pw, args);
+    }
+
+    /** Checks whether bubbles are enabled for this user, handles negative userIds. */
+    public static boolean areBubblesEnabled(@NonNull Context context, @NonNull UserHandle user) {
+        if (user.getIdentifier() < 0) {
+            return Settings.Secure.getInt(context.getContentResolver(),
+                    NOTIFICATION_BUBBLES, 0) == 1;
+        } else {
+            return Settings.Secure.getIntForUser(context.getContentResolver(),
+                    NOTIFICATION_BUBBLES, 0, user.getIdentifier()) == 1;
+        }
     }
 
     static BubbleEntry notifToBubbleEntry(NotificationEntry e) {
