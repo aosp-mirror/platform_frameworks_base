@@ -170,7 +170,6 @@ public class VcnManager {
      * privileged, and which have an associated {@link VcnConfig}.
      *
      * @throws SecurityException if the caller is not running as the primary user
-     * @hide
      */
     @NonNull
     public List<ParcelUuid> getConfiguredSubscriptionGroups() {
