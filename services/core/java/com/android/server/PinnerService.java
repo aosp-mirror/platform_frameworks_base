@@ -848,9 +848,7 @@ public final class PinnerService extends SystemService {
         int mapSize = 0;
 
         try {
-            int openFlags = (OsConstants.O_RDONLY |
-                             OsConstants.O_CLOEXEC |
-                             OsConstants.O_NOFOLLOW);
+            int openFlags = (OsConstants.O_RDONLY | OsConstants.O_CLOEXEC);
             fd = Os.open(fileToPin, openFlags, 0);
             mapSize = (int) Math.min(Os.fstat(fd).st_size, Integer.MAX_VALUE);
             address = Os.mmap(0, mapSize,
