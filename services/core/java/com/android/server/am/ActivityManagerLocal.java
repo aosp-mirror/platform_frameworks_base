@@ -36,4 +36,26 @@ public interface ActivityManagerLocal {
      * @return whether the app will be able to start a foreground service or not.
      */
     boolean canStartForegroundService(int pid, int uid, @NonNull String packageName);
+
+    /**
+     * Returns {@code true} if a foreground service started by an uid is allowed to have
+     * while-in-use permissions.
+     *
+     * @param pid The process id belonging to the app to be checked.
+     * @param uid The UID of the app to be checked.
+     * @param packageName The package name of the app to be checked.
+     * @return whether the foreground service is allowed to have while-in-use permissions.
+     * @hide
+     */
+    boolean canAllowWhileInUsePermissionInFgs(int pid, int uid, @NonNull String packageName);
+
+    /**
+     * Temporarily allow foreground service started by an uid to have while-in-use permission
+     * for durationMs.
+     *
+     * @param uid The UID of the app that starts the foreground service.
+     * @param durationMs elapsedRealTime duration in milliseconds.
+     * @hide
+     */
+    void tempAllowWhileInUsePermissionInFgs(int uid, long durationMs);
 }
