@@ -160,5 +160,5 @@ oneway interface IApplicationThread {
             IUiAutomationConnection instrumentationUiConnection,
             in ApplicationInfo targetInfo);
     void updateUiTranslationState(IBinder activityToken, int state, in TranslationSpec sourceSpec,
-            in TranslationSpec destSpec, in List<AutofillId> viewIds);
+            in TranslationSpec targetSpec, in List<AutofillId> viewIds);
 }
