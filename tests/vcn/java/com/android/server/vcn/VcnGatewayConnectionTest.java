@@ -25,7 +25,10 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -83,31 +86,30 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
         super.setUp();
 
         mWifiInfo = mock(WifiInfo.class);
+        doReturn(mWifiInfo).when(mWifiInfo).makeCopy(anyLong());
     }
 
     private void verifyBuildNetworkCapabilitiesCommon(int transportType) {
-        final NetworkCapabilities underlyingCaps = new NetworkCapabilities();
-        underlyingCaps.addTransportType(transportType);
-        underlyingCaps.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
-        underlyingCaps.addCapability(NET_CAPABILITY_NOT_METERED);
-        underlyingCaps.addCapability(NET_CAPABILITY_NOT_ROAMING);
+        final NetworkCapabilities.Builder capBuilder = new NetworkCapabilities.Builder();
+        capBuilder.addTransportType(transportType);
+        capBuilder.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
+        capBuilder.addCapability(NET_CAPABILITY_NOT_METERED);
+        capBuilder.addCapability(NET_CAPABILITY_NOT_ROAMING);
 
         if (transportType == TRANSPORT_WIFI) {
-            underlyingCaps.setTransportInfo(mWifiInfo);
-            underlyingCaps.setOwnerUid(TEST_UID);
+            capBuilder.setTransportInfo(mWifiInfo);
+            capBuilder.setOwnerUid(TEST_UID);
         } else if (transportType == TRANSPORT_CELLULAR) {
-            underlyingCaps.setAdministratorUids(new int[] {TEST_UID});
-            underlyingCaps.setNetworkSpecifier(
+            capBuilder.setNetworkSpecifier(
                     new TelephonyNetworkSpecifier(TEST_SUBSCRIPTION_ID_1));
         }
-
-        UnderlyingNetworkRecord record =
-                new UnderlyingNetworkRecord(
-                        new Network(0), underlyingCaps, new LinkProperties(), false);
+        capBuilder.setAdministratorUids(new int[] {TEST_UID});
+        UnderlyingNetworkRecord record = new UnderlyingNetworkRecord(
+                mock(Network.class, CALLS_REAL_METHODS),
+                capBuilder.build(), new LinkProperties(), false);
         final NetworkCapabilities vcnCaps =
                 VcnGatewayConnection.buildNetworkCapabilities(
                         VcnGatewayConnectionConfigTest.buildTestConfig(), record);
-
         assertTrue(vcnCaps.hasTransport(TRANSPORT_CELLULAR));
         assertTrue(vcnCaps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertTrue(vcnCaps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
