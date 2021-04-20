@@ -2699,9 +2699,6 @@ public final class Settings implements Watchable, Snappable {
         if (pkg.forceQueryableOverride) {
             serializer.attributeBoolean(null, "forceQueryable", true);
         }
-        if (pkg.isPackageStartable()) {
-            serializer.attributeBoolean(null, "isStartable", true);
-        }
         if (pkg.isPackageLoading()) {
             serializer.attributeBoolean(null, "isLoading", true);
         }
@@ -3471,7 +3468,6 @@ public final class Settings implements Watchable, Snappable {
         PackageSetting packageSetting = null;
         long versionCode = 0;
         boolean installedForceQueryable = false;
-        boolean isStartable = false;
         boolean isLoading = false;
         float loadingProgress = 0;
         UUID domainSetId;
@@ -3491,7 +3487,6 @@ public final class Settings implements Watchable, Snappable {
             cpuAbiOverrideString = parser.getAttributeValue(null, "cpuAbiOverride");
             updateAvailable = parser.getAttributeBoolean(null, "updateAvailable", false);
             installedForceQueryable = parser.getAttributeBoolean(null, "forceQueryable", false);
-            isStartable = parser.getAttributeBoolean(null, "isStartable", false);
             isLoading = parser.getAttributeBoolean(null, "isLoading", false);
             loadingProgress = parser.getAttributeFloat(null, "loadingProgress", 0);
 
@@ -3650,8 +3645,7 @@ public final class Settings implements Watchable, Snappable {
             packageSetting.secondaryCpuAbiString = secondaryCpuAbiString;
             packageSetting.updateAvailable = updateAvailable;
             packageSetting.forceQueryableOverride = installedForceQueryable;
-            packageSetting.incrementalStates = new IncrementalStates(isStartable, isLoading,
-                    loadingProgress);
+            packageSetting.incrementalStates = new IncrementalStates(isLoading, loadingProgress);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {

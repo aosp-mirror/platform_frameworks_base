@@ -24,24 +24,17 @@ import android.os.Parcelable;
  * @hide
  */
 public class IncrementalStatesInfo implements Parcelable {
-    private boolean mIsStartable;
     private boolean mIsLoading;
     private float mProgress;
 
-    public IncrementalStatesInfo(boolean isStartable, boolean isLoading, float progress) {
-        mIsStartable = isStartable;
+    public IncrementalStatesInfo(boolean isLoading, float progress) {
         mIsLoading = isLoading;
         mProgress = progress;
     }
 
     private IncrementalStatesInfo(Parcel source) {
-        mIsStartable = source.readBoolean();
         mIsLoading = source.readBoolean();
         mProgress = source.readFloat();
-    }
-
-    public boolean isStartable() {
-        return mIsStartable;
     }
 
     public boolean isLoading() {
@@ -59,7 +52,6 @@ public class IncrementalStatesInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBoolean(mIsStartable);
         dest.writeBoolean(mIsLoading);
         dest.writeFloat(mProgress);
     }

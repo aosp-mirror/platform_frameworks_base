@@ -2829,55 +2829,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MY_PACKAGE_UNSUSPENDED = "android.intent.action.MY_PACKAGE_UNSUSPENDED";
 
     /**
-     * Broadcast Action: Sent to indicate that the package becomes startable.
-     * The intent will have the following extra values:
-     * <ul>
-     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package. </li>
-     * <li> {@link #EXTRA_PACKAGE_NAME} containing the package name. </li>
-     * </li>
-     * </ul>
-     *
-     * <p class="note">This is a protected intent that can only be sent by the system.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PACKAGE_STARTABLE = "android.intent.action.PACKAGE_STARTABLE";
-
-    /**
-     * Broadcast Action: Sent to indicate that the package becomes unstartable.
-     * The intent will have the following extra values:
-     * <ul>
-     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package. </li>
-     * <li> {@link #EXTRA_PACKAGE_NAME} containing the package name. </li>
-     * <li> {@link #EXTRA_UNSTARTABLE_REASON} containing the integer indicating the reason for
-     * the state change,
-     * @see PackageManager.UnstartableReason
-     * </li>
-     * </ul>
-     *
-     * <p class="note">This is a protected intent that can only be sent by the system.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PACKAGE_UNSTARTABLE =
-            "android.intent.action.PACKAGE_UNSTARTABLE";
-
-    /**
-     * Broadcast Action: Sent to indicate that the package is fully loaded.
-     * <ul>
-     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package. </li>
-     * <li> {@link #EXTRA_PACKAGE_NAME} containing the package name. </li>
-     * </li>
-     * </ul>
-     *
-     * <p class="note">This is a protected intent that can only be sent by the system.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PACKAGE_FULLY_LOADED =
-            "android.intent.action.PACKAGE_FULLY_LOADED";
-
-    /**
      * Broadcast Action: A user ID has been removed from the system.  The user
      * ID number is stored in the extra data under {@link #EXTRA_UID}.
      *
@@ -6170,13 +6121,6 @@ public class Intent implements Parcelable, Cloneable {
      * </p>
      */
     public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
-
-    /**
-     * Intent extra: the reason that the package associated with this intent has become unstartable.
-     *
-     * <p>Type: String
-     */
-    public static final String EXTRA_UNSTARTABLE_REASON = "android.intent.extra.UNSTARTABLE_REASON";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
