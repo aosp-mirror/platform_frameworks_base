@@ -657,6 +657,16 @@ package android.app.usage {
     ctor public UsageStats();
   }
 
+  public static final class UsageStats.Builder {
+    ctor public UsageStats.Builder();
+    method @NonNull public android.app.usage.UsageStats build();
+    method @NonNull public android.app.usage.UsageStats.Builder setFirstTimeStamp(long);
+    method @NonNull public android.app.usage.UsageStats.Builder setLastTimeStamp(long);
+    method @NonNull public android.app.usage.UsageStats.Builder setLastTimeUsed(long);
+    method @NonNull public android.app.usage.UsageStats.Builder setPackageName(@Nullable String);
+    method @NonNull public android.app.usage.UsageStats.Builder setTotalTimeInForeground(long);
+  }
+
   public final class UsageStatsManager {
     method public void forceUsageSourceSettingRead();
   }
@@ -1900,6 +1910,16 @@ package android.os.storage {
 
   public final class StorageVolume implements android.os.Parcelable {
     method public String getPath();
+  }
+
+  public static final class StorageVolume.Builder {
+    ctor public StorageVolume.Builder(@NonNull String, @NonNull java.io.File, @NonNull String, @NonNull android.os.UserHandle, @NonNull String);
+    method @NonNull public android.os.storage.StorageVolume build();
+    method @NonNull public android.os.storage.StorageVolume.Builder setEmulated(boolean);
+    method @NonNull public android.os.storage.StorageVolume.Builder setPrimary(boolean);
+    method @NonNull public android.os.storage.StorageVolume.Builder setRemovable(boolean);
+    method @NonNull public android.os.storage.StorageVolume.Builder setStorageUuid(@Nullable java.util.UUID);
+    method @NonNull public android.os.storage.StorageVolume.Builder setUuid(@Nullable String);
   }
 
 }

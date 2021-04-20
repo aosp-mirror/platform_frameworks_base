@@ -50,6 +50,7 @@ public class TvPipNotificationController {
     // Referenced in com.android.systemui.util.NotificationChannels.
     public static final String NOTIFICATION_CHANNEL = "TVPIP";
     private static final String NOTIFICATION_TAG = "TvPip";
+    private static final String SYSTEMUI_PERMISSION = "com.android.systemui.permission.SELF";
 
     private static final String ACTION_SHOW_PIP_MENU =
             "com.android.wm.shell.pip.tv.notification.action.SHOW_PIP_MENU";
@@ -207,7 +208,8 @@ public class TvPipNotificationController {
     }
 
     private static PendingIntent createPendingIntent(Context context, String action) {
-        return PendingIntent.getBroadcast(context, 0, new Intent(action),
+        return PendingIntent.getBroadcast(context, 0,
+                new Intent(action).setPackage(context.getPackageName()),
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
@@ -223,7 +225,7 @@ public class TvPipNotificationController {
         void register() {
             if (mRegistered) return;
 
-            mContext.registerReceiverForAllUsers(this, mIntentFilter, null /* permission */,
+            mContext.registerReceiverForAllUsers(this, mIntentFilter, SYSTEMUI_PERMISSION,
                     mMainHandler);
             mRegistered = true;
         }

@@ -167,7 +167,7 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     BatteryUsageStats apply(BatteryUsageStatsQuery query, PowerCalculator... calculators) {
-        final String[] customPowerComponentNames = mBatteryStats.getCustomPowerComponentNames();
+        final String[] customPowerComponentNames = mBatteryStats.getCustomEnergyConsumerNames();
         final boolean includePowerModels = (query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(

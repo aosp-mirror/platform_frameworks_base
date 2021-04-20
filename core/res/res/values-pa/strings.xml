@@ -1694,7 +1694,7 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ਜੇਕਰ ਤੁਸੀਂ <xliff:g id="SERVICE">%1$s</xliff:g> ਚਾਲੂ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਇਨਕ੍ਰਿਪਸ਼ਨ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰੇਗਾ।"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ਪੂਰਾ ਕੰਟਰੋਲ ਉਹਨਾਂ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਹੈ ਜੋ ਪਹੁੰਚਯੋਗਤਾ ਸੰਬੰਧੀ ਲੋੜਾਂ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕਰਦੀਆਂ ਹਨ, ਪਰ ਜ਼ਿਆਦਾਤਰ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਨਹੀਂ ਹੁੰਦਾ।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ਸਕ੍ਰੀਨ ਨੂੰ ਦੇਖੋ ਅਤੇ ਕੰਟਰੋਲ ਕਰੋ"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ਇਹ ਸਕ੍ਰੀਨ \'ਤੇ ਸਾਰੀ ਸਮੱਗਰੀ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਪਰ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ਇਹ ਸਕ੍ਰੀਨ \'ਤੇ ਸਾਰੀ ਸਮੱਗਰੀ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਪਰ ਦਿਖਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ਕਾਰਵਾਈਆਂ ਦੇਖੋ ਅਤੇ ਕਰੋ"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ਇਹ ਕਿਸੇ ਐਪ ਜਾਂ ਹਾਰਡਵੇਅਰ ਸੈਂਸਰ ਦੇ ਨਾਲ ਤੁਹਾਡੀਆਂ ਅੰਤਰਕਿਰਿਆਵਾਂ ਨੂੰ ਟਰੈਕ ਕਰ ਸਕਦੀ ਹੈ, ਅਤੇ ਤੁਹਾਡੀ ਤਰਫ਼ੋਂ ਐਪਾਂ ਦੇ ਨਾਲ ਅੰਤਰਕਿਰਿਆ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ਕਰਨ ਦਿਓ"</string>
@@ -2264,7 +2264,7 @@
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"ਨਵੀਆਂ ਵੱਡਦਰਸ਼ੀਕਰਨ ਸੈਟਿੰਗਾਂ"</string>
-    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ਹੁਣ ਤੁਸੀਂ ਆਪਣੀ ਸਕ੍ਰੀਨ ਦਾ ਕੁਝ ਹਿੱਸਾ ਵੱਡਦਰਸ਼ੀ ਕਰ ਸਕਦੇ ਹੋ"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ਹੁਣ ਤੁਸੀਂ ਆਪਣੀ ਸਕ੍ਰੀਨ ਦਾ ਕੁਝ ਹਿੱਸਾ ਵੱਡਾ ਕਰ ਸਕਦੇ ਹੋ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਚਾਲੂ ਕਰੋ"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ਡੀਵਾਈਸ ਦੇ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਨੂੰ ਅਣਬਲਾਕ ਕਰੋ"</string>

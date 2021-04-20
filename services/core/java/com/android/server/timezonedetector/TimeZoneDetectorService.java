@@ -321,6 +321,13 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         ipw.flush();
     }
 
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+        new TimeZoneDetectorShellCommand(this).exec(
+                this, in, out, err, args, callback, resultReceiver);
+    }
+
     private void enforceManageTimeZoneDetectorPermission() {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION,
@@ -345,14 +352,6 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE,
                 "suggest manual time and time zone");
-    }
-
-    @Override
-    public void onShellCommand(FileDescriptor in, FileDescriptor out,
-            FileDescriptor err, String[] args, ShellCallback callback,
-            ResultReceiver resultReceiver) {
-        new TimeZoneDetectorShellCommand(this).exec(
-                this, in, out, err, args, callback, resultReceiver);
     }
 }
 

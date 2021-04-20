@@ -31,7 +31,6 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
@@ -239,7 +238,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
 
         when(mBuilder.build()).thenReturn(mock(PriorityOnboardingDialogController.class));
 
-        when(mPeopleSpaceWidgetManager.requestPinAppWidget(any())).thenReturn(true);
+        when(mPeopleSpaceWidgetManager.requestPinAppWidget(any(), any())).thenReturn(true);
     }
 
     @Test
@@ -1289,7 +1288,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mNotificationInfo.findViewById(R.id.done).performClick();
 
         // THEN the user is presented with the People Tile pinning request
-        verify(mPeopleSpaceWidgetManager, times(1)).requestPinAppWidget(any());
+        verify(mPeopleSpaceWidgetManager, times(1)).requestPinAppWidget(any(), any());
     }
 
     @Test
@@ -1325,7 +1324,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mNotificationInfo.findViewById(R.id.done).performClick();
 
         // THEN the user is not presented with the People Tile pinning request
-        verify(mPeopleSpaceWidgetManager, never()).requestPinAppWidget(mShortcutInfo);
+        verify(mPeopleSpaceWidgetManager, never()).requestPinAppWidget(eq(mShortcutInfo), any());
     }
 
     @Test
@@ -1364,6 +1363,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mNotificationInfo.findViewById(R.id.done).performClick();
 
         // THEN the user is not presented with the People Tile pinning request
-        verify(mPeopleSpaceWidgetManager, never()).requestPinAppWidget(mShortcutInfo);
+        verify(mPeopleSpaceWidgetManager, never()).requestPinAppWidget(eq(mShortcutInfo), any());
     }
 }
