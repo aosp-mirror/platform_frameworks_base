@@ -519,7 +519,7 @@ applications that come with the platform
         <permission name="android.permission.CONFIGURE_DISPLAY_BRIGHTNESS" />
         <permission name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
         <permission name="android.permission.SET_MEDIA_KEY_LISTENER" />
-        <permission name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
+        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
         <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
         <permission name="android.permission.UPDATE_DEVICE_STATS" />
     </privapp-permissions>
