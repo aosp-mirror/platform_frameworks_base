@@ -60,7 +60,7 @@ public class ColorFiltersMutateActivity extends Activity {
         private float mShaderParam1 = 0.0f;
 
         static final String sSkSL =
-                "in shader bitmapShader;\n"
+                "uniform shader bitmapShader;\n"
                 + "uniform float param1;\n"
                 + "half4 main(float2 xy) {\n"
                 + "  return half4(sample(bitmapShader, xy).rgb, param1);\n"
