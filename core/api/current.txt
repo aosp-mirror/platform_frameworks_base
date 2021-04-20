@@ -39110,6 +39110,7 @@ package android.speech {
     field public static final String ACTION_VOICE_SEARCH_HANDS_FREE = "android.speech.action.VOICE_SEARCH_HANDS_FREE";
     field public static final String ACTION_WEB_SEARCH = "android.speech.action.WEB_SEARCH";
     field public static final String DETAILS_META_DATA = "android.speech.DETAILS";
+    field public static final String EXTRA_AUDIO_INJECT_SOURCE = "android.speech.extra.AUDIO_INJECT_SOURCE";
     field public static final String EXTRA_CALLING_PACKAGE = "calling_package";
     field public static final String EXTRA_CONFIDENCE_SCORES = "android.speech.extra.CONFIDENCE_SCORES";
     field public static final String EXTRA_LANGUAGE = "android.speech.extra.LANGUAGE";
