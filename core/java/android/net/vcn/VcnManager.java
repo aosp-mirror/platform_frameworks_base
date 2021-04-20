@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -157,6 +158,24 @@ public class VcnManager {
             mService.clearVcnConfig(subscriptionGroup, mContext.getOpPackageName());
         } catch (ServiceSpecificException e) {
             throw new IOException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves the list of Subscription Groups for which a VCN Configuration has been set.
+     *
+     * <p>The returned list will include only subscription groups for which the carrier app is
+     * privileged, and which have an associated {@link VcnConfig}.
+     *
+     * @throws SecurityException if the caller is not running as the primary user
+     * @hide
+     */
+    @NonNull
+    public List<ParcelUuid> getConfiguredSubscriptionGroups() {
+        try {
+            return mService.getConfiguredSubscriptionGroups(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

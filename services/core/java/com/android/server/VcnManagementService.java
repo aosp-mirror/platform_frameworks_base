@@ -614,6 +614,34 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         });
     }
 
+    /**
+     * Retrieves the list of subscription groups with configured VcnConfigs
+     *
+     * <p>Limited to subscription groups for which the caller is carrier privileged.
+     *
+     * <p>Implements the IVcnManagementService Binder interface.
+     */
+    @Override
+    @NonNull
+    public List<ParcelUuid> getConfiguredSubscriptionGroups(@NonNull String opPkgName) {
+        requireNonNull(opPkgName, "opPkgName was null");
+
+        mContext.getSystemService(AppOpsManager.class)
+                .checkPackage(mDeps.getBinderCallingUid(), opPkgName);
+        enforcePrimaryUser();
+
+        final List<ParcelUuid> result = new ArrayList<>();
+        synchronized (mLock) {
+            for (ParcelUuid subGrp : mConfigs.keySet()) {
+                if (mLastSnapshot.packageHasPermissionsForSubscriptionGroup(subGrp, opPkgName)) {
+                    result.add(subGrp);
+                }
+            }
+        }
+
+        return result;
+    }
+
     @GuardedBy("mLock")
     private void writeConfigsToDiskLocked() {
         try {
