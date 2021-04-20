@@ -26005,6 +26005,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_minWidth
      */
+    @RemotableViewMethod
     public void setMinimumWidth(int minWidth) {
         mMinWidth = minWidth;
         requestLayout();
