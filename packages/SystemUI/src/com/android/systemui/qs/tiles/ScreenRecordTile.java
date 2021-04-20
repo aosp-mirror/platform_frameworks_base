@@ -22,7 +22,10 @@ import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
@@ -80,7 +83,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (mController.isStarting()) {
             cancelCountdown();
         } else if (mController.isRecording()) {
