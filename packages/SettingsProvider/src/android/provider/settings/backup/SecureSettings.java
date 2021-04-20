@@ -187,5 +187,6 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
+        Settings.Secure.NOTIFICATION_BUBBLES,
     };
 }
