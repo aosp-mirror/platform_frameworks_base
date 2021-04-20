@@ -2378,6 +2378,46 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
+    /**
+     * Propagate a wake event to the wallpaper engine.
+     */
+    public void notifyWakingUp(int x, int y, @NonNull Bundle extras) {
+        synchronized (mLock) {
+            final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            data.connection.forEachDisplayConnector(
+                    displayConnector -> {
+                        if (displayConnector.mEngine != null) {
+                            try {
+                                displayConnector.mEngine.dispatchWallpaperCommand(
+                                        WallpaperManager.COMMAND_WAKING_UP, x, y, -1, extras);
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+        }
+    }
+
+    /**
+     * Propagate a sleep event to the wallpaper engine.
+     */
+    public void notifyGoingToSleep(int x, int y, @NonNull Bundle extras) {
+        synchronized (mLock) {
+            final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            data.connection.forEachDisplayConnector(
+                    displayConnector -> {
+                        if (displayConnector.mEngine != null) {
+                            try {
+                                displayConnector.mEngine.dispatchWallpaperCommand(
+                                        WallpaperManager.COMMAND_GOING_TO_SLEEP, x, y, -1, extras);
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+        }
+    }
+
     @Override
     public boolean setLockWallpaperCallback(IWallpaperManagerCallback cb) {
         checkPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW);

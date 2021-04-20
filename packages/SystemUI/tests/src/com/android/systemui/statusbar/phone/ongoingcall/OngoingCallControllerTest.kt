@@ -19,14 +19,16 @@ package com.android.systemui.statusbar.phone.ongoingcall
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Person
+import android.content.Intent
 import android.service.notification.NotificationListenerService.REASON_USER_STOPPED
-import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.widget.LinearLayout
+import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -43,6 +45,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
@@ -55,6 +58,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     private lateinit var notifCollectionListener: NotifCollectionListener
 
     @Mock private lateinit var mockOngoingCallListener: OngoingCallListener
+    @Mock private lateinit var mockActivityStarter: ActivityStarter
 
     private lateinit var chipView: LinearLayout
 
@@ -71,7 +75,8 @@ class OngoingCallControllerTest : SysuiTestCase() {
         `when`(featureFlags.isOngoingCallStatusBarChipEnabled).thenReturn(true)
         val notificationCollection = mock(CommonNotifCollection::class.java)
 
-        controller = OngoingCallController(notificationCollection, featureFlags, FakeSystemClock())
+        controller = OngoingCallController(
+                notificationCollection, featureFlags, FakeSystemClock(), mockActivityStarter)
         controller.init()
         controller.addCallback(mockOngoingCallListener)
         controller.setChipView(chipView)
@@ -111,22 +116,24 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     @Test
     fun hasOngoingCall_noOngoingCallNotifSent_returnsFalse() {
-        assertThat(controller.hasOngoingCall).isFalse()
+        assertThat(controller.hasOngoingCall()).isFalse()
     }
 
     @Test
     fun hasOngoingCall_ongoingCallNotifSentAndChipViewSet_returnsTrue() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
 
-        assertThat(controller.hasOngoingCall).isTrue()
+        assertThat(controller.hasOngoingCall()).isTrue()
     }
 
     @Test
-    fun hasOngoingCall_ongoingCallNotifSentButNoChipView_returnsFalse() {
-        controller.setChipView(null)
+    fun hasOngoingCall_ongoingCallNotifSentButInvalidChipView_returnsFalse() {
+        val invalidChipView = LinearLayout(context)
+        controller.setChipView(invalidChipView)
+
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
 
-        assertThat(controller.hasOngoingCall).isFalse()
+        assertThat(controller.hasOngoingCall()).isFalse()
     }
 
     @Test
@@ -136,12 +143,42 @@ class OngoingCallControllerTest : SysuiTestCase() {
         notifCollectionListener.onEntryUpdated(ongoingCallNotifEntry)
         notifCollectionListener.onEntryRemoved(ongoingCallNotifEntry, REASON_USER_STOPPED)
 
-        assertThat(controller.hasOngoingCall).isFalse()
+        assertThat(controller.hasOngoingCall()).isFalse()
+    }
+
+    /**
+     * This test fakes a theme change during an ongoing call.
+     *
+     * When a theme change happens, [CollapsedStatusBarFragment] and its views get re-created, so
+     * [OngoingCallController.setChipView] gets called with a new view. If there's an active ongoing
+     * call when the theme changes, the new view needs to be updated with the call information.
+     */
+    @Test
+    fun setChipView_whenHasOngoingCallIsTrue_listenerNotifiedWithNewView() {
+        // Start an ongoing call.
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        lateinit var newChipView: LinearLayout
+        TestableLooper.get(this).runWithLooper {
+            newChipView = LayoutInflater.from(mContext)
+                    .inflate(R.layout.ongoing_call_chip, null) as LinearLayout
+        }
+
+        // Change the chip view associated with the controller.
+        controller.setChipView(newChipView)
+
+        // Verify the listener was notified once for the initial call and again when the new view
+        // was set.
+        verify(mockOngoingCallListener, times(2)).onOngoingCallStarted(anyBoolean())
     }
 
     private fun createOngoingCallNotifEntry(): NotificationEntry {
         val notificationEntryBuilder = NotificationEntryBuilder()
         notificationEntryBuilder.modifyNotification(context).style = ongoingCallStyle
+
+        val contentIntent = mock(PendingIntent::class.java)
+        `when`(contentIntent.intent).thenReturn(mock(Intent::class.java))
+        notificationEntryBuilder.modifyNotification(context).setContentIntent(contentIntent)
         return notificationEntryBuilder.build()
     }
 

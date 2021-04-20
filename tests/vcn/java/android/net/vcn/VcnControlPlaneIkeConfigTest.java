@@ -22,12 +22,7 @@ import static android.net.ipsec.ike.SaProposal.PSEUDORANDOM_FUNCTION_AES128_XCBC
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.ipsec.ike.ChildSaProposal;
 import android.net.ipsec.ike.IkeFqdnIdentification;
 import android.net.ipsec.ike.IkeSaProposal;
@@ -56,20 +51,13 @@ public class VcnControlPlaneIkeConfigTest {
                         .addPseudorandomFunction(PSEUDORANDOM_FUNCTION_AES128_XCBC)
                         .build();
 
-        Context mockContext = mock(Context.class);
-        ConnectivityManager mockConnectManager = mock(ConnectivityManager.class);
-        doReturn(mockConnectManager)
-                .when(mockContext)
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        doReturn(mock(Network.class)).when(mockConnectManager).getActiveNetwork();
-
         final String serverHostname = "192.0.2.100";
         final String testLocalId = "test.client.com";
         final String testRemoteId = "test.server.com";
         final byte[] psk = "psk".getBytes();
 
         IKE_PARAMS =
-                new IkeSessionParams.Builder(mockContext)
+                new IkeSessionParams.Builder()
                         .setServerHostname(serverHostname)
                         .addSaProposal(ikeProposal)
                         .setLocalIdentification(new IkeFqdnIdentification(testLocalId))

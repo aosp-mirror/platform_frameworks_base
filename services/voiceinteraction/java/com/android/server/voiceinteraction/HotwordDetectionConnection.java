@@ -24,6 +24,7 @@ import static android.service.voice.HotwordDetectionService.KEY_INITIALIZATION_S
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
@@ -34,10 +35,12 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
@@ -47,6 +50,7 @@ import android.service.voice.IHotwordDetectionService;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.contentcapture.IContentCaptureManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -135,6 +139,7 @@ final class HotwordDetectionConnection {
             return;
         }
         updateStateWithCallbackLocked(options, sharedMemory, callback);
+        updateContentCaptureManager();
     }
 
     private void updateStateWithCallbackLocked(PersistableBundle options,
@@ -191,6 +196,15 @@ final class HotwordDetectionConnection {
                         // NOTE: so far we don't need to take any action.
                     }
                 });
+    }
+
+    private void updateContentCaptureManager() {
+        IBinder b = ServiceManager
+                .getService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
+        IContentCaptureManager binderService = IContentCaptureManager.Stub.asInterface(b);
+        mRemoteHotwordDetectionService.post(
+                service -> service.updateContentCaptureManager(binderService,
+                        new ContentCaptureOptions(null)));
     }
 
     private boolean isBound() {

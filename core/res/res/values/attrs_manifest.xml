@@ -1880,6 +1880,9 @@
         apps due to inconsistencies in MediaStore collection and lower file system.
         When the flag is set, app should scan the file after file path operations to ensure
         consistency of MediaStore collection.
+        <p> The flag can be set to false if the app doesn't do many bulk file path operations or if
+        app prefers the system to ensure the consistency of the MediaStore collection for file path
+        operations without scanning the file.
 
         <p> The default value is {@code true} if
         <ul>
