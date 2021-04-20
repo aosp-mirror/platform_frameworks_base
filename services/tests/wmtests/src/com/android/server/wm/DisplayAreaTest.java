@@ -586,8 +586,6 @@ public class DisplayAreaTest extends WindowTestsBase {
     }
 
     private WindowToken createWindowToken(int type) {
-        return new WindowToken(mWm, new Binder(),
-                type, false /* persist */, null /* displayContent */,
-                false /* canManageTokens */);
+        return new WindowToken.Builder(mWm, new Binder(), type).build();
     }
 }
