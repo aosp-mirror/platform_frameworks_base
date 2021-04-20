@@ -470,6 +470,11 @@ class JobConcurrencyManager {
         }
     }
 
+    @GuardedBy("mLock")
+    boolean isJobRunningLocked(JobStatus job) {
+        return mRunningJobs.contains(job);
+    }
+
     /** Return {@code true} if the state was updated. */
     @GuardedBy("mLock")
     private boolean refreshSystemStateLocked() {
