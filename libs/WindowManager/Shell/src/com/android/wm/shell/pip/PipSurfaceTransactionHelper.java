@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.SystemProperties;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
@@ -42,7 +43,8 @@ public class PipSurfaceTransactionHelper {
 
     public PipSurfaceTransactionHelper(Context context) {
         final Resources res = context.getResources();
-        mEnableCornerRadius = res.getBoolean(R.bool.config_pipEnableRoundCorner);
+        mEnableCornerRadius = res.getBoolean(R.bool.config_pipEnableRoundCorner)
+            || SystemProperties.getBoolean("debug.sf.enable_hole_punch_pip", false);
     }
 
     /**
