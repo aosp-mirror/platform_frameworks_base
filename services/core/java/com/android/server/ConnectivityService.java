@@ -8613,7 +8613,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (vpn == null) return VpnManager.TYPE_VPN_NONE;
         final TransportInfo ti = vpn.networkCapabilities.getTransportInfo();
         if (!(ti instanceof VpnTransportInfo)) return VpnManager.TYPE_VPN_NONE;
-        return ((VpnTransportInfo) ti).type;
+        return ((VpnTransportInfo) ti).getType();
     }
 
     /**
