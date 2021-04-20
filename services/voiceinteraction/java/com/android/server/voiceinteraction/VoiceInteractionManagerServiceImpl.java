@@ -40,6 +40,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
 import android.os.Bundle;
 import android.os.Handler;
@@ -491,6 +492,20 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
 
         mHotwordDetectionConnection.stopListening();
+    }
+
+    public void triggerHardwareRecognitionEventForTestLocked(
+            SoundTrigger.KeyphraseRecognitionEvent event,
+            IHotwordRecognitionStatusCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "triggerHardwareRecognitionEventForTestLocked");
+        }
+        if (mHotwordDetectionConnection == null) {
+            Slog.w(TAG, "triggerHardwareRecognitionEventForTestLocked() called but connection"
+                    + " isn't established");
+            return;
+        }
+        mHotwordDetectionConnection.triggerHardwareRecognitionEventForTestLocked(event, callback);
     }
 
     public IRecognitionStatusCallback createSoundTriggerCallbackLocked(

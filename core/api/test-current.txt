@@ -2341,6 +2341,14 @@ package android.service.quicksettings {
 
 }
 
+package android.service.voice {
+
+  public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
+  }
+
+}
+
 package android.service.watchdog {
 
   public abstract class ExplicitHealthCheckService extends android.app.Service {
