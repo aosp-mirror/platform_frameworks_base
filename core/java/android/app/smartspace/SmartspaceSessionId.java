@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 import java.util.Objects;
 
@@ -36,21 +37,21 @@ public final class SmartspaceSessionId implements Parcelable {
     private final String mId;
 
     @NonNull
-    private final int mUserId;
+    private final UserHandle mUserHandle;
 
     /**
      * Creates a new id for a Smartspace session.
      *
      * @hide
      */
-    public SmartspaceSessionId(@NonNull final String id, @NonNull final int userId) {
+    public SmartspaceSessionId(@NonNull final String id, @NonNull final UserHandle userHandle) {
         mId = id;
-        mUserId = userId;
+        mUserHandle = userHandle;
     }
 
     private SmartspaceSessionId(Parcel p) {
         mId = p.readString();
-        mUserId = p.readInt();
+        mUserHandle = p.readTypedObject(UserHandle.CREATOR);
     }
 
     /**
@@ -65,8 +66,8 @@ public final class SmartspaceSessionId implements Parcelable {
      * Returns the userId associated with this sessionId.
      */
     @NonNull
-    public int getUserId() {
-        return mUserId;
+    public UserHandle getUserHandle() {
+        return mUserHandle;
     }
 
     @Override
@@ -74,20 +75,20 @@ public final class SmartspaceSessionId implements Parcelable {
         if (!getClass().equals(o != null ? o.getClass() : null)) return false;
 
         SmartspaceSessionId other = (SmartspaceSessionId) o;
-        return mId.equals(other.mId) && mUserId == other.mUserId;
+        return mId.equals(other.mId) && mUserHandle == other.mUserHandle;
     }
 
     @Override
     public String toString() {
         return "SmartspaceSessionId{"
                 + "mId='" + mId + '\''
-                + ", mUserId=" + mUserId
+                + ", mUserId=" + mUserHandle.getIdentifier()
                 + '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mUserId);
+        return Objects.hash(mId, mUserHandle);
     }
 
     @Override
@@ -98,7 +99,7 @@ public final class SmartspaceSessionId implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mId);
-        dest.writeInt(mUserId);
+        dest.writeTypedObject(this.mUserHandle, flags);
     }
 
     public static final @NonNull Creator<SmartspaceSessionId> CREATOR =
