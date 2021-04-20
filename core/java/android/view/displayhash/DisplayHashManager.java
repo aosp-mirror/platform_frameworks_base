@@ -35,7 +35,8 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * Utility class for DisplayHash requests.
+ * Manages DisplayHash requests. The manager object can be retrieved by calling
+ * {@code Context.getSystemService(Context.DISPLAY_HASH_SERVICE)}
  */
 @SystemService(DISPLAY_HASH_SERVICE)
 public final class DisplayHashManager {
@@ -75,7 +76,7 @@ public final class DisplayHashManager {
                 return sSupportedHashAlgorithms;
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send request getSupportedHashingAlgorithms", e);
-                return Collections.emptySet();
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -93,7 +94,7 @@ public final class DisplayHashManager {
             return WindowManagerGlobal.getWindowManagerService().verifyDisplayHash(displayHash);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send request verifyImpressionToken", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 

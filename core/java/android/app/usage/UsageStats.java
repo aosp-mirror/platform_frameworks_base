@@ -31,6 +31,8 @@ import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -760,4 +762,48 @@ public final class UsageStats implements Parcelable {
             return new UsageStats[size];
         }
     };
+
+    /** @hide */
+    // This class is used by the mainline test suite, so we have to keep these APIs around across
+    // releases. Consider making this class public to help external developers to write tests as
+    // well.
+    @TestApi
+    public static final class Builder {
+        private final UsageStats mUsageStats = new UsageStats();
+
+        @NonNull
+        public UsageStats build() {
+            return mUsageStats;
+        }
+
+        @NonNull
+        public Builder setPackageName(@Nullable String packageName) {
+            mUsageStats.mPackageName = packageName;
+            return this;
+        }
+
+        @NonNull
+        public Builder setFirstTimeStamp(long firstTimeStamp) {
+            mUsageStats.mBeginTimeStamp = firstTimeStamp;
+            return this;
+        }
+
+        @NonNull
+        public Builder setLastTimeStamp(long lastTimeStamp) {
+            mUsageStats.mEndTimeStamp = lastTimeStamp;
+            return this;
+        }
+
+        @NonNull
+        public Builder setTotalTimeInForeground(long totalTimeInForeground) {
+            mUsageStats.mTotalTimeInForeground = totalTimeInForeground;
+            return this;
+        }
+
+        @NonNull
+        public Builder setLastTimeUsed(long lastTimeUsed) {
+            mUsageStats.mLastTimeUsed = lastTimeUsed;
+            return this;
+        }
+    }
 }

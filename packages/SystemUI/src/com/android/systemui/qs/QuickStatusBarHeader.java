@@ -235,6 +235,12 @@ public class QuickStatusBarHeader extends FrameLayout {
                 public void onAnimationStarted() {
                     mIconContainer.removeIgnoredSlot(mMobileSlotName);
                 }
+
+                @Override
+                public void onAnimationAtStart() {
+                    super.onAnimationAtStart();
+                    mIconContainer.removeIgnoredSlot(mMobileSlotName);
+                }
             });
         }
         mAlphaAnimator = builder.build();

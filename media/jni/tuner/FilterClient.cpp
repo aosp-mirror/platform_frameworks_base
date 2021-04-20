@@ -596,11 +596,11 @@ TunerFilterSectionSettings FilterClient::getAidlSectionSettings(
             sectionBits.mask.resize(hidlSectionBits.mask.size());
             sectionBits.mode.resize(hidlSectionBits.mode.size());
             copy(hidlSectionBits.filter.begin(), hidlSectionBits.filter.end(),
-                    hidlSectionBits.filter.begin());
+                    sectionBits.filter.begin());
             copy(hidlSectionBits.mask.begin(), hidlSectionBits.mask.end(),
-                    hidlSectionBits.mask.begin());
+                    sectionBits.mask.begin());
             copy(hidlSectionBits.mode.begin(), hidlSectionBits.mode.end(),
-                    hidlSectionBits.mode.begin());
+                    sectionBits.mode.begin());
             aidlSection.condition.set<TunerFilterSectionCondition::sectionBits>(sectionBits);
             break;
         }

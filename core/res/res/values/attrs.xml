@@ -1176,6 +1176,9 @@
         <!-- Alternative color applied to surfaces on top of colorBackground. @hide -->
         <attr name="colorSurfaceHeader" format="color" />
 
+        <!-- Color applied to effects. -->
+        <attr name="effectColor" format="color" />
+
         <!-- The type of the edge effect. The default is glow. -->
         <attr name="edgeEffectType">
             <!-- Use a colored glow at the edge. -->
@@ -6540,13 +6543,8 @@
         <!-- The radius of the ripple when fully expanded. By default, the
              radius is computed based on the size of the ripple's container. -->
         <attr name="radius" />
-        <!-- The style of the ripple drawable is solid by default -->
-        <attr name="rippleStyle">
-            <!-- Solid is the default style -->
-            <enum name="solid" value="0" />
-            <!-- Patterned style-->
-            <enum name="patterned" value="1" />
-        </attr>
+        <!-- Secondary color of the ripple effect. -->
+        <attr name="effectColor" />
     </declare-styleable>
 
     <declare-styleable name="ScaleDrawable">
@@ -9577,7 +9575,7 @@
     <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
     <attr name="lStar" format="float"/>
 
-    <declare-styleable name="DisplayHasherService">
+    <declare-styleable name="DisplayHashingService">
         <!-- The throttle duration for display hash requests
              @hide @SystemApi -->
         <attr name="throttleDurationMillis" format="integer" />

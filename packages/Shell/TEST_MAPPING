@@ -18,6 +18,20 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "name": "CtsUiAutomationTestCases",
+      "options": [
+        {
+          "include-filter": "android.app.uiautomation.cts.UiAutomationTest#testAdoptAllShellPermissions"
+        },
+        {
+          "include-filter": "android.app.uiautomation.cts.UiAutomationTest#testAdoptSomeShellPermissions"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
     }
   ],
   "postsubmit": [

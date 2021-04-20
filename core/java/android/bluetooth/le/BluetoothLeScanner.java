@@ -442,6 +442,7 @@ public final class BluetoothLeScanner {
             }
         }
 
+        @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
         public void stopLeScan() {
             synchronized (this) {
                 if (mScannerId <= 0) {
@@ -458,6 +459,7 @@ public final class BluetoothLeScanner {
             }
         }
 
+        @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
         void flushPendingBatchResults() {
             synchronized (this) {
                 if (mScannerId <= 0) {
@@ -588,6 +590,7 @@ public final class BluetoothLeScanner {
         }
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private void postCallbackError(final ScanCallback callback, final int errorCode) {
         mHandler.post(new Runnable() {
             @Override

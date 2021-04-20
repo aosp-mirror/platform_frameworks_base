@@ -117,6 +117,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         final IBluetoothAvrcpController service =
@@ -137,6 +139,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         final IBluetoothAvrcpController service =
@@ -157,6 +161,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         final IBluetoothAvrcpController service =
@@ -178,6 +184,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
      *
      * @return the {@link BluetoothAvrcpPlayerSettings} or {@link null} if there is an error.
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothAvrcpPlayerSettings getPlayerSettings(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "getPlayerSettings");
         BluetoothAvrcpPlayerSettings settings = null;
@@ -198,6 +206,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
      * Sets the player app setting for current player.
      * returns true in case setting is supported by remote, false otherwise
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean setPlayerApplicationSetting(BluetoothAvrcpPlayerSettings plAppSetting) {
         if (DBG) Log.d(TAG, "setPlayerApplicationSetting");
         final IBluetoothAvrcpController service =
@@ -218,6 +228,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
      * Send Group Navigation Command to Remote.
      * possible keycode values: next_grp, previous_grp defined above
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void sendGroupNavigationCmd(BluetoothDevice device, int keyCode, int keyState) {
         Log.d(TAG, "sendGroupNavigationCmd dev = " + device + " key " + keyCode + " State = "
                 + keyState);

@@ -20,7 +20,7 @@ import android.content.Context;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.RelativeSizeSpan;
+import android.text.style.AbsoluteSizeSpan;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -192,7 +192,7 @@ public class UsageProgressBarPreference extends Preference {
         final Matcher matcher = mNumberPattern.matcher(summary);
         if (matcher.find()) {
             final SpannableString spannableSummary =  new SpannableString(summary);
-            spannableSummary.setSpan(new RelativeSizeSpan(2.4f), matcher.start(),
+            spannableSummary.setSpan(new AbsoluteSizeSpan(64, true /* dip */), matcher.start(),
                     matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             return spannableSummary;
         }

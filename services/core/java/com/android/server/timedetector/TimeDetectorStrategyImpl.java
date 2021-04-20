@@ -325,9 +325,9 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         ipw.println("mEnvironment.systemClockMillis()=" + mEnvironment.systemClockMillis());
         ipw.println("mEnvironment.systemClockUpdateThresholdMillis()="
                 + mEnvironment.systemClockUpdateThresholdMillis());
+        Instant autoTimeLowerBound = mEnvironment.autoTimeLowerBound();
         ipw.printf("mEnvironment.autoTimeLowerBound()=%s(%s)\n",
-                mEnvironment.autoTimeLowerBound(),
-                mEnvironment.autoTimeLowerBound().toEpochMilli());
+                autoTimeLowerBound, autoTimeLowerBound.toEpochMilli());
         String priorities =
                 Arrays.stream(mEnvironment.autoOriginPriorities())
                         .mapToObj(TimeDetectorStrategy::originToString)
