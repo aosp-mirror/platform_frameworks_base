@@ -317,46 +317,38 @@ public class StartingSurfaceDrawer {
         // 3. Pre-draw the BitmapShader if the icon is immobile on splash screen worker thread, at
         // the same time the splash screen thread should be executing Session#relayout. Blocking the
         // traversal -> draw on splash screen thread until the BitmapShader of the icon is ready.
-        final Runnable setViewSynchronized;
-        if (!emptyView) {
-            // Record whether create splash screen view success, notify to current thread after
-            // create splash screen view finished.
-            final SplashScreenViewSupplier viewSupplier = new SplashScreenViewSupplier();
-            setViewSynchronized = () -> {
-                // waiting for setContentView before relayoutWindow
-                SplashScreenView contentView = viewSupplier.get();
-                final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
-                // if record == null, either the starting window added fail or removed already.
-                if (record != null) {
-                    // if view == null then creation of content view was failed.
-                    if (contentView != null) {
-                        try {
-                            win.setContentView(contentView);
-                            contentView.cacheRootWindow(win);
-                        } catch (RuntimeException e) {
-                            Slog.w(TAG, "failed set content view to starting window "
-                                    + "at taskId: " + taskId, e);
-                            contentView = null;
-                        }
+
+        // Record whether create splash screen view success, notify to current thread after
+        // create splash screen view finished.
+        final SplashScreenViewSupplier viewSupplier = new SplashScreenViewSupplier();
+        final Runnable setViewSynchronized = () -> {
+            // waiting for setContentView before relayoutWindow
+            SplashScreenView contentView = viewSupplier.get();
+            final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
+            // if record == null, either the starting window added fail or removed already.
+            if (record != null) {
+                // if view == null then creation of content view was failed.
+                if (contentView != null) {
+                    try {
+                        win.setContentView(contentView);
+                        contentView.cacheRootWindow(win);
+                    } catch (RuntimeException e) {
+                        Slog.w(TAG, "failed set content view to starting window "
+                                + "at taskId: " + taskId, e);
+                        contentView = null;
                     }
-                    record.setSplashScreenView(contentView);
                 }
-            };
-            mSplashscreenContentDrawer.createContentView(context,
-                    splashscreenContentResId[0], activityInfo, taskId, viewSupplier::setView);
-        } else {
-            setViewSynchronized = null;
-        }
+                record.setSplashScreenView(contentView);
+            }
+        };
+        mSplashscreenContentDrawer.createContentView(context, emptyView,
+                splashscreenContentResId[0], activityInfo, taskId, viewSupplier::setView);
 
         try {
             final View view = win.getDecorView();
             final WindowManager wm = mContext.getSystemService(WindowManager.class);
             postAddWindow(taskId, appToken, view, wm, params);
 
-            // all done
-            if (emptyView) {
-                return;
-            }
             // We use the splash screen worker thread to create SplashScreenView while adding the
             // window, as otherwise Choreographer#doFrame might be delayed on this thread.
             // And since Choreographer#doFrame won't happen immediately after adding the window, if
