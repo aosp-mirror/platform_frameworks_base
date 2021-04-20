@@ -34,12 +34,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Tests for TelephonySubscriptionTracker */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnNetworkProviderTest {
     private static final int TEST_SCORE_UNSATISFIED = 0;
-    private static final int TEST_SCORE_HIGH = 100;
     private static final int TEST_PROVIDER_ID = 1;
 
     @NonNull private final Context mContext;
@@ -65,17 +67,7 @@ public class VcnNetworkProviderTest {
 
         final NetworkRequest request = mock(NetworkRequest.class);
         mVcnNetworkProvider.onNetworkRequested(request, TEST_SCORE_UNSATISFIED, TEST_PROVIDER_ID);
-        verify(mListener).onNetworkRequested(request, TEST_SCORE_UNSATISFIED, TEST_PROVIDER_ID);
-    }
-
-    @Test
-    public void testRequestsPassedToRegisteredListeners_satisfiedByHighScoringProvider()
-            throws Exception {
-        mVcnNetworkProvider.registerListener(mListener);
-
-        final NetworkRequest request = mock(NetworkRequest.class);
-        mVcnNetworkProvider.onNetworkRequested(request, TEST_SCORE_HIGH, TEST_PROVIDER_ID);
-        verify(mListener).onNetworkRequested(request, TEST_SCORE_HIGH, TEST_PROVIDER_ID);
+        verify(mListener).onNetworkRequested(request);
     }
 
     @Test
@@ -85,6 +77,31 @@ public class VcnNetworkProviderTest {
 
         final NetworkRequest request = mock(NetworkRequest.class);
         mVcnNetworkProvider.onNetworkRequested(request, TEST_SCORE_UNSATISFIED, TEST_PROVIDER_ID);
+        verifyNoMoreInteractions(mListener);
+    }
+
+    @Test
+    public void testCachedRequestsPassedOnRegister() throws Exception {
+        final List<NetworkRequest> requests = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            // Build unique network requests; in this case, iterate down the capabilities as a way
+            // to unique-ify requests.
+            final NetworkRequest request =
+                    new NetworkRequest.Builder().clearCapabilities().addCapability(i).build();
+
+            requests.add(request);
+            mVcnNetworkProvider.onNetworkRequested(request, i, i + 1);
+        }
+
+        // Remove one, and verify that it is never sent to the listeners.
+        final NetworkRequest removed = requests.remove(0);
+        mVcnNetworkProvider.onNetworkRequestWithdrawn(removed);
+
+        mVcnNetworkProvider.registerListener(mListener);
+        for (NetworkRequest request : requests) {
+            verify(mListener).onNetworkRequested(request);
+        }
         verifyNoMoreInteractions(mListener);
     }
 }

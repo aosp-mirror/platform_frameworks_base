@@ -75,8 +75,6 @@ import java.util.UUID;
 public class VcnTest {
     private static final String PKG_NAME = VcnTest.class.getPackage().getName();
     private static final ParcelUuid TEST_SUB_GROUP = new ParcelUuid(new UUID(0, 0));
-    private static final int NETWORK_SCORE = 0;
-    private static final int PROVIDER_ID = 5;
     private static final boolean MOBILE_DATA_ENABLED = true;
     private static final Set<Integer> TEST_SUB_IDS_IN_GROUP =
             new ArraySet<>(Arrays.asList(1, 2, 3));
@@ -177,7 +175,7 @@ public class VcnTest {
             requestBuilder.addCapability(netCapability);
         }
 
-        requestListener.onNetworkRequested(requestBuilder.build(), NETWORK_SCORE, PROVIDER_ID);
+        requestListener.onNetworkRequested(requestBuilder.build());
         mTestLooper.dispatchAll();
     }
 
