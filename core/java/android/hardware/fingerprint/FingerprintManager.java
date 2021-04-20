@@ -23,6 +23,7 @@ import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
+import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -867,6 +868,19 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
+     * Forwards FingerprintStateListener to FingerprintService
+     * @param listener new FingerprintStateListener being added
+     * @hide
+     */
+    public void registerFingerprintStateListener(@NonNull FingerprintStateListener listener) {
+        try {
+            mService.registerFingerprintStateListener(listener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
@@ -965,6 +979,16 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns whether the device has a power button fingerprint sensor.
+     * @return boolean indicating whether power button is fingerprint sensor
+     * @hide
+     */
+    public boolean isPowerbuttonFps() {
+        final FingerprintSensorPropertiesInternal sensorProps = getFirstFingerprintSensor();
+        return sensorProps.sensorType == TYPE_POWER_BUTTON;
     }
 
     /**
