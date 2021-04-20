@@ -317,10 +317,10 @@ public final class SplashScreenView extends FrameLayout {
     }
 
     void initIconAnimation(Drawable iconDrawable, long duration) {
-        if (!(iconDrawable instanceof SplashscreenIconDrawable)) {
+        if (!(iconDrawable instanceof IconAnimateListener)) {
             return;
         }
-        SplashscreenIconDrawable aniDrawable = (SplashscreenIconDrawable) iconDrawable;
+        IconAnimateListener aniDrawable = (IconAnimateListener) iconDrawable;
         aniDrawable.prepareAnimate(duration, this::animationStartCallback);
     }
 
@@ -455,20 +455,17 @@ public final class SplashScreenView extends FrameLayout {
     }
 
     /**
-     * A lightweight Drawable object to make the view drawing faster and keep this
-     * drawable masked by config_icon_mask.
+     * An interface for an animatable drawable object to register a callback when animation start.
      * @hide
      */
-    public abstract static class SplashscreenIconDrawable extends Drawable {
+    public interface IconAnimateListener {
         /**
          * Prepare the animation if this drawable also be animatable.
          * @param duration The animation duration.
          * @param startListener The callback listener used to receive the start of the animation.
          * @return true if this drawable object can also be animated and it can be played now.
          */
-        protected boolean prepareAnimate(long duration, Runnable startListener) {
-            return false;
-        }
+        boolean prepareAnimate(long duration, Runnable startListener);
     }
 
     /**
