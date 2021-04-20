@@ -129,7 +129,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected int mSubId;
 
     private NetworkCapabilities mNetCapabilities;
-    private Network mNetwork;
     private ConnectivityManager.NetworkCallback mDefaultCallbackInWifiTracker;
     private ConnectivityManager.NetworkCallback mDefaultCallbackInNetworkController;
     private ConnectivityManager.NetworkCallback mNetworkCallback;
@@ -174,10 +173,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockCm = mock(ConnectivityManager.class);
         mMockBd = mock(BroadcastDispatcher.class);
         mMockNsm = mock(NetworkScoreManager.class);
-        mNetwork = mock(Network.class);
         mMockSubDefaults = mock(SubscriptionDefaults.class);
         mNetCapabilities = new NetworkCapabilities();
-        when(mNetwork.getNetId()).thenReturn(0);
         when(mMockTm.isDataCapable()).thenReturn(true);
         when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
         doAnswer(invocation -> {
@@ -326,7 +323,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 new NetworkCapabilities.Builder(mNetCapabilities);
         builder.setTransportInfo(info);
         setConnectivityCommon(builder, networkType, validated, isConnected);
-        mDefaultCallbackInNetworkController.onCapabilitiesChanged(mNetwork, builder.build());
+        mDefaultCallbackInNetworkController.onCapabilitiesChanged(
+                mock(Network.class), builder.build());
     }
 
     public void setConnectivityViaCallbackInNetworkController(
@@ -337,7 +335,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             builder.setTransportInfo(wifiInfo);
         }
         setConnectivityCommon(builder, networkType, validated, isConnected);
-        mDefaultCallbackInNetworkController.onCapabilitiesChanged(mNetwork, builder.build());
+        mDefaultCallbackInNetworkController.onCapabilitiesChanged(
+                mock(Network.class), builder.build());
     }
 
     public void setConnectivityViaCallbackInWifiTracker(
@@ -351,10 +350,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         if (networkType == NetworkCapabilities.TRANSPORT_WIFI) {
             if (isConnected) {
                 final NetworkCapabilities newCap = builder.build();
-                mNetworkCallback.onAvailable(mNetwork);
-                mNetworkCallback.onCapabilitiesChanged(mNetwork, newCap);
+                mNetworkCallback.onAvailable(mock(Network.class));
+                mNetworkCallback.onCapabilitiesChanged(mock(Network.class), newCap);
             } else {
-                mNetworkCallback.onLost(mNetwork);
+                mNetworkCallback.onLost(mock(Network.class));
             }
         }
     }
@@ -368,11 +367,11 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         if (networkType == NetworkCapabilities.TRANSPORT_CELLULAR) {
             if (isConnected) {
                 final NetworkCapabilities newCap = builder.build();
-                mNetworkCallback.onAvailable(mNetwork);
-                mNetworkCallback.onCapabilitiesChanged(mNetwork, newCap);
-                mDefaultCallbackInWifiTracker.onCapabilitiesChanged(mNetwork, newCap);
+                mNetworkCallback.onAvailable(mock(Network.class));
+                mNetworkCallback.onCapabilitiesChanged(mock(Network.class), newCap);
+                mDefaultCallbackInWifiTracker.onCapabilitiesChanged(mock(Network.class), newCap);
             } else {
-                mNetworkCallback.onLost(mNetwork);
+                mNetworkCallback.onLost(mock(Network.class));
             }
         }
     }
@@ -386,7 +385,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         }
         setConnectivityCommon(builder, networkType, validated, isConnected);
         mDefaultCallbackInWifiTracker.onCapabilitiesChanged(
-                mNetwork, builder.build());
+                mock(Network.class), builder.build());
     }
 
     private static void setConnectivityCommon(NetworkCapabilities.Builder builder,
