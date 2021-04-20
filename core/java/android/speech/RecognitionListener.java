@@ -62,7 +62,8 @@ public interface RecognitionListener {
     /**
      * A network or recognition error occurred.
      * 
-     * @param error code is defined in {@link SpeechRecognizer}
+     * @param error code is defined in {@link SpeechRecognizer}. Implementations need to handle any
+     *              integer error constant to be passed here beyond constants prefixed with ERROR_.
      */
     void onError(@SpeechRecognizer.RecognitionError int error);
 
