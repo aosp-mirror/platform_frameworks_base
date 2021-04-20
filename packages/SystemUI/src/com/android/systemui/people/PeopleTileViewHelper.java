@@ -71,7 +71,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-class PeopleTileViewHelper {
+/** Functions that help creating the People tile layouts. */
+public class PeopleTileViewHelper {
     /** Turns on debugging information about People Space. */
     public static final boolean DEBUG = true;
     private static final String TAG = "PeopleTileView";
@@ -115,7 +116,7 @@ class PeopleTileViewHelper {
     private Locale mLocale;
     private NumberFormat mIntegerFormat;
 
-    PeopleTileViewHelper(Context context, PeopleSpaceTile tile,
+    public PeopleTileViewHelper(Context context, PeopleSpaceTile tile,
             int appWidgetId, Bundle options) {
         mContext = context;
         mTile = tile;
@@ -346,6 +347,7 @@ class PeopleTileViewHelper {
     private RemoteViews createMissedCallRemoteViews() {
         RemoteViews views = getViewForContentLayout();
         views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
+        views.setViewVisibility(R.id.messages_count, View.GONE);
         setMaxLines(views);
         views.setTextViewText(R.id.text_content, mTile.getNotificationContent());
         views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_phone_missed);
@@ -546,7 +548,6 @@ class PeopleTileViewHelper {
         if (mLayoutSize == LAYOUT_SMALL) {
             views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
             views.setViewVisibility(R.id.name, View.GONE);
-            views.setViewVisibility(R.id.messages_count, View.GONE);
         } else {
             views.setViewVisibility(R.id.predefined_icon, View.GONE);
             views.setViewVisibility(R.id.name, View.VISIBLE);
@@ -561,6 +562,7 @@ class PeopleTileViewHelper {
             views.setViewPadding(R.id.item, horizontalPadding, verticalPadding, horizontalPadding,
                     verticalPadding);
         }
+        views.setViewVisibility(R.id.messages_count, View.GONE);
         return views;
     }
 
