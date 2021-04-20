@@ -4666,11 +4666,9 @@ public final class Settings {
         public static final String TIME_12_24 = "time_12_24";
 
         /**
-         * Date format string
-         *   mm/dd/yyyy
-         *   dd/mm/yyyy
-         *   yyyy/mm/dd
+         * @deprecated No longer used. Use {@link #TIME_12_24} instead.
          */
+        @Deprecated
         @Readable
         public static final String DATE_FORMAT = "date_format";
 

@@ -56,7 +56,6 @@ public class SystemSettings {
         Settings.System.AUTO_TIME,                  // moved to global
         Settings.System.AUTO_TIME_ZONE,             // moved to global
         Settings.System.TIME_12_24,
-        Settings.System.DATE_FORMAT,
         Settings.System.DTMF_TONE_WHEN_DIALING,
         Settings.System.DTMF_TONE_TYPE_WHEN_DIALING,
         Settings.System.HEARING_AID,

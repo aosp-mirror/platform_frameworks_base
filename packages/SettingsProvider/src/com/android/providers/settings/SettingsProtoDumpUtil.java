@@ -2708,9 +2708,6 @@ class SettingsProtoDumpUtil {
         p.end(bluetoothToken);
 
         dumpSetting(s, p,
-                Settings.System.DATE_FORMAT,
-                SystemSettingsProto.DATE_FORMAT);
-        dumpSetting(s, p,
                 Settings.System.DISPLAY_COLOR_MODE,
                 SystemSettingsProto.DISPLAY_COLOR_MODE);
 

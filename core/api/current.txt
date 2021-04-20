@@ -35367,7 +35367,7 @@ package android.provider {
     field @Deprecated public static final String BLUETOOTH_ON = "bluetooth_on";
     field public static final android.net.Uri CONTENT_URI;
     field @Deprecated public static final String DATA_ROAMING = "data_roaming";
-    field public static final String DATE_FORMAT = "date_format";
+    field @Deprecated public static final String DATE_FORMAT = "date_format";
     field @Deprecated public static final String DEBUG_APP = "debug_app";
     field public static final android.net.Uri DEFAULT_ALARM_ALERT_URI;
     field public static final android.net.Uri DEFAULT_NOTIFICATION_URI;
