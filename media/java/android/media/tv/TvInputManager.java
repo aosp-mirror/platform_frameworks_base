@@ -907,6 +907,7 @@ public final class TvInputManager {
          * @hide
          */
         @SystemApi
+        @RequiresPermission(android.Manifest.permission.ACCESS_TUNED_INFO)
         public void onCurrentTunedInfosUpdated(@NonNull List<TunedInfo> tunedInfos) {
         }
     }
@@ -1989,7 +1990,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission("com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS")
+    @RequiresPermission(android.Manifest.permission.ACCESS_TUNED_INFO)
     @NonNull
     public List<TunedInfo> getCurrentTunedInfos() {
         try {
