@@ -17,10 +17,13 @@
 package android.view.textservice;
 
 import android.annotation.BinderThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -37,6 +40,7 @@ import com.android.internal.textservice.ITextServicesSessionListener;
 import dalvik.system.CloseGuard;
 
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Queue;
 import java.util.concurrent.Executor;
 
@@ -521,6 +525,161 @@ public class SpellCheckerSession {
         private SpellCheckerSession getSpellCheckerSession() {
             synchronized (SpellCheckerSessionListenerImpl.this) {
                 return mSpellCheckerSession;
+            }
+        }
+    }
+
+    /** Parameters used to create a {@link SpellCheckerSession}. */
+    public static class SpellCheckerSessionParams {
+        @Nullable
+        private final Locale mLocale;
+        private final boolean mShouldReferToSpellCheckerLanguageSettings;
+        private final @SuggestionsInfo.ResultAttrs int mSupportedAttributes;
+        private final Bundle mExtras;
+
+        private SpellCheckerSessionParams(Locale locale,
+                boolean referToSpellCheckerLanguageSettings, int supportedAttributes,
+                Bundle extras) {
+            mLocale = locale;
+            mShouldReferToSpellCheckerLanguageSettings = referToSpellCheckerLanguageSettings;
+            mSupportedAttributes = supportedAttributes;
+            mExtras = extras;
+        }
+
+        /**
+         * Returns the locale in which the spell checker should operate.
+         *
+         * @see android.service.textservice.SpellCheckerService.Session#getLocale()
+         */
+        @SuppressLint("UseIcu")
+        @Nullable
+        public Locale getLocale() {
+            return mLocale;
+        }
+
+        /**
+         * Returns true if the user's spell checker language settings should be used to determine
+         * the spell checker locale.
+         */
+        public boolean shouldReferToSpellCheckerLanguageSettings() {
+            return mShouldReferToSpellCheckerLanguageSettings;
+        }
+
+        /**
+         * Returns a bitmask of {@link SuggestionsInfo} attributes that the spell checker can set
+         * in {@link SuggestionsInfo} it returns.
+         *
+         * @see android.service.textservice.SpellCheckerService.Session#getSupportedAttributes()
+         */
+        public @SuggestionsInfo.ResultAttrs int getSupportedAttributes() {
+            return mSupportedAttributes;
+        }
+
+        /**
+         * Returns a bundle containing extra parameters for the spell checker.
+         *
+         * <p>This bundle can be used to pass implementation-specific parameters to the
+         * {@link android.service.textservice.SpellCheckerService} implementation.
+         *
+         * @see android.service.textservice.SpellCheckerService.Session#getBundle()
+         */
+        @NonNull
+        public Bundle getExtras() {
+            return mExtras;
+        }
+
+        /** Builder of {@link SpellCheckerSessionParams}. */
+        public static final class Builder {
+            @Nullable
+            private Locale mLocale;
+            private boolean mShouldReferToSpellCheckerLanguageSettings = false;
+            private @SuggestionsInfo.ResultAttrs int mSupportedAttributes = 0;
+            private Bundle mExtras = Bundle.EMPTY;
+
+            /** Constructs a {@code Builder}. */
+            public Builder() {
+            }
+
+            /**
+             * Returns constructed {@link SpellCheckerSession} instance.
+             *
+             * <p>Before calling this method, either {@link #setLocale(Locale)} should be called
+             * with a non-null locale or
+             * {@link #setShouldReferToSpellCheckerLanguageSettings(boolean)} should be called with
+             * {@code true}.
+             */
+            @NonNull
+            public SpellCheckerSessionParams build() {
+                if (mLocale == null && !mShouldReferToSpellCheckerLanguageSettings) {
+                    throw new IllegalArgumentException("mLocale should not be null if "
+                            + " mShouldReferToSpellCheckerLanguageSettings is false.");
+                }
+                return new SpellCheckerSessionParams(mLocale,
+                        mShouldReferToSpellCheckerLanguageSettings, mSupportedAttributes, mExtras);
+            }
+
+            /**
+             * Sets the locale in which the spell checker should operate.
+             *
+             * @see android.service.textservice.SpellCheckerService.Session#getLocale()
+             */
+            @NonNull
+            public Builder setLocale(@SuppressLint("UseIcu") @Nullable Locale locale) {
+                mLocale = locale;
+                return this;
+            }
+
+            /**
+             * Sets whether or not the user's spell checker language settings should be used to
+             * determine spell checker locale.
+             *
+             * <p>If {@code shouldReferToSpellCheckerLanguageSettings} is true, the exact way of
+             * determining spell checker locale differs based on {@code locale} specified in
+             * {@link #setLocale(Locale)}.
+             * If {@code shouldReferToSpellCheckerLanguageSettings} is true and {@code locale} is
+             * null, the locale specified in Settings will be used. If
+             * {@code shouldReferToSpellCheckerLanguageSettings} is true and {@code locale} is not
+             * null, {@link SpellCheckerSession} can be created only when the locale specified in
+             * Settings is the same as {@code locale}. Exceptionally, if
+             * {@code shouldReferToSpellCheckerLanguageSettings} is true and {@code locale} is
+             * language only (e.g. "en"), the specified locale in Settings (e.g. "en_US") will be
+             * used.
+             *
+             * @see #setLocale(Locale)
+             */
+            @NonNull
+            public Builder setShouldReferToSpellCheckerLanguageSettings(
+                    boolean shouldReferToSpellCheckerLanguageSettings) {
+                mShouldReferToSpellCheckerLanguageSettings =
+                        shouldReferToSpellCheckerLanguageSettings;
+                return this;
+            }
+
+            /**
+             * Sets a bitmask of {@link SuggestionsInfo} attributes that the spell checker can set
+             * in {@link SuggestionsInfo} it returns.
+             *
+             * @see android.service.textservice.SpellCheckerService.Session#getSupportedAttributes()
+             */
+            @NonNull
+            public Builder setSupportedAttributes(
+                    @SuggestionsInfo.ResultAttrs int supportedAttributes) {
+                mSupportedAttributes = supportedAttributes;
+                return this;
+            }
+
+            /**
+             * Sets a bundle containing extra parameters for the spell checker.
+             *
+             * <p>This bundle can be used to pass implementation-specific parameters to the
+             * {@link android.service.textservice.SpellCheckerService} implementation.
+             *
+             * @see android.service.textservice.SpellCheckerService.Session#getBundle()
+             */
+            @NonNull
+            public Builder setExtras(@NonNull Bundle extras) {
+                mExtras = extras;
+                return this;
             }
         }
     }
