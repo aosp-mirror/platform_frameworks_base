@@ -39,7 +39,6 @@ import android.annotation.Nullable;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
-import android.app.backup.BackupManager;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -1587,9 +1586,17 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void dumpGfxInfo(ParcelFileDescriptor pfd, String[] args) {
-            nDumpGraphicsInfo(pfd.getFileDescriptor());
-            WindowManagerGlobal.getInstance().dumpGfxInfo(pfd.getFileDescriptor(), args);
-            IoUtils.closeQuietly(pfd);
+            DumpComponentInfo data = new DumpComponentInfo();
+            try {
+                data.fd = pfd.dup();
+                data.token = null;
+                data.args = args;
+                sendMessage(H.DUMP_GFXINFO, data, 0, 0, true /*async*/);
+            } catch (IOException e) {
+                Slog.w(TAG, "dumpGfxInfo failed", e);
+            } finally {
+                IoUtils.closeQuietly(pfd);
+            }
         }
 
         @Override
@@ -1961,6 +1968,7 @@ public final class ActivityThread extends ClientTransactionHandler
         public static final int ATTACH_STARTUP_AGENTS = 162;
         public static final int UPDATE_UI_TRANSLATION_STATE = 163;
         public static final int SET_CONTENT_CAPTURE_OPTIONS_CALLBACK = 164;
+        public static final int DUMP_GFXINFO = 165;
 
         public static final int INSTRUMENT_WITHOUT_RESTART = 170;
         public static final int FINISH_INSTRUMENTATION_WITHOUT_RESTART = 171;
@@ -2010,6 +2018,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     case UPDATE_UI_TRANSLATION_STATE: return "UPDATE_UI_TRANSLATION_STATE";
                     case SET_CONTENT_CAPTURE_OPTIONS_CALLBACK:
                         return "SET_CONTENT_CAPTURE_OPTIONS_CALLBACK";
+                    case DUMP_GFXINFO: return "DUMP GFXINFO";
                     case INSTRUMENT_WITHOUT_RESTART: return "INSTRUMENT_WITHOUT_RESTART";
                     case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
                         return "FINISH_INSTRUMENTATION_WITHOUT_RESTART";
@@ -2082,6 +2091,9 @@ public final class ActivityThread extends ClientTransactionHandler
                     break;
                 case DUMP_SERVICE:
                     handleDumpService((DumpComponentInfo)msg.obj);
+                    break;
+                case DUMP_GFXINFO:
+                    handleDumpGfxInfo((DumpComponentInfo) msg.obj);
                     break;
                 case LOW_MEMORY:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "lowMemory");
@@ -4480,6 +4492,17 @@ public final class ActivityThread extends ClientTransactionHandler
                             + " with " + data.intent + ": " + e.toString(), e);
                 }
             }
+        }
+    }
+
+    private void handleDumpGfxInfo(DumpComponentInfo info) {
+        try {
+            nDumpGraphicsInfo(info.fd.getFileDescriptor());
+            WindowManagerGlobal.getInstance().dumpGfxInfo(info.fd.getFileDescriptor(), info.args);
+        } catch (Exception e) {
+            Log.w(TAG, "Caught exception from dumpGfxInfo()", e);
+        } finally {
+            IoUtils.closeQuietly(info.fd);
         }
     }
 
