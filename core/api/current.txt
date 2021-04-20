@@ -11907,11 +11907,15 @@ package android.content.pm {
     field public static final String FEATURE_SECURE_LOCK_SCREEN = "android.software.secure_lock_screen";
     field public static final String FEATURE_SECURITY_MODEL_COMPATIBLE = "android.hardware.security.model.compatible";
     field public static final String FEATURE_SENSOR_ACCELEROMETER = "android.hardware.sensor.accelerometer";
+    field public static final String FEATURE_SENSOR_ACCELEROMETER_LIMITED_AXES = "android.hardware.sensor.accelerometer_limited_axes";
+    field public static final String FEATURE_SENSOR_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED = "android.hardware.sensor.accelerometer_limited_axes_uncalibrated";
     field public static final String FEATURE_SENSOR_AMBIENT_TEMPERATURE = "android.hardware.sensor.ambient_temperature";
     field public static final String FEATURE_SENSOR_BAROMETER = "android.hardware.sensor.barometer";
     field public static final String FEATURE_SENSOR_COMPASS = "android.hardware.sensor.compass";
     field public static final String FEATURE_SENSOR_DYNAMIC_HEAD_TRACKER = "android.hardware.sensor.dynamic.head_tracker";
     field public static final String FEATURE_SENSOR_GYROSCOPE = "android.hardware.sensor.gyroscope";
+    field public static final String FEATURE_SENSOR_GYROSCOPE_LIMITED_AXES = "android.hardware.sensor.gyroscope_limited_axes";
+    field public static final String FEATURE_SENSOR_GYROSCOPE_LIMITED_AXES_UNCALIBRATED = "android.hardware.sensor.gyroscope_limited_axes_uncalibrated";
     field public static final String FEATURE_SENSOR_HEART_RATE = "android.hardware.sensor.heartrate";
     field public static final String FEATURE_SENSOR_HEART_RATE_ECG = "android.hardware.sensor.heartrate.ecg";
     field public static final String FEATURE_SENSOR_HINGE_ANGLE = "android.hardware.sensor.hinge_angle";
