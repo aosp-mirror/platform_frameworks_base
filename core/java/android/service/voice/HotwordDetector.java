@@ -169,5 +169,13 @@ public interface HotwordDetector {
          * @param status Info about initialization state of {@link HotwordDetectionService}.
          */
         void onHotwordDetectionServiceInitialized(@InitializationStatus int status);
+
+        /**
+         * Called with the {@link HotwordDetectionService} is restarted.
+         *
+         * Clients are expected to call {@link HotwordDetector#updateState} to share the state with
+         * the newly created service.
+         */
+        void onHotwordDetectionServiceRestarted();
     }
 }
