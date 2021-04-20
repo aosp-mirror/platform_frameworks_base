@@ -92,6 +92,18 @@ public class ViewGroupScrollCaptureTest {
                 viewGroup.getScrollCaptureHint());
     }
 
+    /** Make sure the hint flags are saved and loaded correctly. */
+    @Test
+    public void testSetScrollCaptureHint_mutuallyExclusiveFlags() throws Exception {
+        final Context context = getInstrumentation().getContext();
+        final MockViewGroup viewGroup = new MockViewGroup(context);
+
+        viewGroup.setScrollCaptureHint(
+                View.SCROLL_CAPTURE_HINT_INCLUDE | View.SCROLL_CAPTURE_HINT_EXCLUDE);
+        assertEquals("Mutually exclusive flags were not resolved correctly",
+                ViewGroup.SCROLL_CAPTURE_HINT_EXCLUDE, viewGroup.getScrollCaptureHint());
+    }
+
     /**
      * Ensure a ViewGroup with 'scrollCaptureHint=auto', but no ScrollCaptureCallback set dispatches
      * correctly. Verifies that the framework helper is called. Verifies a that non-null callback
