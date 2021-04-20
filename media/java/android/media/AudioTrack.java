@@ -44,6 +44,7 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.Executor;
 
@@ -1585,9 +1586,24 @@ public class AudioTrack extends PlayerBase
             AudioFormat.CHANNEL_OUT_LOW_FREQUENCY |
             AudioFormat.CHANNEL_OUT_BACK_LEFT |
             AudioFormat.CHANNEL_OUT_BACK_RIGHT |
+            AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER |
+            AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER |
             AudioFormat.CHANNEL_OUT_BACK_CENTER |
             AudioFormat.CHANNEL_OUT_SIDE_LEFT |
-            AudioFormat.CHANNEL_OUT_SIDE_RIGHT;
+            AudioFormat.CHANNEL_OUT_SIDE_RIGHT |
+            AudioFormat.CHANNEL_OUT_TOP_CENTER |
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT |
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_CENTER |
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT |
+            AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT |
+            AudioFormat.CHANNEL_OUT_TOP_BACK_CENTER |
+            AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT |
+            AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT |
+            AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT |
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT |
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_CENTER |
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT |
+            AudioFormat.CHANNEL_OUT_LOW_FREQUENCY_2;
 
     // Returns a boolean whether the attributes, format, bufferSizeInBytes, mode allow
     // power saving to be automatically enabled for an AudioTrack. Returns false if
@@ -1740,6 +1756,26 @@ public class AudioTrack extends PlayerBase
         mDataLoadMode = mode;
     }
 
+    // General pair map
+    private static final HashMap<String, Integer> CHANNEL_PAIR_MAP = new HashMap<>() {{
+        put("front", AudioFormat.CHANNEL_OUT_FRONT_LEFT
+                | AudioFormat.CHANNEL_OUT_FRONT_RIGHT);
+        put("back", AudioFormat.CHANNEL_OUT_BACK_LEFT
+                | AudioFormat.CHANNEL_OUT_BACK_RIGHT);
+        put("front of center", AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER
+                | AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER);
+        put("side", AudioFormat.CHANNEL_OUT_SIDE_LEFT
+                | AudioFormat.CHANNEL_OUT_SIDE_RIGHT);
+        put("top front", AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT
+                | AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT);
+        put("top back", AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT
+                | AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT);
+        put("top side", AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT
+                | AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT);
+        put("bottom front", AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT
+                | AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT);
+    }};
+
     /**
      * Convenience method to check that the channel configuration (a.k.a channel mask) is supported
      * @param channelConfig the mask to validate
@@ -1766,20 +1802,14 @@ public class AudioTrack extends PlayerBase
                 loge("Front channels must be present in multichannel configurations");
                 return false;
         }
-        final int backPair =
-                AudioFormat.CHANNEL_OUT_BACK_LEFT | AudioFormat.CHANNEL_OUT_BACK_RIGHT;
-        if ((channelConfig & backPair) != 0) {
-            if ((channelConfig & backPair) != backPair) {
-                loge("Rear channels can't be used independently");
+        // Check all pairs to see that they are matched (front duplicated here).
+        for (HashMap.Entry<String, Integer> e : CHANNEL_PAIR_MAP.entrySet()) {
+            final int positionPair = e.getValue();
+            if ((channelConfig & positionPair) != 0
+                    && (channelConfig & positionPair) != positionPair) {
+                loge("Channel pair (" + e.getKey() + ") cannot be used independently");
                 return false;
             }
-        }
-        final int sidePair =
-                AudioFormat.CHANNEL_OUT_SIDE_LEFT | AudioFormat.CHANNEL_OUT_SIDE_RIGHT;
-        if ((channelConfig & sidePair) != 0
-                && (channelConfig & sidePair) != sidePair) {
-            loge("Side channels can't be used independently");
-            return false;
         }
         return true;
     }
