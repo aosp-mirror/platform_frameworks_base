@@ -17,6 +17,7 @@
 package com.android.systemui.wmshell;
 
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
@@ -44,7 +45,14 @@ import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.face.FaceManager;
 import android.os.Handler;
@@ -78,6 +86,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -90,15 +99,18 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEntry;
+import com.android.wm.shell.bubbles.BubbleIconFactory;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
+import com.android.wm.shell.bubbles.BubbleViewInfoTask;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
@@ -1132,7 +1144,7 @@ public class BubblesTest extends SysuiTestCase {
 
         // Switch users
         mBubbleController.onUserChanged(secondUserId);
-        assertThat(mBubbleData.getOverflowBubbles().isEmpty());
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
 
         // Give this user some bubbles
         mBubbleController.updateBubble(mBubbleEntryUser11);
@@ -1143,6 +1155,75 @@ public class BubblesTest extends SysuiTestCase {
         // Verify these are in the overflow
         assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntryUser11.getKey())).isNotNull();
         assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntry2User11.getKey())).isNotNull();
+    }
+
+
+    /**
+     * Verifies that the package manager for the user is used when loading info for the bubble.
+     */
+    @Test
+    public void test_bubbleViewInfoGetPackageForUser() throws Exception {
+        final int workProfileUserId = 10;
+        final UserHandle workUser = new UserHandle(workProfileUserId);
+        final String workPkg = "work.pkg";
+
+        final Bubble bubble = createBubble(workProfileUserId, workPkg);
+        assertEquals(workProfileUserId, bubble.getUser().getIdentifier());
+
+        final Context context = setUpContextWithPackageManager(workPkg, null /* AppInfo */);
+        when(context.getResources()).thenReturn(mContext.getResources());
+        final Context userContext = setUpContextWithPackageManager(workPkg,
+                mock(ApplicationInfo.class));
+
+        // If things are working correctly, StatusBar.getPackageManagerForUser will call this
+        when(context.createPackageContextAsUser(eq(workPkg), anyInt(), eq(workUser)))
+                .thenReturn(userContext);
+
+        BubbleViewInfoTask.BubbleViewInfo info = BubbleViewInfoTask.BubbleViewInfo.populate(context,
+                mBubbleController,
+                mBubbleController.getStackView(),
+                new BubbleIconFactory(mContext),
+                bubble,
+                true /* skipInflation */);
+        verify(userContext, times(1)).getPackageManager();
+        verify(context, times(1)).createPackageContextAsUser(eq(workPkg),
+                eq(Context.CONTEXT_RESTRICTED),
+                eq(workUser));
+        assertNotNull(info);
+    }
+
+    /** Creates a bubble using the userId and package. */
+    private Bubble createBubble(int userId, String pkg) {
+        final UserHandle userHandle = new UserHandle(userId);
+        NotificationEntry workEntry = new NotificationEntryBuilder()
+                .setPkg(pkg)
+                .setUser(userHandle)
+                .build();
+        workEntry.setBubbleMetadata(getMetadata());
+        workEntry.setFlagBubble(true);
+
+        return new Bubble(BubblesManager.notifToBubbleEntry(workEntry),
+                null,
+                mock(Bubbles.PendingIntentCanceledListener.class), new SyncExecutor());
+    }
+
+    /** Creates a context that will return a PackageManager with specific AppInfo. */
+    private Context setUpContextWithPackageManager(String pkg, ApplicationInfo info)
+            throws Exception {
+        final PackageManager pm = mock(PackageManager.class);
+        when(pm.getApplicationInfo(eq(pkg), anyInt())).thenReturn(info);
+
+        if (info != null) {
+            Drawable d = mock(Drawable.class);
+            when(d.getBounds()).thenReturn(new Rect());
+            when(pm.getApplicationIcon(anyString())).thenReturn(d);
+            when(pm.getUserBadgedIcon(any(), any())).thenReturn(d);
+        }
+
+        final Context context = mock(Context.class);
+        when(context.getPackageName()).thenReturn(pkg);
+        when(context.getPackageManager()).thenReturn(pm);
+        return context;
     }
 
     /**
@@ -1160,5 +1241,14 @@ public class BubblesTest extends SysuiTestCase {
             flags &= ~flag;
         }
         bubbleMetadata.setFlags(flags);
+    }
+
+    private Notification.BubbleMetadata getMetadata() {
+        Intent target = new Intent(mContext, BubblesTestActivity.class);
+        PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, target, FLAG_MUTABLE);
+
+        return new Notification.BubbleMetadata.Builder(bubbleIntent,
+                Icon.createWithResource(mContext, R.drawable.bubble_ic_create_bubble))
+                .build();
     }
 }
