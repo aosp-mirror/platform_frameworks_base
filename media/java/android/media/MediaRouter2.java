@@ -180,7 +180,7 @@ public final class MediaRouter2 {
             // SecurityException will be thrown if there's no permission.
             serviceBinder.enforceMediaContentControlPermission();
         } catch (RemoteException e) {
-            Log.e(TAG, "Unable to check MEDIA_CONTENT_CONTROL permission.");
+            e.rethrowFromSystemServer();
         }
 
         PackageManager pm = context.getPackageManager();
