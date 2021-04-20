@@ -102,8 +102,8 @@ final class RippleShader extends RuntimeShader {
     private static final String SHADER_MAIN = "vec4 main(vec2 p) {\n"
             + "    float fadeIn = subProgress(0., 0.1, in_progress);\n"
             + "    float scaleIn = subProgress(0., 0.45, in_progress);\n"
-            + "    float fadeOutNoise = subProgress(0.5, 1., in_progress);\n"
-            + "    float fadeOutRipple = subProgress(0.5, 0.75, in_progress);\n"
+            + "    float fadeOutNoise = subProgress(0.5, 0.95, in_progress);\n"
+            + "    float fadeOutRipple = subProgress(0.5, 1., in_progress);\n"
             + "    vec2 center = mix(in_touch, in_origin, scaleIn);\n"
             + "    float ring = softRing(p, center, in_maxRadius, scaleIn, 0.45);\n"
             + "    float alpha = min(fadeIn, 1. - fadeOutNoise);\n"
@@ -210,7 +210,7 @@ final class RippleShader extends RuntimeShader {
     }
 
     public void setResolution(float w, float h, int density) {
-        final float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE * 1.25f;
+        final float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE;
         setUniform("in_resolutionScale", new float[] {1f / w, 1f / h});
         setUniform("in_noiseScale", new float[] {densityScale / w, densityScale / h});
     }
