@@ -39,6 +39,7 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
+import com.android.systemui.people.widget.PeopleTileKey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,14 +137,15 @@ public class PeopleSpaceActivity extends Activity {
                     getSizeInDp(mContext, R.dimen.avatar_size_for_medium,
                             mContext.getResources().getDisplayMetrics().density)));
 
-            tileView.setOnClickListener(v -> storeWidgetConfiguration(tile));
+            PeopleTileKey key = new PeopleTileKey(tile);
+            tileView.setOnClickListener(v -> storeWidgetConfiguration(tile, key));
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve shortcut information", e);
         }
     }
 
     /** Stores the user selected configuration for {@code mAppWidgetId}. */
-    private void storeWidgetConfiguration(PeopleSpaceTile tile) {
+    private void storeWidgetConfiguration(PeopleSpaceTile tile, PeopleTileKey key) {
         if (PeopleSpaceUtils.DEBUG) {
             if (DEBUG) {
                 Log.d(TAG, "Put " + tile.getUserName() + "'s shortcut ID: "
@@ -151,7 +153,7 @@ public class PeopleSpaceActivity extends Activity {
                         + mAppWidgetId);
             }
         }
-        mPeopleSpaceWidgetManager.addNewWidget(mAppWidgetId, tile);
+        mPeopleSpaceWidgetManager.addNewWidget(mAppWidgetId, key);
         finishActivity();
     }
 
