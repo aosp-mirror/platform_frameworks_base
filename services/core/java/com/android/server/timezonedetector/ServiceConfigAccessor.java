@@ -70,6 +70,10 @@ public final class ServiceConfigAccessor {
      */
     public static final @ProviderMode String PROVIDER_MODE_ENABLED = "enabled";
 
+    /**
+     * Device config keys that affect the {@link TimeZoneDetectorService} service and {@link
+     * com.android.server.timezonedetector.location.LocationTimeZoneManagerService}.
+     */
     private static final Set<String> SERVER_FLAGS_KEYS_TO_WATCH = Collections.unmodifiableSet(
             new ArraySet<>(new String[] {
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
