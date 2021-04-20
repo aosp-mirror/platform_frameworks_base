@@ -139,7 +139,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
     private static final boolean DEFAULT_APP_LOCKED_IMPORTANCE  = false;
 
-    static final boolean DEFAULT_GLOBAL_ALLOW_BUBBLE = true;
+    static final boolean DEFAULT_BUBBLES_ENABLED = true;
     @VisibleForTesting
     static final int DEFAULT_BUBBLE_PREFERENCE = BUBBLE_PREFERENCE_NONE;
     static final boolean DEFAULT_MEDIA_NOTIFICATION_FILTERING = true;
@@ -173,9 +173,9 @@ public class PreferencesHelper implements RankingConfig {
     private final AppOpsManager mAppOps;
 
     private SparseBooleanArray mBadgingEnabled;
+    private SparseBooleanArray mBubblesEnabled;
     private SparseBooleanArray mLockScreenShowNotifications;
     private SparseBooleanArray mLockScreenPrivateNotifications;
-    private boolean mBubblesEnabledGlobally = DEFAULT_GLOBAL_ALLOW_BUBBLE;
     private boolean mIsMediaNotificationFilteringEnabled = DEFAULT_MEDIA_NOTIFICATION_FILTERING;
     private boolean mAreChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
@@ -2372,20 +2372,6 @@ public class PreferencesHelper implements RankingConfig {
                 .setPackageName(pkg);
     }
 
-    public void updateBubblesEnabled() {
-        final boolean newValue = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.NOTIFICATION_BUBBLES,
-                DEFAULT_GLOBAL_ALLOW_BUBBLE ? 1 : 0) == 1;
-        if (newValue != mBubblesEnabledGlobally) {
-            mBubblesEnabledGlobally = newValue;
-            updateConfig();
-        }
-    }
-
-    public boolean bubblesEnabled() {
-        return mBubblesEnabledGlobally;
-    }
-
     /** Requests check of the feature setting for showing media notifications in quick settings. */
     public void updateMediaNotificationFilteringEnabled() {
         final boolean newValue = Settings.Global.getInt(mContext.getContentResolver(),
@@ -2433,6 +2419,42 @@ public class PreferencesHelper implements RankingConfig {
                             DEFAULT_SHOW_BADGE ? 1 : 0, userId) != 0);
         }
         return mBadgingEnabled.get(userId, DEFAULT_SHOW_BADGE);
+    }
+
+    /** Updates whether bubbles are enabled for this user. */
+    public void updateBubblesEnabled() {
+        if (mBubblesEnabled == null) {
+            mBubblesEnabled = new SparseBooleanArray();
+        }
+        boolean changed = false;
+        // update the cached values
+        for (int index = 0; index < mBubblesEnabled.size(); index++) {
+            int userId = mBubblesEnabled.keyAt(index);
+            final boolean oldValue = mBubblesEnabled.get(userId);
+            final boolean newValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.NOTIFICATION_BUBBLES,
+                    DEFAULT_BUBBLES_ENABLED ? 1 : 0, userId) != 0;
+            mBubblesEnabled.put(userId, newValue);
+            changed |= oldValue != newValue;
+        }
+        if (changed) {
+            updateConfig();
+        }
+    }
+
+    /** Returns true if bubbles are enabled for this user. */
+    public boolean bubblesEnabled(UserHandle userHandle) {
+        int userId = userHandle.getIdentifier();
+        if (userId == UserHandle.USER_ALL) {
+            return false;
+        }
+        if (mBubblesEnabled.indexOfKey(userId) < 0) {
+            mBubblesEnabled.put(userId,
+                    Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                            Settings.Secure.NOTIFICATION_BUBBLES,
+                            DEFAULT_BUBBLES_ENABLED ? 1 : 0, userId) != 0);
+        }
+        return mBubblesEnabled.get(userId, DEFAULT_BUBBLES_ENABLED);
     }
 
     public void updateLockScreenPrivateNotifications() {
