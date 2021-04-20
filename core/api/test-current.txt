@@ -347,6 +347,10 @@ package android.app {
     method public boolean isSeamlessResizeEnabled();
   }
 
+  public final class PictureInPictureUiState implements android.os.Parcelable {
+    ctor public PictureInPictureUiState(boolean);
+  }
+
   public class StatusBarManager {
     method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
