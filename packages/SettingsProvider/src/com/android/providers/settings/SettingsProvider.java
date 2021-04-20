@@ -20,6 +20,7 @@ import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER;
+import static android.provider.Settings.Secure.NOTIFICATION_BUBBLES;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
@@ -3400,7 +3401,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 199;
+            private static final int SETTINGS_VERSION = 201;
 
             private final int mUserId;
 
@@ -4645,11 +4646,8 @@ public class SettingsProvider extends ContentProvider {
                     // Version 184: Reset the default for Global Settings: NOTIFICATION_BUBBLES
                     // This is originally set in version 182, however, the default value changed
                     // so this step is to ensure the value is updated to the correct default.
-                    getGlobalSettingsLocked().insertSettingOverrideableByRestoreLocked(
-                            Global.NOTIFICATION_BUBBLES, getContext().getResources().getBoolean(
-                                    R.bool.def_notification_bubbles) ? "1" : "0", null /* tag */,
-                            true /* makeDefault */, SettingsState.SYSTEM_PACKAGE_NAME);
 
+                    // Removed. Bubbles moved to secure settings. See version 197.
                     currentVersion = 185;
                 }
 
@@ -4894,7 +4892,6 @@ public class SettingsProvider extends ContentProvider {
                                 defEnableNonResizableMultiWindow ? "1" : "0", null, true,
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
-
                     currentVersion = 198;
                 }
 
@@ -4926,6 +4923,40 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 199;
+                }
+
+                if (currentVersion == 199) {
+                    // Version 199: Bubbles moved to secure settings. Use the global value for
+                    // the newly inserted secure setting; we'll delete the global value in the
+                    // next version step.
+                    // If this is a new profile, check if a secure setting exists for the
+                    // owner of the profile and use that value for the work profile.
+                    int owningId = resolveOwningUserIdForSecureSettingLocked(userId,
+                            NOTIFICATION_BUBBLES);
+                    Setting previous = getGlobalSettingsLocked()
+                            .getSettingLocked("notification_bubbles");
+                    Setting secureBubbles = getSecureSettingsLocked(owningId)
+                            .getSettingLocked(NOTIFICATION_BUBBLES);
+                    String oldValue = "1";
+                    if (!previous.isNull()) {
+                        oldValue = previous.getValue();
+                    } else if (!secureBubbles.isNull()) {
+                        oldValue = secureBubbles.getValue();
+                    }
+                    if (secureBubbles.isNull()) {
+                        boolean isDefault = oldValue.equals("1");
+                        getSecureSettingsLocked(userId).insertSettingLocked(
+                                Secure.NOTIFICATION_BUBBLES, oldValue, null /* tag */,
+                                isDefault, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 200;
+                }
+
+                if (currentVersion == 200) {
+                    // Version 200: delete the global bubble setting which was moved to secure in
+                    // version 199.
+                    getGlobalSettingsLocked().deleteSettingLocked("notification_bubbles");
+                    currentVersion = 201;
                 }
 
                 // vXXX: Add new settings above this point.

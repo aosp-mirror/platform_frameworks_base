@@ -9498,6 +9498,18 @@ public final class Settings {
                 = "bubble_important_conversations";
 
         /**
+         * When enabled, notifications able to bubble will display an affordance allowing the user
+         * to bubble them.
+         * The value is boolean (1 to enable or 0 to disable).
+         *
+         * @hide
+         */
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
+        @Readable
+        public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
+
+        /**
          * Whether notifications are dismissed by a right-to-left swipe (instead of a left-to-right
          * swipe).
          *
@@ -9968,6 +9980,7 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_CHANGER);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
             CLONE_TO_MANAGED_PROFILE.add(SHOW_IME_WITH_HARD_KEYBOARD);
+            CLONE_TO_MANAGED_PROFILE.add(NOTIFICATION_BUBBLES);
         }
 
         /** @hide */
@@ -10061,7 +10074,9 @@ public final class Settings {
          * Whether the notification bubbles are globally enabled
          * The value is boolean (1 or 0).
          * @hide
+         * @deprecated moved to secure settings.
          */
+        @Deprecated
         @TestApi
         @Readable
         public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
@@ -14810,7 +14825,7 @@ public final class Settings {
             MOVED_TO_SECURE.add(Global.ZEN_SETTINGS_SUGGESTION_VIEWED);
             MOVED_TO_SECURE.add(Global.CHARGING_SOUNDS_ENABLED);
             MOVED_TO_SECURE.add(Global.CHARGING_VIBRATION_ENABLED);
-
+            MOVED_TO_SECURE.add(Global.NOTIFICATION_BUBBLES);
         }
 
         /** @hide */

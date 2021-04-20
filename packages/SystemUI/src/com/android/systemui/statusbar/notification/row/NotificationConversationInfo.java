@@ -22,7 +22,6 @@ import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-import static android.provider.Settings.Global.NOTIFICATION_BUBBLES;
 
 import static com.android.systemui.animation.Interpolators.FAST_OUT_SLOW_IN;
 
@@ -48,7 +47,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.transition.ChangeBounds;
@@ -573,8 +571,7 @@ public class NotificationConversationInfo extends LinearLayout implements
 
         boolean showAsBubble = mBubbleMetadata != null
                 && mBubbleMetadata.getAutoExpandBubble()
-                && Settings.Global.getInt(mContext.getContentResolver(),
-                        NOTIFICATION_BUBBLES, 0) == 1;
+                && BubblesManager.areBubblesEnabled(mContext, mSbn.getUser());
 
         Drawable person =  mIconFactory.getBaseIconDrawable(mShortcutInfo);
         if (person == null) {

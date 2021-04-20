@@ -58,7 +58,8 @@ internal class BubbleDataRepository(
      */
     fun addBubbles(@UserIdInt userId: Int, bubbles: List<Bubble>) {
         if (DEBUG) Log.d(TAG, "adding ${bubbles.size} bubbles")
-        val entities = transform(userId, bubbles).also(volatileRepository::addBubbles)
+        val entities = transform(bubbles).also {
+            b -> volatileRepository.addBubbles(userId, b) }
         if (entities.isNotEmpty()) persistToDisk()
     }
 
@@ -67,14 +68,15 @@ internal class BubbleDataRepository(
      */
     fun removeBubbles(@UserIdInt userId: Int, bubbles: List<Bubble>) {
         if (DEBUG) Log.d(TAG, "removing ${bubbles.size} bubbles")
-        val entities = transform(userId, bubbles).also(volatileRepository::removeBubbles)
+        val entities = transform(bubbles).also {
+            b -> volatileRepository.removeBubbles(userId, b) }
         if (entities.isNotEmpty()) persistToDisk()
     }
 
-    private fun transform(userId: Int, bubbles: List<Bubble>): List<BubbleEntity> {
+    private fun transform(bubbles: List<Bubble>): List<BubbleEntity> {
         return bubbles.mapNotNull { b ->
             BubbleEntity(
-                    userId,
+                    b.user.identifier,
                     b.packageName,
                     b.metadataShortcutId ?: return@mapNotNull null,
                     b.key,
@@ -116,10 +118,11 @@ internal class BubbleDataRepository(
     /**
      * Load bubbles from disk.
      * @param cb The callback to be run after the bubbles are loaded.  This callback is always made
-     *           on the main thread of the hosting process.
+     *           on the main thread of the hosting process. The callback is only run if there are
+     *           bubbles.
      */
     @SuppressLint("WrongConstant")
-    fun loadBubbles(cb: (List<Bubble>) -> Unit) = ioScope.launch {
+    fun loadBubbles(userId: Int, cb: (List<Bubble>) -> Unit) = ioScope.launch {
         /**
          * Load BubbleEntity from disk.
          * e.g.
@@ -129,8 +132,9 @@ internal class BubbleDataRepository(
          *     BubbleEntity(0, "com.example.messenger", "id-1")
          * ]
          */
-        val entities = persistentRepository.readFromDisk()
-        volatileRepository.addBubbles(entities)
+        val entitiesByUser = persistentRepository.readFromDisk()
+        val entities = entitiesByUser.get(userId) ?: return@launch
+        volatileRepository.addBubbles(userId, entities)
         /**
          * Extract userId/packageName from these entities.
          * e.g.
@@ -139,9 +143,10 @@ internal class BubbleDataRepository(
          * ]
          */
         val shortcutKeys = entities.map { ShortcutKey(it.userId, it.packageName) }.toSet()
+
         /**
-         * Retrieve shortcuts with given userId/packageName combination, then construct a mapping
-         * from the userId/packageName pair to a list of associated ShortcutInfo.
+         * Retrieve shortcuts with given userId/packageName combination, then construct a
+         * mapping from the userId/packageName pair to a list of associated ShortcutInfo.
          * e.g.
          * {
          *     ShortcutKey(0, "com.example.messenger") -> [
@@ -161,21 +166,23 @@ internal class BubbleDataRepository(
                             .setQueryFlags(SHORTCUT_QUERY_FLAG), UserHandle.of(key.userId))
                     ?: emptyList()
         }.groupBy { ShortcutKey(it.userId, it.`package`) }
-        // For each entity loaded from xml, find the corresponding ShortcutInfo then convert them
-        // into Bubble.
+        // For each entity loaded from xml, find the corresponding ShortcutInfo then convert
+        // them into Bubble.
         val bubbles = entities.mapNotNull { entity ->
             shortcutMap[ShortcutKey(entity.userId, entity.packageName)]
                     ?.firstOrNull { shortcutInfo -> entity.shortcutId == shortcutInfo.id }
-                    ?.let { shortcutInfo -> Bubble(
-                            entity.key,
-                            shortcutInfo,
-                            entity.desiredHeight,
-                            entity.desiredHeightResId,
-                            entity.title,
-                            entity.taskId,
-                            entity.locus,
-                            mainExecutor
-                    ) }
+                    ?.let { shortcutInfo ->
+                        Bubble(
+                                entity.key,
+                                shortcutInfo,
+                                entity.desiredHeight,
+                                entity.desiredHeightResId,
+                                entity.title,
+                                entity.taskId,
+                                entity.locus,
+                                mainExecutor
+                        )
+                    }
         }
         mainExecutor.execute { cb(bubbles) }
     }

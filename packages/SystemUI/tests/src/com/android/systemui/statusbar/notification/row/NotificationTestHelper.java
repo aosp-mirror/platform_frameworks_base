@@ -239,51 +239,87 @@ public class NotificationTestHelper {
     /**
      * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
      */
-    public ExpandableNotificationRow createBubbleInGroup()
-            throws Exception {
-        return createBubble(makeBubbleMetadata(null), PKG, true);
-    }
-
-    /**
-     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
-     */
     public ExpandableNotificationRow createBubble()
             throws Exception {
-        return createBubble(makeBubbleMetadata(null), PKG, false);
-    }
-
-    /**
-     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
-     *
-     * @param deleteIntent the intent to assign to {@link BubbleMetadata#deleteIntent}
-     */
-    public ExpandableNotificationRow createBubble(@Nullable PendingIntent deleteIntent)
-            throws Exception {
-        return createBubble(makeBubbleMetadata(deleteIntent), PKG, false);
-    }
-
-    /**
-     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
-     *
-     * @param bubbleMetadata the {@link BubbleMetadata} to use
-     */
-    public ExpandableNotificationRow createBubble(BubbleMetadata bubbleMetadata, String pkg)
-            throws Exception {
-        return createBubble(bubbleMetadata, pkg, false);
-    }
-
-    private ExpandableNotificationRow createBubble(BubbleMetadata bubbleMetadata, String pkg,
-            boolean inGroup)
-            throws Exception {
         Notification n = createNotification(false /* isGroupSummary */,
-                inGroup ? GROUP_KEY : null /* groupKey */, bubbleMetadata);
+                null /* groupKey */, makeBubbleMetadata(null));
         n.flags |= FLAG_BUBBLE;
-        ExpandableNotificationRow row = generateRow(n, pkg, UID, USER_HANDLE,
+        ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
                 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
         modifyRanking(row.getEntry())
                 .setCanBubble(true)
                 .build();
         return row;
+    }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble and is part
+     * of a group of notifications.
+     */
+    public ExpandableNotificationRow createBubbleInGroup()
+            throws Exception {
+        Notification n = createNotification(false /* isGroupSummary */,
+                GROUP_KEY /* groupKey */, makeBubbleMetadata(null));
+        n.flags |= FLAG_BUBBLE;
+        ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
+                0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+        modifyRanking(row.getEntry())
+                .setCanBubble(true)
+                .build();
+        return row;
+    }
+
+    /**
+     * Returns an {@link NotificationEntry} that should be shown as a bubble.
+     *
+     * @param deleteIntent the intent to assign to {@link BubbleMetadata#deleteIntent}
+     */
+    public NotificationEntry createBubble(@Nullable PendingIntent deleteIntent) {
+        return createBubble(makeBubbleMetadata(deleteIntent), USER_HANDLE);
+    }
+
+    /**
+     * Returns an {@link NotificationEntry} that should be shown as a bubble.
+     *
+     * @param handle the user to associate with this bubble.
+     */
+    public NotificationEntry createBubble(UserHandle handle) {
+        return createBubble(makeBubbleMetadata(null), handle);
+    }
+
+    /**
+     * Returns an {@link NotificationEntry} that should be shown as a bubble.
+     *
+     * @param userHandle the user to associate with this notification.
+     */
+    private NotificationEntry createBubble(BubbleMetadata metadata, UserHandle userHandle) {
+        Notification n = createNotification(false /* isGroupSummary */, null /* groupKey */,
+                metadata);
+        n.flags |= FLAG_BUBBLE;
+
+        final NotificationChannel channel =
+                new NotificationChannel(
+                        n.getChannelId(),
+                        n.getChannelId(),
+                        IMPORTANCE_HIGH);
+        channel.setBlockable(true);
+
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg(PKG)
+                .setOpPkg(PKG)
+                .setId(mId++)
+                .setUid(UID)
+                .setInitialPid(2000)
+                .setNotification(n)
+                .setUser(userHandle)
+                .setPostTime(System.currentTimeMillis())
+                .setChannel(channel)
+                .build();
+
+        modifyRanking(entry)
+                .setCanBubble(true)
+                .build();
+        return entry;
     }
 
     /**
