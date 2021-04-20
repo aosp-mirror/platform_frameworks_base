@@ -49,6 +49,7 @@ import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ServiceManager;
@@ -484,24 +485,31 @@ public class PeopleSpaceWidgetManager {
             if (DEBUG) Log.d(TAG, "Could not find stored tile to add conversation to");
             return;
         }
+        PeopleSpaceTile.Builder updatedTile = storedTile.toBuilder();
         ShortcutInfo info = conversation.getShortcutInfo();
         Uri uri = null;
         if (info.getPersons() != null && info.getPersons().length > 0) {
             Person person = info.getPersons()[0];
             uri = person.getUri() == null ? null : Uri.parse(person.getUri());
         }
-        storedTile = storedTile.toBuilder()
-                .setUserName(info.getLabel())
-                .setUserIcon(
-                        PeopleSpaceTile.convertDrawableToIcon(mLauncherApps.getShortcutIconDrawable(
-                                info, 0)))
+        CharSequence label = info.getLabel();
+        if (label != null) {
+            updatedTile.setUserName(label);
+        }
+        Icon icon = PeopleSpaceTile.convertDrawableToIcon(mLauncherApps.getShortcutIconDrawable(
+                info, 0));
+        if (icon != null) {
+            updatedTile.setUserIcon(icon);
+        }
+        updatedTile
                 .setContactUri(uri)
                 .setStatuses(conversation.getStatuses())
                 .setLastInteractionTimestamp(conversation.getLastEventTimestamp())
                 .setIsImportantConversation(conversation.getParentNotificationChannel() != null
                         && conversation.getParentNotificationChannel().isImportantConversation())
                 .build();
-        updateAppWidgetOptionsAndView(mAppWidgetManager, mContext, appWidgetId, storedTile);
+        updateAppWidgetOptionsAndView(mAppWidgetManager, mContext, appWidgetId,
+                updatedTile.build());
     }
 
     /**
