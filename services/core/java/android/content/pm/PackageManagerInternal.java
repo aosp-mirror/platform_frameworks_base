@@ -826,6 +826,12 @@ public abstract class PackageManagerInternal {
             String packageName, int userId);
 
     /**
+     * Return the enabled setting for a package component (activity, receiver, service, provider).
+     */
+    public abstract @PackageManager.EnabledState int getComponentEnabledSetting(
+            @NonNull ComponentName componentName, int callingUid, int userId);
+
+    /**
      * Extra field name for the token of a request to enable rollback for a
      * package.
      */

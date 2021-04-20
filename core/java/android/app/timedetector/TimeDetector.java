@@ -32,6 +32,18 @@ import android.os.TimestampedValue;
 public interface TimeDetector {
 
     /**
+     * The name of the service for shell commands.
+     * @hide
+     */
+    String SHELL_COMMAND_SERVICE_NAME = "time_detector";
+
+    /**
+     * A shell command that prints the current "auto time detection" global setting value.
+     * @hide
+     */
+    String SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED = "is_auto_detection_enabled";
+
+    /**
      * A shared utility method to create a {@link ManualTimeSuggestion}.
      *
      * @hide

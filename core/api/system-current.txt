@@ -40,6 +40,7 @@ package android {
     field public static final String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
     field public static final String BIND_CONTENT_SUGGESTIONS_SERVICE = "android.permission.BIND_CONTENT_SUGGESTIONS_SERVICE";
     field public static final String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
+    field public static final String BIND_DISPLAY_HASHING_SERVICE = "android.permission.BIND_DISPLAY_HASHING_SERVICE";
     field public static final String BIND_DOMAIN_VERIFICATION_AGENT = "android.permission.BIND_DOMAIN_VERIFICATION_AGENT";
     field public static final String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
@@ -2527,6 +2528,18 @@ package android.content.pm {
 
   public class DataLoaderParams {
     method @NonNull public static final android.content.pm.DataLoaderParams forIncremental(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public static final android.content.pm.DataLoaderParams forStreaming(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public final String getArguments();
+    method @NonNull public final android.content.ComponentName getComponentName();
+    method @NonNull public final int getType();
+  }
+
+  public final class InstallationFile {
+    method public long getLengthBytes();
+    method public int getLocation();
+    method @Nullable public byte[] getMetadata();
+    method @NonNull public String getName();
+    method @Nullable public byte[] getSignature();
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {
@@ -2620,10 +2633,19 @@ package android.content.pm {
   public class PackageInstaller {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
     field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
+    field public static final int DATA_LOADER_TYPE_NONE = 0; // 0x0
+    field public static final int DATA_LOADER_TYPE_STREAMING = 1; // 0x1
+    field public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
+    field public static final int LOCATION_DATA_APP = 0; // 0x0
+    field public static final int LOCATION_MEDIA_DATA = 2; // 0x2
+    field public static final int LOCATION_MEDIA_OBB = 1; // 0x1
   }
 
   public static class PackageInstaller.Session implements java.io.Closeable {
+    method @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public void addFile(int, @NonNull String, long, @NonNull byte[], @Nullable byte[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void commitTransferred(@NonNull android.content.IntentSender);
+    method @Nullable @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public android.content.pm.DataLoaderParams getDataLoaderParams();
+    method @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public void removeFile(int, @NonNull String);
   }
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
@@ -2644,6 +2666,7 @@ package android.content.pm {
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public void setAllocateAggressive(boolean);
     method @Deprecated public void setAllowDowngrade(boolean);
+    method @RequiresPermission(allOf={android.Manifest.permission.INSTALL_PACKAGES, "com.android.permission.USE_INSTALLER_V2"}) public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
     method public void setDontKillApp(boolean);
     method public void setEnableRollback(boolean);
     method public void setEnableRollback(boolean, int);
@@ -8369,6 +8392,7 @@ package android.os {
     field public static final int REASON_ACCOUNT_TRANSFER = 104; // 0x68
     field public static final int REASON_ACTIVITY_RECOGNITION = 103; // 0x67
     field public static final int REASON_GEOFENCING = 100; // 0x64
+    field public static final int REASON_LOCATION_PROVIDER = 312; // 0x138
     field public static final int REASON_OTHER = 1; // 0x1
     field public static final int REASON_PUSH_MESSAGING = 101; // 0x65
     field public static final int REASON_PUSH_MESSAGING_OVER_QUOTA = 102; // 0x66
@@ -8421,6 +8445,7 @@ package android.os {
     field @Deprecated public static final int EVENT_UNSPECIFIED = 0; // 0x0
     field @Deprecated public static final int REASON_ACTIVITY_RECOGNITION = 103; // 0x67
     field @Deprecated public static final int REASON_GEOFENCING = 100; // 0x64
+    field @Deprecated public static final int REASON_LOCATION_PROVIDER = 312; // 0x138
     field @Deprecated public static final int REASON_OTHER = 1; // 0x1
     field @Deprecated public static final int REASON_PUSH_MESSAGING = 101; // 0x65
     field @Deprecated public static final int REASON_PUSH_MESSAGING_OVER_QUOTA = 102; // 0x66
@@ -9817,12 +9842,30 @@ package android.service.contentsuggestions {
 
 }
 
+package android.service.dataloader {
+
+  public abstract class DataLoaderService extends android.app.Service {
+    ctor public DataLoaderService();
+    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader(@NonNull android.content.pm.DataLoaderParams);
+  }
+
+  public static interface DataLoaderService.DataLoader {
+    method public boolean onCreate(@NonNull android.content.pm.DataLoaderParams, @NonNull android.service.dataloader.DataLoaderService.FileSystemConnector);
+    method public boolean onPrepareImage(@NonNull java.util.Collection<android.content.pm.InstallationFile>, @NonNull java.util.Collection<java.lang.String>);
+  }
+
+  public static final class DataLoaderService.FileSystemConnector {
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void writeData(@NonNull String, long, long, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
+  }
+
+}
+
 package android.service.displayhash {
 
   public final class DisplayHashParams implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.util.Size getBufferSize();
-    method public boolean isGrayscaleBuffer();
+    method public boolean isUseGrayscale();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.displayhash.DisplayHashParams> CREATOR;
   }
@@ -9831,17 +9874,17 @@ package android.service.displayhash {
     ctor public DisplayHashParams.Builder();
     method @NonNull public android.service.displayhash.DisplayHashParams build();
     method @NonNull public android.service.displayhash.DisplayHashParams.Builder setBufferSize(int, int);
-    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setGrayscaleBuffer(boolean);
+    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setUseGrayscale(boolean);
   }
 
-  public abstract class DisplayHasherService extends android.app.Service {
-    ctor public DisplayHasherService();
+  public abstract class DisplayHashingService extends android.app.Service {
+    ctor public DisplayHashingService();
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @Nullable public abstract void onGenerateDisplayHash(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String, @NonNull android.view.displayhash.DisplayHashResultCallback);
+    method public abstract void onGenerateDisplayHash(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String, @NonNull android.view.displayhash.DisplayHashResultCallback);
     method @NonNull public abstract java.util.Map<java.lang.String,android.service.displayhash.DisplayHashParams> onGetDisplayHashAlgorithms();
     method @Nullable public abstract android.view.displayhash.VerifiedDisplayHash onVerifyDisplayHash(@NonNull byte[], @NonNull android.view.displayhash.DisplayHash);
-    field public static final String SERVICE_INTERFACE = "android.service.displayhash.DisplayHasherService";
-    field public static final String SERVICE_META_DATA = "android.displayhash.display_hasher_service";
+    field public static final String SERVICE_INTERFACE = "android.service.displayhash.DisplayHashingService";
+    field public static final String SERVICE_META_DATA = "android.displayhash.display_hashing_service";
   }
 
 }
@@ -10183,7 +10226,7 @@ package android.service.rotationresolver {
     ctor public RotationResolutionRequest(@NonNull String, int, int, boolean, long);
     method public int describeContents();
     method public int getCurrentRotation();
-    method @NonNull public String getPackageName();
+    method @NonNull public String getForegroundPackageName();
     method public int getProposedRotation();
     method public long getTimeoutMillis();
     method public boolean shouldUseCamera();

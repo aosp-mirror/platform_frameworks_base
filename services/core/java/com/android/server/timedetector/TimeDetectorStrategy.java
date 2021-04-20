@@ -27,10 +27,13 @@ import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.TimestampedValue;
 import android.util.IndentingPrintWriter;
 
+import com.android.internal.util.Preconditions;
 import com.android.server.timezonedetector.Dumpable;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * The interface for the class that implements the time detection algorithm used by the
@@ -44,9 +47,9 @@ import java.lang.annotation.RetentionPolicy;
  */
 public interface TimeDetectorStrategy extends Dumpable {
 
-    @IntDef({ ORIGIN_TELEPHONY, ORIGIN_MANUAL, ORIGIN_NETWORK, ORIGIN_GNSS,
-        ORIGIN_EXTERNAL })
+    @IntDef({ ORIGIN_TELEPHONY, ORIGIN_MANUAL, ORIGIN_NETWORK, ORIGIN_GNSS, ORIGIN_EXTERNAL })
     @Retention(RetentionPolicy.SOURCE)
+    @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
     @interface Origin {}
 
     /** Used when a time value originated from a telephony signal. */
@@ -126,9 +129,11 @@ public interface TimeDetectorStrategy extends Dumpable {
 
     /**
      * Converts a human readable config string to one of the {@code ORIGIN_} constants.
-     * Throws an {@link IllegalArgumentException} if the value is unrecognized.
+     * Throws an {@link IllegalArgumentException} if the value is unrecognized or {@code null}.
      */
     static @Origin int stringToOrigin(String originString) {
+        Preconditions.checkArgument(originString != null);
+
         switch (originString) {
             case "manual":
                 return ORIGIN_MANUAL;

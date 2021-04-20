@@ -24,6 +24,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
@@ -237,9 +238,11 @@ public interface StatusBarDependenciesModule {
     static OngoingCallController provideOngoingCallController(
             CommonNotifCollection notifCollection,
             FeatureFlags featureFlags,
-            SystemClock systemClock) {
+            SystemClock systemClock,
+            ActivityStarter activityStarter) {
         OngoingCallController ongoingCallController =
-                new OngoingCallController(notifCollection, featureFlags, systemClock);
+                new OngoingCallController(
+                        notifCollection, featureFlags, systemClock, activityStarter);
         ongoingCallController.init();
         return ongoingCallController;
     }

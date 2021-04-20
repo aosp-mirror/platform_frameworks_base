@@ -527,6 +527,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             throw new SecurityException("User restriction prevents installing");
         }
 
+        if (params.dataLoaderParams != null
+                && mContext.checkCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2)
+                        != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the "
+                    + "com.android.permission.USE_INSTALLER_V2 permission "
+                    + "to use a data loader");
+        }
+
         // INSTALL_REASON_ROLLBACK allows an app to be rolled back without requiring the ROLLBACK
         // capability; ensure if this is set as the install reason the app has one of the necessary
         // signature permissions to perform the rollback.

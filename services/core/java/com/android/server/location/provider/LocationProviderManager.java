@@ -25,12 +25,12 @@ import static android.location.LocationManager.KEY_LOCATION_CHANGED;
 import static android.location.LocationManager.KEY_PROVIDER_ENABLED;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
 import static android.os.IPowerManager.LOCATION_MODE_NO_CHANGE;
+import static android.os.PowerExemptionManager.REASON_LOCATION_PROVIDER;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
 import static android.os.PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
-import static android.os.PowerWhitelistManager.REASON_LOCATION_PROVIDER;
-import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
@@ -148,10 +148,10 @@ public class LocationProviderManager extends
     private static final long MAX_HIGH_POWER_INTERVAL_MS = 5 * 60 * 1000;
 
     // max age of a location before it is no longer considered "current"
-    private static final long MAX_CURRENT_LOCATION_AGE_MS = 10 * 1000;
+    private static final long MAX_CURRENT_LOCATION_AGE_MS = 30 * 1000;
 
     // max timeout allowed for getting the current location
-    private static final long GET_CURRENT_LOCATION_MAX_TIMEOUT_MS = 30 * 1000;
+    private static final long MAX_GET_CURRENT_LOCATION_TIMEOUT_MS = 30 * 1000;
 
     // max jitter allowed for min update interval as a percentage of the interval
     private static final float FASTEST_INTERVAL_JITTER_PERCENTAGE = .10f;
@@ -230,7 +230,7 @@ public class LocationProviderManager extends
             options.setDontSendToRestrictedApps(true);
             // allows apps to start a fg service in response to a location PI
             options.setTemporaryAppAllowlist(TEMPORARY_APP_ALLOWLIST_DURATION_MS,
-                    TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                    TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                     REASON_LOCATION_PROVIDER,
                     "");
 
@@ -1655,9 +1655,9 @@ public class LocationProviderManager extends
 
     public @Nullable ICancellationSignal getCurrentLocation(LocationRequest request,
             CallerIdentity identity, int permissionLevel, ILocationCallback callback) {
-        if (request.getDurationMillis() > GET_CURRENT_LOCATION_MAX_TIMEOUT_MS) {
+        if (request.getDurationMillis() > MAX_GET_CURRENT_LOCATION_TIMEOUT_MS) {
             request = new LocationRequest.Builder(request)
-                    .setDurationMillis(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS)
+                    .setDurationMillis(MAX_GET_CURRENT_LOCATION_TIMEOUT_MS)
                     .build();
         }
 

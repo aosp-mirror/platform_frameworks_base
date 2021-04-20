@@ -18,6 +18,9 @@ package com.android.server.rotationresolver;
 
 import static android.provider.DeviceConfig.NAMESPACE_ROTATION_RESOLVER;
 import static android.service.rotationresolver.RotationResolverService.ROTATION_RESULT_FAILURE_CANCELLED;
+import static android.service.rotationresolver.RotationResolverService.ROTATION_RESULT_FAILURE_NOT_SUPPORTED;
+import static android.service.rotationresolver.RotationResolverService.ROTATION_RESULT_FAILURE_PREEMPTED;
+import static android.service.rotationresolver.RotationResolverService.ROTATION_RESULT_FAILURE_TIMED_OUT;
 
 import static com.android.internal.util.FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_0;
 import static com.android.internal.util.FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_180;
@@ -37,6 +40,7 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.rotationresolver.RotationResolverInternal;
 import android.service.rotationresolver.RotationResolutionRequest;
+import android.service.rotationresolver.RotationResolverService;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -217,24 +221,37 @@ public class RotationResolverManagerService extends
         }
     }
 
-    static void logRotationStats(int proposedRotation, int currentRotation,
-            int resolvedRotation, long timeToCalculate) {
+    static void logRotationStatsWithTimeToCalculate(int proposedRotation, int currentRotation,
+            int result, long timeToCalculate) {
         FrameworkStatsLog.write(FrameworkStatsLog.AUTO_ROTATE_REPORTED,
                 /* previous_orientation= */ surfaceRotationToProto(currentRotation),
                 /* proposed_orientation= */ surfaceRotationToProto(proposedRotation),
-                /* resolved_orientation= */ surfaceRotationToProto(resolvedRotation),
+                result,
                 /* process_duration_millis= */ timeToCalculate);
     }
 
     static void logRotationStats(int proposedRotation, int currentRotation,
-            int resolvedRotation) {
+            int result) {
         FrameworkStatsLog.write(FrameworkStatsLog.AUTO_ROTATE_REPORTED,
                 /* previous_orientation= */ surfaceRotationToProto(currentRotation),
                 /* proposed_orientation= */ surfaceRotationToProto(proposedRotation),
-                /* resolved_orientation= */ surfaceRotationToProto(resolvedRotation));
+                result);
     }
 
-    private static int surfaceRotationToProto(@Surface.Rotation int rotationPoseResult) {
+    static int errorCodeToProto(@RotationResolverService.FailureCodes int error) {
+        switch (error) {
+            case ROTATION_RESULT_FAILURE_NOT_SUPPORTED:
+                return RESOLUTION_UNAVAILABLE;
+            case ROTATION_RESULT_FAILURE_TIMED_OUT:
+            case ROTATION_RESULT_FAILURE_PREEMPTED:
+            case ROTATION_RESULT_FAILURE_CANCELLED:
+                return ORIENTATION_UNKNOWN;
+            default:
+                return RESOLUTION_FAILURE;
+        }
+    }
+
+    static int surfaceRotationToProto(@Surface.Rotation int rotationPoseResult) {
         switch (rotationPoseResult) {
             case Surface.ROTATION_0:
                 return AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_0;
@@ -245,7 +262,8 @@ public class RotationResolverManagerService extends
             case Surface.ROTATION_270:
                 return AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_270;
             default:
-                return ORIENTATION_UNKNOWN;
+                // Should not reach here.
+                return RESOLUTION_FAILURE;
         }
     }
 }
