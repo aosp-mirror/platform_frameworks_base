@@ -29,14 +29,3 @@ cc_library_shared {
         "libbase",
     ],
 }
-
-filegroup {
-    name: "lib_alarmManagerService_native",
-    srcs: [
-        "com_android_server_alarm_AlarmManagerService.cpp",
-    ],
-    visibility: [
-        // TODO: remove this
-        "//vendor:__subpackages__",
-    ],
-}
