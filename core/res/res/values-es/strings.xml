@@ -1694,7 +1694,7 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si activas <xliff:g id="SERVICE">%1$s</xliff:g>, el dispositivo no utilizará el bloqueo de pantalla para mejorar el cifrado de datos."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"El control total es adecuado para las aplicaciones de accesibilidad, pero no para la mayoría de las aplicaciones."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver y controlar la pantalla"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Puede leer todo el contenido de la pantalla y mostrar contenido sobre otras aplicaciones."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Puede leer todo el contenido de la pantalla y mostrar contenido encima de otras aplicaciones."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ver y realizar acciones"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Puede registrar tus interacciones con una aplicación o un sensor de hardware, así como interactuar con las aplicaciones en tu nombre."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
@@ -1854,7 +1854,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
     <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Ahorro de batería activa el tema oscuro y limita o desactiva la actividad en segundo plano, algunos efectos visuales y funciones como \"Hey Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
     <string name="battery_saver_description" msgid="7695751399533397741">"Ahorro de batería activa el tema oscuro y limita o desactiva la actividad en segundo plano, algunos efectos visuales y funciones como \"Hey Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"El modo Ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que puede reducir el uso de datos. Una aplicación activa puede acceder a los datos, aunque con menos frecuencia. Esto significa que es posible que, por ejemplo, algunas imágenes no se muestren hasta que las toques."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que puede reducir el uso de datos. Una aplicación que estés usando de forma activa puede acceder a los datos, aunque con menos frecuencia. Esto significa que es posible que, por ejemplo, algunas imágenes no se muestren hasta que las toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1929,8 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Cerrar"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Responder"</string>
-    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
-    <skip />
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Vídeo"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Rechazar"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Colgar"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Llamada entrante"</string>

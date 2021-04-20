@@ -1694,9 +1694,9 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ако вклучите <xliff:g id="SERVICE">%1$s</xliff:g>, уредот нема да го користи заклучувањето на екранот за да го подобри шифрирањето на податоците."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Приказ и контрола на екранот"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини на други апликации."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Приказ и изведување дејства"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ги следи вашите интеракции со апликациите или хардверскиот сензор и да комуницира со апликациите во ваше име."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини врз другите апликации."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и вршење на дејствата"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ја следи вашата интеракција со апликациите или хардверскиот сензор и да врши интеракција со апликациите во ваше име."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволи"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Одбиј"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Допрете на функција за да почнете да ја користите:"</string>
@@ -1929,8 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Затвори"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Одговори"</string>
-    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
-    <skip />
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Видео"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Одбиј"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Спушти"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Дојдовен повик"</string>
@@ -2265,7 +2264,7 @@
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Нови поставки за зголемување"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Сега може да зголемувате дел од екранот"</string>
-    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Вклучи во „Поставки“"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Вклучете во „Поставки“"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Отфрли"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Одблокирајте го пристапот до микрофонот на уредот"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Одблокирајте го пристапот до камерата на уредот"</string>
