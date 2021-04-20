@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.text.SpannedString;
-import android.text.style.RelativeSizeSpan;
+import android.text.style.AbsoluteSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -56,38 +56,38 @@ public class UsageProgressBarPreferenceTest {
     }
 
     @Test
-    public void setUsageSummary_noNumber_noRelativeSizeSpan() {
+    public void setUsageSummary_noNumber_noAbsoluteSizeSpan() {
         mUsageProgressBarPreference.setUsageSummary("test");
 
         mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
 
         final TextView usageSummary = (TextView) mViewHolder.findViewById(R.id.usage_summary);
         final SpannedString summary = new SpannedString(usageSummary.getText());
-        assertThat(summary.getSpans(0, summary.length(), RelativeSizeSpan.class).length)
+        assertThat(summary.getSpans(0, summary.length(), AbsoluteSizeSpan.class).length)
                 .isEqualTo(0);
     }
 
     @Test
-    public void setUsageSummary_integerNumber_findRelativeSizeSpan() {
+    public void setUsageSummary_integerNumber_findAbsoluteSizeSpan() {
         mUsageProgressBarPreference.setUsageSummary("10Test");
 
         mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
 
         final TextView usageSummary = (TextView) mViewHolder.findViewById(R.id.usage_summary);
         final SpannedString summary = new SpannedString(usageSummary.getText());
-        assertThat(summary.getSpans(0, summary.length(), RelativeSizeSpan.class).length)
+        assertThat(summary.getSpans(0, summary.length(), AbsoluteSizeSpan.class).length)
                 .isEqualTo(1);
     }
 
     @Test
-    public void setUsageSummary_floatNumber_findRelativeSizeSpan() {
+    public void setUsageSummary_floatNumber_findAbsoluteSizeSpan() {
         mUsageProgressBarPreference.setUsageSummary("3.14Test");
 
         mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
 
         final TextView usageSummary = (TextView) mViewHolder.findViewById(R.id.usage_summary);
         final SpannedString summary = new SpannedString(usageSummary.getText());
-        assertThat(summary.getSpans(0, summary.length(), RelativeSizeSpan.class).length)
+        assertThat(summary.getSpans(0, summary.length(), AbsoluteSizeSpan.class).length)
                 .isEqualTo(1);
     }
 
