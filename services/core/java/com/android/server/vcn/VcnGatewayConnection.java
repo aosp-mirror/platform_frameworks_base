@@ -16,6 +16,8 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
@@ -47,6 +49,7 @@ import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkProvider;
+import android.net.NetworkScore;
 import android.net.RouteInfo;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.Uri;
@@ -517,6 +520,7 @@ public class VcnGatewayConnection extends StateMachine {
     @NonNull private final VcnGatewayStatusCallback mGatewayStatusCallback;
     @NonNull private final Dependencies mDeps;
     @NonNull private final VcnUnderlyingNetworkTrackerCallback mUnderlyingNetworkTrackerCallback;
+    private final boolean mIsMobileDataEnabled;
 
     @NonNull private final IpSecManager mIpSecManager;
 
@@ -626,13 +630,15 @@ public class VcnGatewayConnection extends StateMachine {
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull VcnGatewayConnectionConfig connectionConfig,
-            @NonNull VcnGatewayStatusCallback gatewayStatusCallback) {
+            @NonNull VcnGatewayStatusCallback gatewayStatusCallback,
+            boolean isMobileDataEnabled) {
         this(
                 vcnContext,
                 subscriptionGroup,
                 snapshot,
                 connectionConfig,
                 gatewayStatusCallback,
+                isMobileDataEnabled,
                 new Dependencies());
     }
 
@@ -643,6 +649,7 @@ public class VcnGatewayConnection extends StateMachine {
             @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull VcnGatewayConnectionConfig connectionConfig,
             @NonNull VcnGatewayStatusCallback gatewayStatusCallback,
+            boolean isMobileDataEnabled,
             @NonNull Dependencies deps) {
         super(TAG, Objects.requireNonNull(vcnContext, "Missing vcnContext").getLooper());
         mVcnContext = vcnContext;
@@ -650,6 +657,7 @@ public class VcnGatewayConnection extends StateMachine {
         mConnectionConfig = Objects.requireNonNull(connectionConfig, "Missing connectionConfig");
         mGatewayStatusCallback =
                 Objects.requireNonNull(gatewayStatusCallback, "Missing gatewayStatusCallback");
+        mIsMobileDataEnabled = isMobileDataEnabled;
         mDeps = Objects.requireNonNull(deps, "Missing deps");
 
         mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
@@ -1502,7 +1510,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull VcnNetworkAgent agent,
                 @NonNull VcnChildSessionConfiguration childConfig) {
             final NetworkCapabilities caps =
-                    buildNetworkCapabilities(mConnectionConfig, mUnderlying);
+                    buildNetworkCapabilities(mConnectionConfig, mUnderlying, mIsMobileDataEnabled);
             final LinkProperties lp =
                     buildConnectedLinkProperties(
                             mConnectionConfig, tunnelIface, childConfig, mUnderlying);
@@ -1515,7 +1523,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull IpSecTunnelInterface tunnelIface,
                 @NonNull VcnChildSessionConfiguration childConfig) {
             final NetworkCapabilities caps =
-                    buildNetworkCapabilities(mConnectionConfig, mUnderlying);
+                    buildNetworkCapabilities(mConnectionConfig, mUnderlying, mIsMobileDataEnabled);
             final LinkProperties lp =
                     buildConnectedLinkProperties(
                             mConnectionConfig, tunnelIface, childConfig, mUnderlying);
@@ -1843,7 +1851,8 @@ public class VcnGatewayConnection extends StateMachine {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static NetworkCapabilities buildNetworkCapabilities(
             @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig,
-            @Nullable UnderlyingNetworkRecord underlying) {
+            @Nullable UnderlyingNetworkRecord underlying,
+            boolean isMobileDataEnabled) {
         final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
 
         builder.addTransportType(TRANSPORT_CELLULAR);
@@ -1853,6 +1862,12 @@ public class VcnGatewayConnection extends StateMachine {
 
         // Add exposed capabilities
         for (int cap : gatewayConnectionConfig.getAllExposedCapabilities()) {
+            // Skip adding INTERNET or DUN if mobile data is disabled.
+            if (!isMobileDataEnabled
+                    && (cap == NET_CAPABILITY_INTERNET || cap == NET_CAPABILITY_DUN)) {
+                continue;
+            }
+
             builder.addCapability(cap);
         }
 
@@ -2040,6 +2055,12 @@ public class VcnGatewayConnection extends StateMachine {
                 "mNetworkAgent.getNetwork(): "
                         + (mNetworkAgent == null ? null : mNetworkAgent.getNetwork()));
 
+        pw.println("mUnderlying:");
+        pw.increaseIndent();
+        mUnderlying.dump(pw);
+        pw.decreaseIndent();
+        pw.println();
+
         pw.decreaseIndent();
     }
 
@@ -2183,7 +2204,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull String tag,
                 @NonNull NetworkCapabilities caps,
                 @NonNull LinkProperties lp,
-                @NonNull int score,
+                @NonNull NetworkScore score,
                 @NonNull NetworkAgentConfig nac,
                 @NonNull NetworkProvider provider,
                 @NonNull Consumer<VcnNetworkAgent> networkUnwantedCallback,
@@ -2324,7 +2345,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull String tag,
                 @NonNull NetworkCapabilities caps,
                 @NonNull LinkProperties lp,
-                @NonNull int score,
+                @NonNull NetworkScore score,
                 @NonNull NetworkAgentConfig nac,
                 @NonNull NetworkProvider provider,
                 @NonNull Consumer<VcnNetworkAgent> networkUnwantedCallback,
