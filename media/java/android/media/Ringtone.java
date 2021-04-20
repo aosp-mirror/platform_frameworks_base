@@ -405,9 +405,11 @@ public class Ringtone {
      */
     public void play() {
         if (mLocalPlayer != null) {
-            // do not play ringtones if stream volume is 0
-            // (typically because ringer mode is silent).
-            if (mAudioManager.getStreamVolume(
+            // Play ringtones if stream volume is over 0 or if it is a haptic-only ringtone
+            // (typically because ringer mode is vibrate).
+            boolean isHapticOnly = AudioManager.hasHapticChannels(mUri)
+                    && !mAudioAttributes.areHapticChannelsMuted() && mVolume == 0;
+            if (isHapticOnly || mAudioManager.getStreamVolume(
                     AudioAttributes.toLegacyStreamType(mAudioAttributes)) != 0) {
                 startLocalPlayer();
             }
