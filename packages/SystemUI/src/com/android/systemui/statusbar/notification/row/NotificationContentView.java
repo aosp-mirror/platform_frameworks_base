@@ -1481,18 +1481,26 @@ public class NotificationContentView extends FrameLayout {
             return null;
         }
 
-        SmartReplyView smartReplyView = null;
-        if (smartReplyContainer.getChildCount() == 1
-                && smartReplyContainer.getChildAt(0) instanceof SmartReplyView) {
+        // Search for an existing SmartReplyView
+        int index = 0;
+        final int childCount = smartReplyContainer.getChildCount();
+        for (; index < childCount; index++) {
+            View child = smartReplyContainer.getChildAt(index);
+            if (child.getId() == R.id.smart_reply_view && child instanceof SmartReplyView) {
+                break;
+            }
+        }
+
+        if (index < childCount) {
             // If we already have a SmartReplyView - replace it with the newly inflated one. The
             // newly inflated one is connected to the new inflated smart reply/action buttons.
-            smartReplyContainer.removeAllViews();
+            smartReplyContainer.removeViewAt(index);
         }
-        if (smartReplyContainer.getChildCount() == 0
-                && inflatedSmartReplyViewHolder != null
+        SmartReplyView smartReplyView = null;
+        if (inflatedSmartReplyViewHolder != null
                 && inflatedSmartReplyViewHolder.getSmartReplyView() != null) {
             smartReplyView = inflatedSmartReplyViewHolder.getSmartReplyView();
-            smartReplyContainer.addView(smartReplyView);
+            smartReplyContainer.addView(smartReplyView, index);
         }
         if (smartReplyView != null) {
             smartReplyView.resetSmartSuggestions(smartReplyContainer);
