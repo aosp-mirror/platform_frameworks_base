@@ -22,8 +22,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.test.TestLooper;
 
@@ -36,9 +34,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /** Tests for TelephonySubscriptionTracker */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -46,8 +41,6 @@ public class VcnNetworkProviderTest {
     private static final int TEST_SCORE_UNSATISFIED = 0;
     private static final int TEST_SCORE_HIGH = 100;
     private static final int TEST_PROVIDER_ID = 1;
-    private static final int TEST_LEGACY_TYPE = ConnectivityManager.TYPE_MOBILE;
-    private static final NetworkRequest.Type TEST_REQUEST_TYPE = NetworkRequest.Type.REQUEST;
 
     @NonNull private final Context mContext;
     @NonNull private final TestLooper mTestLooper;
@@ -92,30 +85,6 @@ public class VcnNetworkProviderTest {
 
         final NetworkRequest request = mock(NetworkRequest.class);
         mVcnNetworkProvider.onNetworkRequested(request, TEST_SCORE_UNSATISFIED, TEST_PROVIDER_ID);
-        verifyNoMoreInteractions(mListener);
-    }
-
-    @Test
-    public void testCachedRequestsPassedOnRegister() throws Exception {
-        final List<NetworkRequest> requests = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            final NetworkRequest request =
-                    new NetworkRequest(
-                            new NetworkCapabilities(),
-                            TEST_LEGACY_TYPE,
-                            i /* requestId */,
-                            TEST_REQUEST_TYPE);
-
-            requests.add(request);
-            mVcnNetworkProvider.onNetworkRequested(request, i, i + 1);
-        }
-
-        mVcnNetworkProvider.registerListener(mListener);
-        for (int i = 0; i < requests.size(); i++) {
-            final NetworkRequest request = requests.get(i);
-            verify(mListener).onNetworkRequested(request, i, i + 1);
-        }
         verifyNoMoreInteractions(mListener);
     }
 }
