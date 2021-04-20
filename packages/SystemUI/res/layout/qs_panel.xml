@@ -32,6 +32,7 @@
         android:id="@+id/expanded_qs_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/qs_container_bottom_padding"
         android:elevation="4dp"
         android:importantForAccessibility="no"
         android:scrollbars="none"
