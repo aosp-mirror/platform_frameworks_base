@@ -2262,7 +2262,7 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Chế độ cài đặt phóng to mới"</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Chế độ phóng to mới"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Giờ đây, bạn có thể phóng to một phần màn hình"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Bật trong phần Cài đặt"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Đóng"</string>
@@ -2273,6 +2273,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Quyền riêng tư khi sử dụng cảm biến"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Biểu tượng ứng dụng"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Hình ảnh thương hiệu của ứng dụng"</string>
-    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Kiểm tra chế độ cài đặt quyền truy cập"</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Hãy kiểm tra chế độ cài đặt quyền truy cập"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> có thể xem và điều khiển màn hình của bạn. Nhấn để xem lại."</string>
 </resources>

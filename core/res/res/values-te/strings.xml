@@ -1366,7 +1366,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"అనలాగ్ ఆడియో ఉపకరణం కనుగొనబడింది"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"జోడించిన పరికరం ఈ ఫోన్‌కు అనుకూలంగా లేదు. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB డీబగ్గింగ్ కనెక్ట్ చేయబడింది"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB డీబగ్గింగ్‌ను ఆఫ్ చేయడానికి నొక్కండి"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB డీబగ్గింగ్‌ను ఆఫ్ చేయడానికి ట్యాప్ చేయండి"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"డీబగ్గింగ్‌ని నిలిపివేయడానికి ఎంచుకోండి."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"వైర్‌లెస్ డీబగ్గింగ్ కనెక్ట్ చేయబడింది"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"వైర్‌లెస్ డీబగ్గింగ్‌ని ఆఫ్ చేయడానికి ట్యాప్ చేయండి"</string>
@@ -1929,8 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"మూసివేయి"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"సమాధానం ఇవ్వు"</string>
-    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
-    <skip />
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"వీడియో కాల్"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"తిరస్కరించండి"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"కాల్ ముగించు"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ఇన్‌కమింగ్ కాల్"</string>
