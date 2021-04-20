@@ -52,7 +52,7 @@ public final class MeasuredEnergySnapshotTest {
     private static final  EnergyConsumer CONSUMER_OTHER_1 = createEnergyConsumer(
             1, 1, EnergyConsumerType.OTHER, "HPU");
     private static final  EnergyConsumer CONSUMER_OTHER_2 = createEnergyConsumer(
-            436, 2, EnergyConsumerType.OTHER, "IPU\n&\005");
+            436, 2, EnergyConsumerType.OTHER, "IPU");
 
     private static final SparseArray<EnergyConsumer> ALL_ID_CONSUMER_MAP = createIdToConsumerMap(
             CONSUMER_DISPLAY, CONSUMER_OTHER_0, CONSUMER_OTHER_1, CONSUMER_OTHER_2);
@@ -228,8 +228,7 @@ public final class MeasuredEnergySnapshotTest {
     @Test
     public void testGetOtherOrdinalNames() {
         final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
-        assertThat(snapshot.getOtherOrdinalNames()).asList()
-                .containsExactly("GPU", "HPU", "IPU &_");
+        assertThat(snapshot.getOtherOrdinalNames()).asList().containsExactly("GPU", "HPU", "IPU");
     }
 
     @Test
