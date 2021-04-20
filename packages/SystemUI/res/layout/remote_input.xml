@@ -22,28 +22,75 @@
         android:id="@+id/remote_input"
         android:layout_height="match_parent"
         android:layout_width="match_parent">
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/remote_input_content"
+        android:orientation="vertical"
+        android:clipToPadding="false"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="16dp"
+        android:layout_weight="1">
+        <FrameLayout
+            android:id="@+id/remote_input_content_container"
+            android:layout_marginTop="-6dp"
+            android:layout_height="60dp"
+            android:layout_width="60dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"
+            android:layout_gravity="center_vertical">
+            <ImageView
+                android:id="@+id/remote_input_attachment_image"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="start|bottom"
+                android:clipToOutline="true"
+                android:background="@drawable/rounded_rect_background"
+                android:scaleType="centerCrop" />
+            <ImageView
+                android:id="@+id/remote_input_delete_bg"
+                android:paddingStart="24dp"
+                android:paddingBottom="24dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="end|top"
+                android:src="@drawable/thumbnail_delete_btn_bg"/>
+            <ImageView
+                android:id="@+id/remote_input_delete"
+                android:paddingTop="3dp"
+                android:paddingEnd="3dp"
+                android:paddingStart="27dp"
+                android:paddingBottom="27dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="end|top"
+                android:src="@drawable/ic_close"
+                android:contentDescription="@string/notif_inline_reply_remove_attachment_description"/>
+        </FrameLayout>
 
-    <view class="com.android.systemui.statusbar.policy.RemoteInputView$RemoteEditText"
-            android:id="@+id/remote_input_text"
-            android:layout_height="wrap_content"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:paddingTop="2dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="12dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="16dp"
-            android:layout_gravity="start|center_vertical"
-            android:textAppearance="?android:attr/textAppearance"
-            android:textColor="@color/remote_input_text"
-            android:textColorHint="@color/remote_input_hint"
-            android:textSize="16sp"
-            android:background="@null"
-            android:maxLines="4"
-            android:ellipsize="start"
-            android:inputType="textShortMessage|textMultiLine|textAutoCorrect|textCapSentences"
-            android:imeOptions="actionSend|flagNoExtractUi|flagNoFullscreen" />
+        <view class="com.android.systemui.statusbar.policy.RemoteInputView$RemoteEditText"
+                android:id="@+id/remote_input_text"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:paddingTop="2dp"
+                android:paddingStart="4dp"
+                android:paddingBottom="4dp"
+                android:paddingEnd="12dp"
+                android:layout_gravity="start|center_vertical"
+                android:textAppearance="?android:attr/textAppearance"
+                android:textColor="@color/remote_input_text"
+                android:textColorHint="@color/remote_input_hint"
+                android:textSize="16sp"
+                android:background="@null"
+                android:maxLines="4"
+                android:ellipsize="start"
+                android:inputType="textShortMessage|textMultiLine|textAutoCorrect|textCapSentences"
+                android:imeOptions="actionSend|flagNoExtractUi|flagNoFullscreen" />
+    </LinearLayout>
 
     <FrameLayout
             android:layout_width="wrap_content"
