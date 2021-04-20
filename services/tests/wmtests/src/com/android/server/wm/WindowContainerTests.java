@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -631,6 +632,22 @@ public class WindowContainerTests extends WindowTestsBase {
         visibleUnspecifiedRootChild.setFillsParent(true);
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, visibleUnspecifiedRootChild.getOrientation());
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, root.getOrientation());
+    }
+
+    @Test
+    public void testSetOrientation() {
+        final TestWindowContainer root = spy(new TestWindowContainerBuilder(mWm).build());
+        final TestWindowContainer child = spy(root.addChildWindow());
+        doReturn(true).when(root).handlesOrientationChangeFromDescendant();
+        child.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        child.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        // The ancestor should decide whether to dispatch the configuration change.
+        verify(child, never()).onConfigurationChanged(any());
+
+        doReturn(false).when(root).handlesOrientationChangeFromDescendant();
+        child.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        // The ancestor doesn't handle the request so the descendant applies the change directly.
+        verify(child).onConfigurationChanged(any());
     }
 
     @Test
