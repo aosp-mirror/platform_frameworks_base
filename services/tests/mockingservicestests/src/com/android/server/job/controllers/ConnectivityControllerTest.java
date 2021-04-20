@@ -295,11 +295,11 @@ public class ConnectivityControllerTest {
         doNothing().when(mConnManager).registerNetworkCallback(any(), callbackCaptor.capture());
         final ArgumentCaptor<NetworkCallback> redCallbackCaptor =
                 ArgumentCaptor.forClass(NetworkCallback.class);
-        doNothing().when(mConnManager).registerDefaultNetworkCallbackAsUid(
+        doNothing().when(mConnManager).registerDefaultNetworkCallbackForUid(
                 eq(UID_RED), redCallbackCaptor.capture(), any());
         final ArgumentCaptor<NetworkCallback> blueCallbackCaptor =
                 ArgumentCaptor.forClass(NetworkCallback.class);
-        doNothing().when(mConnManager).registerDefaultNetworkCallbackAsUid(
+        doNothing().when(mConnManager).registerDefaultNetworkCallbackForUid(
                 eq(UID_BLUE), blueCallbackCaptor.capture(), any());
 
         final ConnectivityController controller = new ConnectivityController(mService);
@@ -600,11 +600,11 @@ public class ConnectivityControllerTest {
         doNothing().when(mConnManager).registerNetworkCallback(any(), callback.capture());
         final ArgumentCaptor<NetworkCallback> redCallback =
                 ArgumentCaptor.forClass(NetworkCallback.class);
-        doNothing().when(mConnManager).registerDefaultNetworkCallbackAsUid(
+        doNothing().when(mConnManager).registerDefaultNetworkCallbackForUid(
                 eq(UID_RED), redCallback.capture(), any());
         final ArgumentCaptor<NetworkCallback> blueCallback =
                 ArgumentCaptor.forClass(NetworkCallback.class);
-        doNothing().when(mConnManager).registerDefaultNetworkCallbackAsUid(
+        doNothing().when(mConnManager).registerDefaultNetworkCallbackForUid(
                 eq(UID_BLUE), blueCallback.capture(), any());
 
         final JobStatus networked = createJobStatus(createJob()

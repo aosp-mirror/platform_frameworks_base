@@ -4462,7 +4462,7 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
             @NonNull Handler handler) {
-        registerDefaultNetworkCallbackAsUid(Process.INVALID_UID, networkCallback, handler);
+        registerDefaultNetworkCallbackForUid(Process.INVALID_UID, networkCallback, handler);
     }
 
     /**
@@ -4492,7 +4492,7 @@ public class ConnectivityManager {
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_SETTINGS})
-    public void registerDefaultNetworkCallbackAsUid(int uid,
+    public void registerDefaultNetworkCallbackForUid(int uid,
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
         CallbackHandler cbHandler = new CallbackHandler(handler);
         sendRequestForNetwork(uid, null /* need */, networkCallback, 0 /* timeoutMs */,
