@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.assist.ActivityId;
 import android.content.Context;
+import android.icu.util.ULocale;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
@@ -423,8 +424,8 @@ public final class UiTranslationManager {
                 case STATE_UI_TRANSLATION_STARTED:
                 case STATE_UI_TRANSLATION_RESUMED:
                     mCallback.onStarted(
-                            bundle.getString(EXTRA_SOURCE_LOCALE),
-                            bundle.getString(EXTRA_TARGET_LOCALE));
+                            (ULocale) bundle.getSerializable(EXTRA_SOURCE_LOCALE),
+                            (ULocale) bundle.getSerializable(EXTRA_TARGET_LOCALE));
                     break;
                 case STATE_UI_TRANSLATION_PAUSED:
                     mCallback.onPaused();

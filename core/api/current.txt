@@ -52882,10 +52882,12 @@ package android.view.translation {
   }
 
   public final class TranslationSpec implements android.os.Parcelable {
-    ctor public TranslationSpec(@NonNull String, int);
+    ctor @Deprecated public TranslationSpec(@NonNull String, int);
+    ctor public TranslationSpec(@NonNull android.icu.util.ULocale, int);
     method public int describeContents();
     method public int getDataFormat();
-    method @NonNull public String getLanguage();
+    method @Deprecated @NonNull public String getLanguage();
+    method @NonNull public android.icu.util.ULocale getLocale();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationSpec> CREATOR;
     field public static final int DATA_FORMAT_TEXT = 1; // 0x1
@@ -52905,7 +52907,8 @@ package android.view.translation {
   public interface UiTranslationStateCallback {
     method public void onFinished();
     method public void onPaused();
-    method public void onStarted(@NonNull String, @NonNull String);
+    method @Deprecated public void onStarted(@NonNull String, @NonNull String);
+    method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
   }
 
   @UiThread public interface ViewTranslationCallback {
