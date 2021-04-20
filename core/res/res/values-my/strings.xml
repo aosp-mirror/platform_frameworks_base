@@ -142,7 +142,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"WiFi ခေါ်ဆိုမှု"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ပိတ်ထားသည်"</string>
+    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ပိတ်"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi သုံး၍ ခေါ်ဆိုသည်"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"မိုဘိုင်းကွန်ရက်သုံး၍ ခေါ်ဆိုသည်"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"ကြိုးမဲ့အင်တာနက် သာလျှင်"</string>
@@ -317,7 +317,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"အသံဖမ်းခြင်း"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ကိုယ်လက်လှုပ်ရှားမှု"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"သင့်ကိုယ်လက်လှုပ်ရှားမှုကို ဝင်ကြည့်ရန်"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"ကင်မရာ"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"အနီးတစ်ဝိုက်ရှိ စက်များ"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"အနီးတစ်ဝိုက်ရှိ စက်များကို ရှာဖွေပြီးချိတ်ဆက်မည်"</string>
@@ -1175,7 +1175,7 @@
     <string name="no" msgid="5122037903299899715">"မလုပ်တော့"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"သတိပြုရန်"</string>
     <string name="loading" msgid="3138021523725055037">"တင်နေ…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"ဖွင့်ရန်"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ဖွင့်"</string>
     <string name="capital_off" msgid="7443704171014626777">"ပိတ်"</string>
     <string name="checked" msgid="9179896827054513119">"အမှန်ခြစ်ပြီး"</string>
     <string name="not_checked" msgid="7972320087569023342">"ခြစ် မထား"</string>
@@ -1688,8 +1688,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုဖြစ်သော <xliff:g id="SERVICE">%1$s</xliff:g> ကို ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nဤဖြတ်လမ်းလင့်ခ်ကို \'ဆက်တင်များ &gt; အများသုံးစွဲနိုင်မှု\' တွင် နောက်ဝန်ဆောင်မှုတစ်ခုသို့ ပြောင်းနိုင်သည်။"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ဖွင့်ရန်"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"မဖွင့်ပါနှင့်"</string>
-    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ဖွင့်ထားသည်"</string>
-    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ပိတ်ထားသည်"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ဖွင့်"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ပိတ်"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> ကို သင့်စက်အား အပြည့်အဝထိန်းချုပ်ခွင့် ပေးလိုပါသလား။"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> ဖွင့်လိုက်ပါက သင်၏စက်သည် ဒေတာအသွင်ဝှက်ခြင်း ပိုကောင်းမွန်စေရန် သင့်ဖန်သားပြင်လော့ခ်ကို သုံးမည်မဟုတ်ပါ။"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"အများသုံးစွဲနိုင်မှု လိုအပ်ချက်များအတွက် အထောက်အကူပြုသည့် အက်ပ်များအား အပြည့်အဝ ထိန်းချုပ်ခွင့်ပေးခြင်းသည် သင့်လျော်သော်လည်း အက်ပ်အများစုအတွက် မသင့်လျော်ပါ။"</string>
@@ -1929,8 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"ပိတ်ရန်"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>− <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"ဖုန်းကိုင်ရန်"</string>
-    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
-    <skip />
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"ဗီဒီယို"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"ငြင်းပယ်ရန်"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ဖုန်းချရန်"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"အဝင်ခေါ်ဆိုမှု"</string>
@@ -2066,7 +2065,7 @@
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"စနစ်"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ဆက်တင်များ"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"ကင်မရာ"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Camera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"မိုက်ခရိုဖုန်း"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"သင့်မျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များပေါ်တွင် ပြသခြင်း"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"အကြံပြုချက် ပေးရန်"</string>

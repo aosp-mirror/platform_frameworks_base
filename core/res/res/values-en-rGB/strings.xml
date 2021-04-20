@@ -2264,7 +2264,7 @@
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"New magnification settings"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"You can now magnify part of your screen"</string>
-    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Turn on in settings"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Turn on in Settings"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Dismiss"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Unblock device microphone"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Unblock device camera"</string>

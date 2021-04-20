@@ -733,11 +733,11 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"Ekran kilidini dəyişmək"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ekran kilidini dəyişmək"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Ekranı kilidləmək"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Ekranın nə vaxt və necə kilidlənməsinə nəzarət edir."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Ekranın kilidlənmə vaxtına və üsuluna nəzarət."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Bütün məlumatları silmək"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Planşetin datasını xəbərdarlıq olmadan, zavod data sıfırlaması ilə silin."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Android TV cihazının datasını fabrik sıfırlaması haqqında xəbərdarlıq olmadan silin."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Telefonun datasını xəbərdarlıq olmadan, zavod data sıfırlaması ilə silin"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Telefondakı bütün məlumatları xəbərdarlıqsız sıfırlayaraq məhv etmək"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"İstifadəçi verilənlərini sil"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Xəbərdarlıq etmədən bu istifadəçinin verilənlərini bu planşetdə silin."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Bu istifadəçinin datasını xəbərdarlıq olmadan Android TV cihazında silin."</string>
@@ -751,7 +751,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Kameraları dekativ edin"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Bütün cihaz kameralarının istifadəsini əngəllə."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Ekran kilidini deaktiv etmək"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Bəzi ekran funksiyaları istifadəsinin qarşısını alın."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Bəzi ekran funksiyaları istifadəsinin qarşısını almaq."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Ev"</item>
     <item msgid="7740243458912727194">"Mobil"</item>
@@ -1846,7 +1846,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2-ci İş <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3-cü İş <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Ayırmadan öncə PIN istənilsin"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Ayırmadan öncə kilid modeli istənilsin"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Qrafik açar istənilsin"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Ayırmadan öncə parol istənilsin"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Admin tərəfindən quraşdırıldı"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Admin tərəfindən yeniləndi"</string>
