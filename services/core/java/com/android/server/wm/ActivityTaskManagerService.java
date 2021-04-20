@@ -141,6 +141,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
+import android.app.PictureInPictureUiState;
 import android.app.ProfilerInfo;
 import android.app.RemoteAction;
 import android.app.WaitResult;
@@ -3641,6 +3642,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             for (int i = 0; i < packageNames.size(); ++i) {
                 mTaskSupervisor.mLaunchParamsPersister.removeRecordForPackage(packageNames.get(i));
             }
+        }
+    }
+
+    @Override
+    public void onPictureInPictureStateChanged(PictureInPictureUiState pipState) {
+        enforceTaskPermission("onPictureInPictureStateChanged");
+        final Task rootPinnedStask = mRootWindowContainer.getDefaultTaskDisplayArea()
+                .getRootPinnedTask();
+        if (rootPinnedStask != null && rootPinnedStask.getTopMostActivity() != null) {
+            mWindowManager.mAtmService.mActivityClientController.onPictureInPictureStateChanged(
+                    rootPinnedStask.getTopMostActivity(), pipState);
         }
     }
 
