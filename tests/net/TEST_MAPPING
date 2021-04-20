@@ -28,7 +28,7 @@
   ],
   "imports": [
     {
-      "path": "cts/tests/tests/net"
+      "path": "packages/modules/Connectivity"
     }
   ]
 }
