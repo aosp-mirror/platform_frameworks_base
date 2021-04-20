@@ -159,7 +159,7 @@ public class MeasuredEnergyStatsTest {
         stats.updateCustomBucket(1, 60);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false, false);
         parcel.setDataPosition(0);
         MeasuredEnergyStats newStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(parcel);
 
@@ -175,6 +175,7 @@ public class MeasuredEnergyStatsTest {
         }
         assertEquals(POWER_DATA_UNAVAILABLE,
                 newStats.getAccumulatedCustomBucketCharge(customBucketNames.length + 1));
+        assertThat(newStats.getCustomBucketNames()).asList().containsExactly("A", "B");
         parcel.recycle();
     }
 
@@ -201,7 +202,7 @@ public class MeasuredEnergyStatsTest {
         stats.updateCustomBucket(1, 316);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false, false);
 
         final boolean[] newsupportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
         newsupportedStandardBuckets[POWER_BUCKET_SCREEN_ON] = true;
@@ -234,6 +235,7 @@ public class MeasuredEnergyStatsTest {
         }
         assertEquals(POWER_DATA_UNAVAILABLE,
                 newStats.getAccumulatedCustomBucketCharge(customBucketNames.length + 1));
+        assertThat(newStats.getCustomBucketNames()).asList().containsExactly("A", "B");
         parcel.recycle();
     }
 
@@ -251,7 +253,7 @@ public class MeasuredEnergyStatsTest {
 
         // Let's try parcelling with including zeros
         final Parcel includeZerosParcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, includeZerosParcel, false);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, includeZerosParcel, false, false);
         includeZerosParcel.setDataPosition(0);
 
         MeasuredEnergyStats newStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(
@@ -275,7 +277,7 @@ public class MeasuredEnergyStatsTest {
 
         // Now let's try parcelling with skipping zeros
         final Parcel skipZerosParcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, skipZerosParcel, true);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, skipZerosParcel, true, true);
         skipZerosParcel.setDataPosition(0);
 
         newStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(skipZerosParcel);
@@ -315,7 +317,7 @@ public class MeasuredEnergyStatsTest {
         stats.updateCustomBucket(1, 60);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false, false);
         parcel.setDataPosition(0);
 
         MeasuredEnergyStats newStats =
@@ -344,7 +346,7 @@ public class MeasuredEnergyStatsTest {
         stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 7L);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false, false);
 
         final boolean[] newSupportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
         newSupportedStandardBuckets[POWER_BUCKET_SCREEN_ON] = true;
