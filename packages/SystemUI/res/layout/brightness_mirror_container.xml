@@ -17,10 +17,14 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:theme="@style/Theme.SystemUI.QuickSettings"
-    android:id="@+id/brightness_mirror"
-    android:layout_width="@dimen/qs_panel_width"
-    android:layout_height="@dimen/brightness_mirror_height"
-    android:layout_gravity="@integer/notification_panel_layout_gravity"
+    android:id="@+id/brightness_mirror_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/brightness_mirror_background"
+    android:layout_gravity="center_vertical"
+    android:layout_margin="8dp"
+    android:padding="@dimen/rounded_slider_background_padding"
+    android:gravity="center"
     android:visibility="invisible">
 
 </FrameLayout>
