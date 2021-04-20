@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
@@ -1151,10 +1152,10 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public WindowLayout windowLayout;
 
     /**
-     * Attribution tags for finer grained calls if a {@android.content.Context#sendBroadcast(Intent,
-     * String)} is used with a permission.
-     * @hide
+     * Attribution tags for finer grained calls if a {@link
+     * android.content.Context#sendBroadcast(Intent, String)} is used with a permission.
      */
+    @SuppressLint("MissingNullability")
     public String[] attributionTags;
 
     public ActivityInfo() {
