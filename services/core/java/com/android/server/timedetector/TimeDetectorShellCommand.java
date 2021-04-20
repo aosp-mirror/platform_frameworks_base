@@ -16,6 +16,7 @@
 package com.android.server.timedetector;
 
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SERVICE_NAME;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
 
 import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE;
@@ -61,26 +62,22 @@ class TimeDetectorShellCommand extends ShellCommand {
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
-        pw.println("Time Detector (time_detector) commands:");
-        pw.println("  help");
-        pw.println("    Print this help text.");
+        pw.printf("Time Detector (%s) commands:\n", SHELL_COMMAND_SERVICE_NAME);
+        pw.printf("  help\n");
+        pw.printf("    Print this help text.\n");
         pw.printf("  %s\n", SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED);
-        pw.println("    Prints true/false according to the automatic time detection setting");
+        pw.printf("    Prints true/false according to the automatic time detection setting.\n");
         pw.println();
         pw.printf("This service is also affected by the following device_config flags in the"
                 + " %s namespace:\n", NAMESPACE_SYSTEM_TIME);
-        pw.printf("    %s - the lower bound used to validate time suggestions when they are"
-                        + " received.\n", KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE);
-        pw.println("         Specified in milliseconds since the start of the Unix epoch.");
-        pw.printf("    %s - [default=null], a comma separated list of origins. See"
-                + " TimeDetectorStrategy for details\n",
-                KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE);
+        pw.printf("  %s\n", KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE);
+        pw.printf("    The lower bound used to validate time suggestions when they are received."
+                + "\n");
+        pw.printf("    Specified in milliseconds since the start of the Unix epoch.\n");
+        pw.printf("  %s\n", KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE);
+        pw.printf("    A comma separated list of origins. See TimeDetectorStrategy for details.\n");
         pw.println();
-        pw.println("Example:");
-        pw.printf("    $ adb shell cmd device_config put %s %s %s\n",
-                NAMESPACE_SYSTEM_TIME, KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE,
-                "external");
-        pw.println("See adb shell cmd device_config for more information.");
+        pw.printf("See \"adb shell cmd device_config\" for more information on setting flags.\n");
         pw.println();
     }
 }
