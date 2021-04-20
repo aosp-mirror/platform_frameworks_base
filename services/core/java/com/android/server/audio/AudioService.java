@@ -84,6 +84,7 @@ import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioFocusDispatcher;
+import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
 import android.media.IAudioService;
@@ -120,6 +121,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -312,6 +314,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_RECORDING_CONFIG_CHANGE = 37;
     private static final int MSG_SET_A2DP_DEV_CONNECTION_STATE = 38;
     private static final int MSG_A2DP_DEV_CONFIG_CHANGE = 39;
+    private static final int MSG_DISPATCH_AUDIO_MODE = 40;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -4712,6 +4715,8 @@ public class AudioService extends IAudioService.Stub
                 if (DEBUG_MODE) {
                     Log.v(TAG, "onUpdateAudioMode: mode successfully set to " + mode);
                 }
+                sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_MODE, SENDMSG_REPLACE, mode, 0,
+                        /*obj*/ null, /*delay*/ 0);
                 int previousMode = mMode.getAndSet(mode);
                 // Note: newModeOwnerPid is always 0 when actualMode is MODE_NORMAL
                 mModeLogger.log(new PhoneStateEvent(requesterPackage, requesterPid,
@@ -4754,6 +4759,38 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#isCallScreeningModeSupported() */
     public boolean isCallScreeningModeSupported() {
         return mIsCallScreeningModeSupported;
+    }
+
+    protected void dispatchMode(int mode) {
+        final int nbDispatchers = mModeDispatchers.beginBroadcast();
+        for (int i = 0; i < nbDispatchers; i++) {
+            try {
+                mModeDispatchers.getBroadcastItem(i).dispatchAudioModeChanged(mode);
+            } catch (RemoteException e) {
+            }
+        }
+        mModeDispatchers.finishBroadcast();
+    }
+
+    final RemoteCallbackList<IAudioModeDispatcher> mModeDispatchers =
+            new RemoteCallbackList<IAudioModeDispatcher>();
+
+    /**
+     * @see {@link AudioManager#addOnModeChangedListener(Executor, AudioManager.OnModeChangedListener)}
+     * @param dispatcher
+     */
+    public void registerModeDispatcher(
+            @NonNull IAudioModeDispatcher dispatcher) {
+        mModeDispatchers.register(dispatcher);
+    }
+
+    /**
+     * @see {@link AudioManager#removeOnModeChangedListener(AudioManager.OnModeChangedListener)}
+     * @param dispatcher
+     */
+    public void unregisterModeDispatcher(
+            @NonNull IAudioModeDispatcher dispatcher) {
+        mModeDispatchers.unregister(dispatcher);
     }
 
     /** @see AudioManager#setRttEnabled() */
@@ -7521,6 +7558,10 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_A2DP_DEV_CONFIG_CHANGE:
                     mDeviceBroker.postBluetoothA2dpDeviceConfigChange((BluetoothDevice) msg.obj);
+                    break;
+
+                case MSG_DISPATCH_AUDIO_MODE:
+                    dispatchMode(msg.arg1);
                     break;
             }
         }
