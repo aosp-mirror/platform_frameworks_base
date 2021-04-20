@@ -24614,7 +24614,6 @@ package android.media.effect {
 package android.media.metrics {
 
   public abstract class Event {
-    ctor protected Event(long);
     method @NonNull public android.os.Bundle getMetricsBundle();
     method @IntRange(from=0xffffffff) public long getTimeSinceCreatedMillis();
   }
@@ -24624,7 +24623,7 @@ package android.media.metrics {
     field @NonNull public static final android.media.metrics.LogSessionId LOG_SESSION_ID_NONE;
   }
 
-  public class MediaMetricsManager {
+  public final class MediaMetricsManager {
     method @NonNull public android.media.metrics.PlaybackSession createPlaybackSession();
     method @NonNull public android.media.metrics.RecordingSession createRecordingSession();
     field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
