@@ -40,6 +40,7 @@
 #include "pipeline/skia/SkiaLayer.h"
 
 #include <vector>
+#include <pipeline/skia/StretchMask.h>
 
 class SkBitmap;
 class SkPaint;
@@ -126,6 +127,8 @@ public:
             }
         }
     }
+
+    StretchMask& getStretchMask() { return mStretchMask; }
 
     VirtualLightRefBase* getUserContext() const { return mUserContext.get(); }
 
@@ -286,6 +289,7 @@ private:
     UsageHint mUsageHint = UsageHint::Unknown;
 
     bool mHasHolePunches;
+    StretchMask mStretchMask;
 
     // METHODS & FIELDS ONLY USED BY THE SKIA RENDERER
 public:

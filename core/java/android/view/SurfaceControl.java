@@ -146,8 +146,9 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetBlurRegions(long transactionObj, long nativeObj,
             float[][] regions, int length);
     private static native void nativeSetStretchEffect(long transactionObj, long nativeObj,
-            float left, float top, float right, float bottom, float vecX, float vecY,
-            float maxStretchAmount);
+            float width, float height, float vecX, float vecY,
+            float maxStretchAmountX, float maxStretchAmountY, float childRelativeLeft,
+            float childRelativeTop, float childRelativeRight, float childRelativeBottom);
 
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
@@ -3038,11 +3039,14 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
-        public Transaction setStretchEffect(SurfaceControl sc, float left, float top, float right,
-                float bottom, float vecX, float vecY, float maxStretchAmount) {
+        public Transaction setStretchEffect(SurfaceControl sc, float width, float height,
+                float vecX, float vecY, float maxStretchAmountX,
+                float maxStretchAmountY, float childRelativeLeft, float childRelativeTop, float childRelativeRight,
+                float childRelativeBottom) {
             checkPreconditions(sc);
-            nativeSetStretchEffect(mNativeObject, sc.mNativeObject, left, top, right, bottom,
-                    vecX, vecY, maxStretchAmount);
+            nativeSetStretchEffect(mNativeObject, sc.mNativeObject, width, height,
+                    vecX, vecY, maxStretchAmountX, maxStretchAmountY, childRelativeLeft, childRelativeTop,
+                    childRelativeRight, childRelativeBottom);
             return this;
         }
 
