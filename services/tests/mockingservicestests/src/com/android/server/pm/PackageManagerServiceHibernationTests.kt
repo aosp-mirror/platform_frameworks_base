@@ -24,6 +24,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import com.android.server.apphibernation.AppHibernationManagerInternal
+import com.android.server.apphibernation.AppHibernationService
 import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.testutils.whenever
 import org.junit.Assert.assertFalse
@@ -61,6 +62,7 @@ class PackageManagerServiceHibernationTests {
         MockitoAnnotations.initMocks(this)
         wheneverStatic { DeviceConfig.getBoolean(
             NAMESPACE_APP_HIBERNATION, KEY_APP_HIBERNATION_ENABLED, false) }.thenReturn(true)
+        AppHibernationService.sIsServiceEnabled = true
         rule.system().stageNominalSystemState()
         whenever(rule.mocks().injector.getLocalService(AppHibernationManagerInternal::class.java))
             .thenReturn(appHibernationManager)
