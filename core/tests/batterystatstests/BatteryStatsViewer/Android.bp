@@ -7,7 +7,7 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_test {
+android_app {
     name: "BatteryStatsViewer",
     srcs: ["src/**/*.java"],
     defaults: ["SettingsLibDefaults"],
@@ -19,4 +19,6 @@ android_test {
     ],
     platform_apis: true,
     certificate: "platform",
+    system_ext_specific: true,
+    owner: "google",
 }
