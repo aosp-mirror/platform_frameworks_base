@@ -570,4 +570,9 @@ public abstract class ActivityManagerInternal {
 
     /** Unregister an {@link AnrController} */
     public abstract void unregisterAnrController(AnrController controller);
+
+    /**
+     * Is the FGS started from an uid temporarily allowed to have while-in-use permission?
+     */
+    public abstract boolean isTempAllowlistedForFgsWhileInUse(int uid);
 }
