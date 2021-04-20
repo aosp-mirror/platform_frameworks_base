@@ -28,6 +28,7 @@ import android.util.Range;
 import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SpellCheckerSession;
 import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
+import android.view.textservice.SpellCheckerSession.SpellCheckerSessionParams;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
 import android.view.textservice.TextServicesManager;
@@ -124,10 +125,12 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     | SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO
                     | SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_GRAMMAR_ERROR
                     | SuggestionsInfo.RESULT_ATTR_DONT_SHOW_UI_FOR_SUGGESTIONS;
+            SpellCheckerSessionParams params = new SpellCheckerSessionParams.Builder()
+                    .setLocale(mCurrentLocale)
+                    .setSupportedAttributes(supportedAttributes)
+                    .build();
             mSpellCheckerSession = mTextServicesManager.newSpellCheckerSession(
-                    mCurrentLocale, false, supportedAttributes,
-                    null /* Bundle not currently used by the textServicesManager */,
-                    mTextView.getContext().getMainExecutor(), this);
+                    params, mTextView.getContext().getMainExecutor(), this);
         }
 
         // Restore SpellCheckSpans in pool
