@@ -31,6 +31,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 
 import java.util.ArrayList;
@@ -394,6 +395,18 @@ public class UnderlyingNetworkTracker {
         @Override
         public int hashCode() {
             return Objects.hash(network, networkCapabilities, linkProperties, isBlocked);
+        }
+
+        /** Dumps the state of this record for logging and debugging purposes. */
+        public void dump(IndentingPrintWriter pw) {
+            pw.println("UnderlyingNetworkRecord:");
+            pw.increaseIndent();
+
+            pw.println("mNetwork: " + network);
+            pw.println("mNetworkCapabilities: " + networkCapabilities);
+            pw.println("mLinkProperties: " + linkProperties);
+
+            pw.decreaseIndent();
         }
 
         /** Builder to incrementally construct an UnderlyingNetworkRecord. */
