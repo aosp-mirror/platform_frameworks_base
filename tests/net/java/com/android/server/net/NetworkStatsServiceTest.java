@@ -67,6 +67,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -88,8 +89,8 @@ import android.net.NetworkStateSnapshot;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
-import android.net.UnderlyingNetworkInfo;
 import android.net.TelephonyNetworkSpecifier;
+import android.net.UnderlyingNetworkInfo;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.os.ConditionVariable;
 import android.os.Handler;
@@ -165,9 +166,9 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
     private long mElapsedRealtime;
 
-    private BroadcastInterceptingContext mServiceContext;
     private File mStatsDir;
-
+    private MockContext mServiceContext;
+    private @Mock TelephonyManager mTelephonyManager;
     private @Mock INetworkManagementService mNetManager;
     private @Mock NetworkStatsFactory mStatsFactory;
     private @Mock NetworkStatsSettings mSettings;
@@ -183,19 +184,32 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     private ContentObserver mContentObserver;
     private Handler mHandler;
 
+    private class MockContext extends BroadcastInterceptingContext {
+        private final Context mBaseContext;
+
+        MockContext(Context base) {
+            super(base);
+            mBaseContext = base;
+        }
+
+        @Override
+        public Object getSystemService(String name) {
+            if (Context.TELEPHONY_SERVICE.equals(name)) return mTelephonyManager;
+            return mBaseContext.getSystemService(name);
+        }
+    }
+
     private final Clock mClock = new SimpleClock(ZoneOffset.UTC) {
         @Override
         public long millis() {
             return currentTimeMillis();
         }
     };
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         final Context context = InstrumentationRegistry.getContext();
-
-        mServiceContext = new BroadcastInterceptingContext(context);
+        mServiceContext = new MockContext(context);
         mStatsDir = context.getFilesDir();
         if (mStatsDir.exists()) {
             IoUtils.deleteContents(mStatsDir);
@@ -217,7 +231,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         expectDefaultSettings();
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectSystemReady();
-
         mService.systemReady();
         // Verify that system ready fetches realtime stats
         verify(mStatsFactory).readNetworkStatsDetail(UID_ALL, INTERFACES_ALL, TAG_ALL);
@@ -227,6 +240,9 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         waitForIdle();
         verify(mNetworkStatsSubscriptionsMonitor).start();
         reset(mNetworkStatsSubscriptionsMonitor);
+
+        doReturn(TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS).when(mTelephonyManager)
+                .checkCarrierPrivilegesForPackageAnyPhone(anyString());
 
         mSession = mService.openSession();
         assertNotNull("openSession() failed", mSession);
