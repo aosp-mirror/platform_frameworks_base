@@ -630,17 +630,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mSecureStateProvider = secureStateProvider;
     }
 
-    @Override
-    public boolean isDimmable() {
-        if (!getShowingLayout().isDimmable()) {
-            return false;
-        }
-        if (showingPulsing()) {
-            return false;
-        }
-        return super.isDimmable();
-    }
-
     private void updateLimits() {
         for (NotificationContentView l : mLayouts) {
             updateLimitsForView(l);
@@ -853,7 +842,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mNotificationParent = isChildInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(isChildInGroup);
 
-        resetBackgroundAlpha();
         updateBackgroundForGroupState();
         updateClickAndFocus();
         if (mNotificationParent != null) {
@@ -892,11 +880,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return true;
         }
         return false;
-    }
-
-    @Override
-    protected boolean shouldHideBackground() {
-        return super.shouldHideBackground() || mShowNoBackground;
     }
 
     @Override
@@ -2873,7 +2856,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mShowNoBackground = false;
         }
         updateOutline();
-        updateBackground();
     }
 
     public int getPositionOfChild(ExpandableNotificationRow childRow) {
