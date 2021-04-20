@@ -11083,17 +11083,6 @@ package android.telephony {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallQuality> CREATOR;
   }
 
-  public final class CarrierBandwidth implements android.os.Parcelable {
-    ctor public CarrierBandwidth(int, int, int, int);
-    method public int describeContents();
-    method public int getPrimaryDownlinkCapacityKbps();
-    method public int getPrimaryUplinkCapacityKbps();
-    method public int getSecondaryDownlinkCapacityKbps();
-    method public int getSecondaryUplinkCapacityKbps();
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CarrierBandwidth> CREATOR;
-    field public static final int INVALID = -1; // 0xffffffff
-  }
-
   public class CarrierConfigManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDefaultCarrierServicePackageName();
     method @NonNull public static android.os.PersistableBundle getDefaultConfig();
