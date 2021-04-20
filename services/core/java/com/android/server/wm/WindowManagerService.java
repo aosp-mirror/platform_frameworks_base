@@ -1543,13 +1543,20 @@ public class WindowManagerService extends IWindowManager.Stub
                     final IBinder binder = attrs.token != null ? attrs.token : windowContextToken;
                     final Bundle options = mWindowContextListenerController
                             .getOptions(windowContextToken);
-                    token = new WindowToken(this, binder, type, false /* persistOnEmpty */,
-                            displayContent, session.mCanAddInternalSystemWindow,
-                            isRoundedCornerOverlay, true /* fromClientToken */, options);
+                    token = new WindowToken.Builder(this, binder, type)
+                            .setDisplayContent(displayContent)
+                            .setOwnerCanManageAppTokens(session.mCanAddInternalSystemWindow)
+                            .setRoundedCornerOverlay(isRoundedCornerOverlay)
+                            .setFromClientToken(true)
+                            .setOptions(options)
+                            .build();
                 } else {
                     final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
-                    token = new WindowToken(this, binder, type, false, displayContent,
-                            session.mCanAddInternalSystemWindow, isRoundedCornerOverlay);
+                    token = new WindowToken.Builder(this, binder, type)
+                            .setDisplayContent(displayContent)
+                            .setOwnerCanManageAppTokens(session.mCanAddInternalSystemWindow)
+                            .setRoundedCornerOverlay(isRoundedCornerOverlay)
+                            .build();
                 }
             } else if (rootType >= FIRST_APPLICATION_WINDOW
                     && rootType <= LAST_APPLICATION_WINDOW) {
@@ -1620,8 +1627,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 // It is not valid to use an app token with other system types; we will
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
-                token = new WindowToken(this, client.asBinder(), type, false /* persistOnEmpty */,
-                        displayContent, session.mCanAddInternalSystemWindow);
+                token = new WindowToken.Builder(this, client.asBinder(), type)
+                        .setDisplayContent(displayContent)
+                        .setOwnerCanManageAppTokens(session.mCanAddInternalSystemWindow)
+                        .build();
             }
 
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
@@ -2647,9 +2656,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 new WallpaperWindowToken(this, binder, true, dc,
                         true /* ownerCanManageAppTokens */, options);
             } else {
-                new WindowToken(this, binder, type, true /* persistOnEmpty */, dc,
-                        true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
-                        false /* fromClientToken */, options);
+                new WindowToken.Builder(this, binder, type)
+                        .setDisplayContent(dc)
+                        .setPersistOnEmpty(true)
+                        .setOwnerCanManageAppTokens(true)
+                        .setOptions(options)
+                        .build();
             }
         }
     }
