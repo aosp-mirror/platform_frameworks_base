@@ -12070,7 +12070,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Distribute Bluetooth energy info and network traffic to apps.
      *
-     * @param info The energy information from the bluetooth controller.
+     * @param info The accumulated energy information from the bluetooth controller.
      */
     public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info,
             final long consumedChargeUC, long elapsedRealtimeMs, long uptimeMs) {
@@ -12082,9 +12082,6 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
         if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
-            // TODO(174818545): mLastBluetoothActivityInfo is actually extremely suspicious.
-            //  Firstly, the following line was originally missing. But even more so, BESW says that
-            //  info is a delta, not a total, so this entire algorithm requires review.
             mLastBluetoothActivityInfo.set(info);
             return;
         }
