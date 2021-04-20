@@ -1441,7 +1441,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     void dump(String prefix, PrintWriter pw) {
-        pw.println(prefix); pw.println("InsetsController:");
+        pw.print(prefix); pw.println("InsetsController:");
         mState.dump(prefix + "  ", pw);
     }
 
