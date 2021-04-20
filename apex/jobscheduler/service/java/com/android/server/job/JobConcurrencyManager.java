@@ -179,7 +179,7 @@ class JobConcurrencyManager {
             new WorkConfigLimitsPerMemoryTrimLevel(
                     new WorkTypeConfig("screen_on_normal", 11,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_FGS, 1),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
                                     Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1)),
                             // defaultMax
@@ -202,7 +202,7 @@ class JobConcurrencyManager {
                             List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
                                     Pair.create(WORK_TYPE_EJ, 1)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 1),
+                            List.of(Pair.create(WORK_TYPE_BG, 2),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1),
                                     Pair.create(WORK_TYPE_BGUSER, 1))
                     ),
@@ -218,23 +218,23 @@ class JobConcurrencyManager {
             );
     private static final WorkConfigLimitsPerMemoryTrimLevel CONFIG_LIMITS_SCREEN_OFF =
             new WorkConfigLimitsPerMemoryTrimLevel(
-                    new WorkTypeConfig("screen_off_normal", 15,
+                    new WorkTypeConfig("screen_off_normal", 16,
                             // defaultMin
                             List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 2),
                                     Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 6),
+                            List.of(Pair.create(WORK_TYPE_BG, 10),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 2),
                                     Pair.create(WORK_TYPE_BGUSER, 3))
                     ),
-                    new WorkTypeConfig("screen_off_moderate", 15,
+                    new WorkTypeConfig("screen_off_moderate", 14,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_FGS, 2),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 2),
                                     Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 4),
+                            List.of(Pair.create(WORK_TYPE_BG, 7),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1),
                                     Pair.create(WORK_TYPE_BGUSER, 1))
                     ),
@@ -243,7 +243,7 @@ class JobConcurrencyManager {
                             List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
                                     Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 1)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 1),
+                            List.of(Pair.create(WORK_TYPE_BG, 3),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1),
                                     Pair.create(WORK_TYPE_BGUSER, 1))
                     ),
