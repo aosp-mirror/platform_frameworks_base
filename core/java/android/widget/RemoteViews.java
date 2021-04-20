@@ -943,6 +943,13 @@ public class RemoteViews implements Parcelable, Filter {
             View target = root.findViewById(viewId);
             if (target == null) return;
 
+            // Ensure that we are applying to an AppWidget root
+            if (!(rootParent instanceof AppWidgetHostView)) {
+                Log.e(LOG_TAG, "setRemoteAdapter can only be used for "
+                        + "AppWidgets (root id: " + viewId + ")");
+                return;
+            }
+
             if (!(target instanceof AdapterView)) {
                 Log.e(LOG_TAG, "Cannot call setRemoteAdapter on a view which is not "
                         + "an AdapterView (id: " + viewId + ")");
@@ -1008,14 +1015,15 @@ public class RemoteViews implements Parcelable, Filter {
 
             // Ensure that we are applying to an AppWidget root
             if (!(rootParent instanceof AppWidgetHostView)) {
-                Log.e(LOG_TAG, "SetRemoteViewsAdapterIntent action can only be used for " +
-                        "AppWidgets (root id: " + viewId + ")");
+                Log.e(LOG_TAG, "setRemoteAdapter can only be used for "
+                        + "AppWidgets (root id: " + viewId + ")");
                 return;
             }
+
             // Ensure that we are calling setRemoteAdapter on an AdapterView that supports it
             if (!(target instanceof AbsListView) && !(target instanceof AdapterViewAnimator)) {
-                Log.e(LOG_TAG, "Cannot setRemoteViewsAdapter on a view which is not " +
-                        "an AbsListView or AdapterViewAnimator (id: " + viewId + ")");
+                Log.e(LOG_TAG, "Cannot setRemoteAdapter on a view which is not "
+                        + "an AbsListView or AdapterViewAnimator (id: " + viewId + ")");
                 return;
             }
 
