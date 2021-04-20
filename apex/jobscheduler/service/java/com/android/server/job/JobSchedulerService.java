@@ -336,8 +336,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     // (ScheduledJobStateChanged and JobStatusDumpProto).
     public static final int RESTRICTED_INDEX = 5;
 
-    // -- Pre-allocated temporaries only for use in assignJobsToContextsLocked --
-
     private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener {
         public void start() {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
@@ -1632,22 +1630,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         return false;
     }
 
-    /**
-     * @param job JobStatus we are querying against.
-     * @return Whether or not the job represented by the status object is currently being run or
-     * is pending.
-     */
-    private boolean isCurrentlyActiveLocked(JobStatus job) {
-        for (int i=0; i<mActiveServices.size(); i++) {
-            JobServiceContext serviceContext = mActiveServices.get(i);
-            final JobStatus running = serviceContext.getRunningJobLocked();
-            if (running != null && running.matches(job.getUid(), job.getJobId())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     void noteJobsPending(List<JobStatus> jobs) {
         for (int i = jobs.size() - 1; i >= 0; i--) {
             JobStatus job = jobs.get(i);
@@ -2253,10 +2235,12 @@ public class JobSchedulerService extends com.android.server.SystemService
      *      - The component is enabled and runnable.
      */
     @VisibleForTesting
+    @GuardedBy("mLock")
     boolean isReadyToBeExecutedLocked(JobStatus job) {
         return isReadyToBeExecutedLocked(job, true);
     }
 
+    @GuardedBy("mLock")
     boolean isReadyToBeExecutedLocked(JobStatus job, boolean rejectActive) {
         final boolean jobReady = job.isReady();
 
@@ -2296,7 +2280,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         final boolean jobPending = mPendingJobs.contains(job);
-        final boolean jobActive = rejectActive && isCurrentlyActiveLocked(job);
+        final boolean jobActive = rejectActive && mConcurrencyManager.isJobRunningLocked(job);
 
         if (DEBUG) {
             Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
@@ -2452,7 +2436,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             synchronized (mLock) {
                 final List<JobInfo> pendingJobs = new ArrayList<JobInfo>();
                 mJobs.forEachJob(Process.SYSTEM_UID, (job) -> {
-                    if (job.getJob().isPeriodic() || !isCurrentlyActiveLocked(job)) {
+                    if (job.getJob().isPeriodic() || !mConcurrencyManager.isJobRunningLocked(job)) {
                         pendingJobs.add(job.getJob());
                     }
                 });
@@ -3101,7 +3085,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.print("pending");
                     printed = true;
                 }
-                if (isCurrentlyActiveLocked(js)) {
+                if (mConcurrencyManager.isJobRunningLocked(js)) {
                     if (printed) {
                         pw.print(" ");
                     }
@@ -3284,7 +3268,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.print(" !pending=");
                     pw.print(!mPendingJobs.contains(job));
                     pw.print(" !active=");
-                    pw.print(!isCurrentlyActiveLocked(job));
+                    pw.print(!mConcurrencyManager.isJobRunningLocked(job));
                     pw.print(" !backingup=");
                     pw.print(!(mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0));
                     pw.print(" comp=");
@@ -3540,7 +3524,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_PENDING,
                             mPendingJobs.contains(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_CURRENTLY_ACTIVE,
-                            isCurrentlyActiveLocked(job));
+                            mConcurrencyManager.isJobRunningLocked(job));
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_UID_BACKING_UP,
                             mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0);
                     proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_COMPONENT_USABLE,
