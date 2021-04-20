@@ -56,7 +56,7 @@ public class ImageWallpaper extends WallpaperService {
     private static final String TAG = ImageWallpaper.class.getSimpleName();
     // We delayed destroy render context that subsequent render requests have chance to cancel it.
     // This is to avoid destroying then recreating render context in a very short time.
-    private static final int DELAY_FINISH_RENDERING = 1000;
+    private static final int DELAY_FINISH_RENDERING = 3000;
     private static final @android.annotation.NonNull RectF LOCAL_COLOR_BOUNDS =
             new RectF(0, 0, 1, 1);
     private static final boolean DEBUG = false;
@@ -107,7 +107,6 @@ public class ImageWallpaper extends WallpaperService {
         private ImageWallpaperRenderer mRenderer;
         private EglHelper mEglHelper;
         private final Runnable mFinishRenderingTask = this::finishRendering;
-        private final Runnable mInitChoreographerTask = this::initChoreographerInternal;
         private int mWidth = 1;
         private int mHeight = 1;
         private int mImgWidth = 1;
@@ -116,7 +115,6 @@ public class ImageWallpaper extends WallpaperService {
         private float mPageOffset = 1.f;
         private volatile float mDozeAmount;
         private volatile boolean mNewDozeValue = false;
-        private volatile boolean mShouldScheduleFrame = false;
 
         GLEngine() {
         }
@@ -141,7 +139,10 @@ public class ImageWallpaper extends WallpaperService {
             mWidth = window.width();
             mMiniBitmap = null;
             if (mWorker != null && mWorker.getThreadHandler() != null) {
-                mWorker.getThreadHandler().post(this::updateMiniBitmap);
+                mWorker.getThreadHandler().post(() -> {
+                    updateMiniBitmap();
+                    Choreographer.getInstance().postFrameCallback(GLEngine.this);
+                });
             }
 
             mDozeAmount = mStatusBarStateController.getDozeAmount();
@@ -221,16 +222,15 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onDestroy() {
             mMiniBitmap = null;
-
-            mStatusBarStateController.removeCallback(this);
-
             mWorker.getThreadHandler().post(() -> {
-                finishChoreographerInternal();
+                Choreographer.getInstance().removeFrameCallback(this);
                 mRenderer.finish();
                 mRenderer = null;
                 mEglHelper.finish();
                 mEglHelper = null;
             });
+
+            mStatusBarStateController.removeCallback(this);
         }
 
         @Override
@@ -357,8 +357,6 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onDozeAmountChanged(float linear, float eased) {
-            initChoreographer();
-
             mDozeAmount = linear;
             mNewDozeValue = true;
         }
@@ -369,10 +367,8 @@ public class ImageWallpaper extends WallpaperService {
             postRender();
         }
 
-        /**
-         * Important: this method should only be invoked from the ImageWallpaper (worker) Thread.
-         */
         public void preRender() {
+            // This method should only be invoked from worker thread.
             Trace.beginSection("ImageWallpaper#preRender");
             preRenderInternal();
             Trace.endSection();
@@ -407,10 +403,8 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
-        /**
-         * Important: this method should only be invoked from the ImageWallpaper (worker) Thread.
-         */
         public void requestRender() {
+            // This method should only be invoked from worker thread.
             Trace.beginSection("ImageWallpaper#requestRender");
             requestRenderInternal();
             Trace.endSection();
@@ -434,10 +428,8 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
-        /**
-         * Important: this method should only be invoked from the ImageWallpaper (worker) Thread.
-         */
         public void postRender() {
+            // This method should only be invoked from worker thread.
             Trace.beginSection("ImageWallpaper#postRender");
             scheduleFinishRendering();
             Trace.endSection();
@@ -456,41 +448,11 @@ public class ImageWallpaper extends WallpaperService {
 
         private void finishRendering() {
             Trace.beginSection("ImageWallpaper#finishRendering");
-            finishChoreographerInternal();
             if (mEglHelper != null) {
                 mEglHelper.destroyEglSurface();
                 mEglHelper.destroyEglContext();
             }
             Trace.endSection();
-        }
-
-        private void initChoreographer() {
-            if (!mWorker.getThreadHandler().hasCallbacks(mInitChoreographerTask)
-                    && !mShouldScheduleFrame) {
-                mWorker.getThreadHandler().post(mInitChoreographerTask);
-            }
-        }
-
-        /**
-         * Subscribes the engine to listen to Choreographer frame events.
-         * Important: this method should only be invoked from the ImageWallpaper (worker) Thread.
-         */
-        private void initChoreographerInternal() {
-            if (!mShouldScheduleFrame) {
-                // Prepare EGL Context and Surface
-                preRender();
-                mShouldScheduleFrame = true;
-                Choreographer.getInstance().postFrameCallback(GLEngine.this);
-            }
-        }
-
-        /**
-         * Unsubscribe the engine from listening to Choreographer frame events.
-         * Important: this method should only be invoked from the ImageWallpaper (worker) Thread.
-         */
-        private void finishChoreographerInternal() {
-            mShouldScheduleFrame = false;
-            Choreographer.getInstance().removeFrameCallback(GLEngine.this);
         }
 
         private boolean needSupportWideColorGamut() {
@@ -519,10 +481,7 @@ public class ImageWallpaper extends WallpaperService {
                 drawFrame();
                 mNewDozeValue = false;
             }
-
-            if (mShouldScheduleFrame) {
-                Choreographer.getInstance().postFrameCallback(this);
-            }
+            Choreographer.getInstance().postFrameCallback(this);
         }
     }
 }
