@@ -23,6 +23,9 @@ LOCAL_RRO_THEME := NavigationBarMode2Button
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_PACKAGE_NAME := NavigationBarMode2ButtonOverlay
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../NOTICE
 LOCAL_SDK_VERSION := current
 
 include $(BUILD_RRO_PACKAGE)
