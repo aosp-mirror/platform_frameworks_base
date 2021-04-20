@@ -242,15 +242,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.AUDIO_SAFE_VOLUME_STATE,
                 GlobalSettingsProto.AUDIO_SAFE_VOLUME_STATE);
 
-        final long autoToken = p.start(GlobalSettingsProto.AUTO);
-        dumpSetting(s, p,
-                Settings.Global.AUTO_TIME,
-                GlobalSettingsProto.Auto.TIME);
-        dumpSetting(s, p,
-                Settings.Global.AUTO_TIME_ZONE,
-                GlobalSettingsProto.Auto.TIME_ZONE);
-        p.end(autoToken);
-
         final long autofillToken = p.start(GlobalSettingsProto.AUTOFILL);
         dumpSetting(s, p,
                 Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
@@ -508,6 +499,15 @@ class SettingsProtoDumpUtil {
                 Settings.Global.DATABASE_CREATION_BUILDID,
                 GlobalSettingsProto.Database.CREATION_BUILDID);
         p.end(databaseToken);
+
+        final long dateTimeToken = p.start(GlobalSettingsProto.DATE_TIME);
+        dumpSetting(s, p,
+                Settings.Global.AUTO_TIME,
+                GlobalSettingsProto.DateTime.AUTO_TIME);
+        dumpSetting(s, p,
+                Settings.Global.AUTO_TIME_ZONE,
+                GlobalSettingsProto.DateTime.AUTO_TIME_ZONE);
+        p.end(dateTimeToken);
 
         final long debugToken = p.start(GlobalSettingsProto.DEBUG);
         dumpSetting(s, p,
@@ -2021,6 +2021,12 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.CONTROLS_ENABLED,
                 SecureSettingsProto.Controls.ENABLED);
         p.end(controlsToken);
+
+        final long dateTimeToken = p.start(SecureSettingsProto.DATE_TIME);
+        dumpSetting(s, p,
+                Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
+                SecureSettingsProto.DateTime.LOCATION_TIME_ZONE_DETECTION_ENABLED);
+        p.end(dateTimeToken);
 
         dumpSetting(s, p,
                 Settings.Secure.DEVICE_PAIRED,
