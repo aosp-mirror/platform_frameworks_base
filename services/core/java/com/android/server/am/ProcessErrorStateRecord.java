@@ -472,11 +472,6 @@ class ProcessErrorStateRecord {
                 mDialogController.setAnrController(anrController);
             }
 
-            // Notify package manager service to possibly update package state
-            if (aInfo != null && aInfo.packageName != null) {
-                packageManagerInternal.notifyPackageCrashOrAnr(aInfo.packageName);
-            }
-
             // mUiHandler can be null if the AMS is constructed with injector only. This will only
             // happen in tests.
             if (mService.mUiHandler != null) {
