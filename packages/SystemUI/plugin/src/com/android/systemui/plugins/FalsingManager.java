@@ -58,7 +58,6 @@ public interface FalsingManager {
     /** Returns true if the gesture should be rejected. */
     boolean isFalseTouch(int interactionType);
 
-
     /**
      * Does basic checking to see if gesture looks like a tap.
      *
@@ -127,8 +126,19 @@ public interface FalsingManager {
     /** Removes a {@link FalsingBeliefListener}. */
     void removeFalsingBeliefListener(FalsingBeliefListener listener);
 
+    /** Adds a {@link FalsingTapListener}. */
+    void addTapListener(FalsingTapListener falsingTapListener);
+
+    /** Removes a {@link FalsingTapListener}. */
+    void removeTapListener(FalsingTapListener falsingTapListener);
+
     /** Listener that is alerted when falsing belief level crosses a predfined threshold. */
     interface FalsingBeliefListener {
         void onFalse();
+    }
+
+    /** Listener that is alerted when a double tap is required to confirm a single tap. */
+    interface FalsingTapListener {
+        void onDoubleTapRequired();
     }
 }
