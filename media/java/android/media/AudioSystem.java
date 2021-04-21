@@ -2023,7 +2023,8 @@ public class AudioSystem
     };
 
     /** @hide */
-    public static String streamToString(int stream) {
+    @TestApi
+    public static @NonNull String streamToString(int stream) {
         if (stream >= 0 && stream < STREAM_NAMES.length) return STREAM_NAMES[stream];
         if (stream == AudioManager.USE_DEFAULT_STREAM_TYPE) return "USE_DEFAULT_STREAM_TYPE";
         return "UNKNOWN_STREAM_" + stream;

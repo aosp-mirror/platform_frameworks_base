@@ -3542,7 +3542,7 @@ public class AudioService extends IAudioService.Stub
         }
         // The default volume group is the one hosted by default product strategy, i.e.
         // supporting Default Attributes
-        return getVolumeGroupIdForAttributesInt(AudioProductStrategy.sDefaultAttributes);
+        return getVolumeGroupIdForAttributesInt(AudioProductStrategy.getDefaultAttributes());
     }
 
     private int getVolumeGroupIdForAttributesInt(@NonNull AudioAttributes attributes) {
@@ -6244,7 +6244,7 @@ public class AudioService extends IAudioService.Stub
 
     private void ensureValidAttributes(AudioVolumeGroup avg) {
         boolean hasAtLeastOneValidAudioAttributes = avg.getAudioAttributes().stream()
-                .anyMatch(aa -> !aa.equals(AudioProductStrategy.sDefaultAttributes));
+                .anyMatch(aa -> !aa.equals(AudioProductStrategy.getDefaultAttributes()));
         if (!hasAtLeastOneValidAudioAttributes) {
             throw new IllegalArgumentException("Volume Group " + avg.name()
                     + " has no valid audio attributes");
@@ -6292,7 +6292,7 @@ public class AudioService extends IAudioService.Stub
         private int mIndexMax;
         private int mLegacyStreamType = AudioSystem.STREAM_DEFAULT;
         private int mPublicStreamType = AudioSystem.STREAM_MUSIC;
-        private AudioAttributes mAudioAttributes = AudioProductStrategy.sDefaultAttributes;
+        private AudioAttributes mAudioAttributes = AudioProductStrategy.getDefaultAttributes();
 
         // No API in AudioSystem to get a device from strategy or from attributes.
         // Need a valid public stream type to use current API getDeviceForStream
@@ -6305,8 +6305,9 @@ public class AudioService extends IAudioService.Stub
             if (DEBUG_VOL) {
                 Log.v(TAG, "VolumeGroupState for " + avg.toString());
             }
+            // mAudioAttributes is the default at this point
             for (final AudioAttributes aa : avg.getAudioAttributes()) {
-                if (!aa.equals(AudioProductStrategy.sDefaultAttributes)) {
+                if (!aa.equals(mAudioAttributes)) {
                     mAudioAttributes = aa;
                     break;
                 }

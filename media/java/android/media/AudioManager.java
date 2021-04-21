@@ -387,6 +387,18 @@ public class AudioManager {
      */
     @Deprecated public static final int NUM_STREAMS = AudioSystem.NUM_STREAMS;
 
+    /** @hide */
+    private static final int[] PUBLIC_STREAM_TYPES = { AudioManager.STREAM_VOICE_CALL,
+            AudioManager.STREAM_SYSTEM, AudioManager.STREAM_RING, AudioManager.STREAM_MUSIC,
+            AudioManager.STREAM_ALARM, AudioManager.STREAM_NOTIFICATION,
+            AudioManager.STREAM_DTMF,  AudioManager.STREAM_ACCESSIBILITY };
+
+    /** @hide */
+    @TestApi
+    public static final int[] getPublicStreamTypes() {
+        return PUBLIC_STREAM_TYPES;
+    }
+
     /**
      * Increase the ringer volume.
      *
@@ -1071,6 +1083,7 @@ public class AudioManager {
      * @return The minimum valid volume index for the stream.
      * @see #getStreamVolume(int)
      */
+    @TestApi
     public int getStreamMinVolumeInt(int streamType) {
         final IAudioService service = getService();
         try {

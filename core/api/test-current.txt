@@ -1397,6 +1397,7 @@ package android.location {
 package android.media {
 
   public final class AudioAttributes implements android.os.Parcelable {
+    method public static int[] getSdkUsages();
     method @NonNull public static String usageToXsdString(int);
     method public static int xsdStringToUsage(@NonNull String);
   }
@@ -1421,6 +1422,8 @@ package android.media {
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
+    method public static final int[] getPublicStreamTypes();
+    method public int getStreamMinVolumeInt(int);
     method public boolean hasRegisteredDynamicPolicy();
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE}) public boolean isFullVolumeDevice();
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int requestAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String, int, int);
@@ -1444,6 +1447,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS) public static float getMasterBalance();
     method public static final int getNumStreamTypes();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS) public static int setMasterBalance(float);
+    method @NonNull public static String streamToString(int);
     field public static final int DEVICE_ROLE_DISABLED = 2; // 0x2
     field public static final int DEVICE_ROLE_NONE = 0; // 0x0
     field public static final int DEVICE_ROLE_PREFERRED = 1; // 0x1
@@ -1542,8 +1546,10 @@ package android.media.audiopolicy {
   }
 
   public final class AudioProductStrategy implements android.os.Parcelable {
+    method @NonNull public static android.media.AudioAttributes getDefaultAttributes();
     method public int getLegacyStreamTypeForAudioAttributes(@NonNull android.media.AudioAttributes);
     method public int getVolumeGroupIdForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method public int getVolumeGroupIdForLegacyStreamType(int);
   }
 
 }
