@@ -26,6 +26,7 @@ import android.util.SparseIntArray;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
@@ -101,8 +102,31 @@ public abstract class AppOpsManagerInternal {
                         Boolean, SyncNotedAppOp> superImpl);
 
         /**
+         * Allows overriding start operation behavior.
+         *
+         * @param token The client state.
+         * @param code The op code to start.
+         * @param uid The UID for which to note.
+         * @param packageName The package for which to note. {@code null} for system package.
+         * @param attributionTag the attribution tag.
+         * @param startIfModeDefault Whether to start the op of the mode is default.
+         * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
+         * @param message The message in the async noted op
+         * @param shouldCollectMessage whether to collect messages
+         * @param superImpl The super implementation.
+         * @return The app op note result.
+         */
+        SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+                @Nullable String packageName, @Nullable String attributionTag,
+                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message, boolean shouldCollectMessage, @NonNull NonaFunction<
+                        IBinder, Integer, Integer, String, String, Boolean, Boolean, String,
+                        Boolean, SyncNotedAppOp> superImpl);
+
+        /**
          * Allows overriding start proxy operation behavior.
          *
+         * @param token The client state.
          * @param code The op code to start.
          * @param attributionSource The permission identity of the caller.
          * @param startIfModeDefault Whether to start the op of the mode is default.

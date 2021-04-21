@@ -37,11 +37,11 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
@@ -166,11 +166,22 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             boolean shouldCollectAsyncNotedOp, @Nullable String message,
             boolean shouldCollectMessage, boolean skipProxyOperation, @NonNull HexFunction<Integer,
                     AttributionSource, Boolean, String, Boolean, Boolean,
-            SyncNotedAppOp> superImpl) {
+                    SyncNotedAppOp> superImpl) {
         return superImpl.apply(resolveDatasourceOp(code, attributionSource.getUid(),
                 attributionSource.getPackageName(), attributionSource.getAttributionTag()),
                 attributionSource, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                 skipProxyOperation);
+    }
+
+    @Override
+    public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+            @Nullable String packageName, @Nullable String attributionTag,
+            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
+            boolean shouldCollectMessage, @NonNull NonaFunction<IBinder, Integer, Integer, String,
+                    String, Boolean, Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
+        return superImpl.apply(token, resolveDatasourceOp(code, uid, packageName, attributionTag),
+                uid, packageName, attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp,
+                message, shouldCollectMessage);
     }
 
     @Override
