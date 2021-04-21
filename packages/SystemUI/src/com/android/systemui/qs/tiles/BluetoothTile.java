@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles;
 
-import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -32,6 +31,8 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -96,7 +97,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         // Secondary clicks are header clicks, just toggle.
         final boolean isEnabled = mState.value;
         // Immediately enter transient enabling state when turning bluetooth on.
@@ -110,7 +111,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleSecondaryClick() {
+    protected void handleSecondaryClick(@Nullable View view) {
         if (!mController.canConfigBluetooth()) {
             mActivityStarter.postStartActivityDismissingKeyguard(
                     new Intent(Settings.ACTION_BLUETOOTH_SETTINGS), 0);

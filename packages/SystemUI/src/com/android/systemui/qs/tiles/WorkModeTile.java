@@ -21,7 +21,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -75,7 +78,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    public void handleClick() {
+    public void handleClick(@Nullable View view) {
         mProfileController.setWorkModeEnabled(!mState.value);
     }
 

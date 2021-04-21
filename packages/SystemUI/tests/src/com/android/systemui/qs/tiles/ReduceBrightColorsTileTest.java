@@ -121,7 +121,7 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
         // Validity check
         assertEquals(Tile.STATE_INACTIVE, mTile.getState().state);
 
-        mTile.handleClick();
+        mTile.handleClick(null /* view */);
 
         verify(mReduceBrightColorsController, times(1))
                 .setReduceBrightColorsActivated(eq(true));
