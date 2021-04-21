@@ -34,6 +34,7 @@ public interface QSFlagsModule {
     String RBC_AVAILABLE = "rbc_available";
     String PM_LITE_ENABLED = "pm_lite";
     String PM_LITE_SETTING = "sysui_pm_lite";
+    int PM_LITE_SETTING_DEFAULT = 1;
 
     /** */
     @Provides
@@ -47,6 +48,7 @@ public interface QSFlagsModule {
     @SysUISingleton
     @Named(PM_LITE_ENABLED)
     static boolean isPMLiteEnabled(FeatureFlags featureFlags, GlobalSettings globalSettings) {
-        return featureFlags.isPMLiteEnabled() && globalSettings.getInt(PM_LITE_SETTING, 0) != 0;
+        return featureFlags.isPMLiteEnabled()
+                && globalSettings.getInt(PM_LITE_SETTING, PM_LITE_SETTING_DEFAULT) != 0;
     }
 }
