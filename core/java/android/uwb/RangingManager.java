@@ -63,8 +63,7 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
                     new RangingSession(executor, callbacks, mAdapter, sessionHandle);
             mRangingSessionTable.put(sessionHandle, session);
             try {
-                // TODO: Pass in the attributionSource to the service.
-                mAdapter.openRanging(sessionHandle, this, params);
+                mAdapter.openRanging(attributionSource, sessionHandle, this, params);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
