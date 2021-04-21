@@ -20,11 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
+import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainVerificationManager;
 
 import com.android.server.pm.verify.domain.DomainVerificationService;
 
+import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.UUID;
 
 /**
@@ -57,5 +60,15 @@ class DomainVerificationJavaUtil {
             @Nullable UUID domainSetId, @Nullable Set<String> domains, boolean enabled)
             throws PackageManager.NameNotFoundException {
         return manager.setDomainVerificationUserSelection(domainSetId, domains, enabled);
+    }
+
+    static SortedSet<DomainOwner> getOwnersForDomain(@NonNull DomainVerificationManager manager,
+            @Nullable String domain) {
+        return manager.getOwnersForDomain(domain);
+    }
+
+    static List<DomainOwner> getOwnersForDomain(@NonNull DomainVerificationService service,
+            @Nullable String domain, @UserIdInt int userId) {
+        return service.getOwnersForDomain(domain, userId);
     }
 }

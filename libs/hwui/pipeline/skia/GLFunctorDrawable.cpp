@@ -24,6 +24,7 @@
 #include "SkClipStack.h"
 #include "SkRect.h"
 #include "SkM44.h"
+#include "utils/GLUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -170,6 +171,8 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         setScissor(info.height, clipRegion.getBounds());
     }
 
+    // WebView may swallow GL errors, so catch them here
+    GL_CHECKPOINT(LOW);
     mWebViewHandle->drawGl(info);
 
     if (clearStencilAfterFunctor) {

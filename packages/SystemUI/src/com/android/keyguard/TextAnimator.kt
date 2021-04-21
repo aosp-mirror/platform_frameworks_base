@@ -65,13 +65,19 @@ class TextAnimator(
             invalidateCallback()
         }
         addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) = textInterpolator.rebase()
+            override fun onAnimationEnd(animation: Animator?) {
+                textInterpolator.rebase()
+            }
             override fun onAnimationCancel(animation: Animator?) = textInterpolator.rebase()
         })
     }
 
     fun updateLayout(layout: Layout) {
         textInterpolator.layout = layout
+    }
+
+    fun isRunning(): Boolean {
+        return animator.isRunning
     }
 
     fun draw(c: Canvas) = textInterpolator.draw(c)
@@ -101,7 +107,9 @@ class TextAnimator(
         color: Int? = null,
         animate: Boolean = true,
         duration: Long = -1L,
-        interpolator: TimeInterpolator? = null
+        interpolator: TimeInterpolator? = null,
+        delay: Long = 0,
+        onAnimationEnd: Runnable? = null
     ) {
         if (animate) {
             animator.cancel()
@@ -120,12 +128,25 @@ class TextAnimator(
         textInterpolator.onTargetPaintModified()
 
         if (animate) {
+            animator.startDelay = delay
             animator.duration = if (duration == -1L) {
                 DEFAULT_ANIMATION_DURATION
             } else {
                 duration
             }
             interpolator?.let { animator.interpolator = it }
+            if (onAnimationEnd != null) {
+                val listener = object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        onAnimationEnd.run()
+                        animator.removeListener(this)
+                    }
+                    override fun onAnimationCancel(animation: Animator?) {
+                        animator.removeListener(this)
+                    }
+                }
+                animator.addListener(listener)
+            }
             animator.start()
         } else {
             // No animation is requested, thus set base and target state to the same state.

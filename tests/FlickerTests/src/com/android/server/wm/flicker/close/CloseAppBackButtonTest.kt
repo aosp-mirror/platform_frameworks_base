@@ -16,12 +16,14 @@
 
 package com.android.server.wm.flicker.close
 
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -43,6 +45,30 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
                 wmHelper.waitForHomeActivityVisible()
             }
         }
+
+    @FlakyTest(bugId = 185401242)
+    @Test
+    override fun launcherLayerReplacesApp() {
+        super.launcherLayerReplacesApp()
+    }
+
+    @FlakyTest(bugId = 185401242)
+    @Test
+    override fun launcherReplacesAppWindowAsTopWindow() {
+        super.launcherReplacesAppWindowAsTopWindow()
+    }
+
+    @FlakyTest(bugId = 185401242)
+    @Test
+    override fun launcherWindowBecomesVisible() {
+        super.launcherWindowBecomesVisible()
+    }
+
+    @FlakyTest(bugId = 185401242)
+    @Test
+    override fun noUncoveredRegions() {
+        super.noUncoveredRegions()
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

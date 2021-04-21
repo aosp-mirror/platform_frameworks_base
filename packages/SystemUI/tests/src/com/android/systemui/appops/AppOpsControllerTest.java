@@ -233,9 +233,9 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 TEST_UID, TEST_PACKAGE_NAME, TEST_ATTRIBUTION_NAME,
                 AppOpsManager.OP_FLAG_SELF, AppOpsManager.MODE_ALLOWED);
         assertEquals(2,
-                mController.getActiveAppOpsForUser(UserHandle.getUserId(TEST_UID)).size());
-        assertEquals(1,
-                mController.getActiveAppOpsForUser(UserHandle.getUserId(TEST_UID_OTHER)).size());
+                mController.getActiveAppOpsForUser(UserHandle.getUserId(TEST_UID), false).size());
+        assertEquals(1, mController.getActiveAppOpsForUser(UserHandle.getUserId(TEST_UID_OTHER),
+                false).size());
     }
 
     @Test
@@ -245,11 +245,11 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mController.onOpActiveChanged(AppOpsManager.OP_RECORD_AUDIO,
                 TEST_UID_NON_USER_SENSITIVE, mExemptedRolePkgName, true);
         assertEquals(0, mController.getActiveAppOpsForUser(
-                UserHandle.getUserId(TEST_UID_NON_USER_SENSITIVE)).size());
+                UserHandle.getUserId(TEST_UID_NON_USER_SENSITIVE), false).size());
         mController.onOpActiveChanged(AppOpsManager.OP_RECORD_AUDIO,
                 TEST_UID_NON_USER_SENSITIVE, SYSTEM_PKG, true);
         assertEquals(0, mController.getActiveAppOpsForUser(
-                UserHandle.getUserId(TEST_UID_NON_USER_SENSITIVE)).size());
+                UserHandle.getUserId(TEST_UID_NON_USER_SENSITIVE), false).size());
     }
 
     @Test
@@ -441,7 +441,19 @@ public class AppOpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnlyRecordAudioPaused() {
+    public void testPausedPhoneCallMicrophoneFilteredOut() {
+        mController.addCallback(new int[]{AppOpsManager.OP_PHONE_CALL_MICROPHONE}, mCallback);
+        mTestableLooper.processAllMessages();
+
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_PHONE_CALL_MICROPHONE, TEST_UID, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+
+        assertTrue(mController.getActiveAppOps().isEmpty());
+    }
+
+    @Test
+    public void testOnlyRecordAudioPhoneCallMicrophonePaused() {
         mController.addCallback(new int[]{
                 AppOpsManager.OP_RECORD_AUDIO,
                 AppOpsManager.OP_CAMERA
@@ -532,6 +544,40 @@ public class AppOpsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPhoneCallMicrophoneFilteredWhenMicDisabled() {
+        mController.addCallback(
+                new int[]{AppOpsManager.OP_PHONE_CALL_MICROPHONE, AppOpsManager.OP_CAMERA},
+                mCallback);
+        mTestableLooper.processAllMessages();
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_PHONE_CALL_MICROPHONE, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        List<AppOpItem> list = mController.getActiveAppOps();
+        assertEquals(1, list.size());
+        assertEquals(AppOpsManager.OP_PHONE_CALL_MICROPHONE, list.get(0).getCode());
+        assertFalse(list.get(0).isDisabled());
+
+        // Add a camera op, and disable the microphone. The camera op should be the only op returned
+        mController.onSensorBlockedChanged(MICROPHONE, true);
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_CAMERA, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        list = mController.getActiveAppOps();
+        assertEquals(1, list.size());
+        assertEquals(AppOpsManager.OP_CAMERA, list.get(0).getCode());
+
+
+        // Re enable the microphone, and verify the op returns
+        mController.onSensorBlockedChanged(MICROPHONE, false);
+        mTestableLooper.processAllMessages();
+
+        list = mController.getActiveAppOps();
+        assertEquals(2, list.size());
+        int micIdx = list.get(0).getCode() == AppOpsManager.OP_CAMERA ? 1 : 0;
+        assertEquals(AppOpsManager.OP_PHONE_CALL_MICROPHONE, list.get(micIdx).getCode());
+    }
+
+    @Test
     public void testCameraFilteredWhenCameraDisabled() {
         mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO, AppOpsManager.OP_CAMERA},
                 mCallback);
@@ -561,6 +607,39 @@ public class AppOpsControllerTest extends SysuiTestCase {
         assertEquals(2, list.size());
         int cameraIdx = list.get(0).getCode() == AppOpsManager.OP_CAMERA ? 0 : 1;
         assertEquals(AppOpsManager.OP_CAMERA, list.get(cameraIdx).getCode());
+    }
+
+    @Test
+    public void testPhoneCallCameraFilteredWhenCameraDisabled() {
+        mController.addCallback(
+                new int[]{AppOpsManager.OP_RECORD_AUDIO, AppOpsManager.OP_PHONE_CALL_CAMERA},
+                mCallback);
+        mTestableLooper.processAllMessages();
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_PHONE_CALL_CAMERA, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        List<AppOpItem> list = mController.getActiveAppOps();
+        assertEquals(1, list.size());
+        assertEquals(AppOpsManager.OP_PHONE_CALL_CAMERA, list.get(0).getCode());
+        assertFalse(list.get(0).isDisabled());
+
+        // Add an audio op, and disable the camera. The audio op should be the only op returned
+        mController.onSensorBlockedChanged(CAMERA, true);
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        list = mController.getActiveAppOps();
+        assertEquals(1, list.size());
+        assertEquals(AppOpsManager.OP_RECORD_AUDIO, list.get(0).getCode());
+
+        // Re enable the camera, and verify the op returns
+        mController.onSensorBlockedChanged(CAMERA, false);
+        mTestableLooper.processAllMessages();
+
+        list = mController.getActiveAppOps();
+        assertEquals(2, list.size());
+        int cameraIdx = list.get(0).getCode() == AppOpsManager.OP_PHONE_CALL_CAMERA ? 0 : 1;
+        assertEquals(AppOpsManager.OP_PHONE_CALL_CAMERA, list.get(cameraIdx).getCode());
     }
 
     private class TestHandler extends AppOpsControllerImpl.H {

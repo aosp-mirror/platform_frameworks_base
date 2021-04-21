@@ -325,8 +325,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"доступ да даных фізічнай актыўнасці"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"рабіць фатаздымкі і запісваць відэа"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Прылады з Bluetooth паблізу"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"выяўляць прылады з Bluetooth, якія знаходзяцца паблізу, і падключацца да іх"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Прылады паблізу"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"выяўляць прылады паблізу і падключацца да іх"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Журналы выклікаў"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"Чытанне і запіс журнала тэлефонных выклікаў"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Тэлефон"</string>
@@ -544,10 +544,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Дазваляе праграме выяўляць прылады з Bluetooth і спалучацца з імі"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"падключацца да спалучаных прылад з Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Дазваляе праграме падключацца да спалучаных прылад з Bluetooth"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"адпраўляць рэкламу на прылады з Bluetooth паблізу"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Дазволіць праграме адпраўляць рэкламу на прылады з Bluetooth, якія знаходзяцца паблізу"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"вызначаць адлегласць паміж прыладамі з звышшырокапалоснай сувяззю"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Дазволіць праграме вызначаць адлегласць паміж прыладамі паблізу, якія выкарыстоўваюць звышшырокапалосную сувязь"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Інфармацыя пра прыярытэтны сэрвіс аплаты NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дазваляе праграме атрымаць доступ да інфармацыі пра прыярытэтны сэрвіс аплаты NFC, напрыклад зарэгістраваныя ідэнтыфікатары праграм і маршруты адпраўкі даных."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"кантроль Near Field Communication"</string>
@@ -1406,8 +1406,8 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Выяўлены аксесуар аналагавага аўдыя"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Далучаная прылада не сумяшчальная з гэтым тэлефонам. Націсніце, каб даведацца больш."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Адладка па USB падключана"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Націсніце, каб выключыць адладку па USB"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Выберыце, каб адключыць адладку USB."</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Націсніце, каб адключыць адладку па USB"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Выберыце, каб адключыць адладку па USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Адладка па Wi-Fi уключана"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Націсніце, каб выключыць адладку па Wi-Fi"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Выберыце, каб выключыць адладку па Wi-Fi."</string>
@@ -1661,7 +1661,7 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Сістэма"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth-аўдыё"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Бесправадны дысплей"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"Перадача"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"Трансляцыя"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Падключыцца да прылады"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Трансліраваць экран на прыладу"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Пошук прылад..."</string>
@@ -1751,8 +1751,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Гатова"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Дэактываваць камбінацыю хуткага доступу"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Выкарыстоўваць камбінацыю хуткага доступу"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колеру"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Карэкцыя колеру"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колераў"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Карэкцыя колераў"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дадатковае памяншэнне яркасці"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Клавішы гучнасці ўтрымліваліся націснутымі. Уключана служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Клавішы гучнасці ўтрымліваліся націснутымі. Служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" выключана."</string>
@@ -1898,8 +1898,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Абноўлены вашым адміністратарам"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Выдалены вашым адміністратарам"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду:\n\n•·уключае цёмную тэму;\n• выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі, напрыклад \"Ok Google\"\n\n"<annotation id="url">"Даведацца больш"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду:\n\n• уключае цёмную тэму;\n• выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі, напрыклад \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"У рэжыме эканоміі зараду ўключаецца цёмная тэма і абмяжоўваюцца ці выключаюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і функцыі, напрыклад \"Ok Google\"\n\n"<annotation id="url">"Даведацца больш"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"У рэжыме эканоміі зараду ўключаецца цёмная тэма і абмяжоўваюцца ці выключаюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і функцыі, напрыклад \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"У рэжыме \"Эканомія трафіка\" фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Уключыць"</string>
@@ -1991,6 +1991,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Закрыць"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Адказаць"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Відэа"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Адхіліць"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Завяршыць"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Уваходны выклік"</string>
@@ -2054,7 +2055,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"Прадукцыйнасць"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Спецыяльныя магчымасці"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Сховішча на прыладзе"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Адладка USB"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Адладка па USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"гадз"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"хв"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"Задаць час"</string>
@@ -2138,6 +2139,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Гэта апавяшчэнне пераведзена ў рэжым \"Без гуку\". Націсніце тут і дайце водгук."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Гэта апавяшчэнне ацэнена як важнае. Націсніце тут і дайце водгук."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Гэта апавяшчэнне ацэнена як няважнае. Націсніце тут і дайце водгук."</string>
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Палепшаныя апавяшчэнні"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Каб і далей атрымліваць прапановы дзеянняў, адказаў і іншага змесціва, уключыце палепшаныя апавяшчэнні. Адаптыўныя апавяшчэнні Android больш не падтрымліваюцца."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Уключыць"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Не зараз"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Даведацца больш"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Палепшаныя апавяшчэнні маюць доступ да змесціва ўсіх апавяшчэнняў, у тым ліку да асабістай інфармацыі – імён кантактаў і паведамленняў. Гэта функцыя таксама можа адхіляць апавяшчэнні ці актываваць у іх кнопкі дзеянняў, у тым ліку адказваць на тэлефонныя выклікі.\n\nГэта функцыя можа ўключаць і выключаць прыярытэтны рэжым, а таксама змяняць звязаныя налады."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Апавяшчэнне з інфармацыяй пра ўсталяваны рэжым"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятар можа разрадзіцца хутчэй, чым прыйдзе час звычайнай зарадкі"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Каб павялічыць тэрмін работы акумулятара, уключаны рэжым эканоміі зараду"</string>
@@ -2327,9 +2334,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Цяпер можна павялічваць частку экрана"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Уключыць у Наладах"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Адхіліць"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Каб працягнуць, дайце праграме &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; доступ да мікрафона прылады."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Каб працягнуць, дайце праграме &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; доступ да камеры прылады."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Уключыць"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Разблакіруйце мікрафон прылады"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Разблакіруйце камеру прылады"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Для праграмы &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; і ўсіх праграм і сэрвісаў"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Разблакіраваць"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Прыватнасць інфармацыі з датчыка"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Значок праграмы"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Відарыс брэнда праграмы"</string>

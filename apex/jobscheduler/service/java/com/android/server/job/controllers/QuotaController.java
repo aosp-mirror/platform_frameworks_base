@@ -34,7 +34,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
@@ -340,9 +339,6 @@ public final class QuotaController extends StateController {
     /** List of UIDs currently in the foreground. */
     private final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
 
-    /** Cached mapping of UIDs (for all users) to a list of packages in the UID. */
-    private final SparseSetArray<String> mUidToPackageCache = new SparseSetArray<>();
-
     /**
      * List of jobs that started while the UID was in the TOP state. There will be no more than
      * 16 ({@link JobSchedulerService#MAX_JOB_CONTEXTS_COUNT}) running at once, so an ArraySet is
@@ -448,22 +444,6 @@ public final class QuotaController extends StateController {
         public void onUidCachedChanged(int uid, boolean cached) {
         }
     }
-
-    private final BroadcastReceiver mPackageAddedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent == null) {
-                return;
-            }
-            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                return;
-            }
-            final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-            synchronized (mLock) {
-                mUidToPackageCache.remove(uid);
-            }
-        }
-    };
 
     /**
      * The rolling window size for each standby bucket. Within each window, an app will have 10
@@ -611,9 +591,6 @@ public final class QuotaController extends StateController {
         mBackgroundJobsController = backgroundJobsController;
         mConnectivityController = connectivityController;
 
-        final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
-        mContext.registerReceiverAsUser(mPackageAddedReceiver, UserHandle.ALL, filter, null, null);
-
         // Set up the app standby bucketing tracker
         AppStandbyInternal appStandby = LocalServices.getService(AppStandbyInternal.class);
         appStandby.addListener(new StandbyTracker());
@@ -699,27 +676,30 @@ public final class QuotaController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
-        if (jobStatus.clearTrackingController(JobStatus.TRACKING_QUOTA)) {
-            Timer timer = mPkgTimers.get(jobStatus.getSourceUserId(),
-                    jobStatus.getSourcePackageName());
+    public void unprepareFromExecutionLocked(JobStatus jobStatus) {
+        Timer timer = mPkgTimers.get(jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
+        if (timer != null) {
+            timer.stopTrackingJob(jobStatus);
+        }
+        if (jobStatus.isRequestedExpeditedJob()) {
+            timer = mEJPkgTimers.get(jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
             if (timer != null) {
                 timer.stopTrackingJob(jobStatus);
             }
-            if (jobStatus.isRequestedExpeditedJob()) {
-                timer = mEJPkgTimers.get(jobStatus.getSourceUserId(),
-                        jobStatus.getSourcePackageName());
-                if (timer != null) {
-                    timer.stopTrackingJob(jobStatus);
-                }
-            }
+        }
+        mTopStartedJobs.remove(jobStatus);
+    }
+
+    @Override
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
+            boolean forUpdate) {
+        if (jobStatus.clearTrackingController(JobStatus.TRACKING_QUOTA)) {
+            unprepareFromExecutionLocked(jobStatus);
             ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUserId(),
                     jobStatus.getSourcePackageName());
             if (jobs != null) {
                 jobs.remove(jobStatus);
             }
-            mTopStartedJobs.remove(jobStatus);
         }
     }
 
@@ -730,13 +710,15 @@ public final class QuotaController extends StateController {
             return;
         }
         clearAppStatsLocked(UserHandle.getUserId(uid), packageName);
-        mForegroundUids.delete(uid);
-        mUidToPackageCache.remove(uid);
-        mTempAllowlistCache.delete(uid);
-        mTempAllowlistGraceCache.delete(uid);
-        mTopAppCache.delete(uid);
-        mTopAppTrackers.delete(uid);
-        mTopAppGraceCache.delete(uid);
+        if (mService.getPackagesForUidLocked(uid) == null) {
+            // All packages in the UID have been removed. It's safe to remove things based on
+            // UID alone.
+            mForegroundUids.delete(uid);
+            mTempAllowlistCache.delete(uid);
+            mTempAllowlistGraceCache.delete(uid);
+            mTopAppCache.delete(uid);
+            mTopAppGraceCache.delete(uid);
+        }
     }
 
     @Override
@@ -754,8 +736,8 @@ public final class QuotaController extends StateController {
         mInQuotaAlarmListener.removeAlarmsLocked(userId);
         mExecutionStatsCache.delete(userId);
         mEJStats.delete(userId);
-        mUidToPackageCache.clear();
         mSystemInstallers.remove(userId);
+        mTopAppTrackers.delete(userId);
     }
 
     /** Drop all historical stats and stop tracking any active sessions for the specified app. */
@@ -780,6 +762,7 @@ public final class QuotaController extends StateController {
         mInQuotaAlarmListener.removeAlarmLocked(userId, packageName);
         mExecutionStatsCache.delete(userId, packageName);
         mEJStats.delete(userId, packageName);
+        mTopAppTrackers.delete(userId, packageName);
     }
 
     private void cacheInstallerPackagesLocked(int userId) {
@@ -2450,7 +2433,7 @@ public final class QuotaController extends StateController {
             synchronized (mLock) {
                 final long nowElapsed = sElapsedRealtimeClock.millis();
                 mTempAllowlistCache.put(uid, true);
-                final ArraySet<String> packages = getPackagesForUidLocked(uid);
+                final ArraySet<String> packages = mService.getPackagesForUidLocked(uid);
                 if (packages != null) {
                     final int userId = UserHandle.getUserId(uid);
                     for (int i = packages.size() - 1; i >= 0; --i) {
@@ -2503,26 +2486,6 @@ public final class QuotaController extends StateController {
         mTimingSessions.forEach(mDeleteOldSessionsFunctor);
         // Don't delete EJ timing sessions here. They'll be removed in
         // getRemainingEJExecutionTimeLocked().
-    }
-
-    @Nullable
-    private ArraySet<String> getPackagesForUidLocked(final int uid) {
-        ArraySet<String> packages = mUidToPackageCache.get(uid);
-        if (packages == null) {
-            try {
-                String[] pkgs = AppGlobals.getPackageManager()
-                        .getPackagesForUid(uid);
-                if (pkgs != null) {
-                    for (String pkg : pkgs) {
-                        mUidToPackageCache.add(uid, pkg);
-                    }
-                    packages = mUidToPackageCache.get(uid);
-                }
-            } catch (RemoteException e) {
-                // Shouldn't happen.
-            }
-        }
-        return packages;
     }
 
     private class QcHandler extends Handler {
@@ -2655,7 +2618,8 @@ public final class QuotaController extends StateController {
                             // Update Timers first.
                             if (mPkgTimers.indexOfKey(userId) >= 0
                                     || mEJPkgTimers.indexOfKey(userId) >= 0) {
-                                final ArraySet<String> packages = getPackagesForUidLocked(uid);
+                                final ArraySet<String> packages =
+                                        mService.getPackagesForUidLocked(uid);
                                 if (packages != null) {
                                     for (int i = packages.size() - 1; i >= 0; --i) {
                                         Timer t = mEJPkgTimers.get(userId, packages.valueAt(i));
@@ -2740,7 +2704,7 @@ public final class QuotaController extends StateController {
                             }
                             mTempAllowlistGraceCache.delete(uid);
                             mTopAppGraceCache.delete(uid);
-                            final ArraySet<String> packages = getPackagesForUidLocked(uid);
+                            final ArraySet<String> packages = mService.getPackagesForUidLocked(uid);
                             if (packages != null) {
                                 final int userId = UserHandle.getUserId(uid);
                                 for (int i = packages.size() - 1; i >= 0; --i) {
@@ -4109,17 +4073,6 @@ public final class QuotaController extends StateController {
         pw.println(mTempAllowlistGraceCache.toString());
         pw.println();
 
-        pw.println("Cached UID->package map:");
-        pw.increaseIndent();
-        for (int i = 0; i < mUidToPackageCache.size(); ++i) {
-            final int uid = mUidToPackageCache.keyAt(i);
-            pw.print(uid);
-            pw.print(": ");
-            pw.println(mUidToPackageCache.get(uid));
-        }
-        pw.decreaseIndent();
-        pw.println();
-
         pw.println("Special apps:");
         pw.increaseIndent();
         pw.print("System installers", mSystemInstallers.toString());
@@ -4276,22 +4229,6 @@ public final class QuotaController extends StateController {
         for (int i = 0; i < mForegroundUids.size(); ++i) {
             proto.write(StateControllerProto.QuotaController.FOREGROUND_UIDS,
                     mForegroundUids.keyAt(i));
-        }
-
-        for (int i = 0; i < mUidToPackageCache.size(); ++i) {
-            final long upToken = proto.start(
-                    StateControllerProto.QuotaController.UID_TO_PACKAGE_CACHE);
-
-            final int uid = mUidToPackageCache.keyAt(i);
-            ArraySet<String> packages = mUidToPackageCache.get(uid);
-
-            proto.write(StateControllerProto.QuotaController.UidPackageMapping.UID, uid);
-            for (int j = 0; j < packages.size(); ++j) {
-                proto.write(StateControllerProto.QuotaController.UidPackageMapping.PACKAGE_NAMES,
-                        packages.valueAt(j));
-            }
-
-            proto.end(upToken);
         }
 
         mTrackedJobs.forEach((jobs) -> {

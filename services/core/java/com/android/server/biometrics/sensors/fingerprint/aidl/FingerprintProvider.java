@@ -115,7 +115,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             Slog.e(getTag(), "Stopping background authentication, top: "
                                     + topPackage + " currentClient: " + client);
                             mSensors.valueAt(i).getScheduler()
-                                    .cancelAuthentication(client.getToken());
+                                    .cancelAuthenticationOrDetection(client.getToken());
                         }
                     }
                 }
@@ -383,7 +383,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @Override
     public void cancelAuthentication(int sensorId, @NonNull IBinder token) {
-        mHandler.post(() -> mSensors.get(sensorId).getScheduler().cancelAuthentication(token));
+        mHandler.post(() -> mSensors.get(sensorId).getScheduler()
+                .cancelAuthenticationOrDetection(token));
     }
 
     @Override

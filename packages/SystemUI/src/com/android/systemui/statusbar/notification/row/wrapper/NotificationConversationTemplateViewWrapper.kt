@@ -23,12 +23,9 @@ import com.android.internal.widget.CachingIconView
 import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.MessagingLinearLayout
 import com.android.systemui.R
-import com.android.systemui.statusbar.TransformableView
-import com.android.systemui.statusbar.ViewTransformationHelper
 import com.android.systemui.statusbar.notification.NotificationUtils
-import com.android.systemui.statusbar.notification.TransformState
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.notification.row.HybridNotificationView
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationMessagingTemplateViewWrapper.setCustomImageMessageTransform
 
 /**
  * Wraps a notification containing a conversation template
@@ -93,33 +90,7 @@ class NotificationConversationTemplateViewWrapper constructor(
                 appName,
                 conversationTitleView)
 
-        // Let's ignore the image message container since that is transforming as part of the
-        // messages already
-        mTransformationHelper.setCustomTransformation(
-                object : ViewTransformationHelper.CustomTransformation() {
-                    override fun transformTo(
-                        ownState: TransformState,
-                        otherView: TransformableView,
-                        transformationAmount: Float
-                    ): Boolean {
-                        if (otherView is HybridNotificationView) {
-                            return false
-                        }
-                        // we're hidden by default by the transformState
-                        ownState.ensureVisible()
-                        // Let's do nothing otherwise, this is already handled by the messages
-                        return true
-                    }
-
-                    override fun transformFrom(
-                        ownState: TransformState,
-                        otherView: TransformableView,
-                        transformationAmount: Float
-                    ): Boolean =
-                            transformTo(ownState, otherView, transformationAmount)
-                },
-                imageMessageContainer.id
-        )
+        setCustomImageMessageTransform(mTransformationHelper, imageMessageContainer)
 
         addViewsTransformingToSimilar(
                 conversationIconView,

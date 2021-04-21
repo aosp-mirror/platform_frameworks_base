@@ -228,6 +228,27 @@ public class FileUtilsTest {
     }
 
     @Test
+    public void testCopyFileWithAppend() throws Exception {
+        final File src = new File(mTarget, "src");
+        final File dest = new File(mTarget, "dest");
+
+        byte[] expected = new byte[10];
+        byte[] actual = new byte[10];
+        new Random().nextBytes(expected);
+        writeFile(src, expected);
+
+        try (FileInputStream in = new FileInputStream(src);
+                FileOutputStream out = new FileOutputStream(dest, true /* append */)) {
+            // sendfile(2) fails if output fd is opened with O_APPEND, but FileUtils#copy should
+            // fallback to userspace copy
+            FileUtils.copy(in, out);
+        }
+
+        actual = readFile(dest);
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test
     public void testIsFilenameSafe() throws Exception {
         assertTrue(FileUtils.isFilenameSafe(new File("foobar")));
         assertTrue(FileUtils.isFilenameSafe(new File("a_b-c=d.e/0,1+23")));
@@ -577,7 +598,6 @@ public class FileUtilsTest {
 
         final File validVideoCameraDir = new File(cameraDir, "validVideo-" + nonce + ".mp4");
         final File validImageCameraDir = new File(cameraDir, "validImage-" + nonce + ".jpg");
-        final File invalidVideoCameraDir = new File(cameraDir, ".invalidVideo-" + nonce + ".mp4");
 
         final File validVideoNonCameraDir = new File(nonCameraDir, "validVideo-" + nonce + ".mp4");
         final File validImageNonCameraDir = new File(nonCameraDir, "validImage-" + nonce + ".jpg");
@@ -588,9 +608,6 @@ public class FileUtilsTest {
                             MODE_CREATE | MODE_READ_WRITE).getFileDescriptor();
             FileDescriptor pfdValidImageCameraDir =
                     ParcelFileDescriptor.open(validImageCameraDir,
-                            MODE_CREATE | MODE_READ_WRITE).getFileDescriptor();
-            FileDescriptor pfdInvalidVideoCameraDir =
-                    ParcelFileDescriptor.open(invalidVideoCameraDir,
                             MODE_CREATE | MODE_READ_WRITE).getFileDescriptor();
 
             FileDescriptor pfdValidVideoNonCameraDir =
@@ -603,13 +620,11 @@ public class FileUtilsTest {
             assertNotNull(convertToModernFd(pfdValidVideoCameraDir));
 
             assertNull(convertToModernFd(pfdValidImageCameraDir));
-            assertNull(convertToModernFd(pfdInvalidVideoCameraDir));
             assertNull(convertToModernFd(pfdValidVideoNonCameraDir));
             assertNull(convertToModernFd(pfdValidImageNonCameraDir));
         } finally {
             validVideoCameraDir.delete();
             validImageCameraDir.delete();
-            invalidVideoCameraDir.delete();
             validVideoNonCameraDir.delete();
             validImageNonCameraDir.delete();
         }

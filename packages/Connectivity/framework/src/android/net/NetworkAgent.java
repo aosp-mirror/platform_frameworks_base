@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
@@ -106,6 +107,9 @@ public abstract class NetworkAgent {
     private final String LOG_TAG;
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
+    /** @hide */
+    @TestApi
+    public static final int MIN_LINGER_TIMER_MS = 2000;
     private final ArrayList<RegistryAction> mPreConnectedQueue = new ArrayList<>();
     private volatile long mLastBwRefreshTime = 0;
     private static final long BW_REFRESH_MIN_WIN_MS = 500;
@@ -390,6 +394,15 @@ public abstract class NetworkAgent {
      * @hide
      */
     public static final int CMD_NETWORK_DESTROYED = BASE + 23;
+
+    /**
+     * Sent by the NetworkAgent to ConnectivityService to set the linger duration for this network
+     * agent.
+     * arg1 = the linger duration, represents by {@link Duration}.
+     *
+     * @hide
+     */
+    public static final int EVENT_LINGER_DURATION_CHANGED = BASE + 24;
 
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
         final NetworkInfo ni = new NetworkInfo(config.legacyType, config.legacySubType,
@@ -1287,6 +1300,22 @@ public abstract class NetworkAgent {
         queueOrSendMessage(ra -> ra.sendQosCallbackError(qosCallbackId, exceptionType));
     }
 
+    /**
+     * Set the linger duration for this network agent.
+     * @param duration the delay between the moment the network becomes unneeded and the
+     *                 moment the network is disconnected or moved into the background.
+     *                 Note that If this duration has greater than millisecond precision, then
+     *                 the internal implementation will drop any excess precision.
+     */
+    public void setLingerDuration(@NonNull final Duration duration) {
+        Objects.requireNonNull(duration);
+        final long durationMs = duration.toMillis();
+        if (durationMs < MIN_LINGER_TIMER_MS || durationMs > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Duration must be within ["
+                    + MIN_LINGER_TIMER_MS + "," + Integer.MAX_VALUE + "]ms");
+        }
+        queueOrSendMessage(ra -> ra.sendLingerDuration((int) durationMs));
+    }
 
     /** @hide */
     protected void log(final String s) {

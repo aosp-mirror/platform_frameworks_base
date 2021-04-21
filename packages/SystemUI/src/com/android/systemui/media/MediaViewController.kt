@@ -32,10 +32,15 @@ import javax.inject.Inject
  * with the view instance and keeping the media view states up to date.
  */
 class MediaViewController @Inject constructor(
-    context: Context,
+    private val context: Context,
     private val configurationController: ConfigurationController,
     private val mediaHostStatesManager: MediaHostStatesManager
 ) {
+
+    /** Indicating the media view controller is for a player or recommendation. */
+    enum class TYPE {
+        PLAYER, RECOMMENDATION
+    }
 
     companion object {
         @JvmField
@@ -53,6 +58,7 @@ class MediaViewController @Inject constructor(
     private var animationDuration: Long = 0
     private var animateNextStateChange: Boolean = false
     private val measurement = MeasurementOutput(0, 0)
+    private var type: TYPE = TYPE.PLAYER
 
     /**
      * A map containing all viewStates for all locations of this mediaState
@@ -181,8 +187,6 @@ class MediaViewController @Inject constructor(
         private set
 
     init {
-        collapsedLayout.load(context, R.xml.media_collapsed)
-        expandedLayout.load(context, R.xml.media_expanded)
         mediaHostStatesManager.addController(this)
         layoutController.sizeChangedListener = { width: Int, height: Int ->
             currentWidth = width
@@ -313,7 +317,11 @@ class MediaViewController @Inject constructor(
         return result
     }
 
-    private fun getKey(state: MediaHostState, guts: Boolean, result: CacheKey): CacheKey {
+    private fun getKey(
+        state: MediaHostState,
+        guts: Boolean,
+        result: CacheKey
+    ): CacheKey {
         result.apply {
             heightMeasureSpec = state.measurementInput?.heightMeasureSpec ?: 0
             widthMeasureSpec = state.measurementInput?.widthMeasureSpec ?: 0
@@ -327,7 +335,8 @@ class MediaViewController @Inject constructor(
      * Attach a view to this controller. This may perform measurements if it's not available yet
      * and should therefore be done carefully.
      */
-    fun attach(transitionLayout: TransitionLayout) {
+    fun attach(transitionLayout: TransitionLayout, type: TYPE) {
+        updateMediaViewControllerType(type)
         this.transitionLayout = transitionLayout
         layoutController.attach(transitionLayout)
         if (currentEndLocation == -1) {
@@ -426,7 +435,7 @@ class MediaViewController @Inject constructor(
         viewState: TransitionViewState?,
         location: Int,
         outState: TransitionViewState
-    ) : TransitionViewState? {
+    ): TransitionViewState? {
         val result = viewState?.copy(outState) ?: return null
         val overrideSize = mediaHostStatesManager.carouselSizes[location]
         overrideSize?.let {
@@ -436,6 +445,18 @@ class MediaViewController @Inject constructor(
             result.width = Math.max(it.measuredWidth, result.width)
         }
         return result
+    }
+
+    private fun updateMediaViewControllerType(type: TYPE) {
+        this.type = type
+        if (type == TYPE.PLAYER) {
+            collapsedLayout.load(context, R.xml.media_collapsed)
+            expandedLayout.load(context, R.xml.media_expanded)
+        } else {
+            collapsedLayout.load(context, R.xml.media_recommendation)
+            expandedLayout.load(context, R.xml.media_recommendation)
+        }
+        refreshState()
     }
 
     /**

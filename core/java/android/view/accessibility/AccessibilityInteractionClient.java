@@ -130,6 +130,10 @@ public final class AccessibilityInteractionClient
 
     private Message mSameThreadMessage;
 
+    private int mInteractionIdWaitingForPrefetchResult = -1;
+    private int mConnectionIdWaitingForPrefetchResult;
+    private String[] mPackageNamesForNextPrefetchResult;
+
     /**
      * @return The client for the current thread.
      */
@@ -494,25 +498,27 @@ public final class AccessibilityInteractionClient
                     Binder.restoreCallingIdentity(identityToken);
                 }
                 if (packageNames != null) {
-                    List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
-                            interactionId);
+                    AccessibilityNodeInfo info =
+                            getFindAccessibilityNodeInfoResultAndClear(interactionId);
                     if (mAccessibilityManager != null
                             && mAccessibilityManager.isAccessibilityTracingEnabled()) {
                         logTrace(connection, "findAccessibilityNodeInfoByAccessibilityId",
-                                "InteractionId:" + interactionId + ";Result: " + infos
-                                + ";connectionId=" + connectionId + ";accessibilityWindowId="
-                                + accessibilityWindowId + ";accessibilityNodeId="
-                                + accessibilityNodeId + ";bypassCache=" + bypassCache
-                                + ";prefetchFlags=" + prefetchFlags + ";arguments=" + arguments);
+                                "InteractionId:" + interactionId + ";Result: " + info
+                                        + ";connectionId=" + connectionId
+                                        + ";accessibilityWindowId="
+                                        + accessibilityWindowId + ";accessibilityNodeId="
+                                        + accessibilityNodeId + ";bypassCache=" + bypassCache
+                                        + ";prefetchFlags=" + prefetchFlags
+                                        + ";arguments=" + arguments);
                     }
-                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId,
+                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_MASK) != 0
+                            && info != null) {
+                        setInteractionWaitingForPrefetchResult(interactionId, connectionId,
+                                packageNames);
+                    }
+                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId,
                             bypassCache, packageNames);
-                    if (infos != null && !infos.isEmpty()) {
-                        for (int i = 1; i < infos.size(); i++) {
-                            infos.get(i).recycle();
-                        }
-                        return infos.get(0);
-                    }
+                    return info;
                 }
             } else {
                 if (DEBUG) {
@@ -524,6 +530,15 @@ public final class AccessibilityInteractionClient
                     + " findAccessibilityNodeInfoByAccessibilityId", re);
         }
         return null;
+    }
+
+    private void setInteractionWaitingForPrefetchResult(int interactionId, int connectionId,
+            String[] packageNames) {
+        synchronized (mInstanceLock) {
+            mInteractionIdWaitingForPrefetchResult = interactionId;
+            mConnectionIdWaitingForPrefetchResult = connectionId;
+            mPackageNamesForNextPrefetchResult = packageNames;
+        }
     }
 
     private static String idToString(int accessibilityWindowId, long accessibilityNodeId) {
@@ -920,6 +935,46 @@ public final class AccessibilityInteractionClient
                 mCallingUid = Binder.getCallingUid();
             }
             mInstanceLock.notifyAll();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setPrefetchAccessibilityNodeInfoResult(@NonNull List<AccessibilityNodeInfo> infos,
+                                                       int interactionId) {
+        int interactionIdWaitingForPrefetchResultCopy = -1;
+        int connectionIdWaitingForPrefetchResultCopy = -1;
+        String[] packageNamesForNextPrefetchResultCopy = null;
+
+        if (infos.isEmpty()) {
+            return;
+        }
+
+        synchronized (mInstanceLock) {
+            if (mInteractionIdWaitingForPrefetchResult == interactionId) {
+                interactionIdWaitingForPrefetchResultCopy = mInteractionIdWaitingForPrefetchResult;
+                connectionIdWaitingForPrefetchResultCopy =
+                        mConnectionIdWaitingForPrefetchResult;
+                if (mPackageNamesForNextPrefetchResult != null) {
+                    packageNamesForNextPrefetchResultCopy =
+                            new String[mPackageNamesForNextPrefetchResult.length];
+                    for (int i = 0; i < mPackageNamesForNextPrefetchResult.length; i++) {
+                        packageNamesForNextPrefetchResultCopy[i] =
+                                mPackageNamesForNextPrefetchResult[i];
+                    }
+                }
+            }
+        }
+
+        if (interactionIdWaitingForPrefetchResultCopy == interactionId) {
+            finalizeAndCacheAccessibilityNodeInfos(
+                    infos, connectionIdWaitingForPrefetchResultCopy, false,
+                    packageNamesForNextPrefetchResultCopy);
+        } else if (DEBUG) {
+            Log.w(LOG_TAG, "Prefetching for interaction with id " + interactionId + " dropped "
+                    + infos.size() + " nodes");
         }
     }
 

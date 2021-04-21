@@ -229,7 +229,8 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                             getTargetUserId(), mIsStrongBiometric);
                 } else if (!isBiometricPrompt() && listener != null) {
                     if (mIsStrongBiometric) {
-                        KeyStore.getInstance().addAuthToken(byteToken);
+                        final int result = KeyStore.getInstance().addAuthToken(byteToken);
+                        Slog.d(TAG, "addAuthToken: " + result);
                     } else {
                         Slog.d(TAG, "Skipping addAuthToken");
                     }

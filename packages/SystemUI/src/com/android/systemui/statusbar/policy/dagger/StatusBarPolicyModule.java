@@ -48,6 +48,8 @@ import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.SecurityControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
+import com.android.systemui.statusbar.policy.WalletController;
+import com.android.systemui.statusbar.policy.WalletControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 
@@ -117,6 +119,10 @@ public interface StatusBarPolicyModule {
     @Binds
     DeviceControlsController provideDeviceControlsController(
             DeviceControlsControllerImpl controllerImpl);
+
+    /** */
+    @Binds
+    WalletController provideWalletController(WalletControllerImpl controllerImpl);
 
     /** */
     @Binds

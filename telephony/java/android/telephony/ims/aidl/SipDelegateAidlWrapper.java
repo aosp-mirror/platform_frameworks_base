@@ -79,11 +79,11 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
         }
 
         @Override
-        public void closeDialog(String callId)  {
+        public void cleanupSession(String callId)  {
             SipDelegate d = mDelegate;
             final long token = Binder.clearCallingIdentity();
             try {
-                mExecutor.execute(() -> d.closeDialog(callId));
+                mExecutor.execute(() -> d.cleanupSession(callId));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

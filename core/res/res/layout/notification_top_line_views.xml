@@ -113,11 +113,10 @@
         android:layout_width="@dimen/notification_feedback_size"
         android:layout_height="@dimen/notification_feedback_size"
         android:layout_marginStart="@dimen/notification_header_separating_margin"
-        android:layout_gravity="center"
+        android:baseline="13dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_feedback_indicator"
         android:background="?android:selectableItemBackgroundBorderless"
-        android:paddingTop="2dp"
         android:visibility="gone"
         android:contentDescription="@string/notification_feedback_indicator"
         />

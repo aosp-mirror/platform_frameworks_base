@@ -22,6 +22,7 @@ import static android.net.NetworkCapabilities.REDACT_FOR_NETWORK_SETTINGS;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.net.NetworkCapabilities.RedactionType;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -45,7 +46,7 @@ public final class VpnTransportInfo implements TransportInfo, Parcelable {
     public final String sessionId;
 
     @Override
-    public long getApplicableRedactions() {
+    public @RedactionType long getApplicableRedactions() {
         return REDACT_FOR_NETWORK_SETTINGS;
     }
 
@@ -53,7 +54,7 @@ public final class VpnTransportInfo implements TransportInfo, Parcelable {
      * Create a copy of a {@link VpnTransportInfo} with the sessionId redacted if necessary.
      */
     @NonNull
-    public VpnTransportInfo makeCopy(long redactions) {
+    public VpnTransportInfo makeCopy(@RedactionType long redactions) {
         return new VpnTransportInfo(type,
             ((redactions & REDACT_FOR_NETWORK_SETTINGS) != 0) ? null : sessionId);
     }

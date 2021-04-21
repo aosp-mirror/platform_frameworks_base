@@ -94,6 +94,7 @@ interface IAppSearchManager {
      * @param databaseName  The name of the database where this document lives.
      * @param documentBundes List of GenericDocument bundles.
      * @param userId Id of the calling user
+     * @param binderCallStartTimeMillis start timestamp of binder call in Millis
      * @param callback
      *     If the call fails to start, {@link IAppSearchBatchResultCallback#onSystemError}
      *     will be called with the cause throwable. Otherwise,
@@ -106,6 +107,7 @@ interface IAppSearchManager {
         in String databaseName,
         in List<Bundle> documentBundles,
         in int userId,
+        in long binderCallStartTimeMillis,
         in IAppSearchBatchResultCallback callback);
 
     /**

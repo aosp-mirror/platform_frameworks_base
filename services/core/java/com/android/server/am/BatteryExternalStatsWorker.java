@@ -137,8 +137,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     @GuardedBy("mWorkerLock")
     private PowerStatsInternal mPowerStatsInternal = null;
 
-    // WiFi keeps an accumulated total of stats, unlike Bluetooth.
-    // Keep the last WiFi stats so we can compute a delta.
+    // WiFi keeps an accumulated total of stats. Keep the last WiFi stats so we can compute a delta.
+    // (This is unlike Bluetooth, where BatteryStatsImpl is left responsible for taking the delta.)
     @GuardedBy("mWorkerLock")
     private WifiActivityEnergyInfo mLastWifiInfo =
             new WifiActivityEnergyInfo(0, 0, 0, 0, 0, 0);
@@ -205,7 +205,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             mPowerStatsInternal = psi;
 
             boolean[] supportedStdBuckets = null;
-            int numCustomBuckets = 0;
+            String[] customBucketNames = null;
             if (mPowerStatsInternal != null) {
                 final SparseArray<EnergyConsumer> idToConsumer
                         = populateEnergyConsumerSubsystemMapsLocked();
@@ -227,12 +227,12 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                                 + e.getCause());
                         // Continue running, later attempts to query may be successful.
                     }
-                    numCustomBuckets = mMeasuredEnergySnapshot.getNumOtherOrdinals();
+                    customBucketNames = mMeasuredEnergySnapshot.getOtherOrdinalNames();
                     supportedStdBuckets = getSupportedEnergyBuckets(idToConsumer);
                 }
             }
             synchronized (mStats) {
-                mStats.initMeasuredEnergyStatsLocked(supportedStdBuckets, numCustomBuckets);
+                mStats.initMeasuredEnergyStatsLocked(supportedStdBuckets, customBucketNames);
             }
         }
     }

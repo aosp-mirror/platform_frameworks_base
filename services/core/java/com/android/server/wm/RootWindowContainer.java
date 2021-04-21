@@ -2124,6 +2124,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         .setDeferTaskAppear(true)
                         .setHasBeenVisible(true)
                         .build();
+                // Establish bi-directional link between the original and pinned task.
+                r.setLastParentBeforePip();
                 // It's possible the task entering PIP is in freeform, so save the last
                 // non-fullscreen bounds. Then when this new PIP task exits PIP, it can restore
                 // to its previous freeform bounds.

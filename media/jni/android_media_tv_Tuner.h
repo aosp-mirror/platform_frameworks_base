@@ -73,6 +73,8 @@ using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageTypeExt1_1;
 
 using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
 
+const static int TUNER_VERSION_1_1 = ((1 << 16) | 1);
+
 namespace android {
 
 struct LnbClientCallbackImpl : public LnbClientCallback {

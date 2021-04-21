@@ -37,7 +37,11 @@ import java.util.Set;
 public final class SchemaMigrationUtil {
     private SchemaMigrationUtil() {}
 
-    /** Returns all active {@link Migrator}s that need to be triggered in this migration. */
+    /**
+     * Returns all active {@link Migrator}s that need to be triggered in this migration.
+     *
+     * <p>{@link Migrator#shouldMigrate} returns {@code true} will make the {@link Migrator} active.
+     */
     @NonNull
     public static Map<String, Migrator> getActiveMigrators(
             @NonNull Set<AppSearchSchema> existingSchemas,

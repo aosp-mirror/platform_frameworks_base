@@ -439,24 +439,22 @@ public final class CompanionDeviceManager {
     /**
      * Associates given device with given app for the given user directly, without UI prompt.
      *
-     * @return whether successful
-     *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES)
-    public boolean associate(
+    public void associate(
             @NonNull String packageName,
             @NonNull MacAddress macAddress) {
         if (!checkFeaturePresent()) {
-            return false;
+            return;
         }
         Objects.requireNonNull(packageName, "package name cannot be null");
         Objects.requireNonNull(macAddress, "mac address cannot be null");
 
         UserHandle user = android.os.Process.myUserHandle();
         try {
-            return mService.createAssociation(
+            mService.createAssociation(
                     packageName, macAddress.toString(), user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

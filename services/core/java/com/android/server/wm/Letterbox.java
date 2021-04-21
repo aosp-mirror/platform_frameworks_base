@@ -47,6 +47,10 @@ public class Letterbox {
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
     private final Supplier<Boolean> mAreCornersRounded;
     private final Supplier<Color> mColorSupplier;
+    // Parameters for "blurred wallpaper" letterbox background.
+    private final Supplier<Boolean> mHasWallpaperBackgroundSupplier;
+    private final Supplier<Integer> mBlurRadiusSupplier;
+    private final Supplier<Float> mDarkScrimAlphaSupplier;
 
     private final Rect mOuter = new Rect();
     private final Rect mInner = new Rect();
@@ -68,11 +72,17 @@ public class Letterbox {
     public Letterbox(Supplier<SurfaceControl.Builder> surfaceControlFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
             Supplier<Boolean> areCornersRounded,
-            Supplier<Color> colorSupplier) {
+            Supplier<Color> colorSupplier,
+            Supplier<Boolean> hasWallpaperBackgroundSupplier,
+            Supplier<Integer> blurRadiusSupplier,
+            Supplier<Float> darkScrimAlphaSupplier) {
         mSurfaceControlFactory = surfaceControlFactory;
         mTransactionFactory = transactionFactory;
         mAreCornersRounded = areCornersRounded;
         mColorSupplier = colorSupplier;
+        mHasWallpaperBackgroundSupplier = hasWallpaperBackgroundSupplier;
+        mBlurRadiusSupplier = blurRadiusSupplier;
+        mDarkScrimAlphaSupplier = darkScrimAlphaSupplier;
     }
 
     /**
@@ -140,18 +150,6 @@ public class Letterbox {
     }
 
     /**
-     * Returns true if any part of the letterbox overlaps with the given {@code rect}.
-     */
-    public boolean isOverlappingWith(Rect rect) {
-        for (LetterboxSurface surface : mSurfaces) {
-            if (surface.isOverlappingWith(rect)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Hides the letterbox.
      *
      * The caller must use {@link #applySurfaceChanges} to apply the new layout to the surface.
@@ -180,7 +178,7 @@ public class Letterbox {
                 return true;
             }
         }
-        if (mBehind.needsApplySurfaceChanges()) {
+        if (mAreCornersRounded.get() && mBehind.needsApplySurfaceChanges()) {
             return true;
         }
         return false;
@@ -274,6 +272,7 @@ public class Letterbox {
         private final String mType;
         private SurfaceControl mSurface;
         private Color mColor;
+        private boolean mHasWallpaperBackground;
 
         private final Rect mSurfaceFrameRelative = new Rect();
         private final Rect mLayoutFrameGlobal = new Rect();
@@ -328,17 +327,6 @@ public class Letterbox {
             return Math.max(0, mLayoutFrameGlobal.height());
         }
 
-        /**
-         * Returns if the given {@code rect} overlaps with this letterbox piece.
-         * @param rect the area to check for overlap in global coordinates
-         */
-        public boolean isOverlappingWith(Rect rect) {
-            if (mLayoutFrameGlobal.isEmpty()) {
-                return false;
-            }
-            return Rect.intersects(rect, mLayoutFrameGlobal);
-        }
-
         public void applySurfaceChanges(SurfaceControl.Transaction t) {
             if (!needsApplySurfaceChanges()) {
                 // Nothing changed.
@@ -351,15 +339,14 @@ public class Letterbox {
                 }
 
                 mColor = mColorSupplier.get();
-                final float[] rgbTmpFloat = new float[3];
-                rgbTmpFloat[0] = mColor.red();
-                rgbTmpFloat[1] = mColor.green();
-                rgbTmpFloat[2] = mColor.blue();
-                t.setColor(mSurface, rgbTmpFloat);
-
+                t.setColor(mSurface, getRgbColorArray());
                 t.setPosition(mSurface, mSurfaceFrameRelative.left, mSurfaceFrameRelative.top);
                 t.setWindowCrop(mSurface, mSurfaceFrameRelative.width(),
                         mSurfaceFrameRelative.height());
+
+                mHasWallpaperBackground = mHasWallpaperBackgroundSupplier.get();
+                updateAlphaAndBlur(t);
+
                 t.show(mSurface);
             } else if (mSurface != null) {
                 t.hide(mSurface);
@@ -370,9 +357,43 @@ public class Letterbox {
             }
         }
 
+        private void updateAlphaAndBlur(SurfaceControl.Transaction t) {
+            if (!mHasWallpaperBackground) {
+                // Opaque
+                t.setAlpha(mSurface, 1.0f);
+                // Removing pre-exesting blur
+                t.setBackgroundBlurRadius(mSurface, 0);
+                return;
+            }
+            final float alpha = mDarkScrimAlphaSupplier.get();
+            t.setAlpha(mSurface, alpha);
+
+            // Translucent dark scrim can be shown without blur.
+            if (mBlurRadiusSupplier.get() <= 0) {
+                // Removing pre-exesting blur
+                t.setBackgroundBlurRadius(mSurface, 0);
+                return;
+            }
+
+            t.setBackgroundBlurRadius(mSurface, mBlurRadiusSupplier.get());
+        }
+
+        private float[] getRgbColorArray() {
+            final float[] rgbTmpFloat = new float[3];
+            rgbTmpFloat[0] = mColor.red();
+            rgbTmpFloat[1] = mColor.green();
+            rgbTmpFloat[2] = mColor.blue();
+            return rgbTmpFloat;
+        }
+
         public boolean needsApplySurfaceChanges() {
             return !mSurfaceFrameRelative.equals(mLayoutFrameRelative)
-                    || mColorSupplier.get() != mColor;
+                    // If mSurfaceFrameRelative is empty then mHasWallpaperBackground and mColor
+                    // may never be updated in applySurfaceChanges but this doesn't mean that
+                    // update is needed.
+                    || !mSurfaceFrameRelative.isEmpty()
+                    && (mHasWallpaperBackgroundSupplier.get() != mHasWallpaperBackground
+                    || !mColorSupplier.get().equals(mColor));
         }
     }
 }

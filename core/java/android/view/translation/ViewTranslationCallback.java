@@ -21,23 +21,27 @@ import android.annotation.UiThread;
 import android.view.View;
 
 /**
- * Callback for handling the translated information show or hide in the {@link View}. See {@link
- * View#onTranslationResponse} for how to get the translated information.
+ * Callback for handling the translated information show or hide in the {@link View}.
  */
 @UiThread
 public interface ViewTranslationCallback {
     /**
      * Called when the translated text is ready to show or if the user has requested to reshow the
-     * translated content after hiding it. This may be called before the translation results are
-     * returned through the {@link View#onTranslationResponse}.
+     * translated content after hiding it.
+     * <p>
+     * The translated content can be obtained from {@link View#getViewTranslationResponse}. This
+     * method will not be called before {@link View#onViewTranslationResponse} or
+     * {@link View#onVirtualViewTranslationResponses}.
+     *
+     * See {@link View#onViewTranslationResponse} for how to get the translated information.
      *
      * @return {@code true} if the View handles showing the translation.
      */
     boolean onShowTranslation(@NonNull View view);
     /**
      * Called when the user wants to show the original text instead of the translated text. This
-     * may be called before the translation results are returned through the
-     * {@link View#onTranslationResponse}.
+     * method will not be called before {@link View#onViewTranslationResponse} or
+     * {@link View#onViewTranslationResponse}.
      *
      * @return {@code true} if the View handles hiding the translation.
      */
@@ -48,4 +52,16 @@ public interface ViewTranslationCallback {
      * @return {@code true} if the View handles clearing the translation.
      */
     boolean onClearTranslation(@NonNull View view);
+
+    /**
+     * Enables padding on the view's original content.
+     * <p>
+     * This is useful when we do not modify the content directly, rather use a mechanism like
+     * {@link android.text.method.TransformationMethod}. If the app misbehaves when the displayed
+     * translation and the underlying content have different sizes, the platform intelligence can
+     * request that the original content be padded to make the sizes match.
+     *
+     * @hide
+     */
+    default void enableContentPadding() {}
 }

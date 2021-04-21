@@ -76,4 +76,8 @@ final class FakeVibrator extends Vibrator {
     @Override
     public void cancel() {
     }
+
+    @Override
+    public void cancel(int usageFilter) {
+    }
 }

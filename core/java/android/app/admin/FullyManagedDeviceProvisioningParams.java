@@ -229,7 +229,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
 
         /**
          * Marks that the Device Owner may grant permissions related to device sensors.
-         * See {@link DevicePolicyManager#EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT}.
+         * See {@link DevicePolicyManager#EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT}.
          */
         @NonNull
         @SuppressLint("MissingGetterMatchingBuilder")

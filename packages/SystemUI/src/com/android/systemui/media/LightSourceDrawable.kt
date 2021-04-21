@@ -36,8 +36,8 @@ import android.util.AttributeSet
 import android.util.MathUtils.lerp
 import androidx.annotation.Keep
 import com.android.internal.graphics.ColorUtils
-import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
 import org.xmlpull.v1.XmlPullParser
 
 private const val RIPPLE_ANIM_DURATION = 800L

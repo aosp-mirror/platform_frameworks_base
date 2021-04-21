@@ -49,6 +49,22 @@ public interface QSFragmentModule {
     String QS_SECURITY_FOOTER_VIEW = "qs_security_footer";
     String QS_USING_MEDIA_PLAYER = "qs_using_media_player";
 
+    /**
+     * Provide a context themed using the QS theme
+     */
+    @Provides
+    @QSThemedContext
+    static Context provideThemedContext(@RootView View view) {
+        return view.getContext();
+    }
+
+    /** */
+    @Provides
+    @QSThemedContext
+    static LayoutInflater provideThemedLayoutInflater(@QSThemedContext Context context) {
+        return LayoutInflater.from(context);
+    }
+
     /** */
     @Provides
     @RootView
@@ -109,7 +125,10 @@ public interface QSFragmentModule {
     @Provides
     @QSScope
     @Named(QS_SECURITY_FOOTER_VIEW)
-    static View providesQSSecurityFooterView(LayoutInflater layoutInflater, QSPanel qsPanel) {
+    static View providesQSSecurityFooterView(
+            @QSThemedContext LayoutInflater layoutInflater,
+            QSPanel qsPanel
+    ) {
         return layoutInflater.inflate(R.layout.quick_settings_footer, qsPanel, false);
     }
 

@@ -19,12 +19,12 @@ package com.android.server.appsearch.external.localstorage.converter;
 import android.annotation.NonNull;
 import android.app.appsearch.SearchSpec;
 
-import com.android.internal.util.Preconditions;
-
 import com.google.android.icing.proto.ResultSpecProto;
 import com.google.android.icing.proto.ScoringSpecProto;
 import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.proto.TermMatchType;
+
+import java.util.Objects;
 
 /**
  * Translates a {@link SearchSpec} into icing search protos.
@@ -37,7 +37,7 @@ public final class SearchSpecToProtoConverter {
     /** Extracts {@link SearchSpecProto} information from a {@link SearchSpec}. */
     @NonNull
     public static SearchSpecProto toSearchSpecProto(@NonNull SearchSpec spec) {
-        Preconditions.checkNotNull(spec);
+        Objects.requireNonNull(spec);
         SearchSpecProto.Builder protoBuilder =
                 SearchSpecProto.newBuilder()
                         .addAllSchemaTypeFilters(spec.getFilterSchemas())
@@ -56,7 +56,7 @@ public final class SearchSpecToProtoConverter {
     /** Extracts {@link ResultSpecProto} information from a {@link SearchSpec}. */
     @NonNull
     public static ResultSpecProto toResultSpecProto(@NonNull SearchSpec spec) {
-        Preconditions.checkNotNull(spec);
+        Objects.requireNonNull(spec);
         return ResultSpecProto.newBuilder()
                 .setNumPerPage(spec.getResultCountPerPage())
                 .setSnippetSpec(
@@ -73,7 +73,7 @@ public final class SearchSpecToProtoConverter {
     /** Extracts {@link ScoringSpecProto} information from a {@link SearchSpec}. */
     @NonNull
     public static ScoringSpecProto toScoringSpecProto(@NonNull SearchSpec spec) {
-        Preconditions.checkNotNull(spec);
+        Objects.requireNonNull(spec);
         ScoringSpecProto.Builder protoBuilder = ScoringSpecProto.newBuilder();
 
         @SearchSpec.Order int orderCode = spec.getOrder();

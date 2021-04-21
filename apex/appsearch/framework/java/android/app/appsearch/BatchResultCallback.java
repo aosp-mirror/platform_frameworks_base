@@ -36,13 +36,23 @@ public interface BatchResultCallback<KeyType, ValueType> {
     void onResult(@NonNull AppSearchBatchResult<KeyType, ValueType> result);
 
     /**
-     * Called when a system error occurred.
+     * Called when a system error occurs.
      *
-     * @param throwable The cause throwable.
+     * <p>This method is only called the infrastructure is fundamentally broken or unavailable, such
+     * that none of the requests could be started. For example, it will be called if the AppSearch
+     * service unexpectedly fails to initialize and can't be recovered by any means, or if
+     * communicating to the server over Binder fails (e.g. system service crashed or device is
+     * rebooting).
+     *
+     * <p>The error is not expected to be recoverable and there is no specific recommended action
+     * other than displaying a permanent message to the user.
+     *
+     * <p>Normal errors that are caused by invalid inputs or recoverable/retriable situations
+     * are reported associated with the input that caused them via the {@link #onResult} method.
+     *
+     * @param throwable an exception describing the system error
      */
     default void onSystemError(@Nullable Throwable throwable) {
-        if (throwable != null) {
-            throw new RuntimeException(throwable);
-        }
+        throw new RuntimeException("Unrecoverable system error", throwable);
     }
 }

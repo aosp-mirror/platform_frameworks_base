@@ -26,6 +26,7 @@ import com.android.internal.util.Preconditions;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Provides results for AppSearch batch operations which encompass multiple documents.
@@ -180,7 +181,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
         public Builder<KeyType, ValueType> setSuccess(
                 @NonNull KeyType key, @Nullable ValueType result) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(key);
+            Objects.requireNonNull(key);
             return setResult(key, AppSearchResult.newSuccessfulResult(result));
         }
 
@@ -198,7 +199,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
                 @AppSearchResult.ResultCode int resultCode,
                 @Nullable String errorMessage) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(key);
+            Objects.requireNonNull(key);
             return setResult(key, AppSearchResult.newFailedResult(resultCode, errorMessage));
         }
 
@@ -214,8 +215,8 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
         public Builder<KeyType, ValueType> setResult(
                 @NonNull KeyType key, @NonNull AppSearchResult<ValueType> result) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(key);
-            Preconditions.checkNotNull(result);
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(result);
             if (result.isSuccess()) {
                 mSuccesses.put(key, result.getResultValue());
                 mFailures.remove(key);

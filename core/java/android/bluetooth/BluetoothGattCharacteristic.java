@@ -237,7 +237,6 @@ public class BluetoothGattCharacteristic implements Parcelable {
 
     /**
      * Create a new BluetoothGattCharacteristic.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param uuid The UUID for this characteristic
      * @param properties Properties of this characteristic
@@ -344,7 +343,6 @@ public class BluetoothGattCharacteristic implements Parcelable {
 
     /**
      * Adds a descriptor to this characteristic.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param descriptor Descriptor to be added to this characteristic.
      * @return true, if the descriptor was added to the characteristic

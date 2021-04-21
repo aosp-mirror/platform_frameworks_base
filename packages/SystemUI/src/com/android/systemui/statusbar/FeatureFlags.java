@@ -53,11 +53,6 @@ public class FeatureFlags {
         return mFlagReader.isEnabled(R.bool.flag_notification_twocolumn);
     }
 
-    // Does not support runtime changes
-    public boolean isQSLabelsEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_qs_labels);
-    }
-
     public boolean isKeyguardLayoutEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_keyguard_layout);
     }
@@ -96,5 +91,9 @@ public class FeatureFlags {
 
     public boolean isOngoingCallStatusBarChipEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_ongoing_call_status_bar_chip);
+    }
+
+    public boolean isSmartspaceEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_smartspace);
     }
 }

@@ -16,7 +16,6 @@
 
 package android.bluetooth.le;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;

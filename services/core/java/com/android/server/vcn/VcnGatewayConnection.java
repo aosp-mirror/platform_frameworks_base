@@ -16,6 +16,8 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
@@ -23,6 +25,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.ipsec.ike.exceptions.IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_INTERNAL_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
@@ -46,6 +49,7 @@ import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkProvider;
+import android.net.NetworkScore;
 import android.net.RouteInfo;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.Uri;
@@ -57,7 +61,6 @@ import android.net.ipsec.ike.IkeSession;
 import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.ipsec.ike.IkeSessionConfiguration;
 import android.net.ipsec.ike.IkeSessionParams;
-import android.net.ipsec.ike.exceptions.AuthenticationFailedException;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
@@ -517,6 +520,7 @@ public class VcnGatewayConnection extends StateMachine {
     @NonNull private final VcnGatewayStatusCallback mGatewayStatusCallback;
     @NonNull private final Dependencies mDeps;
     @NonNull private final VcnUnderlyingNetworkTrackerCallback mUnderlyingNetworkTrackerCallback;
+    private final boolean mIsMobileDataEnabled;
 
     @NonNull private final IpSecManager mIpSecManager;
 
@@ -626,13 +630,15 @@ public class VcnGatewayConnection extends StateMachine {
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull VcnGatewayConnectionConfig connectionConfig,
-            @NonNull VcnGatewayStatusCallback gatewayStatusCallback) {
+            @NonNull VcnGatewayStatusCallback gatewayStatusCallback,
+            boolean isMobileDataEnabled) {
         this(
                 vcnContext,
                 subscriptionGroup,
                 snapshot,
                 connectionConfig,
                 gatewayStatusCallback,
+                isMobileDataEnabled,
                 new Dependencies());
     }
 
@@ -643,6 +649,7 @@ public class VcnGatewayConnection extends StateMachine {
             @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull VcnGatewayConnectionConfig connectionConfig,
             @NonNull VcnGatewayStatusCallback gatewayStatusCallback,
+            boolean isMobileDataEnabled,
             @NonNull Dependencies deps) {
         super(TAG, Objects.requireNonNull(vcnContext, "Missing vcnContext").getLooper());
         mVcnContext = vcnContext;
@@ -650,6 +657,7 @@ public class VcnGatewayConnection extends StateMachine {
         mConnectionConfig = Objects.requireNonNull(connectionConfig, "Missing connectionConfig");
         mGatewayStatusCallback =
                 Objects.requireNonNull(gatewayStatusCallback, "Missing gatewayStatusCallback");
+        mIsMobileDataEnabled = isMobileDataEnabled;
         mDeps = Objects.requireNonNull(deps, "Missing deps");
 
         mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
@@ -1051,12 +1059,21 @@ public class VcnGatewayConnection extends StateMachine {
         sessionLostWithoutCallback(token, exception);
     }
 
+    private static boolean isIkeAuthFailure(@NonNull Exception exception) {
+        if (!(exception instanceof IkeProtocolException)) {
+            return false;
+        }
+
+        return ((IkeProtocolException) exception).getErrorType()
+                == ERROR_TYPE_AUTHENTICATION_FAILED;
+    }
+
     private void notifyStatusCallbackForSessionClosed(@NonNull Exception exception) {
         final int errorCode;
         final String exceptionClass;
         final String exceptionMessage;
 
-        if (exception instanceof AuthenticationFailedException) {
+        if (isIkeAuthFailure(exception)) {
             errorCode = VCN_ERROR_CODE_CONFIG_ERROR;
             exceptionClass = exception.getClass().getName();
             exceptionMessage = exception.getMessage();
@@ -1493,7 +1510,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull VcnNetworkAgent agent,
                 @NonNull VcnChildSessionConfiguration childConfig) {
             final NetworkCapabilities caps =
-                    buildNetworkCapabilities(mConnectionConfig, mUnderlying);
+                    buildNetworkCapabilities(mConnectionConfig, mUnderlying, mIsMobileDataEnabled);
             final LinkProperties lp =
                     buildConnectedLinkProperties(
                             mConnectionConfig, tunnelIface, childConfig, mUnderlying);
@@ -1506,7 +1523,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull IpSecTunnelInterface tunnelIface,
                 @NonNull VcnChildSessionConfiguration childConfig) {
             final NetworkCapabilities caps =
-                    buildNetworkCapabilities(mConnectionConfig, mUnderlying);
+                    buildNetworkCapabilities(mConnectionConfig, mUnderlying, mIsMobileDataEnabled);
             final LinkProperties lp =
                     buildConnectedLinkProperties(
                             mConnectionConfig, tunnelIface, childConfig, mUnderlying);
@@ -1834,7 +1851,8 @@ public class VcnGatewayConnection extends StateMachine {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static NetworkCapabilities buildNetworkCapabilities(
             @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig,
-            @Nullable UnderlyingNetworkRecord underlying) {
+            @Nullable UnderlyingNetworkRecord underlying,
+            boolean isMobileDataEnabled) {
         final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
 
         builder.addTransportType(TRANSPORT_CELLULAR);
@@ -1844,6 +1862,12 @@ public class VcnGatewayConnection extends StateMachine {
 
         // Add exposed capabilities
         for (int cap : gatewayConnectionConfig.getAllExposedCapabilities()) {
+            // Skip adding INTERNET or DUN if mobile data is disabled.
+            if (!isMobileDataEnabled
+                    && (cap == NET_CAPABILITY_INTERNET || cap == NET_CAPABILITY_DUN)) {
+                continue;
+            }
+
             builder.addCapability(cap);
         }
 
@@ -2022,7 +2046,11 @@ public class VcnGatewayConnection extends StateMachine {
         pw.println("VcnGatewayConnection (" + mConnectionConfig.getGatewayConnectionName() + "):");
         pw.increaseIndent();
 
-        pw.println("Current state: " + getCurrentState().getClass().getSimpleName());
+        pw.println(
+                "Current state: "
+                        + (getCurrentState() == null
+                                ? null
+                                : getCurrentState().getClass().getSimpleName()));
         pw.println("mIsQuitting: " + mIsQuitting);
         pw.println("mIsInSafeMode: " + mIsInSafeMode);
         pw.println("mCurrentToken: " + mCurrentToken);
@@ -2030,6 +2058,16 @@ public class VcnGatewayConnection extends StateMachine {
         pw.println(
                 "mNetworkAgent.getNetwork(): "
                         + (mNetworkAgent == null ? null : mNetworkAgent.getNetwork()));
+
+        pw.println("mUnderlying:");
+        pw.increaseIndent();
+        if (mUnderlying != null) {
+            mUnderlying.dump(pw);
+        } else {
+            pw.println("null");
+        }
+        pw.decreaseIndent();
+        pw.println();
 
         pw.decreaseIndent();
     }
@@ -2097,7 +2135,7 @@ public class VcnGatewayConnection extends StateMachine {
                 (VcnControlPlaneIkeConfig) mConnectionConfig.getControlPlaneConfig();
         final IkeSessionParams.Builder builder =
                 new IkeSessionParams.Builder(controlPlaneConfig.getIkeSessionParams());
-        builder.setConfiguredNetwork(network);
+        builder.setNetwork(network);
 
         return builder.build();
     }
@@ -2174,7 +2212,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull String tag,
                 @NonNull NetworkCapabilities caps,
                 @NonNull LinkProperties lp,
-                @NonNull int score,
+                @NonNull NetworkScore score,
                 @NonNull NetworkAgentConfig nac,
                 @NonNull NetworkProvider provider,
                 @NonNull Consumer<VcnNetworkAgent> networkUnwantedCallback,
@@ -2315,7 +2353,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull String tag,
                 @NonNull NetworkCapabilities caps,
                 @NonNull LinkProperties lp,
-                @NonNull int score,
+                @NonNull NetworkScore score,
                 @NonNull NetworkAgentConfig nac,
                 @NonNull NetworkProvider provider,
                 @NonNull Consumer<VcnNetworkAgent> networkUnwantedCallback,

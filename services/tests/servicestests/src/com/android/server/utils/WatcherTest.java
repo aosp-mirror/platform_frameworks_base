@@ -896,4 +896,25 @@ public class WatcherTest {
         leafD.tick();
         tester.verify(3, "tick leafD");
     }
+
+    @Test
+    public void testSnapshotCache() {
+        final String name = "SnapshotCache";
+        WatchableTester tester;
+
+        Leaf leafA = new Leaf();
+        SnapshotCache<Leaf> cache = new SnapshotCache<>(leafA, leafA) {
+                @Override
+                public Leaf createSnapshot() {
+                    return mSource.snapshot();
+                }};
+
+        Leaf s1 = cache.snapshot();
+        assertTrue(s1 == cache.snapshot());
+        leafA.tick();
+        Leaf s2 = cache.snapshot();
+        assertTrue(s1 != s2);
+        assertTrue(leafA.get() == s1.get() + 1);
+        assertTrue(leafA.get() == s2.get());
+    }
 }

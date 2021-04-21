@@ -25,7 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
+import com.android.server.wm.flicker.launcherWindowBecomesInvisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -70,8 +70,8 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
 
     @Postsubmit
     @Test
-    override fun wallpaperWindowBecomesInvisible() {
-        testSpec.wallpaperWindowBecomesInvisible()
+    override fun launcherWindowBecomesInvisible() {
+        testSpec.launcherWindowBecomesInvisible()
     }
 
     @FlakyTest
@@ -96,6 +96,12 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
     @Test
     override fun focusChanges() {
         super.focusChanges()
+    }
+
+    @FlakyTest(bugId = 185400889)
+    @Test
+    override fun noUncoveredRegions() {
+        super.noUncoveredRegions()
     }
 
     companion object {

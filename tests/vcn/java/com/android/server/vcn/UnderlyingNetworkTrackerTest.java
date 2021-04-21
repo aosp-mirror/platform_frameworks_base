@@ -153,21 +153,19 @@ public class UnderlyingNetworkTrackerTest {
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
                         eq(getWifiRequest(expectedSubIds)),
-                        any(),
-                        any(NetworkBringupCallback.class));
+                        any(NetworkBringupCallback.class),
+                        any());
         for (final int subId : expectedSubIds) {
             verify(mConnectivityManager)
                     .requestBackgroundNetwork(
                             eq(getCellRequestForSubId(subId)),
-                            any(),
-                            any(NetworkBringupCallback.class));
+                            any(NetworkBringupCallback.class), any());
         }
 
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
                         eq(getRouteSelectionRequest(expectedSubIds)),
-                        any(),
-                        any(RouteSelectionCallback.class));
+                        any(RouteSelectionCallback.class), any());
     }
 
     @Test
@@ -191,7 +189,7 @@ public class UnderlyingNetworkTrackerTest {
     private NetworkRequest getWifiRequest(Set<Integer> netCapsSubIds) {
         return getExpectedRequestBase()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                .setSubIds(netCapsSubIds)
+                .setSubscriptionIds(netCapsSubIds)
                 .build();
     }
 
@@ -203,7 +201,7 @@ public class UnderlyingNetworkTrackerTest {
     }
 
     private NetworkRequest getRouteSelectionRequest(Set<Integer> netCapsSubIds) {
-        return getExpectedRequestBase().setSubIds(netCapsSubIds).build();
+        return getExpectedRequestBase().setSubscriptionIds(netCapsSubIds).build();
     }
 
     private NetworkRequest.Builder getExpectedRequestBase() {
@@ -267,8 +265,8 @@ public class UnderlyingNetworkTrackerTest {
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
                         eq(getRouteSelectionRequest(INITIAL_SUB_IDS)),
-                        any(),
-                        mRouteSelectionCallbackCaptor.capture());
+                        mRouteSelectionCallbackCaptor.capture(),
+                        any());
 
         RouteSelectionCallback cb = mRouteSelectionCallbackCaptor.getValue();
         cb.onAvailable(mNetwork);

@@ -32,6 +32,8 @@ import android.content.pm.PackageManager;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -203,7 +205,7 @@ public class AppSearchImplPlatformTest {
         mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
 
         // Set schema1
-        String prefix = AppSearchImpl.createPrefix("package", "database");
+        String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
                 "package",
                 "database",
@@ -280,7 +282,7 @@ public class AppSearchImplPlatformTest {
         mMockPackageManager.mockGetPackageUidAsUser(packageNameFoo, mContext.getUserId(), uidFoo);
         mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
 
-        String prefix = AppSearchImpl.createPrefix("package", "database");
+        String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
                 "package",
                 "database",
@@ -353,7 +355,7 @@ public class AppSearchImplPlatformTest {
 
     @Test
     public void testSetSchema_defaultPlatformVisible() throws Exception {
-        String prefix = AppSearchImpl.createPrefix("package", "database");
+        String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
                 "package",
                 "database",
@@ -372,7 +374,7 @@ public class AppSearchImplPlatformTest {
 
     @Test
     public void testSetSchema_platformHidden() throws Exception {
-        String prefix = AppSearchImpl.createPrefix("package", "database");
+        String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
                 "package",
                 "database",
@@ -391,7 +393,7 @@ public class AppSearchImplPlatformTest {
 
     @Test
     public void testSetSchema_defaultNotPackageAccessible() throws Exception {
-        String prefix = AppSearchImpl.createPrefix("package", "database");
+        String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
                 "package",
                 "database",
@@ -419,7 +421,7 @@ public class AppSearchImplPlatformTest {
         mMockPackageManager.mockGetPackageUidAsUser(packageNameFoo, mContext.getUserId(), uidFoo);
         mMockPackageManager.mockAddSigningCertificate(packageNameFoo, sha256CertFoo);
 
-        String prefix = AppSearchImpl.createPrefix("package", "database");
+        String prefix = PrefixUtil.createPrefix("package", "database");
         mAppSearchImpl.setSchema(
                 "package",
                 "database",

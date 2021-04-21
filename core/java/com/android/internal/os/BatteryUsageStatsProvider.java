@@ -21,6 +21,7 @@ import android.hardware.SensorManager;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
+import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
 import android.util.SparseArray;
 
@@ -36,12 +37,12 @@ import java.util.Map;
  */
 public class BatteryUsageStatsProvider {
     private final Context mContext;
-    private final BatteryStatsImpl mStats;
+    private final BatteryStats mStats;
     private final PowerProfile mPowerProfile;
     private final Object mLock = new Object();
     private List<PowerCalculator> mPowerCalculators;
 
-    public BatteryUsageStatsProvider(Context context, BatteryStatsImpl stats) {
+    public BatteryUsageStatsProvider(Context context, BatteryStats stats) {
         mContext = context;
         mStats = stats;
         mPowerProfile = new PowerProfile(mContext);
@@ -97,7 +98,7 @@ public class BatteryUsageStatsProvider {
             allowableStatsAge = Math.min(allowableStatsAge, query.getMaxStatsAge());
         }
 
-        return mStats.mClocks.elapsedRealtime() - lastUpdateTimeStampMs > allowableStatsAge;
+        return elapsedRealtime() - lastUpdateTimeStampMs > allowableStatsAge;
     }
 
     /**
@@ -120,14 +121,10 @@ public class BatteryUsageStatsProvider {
      */
     @VisibleForTesting
     public BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
-        final long realtimeUs = mStats.mClocks.elapsedRealtime() * 1000;
-        final long uptimeUs = mStats.mClocks.uptimeMillis() * 1000;
+        final long realtimeUs = elapsedRealtime() * 1000;
+        final long uptimeUs = uptimeMillis() * 1000;
 
-        final long[] customMeasuredChargesUC =
-                mStats.getCustomConsumerMeasuredBatteryConsumptionUC();
-        final int customPowerComponentCount = customMeasuredChargesUC != null
-                ? customMeasuredChargesUC.length
-                : 0;
+        final String[] customPowerComponentNames = mStats.getCustomEnergyConsumerNames();
 
         // TODO(b/174186358): read extra time component number from configuration
         final int customTimeComponentCount = 0;
@@ -136,7 +133,7 @@ public class BatteryUsageStatsProvider {
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
-                customPowerComponentCount, customTimeComponentCount, includePowerModels);
+                customPowerComponentNames, customTimeComponentCount, includePowerModels);
         batteryUsageStatsBuilder.setStatsStartTimestamp(mStats.getStartClockTime());
 
         SparseArray<? extends BatteryStats.Uid> uidStats = mStats.getUidStats();
@@ -158,16 +155,22 @@ public class BatteryUsageStatsProvider {
 
         if ((query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY) != 0) {
+            if (!(mStats instanceof BatteryStatsImpl)) {
+                throw new UnsupportedOperationException(
+                        "History cannot be included for " + getClass().getName());
+            }
+
+            BatteryStatsImpl batteryStatsImpl = (BatteryStatsImpl) mStats;
             ArrayList<BatteryStats.HistoryTag> tags = new ArrayList<>(
-                    mStats.mHistoryTagPool.size());
+                    batteryStatsImpl.mHistoryTagPool.size());
             for (Map.Entry<BatteryStats.HistoryTag, Integer> entry :
-                    mStats.mHistoryTagPool.entrySet()) {
+                    batteryStatsImpl.mHistoryTagPool.entrySet()) {
                 final BatteryStats.HistoryTag tag = entry.getKey();
                 tag.poolIdx = entry.getValue();
                 tags.add(tag);
             }
 
-            batteryUsageStatsBuilder.setBatteryHistory(mStats.mHistoryBuffer, tags);
+            batteryUsageStatsBuilder.setBatteryHistory(batteryStatsImpl.mHistoryBuffer, tags);
         }
 
         return batteryUsageStatsBuilder.build();
@@ -202,5 +205,21 @@ public class BatteryUsageStatsProvider {
     private long getProcessBackgroundTimeMs(BatteryStats.Uid uid, long realtimeUs) {
         return uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_BACKGROUND, realtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED) / 1000;
+    }
+
+    private long elapsedRealtime() {
+        if (mStats instanceof BatteryStatsImpl) {
+            return ((BatteryStatsImpl) mStats).mClocks.elapsedRealtime();
+        } else {
+            return SystemClock.elapsedRealtime();
+        }
+    }
+
+    private long uptimeMillis() {
+        if (mStats instanceof BatteryStatsImpl) {
+            return ((BatteryStatsImpl) mStats).mClocks.uptimeMillis();
+        } else {
+            return SystemClock.uptimeMillis();
+        }
     }
 }

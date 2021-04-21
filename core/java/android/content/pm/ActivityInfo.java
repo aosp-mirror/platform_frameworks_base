@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
@@ -961,6 +962,29 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public @interface SizeChangesSupportMode {}
 
     /**
+     * This change id forces the packages it is applied to never have Display API sandboxing
+     * applied for a letterbox or SCM activity. The Display APIs will continue to provide
+     * DisplayArea bounds.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long NEVER_SANDBOX_DISPLAY_APIS = 184838306L; // buganizer id
+
+    /**
+     * This change id forces the packages it is applied to always have Display API sandboxing
+     * applied, regardless of windowing mode. The Display APIs will always provide the app bounds.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    @TestApi
+    public static final long ALWAYS_SANDBOX_DISPLAY_APIS = 185004937L; // buganizer id
+
+    /**
      * This change id is the gatekeeper for all treatments that force a given min aspect ratio.
      * Enabling this change will allow the following min aspect ratio treatments to be applied:
      * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
@@ -1151,10 +1175,10 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public WindowLayout windowLayout;
 
     /**
-     * Attribution tags for finer grained calls if a {@android.content.Context#sendBroadcast(Intent,
-     * String)} is used with a permission.
-     * @hide
+     * Attribution tags for finer grained calls if a {@link
+     * android.content.Context#sendBroadcast(Intent, String)} is used with a permission.
      */
+    @SuppressLint("MissingNullability")
     public String[] attributionTags;
 
     public ActivityInfo() {
@@ -1323,6 +1347,26 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         }
 
         return SIZE_CHANGES_UNSUPPORTED_METADATA;
+    }
+
+    /**
+     * Returns if the activity should never be sandboxed to the activity window bounds.
+     * @hide
+     */
+    public boolean neverSandboxDisplayApis() {
+        return CompatChanges.isChangeEnabled(NEVER_SANDBOX_DISPLAY_APIS,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid));
+    }
+
+    /**
+     * Returns if the activity should always be sandboxed to the activity window bounds.
+     * @hide
+     */
+    public boolean alwaysSandboxDisplayApis() {
+        return CompatChanges.isChangeEnabled(ALWAYS_SANDBOX_DISPLAY_APIS,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid));
     }
 
     /** @hide */

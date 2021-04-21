@@ -29,6 +29,7 @@ import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
+import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.wm.shell.transition.Transitions;
 
@@ -46,6 +47,7 @@ public class SystemUIFactory {
     private GlobalRootComponent mRootComponent;
     private WMComponent mWMComponent;
     private SysUIComponent mSysUIComponent;
+    private boolean mInitializeComponents;
 
     public static <T extends SystemUIFactory> T getInstance() {
         return (T) mFactory;
@@ -88,13 +90,13 @@ public class SystemUIFactory {
     public void init(Context context, boolean fromTest)
             throws ExecutionException, InterruptedException {
         // Only initialize components for the main system ui process running as the primary user
-        final boolean initializeComponents = !fromTest
+        mInitializeComponents = !fromTest
                 && android.os.Process.myUserHandle().isSystem()
                 && ActivityThread.currentProcessName().equals(ActivityThread.currentPackageName());
         mRootComponent = buildGlobalRootComponent(context);
         // Stand up WMComponent
         mWMComponent = mRootComponent.getWMComponentBuilder().build();
-        if (initializeComponents) {
+        if (mInitializeComponents) {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
             mWMComponent.init();
@@ -102,7 +104,7 @@ public class SystemUIFactory {
 
         // And finally, retrieve whatever SysUI needs from WMShell and build SysUI.
         SysUIComponent.Builder builder = mRootComponent.getSysUIComponent();
-        if (initializeComponents) {
+        if (mInitializeComponents) {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
@@ -134,7 +136,7 @@ public class SystemUIFactory {
                     .setStartingSurface(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
-        if (initializeComponents) {
+        if (mInitializeComponents) {
             mSysUIComponent.init();
         }
 
@@ -160,6 +162,9 @@ public class SystemUIFactory {
                 .build();
     }
 
+    protected boolean shouldInitializeComponents() {
+        return mInitializeComponents;
+    }
 
     public GlobalRootComponent getRootComponent() {
         return mRootComponent;
@@ -204,5 +209,9 @@ public class SystemUIFactory {
     public BackGestureTfClassifierProvider createBackGestureTfClassifierProvider(
             AssetManager am, String modelName) {
         return new BackGestureTfClassifierProvider();
+    }
+
+    public BcSmartspaceDataPlugin getSmartspaceDataProvider() {
+        return null;
     }
 }

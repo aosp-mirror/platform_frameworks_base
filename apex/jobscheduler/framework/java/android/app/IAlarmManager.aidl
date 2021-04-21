@@ -41,6 +41,6 @@ interface IAlarmManager {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     AlarmManager.AlarmClockInfo getNextAlarmClock(int userId);
     long currentNetworkTimeMillis();
-    boolean canScheduleExactAlarms();
+    boolean hasScheduleExactAlarm(String packageName, int userId);
     int getConfigVersion();
 }

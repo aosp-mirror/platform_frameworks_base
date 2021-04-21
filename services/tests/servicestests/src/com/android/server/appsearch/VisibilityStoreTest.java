@@ -28,6 +28,8 @@ import android.content.pm.PackageManager;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.server.appsearch.external.localstorage.util.PrefixUtil;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -78,13 +80,9 @@ public class VisibilityStoreTest {
     @Test
     public void testValidPackageName() {
         assertThat(VisibilityStore.PACKAGE_NAME)
-                .doesNotContain(
-                        "" + AppSearchImpl.PACKAGE_DELIMITER); // Convert the chars to CharSequences
+                .doesNotContain(String.valueOf(PrefixUtil.PACKAGE_DELIMITER));
         assertThat(VisibilityStore.PACKAGE_NAME)
-                .doesNotContain(
-                        ""
-                                + AppSearchImpl
-                                        .DATABASE_DELIMITER); // Convert the chars to CharSequences
+                .doesNotContain(String.valueOf(PrefixUtil.DATABASE_DELIMITER));
     }
 
     /**
@@ -93,13 +91,9 @@ public class VisibilityStoreTest {
     @Test
     public void testValidDatabaseName() {
         assertThat(VisibilityStore.DATABASE_NAME)
-                .doesNotContain(
-                        "" + AppSearchImpl.PACKAGE_DELIMITER); // Convert the chars to CharSequences
+                .doesNotContain(String.valueOf(PrefixUtil.PACKAGE_DELIMITER));
         assertThat(VisibilityStore.DATABASE_NAME)
-                .doesNotContain(
-                        ""
-                                + AppSearchImpl
-                                        .DATABASE_DELIMITER); // Convert the chars to CharSequences
+                .doesNotContain(String.valueOf(PrefixUtil.DATABASE_DELIMITER));
     }
 
     @Test

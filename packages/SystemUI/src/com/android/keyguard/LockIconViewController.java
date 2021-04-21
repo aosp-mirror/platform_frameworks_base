@@ -199,14 +199,14 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateVisibility() {
-        if (!mIsKeyguardShowing) {
+        if (!mIsKeyguardShowing || (!mUdfpsEnrolled && !mFaceAuthEnrolled)) {
             mView.setVisibility(View.INVISIBLE);
             return;
         }
 
         // these three states are mutually exclusive:
         mShowButton = mUdfpsEnrolled && !mCanDismissLockScreen && !mRunningFPS && isLockScreen();
-        mShowUnlockIcon = mCanDismissLockScreen && isLockScreen();
+        mShowUnlockIcon = mFaceAuthEnrolled & mCanDismissLockScreen && isLockScreen();
         mShowLockIcon = !mUdfpsEnrolled && !mCanDismissLockScreen && isLockScreen()
             && mFaceAuthEnrolled;
 

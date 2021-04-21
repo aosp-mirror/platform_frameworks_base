@@ -96,6 +96,7 @@ public class FaceSensorPropertiesInternal extends SensorPropertiesInternal {
 
     @Override
     public String toString() {
-        return "ID: " + sensorId + ", Strength: " + sensorStrength + ", Type: " + sensorType;
+        return "ID: " + sensorId + ", Strength: " + sensorStrength + ", Type: " + sensorType
+                + ", SupportsFaceDetection: " + supportsFaceDetection;
     }
 }

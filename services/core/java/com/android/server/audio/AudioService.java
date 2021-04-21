@@ -310,6 +310,8 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_UPDATE_A11Y_SERVICE_UIDS = 35;
     private static final int MSG_UPDATE_AUDIO_MODE = 36;
     private static final int MSG_RECORDING_CONFIG_CHANGE = 37;
+    private static final int MSG_SET_A2DP_DEV_CONNECTION_STATE = 38;
+    private static final int MSG_A2DP_DEV_CONFIG_CHANGE = 39;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -562,6 +564,7 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_HDMI_ARC,
+            AudioSystem.DEVICE_OUT_HDMI_EARC,
             AudioSystem.DEVICE_OUT_AUX_LINE));
     // Devices for which the volume is always max, no volume panel
     Set<Integer> mFullVolumeDevices = new HashSet<>();
@@ -5877,6 +5880,9 @@ public class AudioService extends IAudioService.Stub
             if ((device & AudioSystem.DEVICE_OUT_SPEAKER) != 0) {
                 device = AudioSystem.DEVICE_OUT_SPEAKER;
             } else if ((device & AudioSystem.DEVICE_OUT_HDMI_ARC) != 0) {
+                // FIXME(b/184944421): DEVICE_OUT_HDMI_EARC has two bits set,
+                // so it must be handled correctly as it aliases
+                // with DEVICE_OUT_HDMI_ARC | DEVICE_OUT_EARPIECE.
                 device = AudioSystem.DEVICE_OUT_HDMI_ARC;
             } else if ((device & AudioSystem.DEVICE_OUT_SPDIF) != 0) {
                 device = AudioSystem.DEVICE_OUT_SPDIF;
@@ -6110,7 +6116,7 @@ public class AudioService extends IAudioService.Stub
      * See AudioManager.setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent()
      */
     public void setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
-            @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
+            @NonNull BluetoothDevice device, @BtProfileConnectionState int state,
             int profile, boolean suppressNoisyIntent, int a2dpVolume) {
         if (device == null) {
             throw new IllegalArgumentException("Illegal null device");
@@ -6120,8 +6126,13 @@ public class AudioService extends IAudioService.Stub
             throw new IllegalArgumentException("Illegal BluetoothProfile state for device "
                     + " (dis)connection, got " + state);
         }
-        mDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(device, state,
-                profile, suppressNoisyIntent, a2dpVolume);
+
+        AudioDeviceBroker.BtDeviceConnectionInfo info =
+                new AudioDeviceBroker.BtDeviceConnectionInfo(device, state,
+                        profile, suppressNoisyIntent, a2dpVolume);
+        sendMsg(mAudioHandler, MSG_SET_A2DP_DEV_CONNECTION_STATE, SENDMSG_QUEUE,
+                0 /*arg1*/, 0 /*arg2*/,
+                /*obj*/ info, 0 /*delay*/);
     }
 
     /** only public for mocking/spying, do not call outside of AudioService */
@@ -6139,7 +6150,8 @@ public class AudioService extends IAudioService.Stub
         if (device == null) {
             throw new IllegalArgumentException("Illegal null device");
         }
-        mDeviceBroker.postBluetoothA2dpDeviceConfigChange(device);
+        sendMsg(mAudioHandler, MSG_A2DP_DEV_CONFIG_CHANGE, SENDMSG_QUEUE, 0, 0,
+                /*obj*/ device, /*delay*/ 0);
     }
 
     private static final Set<Integer> DEVICE_MEDIA_UNMUTED_ON_PLUG_SET;
@@ -7500,6 +7512,15 @@ public class AudioService extends IAudioService.Stub
                     synchronized (mDeviceBroker.mSetModeLock) {
                         onUpdateAudioMode(msg.arg1, msg.arg2, (String) msg.obj, false /*force*/);
                     }
+                    break;
+
+                case MSG_SET_A2DP_DEV_CONNECTION_STATE:
+                    mDeviceBroker.queueBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                            (AudioDeviceBroker.BtDeviceConnectionInfo) msg.obj);
+                    break;
+
+                case MSG_A2DP_DEV_CONFIG_CHANGE:
+                    mDeviceBroker.postBluetoothA2dpDeviceConfigChange((BluetoothDevice) msg.obj);
                     break;
             }
         }

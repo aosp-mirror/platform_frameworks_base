@@ -23,7 +23,6 @@ import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -50,8 +49,6 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     @Mock
     ConfigurationController mConfigurationController;
     @Mock
-    NotificationIconAreaController mNotificationIconAreaController;
-    @Mock
     DozeParameters mDozeParameters;
 
     private KeyguardStatusViewController mController;
@@ -67,7 +64,6 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mKeyguardUpdateMonitor,
                 mConfigurationController,
-                mNotificationIconAreaController,
                 mDozeParameters);
     }
 

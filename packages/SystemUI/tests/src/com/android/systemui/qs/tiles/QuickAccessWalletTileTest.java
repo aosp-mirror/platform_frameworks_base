@@ -62,6 +62,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -141,6 +142,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         when(mHost.getUiEventLogger()).thenReturn(mUiEventLogger);
         when(mFeatureFlags.isQuickAccessWalletEnabled()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
+        when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(true);
 
         mTile = new QuickAccessWalletTile(
                 mHost,
@@ -171,13 +173,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIsAvailable_qawServiceNotAvailable() {
-        when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(false);
-        assertFalse(mTile.isAvailable());
-    }
-
-    @Test
-    public void testIsAvailable_qawServiceAvailable() {
+    public void testIsAvailable_qawFeatureAvailable() {
         when(mPackageManager.hasSystemFeature(FEATURE_NFC_HOST_CARD_EMULATION)).thenReturn(true);
         when(mPackageManager.hasSystemFeature("org.chromium.arc")).thenReturn(false);
         when(mSecureSettings.getString(NFC_PAYMENT_DEFAULT_COMPONENT)).thenReturn("Component");
@@ -191,11 +187,12 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         when(mQuickAccessWalletClient.createWalletIntent()).thenReturn(intent);
         setUpWalletCard(/* hasCard= */ false);
 
-        mTile.handleClick();
+        mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
         verify(mActivityStarter, times(1))
-                .postStartActivityDismissingKeyguard(eq(intent), anyInt());
+                .postStartActivityDismissingKeyguard(eq(intent), anyInt(),
+                        eq(null) /* animationController */);
     }
 
     @Test
@@ -203,7 +200,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         when(mQuickAccessWalletClient.createWalletIntent()).thenReturn(null);
         setUpWalletCard(/* hasCard= */ false);
 
-        mTile.handleClick();
+        mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
         verifyZeroInteractions(mActivityStarter);
@@ -213,10 +210,11 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     public void testHandleClick_hasCards_startWalletActivity() {
         setUpWalletCard(/* hasCard= */ true);
 
-        mTile.handleClick();
+        mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
-        verify(mSpiedContext).startActivity(mIntentCaptor.capture());
+        verify(mActivityStarter).startActivity(mIntentCaptor.capture(), eq(true) /* dismissShade */,
+                (ActivityLaunchAnimator.Controller) eq(null));
 
         Intent nextStartedIntent = mIntentCaptor.getValue();
         String walletClassName = "com.android.systemui.wallet.ui.WalletActivity";
@@ -229,13 +227,17 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     public void testHandleUpdateState_updateLabelAndIcon() {
         QSTile.State state = new QSTile.State();
         QSTile.Icon icon = QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_wallet);
-        when(mQuickAccessWalletClient.getServiceLabel()).thenReturn("QuickAccessWallet");
 
         mTile.handleUpdateState(state, null);
 
-        assertEquals("QuickAccessWallet", state.label.toString());
+        assertEquals(mContext.getString(R.string.wallet_title), state.label.toString());
         assertTrue(state.label.toString().contentEquals(state.contentDescription));
         assertEquals(icon, state.icon);
+    }
+
+    @Test
+    public void testGetTileLabel() {
+        assertEquals(mContext.getString(R.string.wallet_title), mTile.getTileLabel().toString());
     }
 
     @Test
@@ -288,7 +290,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
 
     @Test
     public void testHandleUpdateState_qawFeatureUnavailable_tileUnavailable() {
-        when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(false);
+        when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(false);
         QSTile.State state = new QSTile.State();
 
         mTile.handleUpdateState(state, null);

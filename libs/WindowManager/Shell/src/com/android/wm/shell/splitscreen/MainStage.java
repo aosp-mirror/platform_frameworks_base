@@ -16,10 +16,7 @@
 
 package com.android.wm.shell.splitscreen;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.graphics.Rect;
 import android.window.WindowContainerToken;
@@ -52,6 +49,7 @@ class MainStage extends StageTaskListener {
 
         final WindowContainerToken rootToken = mRootTaskInfo.token;
         wct.setBounds(rootToken, rootBounds)
+                .setWindowingMode(rootToken, WINDOWING_MODE_MULTI_WINDOW)
                 .setLaunchRoot(
                         rootToken,
                         CONTROLLED_WINDOWING_MODES,

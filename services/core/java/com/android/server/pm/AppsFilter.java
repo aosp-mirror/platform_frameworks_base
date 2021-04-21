@@ -662,11 +662,27 @@ public class AppsFilter implements Watchable, Snappable {
                 removePackage(newPkgSetting);
             }
             mStateProvider.runWithState((settings, users) -> {
-                addPackageInternal(newPkgSetting, settings);
+                ArraySet<String> additionalChangedPackages =
+                        addPackageInternal(newPkgSetting, settings);
                 synchronized (mCacheLock) {
                     if (mShouldFilterCache != null) {
                         updateShouldFilterCacheForPackage(mShouldFilterCache, null, newPkgSetting,
                                 settings, users, settings.size());
+                        if (additionalChangedPackages != null) {
+                            for (int index = 0; index < additionalChangedPackages.size(); index++) {
+                                String changedPackage = additionalChangedPackages.valueAt(index);
+                                PackageSetting changedPkgSetting = settings.get(changedPackage);
+                                if (changedPkgSetting == null) {
+                                    // It's possible for the overlay mapper to know that an actor
+                                    // package changed via an explicit reference, even if the actor
+                                    // isn't installed, so skip if that's the case.
+                                    continue;
+                                }
+
+                                updateShouldFilterCacheForPackage(mShouldFilterCache, null,
+                                        changedPkgSetting, settings, users, settings.size());
+                            }
+                        }
                     } // else, rebuild entire cache when system is ready
                 }
             });
@@ -676,7 +692,12 @@ public class AppsFilter implements Watchable, Snappable {
         }
     }
 
-    private void addPackageInternal(PackageSetting newPkgSetting,
+    /**
+     * @return Additional packages that may have had their viewing visibility changed and may need
+     * to be updated in the cache. Returns null if there are no additional packages.
+     */
+    @Nullable
+    private ArraySet<String> addPackageInternal(PackageSetting newPkgSetting,
             ArrayMap<String, PackageSetting> existingSettings) {
         if (Objects.equals("android", newPkgSetting.name)) {
             // let's set aside the framework signatures
@@ -692,8 +713,7 @@ public class AppsFilter implements Watchable, Snappable {
 
         final AndroidPackage newPkg = newPkgSetting.pkg;
         if (newPkg == null) {
-            // nothing to add
-            return;
+            return null;
         }
 
         if (mProtectedBroadcasts.addAll(newPkg.getProtectedBroadcasts())) {
@@ -765,8 +785,13 @@ public class AppsFilter implements Watchable, Snappable {
                 existingPkgs.put(pkgSetting.name, pkgSetting.pkg);
             }
         }
-        mOverlayReferenceMapper.addPkg(newPkgSetting.pkg, existingPkgs);
+
+        ArraySet<String> changedPackages =
+                mOverlayReferenceMapper.addPkg(newPkgSetting.pkg, existingPkgs);
+
         mFeatureConfig.updatePackageState(newPkgSetting, false /*removed*/);
+
+        return changedPackages;
     }
 
     @GuardedBy("mCacheLock")
@@ -1080,7 +1105,9 @@ public class AppsFilter implements Watchable, Snappable {
                 }
             }
 
-            mOverlayReferenceMapper.removePkg(setting.name);
+            ArraySet<String> additionalChangedPackages =
+                    mOverlayReferenceMapper.removePkg(setting.name);
+
             mFeatureConfig.updatePackageState(setting, true /*removed*/);
 
             // After removing all traces of the package, if it's part of a shared user, re-add other
@@ -1109,6 +1136,25 @@ public class AppsFilter implements Watchable, Snappable {
                                 siblingSetting, settings, users, settings.size());
                     }
                 }
+
+                if (mShouldFilterCache != null) {
+                    if (additionalChangedPackages != null) {
+                        for (int index = 0; index < additionalChangedPackages.size(); index++) {
+                            String changedPackage = additionalChangedPackages.valueAt(index);
+                            PackageSetting changedPkgSetting = settings.get(changedPackage);
+                            if (changedPkgSetting == null) {
+                                // It's possible for the overlay mapper to know that an actor
+                                // package changed via an explicit reference, even if the actor
+                                // isn't installed, so skip if that's the case.
+                                continue;
+                            }
+
+                            updateShouldFilterCacheForPackage(mShouldFilterCache, null,
+                                    changedPkgSetting, settings, users, settings.size());
+                        }
+                    }
+                }
+
                 onChanged();
             }
         });

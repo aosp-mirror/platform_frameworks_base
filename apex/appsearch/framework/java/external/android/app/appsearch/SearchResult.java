@@ -59,7 +59,7 @@ public final class SearchResult {
 
     /** @hide */
     public SearchResult(@NonNull Bundle bundle) {
-        mBundle = Preconditions.checkNotNull(bundle);
+        mBundle = Objects.requireNonNull(bundle);
     }
 
     /** @hide */
@@ -77,8 +77,7 @@ public final class SearchResult {
     public GenericDocument getGenericDocument() {
         if (mDocument == null) {
             mDocument =
-                    new GenericDocument(
-                            Preconditions.checkNotNull(mBundle.getBundle(DOCUMENT_FIELD)));
+                    new GenericDocument(Objects.requireNonNull(mBundle.getBundle(DOCUMENT_FIELD)));
         }
         return mDocument;
     }
@@ -95,7 +94,7 @@ public final class SearchResult {
     public List<MatchInfo> getMatches() {
         if (mMatches == null) {
             List<Bundle> matchBundles =
-                    Preconditions.checkNotNull(mBundle.getParcelableArrayList(MATCHES_FIELD));
+                    Objects.requireNonNull(mBundle.getParcelableArrayList(MATCHES_FIELD));
             mMatches = new ArrayList<>(matchBundles.size());
             for (int i = 0; i < matchBundles.size(); i++) {
                 MatchInfo matchInfo = new MatchInfo(matchBundles.get(i), getGenericDocument());
@@ -112,7 +111,7 @@ public final class SearchResult {
      */
     @NonNull
     public String getPackageName() {
-        return Preconditions.checkNotNull(mBundle.getString(PACKAGE_NAME_FIELD));
+        return Objects.requireNonNull(mBundle.getString(PACKAGE_NAME_FIELD));
     }
 
     /**
@@ -122,7 +121,7 @@ public final class SearchResult {
      */
     @NonNull
     public String getDatabaseName() {
-        return Preconditions.checkNotNull(mBundle.getString(DATABASE_NAME_FIELD));
+        return Objects.requireNonNull(mBundle.getString(DATABASE_NAME_FIELD));
     }
 
     /**
@@ -169,8 +168,8 @@ public final class SearchResult {
          * @param databaseName the database name the matched document belongs to.
          */
         public Builder(@NonNull String packageName, @NonNull String databaseName) {
-            mBundle.putString(PACKAGE_NAME_FIELD, Preconditions.checkNotNull(packageName));
-            mBundle.putString(DATABASE_NAME_FIELD, Preconditions.checkNotNull(databaseName));
+            mBundle.putString(PACKAGE_NAME_FIELD, Objects.requireNonNull(packageName));
+            mBundle.putString(DATABASE_NAME_FIELD, Objects.requireNonNull(databaseName));
         }
 
         /**
@@ -312,9 +311,9 @@ public final class SearchResult {
         @Nullable private MatchRange mWindowRange;
 
         MatchInfo(@NonNull Bundle bundle, @Nullable GenericDocument document) {
-            mBundle = Preconditions.checkNotNull(bundle);
+            mBundle = Objects.requireNonNull(bundle);
             mDocument = document;
-            mPropertyPath = Preconditions.checkNotNull(bundle.getString(PROPERTY_PATH_FIELD));
+            mPropertyPath = Objects.requireNonNull(bundle.getString(PROPERTY_PATH_FIELD));
         }
 
         /**
@@ -449,7 +448,7 @@ public final class SearchResult {
                 Preconditions.checkState(!mBuilt, "Builder has already been used");
                 mBundle.putString(
                         SearchResult.MatchInfo.PROPERTY_PATH_FIELD,
-                        Preconditions.checkNotNull(propertyPath));
+                        Objects.requireNonNull(propertyPath));
                 return this;
             }
 
@@ -461,7 +460,7 @@ public final class SearchResult {
             @NonNull
             public Builder setExactMatchRange(@NonNull MatchRange matchRange) {
                 Preconditions.checkState(!mBuilt, "Builder has already been used");
-                Preconditions.checkNotNull(matchRange);
+                Objects.requireNonNull(matchRange);
                 mBundle.putInt(MatchInfo.EXACT_MATCH_RANGE_LOWER_FIELD, matchRange.getStart());
                 mBundle.putInt(MatchInfo.EXACT_MATCH_RANGE_UPPER_FIELD, matchRange.getEnd());
                 return this;
@@ -475,7 +474,7 @@ public final class SearchResult {
             @NonNull
             public Builder setSnippetRange(@NonNull MatchRange matchRange) {
                 Preconditions.checkState(!mBuilt, "Builder has already been used");
-                Preconditions.checkNotNull(matchRange);
+                Objects.requireNonNull(matchRange);
                 mBundle.putInt(MatchInfo.SNIPPET_RANGE_LOWER_FIELD, matchRange.getStart());
                 mBundle.putInt(MatchInfo.SNIPPET_RANGE_UPPER_FIELD, matchRange.getEnd());
                 return this;

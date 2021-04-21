@@ -81,6 +81,9 @@ bool Properties::isolatedProcess = false;
 int Properties::contextPriority = 0;
 float Properties::defaultSdrWhitePoint = 200.f;
 
+bool Properties::useHintManager = true;
+int Properties::targetCpuTimePercentage = 70;
+
 bool Properties::load() {
     bool prevDebugLayersUpdates = debugLayersUpdates;
     bool prevDebugOverdraw = debugOverdraw;
@@ -127,6 +130,10 @@ bool Properties::load() {
             base::GetBoolProperty(PROPERTY_SKIA_ATRACE_ENABLED, false));
 
     runningInEmulator = base::GetBoolProperty(PROPERTY_IS_EMULATOR, false);
+
+    useHintManager = base::GetBoolProperty(PROPERTY_USE_HINT_MANAGER, true);
+    targetCpuTimePercentage = base::GetIntProperty(PROPERTY_TARGET_CPU_TIME_PERCENTAGE, 70);
+    if (targetCpuTimePercentage <= 0 || targetCpuTimePercentage > 100) targetCpuTimePercentage = 70;
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }

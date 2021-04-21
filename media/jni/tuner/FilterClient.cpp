@@ -62,6 +62,9 @@ FilterClient::~FilterClient() {
     mFilter_1_1 = NULL;
     mAvSharedHandle = NULL;
     mAvSharedMemSize = 0;
+    mIsMediaFilter = false;
+    mFilterMQ = NULL;
+    mFilterMQEventFlag = NULL;
 }
 
 // TODO: remove after migration to Tuner Service is done.
@@ -81,7 +84,7 @@ int FilterClient::read(int8_t* buffer, int size) {
 SharedHandleInfo FilterClient::getAvSharedHandleInfo() {
     handleAvShareMemory();
     SharedHandleInfo info{
-        .sharedHandle = mAvSharedHandle,
+        .sharedHandle = mIsMediaFilter ? mAvSharedHandle : NULL,
         .size = mAvSharedMemSize,
     };
 
@@ -259,9 +262,10 @@ Result FilterClient::setDataSource(sp<FilterClient> filterClient){
 }
 
 Result FilterClient::close() {
-    if (mFilterMQEventFlag != NULL) {
+    if (mFilterMQEventFlag) {
         EventFlag::deleteEventFlag(&mFilterMQEventFlag);
     }
+    mFilterMQEventFlag = NULL;
     mFilterMQ = NULL;
 
     if (mTunerFilter != NULL) {
@@ -592,11 +596,11 @@ TunerFilterSectionSettings FilterClient::getAidlSectionSettings(
             sectionBits.mask.resize(hidlSectionBits.mask.size());
             sectionBits.mode.resize(hidlSectionBits.mode.size());
             copy(hidlSectionBits.filter.begin(), hidlSectionBits.filter.end(),
-                    hidlSectionBits.filter.begin());
+                    sectionBits.filter.begin());
             copy(hidlSectionBits.mask.begin(), hidlSectionBits.mask.end(),
-                    hidlSectionBits.mask.begin());
+                    sectionBits.mask.begin());
             copy(hidlSectionBits.mode.begin(), hidlSectionBits.mode.end(),
-                    hidlSectionBits.mode.begin());
+                    sectionBits.mode.begin());
             aidlSection.condition.set<TunerFilterSectionCondition::sectionBits>(sectionBits);
             break;
         }
@@ -917,7 +921,7 @@ Result FilterClient::getFilterMq() {
         Status s = mTunerFilter->getQueueDesc(&aidlMqDesc);
         res = ClientHelper::getServiceSpecificErrorCode(s);
         if (res == Result::SUCCESS) {
-            mFilterMQ = new (nothrow) AidlMQ(aidlMqDesc);
+            mFilterMQ = new (nothrow) AidlMQ(aidlMqDesc, false/*resetPointer*/);
             EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);
         }
         return res;
@@ -934,7 +938,7 @@ Result FilterClient::getFilterMq() {
             AidlMQDesc aidlMQDesc;
             unsafeHidlToAidlMQDescriptor<uint8_t, int8_t, SynchronizedReadWrite>(
                     filterMQDesc,  &aidlMQDesc);
-            mFilterMQ = new (nothrow) AidlMessageQueue(aidlMQDesc);
+            mFilterMQ = new (nothrow) AidlMessageQueue(aidlMQDesc, false/*resetPointer*/);
             EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);
         }
     }
@@ -943,7 +947,7 @@ Result FilterClient::getFilterMq() {
 }
 
 int FilterClient::copyData(int8_t* buffer, int size) {
-    if (mFilter == NULL || mFilterMQ == NULL || mFilterMQEventFlag == NULL) {
+    if (mFilterMQ == NULL || mFilterMQEventFlag == NULL) {
         return -1;
     }
 
@@ -964,6 +968,7 @@ void FilterClient::checkIsMediaFilter(DemuxFilterType type) {
         if (type.subType.mmtpFilterType() == DemuxMmtpFilterType::AUDIO ||
                 type.subType.mmtpFilterType() == DemuxMmtpFilterType::VIDEO) {
             mIsMediaFilter = true;
+            return;
         }
     }
 
@@ -971,15 +976,17 @@ void FilterClient::checkIsMediaFilter(DemuxFilterType type) {
         if (type.subType.tsFilterType() == DemuxTsFilterType::AUDIO ||
                 type.subType.tsFilterType() == DemuxTsFilterType::VIDEO) {
             mIsMediaFilter = true;
+            return;
         }
     }
+
+    mIsMediaFilter = false;
 }
 
 void FilterClient::handleAvShareMemory() {
     if (mAvSharedHandle != NULL) {
         return;
     }
-
     if (mTunerFilter != NULL && mIsMediaFilter) {
         TunerFilterSharedHandleInfo aidlHandleInfo;
         Status s = mTunerFilter->getAvSharedHandleInfo(&aidlHandleInfo);
@@ -1001,8 +1008,13 @@ void FilterClient::handleAvShareMemory() {
 }
 
 void FilterClient::closeAvSharedMemory() {
+    if (mAvSharedHandle == NULL) {
+        mAvSharedMemSize = 0;
+        return;
+    }
     native_handle_close(mAvSharedHandle);
     native_handle_delete(mAvSharedHandle);
     mAvSharedMemSize = 0;
+    mAvSharedHandle = NULL;
 }
 }  // namespace android

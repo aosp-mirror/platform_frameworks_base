@@ -188,7 +188,7 @@ public class BiometricSchedulerTest {
         // Request it to be canceled. The operation can be canceled immediately, and the scheduler
         // should go back to idle, since in this case the framework has not even requested the HAL
         // to authenticate yet.
-        mScheduler.cancelAuthentication(mToken);
+        mScheduler.cancelAuthenticationOrDetection(mToken);
         assertNull(mScheduler.mCurrentOperation);
     }
 
@@ -298,7 +298,7 @@ public class BiometricSchedulerTest {
                 mScheduler.mPendingOperations.getFirst().mState);
 
         // Request cancel before the authentication client has started
-        mScheduler.cancelAuthentication(mToken);
+        mScheduler.cancelAuthenticationOrDetection(mToken);
         waitForIdle();
         assertEquals(Operation.STATE_WAITING_IN_QUEUE_CANCELING,
                 mScheduler.mPendingOperations.getFirst().mState);

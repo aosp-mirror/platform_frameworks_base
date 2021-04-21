@@ -56,7 +56,8 @@ public final class AdminPermissionControlParams implements Parcelable {
      */
     public AdminPermissionControlParams(@NonNull String granteePackageName,
             @NonNull String permission,
-            int grantState, boolean canAdminGrantSensorsPermissions) {
+            @DevicePolicyManager.PermissionGrantState int grantState,
+            boolean canAdminGrantSensorsPermissions) {
         Preconditions.checkStringNotEmpty(granteePackageName, "Package name must not be empty.");
         Preconditions.checkStringNotEmpty(permission, "Permission must not be empty.");
         checkArgument(grantState == PERMISSION_GRANT_STATE_GRANTED
@@ -112,7 +113,7 @@ public final class AdminPermissionControlParams implements Parcelable {
     }
 
     /** Returns the grant state */
-    public int getGrantState() {
+    public @DevicePolicyManager.PermissionGrantState int getGrantState() {
         return mGrantState;
     }
 

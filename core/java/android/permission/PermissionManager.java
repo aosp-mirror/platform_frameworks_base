@@ -886,6 +886,24 @@ public final class PermissionManager {
     }
 
     /**
+     * @param micMuted whether to consider the microphone muted when retrieving audio ops
+     * @return A list of permission groups currently or recently used by all apps by all users in
+     * the current profile group.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
+    public List<PermGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
+        // Lazily initialize the usage helper
+        if (mUsageHelper == null) {
+            mUsageHelper = new PermissionUsageHelper(mContext);
+        }
+        return mUsageHelper.getOpUsageData(micMuted);
+    }
+
+    /**
      * Determine if a package should be shown in indicators. Only a select few roles, and the
      * system app itself, are hidden. These values are updated at most every 15 seconds.
      * @hide

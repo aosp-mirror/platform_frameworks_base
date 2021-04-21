@@ -36,9 +36,11 @@ import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
 import android.animation.ArgbEvaluator;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -210,9 +212,9 @@ class ScreenRotationAnimation {
             String name = "RotationLayer";
             mScreenshotLayer = displayContent.makeOverlay()
                     .setName(name)
-                    .setBufferSize(mWidth, mHeight)
                     .setSecure(isSecure)
                     .setCallsite("ScreenRotationAnimation")
+                    .setBLASTLayer()
                     .build();
             // This is the way to tell the input system to exclude this surface from occlusion
             // detection since we don't have a window for it. We do this because this window is
@@ -225,32 +227,29 @@ class ScreenRotationAnimation {
                     .setCallsite("ScreenRotationAnimation")
                     .build();
 
-            final Surface surface = mService.mSurfaceFactory.get();
-            // In case display bounds change, screenshot buffer and surface may mismatch so
-            // set a scaling mode.
-            surface.copyFrom(mScreenshotLayer);
-            surface.setScalingMode(Surface.SCALING_MODE_SCALE_TO_WINDOW);
-
+            HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                     "ScreenRotationAnimation#getMedianBorderLuma");
-            mStartLuma = RotationAnimationUtils.getMedianBorderLuma(
-                    screenshotBuffer.getHardwareBuffer(), screenshotBuffer.getColorSpace());
+            mStartLuma = RotationAnimationUtils.getMedianBorderLuma(hardwareBuffer,
+                    screenshotBuffer.getColorSpace());
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-            try {
-                surface.attachAndQueueBufferWithColorSpace(screenshotBuffer.getHardwareBuffer(),
-                        screenshotBuffer.getColorSpace());
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Failed to attach screenshot - " + e.getMessage());
-            }
+
+            GraphicBuffer buffer = GraphicBuffer.createFromHardwareBuffer(
+                    screenshotBuffer.getHardwareBuffer());
+            // Scale the layer to the display size.
+            float dsdx = (float) mWidth / hardwareBuffer.getWidth();
+            float dsdy = (float) mHeight / hardwareBuffer.getHeight();
 
             t.setLayer(mScreenshotLayer, SCREEN_FREEZE_LAYER_BASE);
             t.reparent(mBackColorSurface, displayContent.getSurfaceControl());
             t.setLayer(mBackColorSurface, -1);
             t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
             t.setAlpha(mBackColorSurface, 1);
+            t.setBuffer(mScreenshotLayer, buffer);
+            t.setColorSpace(mScreenshotLayer, screenshotBuffer.getColorSpace());
+            t.setMatrix(mScreenshotLayer, dsdx, 0, 0, dsdy);
             t.show(mScreenshotLayer);
             t.show(mBackColorSurface);
-            surface.destroy();
 
         } catch (OutOfResourcesException e) {
             Slog.w(TAG, "Unable to allocate freeze surface", e);

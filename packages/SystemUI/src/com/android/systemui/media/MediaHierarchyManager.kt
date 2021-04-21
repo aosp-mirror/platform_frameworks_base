@@ -26,7 +26,7 @@ import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
-import com.android.systemui.Interpolators
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController

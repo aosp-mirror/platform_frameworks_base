@@ -15,9 +15,6 @@
  */
 package com.android.server.camera;
 
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.os.Build.VERSION_CODES.M;
 
 import android.annotation.IntDef;
@@ -27,15 +24,12 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.hardware.CameraSessionStats;
 import android.hardware.CameraStreamStats;
 import android.hardware.ICameraService;
@@ -43,7 +37,6 @@ import android.hardware.ICameraServiceProxy;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
-import android.metrics.LogMaker;
 import android.nfc.INfcAdapter;
 import android.os.Binder;
 import android.os.Handler;
@@ -60,17 +53,16 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
+import android.view.IDisplayWindowListener;
 import android.view.Surface;
+import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.framework.protobuf.nano.MessageNano;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.lang.annotation.Retention;
@@ -223,6 +215,37 @@ public class CameraServiceProxy extends SystemService
         }
     }
 
+    private final class DisplayWindowListener extends IDisplayWindowListener.Stub {
+
+        @Override
+        public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+            ICameraService cs = getCameraServiceRawLocked();
+            if (cs == null) return;
+
+            try {
+                cs.notifyDisplayConfigurationChange();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Could not notify cameraserver, remote exception: " + e);
+                // Not much we can do if camera service is dead.
+            }
+        }
+
+        @Override
+        public void onDisplayAdded(int displayId) { }
+
+        @Override
+        public void onDisplayRemoved(int displayId) { }
+
+        @Override
+        public void onFixedRotationStarted(int displayId, int newRotation) { }
+
+        @Override
+        public void onFixedRotationFinished(int displayId) { }
+    }
+
+
+    private final DisplayWindowListener mDisplayWindowListener = new DisplayWindowListener();
+
     private final TaskStateHandler mTaskStackListener = new TaskStateHandler();
 
     private final class TaskInfo {
@@ -236,13 +259,12 @@ public class CameraServiceProxy extends SystemService
     private final class TaskStateHandler extends TaskStackListener {
         private final Object mMapLock = new Object();
 
-        // maps the current top level task id to its corresponding package name
+        // maps the package name to its corresponding current top level task id
         @GuardedBy("mMapLock")
         private final ArrayMap<String, TaskInfo> mTaskInfoMap = new ArrayMap<>();
 
         @Override
-        public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo)
-                throws RemoteException {
+        public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
             synchronized (mMapLock) {
                 TaskInfo info = new TaskInfo();
                 info.frontTaskId = taskInfo.taskId;
@@ -257,7 +279,7 @@ public class CameraServiceProxy extends SystemService
         }
 
         @Override
-        public void onTaskRemoved(int taskId) throws RemoteException {
+        public void onTaskRemoved(int taskId) {
             synchronized (mMapLock) {
                 for (Map.Entry<String, TaskInfo> entry : mTaskInfoMap.entrySet()){
                     if (entry.getValue().frontTaskId == taskId) {
@@ -319,7 +341,7 @@ public class CameraServiceProxy extends SystemService
         /**
          * Gets whether crop-rotate-scale is needed.
          */
-        private boolean getNeedCropRotateScale(Context ctx, String packageName,
+        private boolean getNeedCropRotateScale(@NonNull Context ctx, @NonNull String packageName,
                 @Nullable TaskInfo taskInfo, int sensorOrientation, int lensFacing) {
             if (taskInfo == null) {
                 return false;
@@ -334,7 +356,7 @@ public class CameraServiceProxy extends SystemService
 
             // Only enable the crop-rotate-scale workaround if the app targets M or below and is not
             // resizeable.
-            if ((ctx != null) && !isMOrBelow(ctx, packageName) && taskInfo.isResizeable) {
+            if (!isMOrBelow(ctx, packageName) && taskInfo.isResizeable) {
                 Slog.v(TAG,
                         "The activity is N or above and claims to support resizeable-activity. "
                                 + "Crop-rotate-scale is disabled.");
@@ -372,12 +394,8 @@ public class CameraServiceProxy extends SystemService
                             taskInfo.isFixedOrientationLandscape);
             // We need to do crop-rotate-scale when camera is landscape and activity is portrait or
             // vice versa.
-            if ((taskInfo.isFixedOrientationPortrait && landscapeCamera)
-                    || (taskInfo.isFixedOrientationLandscape && !landscapeCamera)) {
-                return true;
-            } else {
-                return false;
-            }
+            return (taskInfo.isFixedOrientationPortrait && landscapeCamera)
+                    || (taskInfo.isFixedOrientationLandscape && !landscapeCamera);
         }
 
         @Override
@@ -389,14 +407,10 @@ public class CameraServiceProxy extends SystemService
                 return false;
             }
 
-            // A few remaining todos:
-            // 1) Do the same check when working in WM compatible mode. The sequence needs
-            //    to be adjusted and use orientation events as triggers for all active camera
-            //    clients.
-            // 2) Modify the sensor orientation in camera characteristics along with any 3A regions
-            //    in capture requests/results to account for thea physical rotation. The former
-            //    is somewhat tricky as it assumes that camera clients always check for the current
-            //    value by retrieving the camera characteristics from the camera device.
+            // TODO: Modify the sensor orientation in camera characteristics along with any 3A
+            //  regions in capture requests/results to account for thea physical rotation. The
+            //  former is somewhat tricky as it assumes that camera clients always check for the
+            //  current value by retrieving the camera characteristics from the camera device.
             return getNeedCropRotateScale(mContext, packageName,
                     mTaskStackListener.getFrontTaskInfo(packageName), sensorOrientation,
                     lensFacing);
@@ -522,18 +536,25 @@ public class CameraServiceProxy extends SystemService
 
         publishBinderService(CAMERA_SERVICE_PROXY_BINDER_NAME, mCameraServiceProxy);
         publishLocalService(CameraServiceProxy.class, this);
-
-        try {
-            ActivityTaskManager.getService().registerTaskStackListener(mTaskStackListener);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to register task stack listener!");
-        }
     }
 
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_BOOT_COMPLETED) {
             CameraStatsJobService.schedule(mContext);
+
+            try {
+                ActivityTaskManager.getService().registerTaskStackListener(mTaskStackListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to register task stack listener!");
+            }
+
+            try {
+                WindowManagerGlobal.getWindowManagerService().registerDisplayWindowListener(
+                        mDisplayWindowListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to register display window listener!");
+            }
         }
     }
 

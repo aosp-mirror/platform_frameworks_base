@@ -16,6 +16,7 @@
 
 package com.android.keyguard
 
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.testing.AndroidTestingRunner
 import android.text.Layout
@@ -25,7 +26,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -106,5 +109,35 @@ class TextAnimatorTest : SysuiTestCase() {
 
         // Then, animation start should not be called.
         verify(valueAnimator, never()).start()
+    }
+
+    @Test
+    fun testAnimationEnded() {
+        val layout = makeLayout("Hello, World", PAINT)
+        val valueAnimator = mock(ValueAnimator::class.java)
+        val textInterpolator = mock(TextInterpolator::class.java)
+        val paint = mock(TextPaint::class.java)
+        `when`(textInterpolator.targetPaint).thenReturn(paint)
+        val animationEndCallback = mock(Runnable::class.java)
+
+        val textAnimator = TextAnimator(layout, {}).apply {
+            this.textInterpolator = textInterpolator
+            this.animator = valueAnimator
+        }
+
+        textAnimator.setTextStyle(
+                weight = 400,
+                animate = true,
+                onAnimationEnd = animationEndCallback
+        )
+
+        // Verify animationEnd callback has been added.
+        val captor = ArgumentCaptor.forClass(AnimatorListenerAdapter::class.java)
+        verify(valueAnimator).addListener(captor.capture())
+        captor.value.onAnimationEnd(valueAnimator)
+
+        // Verify animationEnd callback has been invoked and removed.
+        verify(animationEndCallback).run()
+        verify(valueAnimator).removeListener(eq(captor.value))
     }
 }

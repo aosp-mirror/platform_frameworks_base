@@ -30,7 +30,7 @@ import com.android.internal.inputmethod.IVoidResultCallback;
  */
 oneway interface IInputMethodPrivilegedOperations {
     void setImeWindowStatusAsync(int vis, int backDisposition);
-    void reportStartInput(in IBinder startInputToken, in IVoidResultCallback resultCallback);
+    void reportStartInputAsync(in IBinder startInputToken);
     void createInputContentUriToken(in Uri contentUri, in String packageName,
             in IIInputContentUriTokenResultCallback resultCallback);
     void reportFullscreenMode(boolean fullscreen, in IVoidResultCallback resultCallback);

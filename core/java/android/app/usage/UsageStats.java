@@ -30,6 +30,9 @@ import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_STOP;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -277,13 +280,15 @@ public final class UsageStats implements Parcelable {
 
     /**
      * Get the last time this package's component was used by a client package, measured in
-     * milliseconds since the epoch. Note that component usage is only reported in certain cases
-     * (e.g. broadcast receiver, service, content provider).
+     * milliseconds since the epoch. Note that component usage is only reported for component
+     * bindings (e.g. broadcast receiver, service, content provider) and only when such a binding
+     * would cause an app to leave the stopped state.
      * See {@link UsageEvents.Event#APP_COMPONENT_USED}
      * @hide
      */
     @SystemApi
-    public long getLastTimeComponentUsed() {
+    @CurrentTimeMillisLong
+    public long getLastTimeAnyComponentUsed() {
         return mLastTimeComponentUsed;
     }
 
@@ -757,4 +762,48 @@ public final class UsageStats implements Parcelable {
             return new UsageStats[size];
         }
     };
+
+    /** @hide */
+    // This class is used by the mainline test suite, so we have to keep these APIs around across
+    // releases. Consider making this class public to help external developers to write tests as
+    // well.
+    @TestApi
+    public static final class Builder {
+        private final UsageStats mUsageStats = new UsageStats();
+
+        @NonNull
+        public UsageStats build() {
+            return mUsageStats;
+        }
+
+        @NonNull
+        public Builder setPackageName(@Nullable String packageName) {
+            mUsageStats.mPackageName = packageName;
+            return this;
+        }
+
+        @NonNull
+        public Builder setFirstTimeStamp(long firstTimeStamp) {
+            mUsageStats.mBeginTimeStamp = firstTimeStamp;
+            return this;
+        }
+
+        @NonNull
+        public Builder setLastTimeStamp(long lastTimeStamp) {
+            mUsageStats.mEndTimeStamp = lastTimeStamp;
+            return this;
+        }
+
+        @NonNull
+        public Builder setTotalTimeInForeground(long totalTimeInForeground) {
+            mUsageStats.mTotalTimeInForeground = totalTimeInForeground;
+            return this;
+        }
+
+        @NonNull
+        public Builder setLastTimeUsed(long lastTimeUsed) {
+            mUsageStats.mLastTimeUsed = lastTimeUsed;
+            return this;
+        }
+    }
 }

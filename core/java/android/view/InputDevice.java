@@ -169,7 +169,6 @@ public final class InputDevice implements Parcelable {
             SOURCE_CLASS_NONE,
             SOURCE_CLASS_BUTTON,
             SOURCE_CLASS_POINTER,
-            SOURCE_CLASS_POINTER,
             SOURCE_CLASS_TRACKBALL,
             SOURCE_CLASS_POSITION,
             SOURCE_CLASS_JOYSTICK
@@ -813,7 +812,9 @@ public final class InputDevice implements Parcelable {
      * {@link Context#getSystemService} with {@link Context#VIBRATOR_SERVICE} as argument.
      *
      * @return The vibrator service associated with the device, never null.
+     * @deprecated Use {@link #getVibratorManager()} to retrieve the default device vibrator.
      */
+    @Deprecated
     public Vibrator getVibrator() {
         synchronized (mMotionRanges) {
             if (mVibrator == null) {

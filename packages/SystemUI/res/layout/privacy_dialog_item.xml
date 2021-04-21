@@ -31,7 +31,6 @@
         android:layout_width="@dimen/ongoing_appops_dialog_circle_size"
         android:layout_height="@dimen/ongoing_appops_dialog_circle_size"
         android:layout_gravity="center_vertical"
-        android:importantForAccessibility="no"
     />
 
     <TextView
@@ -51,6 +50,7 @@
     />
 
     <ImageView
+        android:id="@+id/chevron"
         android:layout_height="24dp"
         android:layout_width="24dp"
         android:layout_gravity="center_vertical"

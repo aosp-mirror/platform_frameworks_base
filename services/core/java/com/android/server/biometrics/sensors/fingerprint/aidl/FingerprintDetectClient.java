@@ -58,6 +58,12 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> {
     }
 
     @Override
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
+        startHalOperation();
+    }
+
+    @Override
     protected void stopHalOperation() {
         UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
         try {

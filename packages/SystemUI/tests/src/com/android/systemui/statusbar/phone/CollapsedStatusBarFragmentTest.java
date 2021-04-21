@@ -37,6 +37,8 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 
@@ -58,6 +60,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private View mCenteredNotificationAreaView;
     private StatusBarStateController mStatusBarStateController;
     private OngoingCallController mOngoingCallController;
+    private SystemStatusAnimationScheduler mAnimationScheduler;
+    private PrivacyDotViewController mDotViewController;
 
     public CollapsedStatusBarFragmentTest() {
         super(CollapsedStatusBarFragment.class);
@@ -180,7 +184,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         Mockito.verify(mOngoingCallController).addCallback(ongoingCallListenerCaptor.capture());
         OngoingCallListener listener = Objects.requireNonNull(ongoingCallListenerCaptor.getValue());
 
-        when(mOngoingCallController.getHasOngoingCall()).thenReturn(true);
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
         listener.onOngoingCallStarted(/* animate= */ false);
 
         assertEquals(View.VISIBLE,
@@ -201,7 +205,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         Mockito.verify(mOngoingCallController).addCallback(ongoingCallListenerCaptor.capture());
         OngoingCallListener listener = Objects.requireNonNull(ongoingCallListenerCaptor.getValue());
 
-        when(mOngoingCallController.getHasOngoingCall()).thenReturn(false);
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(false);
         listener.onOngoingCallEnded(/* animate= */ false);
 
         assertEquals(View.GONE,
@@ -212,6 +216,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         mOngoingCallController = mock(OngoingCallController.class);
-        return new CollapsedStatusBarFragment(mOngoingCallController);
+        mAnimationScheduler = mock(SystemStatusAnimationScheduler.class);
+        mDotViewController = mock(PrivacyDotViewController.class);
+        return new CollapsedStatusBarFragment(
+                mOngoingCallController,
+                mAnimationScheduler,
+                mDotViewController);
     }
 }

@@ -102,7 +102,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mRootView = (ViewGroup) new LayoutInflaterBuilder(mContext)
                 .replace("ImageView", TestableImageView.class)
                 .build().inflate(R.layout.quick_settings_footer, null, false);
-        mFooter = new QSSecurityFooter(mRootView, mContext, mUserTracker, new Handler(looper),
+        mFooter = new QSSecurityFooter(mRootView, mUserTracker, new Handler(looper),
                 mActivityStarter, mSecurityController, looper);
         mFooterText = mRootView.findViewById(R.id.footer_text);
         mFooterIcon = mRootView.findViewById(R.id.footer_icon);

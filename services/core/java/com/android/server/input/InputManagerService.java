@@ -57,7 +57,7 @@ import android.hardware.lights.LightState;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -2033,23 +2033,23 @@ public class InputManagerService extends IInputManager.Stub
 
     // Binder call
     @Override
-    public void vibrateCombined(int deviceId, CombinedVibrationEffect effect, IBinder token) {
+    public void vibrateCombined(int deviceId, CombinedVibration effect, IBinder token) {
         VibratorToken v = getVibratorToken(deviceId, token);
         synchronized (v) {
-            if (!(effect instanceof CombinedVibrationEffect.Mono)
-                    && !(effect instanceof CombinedVibrationEffect.Stereo)) {
+            if (!(effect instanceof CombinedVibration.Mono)
+                    && !(effect instanceof CombinedVibration.Stereo)) {
                 Slog.e(TAG, "Only Mono and Stereo effects are supported");
                 return;
             }
 
             v.mVibrating = true;
-            if (effect instanceof CombinedVibrationEffect.Mono) {
-                CombinedVibrationEffect.Mono mono = (CombinedVibrationEffect.Mono) effect;
+            if (effect instanceof CombinedVibration.Mono) {
+                CombinedVibration.Mono mono = (CombinedVibration.Mono) effect;
                 VibrationInfo info = new VibrationInfo(mono.getEffect());
                 nativeVibrate(mPtr, deviceId, info.getPattern(), info.getAmplitudes(),
                         info.getRepeatIndex(), v.mTokenValue);
-            } else if (effect instanceof CombinedVibrationEffect.Stereo) {
-                CombinedVibrationEffect.Stereo stereo = (CombinedVibrationEffect.Stereo) effect;
+            } else if (effect instanceof CombinedVibration.Stereo) {
+                CombinedVibration.Stereo stereo = (CombinedVibration.Stereo) effect;
                 SparseArray<VibrationEffect> effects = stereo.getEffects();
                 long[] pattern = new long[0];
                 int repeat = Integer.MIN_VALUE;

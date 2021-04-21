@@ -55,6 +55,8 @@ import static com.android.server.wm.StartingSurfaceController.DEBUG_ENABLE_SHELL
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -90,7 +92,6 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
-import android.window.ITaskOrganizer;
 import android.window.ITransitionPlayer;
 import android.window.StartingWindowInfo;
 import android.window.TransitionInfo;
@@ -99,6 +100,7 @@ import android.window.TransitionRequestInfo;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.ArrayUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.Description;
@@ -153,6 +155,22 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     Transaction mTransaction;
 
+    /**
+     * Whether device-specific global overrides have already been checked in
+     * {@link WindowTestsBase#setUpBase()}.
+     */
+    private static boolean sGlobalOverridesChecked;
+    /**
+     * Whether device-specific overrides have already been checked in
+     * {@link WindowTestsBase#setUpBase()} when the default display is used.
+     */
+    private static boolean sOverridesCheckedDefaultDisplay;
+    /**
+     * Whether device-specific overrides have already been checked in
+     * {@link WindowTestsBase#setUpBase()} when a {@link TestDisplayContent} is used.
+     */
+    private static boolean sOverridesCheckedTestDisplay;
+
     @BeforeClass
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
@@ -189,7 +207,45 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // Ensure letterbox aspect ratio is not overridden on any device target.
         // {@link com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}, is set
         // on some device form factors.
-        mAtm.mWindowManager.setFixedOrientationLetterboxAspectRatio(0);
+        mAtm.mWindowManager.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(0);
+        // Ensure letterbox position multiplier is not overridden on any device target.
+        // {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier},
+        // may be set on some device form factors.
+        mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(0.5f);
+
+        checkDeviceSpecificOverridesNotApplied();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        // Revert back to device overrides.
+        mAtm.mWindowManager.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(
+                mContext.getResources().getFloat(
+                        com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio));
+        mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
+                mContext.getResources().getFloat(
+                    com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier));
+    }
+
+    /**
+     * Check that device-specific overrides are not applied. Only need to check once during entire
+     * test run for each case: global overrides, default display, and test display.
+     */
+    private void checkDeviceSpecificOverridesNotApplied() {
+        // Check global overrides
+        if (!sGlobalOverridesChecked) {
+            assertEquals(0, mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
+                    0 /* delta */);
+            sGlobalOverridesChecked = true;
+        }
+        // Check display-specific overrides
+        if (!sOverridesCheckedDefaultDisplay && mDisplayContent == mDefaultDisplay) {
+            assertFalse(mDisplayContent.getIgnoreOrientationRequest());
+            sOverridesCheckedDefaultDisplay = true;
+        } else if (!sOverridesCheckedTestDisplay && mDisplayContent instanceof TestDisplayContent) {
+            assertFalse(mDisplayContent.getIgnoreOrientationRequest());
+            sOverridesCheckedTestDisplay = true;
+        }
     }
 
     private void createTestDisplay(UseTestDisplay annotation) {
@@ -1159,7 +1215,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
-    static class TestStartingWindowOrganizer extends ITaskOrganizer.Stub {
+    static class TestStartingWindowOrganizer extends WindowOrganizerTests.StubOrganizer {
         private final ActivityTaskManagerService mAtm;
         private final WindowManagerService mWMService;
         private final WindowState.PowerManagerWrapper mPowerManagerWrapper;
@@ -1224,24 +1280,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 }
             }
         }
-        @Override
-        public void copySplashScreenView(int taskId) {
-        }
-        @Override
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
-        }
-        @Override
-        public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
-        }
-        @Override
-        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
-        }
-        @Override
-        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
-        }
     }
 
-    static class TestSplitOrganizer extends ITaskOrganizer.Stub {
+    static class TestSplitOrganizer extends WindowOrganizerTests.StubOrganizer {
         final ActivityTaskManagerService mService;
         Task mPrimary;
         Task mSecondary;
@@ -1275,22 +1316,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         public void setMoveToSecondaryOnEnter(boolean move) {
             mMoveToSecondaryOnEnter = move;
         }
-        @Override
-        public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
-        }
-        @Override
-        public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-                boolean playRevealAnimation) {
-        }
-        @Override
-        public void copySplashScreenView(int taskId) {
-        }
-        @Override
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
-        }
-        @Override
-        public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
-        }
+
         @Override
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
             if (mInSplit) {
@@ -1316,9 +1342,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     rootTask.reparent(mSecondary, POSITION_BOTTOM);
                 }
             });
-        }
-        @Override
-        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
         }
     }
 

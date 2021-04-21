@@ -503,7 +503,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    private static final class BtDeviceConnectionInfo {
+    /*package*/ static final class BtDeviceConnectionInfo {
         final @NonNull BluetoothDevice mDevice;
         final @AudioService.BtProfileConnectionState int mState;
         final int mProfile;
@@ -518,6 +518,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
             mProfile = profile;
             mSupprNoisy = suppressNoisyIntent;
             mVolume = vol;
+        }
+
+        BtDeviceConnectionInfo(@NonNull BtDeviceConnectionInfo info) {
+            mDevice = info.mDevice;
+            mState = info.mState;
+            mProfile = info.mProfile;
+            mSupprNoisy = info.mSupprNoisy;
+            mVolume = info.mVolume;
         }
 
         // redefine equality op so we can match messages intended for this device
@@ -541,18 +549,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    /*package*/ void postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
-            @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
-            int profile, boolean suppressNoisyIntent, int a2dpVolume) {
-        final BtDeviceConnectionInfo info = new BtDeviceConnectionInfo(device, state, profile,
-                suppressNoisyIntent, a2dpVolume);
-
-        final String name = TextUtils.emptyIfNull(device.getName());
+    /**
+     * will block on mDeviceStateLock, which is held during an A2DP (dis) connection
+     * not just a simple message post
+     * @param info struct with the (dis)connection information
+     */
+    /*package*/ void queueBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+            @NonNull BtDeviceConnectionInfo info) {
+        final String name = TextUtils.emptyIfNull(info.mDevice.getName());
         new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE + MediaMetrics.SEPARATOR
                 + "postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent")
-                .set(MediaMetrics.Property.STATE, state == BluetoothProfile.STATE_CONNECTED
+                .set(MediaMetrics.Property.STATE, info.mState == BluetoothProfile.STATE_CONNECTED
                         ? MediaMetrics.Value.CONNECTED : MediaMetrics.Value.DISCONNECTED)
-                .set(MediaMetrics.Property.INDEX, a2dpVolume)
+                .set(MediaMetrics.Property.INDEX, info.mVolume)
                 .set(MediaMetrics.Property.NAME, name)
                 .record();
 
@@ -562,10 +571,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
             // when receiving a request to change the connection state of a device, this last
             // request is the source of truth, so cancel all previous requests that are already in
             // the handler
-            removeScheduledA2dpEvents(device);
+            removeScheduledA2dpEvents(info.mDevice);
 
             sendLMsgNoDelay(
-                    state == BluetoothProfile.STATE_CONNECTED
+                    info.mState == BluetoothProfile.STATE_CONNECTED
                             ? MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION
                             : MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION,
                     SENDMSG_QUEUE, info);

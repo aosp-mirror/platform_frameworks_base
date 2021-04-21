@@ -184,8 +184,11 @@ public final class TrackChangeEvent extends Event implements Parcelable {
     }
 
     /**
-     * Gets timestamp since the creation in milliseconds.
+     * Gets timestamp since the creation of the log session in milliseconds.
      * @return the timestamp since the creation in milliseconds, or -1 if unknown.
+     * @see LogSessionId
+     * @see PlaybackSession
+     * @see RecordingSession
      */
     @Override
     @IntRange(from = -1)
@@ -193,6 +196,11 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         return mTimeSinceCreatedMillis;
     }
 
+    /**
+     * Gets the track type.
+     * <p>The track type must be one of {@link #TRACK_TYPE_AUDIO}, {@link #TRACK_TYPE_VIDEO},
+     * {@link #TRACK_TYPE_TEXT}.
+     */
     @TrackType
     public int getTrackType() {
         return mType;
@@ -302,8 +310,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         return 0;
     }
 
-    /** @hide */
-    /* package-private */ TrackChangeEvent(@NonNull Parcel in) {
+    private TrackChangeEvent(@NonNull Parcel in) {
         int flg = in.readInt();
         int state = in.readInt();
         int reason = in.readInt();
@@ -429,8 +436,14 @@ public final class TrackChangeEvent extends Event implements Parcelable {
 
         /**
          * Creates a new Builder.
+         * @param type the track type. It must be one of {@link #TRACK_TYPE_AUDIO},
+         *             {@link #TRACK_TYPE_VIDEO}, {@link #TRACK_TYPE_TEXT}.
          */
-        public Builder(int type) {
+        public Builder(@TrackType int type) {
+            if (type != TRACK_TYPE_AUDIO && type != TRACK_TYPE_VIDEO && type != TRACK_TYPE_TEXT) {
+                throw new IllegalArgumentException("track type must be one of TRACK_TYPE_AUDIO, "
+                    + "TRACK_TYPE_VIDEO, TRACK_TYPE_TEXT.");
+            }
             mType = type;
         }
 
@@ -499,6 +512,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
          * Sets timestamp since the creation in milliseconds.
          * @param value the timestamp since the creation in milliseconds.
          *              -1 indicates the value is unknown.
+         * @see #getTimeSinceCreatedMillis()
          */
         public @NonNull Builder setTimeSinceCreatedMillis(@IntRange(from = -1) long value) {
             checkNotUsed();

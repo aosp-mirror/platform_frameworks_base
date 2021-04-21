@@ -108,6 +108,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private IUdfpsOverlayControllerCallback mUdfpsOverlayControllerCallback;
     @Mock
     private FalsingManager mFalsingManager;
+    @Mock
+    private PowerManager mPowerManager;
 
     private FakeExecutor mFgExecutor;
 
@@ -160,7 +162,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mDumpManager,
                 mKeyguardUpdateMonitor,
                 mKeyguardViewMediator,
-                mFalsingManager);
+                mFalsingManager,
+                mPowerManager);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
 
@@ -259,7 +262,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         // WHEN it is cancelled
-        mUdfpsController.onCancelAodInterrupt();
+        mUdfpsController.onCancelUdfps();
         // THEN the illumination is hidden
         verify(mUdfpsView).stopIllumination();
     }

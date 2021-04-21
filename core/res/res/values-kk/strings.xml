@@ -305,7 +305,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Жұмыс профиліне ауысу"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контактілер"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"контактілерге кіру"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Геодерек"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Локация"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"бұл құрылғының орналасқан жерін көру"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Күнтізбе"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"күнтізбеге кіру"</string>
@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"іс-қимыл дерегін алу"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"суретке түсіріп, бейне жазу"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Маңайдағы Bluetooth құрылғылары"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"маңайдағы Bluetooth құрылғыларын анықтау және жұптау"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Маңайдағы құрылғылар"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"маңайдағы құрылғыларды анықтау және жалғау"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Қоңырау журналдары"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"телефонның қоңыраулар журналын оқу және жазу"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Қолданбаға маңайдағы Bluetooth құрылғыларын анықтап, жұптауға рұқсат береді."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"жұпталған Bluetooth құрылғыларына қосылу"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Қолданбаға жұпталған Bluetooth құрылғыларына қосылуға рұқсат береді."</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Жарнаманы маңайдағы Bluetooth құрылғыларына беру"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Қолданба жарнаманы маңайдағы Bluetooth құрылғыларына бере алады."</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"маңайдағы кең жолақты құрылғылардың бір-біріне қатысты орнын анықтау"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Қолданбаға маңайдағы кең жолақты құрылғылардың бір-біріне қатысты орнын анықтауға мүмкіндік береді."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Таңдаулы NFC төлеу қызметі туралы ақпарат"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Қолданба тіркелген көмектер және баратын жер маршруты сияқты таңдаулы NFC төлеу қызметі туралы ақпаратты ала алатын болады."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC функциясын басқару"</string>
@@ -1290,7 +1290,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Хабар дыбысының қаттылығы"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Әдепкі рингтон"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Әдепкі (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Ешқандай"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Жоқ"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Қоңырау әуендері"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Дабыл сигналдары"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Хабарландыру сигналдары"</string>
@@ -1573,7 +1573,7 @@
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB дискі"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB жады"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Өзгерту"</string>
-    <string name="data_usage_warning_title" msgid="9034893717078325845">"Деректердің пайдаланылуы туралы ескерту"</string>
+    <string name="data_usage_warning_title" msgid="9034893717078325845">"Дерек шығыны туралы ескерту"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"Деректің <xliff:g id="APP">%s</xliff:g> пайдаландыңыз"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"Мобильдік деректер шегіне жетті"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Wi-Fi деректер шегіне жеттіңіз"</string>
@@ -1690,7 +1690,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Қосылмасын"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ҚОСУЛЫ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ӨШІРУЛІ"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> қызметі құрылғыңызды толық басқаруына рұқсат етілсін бе?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> қызметіне құрылғыны толық басқаруға рұқсат етілсін бе?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> қоссаңыз, құрылғыңыз деректерді шифрлау үшін экранды бекітуді пайдаланбайды."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Арнайы мүмкіндіктер бойынша көмектесетін қолданбаларға ғана құрылғыны толық басқару рұқсатын берген дұрыс."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Экранды көру және басқару"</string>
@@ -1698,7 +1698,7 @@
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Әрекеттерді көру және орындау"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ол қолданбамен немесе жабдық датчигімен істеген тапсырмаларыңызды бақылайды және қолданбаларды сіздің атыңыздан пайдаланады."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Рұқсат ету"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Қабылдамау"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Тыйым салу"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Функцияны пайдалана бастау үшін түртіңіз:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"\"Арнайы мүмкіндіктер\" түймесімен қолданылатын функцияларды таңдаңыз"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Дыбыс деңгейі пернелері тіркесімімен қолданылатын функцияларды таңдаңыз"</string>
@@ -1709,7 +1709,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Төте жолды пайдалану"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Түстер инверсиясы"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Түсті түзету"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Аса күңгірт"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Экранды қарайту"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Пайдаланушы дыбыс деңгейі пернелерін басып ұстап тұрды. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қосулы."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Дыбыс деңгейі пернелерін басып тұрған соң, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өшірілді."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін пайдалану үшін дыбыс деңгейін реттейтін екі түймені де 3 секунд басып тұрыңыз"</string>
@@ -1852,10 +1852,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Әкімші жаңартқан"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Әкімші жойған"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Жарайды"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батарея жұмысының ұзақтығын арттыру үшін Батареяны үнемдеу режимі:\n\n•қараңғы тақырыпты іске қосады;\n•фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді не шектейді.\n\n"<annotation id="url">"Толығырақ"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Батарея ұзағырақ жұмыс істеуі үшін, Батареяны үнемдеу режимі:\n\n• қараңғы тақырыпты қосады;\n•фондық жұмысты, кейбір визуалды әсерлерді және \"Ok Google\" сияқты басқа функцияларды өшіреді не шектейді."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге және алуға жол бермейді. Ашық тұрған қолданба деректерді пайдаланады, бірақ шектеулі шамада (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу функциясын қосу керек пе?"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Батареяны үнемдеу режимі қараңғы тақырыпты іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, \"Ok Google\" сияқты функцияларға шектеу қояды немесе оларды өшіреді.\n\n"<annotation id="url">"Толығырақ"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"Батареяны үнемдеу режимі қараңғы тақырыпты іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, \"Ok Google\" сияқты функцияларға шектеу қояды немесе оларды өшіреді."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу режимі қосылсын ба?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d минут бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
@@ -1929,6 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Жабу"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Жауап"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Бейне"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Қабылдамау"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Тұтқаны қою"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Кіріс қоңырау"</string>
@@ -2072,6 +2073,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Бұл хабарландырудың маңыздылық деңгейі \"Үнсіз\" санатына төмендетілді. Пікір қалдыру үшін түртіңіз."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Бұл хабарландырудың маңыздылық деңгейі көтерілді. Пікір қалдыру үшін түртіңіз."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Бұл хабарландырудың маңыздылық деңгейі төмендетілді. Пікір қалдыру үшін түртіңіз."</string>
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Кеңейтілген хабарландыруларды пайдалану"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Ұсынылған әрекеттер, жауаптар және т.б. алып отыру үшін \"Кеңейтілген хабарландырулар\" функциясын қосыңыз. Android-тың \"Бейімделетін хабарландырулар\" функциясына бұдан былай қолдау көрсетілмейді."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Қосу"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Қазір емес"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Толығырақ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"\"Кеңейтілген хабарландырулар\" функциясы барлық хабарландыру мазмұнын (контакт атаулары мен хабарлар сияқты жеке ақпаратты қоса алғанда) оқи алады. Сондай-ақ бұл функция арқылы хабарландыруларды жабуға немесе хабарландырулардағы түймелерді басқаруға (мысалы, телефон қоңырауларына жауап беру) болады.\n\nОл арқылы \"Маңызды\" режимін қосуға немесе өшіруге, қатысты параметрлерді өзгертуге де болады."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режим туралы хабарландыру"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея заряды азаюы мүмкін"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарея ұзаққа жетуі үшін, Батареяны үнемдеу режимі іске қосылды"</string>
@@ -2104,7 +2111,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> файл</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Бөлісу үшін ұсынылатын адамдар жоқ"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Бөлісу үшін ұсынылатын адамдар жоқ."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Қолданбалар тізімі"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Қолданбаға жазу рұқсаты берілмеді, бірақ ол осы USB құрылғысы арқылы дыбыс жаза алады."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Негізгі экран"</string>
@@ -2259,12 +2266,13 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Енді экранның бір бөлігін ұлғайтуға болады."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Параметрлер бөлімінен қосу"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Қабылдамау"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Жалғастыру үшін &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; қолданбасы құрылғыңыздың микрофонына рұқсат алу керек."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Жалғастыру үшін &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; қолданбасы құрылғыңыздың камерасына рұқсат алу керек."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Қосу"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Құрылғы микрофонының бөгеуін алыңыз"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Құрылғы камерасының бөгеуін алыңыз"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; және барлық қолданбалар мен қызметтерге арналған."</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Бөгеуді алу"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Датчикке қатысты құпиялылық"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Қолданба белгішесі"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Қолданба брендін ілгері жылжыту кескіні"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Пайдалану параметрлерін тексеріңіз"</string>
-    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> қызметі экраныңызды көріп, бақылай алады. Көру үшін түртіңіз."</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> экраныңызды көріп, оны басқара алады. Өту үшін түртіңіз."</string>
 </resources>

@@ -24,8 +24,10 @@ import static android.net.NetworkScore.POLICY_EXITING;
 import static android.net.NetworkScore.POLICY_TRANSPORT_PRIMARY;
 import static android.net.NetworkScore.POLICY_YIELD_TO_BAD_WIFI;
 
+import static com.android.net.module.util.CollectionUtils.filter;
 import static com.android.server.connectivity.FullScore.POLICY_ACCEPT_UNVALIDATED;
 import static com.android.server.connectivity.FullScore.POLICY_EVER_USER_SELECTED;
+import static com.android.server.connectivity.FullScore.POLICY_EVER_VALIDATED_NOT_AVOIDED_WHEN_BAD;
 import static com.android.server.connectivity.FullScore.POLICY_IS_INVINCIBLE;
 import static com.android.server.connectivity.FullScore.POLICY_IS_VALIDATED;
 import static com.android.server.connectivity.FullScore.POLICY_IS_VPN;
@@ -58,24 +60,12 @@ public class NetworkRanker {
         /** Get score of this scoreable */
         FullScore getScore();
         /** Get capabilities of this scoreable */
-        NetworkCapabilities getCaps();
+        NetworkCapabilities getCapsNoCopy();
     }
 
     private static final boolean USE_POLICY_RANKING = false;
 
     public NetworkRanker() { }
-
-    // TODO : move to module utils CollectionUtils.
-    @NonNull private static <T> ArrayList<T> filter(@NonNull final Collection<T> source,
-            @NonNull final Predicate<T> test) {
-        final ArrayList<T> matches = new ArrayList<>();
-        for (final T e : source) {
-            if (test.test(e)) {
-                matches.add(e);
-            }
-        }
-        return matches;
-    }
 
     /**
      * Find the best network satisfying this request among the list of passed networks.
@@ -158,11 +148,12 @@ public class NetworkRanker {
         if (accepted.size() == 1) return accepted.get(0);
         if (accepted.size() > 0 && rejected.size() > 0) candidates = new ArrayList<>(accepted);
 
-        // Yield to bad wifi policy : if any wifi has ever been validated, keep only networks
-        // that don't yield to such a wifi network.
+        // Yield to bad wifi policy : if any wifi has ever been validated (even if it's now
+        // unvalidated), and unless it's been explicitly avoided when bad in UI, then keep only
+        // networks that don't yield to such a wifi network.
         final boolean anyWiFiEverValidated = CollectionUtils.any(candidates,
-                nai -> nai.getScore().hasPolicy(POLICY_EVER_USER_SELECTED)
-                        && nai.getCaps().hasTransport(TRANSPORT_WIFI));
+                nai -> nai.getScore().hasPolicy(POLICY_EVER_VALIDATED_NOT_AVOIDED_WHEN_BAD)
+                        && nai.getCapsNoCopy().hasTransport(TRANSPORT_WIFI));
         if (anyWiFiEverValidated) {
             partitionInto(candidates, nai -> !nai.getScore().hasPolicy(POLICY_YIELD_TO_BAD_WIFI),
                     accepted, rejected);
@@ -206,18 +197,18 @@ public class NetworkRanker {
         for (final Scoreable defaultSubNai : accepted) {
             // Remove all networks without the DEFAULT_SUBSCRIPTION policy and the same transports
             // as a network that has it.
-            final int[] transports = defaultSubNai.getCaps().getTransportTypes();
+            final int[] transports = defaultSubNai.getCapsNoCopy().getTransportTypes();
             candidates.removeIf(nai -> !nai.getScore().hasPolicy(POLICY_TRANSPORT_PRIMARY)
-                    && Arrays.equals(transports, nai.getCaps().getTransportTypes()));
+                    && Arrays.equals(transports, nai.getCapsNoCopy().getTransportTypes()));
         }
         if (1 == candidates.size()) return candidates.get(0);
-        // It's guaranteed candidates.size() > 0 because there is at least one with DEFAULT_SUB
-        // policy and only those without it were removed.
+        // It's guaranteed candidates.size() > 0 because there is at least one with the
+        // TRANSPORT_PRIMARY policy and only those without it were removed.
 
         // If some of the networks have a better transport than others, keep only the ones with
         // the best transports.
         for (final int transport : PREFERRED_TRANSPORTS_ORDER) {
-            partitionInto(candidates, nai -> nai.getCaps().hasTransport(transport),
+            partitionInto(candidates, nai -> nai.getCapsNoCopy().hasTransport(transport),
                     accepted, rejected);
             if (accepted.size() == 1) return accepted.get(0);
             if (accepted.size() > 0 && rejected.size() > 0) {
@@ -243,16 +234,17 @@ public class NetworkRanker {
         NetworkAgentInfo bestNetwork = null;
         int bestScore = Integer.MIN_VALUE;
         for (final NetworkAgentInfo nai : nais) {
-            if (nai.getCurrentScore() > bestScore) {
+            final int naiScore = nai.getCurrentScore();
+            if (naiScore > bestScore) {
                 bestNetwork = nai;
-                bestScore = nai.getCurrentScore();
+                bestScore = naiScore;
             }
         }
         return bestNetwork;
     }
 
     /**
-     * Returns whether an offer has a chance to beat a champion network for a request.
+     * Returns whether a {@link Scoreable} has a chance to beat a champion network for a request.
      *
      * Offers are sent by network providers when they think they might be able to make a network
      * with the characteristics contained in the offer. If the offer has no chance to beat
@@ -266,15 +258,15 @@ public class NetworkRanker {
      *
      * @param request The request to evaluate against.
      * @param champion The currently best network for this request.
-     * @param offer The offer.
+     * @param contestant The offer.
      * @return Whether the offer stands a chance to beat the champion.
      */
     public boolean mightBeat(@NonNull final NetworkRequest request,
             @Nullable final NetworkAgentInfo champion,
-            @NonNull final NetworkOffer offer) {
+            @NonNull final Scoreable contestant) {
         // If this network can't even satisfy the request then it can't beat anything, not
         // even an absence of network. It can't satisfy it anyway.
-        if (!request.canBeSatisfiedBy(offer.caps)) return false;
+        if (!request.canBeSatisfiedBy(contestant.getCapsNoCopy())) return false;
         // If there is no satisfying network, then this network can beat, because some network
         // is always better than no network.
         if (null == champion) return true;
@@ -283,25 +275,24 @@ public class NetworkRanker {
             // Otherwise rank them.
             final ArrayList<Scoreable> candidates = new ArrayList<>();
             candidates.add(champion);
-            candidates.add(offer);
-            return offer == getBestNetworkByPolicy(candidates, champion);
+            candidates.add(contestant);
+            return contestant == getBestNetworkByPolicy(candidates, champion);
         } else {
-            return mightBeatByLegacyInt(request, champion.getScore(), offer);
+            return mightBeatByLegacyInt(champion.getScore(), contestant);
         }
     }
 
     /**
-     * Returns whether an offer might beat a champion according to the legacy int.
+     * Returns whether a contestant might beat a champion according to the legacy int.
      */
-    public boolean mightBeatByLegacyInt(@NonNull final NetworkRequest request,
-            @Nullable final FullScore championScore,
-            @NonNull final NetworkOffer offer) {
+    private boolean mightBeatByLegacyInt(@Nullable final FullScore championScore,
+            @NonNull final Scoreable contestant) {
         final int offerIntScore;
-        if (offer.caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+        if (contestant.getCapsNoCopy().hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
             // If the offer might have Internet access, then it might validate.
-            offerIntScore = offer.score.getLegacyIntAsValidated();
+            offerIntScore = contestant.getScore().getLegacyIntAsValidated();
         } else {
-            offerIntScore = offer.score.getLegacyInt();
+            offerIntScore = contestant.getScore().getLegacyInt();
         }
         return championScore.getLegacyInt() < offerIntScore;
     }

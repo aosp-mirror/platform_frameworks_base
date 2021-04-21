@@ -40,6 +40,7 @@ import android.net.INetworkStatsService;
 import android.net.NetworkStats;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -160,7 +161,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 196;
+    static final int VERSION = 198;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -6947,6 +6948,23 @@ public class BatteryStatsImpl extends BatteryStats {
         return mGlobalMeasuredEnergyStats.getAccumulatedCustomBucketCharges();
     }
 
+    /**
+     * Returns the names of custom power components.
+     */
+    @Override
+    public @NonNull String[] getCustomEnergyConsumerNames() {
+        if (mGlobalMeasuredEnergyStats == null) {
+            return new String[0];
+        }
+        final String[] names = mGlobalMeasuredEnergyStats.getCustomBucketNames();
+        for (int i = 0; i < names.length; i++) {
+            if (TextUtils.isEmpty(names[i])) {
+                names[i] = "CUSTOM_" + BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i;
+            }
+        }
+        return names;
+    }
+
     @Override public long getStartClockTime() {
         final long currentTimeMs = System.currentTimeMillis();
         if ((currentTimeMs > MILLISECONDS_IN_YEAR
@@ -12070,7 +12088,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Distribute Bluetooth energy info and network traffic to apps.
      *
-     * @param info The energy information from the bluetooth controller.
+     * @param info The accumulated energy information from the bluetooth controller.
      */
     public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info,
             final long consumedChargeUC, long elapsedRealtimeMs, long uptimeMs) {
@@ -12082,9 +12100,6 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
         if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
-            // TODO(174818545): mLastBluetoothActivityInfo is actually extremely suspicious.
-            //  Firstly, the following line was originally missing. But even more so, BESW says that
-            //  info is a delta, not a total, so this entire algorithm requires review.
             mLastBluetoothActivityInfo.set(info);
             return;
         }
@@ -14379,17 +14394,18 @@ public class BatteryStatsImpl extends BatteryStats {
         mConstants.startObserving(context.getContentResolver());
         registerUsbStateReceiver(context);
     }
+
     /**
      * Initialize the measured charge stats data structures.
      *
      * @param supportedStandardBuckets boolean array indicating which {@link StandardPowerBucket}s
-     *                                 are currently supported.
-     *                                 If null, none are supported (regardless of numCustomBuckets).
-     * @param numCustomBuckets number of custom (OTHER) EnergyConsumers on this device
+     *                                 are currently supported. If null, none are supported
+     *                                 (regardless of customBucketNames).
+     * @param customBucketNames        names of custom (OTHER) EnergyConsumers on this device
      */
     @GuardedBy("this")
     public void initMeasuredEnergyStatsLocked(@Nullable boolean[] supportedStandardBuckets,
-            int numCustomBuckets) {
+            String[] customBucketNames) {
         boolean supportedBucketMismatch = false;
         mScreenStateAtLastEnergyMeasurement = mScreenState;
 
@@ -14401,10 +14417,10 @@ public class BatteryStatsImpl extends BatteryStats {
         } else {
             if (mGlobalMeasuredEnergyStats == null) {
                 mGlobalMeasuredEnergyStats =
-                        new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
+                        new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
             } else {
                 supportedBucketMismatch = !mGlobalMeasuredEnergyStats.isSupportEqualTo(
-                        supportedStandardBuckets, numCustomBuckets);
+                        supportedStandardBuckets, customBucketNames);
             }
 
             if (supportedStandardBuckets[MeasuredEnergyStats.POWER_BUCKET_BLUETOOTH]) {
@@ -14423,7 +14439,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (supportedBucketMismatch) {
             mGlobalMeasuredEnergyStats = supportedStandardBuckets == null
-                    ? null : new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
+                    ? null : new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
             // Supported power buckets changed since last boot.
             // Existing data is no longer reliable.
             resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime());
@@ -15587,7 +15603,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mNextMaxDailyDeadlineMs);
         out.writeLong(mBatteryTimeToFullSeconds);
 
-        MeasuredEnergyStats.writeSummaryToParcel(mGlobalMeasuredEnergyStats, out, false);
+        MeasuredEnergyStats.writeSummaryToParcel(mGlobalMeasuredEnergyStats, out, false, false);
 
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mScreenDozeTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -15912,7 +15928,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(0);
             }
 
-            MeasuredEnergyStats.writeSummaryToParcel(u.mUidMeasuredEnergyStats, out, true);
+            MeasuredEnergyStats.writeSummaryToParcel(u.mUidMeasuredEnergyStats, out, true, true);
 
             final ArrayMap<String, Uid.Wakelock> wakeStats = u.mWakelockStats.getMap();
             int NW = wakeStats.size();

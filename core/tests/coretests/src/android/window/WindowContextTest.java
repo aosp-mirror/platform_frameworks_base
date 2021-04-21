@@ -17,6 +17,7 @@
 package android.window;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
@@ -209,6 +210,38 @@ public class WindowContextTest {
         mWms.removeWindowToken(existingToken, DEFAULT_DISPLAY);
     }
 
+    @Test
+    public void testWindowContextAddViewWithSubWindowType_NotCrash() throws Throwable {
+        final WindowContext windowContext = createWindowContext(TYPE_INPUT_METHOD);
+        final WindowManager wm = windowContext.getSystemService(WindowManager.class);
+
+        // Create a WindowToken with system window type.
+        final IBinder existingToken = new Binder();
+        mWms.addWindowToken(existingToken, TYPE_INPUT_METHOD, windowContext.getDisplayId(),
+                null /* options */);
+
+        final WindowManager.LayoutParams params =
+                new WindowManager.LayoutParams(TYPE_INPUT_METHOD);
+        params.token = existingToken;
+        final View parentWindow = new View(windowContext);
+
+        final AttachStateListener listener = new AttachStateListener();
+        parentWindow.addOnAttachStateChangeListener(listener);
+
+        // Add the parent window
+        mInstrumentation.runOnMainSync(() -> wm.addView(parentWindow, params));
+
+        assertTrue(listener.mLatch.await(4, TimeUnit.SECONDS));
+
+        final WindowManager.LayoutParams subWindowAttrs =
+                new WindowManager.LayoutParams(TYPE_APPLICATION_ATTACHED_DIALOG);
+        subWindowAttrs.token = parentWindow.getWindowToken();
+        final View subWindow = new View(windowContext);
+
+        // Add a window with sub-window type.
+        mInstrumentation.runOnMainSync(() -> wm.addView(subWindow, subWindowAttrs));
+    }
+
     private WindowContext createWindowContext() {
         return createWindowContext(TYPE_APPLICATION_OVERLAY);
     }
@@ -218,5 +251,17 @@ public class WindowContextTest {
         final Display display = instContext.getSystemService(DisplayManager.class)
                 .getDisplay(DEFAULT_DISPLAY);
         return (WindowContext) instContext.createWindowContext(display, type,  null /* options */);
+    }
+
+    private static class AttachStateListener implements View.OnAttachStateChangeListener {
+        final CountDownLatch mLatch = new CountDownLatch(1);
+
+        @Override
+        public void onViewAttachedToWindow(View v) {
+            mLatch.countDown();
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {}
     }
 }

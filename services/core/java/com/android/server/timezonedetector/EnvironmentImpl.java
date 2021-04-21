@@ -47,7 +47,7 @@ import java.util.Optional;
 /**
  * The real implementation of {@link TimeZoneDetectorStrategyImpl.Environment}.
  */
-public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment {
+final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment {
 
     private static final String LOG_TAG = TimeZoneDetectorService.TAG;
     private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";

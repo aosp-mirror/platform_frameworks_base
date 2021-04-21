@@ -1134,6 +1134,15 @@
         <!-- Tertiary accent color used on Material NEXT buttons. @hide -->
         <attr name="colorAccentTertiary" format="color" />
 
+        <!-- Darker accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentPrimaryVariant" format="color" />
+
+        <!-- Secondary darker accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentSecondaryVariant" format="color" />
+
+        <!-- Tertiary darker accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentTertiaryVariant" format="color" />
+
         <!-- The color applied to framework controls in their normal state. -->
         <attr name="colorControlNormal" format="color" />
 
@@ -1154,6 +1163,21 @@
 
         <!-- The color applied to the edge effect on scrolling containers. -->
         <attr name="colorEdgeEffect" format="color" />
+
+        <!-- The color applied to surfaces on top of colorBackground. @hide -->
+        <attr name="colorSurface" format="color" />
+
+        <!-- Alternative color applied to surfaces on top of colorBackground. @hide -->
+        <attr name="colorSurfaceHighlight" format="color" />
+
+        <!-- Alternative color applied to surfaces on top of colorBackground. @hide -->
+        <attr name="colorSurfaceVariant" format="color" />
+
+        <!-- Alternative color applied to surfaces on top of colorBackground. @hide -->
+        <attr name="colorSurfaceHeader" format="color" />
+
+        <!-- Color applied to effects. -->
+        <attr name="effectColor" format="color" />
 
         <!-- The type of the edge effect. The default is glow. -->
         <attr name="edgeEffectType">
@@ -6519,13 +6543,8 @@
         <!-- The radius of the ripple when fully expanded. By default, the
              radius is computed based on the size of the ripple's container. -->
         <attr name="radius" />
-        <!-- The style of the ripple drawable is solid by default -->
-        <attr name="rippleStyle">
-            <!-- Solid is the default style -->
-            <enum name="solid" value="0" />
-            <!-- Patterned style-->
-            <enum name="patterned" value="1" />
-        </attr>
+        <!-- Secondary color of the ripple effect. -->
+        <attr name="effectColor" />
     </declare-styleable>
 
     <declare-styleable name="ScaleDrawable">
@@ -9556,7 +9575,7 @@
     <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
     <attr name="lStar" format="float"/>
 
-    <declare-styleable name="DisplayHasherService">
+    <declare-styleable name="DisplayHashingService">
         <!-- The throttle duration for display hash requests
              @hide @SystemApi -->
         <attr name="throttleDurationMillis" format="integer" />

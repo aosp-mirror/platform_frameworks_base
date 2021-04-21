@@ -593,6 +593,7 @@ public class SettingsBackupTest {
                     Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
                     Settings.Global.CACHED_APPS_FREEZER_ENABLED,
                     Settings.Global.APP_INTEGRITY_VERIFICATION_TIMEOUT,
+                    Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
                     Settings.Global.ADVANCED_BATTERY_USAGE_AMOUNT);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
@@ -750,7 +751,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SUPPRESS_DOZE,
                  Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
                  Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT,
-                 Settings.Secure.TRANSFORM_ENABLED);
+                 Settings.Secure.UI_TRANSLATION_ENABLED);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {

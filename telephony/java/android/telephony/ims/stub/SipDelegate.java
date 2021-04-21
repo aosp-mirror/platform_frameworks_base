@@ -76,8 +76,30 @@ public interface SipDelegate {
      *
      * @param callId The call-ID header value associated with the ongoing SIP Dialog that the
      *         framework is requesting be closed.
+     * @deprecated This method does not take into account INVITE forking. Use
+     * {@link #cleanupSession(String)} instead.
      */
-    void closeDialog(@NonNull String callId);
+    @Deprecated
+    default void closeDialog(@NonNull String callId) { }
+
+    /**
+     * The remote IMS application has closed a SIP session and the routing resources associated
+     * with the SIP session using the provided Call-ID may now be cleaned up.
+     * <p>
+     * Typically, a SIP session will be considered closed when all associated dialogs receive a
+     * BYE request. After the session has been closed, the IMS application will call
+     * {@link SipDelegateConnection#cleanupSession(String)} to signal to the framework that
+     * resources can be released. In some cases, the framework will request that the ImsService
+     * close the session due to the open SIP session holding up an event such as applying a
+     * provisioning change or handing over to another transport type. See
+     * {@link DelegateRegistrationState}.
+     *
+     * @param callId The call-ID header value associated with the ongoing SIP Session that the
+     *         framework is requesting be cleaned up.
+     */
+    default void cleanupSession(@NonNull String callId) {
+        closeDialog(callId);
+    }
 
     /**
      * The remote application has received the SIP message and is processing it.

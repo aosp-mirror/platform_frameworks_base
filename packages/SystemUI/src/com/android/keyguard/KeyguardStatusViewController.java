@@ -18,15 +18,12 @@ package com.android.keyguard;
 
 import android.os.UserHandle;
 import android.util.Slog;
-import android.view.View;
 
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
@@ -49,7 +46,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final KeyguardClockSwitchController mKeyguardClockSwitchController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
-    private final NotificationIconAreaController mNotificationIconAreaController;
     private final DozeParameters mDozeParameters;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
 
@@ -63,14 +59,12 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ConfigurationController configurationController,
-            NotificationIconAreaController notificationIconAreaController,
             DozeParameters dozeParameters) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mConfigurationController = configurationController;
-        mNotificationIconAreaController = notificationIconAreaController;
         mDozeParameters = dozeParameters;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
                 dozeParameters);
@@ -87,7 +81,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     protected void onViewAttached() {
         mKeyguardUpdateMonitor.registerCallback(mInfoCallback);
         mConfigurationController.addCallback(mConfigurationListener);
-        updateAodIcons();
     }
 
     @Override
@@ -237,17 +230,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mKeyguardClockSwitchController.refresh();
     }
 
-    private void updateAodIcons() {
-        NotificationIconContainer nic = (NotificationIconContainer)
-                mView.findViewById(com.android.systemui.R.id.clock_notification_icon_container);
-        if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
-            // alternate icon area is set in KeyguardClockSwitchController
-            mNotificationIconAreaController.setupAodIcons(nic, mLockScreenMode);
-        } else {
-            nic.setVisibility(View.GONE);
-        }
-    }
-
     private boolean shouldShowLogout() {
         return mKeyguardUpdateMonitor.isLogoutEnabled()
                 && KeyguardUpdateMonitor.getCurrentUser() != UserHandle.USER_SYSTEM;
@@ -271,16 +253,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         @Override
         public void onLockScreenModeChanged(int mode) {
             mLockScreenMode = mode;
-            mKeyguardClockSwitchController.updateLockScreenMode(mode);
             mKeyguardSliceViewController.updateLockScreenMode(mode);
-            if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
-                mView.setCanShowOwnerInfo(false);
-                mView.updateLogoutView(false);
-            } else {
-                mView.setCanShowOwnerInfo(true);
-                mView.updateLogoutView(false);
-            }
-            updateAodIcons();
+            mView.setCanShowOwnerInfo(false);
+            mView.updateLogoutView(false);
         }
 
         @Override
@@ -291,11 +266,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         @Override
         public void onTimeZoneChanged(TimeZone timeZone) {
             mKeyguardClockSwitchController.updateTimeZone(timeZone);
-        }
-
-        @Override
-        public void onTimeFormatChanged(String timeFormat) {
-            mKeyguardClockSwitchController.refreshFormat(timeFormat);
         }
 
         @Override
@@ -320,7 +290,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
         @Override
         public void onUserSwitchComplete(int userId) {
-            mKeyguardClockSwitchController.refreshFormat();
             mView.updateOwnerInfo();
             mView.updateLogoutView(shouldShowLogout());
         }

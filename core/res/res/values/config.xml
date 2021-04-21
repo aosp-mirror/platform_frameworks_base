@@ -59,6 +59,7 @@
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_no_calling</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_call_strength</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
     </string-array>
@@ -96,6 +97,7 @@
     <string translatable="false" name="status_bar_camera">camera</string>
     <string translatable="false" name="status_bar_airplane">airplane</string>
     <string translatable="false" name="status_bar_no_calling">no_calling</string>
+    <string translatable="false" name="status_bar_call_strength">call_strength</string>
     <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
     <string translatable="false" name="status_bar_screen_record">screen_record</string>
 
@@ -960,6 +962,13 @@
     -->
     <integer name="config_veryLongPressOnPowerBehavior">0</integer>
 
+    <!-- Control the behavior when the user presses the power and volume up buttons together.
+            0 - Nothing
+            1 - Mute toggle
+            2 - Global actions menu
+    -->
+    <integer name="config_keyChordPowerVolumeUp">1</integer>
+
     <!-- Control the behavior when the user long presses the back button.  Non-zero values are only
          valid for watches as part of CDD/CTS.
             0 - Nothing
@@ -1765,6 +1774,9 @@
         <!-- Add algorithm here -->
     </string-array>
 
+    <!-- Boolean indicating if placing the phone face down will result in a screen off. -->
+    <bool name="config_flipToScreenOffEnabled">true</bool>
+
     <!-- Boolean indicating if current platform supports bluetooth SCO for off call
     use cases -->
     <bool name="config_bluetooth_sco_off_call">true</bool>
@@ -1939,9 +1951,11 @@
     <string name="config_systemTelevisionNotificationHandler" translatable="false"></string>
     <!-- The name of the package that will hold the system activity recognizer role. -->
     <string name="config_systemActivityRecognizer" translatable="false"></string>
+    <!-- The name of the package that will hold the system ui role -->
+    <string name="config_systemUi" translatable="false">com.android.systemui</string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
-    <string name="config_overrideComponentUiPackage" translatable="false"></string>
+    <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
 
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
@@ -3714,13 +3728,6 @@
      -->
     <string name="config_defaultWellbeingPackage" translatable="false"></string>
 
-    <!-- The package name for the companion provider app.
-         This package must be trusted, as it has the permissions to associate apps with devices
-         without a UI prompt.
-         Example: "com.google.android.gms"
-     -->
-    <string name="config_companionProviderPackage" translatable="false"></string>
-
     <!-- The component name for the default system attention service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          See android.attention.AttentionManagerService.
@@ -4661,10 +4668,26 @@
          corners of the activity won't be rounded. -->
     <integer name="config_letterboxActivityCornersRadius">0</integer>
 
+    <!-- Blur radius for the Option 3 in R.integer.config_letterboxBackgroundType. Values < 0 are
+        ignored and 0 is used. -->
+    <dimen name="config_letterboxBackgroundWallpaperBlurRadius">100dp</dimen>
+
+    <!-- Alpha of a black translucent scrim showed over wallpaper letterbox background when
+        the Option 3 is selected for R.integer.config_letterboxBackgroundType.
+        Values < 0 or >= 1 are ignored and 0.0 (transparent) is used instead. -->
+    <item name="config_letterboxBackgroundWallaperDarkScrimAlpha" format="float" type="dimen">
+        0.5
+    </item>
+
     <!-- Corners appearance of the letterbox background.
             0 - Solid background using color specified in R.color.config_letterboxBackgroundColor.
             1 - Color specified in R.attr.colorBackground for the letterboxed application.
             2 - Color specified in R.attr.colorBackgroundFloating for the letterboxed application.
+            3 - Wallpaper with dimmed with blur or/and dark scrim. At least one of the following
+            parameters should be > 0: config_letterboxBackgroundWallpaperBlurRadius,
+            config_letterboxBackgroundWallaperDarkScrimAlpha. If it's not the case or blur radius
+            provided but blur isn't supported by the device and this option
+            is selected then implementation will default to option 0.
         If given value is outside of this range, the option 0 will be assummed. -->
     <integer name="config_letterboxBackgroundType">0</integer>
 
@@ -4674,9 +4697,17 @@
             R.attr.colorBackground isn't specified for the app.
             - Option 2 is selected for R.integer.config_letterboxBackgroundType and
             R.attr.colorBackgroundFloating isn't specified for the app.
+            - Option 3 is selected for R.integer.config_letterboxBackgroundType and blur requested
+            but isn't supported on the device or both dark scrim alpha and blur radius aren't
+            provided.
         Defaults to black if not specified.
      -->
     <color name="config_letterboxBackgroundColor">#000</color>
+
+    <!-- Horizonal position of a center of the letterboxed app window.
+        0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
+        or > 1, it is ignored and central positionis used (0.5). -->
+    <item name="config_letterboxHorizontalPositionMultiplier" format="float" type="dimen">0.5</item>
 
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
@@ -4740,7 +4771,7 @@
     <bool name="config_cecHdmiCecVersion20_allowed">true</bool>
     <bool name="config_cecHdmiCecVersion20_default">false</bool>
 
-    <bool name="config_cecSendStandbyOnSleep_userConfigurable">true</bool>
+    <bool name="config_cecPowerControlMode_userConfigurable">true</bool>
     <bool name="config_cecPowerControlModeTv_allowed">true</bool>
     <bool name="config_cecPowerControlModeTv_default">true</bool>
     <bool name="config_cecPowerControlModeBroadcast_allowed">true</bool>
@@ -4835,4 +4866,6 @@
     <string name="config_systemTextIntelligence" translatable="false"></string>
     <!-- On-device intelligent processor for visual features. -->
     <string name="config_systemVisualIntelligence" translatable="false"></string>
+    <!-- On-device package for providing companion device associations. -->
+    <string name="config_systemCompanionDeviceProvider" translatable="false"></string>
 </resources>

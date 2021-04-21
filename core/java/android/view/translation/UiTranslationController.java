@@ -100,7 +100,7 @@ public class UiTranslationController {
      * Update the Ui translation state.
      */
     public void updateUiTranslationState(@UiTranslationState int state, TranslationSpec sourceSpec,
-            TranslationSpec destSpec, List<AutofillId> views) {
+            TranslationSpec targetSpec, List<AutofillId> views) {
         if (!mActivity.isResumed() && (state == STATE_UI_TRANSLATION_STARTED
                 || state == STATE_UI_TRANSLATION_RESUMED)) {
             return;
@@ -113,11 +113,11 @@ public class UiTranslationController {
         switch (state) {
             case STATE_UI_TRANSLATION_STARTED:
                 final Pair<TranslationSpec, TranslationSpec> specs =
-                        new Pair<>(sourceSpec, destSpec);
+                        new Pair<>(sourceSpec, targetSpec);
                 if (!mTranslators.containsKey(specs)) {
                     mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
                             UiTranslationController::createTranslatorAndStart,
-                            UiTranslationController.this, sourceSpec, destSpec, views));
+                            UiTranslationController.this, sourceSpec, targetSpec, views));
                 } else {
                     onUiTranslationStarted(mTranslators.get(specs), views);
                 }
@@ -302,6 +302,11 @@ public class UiTranslationController {
                 }
                 final LongSparseArray<ViewTranslationResponse> virtualChildResponse =
                         translatedResult.valueAt(i);
+                if (DEBUG) {
+                    // TODO(b/182433547): remove before S release
+                    Log.v(TAG, "onVirtualViewTranslationCompleted: receive "
+                            + virtualChildResponse + " for AutofillId " + autofillId);
+                }
                 mActivity.runOnUiThread(() -> {
                     if (view.getViewTranslationCallback() == null) {
                         if (DEBUG) {
@@ -310,7 +315,7 @@ public class UiTranslationController {
                         }
                         return;
                     }
-                    view.onTranslationResponse(virtualChildResponse);
+                    view.onVirtualViewTranslationResponses(virtualChildResponse);
                     if (view.getViewTranslationCallback() != null) {
                         view.getViewTranslationCallback().onShowTranslation(view);
                     }
@@ -341,8 +346,13 @@ public class UiTranslationController {
             }
             for (int i = 0; i < resultCount; i++) {
                 final ViewTranslationResponse response = translatedResult.valueAt(i);
+                if (DEBUG) {
+                    // TODO(b/182433547): remove before S release
+                    Log.v(TAG, "onTranslationCompleted: response= " + response);
+                }
                 final AutofillId autofillId = response.getAutofillId();
                 if (autofillId == null) {
+                    Log.w(TAG, "No AutofillId is set in ViewTranslationResponse:" + response);
                     continue;
                 }
                 final View view = mViews.get(autofillId).get();
@@ -352,17 +362,19 @@ public class UiTranslationController {
                     continue;
                 }
                 mActivity.runOnUiThread(() -> {
-                    if (view.getViewTranslationCallback() == null) {
+                    final ViewTranslationCallback callback = view.getViewTranslationCallback();
+                    if (callback == null) {
                         if (DEBUG) {
                             Log.d(TAG, view + " doesn't support showing translation because of "
                                     + "null ViewTranslationCallback.");
                         }
                         return;
                     }
-                    view.onTranslationResponse(response);
-                    if (view.getViewTranslationCallback() != null) {
-                        view.getViewTranslationCallback().onShowTranslation(view);
-                    }
+
+                    // TODO: Do this for specific views on request only.
+                    callback.enableContentPadding();
+                    view.onViewTranslationResponse(response);
+                    callback.onShowTranslation(view);
                 });
             }
         }
@@ -373,12 +385,13 @@ public class UiTranslationController {
      * translation when the Translator is created successfully.
      */
     @WorkerThread
-    private void createTranslatorAndStart(TranslationSpec sourceSpec, TranslationSpec destSpec,
+    private void createTranslatorAndStart(TranslationSpec sourceSpec, TranslationSpec targetSpec,
             List<AutofillId> views) {
-        final Translator translator = createTranslatorIfNeeded(sourceSpec, destSpec);
+        // Create Translator
+        final Translator translator = createTranslatorIfNeeded(sourceSpec, targetSpec);
         if (translator == null) {
-            Log.w(TAG, "Can not create Translator for sourceSpec:" + sourceSpec + " destSpec:"
-                    + destSpec);
+            Log.w(TAG, "Can not create Translator for sourceSpec:" + sourceSpec + " targetSpec:"
+                    + targetSpec);
             return;
         }
         onUiTranslationStarted(translator, views);
@@ -388,12 +401,15 @@ public class UiTranslationController {
     private void sendTranslationRequest(Translator translator,
             List<ViewTranslationRequest> requests) {
         if (requests.size() == 0) {
-            Log.wtf(TAG, "No ViewTranslationRequest was collected.");
+            Log.w(TAG, "No ViewTranslationRequest was collected.");
             return;
         }
         final TranslationRequest request = new TranslationRequest.Builder()
                 .setViewTranslationRequests(requests)
                 .build();
+        if (DEBUG) {
+            Log.d(TAG, "sendTranslationRequest: request= " + request);
+        }
         translator.requestUiTranslate(request, (r) -> r.run(), this::onTranslationCompleted);
     }
 
@@ -508,10 +524,17 @@ public class UiTranslationController {
     private void runForEachView(BiConsumer<View, ViewTranslationCallback> action) {
         synchronized (mLock) {
             final ArrayMap<AutofillId, WeakReference<View>> views = new ArrayMap<>(mViews);
+            if (views.size() == 0) {
+                Log.w(TAG, "No views can be excuted for runForEachView.");
+            }
             mActivity.runOnUiThread(() -> {
                 final int viewCounts = views.size();
                 for (int i = 0; i < viewCounts; i++) {
                     final View view = views.valueAt(i).get();
+                    if (DEBUG) {
+                        // TODO(b/182433547): remove before S release
+                        Log.d(TAG, "runForEachView: view= " + view);
+                    }
                     if (view == null || view.getViewTranslationCallback() == null) {
                         if (DEBUG) {
                             Log.d(TAG, "View was gone or ViewTranslationCallback for autofillid "

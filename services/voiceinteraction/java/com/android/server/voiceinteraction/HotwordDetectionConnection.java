@@ -24,6 +24,7 @@ import static android.service.voice.HotwordDetectionService.KEY_INITIALIZATION_S
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
@@ -34,10 +35,12 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
@@ -47,6 +50,7 @@ import android.service.voice.IHotwordDetectionService;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.contentcapture.IContentCaptureManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -135,6 +139,7 @@ final class HotwordDetectionConnection {
             return;
         }
         updateStateWithCallbackLocked(options, sharedMemory, callback);
+        updateContentCaptureManager();
     }
 
     private void updateStateWithCallbackLocked(PersistableBundle options,
@@ -191,6 +196,15 @@ final class HotwordDetectionConnection {
                         // NOTE: so far we don't need to take any action.
                     }
                 });
+    }
+
+    private void updateContentCaptureManager() {
+        IBinder b = ServiceManager
+                .getService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
+        IContentCaptureManager binderService = IContentCaptureManager.Stub.asInterface(b);
+        mRemoteHotwordDetectionService.post(
+                service -> service.updateContentCaptureManager(binderService,
+                        new ContentCaptureOptions(null)));
     }
 
     private boolean isBound() {
@@ -268,6 +282,114 @@ final class HotwordDetectionConnection {
             }
             mCurrentAudioSink = null;
         }
+    }
+
+    void triggerHardwareRecognitionEventForTestLocked(
+            SoundTrigger.KeyphraseRecognitionEvent event,
+            IHotwordRecognitionStatusCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "triggerHardwareRecognitionEventForTestLocked");
+        }
+        detectFromDspSourceForTest(event, callback);
+    }
+
+    private void detectFromDspSourceForTest(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
+            IHotwordRecognitionStatusCallback externalCallback) {
+        if (DEBUG) {
+            Slog.d(TAG, "detectFromDspSourceForTest");
+        }
+
+        AudioRecord record = createFakeAudioRecord();
+        if (record == null) {
+            Slog.d(TAG, "Failed to create fake audio record");
+            return;
+        }
+
+        Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
+        if (clientPipe == null) {
+            Slog.d(TAG, "Failed to create pipe");
+            return;
+        }
+        ParcelFileDescriptor audioSink = clientPipe.second;
+        ParcelFileDescriptor clientRead = clientPipe.first;
+
+        record.startRecording();
+
+        mAudioCopyExecutor.execute(() -> {
+            try (OutputStream fos =
+                         new ParcelFileDescriptor.AutoCloseOutputStream(audioSink)) {
+
+                int remainToRead = 10240;
+                byte[] buffer = new byte[1024];
+                while (remainToRead > 0) {
+                    int bytesRead = record.read(buffer, 0, 1024);
+                    if (DEBUG) {
+                        Slog.d(TAG, "bytesRead = " + bytesRead);
+                    }
+                    if (bytesRead <= 0) {
+                        break;
+                    }
+                    if (bytesRead > 8) {
+                        System.arraycopy(new byte[] {'h', 'o', 't', 'w', 'o', 'r', 'd', '!'}, 0,
+                                buffer, 0, 8);
+                    }
+
+                    fos.write(buffer, 0, bytesRead);
+                    remainToRead -= bytesRead;
+                }
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed supplying audio data to validator", e);
+            }
+        });
+
+        Runnable cancellingJob = () -> {
+            Slog.d(TAG, "Timeout for getting callback from HotwordDetectionService");
+            record.stop();
+            record.release();
+            bestEffortClose(audioSink);
+            bestEffortClose(clientRead);
+        };
+
+        ScheduledFuture<?> cancelingFuture =
+                mScheduledExecutorService.schedule(
+                        cancellingJob, VALIDATION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+
+        IDspHotwordDetectionCallback internalCallback = new IDspHotwordDetectionCallback.Stub() {
+            @Override
+            public void onDetected(HotwordDetectedResult result) throws RemoteException {
+                if (DEBUG) {
+                    Slog.d(TAG, "onDetected");
+                }
+                cancelingFuture.cancel(true);
+                record.stop();
+                record.release();
+                bestEffortClose(audioSink);
+                bestEffortClose(clientRead);
+
+                externalCallback.onKeyphraseDetected(recognitionEvent);
+            }
+
+            @Override
+            public void onRejected(HotwordRejectedResult result) throws RemoteException {
+                if (DEBUG) {
+                    Slog.d(TAG, "onRejected");
+                }
+                cancelingFuture.cancel(true);
+                record.stop();
+                record.release();
+                bestEffortClose(audioSink);
+                bestEffortClose(clientRead);
+
+                externalCallback.onRejected(result);
+            }
+        };
+
+        mRemoteHotwordDetectionService.run(
+                service -> service.detectFromDspSource(
+                        clientRead,
+                        recognitionEvent.getCaptureFormat(),
+                        VALIDATION_TIMEOUT_MILLIS,
+                        internalCallback));
     }
 
     private void detectFromDspSource(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
@@ -434,7 +556,8 @@ final class HotwordDetectionConnection {
         }
         try {
             AudioRecord audioRecord = new AudioRecord(
-                    new AudioAttributes.Builder().setHotwordMode().build(),
+                    new AudioAttributes.Builder()
+                            .setInternalCapturePreset(MediaRecorder.AudioSource.HOTWORD).build(),
                     audioFormat,
                     getBufferSizeInBytes(
                             audioFormat.getSampleRate(),
@@ -453,6 +576,37 @@ final class HotwordDetectionConnection {
             Slog.e(TAG, "Failed to create AudioRecord", e);
             return null;
         }
+    }
+
+    @Nullable
+    private AudioRecord createFakeAudioRecord() {
+        if (DEBUG) {
+            Slog.i(TAG, "#createFakeAudioRecord");
+        }
+        try {
+            AudioRecord audioRecord = new AudioRecord.Builder()
+                    .setAudioFormat(new AudioFormat.Builder()
+                            .setSampleRate(32000)
+                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                            .setChannelMask(AudioFormat.CHANNEL_IN_MONO).build())
+                    .setAudioAttributes(new AudioAttributes.Builder()
+                            .setInternalCapturePreset(MediaRecorder.AudioSource.HOTWORD).build())
+                    .setBufferSizeInBytes(
+                            AudioRecord.getMinBufferSize(32000,
+                                    AudioFormat.CHANNEL_IN_MONO,
+                                    AudioFormat.ENCODING_PCM_16BIT) * 2)
+                    .build();
+
+            if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
+                Slog.w(TAG, "Failed to initialize AudioRecord");
+                audioRecord.release();
+                return null;
+            }
+            return audioRecord;
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Failed to create AudioRecord", e);
+        }
+        return null;
     }
 
     /**

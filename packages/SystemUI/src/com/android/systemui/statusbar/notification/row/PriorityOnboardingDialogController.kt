@@ -28,6 +28,7 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.style.BulletSpan
 import android.view.Gravity
@@ -41,9 +42,9 @@ import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
 import android.widget.ImageView
 import android.widget.TextView
-import com.android.systemui.Interpolators.LINEAR_OUT_SLOW_IN
 import com.android.systemui.Prefs
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators.LINEAR_OUT_SLOW_IN
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
 import com.android.systemui.statusbar.notification.row.NotificationConversationInfo.OnConversationSettingsClickListener
 import com.android.systemui.statusbar.phone.ShadeController
@@ -86,7 +87,7 @@ class PriorityOnboardingDialogController @Inject constructor(
         Prefs.putBoolean(context, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true)
         dialog.dismiss()
         shadeController.animateCollapsePanels()
-        peopleSpaceWidgetManager.requestPinAppWidget(shortcutInfo)
+        peopleSpaceWidgetManager.requestPinAppWidget(shortcutInfo, Bundle())
     }
 
     private fun settings() {

@@ -123,21 +123,18 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#reportStartInput(IBinder,
-     * IVoidResultCallback)}.
+     * Calls {@link IInputMethodPrivilegedOperations#reportStartInputAsync(IBinder)}.
      *
      * @param startInputToken {@link IBinder} token to distinguish startInput session
      */
     @AnyThread
-    public void reportStartInput(IBinder startInputToken) {
+    public void reportStartInputAsync(IBinder startInputToken) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.reportStartInput(startInputToken, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.reportStartInputAsync(startInputToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

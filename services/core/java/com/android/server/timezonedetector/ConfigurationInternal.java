@@ -148,11 +148,12 @@ public final class ConfigurationInternal {
         builder.setConfigureAutoDetectionEnabledCapability(configureAutoDetectionEnabledCapability);
 
         boolean deviceHasLocationTimeZoneDetection = isGeoDetectionSupported();
+        // Note: allowConfigDateTime does not restrict the ability to change location time zone
+        // detection enabled. This is intentional as it has user privacy implications and so it
+        // makes sense to leave this under a user's control.
         final int configureGeolocationDetectionEnabledCapability;
         if (!deviceHasLocationTimeZoneDetection) {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_SUPPORTED;
-        } else if (!allowConfigDateTime) {
-            configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_ALLOWED;
         } else if (!mAutoDetectionEnabled || !isLocationEnabled()) {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_APPLICABLE;
         } else {

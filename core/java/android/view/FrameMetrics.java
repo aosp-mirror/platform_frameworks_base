@@ -242,18 +242,20 @@ public final class FrameMetrics {
         int PERFORM_TRAVERSALS_START = 7;
         int DRAW_START = 8;
         int FRAME_DEADLINE = 9;
-        int SYNC_QUEUED = 10;
-        int SYNC_START = 11;
-        int ISSUE_DRAW_COMMANDS_START = 12;
-        int SWAP_BUFFERS = 13;
-        int FRAME_COMPLETED = 14;
-        int DEQUEUE_BUFFER_DURATION = 15;
-        int QUEUE_BUFFER_DURATION = 16;
-        int GPU_COMPLETED = 17;
-        int SWAP_BUFFERS_COMPLETED = 18;
-        int DISPLAY_PRESENT_TIME = 19;
+        int FRAME_START_TIME = 10;
+        int FRAME_INTERVAL = 11;
+        int SYNC_QUEUED = 12;
+        int SYNC_START = 13;
+        int ISSUE_DRAW_COMMANDS_START = 14;
+        int SWAP_BUFFERS = 15;
+        int FRAME_COMPLETED = 16;
+        int DEQUEUE_BUFFER_DURATION = 17;
+        int QUEUE_BUFFER_DURATION = 18;
+        int GPU_COMPLETED = 19;
+        int SWAP_BUFFERS_COMPLETED = 20;
+        int DISPLAY_PRESENT_TIME = 21;
 
-        int FRAME_STATS_COUNT = 20; // must always be last and in sync with
+        int FRAME_STATS_COUNT = 22; // must always be last and in sync with
                                     // FrameInfoIndex::NumIndexes in libs/hwui/FrameInfo.h
     }
 

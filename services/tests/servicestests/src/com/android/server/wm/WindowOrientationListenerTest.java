@@ -106,8 +106,8 @@ public class WindowOrientationListenerTest {
 
         @Override
         public void resolveRotation(@NonNull RotationResolverCallbackInternal callback,
-                @Surface.Rotation int proposedRotation, @Surface.Rotation int currentRotation,
-                @DurationMillisLong long timeoutMillis,
+                String packageName, @Surface.Rotation int proposedRotation,
+                @Surface.Rotation int currentRotation, @DurationMillisLong long timeoutMillis,
                 @NonNull CancellationSignal cancellationSignal) {
             callback.onSuccess(mResult);
         }

@@ -76,11 +76,11 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
         }
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
@@ -106,7 +106,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun statusBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation)
 
@@ -138,7 +138,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {

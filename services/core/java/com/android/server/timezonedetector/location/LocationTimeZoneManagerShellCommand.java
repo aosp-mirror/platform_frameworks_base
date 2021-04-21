@@ -24,9 +24,6 @@ import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_START;
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_STOP;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
 
-import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED;
-import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT;
-import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS;
@@ -48,6 +45,7 @@ import android.app.time.GeolocationTimeZoneSuggestionProto;
 import android.app.time.LocationTimeZoneManagerProto;
 import android.app.time.LocationTimeZoneManagerServiceStateProto;
 import android.app.time.TimeZoneProviderStateProto;
+import android.app.timezonedetector.TimeZoneDetector;
 import android.os.Bundle;
 import android.os.ShellCommand;
 import android.util.IndentingPrintWriter;
@@ -103,84 +101,68 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
         pw.printf("Location Time Zone Manager (%s) commands for tests:\n", SERVICE_NAME);
-        pw.println("  help");
-        pw.println("    Print this help text.");
+        pw.printf("  help\n");
+        pw.printf("    Print this help text.\n");
         pw.printf("  %s\n", SHELL_COMMAND_START);
-        pw.println("    Starts the location_time_zone_manager, creating time zone providers.");
+        pw.printf("    Starts the service, creating location time zone providers.\n");
         pw.printf("  %s\n", SHELL_COMMAND_STOP);
-        pw.println("    Stops the location_time_zone_manager, destroying time zone providers.");
+        pw.printf("    Stops the service, destroying location time zone providers.\n");
         pw.printf("  %s (true|false)\n", SHELL_COMMAND_RECORD_PROVIDER_STATES);
         pw.printf("    Enables / disables provider state recording mode. See also %s. The default"
                 + " state is always \"false\".\n", SHELL_COMMAND_DUMP_STATE);
-        pw.println("    Note: When enabled, this mode consumes memory and it is only intended for"
-                + " testing.");
-        pw.println("     It should be disabled after use, or the device can be rebooted to"
-                + " reset the mode to disabled.");
-        pw.println("     Disabling (or enabling repeatedly) clears any existing stored states.");
+        pw.printf("    Note: When enabled, this mode consumes memory and it is only intended for"
+                + " testing.\n");
+        pw.printf("    It should be disabled after use, or the device can be rebooted to"
+                + " reset the mode to disabled.\n");
+        pw.printf("    Disabling (or enabling repeatedly) clears any existing stored states.\n");
         pw.printf("  %s [%s]\n", SHELL_COMMAND_DUMP_STATE, DUMP_STATE_OPTION_PROTO);
-        pw.println("    Dumps Location Time Zone Manager state for tests as text or binary proto"
-                + " form.");
-        pw.println("    See the LocationTimeZoneManagerServiceStateProto definition for details.");
+        pw.printf("    Dumps service state for tests as text or binary proto form.\n");
+        pw.printf("    See the LocationTimeZoneManagerServiceStateProto definition for details.\n");
         pw.printf("  %s <provider index> <test command>\n",
                 SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND);
-        pw.println("    Passes a test command to the named provider.");
+        pw.printf("    Passes a test command to the named provider.\n");
         pw.println();
-        pw.println("<provider index> = 0 (primary), 1 (secondary)");
+        pw.printf("<provider index> = 0 (primary), 1 (secondary)\n");
         pw.println();
         pw.printf("%s details:\n", SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND);
         pw.println();
-        pw.println("Provider <test command> encoding:");
+        pw.printf("Provider <test command> encoding:\n");
         pw.println();
         TestCommand.printShellCommandEncodingHelp(pw);
         pw.println();
-        pw.println("Simulated provider mode can be used to test the system server behavior or to"
-                + " reproduce bugs without the complexity of using real providers.");
+        pw.printf("Simulated provider mode can be used to test the system server behavior or to"
+                + " reproduce bugs without the complexity of using real providers.\n");
         pw.println();
-        pw.println("The test commands for simulated providers are:");
+        pw.printf("The test commands for simulated providers are:\n");
         SimulatedLocationTimeZoneProviderProxy.printTestCommandShellHelp(pw);
         pw.println();
-        pw.println("Test commands cannot currently be passed to real provider implementations.");
+        pw.printf("Test commands cannot currently be passed to real provider implementations.\n");
         pw.println();
         pw.printf("This service is also affected by the following device_config flags in the"
                 + " %s namespace:\n", NAMESPACE_SYSTEM_TIME);
-        pw.printf("    %s - [default=true], only observed if the feature is enabled in config,"
-                        + "set this to false to disable the feature\n",
-                KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED);
-        pw.printf("    %s - [default=false]. Only used if the device does not have an explicit"
-                        + " 'location time zone detection enabled' setting configured [*].\n",
-                KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT);
-        pw.printf("    %s - [default=<unset>]. Used to override the device's 'location time zone"
-                        + " detection enabled' setting [*]\n",
-                KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE);
-        pw.printf("    %s - Overrides the mode of the primary provider. Values=%s|%s|%s\n",
-                KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
+        pw.printf("  %s\n", KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE);
+        pw.printf("    Overrides the mode of the primary provider. Values=%s|%s|%s\n",
                 PROVIDER_MODE_DISABLED, PROVIDER_MODE_ENABLED, PROVIDER_MODE_SIMULATED);
-        pw.printf("    %s - Overrides the mode of the secondary provider. Values=%s|%s|%s\n",
-                KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
+        pw.printf("  %s\n", KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE);
+        pw.printf("    Overrides the mode of the secondary provider. Values=%s|%s|%s\n",
                 PROVIDER_MODE_DISABLED, PROVIDER_MODE_ENABLED, PROVIDER_MODE_SIMULATED);
-        pw.printf("    %s - \n",
-                KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE);
-        pw.printf("    %s - Sets the amount of time the service waits when uncertain before making"
-                        + " an 'uncertain' suggestion to the time zone detector.\n",
-                KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS);
-        pw.printf("    %s - Sets the initialization time passed to the location time zone providers"
-                        + "\n",
-                KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS);
-        pw.printf("    %s - Sets the amount of extra time added to the location time zone providers"
-                        + " initialization time\n",
-                KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS);
-        pw.println();
-        pw.println("[*] The user must still have location = on / auto time zone detection = on");
+        pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS);
+        pw.printf("    Sets the amount of time the service waits when uncertain before making an"
+                + " 'uncertain' suggestion to the time zone detector.\n");
+        pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS);
+        pw.printf("    Sets the initialization time passed to the providers.\n");
+        pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS);
+        pw.printf("    Sets the amount of extra time added to the providers' initialization time."
+                + "\n");
         pw.println();
         pw.printf("Typically, use '%s' to stop the service before setting individual"
                 + " flags and '%s' after to restart it.\n",
                 SHELL_COMMAND_STOP, SHELL_COMMAND_START);
         pw.println();
-        pw.println("Example:");
-        pw.printf("    $ adb shell cmd device_config put %s %s %s\n",
-                NAMESPACE_SYSTEM_TIME, KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
-                "true");
-        pw.println("See adb shell cmd device_config for more information.");
+        pw.printf("See \"adb shell cmd device_config\" for more information on setting flags.\n");
+        pw.println();
+        pw.printf("Also see \"adb shell cmd %s help\" for higher-level location time zone"
+                + " commands / settings.\n", TimeZoneDetector.SHELL_COMMAND_SERVICE_NAME);
         pw.println();
     }
 

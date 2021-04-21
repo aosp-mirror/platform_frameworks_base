@@ -84,13 +84,13 @@ public class ScreenPowerCalculatorTest {
 
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_SCREEN);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
                 .isEqualTo(80 * MINUTE_IN_MS);
 
         // 600000000 uAs * (1 mA / 1000 uA) * (1 h / 3600 s)  = 166.66666 mAh
-        assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE))
+        assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isWithin(PRECISION).of(166.66666);
-        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_USAGE))
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
         assertThat(consumer.getConsumedPower())
                 .isWithin(PRECISION).of(166.66666);
@@ -153,11 +153,11 @@ public class ScreenPowerCalculatorTest {
 
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_SCREEN);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
                 .isEqualTo(80 * MINUTE_IN_MS);
-        assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE))
+        assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isWithin(PRECISION).of(92.0);
-        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_USAGE))
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
         assertThat(consumer.getConsumedPower())
                 .isWithin(PRECISION).of(92.0);

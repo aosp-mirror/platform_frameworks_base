@@ -19,10 +19,12 @@ package android.app;
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -207,16 +209,31 @@ public class AlarmManager {
     public static final int FLAG_PRIORITIZE = 1 << 6;
 
     /**
-     * For apps targeting {@link Build.VERSION_CODES#S} or above, APIs
-     * {@link #setExactAndAllowWhileIdle(int, long, PendingIntent)} and
-     * {@link #setAlarmClock(AlarmClockInfo, PendingIntent)} will require holding a new
-     * permission {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
+     * For apps targeting {@link Build.VERSION_CODES#S} or above, any APIs setting exact alarms,
+     * e.g. {@link #setExact(int, long, PendingIntent)},
+     * {@link #setAlarmClock(AlarmClockInfo, PendingIntent)} and others will require holding a new
+     * permission {@link Manifest.permission#SCHEDULE_EXACT_ALARM}
      *
      * @hide
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     public static final long REQUIRE_EXACT_ALARM_PERMISSION = 171306433L;
+
+    /**
+     * For apps targeting {@link Build.VERSION_CODES#S} or above, all inexact alarms will require
+     * to have a minimum window size, expected to be on the order of a few minutes.
+     *
+     * Practically, any alarms requiring smaller windows are the same as exact alarms and should use
+     * the corresponding APIs provided, like {@link #setExact(int, long, PendingIntent)}, et al.
+     *
+     * Inexact alarm with shorter windows specified will have their windows elongated by the system.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    public static final long ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS = 185199076L;
 
     @UnsupportedAppUsage
     private final IAlarmManager mService;
@@ -482,6 +499,11 @@ public class AlarmManager {
      * modest timeliness requirements for its alarms.
      *
      * <p>
+     * Note: Starting with API {@link Build.VERSION_CODES#S}, the system will ensure that the window
+     * specified is at least a few minutes, as smaller windows are considered practically exact
+     * and should use the other APIs provided for exact alarms.
+     *
+     * <p>
      * This method can also be used to achieve strict ordering guarantees among
      * multiple alarms by ensuring that the windows requested for each alarm do
      * not intersect.
@@ -531,6 +553,13 @@ public class AlarmManager {
      * The OnAlarmListener {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
+     *
+     * <p>
+     * Note: Starting with API {@link Build.VERSION_CODES#S}, the system will ensure that the window
+     * specified is at least a few minutes, as smaller windows are considered practically exact
+     * and should use the other APIs provided for exact alarms.
+     *
+     * @see #setWindow(int, long, long, PendingIntent)
      */
     public void setWindow(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
             String tag, OnAlarmListener listener, Handler targetHandler) {
@@ -563,8 +592,8 @@ public class AlarmManager {
      *        in milliseconds.  The alarm will be delivered no later than this many
      *        milliseconds after {@code windowStartMillis}.  Note that this parameter
      *        is a <i>duration,</i> not the timestamp of the end of the window.
-     * @param tag string describing the alarm, used for logging and battery-use
-     *         attribution
+     * @param tag Optional. A string describing the alarm, used for logging and battery-use
+     *         attribution.
      * @param listener {@link OnAlarmListener} instance whose
      *         {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      *         called when the alarm time is reached.  A given OnAlarmListener instance can
@@ -577,9 +606,8 @@ public class AlarmManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.SCHEDULE_PRIORITIZED_ALARM)
     public void setPrioritized(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
-            @NonNull String tag, @NonNull Executor executor, @NonNull OnAlarmListener listener) {
+            @Nullable String tag, @NonNull Executor executor, @NonNull OnAlarmListener listener) {
         Objects.requireNonNull(executor);
-        Objects.requireNonNull(tag);
         Objects.requireNonNull(listener);
         setImpl(type, windowStartMillis, windowLengthMillis, 0, FLAG_PRIORITIZE, null, listener,
                 tag, executor, null, null);
@@ -753,6 +781,50 @@ public class AlarmManager {
         setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener, null,
                 targetHandler, workSource, null);
     }
+
+    /**
+     * Exact version of {@link #set(int, long, long, long, OnAlarmListener, Handler, WorkSource)}.
+     * This equivalent to calling the aforementioned API with {@code windowMillis} and
+     * {@code intervalMillis} set to 0.
+     * One subtle difference is that this API requires {@code workSource} to be non-null. If you
+     * don't want to attribute this alarm to another app for battery consumption, you should use
+     * {@link #setExact(int, long, String, OnAlarmListener, Handler)} instead.
+     *
+     * <p>
+     * Note that using this API requires you to hold
+     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}, unless you are on the system's power
+     * allowlist. This can be set, for example, by marking the app as {@code <allow-in-power-save>}
+     * within the system config.
+     *
+     * @param type            type of alarm
+     * @param triggerAtMillis The exact time in milliseconds, that the alarm should be delivered,
+     *                        expressed in the appropriate clock's units (depending on the alarm
+     *                        type).
+     * @param listener        {@link OnAlarmListener} instance whose
+     *                        {@link OnAlarmListener#onAlarm() onAlarm()} method will be called when
+     *                        the alarm time is reached.
+     * @param executor        The {@link Executor} on which to execute the listener's onAlarm()
+     *                        callback.
+     * @param tag             Optional. A string tag used to identify this alarm in logs and
+     *                        battery-attribution.
+     * @param workSource      A {@link WorkSource} object to attribute this alarm to the app that
+     *                        requested this work.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {
+            Manifest.permission.UPDATE_DEVICE_STATS,
+            Manifest.permission.SCHEDULE_EXACT_ALARM}, conditional = true)
+    public void setExact(@AlarmType int type, long triggerAtMillis, @Nullable String tag,
+            @NonNull Executor executor, @NonNull WorkSource workSource,
+            @NonNull OnAlarmListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(workSource);
+        Objects.requireNonNull(listener);
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, null, listener, tag, executor,
+                workSource, null);
+    }
+
 
     private void setImpl(@AlarmType int type, long triggerAtMillis, long windowMillis,
             long intervalMillis, int flags, PendingIntent operation, final OnAlarmListener listener,
@@ -1132,12 +1204,31 @@ public class AlarmManager {
     }
 
     /**
-     * Called to check if the caller has permission to use alarms set via {@link }
-     * @return
+     * Called to check if the caller has the permission
+     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}.
+     *
+     * Apps can start {@link android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM} to
+     * request this from the user.
+     *
+     * @return {@code true} if the caller has the permission, {@code false} otherwise.
+     * @see android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM
      */
     public boolean canScheduleExactAlarms() {
+        return hasScheduleExactAlarm(mContext.getOpPackageName(), mContext.getUserId());
+    }
+
+    /**
+     * Called to check if the given package in the given user has the permission
+     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}.
+     *
+     * <p><em>Note: This is only for use by system components.</em>
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean hasScheduleExactAlarm(@NonNull String packageName, int userId) {
         try {
-            return mService.canScheduleExactAlarms();
+            return mService.hasScheduleExactAlarm(packageName, userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

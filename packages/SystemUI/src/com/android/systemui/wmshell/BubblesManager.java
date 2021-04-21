@@ -18,6 +18,7 @@ package com.android.systemui.wmshell;
 
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
+import static android.provider.Settings.Secure.NOTIFICATION_BUBBLES;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
@@ -37,15 +38,18 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.ZenModeConfig;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -85,16 +89,13 @@ import com.android.wm.shell.bubbles.Bubbles;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
-import java.util.function.Supplier;
 
 /**
  * The SysUi side bubbles manager which communicate with other SysUi components.
@@ -248,9 +249,22 @@ public class BubblesManager implements Dumpable {
                     public void onUserChanged(int userId) {
                         mBubbles.onUserChanged(userId);
                     }
+
+                    @Override
+                    public void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {
+                        mBubbles.onCurrentProfilesChanged(currentProfiles);
+                    }
+
                 });
 
         mSysuiProxy = new Bubbles.SysuiProxy() {
+            @Override
+            public void isNotificationShadeExpand(Consumer<Boolean> callback) {
+                sysuiMainExecutor.execute(() -> {
+                    callback.accept(mNotificationShadeWindowController.getPanelExpanded());
+                });
+            }
+
             @Override
             public void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback) {
                 sysuiMainExecutor.execute(() -> {
@@ -630,7 +644,7 @@ public class BubblesManager implements Dumpable {
                     } else {
                         mNotificationGroupManager.onEntryRemoved(entry);
                     }
-                });
+                }, mSysuiMainExecutor);
     }
 
     /**
@@ -722,6 +736,17 @@ public class BubblesManager implements Dumpable {
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         mBubbles.dump(fd, pw, args);
+    }
+
+    /** Checks whether bubbles are enabled for this user, handles negative userIds. */
+    public static boolean areBubblesEnabled(@NonNull Context context, @NonNull UserHandle user) {
+        if (user.getIdentifier() < 0) {
+            return Settings.Secure.getInt(context.getContentResolver(),
+                    NOTIFICATION_BUBBLES, 0) == 1;
+        } else {
+            return Settings.Secure.getIntForUser(context.getContentResolver(),
+                    NOTIFICATION_BUBBLES, 0, user.getIdentifier()) == 1;
+        }
     }
 
     static BubbleEntry notifToBubbleEntry(NotificationEntry e) {

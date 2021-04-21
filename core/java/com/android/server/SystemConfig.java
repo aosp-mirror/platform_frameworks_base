@@ -486,7 +486,7 @@ public class SystemConfig {
         // Vendors are only allowed to customize these
         int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS
                 | ALLOW_ASSOCIATIONS;
-        if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.O_MR1) {
+        if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.O_MR1) {
             // For backward compatibility
             vendorPermissionFlag |= (ALLOW_PERMISSIONS | ALLOW_APP_CONFIGS);
         }
@@ -538,9 +538,9 @@ public class SystemConfig {
         int productPermissionFlag = ALLOW_FEATURES | ALLOW_LIBS | ALLOW_PERMISSIONS
                 | ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS | ALLOW_HIDDENAPI_WHITELISTING
                 | ALLOW_ASSOCIATIONS | ALLOW_OVERRIDE_APP_RESTRICTIONS | ALLOW_IMPLICIT_BROADCASTS;
-        if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.R) {
+        if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.R) {
             // TODO(b/157393157): This must check product interface enforcement instead of
-            // FIRST_SDK_VERSION for the devices without product interface enforcement.
+            // DEVICE_INITIAL_SDK_INT for the devices without product interface enforcement.
             productPermissionFlag = ALLOW_ALL;
         }
         readPermissions(Environment.buildPath(
@@ -1241,7 +1241,7 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_APP_ENUMERATION, 0);
         }
 
-        if (Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.Q) {
             addFeature(PackageManager.FEATURE_IPSEC_TUNNELS, 0);
         }
 

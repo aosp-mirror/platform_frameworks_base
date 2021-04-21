@@ -186,14 +186,15 @@ public abstract class WMShellBaseModule {
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps,
+            TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return Optional.of(BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
-                windowManagerShellWrapper, launcherApps, uiEventLogger, organizer,
-                mainExecutor, mainHandler));
+                windowManagerShellWrapper, launcherApps, taskStackListener,
+                uiEventLogger, organizer, mainExecutor, mainHandler));
     }
 
     //
@@ -334,10 +335,12 @@ public abstract class WMShellBaseModule {
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             @ShellMainThread ShellExecutor mainExecutor,
-            DisplayImeController displayImeController) {
+            DisplayImeController displayImeController, Transitions transitions,
+            TransactionPool transactionPool) {
         if (ActivityTaskManager.supportsSplitScreenMultiWindow(context)) {
             return Optional.of(new SplitScreenController(shellTaskOrganizer, syncQueue, context,
-                    rootTaskDisplayAreaOrganizer, mainExecutor, displayImeController));
+                    rootTaskDisplayAreaOrganizer, mainExecutor, displayImeController, transitions,
+                    transactionPool));
         } else {
             return Optional.empty();
         }
@@ -378,8 +381,8 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static StartingWindowController provideStartingWindowController(Context context,
-            @ShellSplashscreenThread ShellExecutor executor, TransactionPool pool) {
-        return new StartingWindowController(context, executor, pool);
+            @ShellSplashscreenThread ShellExecutor splashScreenExecutor, TransactionPool pool) {
+        return new StartingWindowController(context, splashScreenExecutor, pool);
     }
 
     //

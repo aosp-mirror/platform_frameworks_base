@@ -1953,7 +1953,7 @@ public class LocationManager {
 
     /**
      * Sets a new location for the given test provider. This location will be identiable as a mock
-     * location to all clients via {@link Location#isFromMockProvider()}.
+     * location to all clients via {@link Location#isMock()}.
      *
      * <p>The location object must have a minimum number of fields set to be considered valid, as
      * per documentation on {@link Location} class.

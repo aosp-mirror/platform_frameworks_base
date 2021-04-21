@@ -25,6 +25,7 @@ import static android.media.MediaRouter2Utils.getProviderId;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -142,16 +143,14 @@ class MediaRouter2ServiceImpl {
     ////////////////////////////////////////////////////////////////
 
     @NonNull
-    public void checkModifyAudioRoutingPermission() {
+    public void enforceMediaContentControlPermission() {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final long token = Binder.clearCallingIdentity();
 
         try {
-            if (mContext.checkPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING, pid, uid)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Must hold the MODIFY_AUDIO_ROUTING permission.");
-            }
+            mContext.enforcePermission(Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid,
+                    "Must hold MEDIA_CONTENT_CONTROL permission.");
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -889,6 +888,9 @@ class MediaRouter2ServiceImpl {
                     + packageName);
             return;
         }
+
+        mContext.enforcePermission(Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid,
+                "Must hold MEDIA_CONTENT_CONTROL permission.");
 
         UserRecord userRecord = getOrCreateUserRecordLocked(userId);
         managerRecord = new ManagerRecord(userRecord, manager, uid, pid, packageName);

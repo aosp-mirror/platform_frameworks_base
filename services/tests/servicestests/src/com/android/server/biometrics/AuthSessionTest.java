@@ -279,7 +279,7 @@ public class AuthSessionTest {
         IBiometricAuthenticator fingerprintAuthenticator = mock(IBiometricAuthenticator.class);
         when(fingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
         when(fingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        mSensors.add(new BiometricSensor(id,
+        mSensors.add(new BiometricSensor(mContext, id,
                 TYPE_FINGERPRINT /* modality */,
                 Authenticators.BIOMETRIC_STRONG /* strength */,
                 fingerprintAuthenticator) {
@@ -308,13 +308,15 @@ public class AuthSessionTest {
                 componentInfo,
                 type,
                 false /* resetLockoutRequiresHardwareAuthToken */));
+
+        when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(true);
     }
 
     private void setupFace(int id, boolean confirmationAlwaysRequired,
             IBiometricAuthenticator authenticator) throws RemoteException {
         when(authenticator.isHardwareDetected(any())).thenReturn(true);
         when(authenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        mSensors.add(new BiometricSensor(id,
+        mSensors.add(new BiometricSensor(mContext, id,
                 TYPE_FACE /* modality */,
                 Authenticators.BIOMETRIC_STRONG /* strength */,
                 authenticator) {
@@ -329,6 +331,6 @@ public class AuthSessionTest {
             }
         });
 
-        when(mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(true);
+        when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(true);
     }
 }

@@ -47,7 +47,7 @@ key 11    0
 key usage 0x000c01BB    TV_INPUT
 key usage 0x000c022A    BOOKMARK
 key usage 0x000c0096    SETTINGS
-key usage 0x000c0097    NOTIFICATION
+key usage 0x000c009F    NOTIFICATION
 key usage 0x000c008D    GUIDE
 key usage 0x000c0089    TV
 key usage 0x000c009C    CHANNEL_UP

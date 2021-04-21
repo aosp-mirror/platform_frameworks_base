@@ -73,26 +73,33 @@ Result DescramblerClient::setKeyToken(vector<uint8_t> keyToken) {
 
 Result DescramblerClient::addPid(DemuxPid pid, sp<FilterClient> optionalSourceFilter) {
     if (mTunerDescrambler != NULL) {
-        Status s = mTunerDescrambler->addPid(
-                getAidlDemuxPid(pid), optionalSourceFilter->getAidlFilter());
+        shared_ptr<ITunerFilter> aidlFilter = (optionalSourceFilter == NULL)
+                ? NULL : optionalSourceFilter->getAidlFilter();
+        Status s = mTunerDescrambler->addPid(getAidlDemuxPid(pid), aidlFilter);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mDescrambler != NULL) {
-        return mDescrambler->addPid(pid, optionalSourceFilter->getHalFilter());
+        sp<IFilter> halFilter = (optionalSourceFilter == NULL)
+                ? NULL : optionalSourceFilter->getHalFilter();
+        return mDescrambler->addPid(pid, halFilter);
     }
 
-    return Result::INVALID_STATE;}
+    return Result::INVALID_STATE;
+}
 
 Result DescramblerClient::removePid(DemuxPid pid, sp<FilterClient> optionalSourceFilter) {
     if (mTunerDescrambler != NULL) {
-        Status s = mTunerDescrambler->removePid(
-                getAidlDemuxPid(pid), optionalSourceFilter->getAidlFilter());
+        shared_ptr<ITunerFilter> aidlFilter = (optionalSourceFilter == NULL)
+                ? NULL : optionalSourceFilter->getAidlFilter();
+        Status s = mTunerDescrambler->removePid(getAidlDemuxPid(pid), aidlFilter);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mDescrambler != NULL) {
-        return mDescrambler->removePid(pid, optionalSourceFilter->getHalFilter());
+        sp<IFilter> halFilter = (optionalSourceFilter == NULL)
+                ? NULL : optionalSourceFilter->getHalFilter();
+        return mDescrambler->removePid(pid, halFilter);
     }
 
     return Result::INVALID_STATE;

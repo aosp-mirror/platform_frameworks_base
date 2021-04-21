@@ -2829,54 +2829,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MY_PACKAGE_UNSUSPENDED = "android.intent.action.MY_PACKAGE_UNSUSPENDED";
 
     /**
-     * Broadcast Action: Sent to indicate that the package becomes startable.
-     * The intent will have the following extra values:
-     * <ul>
-     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package. </li>
-     * <li> {@link #EXTRA_PACKAGE_NAME} containing the package name. </li>
-     * </li>
-     * </ul>
-     *
-     * <p class="note">This is a protected intent that can only be sent by the system.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PACKAGE_STARTABLE = "android.intent.action.PACKAGE_STARTABLE";
-
-    /**
-     * Broadcast Action: Sent to indicate that the package becomes unstartable.
-     * The intent will have the following extra values:
-     * <ul>
-     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package. </li>
-     * <li> {@link #EXTRA_PACKAGE_NAME} containing the package name. </li>
-     * <li> {@link #EXTRA_UNSTARTABLE_REASON} containing the integer indicating the reason for
-     * the state change,
-     * @see PackageManager.UnstartableReason
-     * </li>
-     * </ul>
-     *
-     * <p class="note">This is a protected intent that can only be sent by the system.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PACKAGE_UNSTARTABLE =
-            "android.intent.action.PACKAGE_UNSTARTABLE";
-
-    /**
-     * Broadcast Action: Sent to indicate that the package is fully loaded.
-     * <ul>
-     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package. </li>
-     * <li> {@link #EXTRA_PACKAGE_NAME} containing the package name. </li>
-     * </li>
-     * </ul>
-     *
-     * <p class="note">This is a protected intent that can only be sent by the system.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PACKAGE_FULLY_LOADED =
-            "android.intent.action.PACKAGE_FULLY_LOADED";
-
-    /**
      * Broadcast Action: A user ID has been removed from the system.  The user
      * ID number is stored in the extra data under {@link #EXTRA_UID}.
      *
@@ -4841,31 +4793,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION =
             "android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION";
 
-    /**
-     * Broadcast Action: Indicates that the device's reboot readiness has changed.
-     *
-     * <p>This broadcast will be sent with an extra that indicates whether or not the device is
-     * ready to reboot.
-     * <p>
-     * The receiver <em>must</em> have the {@link android.Manifest.permission#REBOOT} permission.
-     * <p class="note">
-     * This is a protected intent that can only be sent by the system.
-     *
-     * @see #EXTRA_IS_READY_TO_REBOOT
-     * @hide
-     */
-    @SystemApi
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_REBOOT_READY = "android.intent.action.REBOOT_READY";
-
-    /**
-     * A boolean extra used with {@link #ACTION_REBOOT_READY} which indicates if the
-     * device is ready to reboot.
-     * Will be {@code true} if ready to reboot, {@code false} otherwise.
-     * @hide
-     */
-    @SystemApi
-    public static final String EXTRA_IS_READY_TO_REBOOT = "android.intent.extra.IS_READY_TO_REBOOT";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -5392,8 +5319,8 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_ATTRIBUTION_TAGS = "android.intent.extra.ATTRIBUTION_TAGS";
 
     /**
-     * A long representing the start timestamp (in millis) of the permission usage when used with
-     * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * A long representing the start timestamp (epoch time in millis) of the permission usage
+     * when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
      *
      * @hide
      */
@@ -5401,8 +5328,8 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_START_TIME = "android.intent.extra.START_TIME";
 
     /**
-     * A long representing the end timestamp (in millis) of the permission usage when used with
-     * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * A long representing the end timestamp (epoch time in millis) of the permission usage when
+     * used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
      *
      * @hide
      */
@@ -6194,23 +6121,6 @@ public class Intent implements Parcelable, Cloneable {
      * </p>
      */
     public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
-
-    /**
-     * Intent extra: the reason that the package associated with this intent has become unstartable.
-     *
-     * <p>Type: String
-     */
-    public static final String EXTRA_UNSTARTABLE_REASON = "android.intent.extra.UNSTARTABLE_REASON";
-
-    /**
-     * A boolean extra indicating whether an activity is bubbled. Set on the shortcut or
-     * pending intent provided for the bubble. If the extra is not present or false, then it is not
-     * bubbled.
-     *
-     * @see android.app.Notification.Builder#setBubbleMetadata(Notification.BubbleMetadata)
-     * @see android.app.Notification.BubbleMetadata.Builder#Builder(String)
-     */
-    public static final String EXTRA_IS_BUBBLED = "android.intent.extra.IS_BUBBLED";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

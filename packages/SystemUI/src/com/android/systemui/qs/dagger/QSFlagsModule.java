@@ -30,17 +30,11 @@ import dagger.Provides;
 
 @Module
 public interface QSFlagsModule {
-    String QS_LABELS_FLAG = "qs_labels_flag";
+
     String RBC_AVAILABLE = "rbc_available";
     String PM_LITE_ENABLED = "pm_lite";
     String PM_LITE_SETTING = "sysui_pm_lite";
-
-    @Provides
-    @SysUISingleton
-    @Named(QS_LABELS_FLAG)
-    static boolean provideQSFlag(FeatureFlags featureFlags) {
-        return featureFlags.isQSLabelsEnabled();
-    }
+    int PM_LITE_SETTING_DEFAULT = 1;
 
     /** */
     @Provides
@@ -54,6 +48,7 @@ public interface QSFlagsModule {
     @SysUISingleton
     @Named(PM_LITE_ENABLED)
     static boolean isPMLiteEnabled(FeatureFlags featureFlags, GlobalSettings globalSettings) {
-        return featureFlags.isPMLiteEnabled() && globalSettings.getInt(PM_LITE_SETTING, 0) != 0;
+        return featureFlags.isPMLiteEnabled()
+                && globalSettings.getInt(PM_LITE_SETTING, PM_LITE_SETTING_DEFAULT) != 0;
     }
 }

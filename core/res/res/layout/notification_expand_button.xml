@@ -22,7 +22,6 @@
     android:layout_gravity="top|end"
     android:contentDescription="@string/expand_button_content_description_collapsed"
     android:padding="16dp"
-    android:visibility="gone"
     >
 
     <LinearLayout
@@ -40,6 +39,7 @@
             android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Info"
             android:gravity="center_vertical"
             android:paddingStart="8dp"
+            android:visibility="gone"
             />
 
         <ImageView

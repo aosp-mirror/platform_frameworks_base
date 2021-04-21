@@ -2208,6 +2208,17 @@ public abstract class Context {
     }
 
     /**
+     * Like {@link #sendBroadcastMultiplePermissions(Intent, String[])}, but also allows
+     * specification of a list of excluded permissions. This allows sending a broadcast to an
+     * app that has the permissions in `receiverPermissions` but not `excludedPermissions`.
+     * @hide
+     */
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Broadcast the given intent to all interested BroadcastReceivers, allowing
      * an array of required permissions to be enforced.  This call is asynchronous; it returns
      * immediately, and you will continue executing while the receivers are run.  No results are
@@ -4128,9 +4139,11 @@ public abstract class Context {
      * Use with {@link #getSystemService(String)} to retrieve a {@link android.os.Vibrator} for
      * interacting with the vibration hardware.
      *
+     * @deprecated Use {@link android.os.VibratorManager} to retrieve the default system vibrator.
      * @see #getSystemService(String)
      * @see android.os.Vibrator
      */
+    @Deprecated
     public static final String VIBRATOR_SERVICE = "vibrator";
 
     /**
@@ -4692,10 +4705,9 @@ public abstract class Context {
      * @hide
      * @see #getSystemService(String)
      */
-    // TODO(b/176208267): change it back to translation before S release.
     @SystemApi
     @SuppressLint("ServiceName")
-    public static final String TRANSLATION_MANAGER_SERVICE = "transformer";
+    public static final String TRANSLATION_MANAGER_SERVICE = "translation";
 
     /**
      * Official published name of the translation service which supports ui translation function.
@@ -4802,6 +4814,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
+    @SystemApi
     public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
 
     /**
@@ -4839,7 +4852,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.scheduling.RebootReadinessManagerService} for communicating
+     * {@link android.scheduling.RebootReadinessManager} for communicating
      * with the reboot readiness detector.
      *
      * @see #getSystemService(String)
@@ -5223,6 +5236,14 @@ public abstract class Context {
      * @hide
      */
     public static final String THERMAL_SERVICE = "thermalservice";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.os.PerformanceHintManager} for accessing the performance hinting service.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String PERFORMANCE_HINT_SERVICE = "performance_hint";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

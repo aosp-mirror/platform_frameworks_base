@@ -31,7 +31,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
-import static android.app.admin.PasswordMetrics.computeForPassword;
+import static android.app.admin.PasswordMetrics.computeForPasswordOrPin;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
 import static android.net.InetAddresses.parseNumericAddress;
 
@@ -1304,6 +1304,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testSetDeviceOwner_failures() throws Exception {
         // TODO Test more failure cases.  Basically test all chacks in enforceCanSetDeviceOwner().
+        // Package doesn't exist and caller is not system
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ "Calling identity is not authorized",
+                () -> dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM));
+
+        // Package exists, but caller is not system
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ "Calling identity is not authorized",
+                () -> dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM));
     }
 
     @Test
@@ -1541,6 +1551,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testSetProfileOwner_failures() throws Exception {
         // TODO Test more failure cases.  Basically test all chacks in enforceCanSetProfileOwner().
+        // Package doesn't exist and caller is not system
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ "Calling identity is not authorized",
+                () -> dpm.setProfileOwner(admin1, "owner-name", UserHandle.USER_SYSTEM));
+
+        // Package exists, but caller is not system
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ "Calling identity is not authorized",
+                () -> dpm.setProfileOwner(admin1, "owner-name", UserHandle.USER_SYSTEM));
     }
 
     @Test
@@ -3159,6 +3179,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    public void testSetUserProvisioningState_profileFinalized_canTransitionToUserUnmanaged()
+            throws Exception {
+        setupProfileOwner();
+
+        exerciseUserProvisioningTransitions(CALLER_USER_HANDLE,
+                DevicePolicyManager.STATE_USER_PROFILE_FINALIZED,
+                DevicePolicyManager.STATE_USER_UNMANAGED);
+    }
+
+    @Test
     public void testSetUserProvisioningState_illegalTransitionToAnotherInProgressState()
             throws Exception {
         setupProfileOwner();
@@ -4032,20 +4062,20 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    public void testGetSetEnterpriseNetworkPreference() throws Exception {
+    public void testGetSetPreferentialNetworkService() throws Exception {
         assertExpectException(SecurityException.class, null,
-                () -> dpm.setEnterpriseNetworkPreferenceEnabled(false));
+                () -> dpm.setPreferentialNetworkServiceEnabled(false));
 
         assertExpectException(SecurityException.class, null,
-                () -> dpm.isEnterpriseNetworkPreferenceEnabled());
+                () -> dpm.isPreferentialNetworkServiceEnabled());
 
         final int managedProfileUserId = 15;
         final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
         addManagedProfile(admin1, managedProfileAdminUid, admin1);
         mContext.binder.callingUid = managedProfileAdminUid;
 
-        dpm.setEnterpriseNetworkPreferenceEnabled(false);
-        assertThat(dpm.isEnterpriseNetworkPreferenceEnabled()).isFalse();
+        dpm.setPreferentialNetworkServiceEnabled(false);
+        assertThat(dpm.isPreferentialNetworkServiceEnabled()).isFalse();
         verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
                 eq(UserHandle.of(managedProfileUserId)),
                 eq(ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT),
@@ -4053,8 +4083,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 any()
         );
 
-        dpm.setEnterpriseNetworkPreferenceEnabled(true);
-        assertThat(dpm.isEnterpriseNetworkPreferenceEnabled()).isTrue();
+        dpm.setPreferentialNetworkServiceEnabled(true);
+        assertThat(dpm.isPreferentialNetworkServiceEnabled()).isTrue();
         verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
                 eq(UserHandle.of(managedProfileUserId)),
                 eq(ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE),
@@ -5090,6 +5120,46 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    public void resetPasswordWithToken_NumericPin() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        // adding a token
+        final byte[] token = new byte[32];
+        final long handle = 123456;
+        when(getServices().lockPatternUtils.addEscrowToken(eq(token), eq(UserHandle.USER_SYSTEM),
+                nullable(EscrowTokenStateChangeCallback.class)))
+                .thenReturn(handle);
+        assertThat(dpm.setResetPasswordToken(admin1, token)).isTrue();
+
+        // Test resetting with a numeric pin
+        final String pin = "123456";
+        when(getServices().lockPatternUtils.setLockCredentialWithToken(
+                LockscreenCredential.createPin(pin), handle, token,
+                UserHandle.USER_SYSTEM)).thenReturn(true);
+        assertThat(dpm.resetPasswordWithToken(admin1, pin, token, 0)).isTrue();
+    }
+
+    @Test
+    public void resetPasswordWithToken_EmptyPassword() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        // adding a token
+        final byte[] token = new byte[32];
+        final long handle = 123456;
+        when(getServices().lockPatternUtils.addEscrowToken(eq(token), eq(UserHandle.USER_SYSTEM),
+                nullable(EscrowTokenStateChangeCallback.class)))
+                .thenReturn(handle);
+        assertThat(dpm.setResetPasswordToken(admin1, token)).isTrue();
+
+        // Test resetting with an empty password
+        final String password = "";
+        when(getServices().lockPatternUtils.setLockCredentialWithToken(
+                LockscreenCredential.createNone(), handle, token,
+                UserHandle.USER_SYSTEM)).thenReturn(true);
+        assertThat(dpm.resetPasswordWithToken(admin1, password, token, 0)).isTrue();
+    }
+
+    @Test
     public void testIsActivePasswordSufficient() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         mContext.packageName = admin1.getPackageName();
@@ -5106,7 +5176,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         reset(mContext.spiedContext);
 
-        PasswordMetrics passwordMetricsNoSymbols = computeForPassword("abcdXYZ5".getBytes());
+        PasswordMetrics passwordMetricsNoSymbols = computeForPasswordOrPin(
+                "abcdXYZ5".getBytes(), /* isPin */ false);
 
         setActivePasswordState(passwordMetricsNoSymbols);
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
@@ -5133,7 +5204,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(mContext.spiedContext);
         assertThat(dpm.isActivePasswordSufficient()).isFalse();
 
-        PasswordMetrics passwordMetricsWithSymbols = computeForPassword("abcd.XY5".getBytes());
+        PasswordMetrics passwordMetricsWithSymbols = computeForPasswordOrPin(
+                "abcd.XY5".getBytes(), /* isPin */ false);
 
         setActivePasswordState(passwordMetricsWithSymbols);
         assertThat(dpm.isActivePasswordSufficient()).isTrue();
@@ -5187,7 +5259,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         parentDpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_MEDIUM);
 
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
-                .thenReturn(computeForPassword("184342".getBytes()));
+                .thenReturn(computeForPasswordOrPin("184342".getBytes(), /* isPin */ true));
 
         // Numeric password is compliant with current requirement (QUALITY_NUMERIC set explicitly
         // on the parent admin)
@@ -6310,7 +6382,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(CALLER_USER_HANDLE);
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(CALLER_USER_HANDLE))
-                .thenReturn(computeForPassword("asdf".getBytes()));
+                .thenReturn(computeForPasswordOrPin("asdf".getBytes(), /* isPin */ false));
 
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_MEDIUM);
     }
@@ -6330,10 +6402,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(CALLER_USER_HANDLE))
-                .thenReturn(computeForPassword("asdf".getBytes()));
+                .thenReturn(computeForPasswordOrPin("asdf".getBytes(), /* isPin */ false));
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(parentUser.id))
-                .thenReturn(computeForPassword("parentUser".getBytes()));
+                .thenReturn(computeForPasswordOrPin("parentUser".getBytes(), /* isPin */ false));
 
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_HIGH);
     }
@@ -7009,13 +7081,15 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_NONE);
 
         reset(mContext.spiedContext);
-        PasswordMetrics passwordMetricsNoSymbols = computeForPassword("1234".getBytes());
+        PasswordMetrics passwordMetricsNoSymbols = computeForPasswordOrPin(
+                "1234".getBytes(), /* isPin */ true);
         setActivePasswordState(passwordMetricsNoSymbols);
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_LOW);
         assertThat(dpm.isActivePasswordSufficient()).isFalse();
 
         reset(mContext.spiedContext);
-        passwordMetricsNoSymbols = computeForPassword("84125312943a".getBytes());
+        passwordMetricsNoSymbols = computeForPasswordOrPin(
+                "84125312943a".getBytes(), /* isPin */ false);
         setActivePasswordState(passwordMetricsNoSymbols);
         assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_HIGH);
         // using isActivePasswordSufficient

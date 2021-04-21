@@ -26,7 +26,7 @@ import android.annotation.NonNull;
 class PowerComponents {
     private static final int CUSTOM_POWER_COMPONENT_OFFSET = BatteryConsumer.POWER_COMPONENT_COUNT
             - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
-    public static final int CUSTOM_TIME_COMPONENT_OFFSET = BatteryConsumer.TIME_COMPONENT_COUNT
+    private static final int CUSTOM_TIME_COMPONENT_OFFSET = BatteryConsumer.TIME_COMPONENT_COUNT
             - BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID;
 
     private final double mTotalConsumedPowerMah;
@@ -34,9 +34,12 @@ class PowerComponents {
     private final long[] mTimeComponentsMs;
     private final int mCustomPowerComponentCount;
     private final byte[] mPowerModels;
+    // Not written to Parcel and must be explicitly restored during the parent object's unparceling
+    private String[] mCustomPowerComponentNames;
 
     PowerComponents(@NonNull Builder builder) {
-        mCustomPowerComponentCount = builder.mCustomPowerComponentCount;
+        mCustomPowerComponentNames = builder.mCustomPowerComponentNames;
+        mCustomPowerComponentCount = mCustomPowerComponentNames.length;
         mPowerComponentsMah = builder.mPowerComponentsMah;
         mTimeComponentsMs = builder.mTimeComponentsMs;
         mTotalConsumedPowerMah = builder.getTotalPower();
@@ -117,6 +120,26 @@ class PowerComponents {
         }
     }
 
+    void setCustomPowerComponentNames(String[] customPowerComponentNames) {
+        mCustomPowerComponentNames = customPowerComponentNames;
+    }
+
+    public String getCustomPowerComponentName(int componentId) {
+        if (componentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
+                && componentId < BatteryConsumer.LAST_CUSTOM_POWER_COMPONENT_ID) {
+            try {
+                return mCustomPowerComponentNames[componentId
+                        - BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID];
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new IllegalArgumentException(
+                        "Unsupported custom power component ID: " + componentId);
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "Unsupported custom power component ID: " + componentId);
+        }
+    }
+
     @BatteryConsumer.PowerModel
     int getPowerModel(@BatteryConsumer.PowerComponent int component) {
         if (mPowerModels == null) {
@@ -164,20 +187,37 @@ class PowerComponents {
         }
     }
 
+    public int getCustomPowerComponentCount() {
+        return mCustomPowerComponentCount;
+    }
+
+    /**
+     * Returns the largest usage duration among all time components.
+     */
+    public long getMaxComponentUsageDurationMillis() {
+        long max = 0;
+        for (int i = mTimeComponentsMs.length - 1; i >= 0; i--) {
+            if (mTimeComponentsMs[i] > max) {
+                max = mTimeComponentsMs[i];
+            }
+        }
+        return max;
+    }
+
     /**
      * Builder for PowerComponents.
      */
     static final class Builder {
         private final double[] mPowerComponentsMah;
-        private final int mCustomPowerComponentCount;
+        private final String[] mCustomPowerComponentNames;
         private final long[] mTimeComponentsMs;
         private final byte[] mPowerModels;
 
-        Builder(int customPowerComponentCount, int customTimeComponentCount,
+        Builder(@NonNull String[] customPowerComponentNames, int customTimeComponentCount,
                 boolean includePowerModels) {
-            mCustomPowerComponentCount = customPowerComponentCount;
+            mCustomPowerComponentNames = customPowerComponentNames;
             int powerComponentCount =
-                    BatteryConsumer.POWER_COMPONENT_COUNT + customPowerComponentCount;
+                    BatteryConsumer.POWER_COMPONENT_COUNT + mCustomPowerComponentNames.length;
             mPowerComponentsMah = new double[powerComponentCount];
             mTimeComponentsMs =
                     new long[BatteryConsumer.TIME_COMPONENT_COUNT + customTimeComponentCount];
@@ -285,10 +325,10 @@ class PowerComponents {
         }
 
         public void addPowerAndDuration(Builder other) {
-            for (int i = 0; i < mPowerComponentsMah.length; i++) {
+            for (int i = mPowerComponentsMah.length - 1; i >= 0; i--) {
                 mPowerComponentsMah[i] += other.mPowerComponentsMah[i];
             }
-            for (int i = 0; i < mTimeComponentsMs.length; i++) {
+            for (int i = mTimeComponentsMs.length - 1; i >= 0; i--) {
                 mTimeComponentsMs[i] += other.mTimeComponentsMs[i];
             }
         }

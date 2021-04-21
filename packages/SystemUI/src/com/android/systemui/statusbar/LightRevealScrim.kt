@@ -13,7 +13,7 @@ import android.graphics.RadialGradient
 import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
-import com.android.systemui.Interpolators
+import com.android.systemui.animation.Interpolators
 
 /**
  * Provides methods to modify the various properties of a [LightRevealScrim] to reveal between 0% to

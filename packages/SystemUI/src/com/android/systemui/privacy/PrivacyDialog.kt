@@ -119,7 +119,7 @@ class PrivacyDialog(
         } else {
             app
         }
-        val firstLine = context.getString(stringId, appName, element.type.getName(context))
+        val firstLine = context.getString(stringId, appName)
         val finalText = element.attribution?.let {
             TextUtils.concat(
                     firstLine,
@@ -128,9 +128,14 @@ class PrivacyDialog(
             )
         } ?: firstLine
         newView.requireViewById<TextView>(R.id.text).text = finalText
+        if (element.phoneCall) {
+            newView.requireViewById<View>(R.id.chevron).visibility = View.GONE
+        }
         newView.apply {
             setTag(element)
-            setOnClickListener(clickListener)
+            if (!element.phoneCall) {
+                setOnClickListener(clickListener)
+            }
         }
         return newView
     }

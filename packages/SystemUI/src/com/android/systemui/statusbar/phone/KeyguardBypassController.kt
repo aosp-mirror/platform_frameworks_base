@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.annotation.IntDef
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
 import com.android.systemui.Dumpable
+import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -37,8 +39,17 @@ open class KeyguardBypassController : Dumpable {
 
     private val mKeyguardStateController: KeyguardStateController
     private val statusBarStateController: StatusBarStateController
+    @BypassOverride private val bypassOverride: Int
     private var hasFaceFeature: Boolean
     private var pendingUnlock: PendingUnlock? = null
+
+    @IntDef(
+        FACE_UNLOCK_BYPASS_NO_OVERRIDE,
+        FACE_UNLOCK_BYPASS_ALWAYS,
+        FACE_UNLOCK_BYPASS_NEVER
+    )
+    @Retention(AnnotationRetention.SOURCE)
+    private annotation class BypassOverride
 
     /**
      * Pending unlock info:
@@ -60,7 +71,14 @@ open class KeyguardBypassController : Dumpable {
      * If face unlock dismisses the lock screen or keeps user on keyguard for the current user.
      */
     var bypassEnabled: Boolean = false
-        get() = field && mKeyguardStateController.isFaceAuthEnabled
+        get() {
+            val enabled = when (bypassOverride) {
+                FACE_UNLOCK_BYPASS_ALWAYS -> true
+                FACE_UNLOCK_BYPASS_NEVER -> false
+                else -> field
+            }
+            return enabled && mKeyguardStateController.isFaceAuthEnabled
+        }
         private set
 
     var bouncerShowing: Boolean = false
@@ -85,6 +103,8 @@ open class KeyguardBypassController : Dumpable {
     ) {
         this.mKeyguardStateController = keyguardStateController
         this.statusBarStateController = statusBarStateController
+
+        bypassOverride = context.resources.getInteger(R.integer.config_face_unlock_bypass_override)
 
         hasFaceFeature = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)
         if (!hasFaceFeature) {
@@ -198,5 +218,9 @@ open class KeyguardBypassController : Dumpable {
 
     companion object {
         const val BYPASS_PANEL_FADE_DURATION = 67
+
+        private const val FACE_UNLOCK_BYPASS_NO_OVERRIDE = 0
+        private const val FACE_UNLOCK_BYPASS_ALWAYS = 1
+        private const val FACE_UNLOCK_BYPASS_NEVER = 2
     }
 }

@@ -32,7 +32,8 @@ import android.util.Slog;
  * Abstract {@link HalClientMonitor} subclass that operations eligible/interested in acquisition
  * messages should extend.
  */
-public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implements Interruptable {
+public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implements Interruptable,
+        ErrorConsumer {
 
     private static final String TAG = "Biometrics/AcquisitionClient";
 

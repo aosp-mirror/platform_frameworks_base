@@ -64,6 +64,7 @@ import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -444,11 +445,14 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     private void verifyStopVibrate() {
-        verify(mVibrator, times(1)).cancel();
+        int alarmClassUsageFilter =
+                VibrationAttributes.USAGE_CLASS_ALARM | ~VibrationAttributes.USAGE_CLASS_MASK;
+        verify(mVibrator, times(1)).cancel(eq(alarmClassUsageFilter));
     }
 
-    private void verifyNeverStopVibrate() throws RemoteException {
+    private void verifyNeverStopVibrate() {
         verify(mVibrator, never()).cancel();
+        verify(mVibrator, never()).cancel(anyInt());
     }
 
     private void verifyNeverLights() {

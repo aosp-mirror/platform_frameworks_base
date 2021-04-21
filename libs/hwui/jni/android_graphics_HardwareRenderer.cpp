@@ -34,14 +34,18 @@
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
+#include <thread/CommonPool.h>
 #include <utils/Color.h>
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
 #include <utils/Timers.h>
 #include <utils/TraceUtils.h>
 
+#include <pthread.h>
+
 #include <algorithm>
 #include <atomic>
+#include <vector>
 
 #include "android_graphics_HardwareRendererObserver.h"
 
@@ -53,7 +57,15 @@ using namespace android::uirenderer::renderthread;
 struct {
     jclass clazz;
     jmethodID invokePictureCapturedCallback;
+    jmethodID createHintSession;
+    jmethodID updateTargetWorkDuration;
+    jmethodID reportActualWorkDuration;
+    jmethodID closeHintSession;
 } gHardwareRenderer;
+
+struct {
+    jmethodID onMergeTransaction;
+} gASurfaceTransactionCallback;
 
 struct {
     jmethodID onFrameDraw;
@@ -69,6 +81,14 @@ static JNIEnv* getenv(JavaVM* vm) {
         LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
     }
     return env;
+}
+
+static bool hasExceptionAndClear(JNIEnv* env) {
+    if (GraphicsJNI::hasException(env)) {
+        env->ExceptionClear();
+        return true;
+    }
+    return false;
 }
 
 typedef ANativeWindow* (*ANW_fromSurface)(JNIEnv* env, jobject surface);
@@ -120,6 +140,67 @@ private:
     }
 };
 
+class HintSessionWrapper : public LightRefBase<HintSessionWrapper> {
+public:
+    static sp<HintSessionWrapper> create(JNIEnv* env, RenderProxy* proxy) {
+        if (!Properties::useHintManager) return nullptr;
+
+        // Include UI thread (self), render thread, and thread pool.
+        std::vector<int> tids = CommonPool::getThreadIds();
+        tids.push_back(proxy->getRenderThreadTid());
+        tids.push_back(pthread_gettid_np(pthread_self()));
+
+        jintArray tidsArray = env->NewIntArray(tids.size());
+        if (hasExceptionAndClear(env)) return nullptr;
+        env->SetIntArrayRegion(tidsArray, 0, tids.size(), reinterpret_cast<jint*>(tids.data()));
+        if (hasExceptionAndClear(env)) return nullptr;
+        jobject session = env->CallStaticObjectMethod(
+                gHardwareRenderer.clazz, gHardwareRenderer.createHintSession, tidsArray);
+        if (hasExceptionAndClear(env) || !session) return nullptr;
+        return new HintSessionWrapper(env, session);
+    }
+
+    ~HintSessionWrapper() {
+        if (!mSession) return;
+        JNIEnv* env = getenv(mVm);
+        env->CallStaticVoidMethod(gHardwareRenderer.clazz, gHardwareRenderer.closeHintSession,
+                                  mSession);
+        hasExceptionAndClear(env);
+        env->DeleteGlobalRef(mSession);
+        mSession = nullptr;
+    }
+
+    void updateTargetWorkDuration(long targetDurationNanos) {
+        if (!mSession) return;
+        JNIEnv* env = getenv(mVm);
+        env->CallStaticVoidMethod(gHardwareRenderer.clazz,
+                                  gHardwareRenderer.updateTargetWorkDuration, mSession,
+                                  static_cast<jlong>(targetDurationNanos));
+        hasExceptionAndClear(env);
+    }
+
+    void reportActualWorkDuration(long actualDurationNanos) {
+        if (!mSession) return;
+        JNIEnv* env = getenv(mVm);
+        env->CallStaticVoidMethod(gHardwareRenderer.clazz,
+                                  gHardwareRenderer.reportActualWorkDuration, mSession,
+                                  static_cast<jlong>(actualDurationNanos));
+        hasExceptionAndClear(env);
+    }
+
+private:
+    HintSessionWrapper(JNIEnv* env, jobject jobject) {
+        env->GetJavaVM(&mVm);
+        if (jobject) {
+            mSession = env->NewGlobalRef(jobject);
+            LOG_ALWAYS_FATAL_IF(!mSession, "Failed to make global ref");
+        }
+    }
+
+    JavaVM* mVm = nullptr;
+    jobject mSession = nullptr;
+};
+
 static void android_view_ThreadedRenderer_rotateProcessStatsBuffer(JNIEnv* env, jobject clazz) {
     RenderProxy::rotateProcessStatsBuffer();
 }
@@ -147,6 +228,12 @@ static jlong android_view_ThreadedRenderer_createProxy(JNIEnv* env, jobject claz
     RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootRenderNodePtr);
     ContextFactoryImpl factory(rootRenderNode);
     RenderProxy* proxy = new RenderProxy(translucent, rootRenderNode, &factory);
+    sp<HintSessionWrapper> wrapper = HintSessionWrapper::create(env, proxy);
+    if (wrapper) {
+        proxy->setHintSessionCallbacks(
+                [wrapper](int64_t nanos) { wrapper->updateTargetWorkDuration(nanos); },
+                [wrapper](int64_t nanos) { wrapper->reportActualWorkDuration(nanos); });
+    }
     return (jlong) proxy;
 }
 
@@ -426,6 +513,27 @@ static void android_view_ThreadedRenderer_setPictureCapturedCallbackJNI(JNIEnv* 
     }
 }
 
+static void android_view_ThreadedRenderer_setASurfaceTransactionCallback(
+        JNIEnv* env, jobject clazz, jlong proxyPtr, jobject aSurfaceTransactionCallback) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    if (!aSurfaceTransactionCallback) {
+        proxy->setASurfaceTransactionCallback(nullptr);
+    } else {
+        JavaVM* vm = nullptr;
+        LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
+        auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(
+                vm, env->NewGlobalRef(aSurfaceTransactionCallback));
+        proxy->setASurfaceTransactionCallback(
+                [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) {
+                    JNIEnv* env = getenv(globalCallbackRef->vm());
+                    env->CallVoidMethod(globalCallbackRef->object(),
+                                        gASurfaceTransactionCallback.onMergeTransaction,
+                                        static_cast<jlong>(transObj), static_cast<jlong>(scObj),
+                                        static_cast<jlong>(frameNr));
+                });
+    }
+}
+
 static void android_view_ThreadedRenderer_setFrameCallback(JNIEnv* env,
         jobject clazz, jlong proxyPtr, jobject frameCallback) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -522,7 +630,8 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
         nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
         UiFrameInfoBuilder(proxy.frameInfo())
                 .setVsync(vsync, vsync, UiFrameInfoBuilder::INVALID_VSYNC_ID,
-                    std::numeric_limits<int64_t>::max())
+                    UiFrameInfoBuilder::UNKNOWN_DEADLINE,
+                    UiFrameInfoBuilder::UNKNOWN_FRAME_INTERVAL)
                 .addFlag(FrameInfoFlags::SurfaceCanvas);
         proxy.syncAndDrawFrame();
     }
@@ -678,8 +787,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetName", "(JLjava/lang/String;)V", (void*)android_view_ThreadedRenderer_setName},
         {"nSetSurface", "(JLandroid/view/Surface;Z)V",
          (void*)android_view_ThreadedRenderer_setSurface},
-        {"nSetSurfaceControl", "(JJ)V",
-         (void*)android_view_ThreadedRenderer_setSurfaceControl},
+        {"nSetSurfaceControl", "(JJ)V", (void*)android_view_ThreadedRenderer_setSurfaceControl},
         {"nPause", "(J)Z", (void*)android_view_ThreadedRenderer_pause},
         {"nSetStopped", "(JZ)V", (void*)android_view_ThreadedRenderer_setStopped},
         {"nSetLightAlpha", "(JFF)V", (void*)android_view_ThreadedRenderer_setLightAlpha},
@@ -720,6 +828,9 @@ static const JNINativeMethod gMethods[] = {
         {"nSetPictureCaptureCallback",
          "(JLandroid/graphics/HardwareRenderer$PictureCapturedCallback;)V",
          (void*)android_view_ThreadedRenderer_setPictureCapturedCallbackJNI},
+        {"nSetASurfaceTransactionCallback",
+         "(JLandroid/graphics/HardwareRenderer$ASurfaceTransactionCallback;)V",
+         (void*)android_view_ThreadedRenderer_setASurfaceTransactionCallback},
         {"nSetFrameCallback", "(JLandroid/graphics/HardwareRenderer$FrameDrawingCallback;)V",
          (void*)android_view_ThreadedRenderer_setFrameCallback},
         {"nSetFrameCompleteCallback",
@@ -769,6 +880,23 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
     gHardwareRenderer.invokePictureCapturedCallback = GetStaticMethodIDOrDie(env, hardwareRenderer,
             "invokePictureCapturedCallback",
             "(JLandroid/graphics/HardwareRenderer$PictureCapturedCallback;)V");
+    gHardwareRenderer.createHintSession =
+            GetStaticMethodIDOrDie(env, hardwareRenderer, "createHintSession",
+                                   "([I)Landroid/os/PerformanceHintManager$Session;");
+    gHardwareRenderer.updateTargetWorkDuration =
+            GetStaticMethodIDOrDie(env, hardwareRenderer, "updateTargetWorkDuration",
+                                   "(Landroid/os/PerformanceHintManager$Session;J)V");
+    gHardwareRenderer.reportActualWorkDuration =
+            GetStaticMethodIDOrDie(env, hardwareRenderer, "reportActualWorkDuration",
+                                   "(Landroid/os/PerformanceHintManager$Session;J)V");
+    gHardwareRenderer.closeHintSession =
+            GetStaticMethodIDOrDie(env, hardwareRenderer, "closeHintSession",
+                                   "(Landroid/os/PerformanceHintManager$Session;)V");
+
+    jclass aSurfaceTransactionCallbackClass =
+            FindClassOrDie(env, "android/graphics/HardwareRenderer$ASurfaceTransactionCallback");
+    gASurfaceTransactionCallback.onMergeTransaction =
+            GetMethodIDOrDie(env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)V");
 
     jclass frameCallbackClass = FindClassOrDie(env,
             "android/graphics/HardwareRenderer$FrameDrawingCallback");

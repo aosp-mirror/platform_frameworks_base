@@ -98,9 +98,9 @@ public class WifiNl80211ManagerTest {
     @Mock
     private WifiNl80211Manager.PnoScanRequestCallback mPnoScanRequestCallback;
     @Mock
-    private WifiNl80211Manager.CountryCodeChangeListener mCountryCodeChangeListener;
+    private WifiNl80211Manager.CountryCodeChangedListener mCountryCodeChangedListener;
     @Mock
-    private WifiNl80211Manager.CountryCodeChangeListener mCountryCodeChangeListener2;
+    private WifiNl80211Manager.CountryCodeChangedListener mCountryCodeChangedListener2;
     @Mock
     private Context mContext;
     private TestLooper mLooper;
@@ -768,25 +768,25 @@ public class WifiNl80211ManagerTest {
     }
 
     /**
-     * Ensures callback works after register CountryCodeChangeListener.
+     * Ensures callback works after register CountryCodeChangedListener.
      */
     @Test
-    public void testCountryCodeChangeListenerInvocation() throws Exception {
-        assertTrue(mWificondControl.registerCountryCodeChangeListener(
-                Runnable::run, mCountryCodeChangeListener));
-        assertTrue(mWificondControl.registerCountryCodeChangeListener(
-                Runnable::run, mCountryCodeChangeListener2));
+    public void testCountryCodeChangedListenerInvocation() throws Exception {
+        assertTrue(mWificondControl.registerCountryCodeChangedListener(
+                Runnable::run, mCountryCodeChangedListener));
+        assertTrue(mWificondControl.registerCountryCodeChangedListener(
+                Runnable::run, mCountryCodeChangedListener2));
 
         mWificondEventHandler.OnRegDomainChanged(TEST_COUNTRY_CODE);
-        verify(mCountryCodeChangeListener).onChanged(TEST_COUNTRY_CODE);
-        verify(mCountryCodeChangeListener2).onChanged(TEST_COUNTRY_CODE);
+        verify(mCountryCodeChangedListener).onCountryCodeChanged(TEST_COUNTRY_CODE);
+        verify(mCountryCodeChangedListener2).onCountryCodeChanged(TEST_COUNTRY_CODE);
 
-        reset(mCountryCodeChangeListener);
-        reset(mCountryCodeChangeListener2);
-        mWificondControl.unregisterCountryCodeChangeListener(mCountryCodeChangeListener2);
+        reset(mCountryCodeChangedListener);
+        reset(mCountryCodeChangedListener2);
+        mWificondControl.unregisterCountryCodeChangedListener(mCountryCodeChangedListener2);
         mWificondEventHandler.OnRegDomainChanged(TEST_COUNTRY_CODE);
-        verify(mCountryCodeChangeListener).onChanged(TEST_COUNTRY_CODE);
-        verify(mCountryCodeChangeListener2, never()).onChanged(TEST_COUNTRY_CODE);
+        verify(mCountryCodeChangedListener).onCountryCodeChanged(TEST_COUNTRY_CODE);
+        verify(mCountryCodeChangedListener2, never()).onCountryCodeChanged(TEST_COUNTRY_CODE);
     }
 
     /**

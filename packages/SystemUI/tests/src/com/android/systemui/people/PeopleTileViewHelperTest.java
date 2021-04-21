@@ -114,8 +114,6 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
 
         when(mMockContext.getString(R.string.birthday_status)).thenReturn(
                 mContext.getString(R.string.birthday_status));
-        when(mMockContext.getString(R.string.basic_status)).thenReturn(
-                mContext.getString(R.string.basic_status));
         when(mMockContext.getPackageManager()).thenReturn(mPackageManager);
         when(mMockContext.getString(R.string.over_timestamp)).thenReturn(
                 mContext.getString(R.string.over_timestamp));
@@ -126,7 +124,6 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         when(resources.getConfiguration()).thenReturn(configuration);
         when(resources.getDisplayMetrics()).thenReturn(displayMetrics);
         TextView textView = mock(TextView.class);
-        // when(new TextView(mMockContext)).thenReturn(textView);
         when(textView.getLineHeight()).thenReturn(16);
         when(mPackageManager.getApplicationIcon(anyString())).thenReturn(null);
         mPeopleTileViewHelper = new PeopleTileViewHelper(mContext,
@@ -134,16 +131,41 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCreateRemoteViewsWithLastInteractionTime() {
+    public void testCreateRemoteViewsWithLastInteractionTimeUnderOneDayHidden() {
         RemoteViews views = new PeopleTileViewHelper(mContext,
                 PERSON_TILE_WITHOUT_NOTIFICATION, 0, mOptions).getViews();
+        View result = views.apply(mContext, null);
+
+        // Not showing last interaction.
+        assertEquals(View.GONE, result.findViewById(R.id.last_interaction).getVisibility());
+
+        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
+                getSizeInDp(R.dimen.required_width_for_large));
+        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
+                getSizeInDp(R.dimen.required_height_for_large));
+        RemoteViews largeView = new PeopleTileViewHelper(mContext,
+                PERSON_TILE_WITHOUT_NOTIFICATION, 0, mOptions).getViews();
+        View largeResult = largeView.apply(mContext, null);
+
+        // Not showing last interaction.
+        assertEquals(View.GONE, largeResult.findViewById(R.id.last_interaction).getVisibility());
+    }
+
+    @Test
+    public void testCreateRemoteViewsWithLastInteractionTime() {
+        PeopleSpaceTile tileWithLastInteraction =
+                PERSON_TILE_WITHOUT_NOTIFICATION.toBuilder().setLastInteractionTimestamp(
+                        123445L).build();
+        RemoteViews views = new PeopleTileViewHelper(mContext,
+                tileWithLastInteraction, 0, mOptions).getViews();
         View result = views.apply(mContext, null);
 
         TextView name = (TextView) result.findViewById(R.id.name);
         assertEquals(name.getText(), NAME);
         // Has last interaction.
+        assertEquals(View.VISIBLE, result.findViewById(R.id.last_interaction).getVisibility());
         TextView lastInteraction = (TextView) result.findViewById(R.id.last_interaction);
-        assertEquals(lastInteraction.getText(), mContext.getString(R.string.basic_status));
+        assertEquals(lastInteraction.getText(), "Over 2 weeks ago");
         // No availability.
         assertEquals(View.GONE, result.findViewById(R.id.availability).getVisibility());
         // Shows person icon.
@@ -154,7 +176,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_medium) - 1);
         RemoteViews smallView = new PeopleTileViewHelper(mContext,
-                PERSON_TILE_WITHOUT_NOTIFICATION, 0, mOptions).getViews();
+                tileWithLastInteraction, 0, mOptions).getViews();
         View smallResult = smallView.apply(mContext, null);
 
         // Show name over predefined icon.
@@ -171,14 +193,15 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_height_for_large));
         RemoteViews largeView = new PeopleTileViewHelper(mContext,
-                PERSON_TILE_WITHOUT_NOTIFICATION, 0, mOptions).getViews();
+                tileWithLastInteraction, 0, mOptions).getViews();
         View largeResult = largeView.apply(mContext, null);
 
         name = (TextView) largeResult.findViewById(R.id.name);
         assertEquals(name.getText(), NAME);
         // Has last interaction.
+        assertEquals(View.VISIBLE, largeResult.findViewById(R.id.last_interaction).getVisibility());
         lastInteraction = (TextView) result.findViewById(R.id.last_interaction);
-        assertEquals(lastInteraction.getText(), mContext.getString(R.string.basic_status));
+        assertEquals(lastInteraction.getText(), "Over 2 weeks ago");
         // No availability.
         assertEquals(View.GONE, result.findViewById(R.id.availability).getVisibility());
         // Shows person icon.
@@ -202,8 +225,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         TextView name = (TextView) result.findViewById(R.id.name);
         assertEquals(name.getText(), NAME);
         // Has last interaction over status.
-        TextView lastInteraction = (TextView) result.findViewById(R.id.last_interaction);
-        assertEquals(lastInteraction.getText(), mContext.getString(R.string.basic_status));
+        assertEquals(View.GONE, result.findViewById(R.id.last_interaction).getVisibility());
         // Has availability.
         assertEquals(View.VISIBLE, result.findViewById(R.id.availability).getVisibility());
         // Has person icon.
@@ -237,14 +259,13 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         name = (TextView) largeResult.findViewById(R.id.name);
         assertEquals(name.getText(), NAME);
         // Has last interaction.
-        lastInteraction = (TextView) result.findViewById(R.id.last_interaction);
-        assertEquals(lastInteraction.getText(), mContext.getString(R.string.basic_status));
+        assertEquals(View.GONE, largeResult.findViewById(R.id.last_interaction).getVisibility());
         // Has availability.
-        assertEquals(View.VISIBLE, result.findViewById(R.id.availability).getVisibility());
+        assertEquals(View.VISIBLE, largeResult.findViewById(R.id.availability).getVisibility());
         // Shows person icon.
-        assertEquals(View.VISIBLE, result.findViewById(R.id.person_icon).getVisibility());
+        assertEquals(View.VISIBLE, largeResult.findViewById(R.id.person_icon).getVisibility());
         // No status.
-        assertThat((View) result.findViewById(R.id.text_content)).isNull();
+        assertThat((View) largeResult.findViewById(R.id.text_content)).isNull();
     }
 
     @Test

@@ -317,40 +317,45 @@ public class FontManagerShellCommand extends ShellCommand {
                     "Signature file argument is required.");
         }
 
-        // TODO: close fontFd and sigFd.
-        ParcelFileDescriptor fontFd = shell.openFileForSystem(fontPath, "r");
-        if (fontFd == null) {
-            throw new SystemFontException(
-                    FontManager.RESULT_ERROR_FAILED_TO_OPEN_FONT_FILE,
-                    "Failed to open font file");
-        }
-
-        ParcelFileDescriptor sigFd = shell.openFileForSystem(signaturePath, "r");
-        if (sigFd == null) {
-            throw new SystemFontException(
-                    FontManager.RESULT_ERROR_FAILED_TO_OPEN_SIGNATURE_FILE,
-                    "Failed to open signature file");
-        }
-
-        try (FileInputStream sigFis = new FileInputStream(sigFd.getFileDescriptor())) {
-            int len = sigFis.available();
-            if (len > MAX_SIGNATURE_FILE_SIZE_BYTES) {
+        try (ParcelFileDescriptor fontFd = shell.openFileForSystem(fontPath, "r");
+             ParcelFileDescriptor sigFd = shell.openFileForSystem(signaturePath, "r")) {
+            if (fontFd == null) {
                 throw new SystemFontException(
-                        FontManager.RESULT_ERROR_SIGNATURE_TOO_LARGE,
-                        "Signature file is too large");
+                        FontManager.RESULT_ERROR_FAILED_TO_OPEN_FONT_FILE,
+                        "Failed to open font file");
             }
-            byte[] signature = new byte[len];
-            if (sigFis.read(signature, 0, len) != len) {
+
+            if (sigFd == null) {
+                throw new SystemFontException(
+                        FontManager.RESULT_ERROR_FAILED_TO_OPEN_SIGNATURE_FILE,
+                        "Failed to open signature file");
+            }
+
+            byte[] signature;
+            try (FileInputStream sigFis = new FileInputStream(sigFd.getFileDescriptor())) {
+                int len = sigFis.available();
+                if (len > MAX_SIGNATURE_FILE_SIZE_BYTES) {
+                    throw new SystemFontException(
+                            FontManager.RESULT_ERROR_SIGNATURE_TOO_LARGE,
+                            "Signature file is too large");
+                }
+                signature = new byte[len];
+                if (sigFis.read(signature, 0, len) != len) {
+                    throw new SystemFontException(
+                            FontManager.RESULT_ERROR_INVALID_SIGNATURE_FILE,
+                            "Invalid read length");
+                }
+            } catch (IOException e) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_INVALID_SIGNATURE_FILE,
-                        "Invalid read length");
+                        "Failed to read signature file.", e);
             }
             mService.update(
                     -1, Collections.singletonList(new FontUpdateRequest(fontFd, signature)));
         } catch (IOException e) {
-            throw new SystemFontException(
-                    FontManager.RESULT_ERROR_INVALID_SIGNATURE_FILE,
-                    "Failed to read signature file.", e);
+            // We should reach here only when close() threw IOException.
+            // shell.openFileForSystem() and FontManagerService.update() don't throw IOException.
+            Slog.w(TAG, "Error while closing files", e);
         }
 
         shell.getOutPrintWriter().println("Success");  // TODO: Output more details.

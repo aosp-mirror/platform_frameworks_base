@@ -264,6 +264,10 @@ message SystemMessage {
     // Package: android
     NOTE_CARRIER_SUGGESTION_AVAILABLE = 63;
 
+    // Inform that NAS settings have changed on OS upgrade
+    // Package: android
+    NOTE_NAS_UPGRADE = 64;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

@@ -42,7 +42,9 @@ public class AnimatableClockView extends TextView {
     private static final CharSequence DOUBLE_LINE_FORMAT_24_HOUR = "HH\nmm";
     private static final CharSequence SINGLE_LINE_FORMAT_12_HOUR = "h:mm";
     private static final CharSequence SINGLE_LINE_FORMAT_24_HOUR = "H:mm";
-    private static final long ANIM_DURATION = 300;
+    private static final long DOZE_ANIM_DURATION = 300;
+    private static final long CHARGE_ANIM_DURATION_PHASE_0 = 500;
+    private static final long CHARGE_ANIM_DURATION_PHASE_1 = 1000;
 
     private final Calendar mTime = Calendar.getInstance();
 
@@ -53,6 +55,7 @@ public class AnimatableClockView extends TextView {
     private int mDozingColor;
     private int mLockScreenColor;
     private float mLineSpacingScale = 1f;
+    private int mChargeAnimationDelay = 0;
 
     private TextAnimator mTextAnimator = null;
     private Runnable mOnTextAnimatorInitialized;
@@ -79,6 +82,8 @@ public class AnimatableClockView extends TextView {
         try {
             mDozingWeight = ta.getInt(R.styleable.AnimatableClockView_dozeWeight, 100);
             mLockScreenWeight = ta.getInt(R.styleable.AnimatableClockView_lockScreenWeight, 300);
+            mChargeAnimationDelay = ta.getInt(
+                    R.styleable.AnimatableClockView_chargeAnimationDelay, 200);
         } finally {
             ta.recycle();
         }
@@ -150,11 +155,36 @@ public class AnimatableClockView extends TextView {
         mLockScreenColor = lockScreenColor;
     }
 
+    void animateCharge(boolean isDozing) {
+        if (mTextAnimator == null || mTextAnimator.isRunning()) {
+            // Skip charge animation if dozing animation is already playing.
+            return;
+        }
+        Runnable startAnimPhase2 = () -> setTextStyle(
+                isDozing ? mDozingWeight : mLockScreenWeight/* weight */,
+                -1,
+                null,
+                true /* animate */,
+                CHARGE_ANIM_DURATION_PHASE_1,
+                0 /* delay */,
+                null /* onAnimationEnd */);
+        setTextStyle(isDozing ? mLockScreenWeight : mDozingWeight/* weight */,
+                -1,
+                null,
+                true /* animate */,
+                CHARGE_ANIM_DURATION_PHASE_0,
+                mChargeAnimationDelay,
+                startAnimPhase2);
+    }
+
     void animateDoze(boolean isDozing, boolean animate) {
         setTextStyle(isDozing ? mDozingWeight : mLockScreenWeight /* weight */,
                 -1,
                 isDozing ? mDozingColor : mLockScreenColor,
-                animate);
+                animate,
+                DOZE_ANIM_DURATION,
+                0 /* delay */,
+                null /* onAnimationEnd */);
     }
 
     /**
@@ -170,15 +200,20 @@ public class AnimatableClockView extends TextView {
     private void setTextStyle(
             @IntRange(from = 0, to = 1000) int weight,
             @FloatRange(from = 0) float textSize,
-            int color,
-            boolean animate) {
+            Integer color,
+            boolean animate,
+            long duration,
+            long delay,
+            Runnable onAnimationEnd) {
         if (mTextAnimator != null) {
-            mTextAnimator.setTextStyle(weight, textSize, color, animate, ANIM_DURATION, null);
+            mTextAnimator.setTextStyle(weight, textSize, color, animate, duration, null,
+                    delay, onAnimationEnd);
         } else {
             // when the text animator is set, update its start values
             mOnTextAnimatorInitialized =
                     () -> mTextAnimator.setTextStyle(
-                            weight, textSize, color, false, ANIM_DURATION, null);
+                            weight, textSize, color, false, duration, null,
+                            delay, onAnimationEnd);
         }
     }
 

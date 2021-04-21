@@ -518,6 +518,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
                 mDefaultDisplay.mDisplayId, false);
         verify(transaction).reparent(navToken.getSurfaceControl(), activity.getSurfaceControl());
+        verify(transaction).setLayer(navToken.getSurfaceControl(), Integer.MAX_VALUE);
 
         final WindowContainer parent = navToken.getParent();
         final NavBarFadeAnimationController navBarFadeAnimationController =
@@ -526,6 +527,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mController.cleanupAnimation(REORDER_MOVE_TO_TOP);
         verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
                 mDefaultDisplay.mDisplayId, true);
+        verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
         verify(transaction).reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
         verify(navBarFadeAnimationController).fadeWindowToken(true);
     }
@@ -543,6 +545,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
                 mDefaultDisplay.mDisplayId, false);
         verify(transaction).reparent(navToken.getSurfaceControl(), activity.getSurfaceControl());
+        verify(transaction).setLayer(navToken.getSurfaceControl(), Integer.MAX_VALUE);
 
         final WindowContainer parent = navToken.getParent();
         final NavBarFadeAnimationController navBarFadeAnimationController =
@@ -551,6 +554,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
         verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
                 mDefaultDisplay.mDisplayId, true);
+        verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
         verify(transaction).reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
         verify(navBarFadeAnimationController, never()).fadeWindowToken(anyBoolean());
     }
@@ -564,6 +568,39 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         final ActivityRecord homeActivity = createHomeActivity();
         initializeRecentsAnimationController(mController, homeActivity);
         assertFalse(mController.isNavigationBarAttachedToApp());
+    }
+
+    @Test
+    public void testFadeRotationAfterAttachAndBeforeRestore_notRestoreNavImmediately() {
+        setupForShouldAttachNavBarDuringTransition();
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay);
+        final ActivityRecord homeActivity = createHomeActivity();
+        initializeRecentsAnimationController(mController, homeActivity);
+
+        final WindowToken navToken = mDefaultDisplay.getDisplayPolicy().getNavigationBar().mToken;
+        final SurfaceControl.Transaction transaction = navToken.getPendingTransaction();
+
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                mDefaultDisplay.mDisplayId, false);
+        verify(transaction).reparent(navToken.getSurfaceControl(), activity.getSurfaceControl());
+        verify(transaction).setLayer(navToken.getSurfaceControl(), Integer.MAX_VALUE);
+
+        final WindowContainer parent = navToken.getParent();
+        final NavBarFadeAnimationController navBarFadeAnimationController =
+                mDefaultDisplay.getDisplayPolicy().getNavBarFadeAnimationController();
+
+        FadeRotationAnimationController mockController =
+                mock(FadeRotationAnimationController.class);
+        doReturn(mockController).when(mDefaultDisplay).getFadeRotationAnimationController();
+
+        mController.cleanupAnimation(REORDER_MOVE_TO_TOP);
+        verify(mController.mStatusBar).setNavigationBarLumaSamplingEnabled(
+                mDefaultDisplay.mDisplayId, true);
+        verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
+        verify(mockController).setOnShowRunnable(any());
+        verify(transaction, times(0)).reparent(navToken.getSurfaceControl(),
+                parent.getSurfaceControl());
+        verify(navBarFadeAnimationController, times(0)).fadeWindowToken(true);
     }
 
     @Test

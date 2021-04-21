@@ -70,6 +70,10 @@ public final class ServiceConfigAccessor {
      */
     public static final @ProviderMode String PROVIDER_MODE_ENABLED = "enabled";
 
+    /**
+     * Device config keys that affect the {@link TimeZoneDetectorService} service and {@link
+     * com.android.server.timezonedetector.location.LocationTimeZoneManagerService}.
+     */
     private static final Set<String> SERVER_FLAGS_KEYS_TO_WATCH = Collections.unmodifiableSet(
             new ArraySet<>(new String[] {
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
@@ -133,8 +137,8 @@ public final class ServiceConfigAccessor {
     }
 
     /**
-     * Adds a listener that will be called server flags related to this class change. The callbacks
-     * are delivered on the main looper thread.
+     * Adds a listener that will be called when server flags related to this class change. The
+     * callbacks are delivered on the main looper thread.
      *
      * <p>Note: Only for use by long-lived objects. There is deliberately no associated remove
      * method.

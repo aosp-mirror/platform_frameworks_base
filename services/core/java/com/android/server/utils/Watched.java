@@ -29,4 +29,6 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Watched {
+    /** true if the annotated field is manually tracked */
+    boolean manual() default false;
 }

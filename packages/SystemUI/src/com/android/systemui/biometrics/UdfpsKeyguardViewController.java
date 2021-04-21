@@ -52,12 +52,13 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
 
     @Nullable private Runnable mCancelRunnable;
-    private boolean mShowBouncer;
+    private boolean mShowingUdfpsBouncer;
     private boolean mQsExpanded;
     private boolean mFaceDetectRunning;
     private boolean mHintShown;
     private boolean mTransitioningFromHome;
     private int mStatusBarState;
+    private boolean mKeyguardIsVisible;
 
     protected UdfpsKeyguardViewController(
             @NonNull UdfpsKeyguardView view,
@@ -90,8 +91,11 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         final float dozeAmount = mStatusBarStateController.getDozeAmount();
         mStatusBarStateController.addCallback(mStateListener);
         mStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
-        mStateListener.onStateChanged(mStatusBarStateController.getState());
-        mAlternateAuthInterceptor.setQsExpanded(mKeyguardViewManager.isQsExpanded());
+        mStatusBarState = mStatusBarStateController.getState();
+        mQsExpanded = mKeyguardViewManager.isQsExpanded();
+        mKeyguardIsVisible = mKeyguardUpdateMonitor.isKeyguardVisible();
+        updatePauseAuth();
+
         mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
     }
 
@@ -102,7 +106,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mFaceDetectRunning = false;
 
         mStatusBarStateController.removeCallback(mStateListener);
-        mAlternateAuthInterceptor.hideAlternateAuthBouncer();
         mKeyguardViewManager.setAlternateAuthInterceptor(null);
         mTransitioningFromHome = false;
 
@@ -115,28 +118,32 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dump(fd, pw, args);
-        pw.println("mShowBouncer=" + mShowBouncer);
+        pw.println("mShowingUdfpsBouncer=" + mShowingUdfpsBouncer);
         pw.println("mFaceDetectRunning=" + mFaceDetectRunning);
         pw.println("mTransitioningFromHomeToKeyguard=" + mTransitioningFromHome);
         pw.println("mStatusBarState" + StatusBarState.toShortString(mStatusBarState));
         pw.println("mQsExpanded=" + mQsExpanded);
+        pw.println("mKeyguardVisible=" + mKeyguardIsVisible);
     }
 
     /**
-     * Overrides non-bouncer show logic in shouldPauseAuth to still auth.
+     * Overrides non-bouncer show logic in shouldPauseAuth to still show icon.
+     * @return whether the udfpsBouncer has been newly shown or hidden
      */
-    private void showBouncer(boolean show) {
-        if (mShowBouncer == show) {
-            return;
+    private boolean showUdfpsBouncer(boolean show) {
+        if (mShowingUdfpsBouncer == show) {
+            return false;
         }
 
-        mShowBouncer = show;
+        mShowingUdfpsBouncer = show;
         updatePauseAuth();
-        if (mShowBouncer) {
+        if (mShowingUdfpsBouncer) {
             mView.animateUdfpsBouncer();
         } else {
+            // TODO: beverlyt, we not always want to cancelPostAuthActions
             mView.animateAwayUdfpsBouncer(() -> mKeyguardViewManager.cancelPostAuthActions());
         }
+        return true;
     }
 
     /**
@@ -145,7 +152,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      * is expanded, so this can be overridden with the showBouncer method.
      */
     public boolean shouldPauseAuth() {
-        if (mShowBouncer) {
+        if (mShowingUdfpsBouncer) {
             return false;
         }
 
@@ -161,7 +168,34 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             return true;
         }
 
+        if (!mKeyguardIsVisible) {
+            return true;
+        }
+
         return false;
+    }
+
+    @Override
+    public boolean listenForTouchesOutsideView() {
+        return true;
+    }
+
+    @Override
+    public void onTouchOutsideView() {
+        maybeShowInputBouncer();
+    }
+
+    /**
+     * If we were previously showing the udfps bouncer, hide it and instead show the regular
+     * (pin/pattern/password) bouncer.
+     *
+     * Does nothing if we weren't previously showing the udfps bouncer.
+     */
+    private void maybeShowInputBouncer() {
+        if (mShowingUdfpsBouncer) {
+            mKeyguardViewManager.resetAlternateAuth(false);
+            mKeyguardViewManager.showBouncer(true);
+        }
     }
 
     private void cancelDelayedHint() {
@@ -198,7 +232,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             new StatusBarStateController.StateListener() {
         @Override
         public void onDozeAmountChanged(float linear, float eased) {
-            if (linear != 0) showBouncer(false);
+            if (linear != 0) showUdfpsBouncer(false);
             mView.onDozeAmountChanged(linear, eased);
             if (linear == 1f) {
                 // transition has finished
@@ -245,33 +279,28 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                         cancelDelayedHint();
                     }
                 }
+
+                public void onKeyguardVisibilityChangedRaw(boolean showing) {
+                    mKeyguardIsVisible = showing;
+                    updatePauseAuth();
+                }
             };
 
     private final StatusBarKeyguardViewManager.AlternateAuthInterceptor mAlternateAuthInterceptor =
             new StatusBarKeyguardViewManager.AlternateAuthInterceptor() {
                 @Override
                 public boolean showAlternateAuthBouncer() {
-                    if (mShowBouncer) {
-                        return false;
-                    }
-
-                    showBouncer(true);
-                    return true;
+                    return showUdfpsBouncer(true);
                 }
 
                 @Override
                 public boolean hideAlternateAuthBouncer() {
-                    if (!mShowBouncer) {
-                        return false;
-                    }
-
-                    showBouncer(false);
-                    return true;
+                    return showUdfpsBouncer(false);
                 }
 
                 @Override
                 public boolean isShowingAlternateAuthBouncer() {
-                    return mShowBouncer;
+                    return mShowingUdfpsBouncer;
                 }
 
                 @Override

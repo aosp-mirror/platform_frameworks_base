@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -24,7 +23,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
-import com.android.server.wm.flicker.layerAlwaysVisible
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -60,27 +58,37 @@ class SeamlessAppRotationTest(
 
     @FlakyTest(bugId = 140855415)
     @Test
-    override fun navBarLayerRotatesAndScales() {
-        super.navBarLayerRotatesAndScales()
+    override fun statusBarWindowIsAlwaysVisible() {
+        super.statusBarWindowIsAlwaysVisible()
     }
 
     @FlakyTest(bugId = 140855415)
     @Test
-    override fun statusBarLayerRotatesScales() {
-        super.statusBarLayerRotatesScales()
+    override fun statusBarLayerIsAlwaysVisible() {
+        super.statusBarLayerIsAlwaysVisible()
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 185400889)
+    @Test
+    override fun noUncoveredRegions() {
+        super.noUncoveredRegions()
+    }
+
+    @FlakyTest(bugId = 185400889)
     @Test
     fun appLayerAlwaysVisible() {
-        testSpec.layerAlwaysVisible(testApp.`package`)
+        testSpec.assertLayers {
+            isVisible(testApp.`package`)
+        }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 185400889)
     @Test
     fun appLayerRotates() {
         testSpec.assertLayers {
             this.coversExactly(startingPos, testApp.`package`)
+                .then()
+                .coversExactly(endingPos, testApp.`package`)
         }
     }
 

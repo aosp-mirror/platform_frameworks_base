@@ -77,9 +77,9 @@ public class UserBatteryConsumer extends BatteryConsumer implements Parcelable {
         private final int mUserId;
         private List<UidBatteryConsumer.Builder> mUidBatteryConsumers;
 
-        Builder(int customPowerComponentCount, int customTimeComponentCount,
+        Builder(@NonNull String[] customPowerComponentNames, int customTimeComponentCount,
                 boolean includePowerModels, int userId) {
-            super(customPowerComponentCount, customTimeComponentCount, includePowerModels);
+            super(customPowerComponentNames, customTimeComponentCount, includePowerModels);
             mUserId = userId;
         }
 

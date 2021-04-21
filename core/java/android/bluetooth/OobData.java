@@ -830,7 +830,7 @@ public final class OobData implements Parcelable {
     @Nullable
     @SystemApi
     public byte[] getLeAppearance() {
-        return mLeTemporaryKey;
+        return mLeAppearance;
     }
 
     /**

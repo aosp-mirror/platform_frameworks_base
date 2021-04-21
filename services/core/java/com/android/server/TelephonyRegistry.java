@@ -376,7 +376,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private final LocalLog mListenLog = new LocalLog(200);
 
-    private List<PhysicalChannelConfig> mPhysicalChannelConfigs;
+    private List<List<PhysicalChannelConfig>> mPhysicalChannelConfigs;
 
     private boolean[] mIsDataEnabled;
 
@@ -716,7 +716,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mTelephonyDisplayInfos[i] = null;
             mIsDataEnabled[i] = false;
             mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
-            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
+            mPhysicalChannelConfigs.add(i, new ArrayList<>());
             mAllowedNetworkTypeReason[i] = -1;
             mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, new ArrayList<>());
@@ -816,7 +816,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mTelephonyDisplayInfos[i] = null;
             mIsDataEnabled[i] = false;
             mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
-            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
+            mPhysicalChannelConfigs.add(i, new ArrayList<>());
             mAllowedNetworkTypeReason[i] = -1;
             mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, new ArrayList<>());
@@ -1314,8 +1314,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onPhysicalChannelConfigChanged(
                                 shouldSanitizeLocationForPhysicalChannelConfig(r)
-                                        ? getLocationSanitizedConfigs(mPhysicalChannelConfigs)
-                                        : mPhysicalChannelConfigs);
+                                        ? getLocationSanitizedConfigs(
+                                                mPhysicalChannelConfigs.get(phoneId))
+                                        : mPhysicalChannelConfigs.get(phoneId));
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -2550,11 +2551,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      * Send a notification to registrants that the configs of physical channel has changed for
      * a particular subscription.
      *
+     * @param phoneId the phone id.
      * @param subId the subId
      * @param configs a list of {@link PhysicalChannelConfig}, the configs of physical channel.
      */
-    public void notifyPhysicalChannelConfigForSubscriber(
-            int subId, List<PhysicalChannelConfig> configs) {
+    public void notifyPhysicalChannelConfigForSubscriber(int phoneId, int subId,
+            List<PhysicalChannelConfig> configs) {
         if (!checkNotifyPermission("notifyPhysicalChannelConfig()")) {
             return;
         }
@@ -2566,9 +2568,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         synchronized (mRecords) {
-            int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
-                mPhysicalChannelConfigs.set(phoneId, configs.get(phoneId));
+                mPhysicalChannelConfigs.set(phoneId, configs);
                 for (Record r : mRecords) {
                     if (r.matchTelephonyCallbackEvent(
                             TelephonyCallback.EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED)
@@ -2775,6 +2776,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mDataEnabledReason=" + mDataEnabledReason);
                 pw.println("mAllowedNetworkTypeReason=" + mAllowedNetworkTypeReason[i]);
                 pw.println("mAllowedNetworkTypeValue=" + mAllowedNetworkTypeValue[i]);
+                pw.println("mPhysicalChannelConfigs=" + mPhysicalChannelConfigs.get(i));
                 pw.println("mLinkCapacityEstimateList=" + mLinkCapacityEstimateLists.get(i));
                 pw.decreaseIndent();
             }
@@ -2785,7 +2787,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mEmergencyNumberList=" + mEmergencyNumberList);
             pw.println("mDefaultPhoneId=" + mDefaultPhoneId);
             pw.println("mDefaultSubId=" + mDefaultSubId);
-            pw.println("mPhysicalChannelConfigs=" + mPhysicalChannelConfigs);
 
             pw.decreaseIndent();
 
@@ -2860,7 +2861,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, phoneId);
         intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, phoneId);
+        // Send the broadcast twice -- once for all apps with READ_PHONE_STATE, then again
+        // for all apps with READ_PRIV but not READ_PHONE_STATE. This ensures that any app holding
+        // either READ_PRIV or READ_PHONE get this broadcast exactly once.
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL, Manifest.permission.READ_PHONE_STATE);
+        mContext.createContextAsUser(UserHandle.ALL, 0)
+                .sendBroadcastMultiplePermissions(intent,
+                        new String[] { Manifest.permission.READ_PRIVILEGED_PHONE_STATE },
+                        new String[] { Manifest.permission.READ_PHONE_STATE });
     }
 
     private void broadcastSignalStrengthChanged(SignalStrength signalStrength, int phoneId,
@@ -2987,7 +2995,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 getApnTypesStringFromBitmask(pdcs.getApnSetting().getApnTypeBitmask()));
         intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, slotIndex);
         intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
+        // Send the broadcast twice -- once for all apps with READ_PHONE_STATE, then again
+        // for all apps with READ_PRIV but not READ_PHONE_STATE. This ensures that any app holding
+        // either READ_PRIV or READ_PHONE get this broadcast exactly once.
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL, Manifest.permission.READ_PHONE_STATE);
+        mContext.createContextAsUser(UserHandle.ALL, 0)
+                .sendBroadcastMultiplePermissions(intent,
+                        new String[] { Manifest.permission.READ_PRIVILEGED_PHONE_STATE },
+                        new String[] { Manifest.permission.READ_PHONE_STATE });
     }
 
     /**

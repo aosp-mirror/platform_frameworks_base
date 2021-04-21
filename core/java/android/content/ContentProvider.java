@@ -2655,7 +2655,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      */
     @NonNull
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static Uri createContentUriAsUser(
+    public static Uri createContentUriForUser(
             @NonNull Uri contentUri, @NonNull UserHandle userHandle) {
         if (!ContentResolver.SCHEME_CONTENT.equals(contentUri.getScheme())) {
             throw new IllegalArgumentException(String.format(

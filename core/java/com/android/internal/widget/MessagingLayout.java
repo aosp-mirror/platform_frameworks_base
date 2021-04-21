@@ -16,7 +16,7 @@
 
 package com.android.internal.widget;
 
-import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_AT_END;
+import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_EXTERNAL;
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_INLINE;
 
 import android.annotation.AttrRes;
@@ -27,10 +27,6 @@ import android.app.Notification;
 import android.app.Person;
 import android.app.RemoteInputHistoryItem;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -40,21 +36,22 @@ import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.RemotableViewMethod;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ContrastColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 /**
  * A custom-built layout for the Notification.MessagingStyle allows dynamic addition and removal
@@ -65,15 +62,6 @@ public class MessagingLayout extends FrameLayout
         implements ImageMessageConsumer, IMessagingLayout {
 
     private static final float COLOR_SHIFT_AMOUNT = 60;
-    /**
-     *  Pattren for filter some ingonable characters.
-     *  p{Z} for any kind of whitespace or invisible separator.
-     *  p{C} for any kind of punctuation character.
-     */
-    private static final Pattern IGNORABLE_CHAR_PATTERN
-            = Pattern.compile("[\\p{C}\\p{Z}]");
-    private static final Pattern SPECIAL_CHAR_PATTERN
-            = Pattern.compile ("[!@#$%&*()_+=|<>?{}\\[\\]~-]");
     private static final Consumer<MessagingMessage> REMOVE_MESSAGE
             = MessagingMessage::removeMessage;
     public static final Interpolator LINEAR_OUT_SLOW_IN = new PathInterpolator(0f, 0f, 0.2f, 1f);
@@ -81,26 +69,26 @@ public class MessagingLayout extends FrameLayout
     public static final Interpolator FAST_OUT_SLOW_IN = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     public static final OnLayoutChangeListener MESSAGING_PROPERTY_ANIMATOR
             = new MessagingPropertyAnimator();
+    private final PeopleHelper mPeopleHelper = new PeopleHelper();
     private List<MessagingMessage> mMessages = new ArrayList<>();
     private List<MessagingMessage> mHistoricMessages = new ArrayList<>();
     private MessagingLinearLayout mMessagingLinearLayout;
     private boolean mShowHistoricMessages;
     private ArrayList<MessagingGroup> mGroups = new ArrayList<>();
-    private TextView mTitleView;
+    private MessagingLinearLayout mImageMessageContainer;
+    private ImageView mRightIconView;
+    private Rect mMessagingClipRect;
     private int mLayoutColor;
     private int mSenderTextColor;
     private int mMessageTextColor;
-    private int mAvatarSize;
-    private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private Paint mTextPaint = new Paint();
-    private CharSequence mConversationTitle;
     private Icon mAvatarReplacement;
     private boolean mIsOneToOne;
     private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
     private Person mUser;
     private CharSequence mNameReplacement;
-    private boolean mDisplayImagesAtEnd;
+    private boolean mIsCollapsed;
     private ImageResolver mImageResolver;
+    private CharSequence mConversationTitle;
 
     public MessagingLayout(@NonNull Context context) {
         super(context);
@@ -123,17 +111,16 @@ public class MessagingLayout extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mPeopleHelper.init(getContext());
         mMessagingLinearLayout = findViewById(R.id.notification_messaging);
+        mImageMessageContainer = findViewById(R.id.conversation_image_message_container);
+        mRightIconView = findViewById(R.id.right_icon);
         // We still want to clip, but only on the top, since views can temporarily out of bounds
         // during transitions.
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         int size = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        Rect rect = new Rect(0, 0, size, size);
-        mMessagingLinearLayout.setClipBounds(rect);
-        mTitleView = findViewById(R.id.title);
-        mAvatarSize = getResources().getDimensionPixelSize(R.dimen.messaging_avatar_size);
-        mTextPaint.setTextAlign(Paint.Align.CENTER);
-        mTextPaint.setAntiAlias(true);
+        mMessagingClipRect = new Rect(0, 0, size, size);
+        setMessagingClippingDisabled(false);
     }
 
     @RemotableViewMethod
@@ -153,7 +140,7 @@ public class MessagingLayout extends FrameLayout
      */
     @RemotableViewMethod
     public void setIsCollapsed(boolean isCollapsed) {
-        mDisplayImagesAtEnd = isCollapsed;
+        mIsCollapsed = isCollapsed;
     }
 
     @RemotableViewMethod
@@ -168,7 +155,7 @@ public class MessagingLayout extends FrameLayout
      */
     @RemotableViewMethod
     public void setConversationTitle(CharSequence conversationTitle) {
-        // Unused
+        mConversationTitle = conversationTitle;
     }
 
     @RemotableViewMethod
@@ -180,11 +167,6 @@ public class MessagingLayout extends FrameLayout
         List<Notification.MessagingStyle.Message> newHistoricMessages
                 = Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
         setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON));
-        mConversationTitle = null;
-        TextView headerText = findViewById(R.id.header_text);
-        if (headerText != null) {
-            mConversationTitle = headerText.getText();
-        }
         RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
                 extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         addRemoteInputHistoryToMessages(newMessages, history);
@@ -238,6 +220,41 @@ public class MessagingLayout extends FrameLayout
 
         updateHistoricMessageVisibility();
         updateTitleAndNamesDisplay();
+        // after groups are finalized, hide the first sender name if it's showing as the title
+        mPeopleHelper.maybeHideFirstSenderName(mGroups, mIsOneToOne, mConversationTitle);
+        updateImageMessages();
+    }
+
+    private void updateImageMessages() {
+        View newMessage = null;
+        if (mImageMessageContainer == null) {
+            return;
+        }
+        if (mIsCollapsed && !mGroups.isEmpty()) {
+            // When collapsed, we're displaying the image message in a dedicated container
+            // on the right of the layout instead of inline. Let's add the isolated image there
+            MessagingGroup messagingGroup = mGroups.get(mGroups.size() - 1);
+            MessagingImageMessage isolatedMessage = messagingGroup.getIsolatedMessage();
+            if (isolatedMessage != null) {
+                newMessage = isolatedMessage.getView();
+            }
+        }
+        // Remove all messages that don't belong into the image layout
+        View previousMessage = mImageMessageContainer.getChildAt(0);
+        if (previousMessage != newMessage) {
+            mImageMessageContainer.removeView(previousMessage);
+            if (newMessage != null) {
+                mImageMessageContainer.addView(newMessage);
+            }
+        }
+        mImageMessageContainer.setVisibility(newMessage != null ? VISIBLE : GONE);
+
+        // When showing an image message, do not show the large icon.  Removing the drawable
+        // prevents it from being shown in the left_icon view (by the grouping util).
+        if (newMessage != null && mRightIconView != null && mRightIconView.getDrawable() != null) {
+            mRightIconView.setImageDrawable(null);
+            mRightIconView.setVisibility(GONE);
+        }
     }
 
     private void removeGroups(ArrayList<MessagingGroup> oldGroups) {
@@ -266,34 +283,7 @@ public class MessagingLayout extends FrameLayout
     }
 
     private void updateTitleAndNamesDisplay() {
-        ArrayMap<CharSequence, String> uniqueNames = new ArrayMap<>();
-        ArrayMap<Character, CharSequence> uniqueCharacters = new ArrayMap<>();
-        for (int i = 0; i < mGroups.size(); i++) {
-            MessagingGroup group = mGroups.get(i);
-            CharSequence senderName = group.getSenderName();
-            if (!group.needsGeneratedAvatar() || TextUtils.isEmpty(senderName)) {
-                continue;
-            }
-            if (!uniqueNames.containsKey(senderName)) {
-                // Only use visible characters to get uniqueNames
-                String pureSenderName = IGNORABLE_CHAR_PATTERN
-                        .matcher(senderName).replaceAll("" /* replacement */);
-                char c = pureSenderName.charAt(0);
-                if (uniqueCharacters.containsKey(c)) {
-                    // this character was already used, lets make it more unique. We first need to
-                    // resolve the existing character if it exists
-                    CharSequence existingName = uniqueCharacters.get(c);
-                    if (existingName != null) {
-                        uniqueNames.put(existingName, findNameSplit((String) existingName));
-                        uniqueCharacters.put(c, null);
-                    }
-                    uniqueNames.put(senderName, findNameSplit((String) senderName));
-                } else {
-                    uniqueNames.put(senderName, Character.toString(c));
-                    uniqueCharacters.put(c, pureSenderName);
-                }
-            }
-        }
+        Map<CharSequence, String> uniqueNames = mPeopleHelper.mapUniqueNamesToPrefix(mGroups);
 
         // Now that we have the correct symbols, let's look what we have cached
         ArrayMap<CharSequence, Icon> cachedAvatars = new ArrayMap<>();
@@ -337,26 +327,7 @@ public class MessagingLayout extends FrameLayout
     }
 
     public Icon createAvatarSymbol(CharSequence senderName, String symbol, int layoutColor) {
-        if (symbol.isEmpty() || TextUtils.isDigitsOnly(symbol) ||
-                SPECIAL_CHAR_PATTERN.matcher(symbol).find()) {
-            Icon avatarIcon = Icon.createWithResource(getContext(),
-                    com.android.internal.R.drawable.messaging_user);
-            avatarIcon.setTint(findColor(senderName, layoutColor));
-            return avatarIcon;
-        } else {
-            Bitmap bitmap = Bitmap.createBitmap(mAvatarSize, mAvatarSize, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            float radius = mAvatarSize / 2.0f;
-            int color = findColor(senderName, layoutColor);
-            mPaint.setColor(color);
-            canvas.drawCircle(radius, radius, radius, mPaint);
-            boolean needDarkText = ColorUtils.calculateLuminance(color) > 0.5f;
-            mTextPaint.setColor(needDarkText ? Color.BLACK : Color.WHITE);
-            mTextPaint.setTextSize(symbol.length() == 1 ? mAvatarSize * 0.5f : mAvatarSize * 0.3f);
-            int yPos = (int) (radius - ((mTextPaint.descent() + mTextPaint.ascent()) / 2));
-            canvas.drawText(symbol, radius, yPos, mTextPaint);
-            return Icon.createWithBitmap(bitmap);
-        }
+        return mPeopleHelper.createAvatarSymbol(senderName, symbol, layoutColor);
     }
 
     private int findColor(CharSequence senderName, int layoutColor) {
@@ -449,8 +420,8 @@ public class MessagingLayout extends FrameLayout
                 newGroup = MessagingGroup.createGroup(mMessagingLinearLayout);
                 mAddedGroups.add(newGroup);
             }
-            newGroup.setImageDisplayLocation(mDisplayImagesAtEnd
-                    ? IMAGE_DISPLAY_LOCATION_AT_END
+            newGroup.setImageDisplayLocation(mIsCollapsed
+                    ? IMAGE_DISPLAY_LOCATION_EXTERNAL
                     : IMAGE_DISPLAY_LOCATION_INLINE);
             newGroup.setIsInConversation(false);
             newGroup.setLayoutColor(mLayoutColor);
@@ -460,6 +431,8 @@ public class MessagingLayout extends FrameLayout
             if (sender != mUser && mNameReplacement != null) {
                 nameOverride = mNameReplacement;
             }
+            newGroup.setSingleLine(mIsCollapsed);
+            newGroup.setShowingAvatar(!mIsCollapsed);
             newGroup.setSender(sender, nameOverride);
             newGroup.setSending(groupIndex == (groups.size() - 1) && showSpinner);
             mGroups.add(newGroup);
@@ -600,12 +573,17 @@ public class MessagingLayout extends FrameLayout
         return mMessagingLinearLayout;
     }
 
+    @Nullable
+    public ViewGroup getImageMessageContainer() {
+        return mImageMessageContainer;
+    }
+
     public ArrayList<MessagingGroup> getMessagingGroups() {
         return mGroups;
     }
 
     @Override
     public void setMessagingClippingDisabled(boolean clippingDisabled) {
-        // Don't do anything, this is only used for the ConversationLayout
+        mMessagingLinearLayout.setClipBounds(clippingDisabled ? null : mMessagingClipRect);
     }
 }

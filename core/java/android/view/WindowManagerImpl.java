@@ -335,4 +335,13 @@ public final class WindowManagerImpl implements WindowManager {
         } catch (RemoteException e) {
         }
     }
+
+    @Override
+    public boolean isTaskSnapshotSupported() {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().isTaskSnapshotSupported();
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
 }

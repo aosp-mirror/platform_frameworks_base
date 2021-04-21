@@ -284,7 +284,8 @@
     <allow-in-power-save package="com.android.shell" />
 
     <!-- Whitelist system providers -->
-    <allow-in-power-save-except-idle package="com.android.providers.calendar" />
+    <!-- Calendar provider needs alarms while in idle -->
+    <allow-in-power-save package="com.android.providers.calendar" />
     <allow-in-power-save-except-idle package="com.android.providers.contacts" />
 
     <!-- The PAC proxy process must have network access, otherwise no app will

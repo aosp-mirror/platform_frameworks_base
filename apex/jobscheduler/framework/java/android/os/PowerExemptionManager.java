@@ -176,8 +176,6 @@ public class PowerExemptionManager {
     /** @hide */
     public static final int REASON_DEVICE_DEMO_MODE = 63;
     /** @hide */
-    public static final int REASON_EXEMPTED_PACKAGE = 64;
-    /** @hide */
     public static final int REASON_ALLOWLISTED_PACKAGE = 65;
     /** @hide */
     public static final int REASON_APPOP = 66;
@@ -187,6 +185,11 @@ public class PowerExemptionManager {
     public static final int REASON_OP_ACTIVATE_VPN = 68;
     /** @hide */
     public static final int REASON_OP_ACTIVATE_PLATFORM_VPN = 69;
+    /**
+     * Temporarily allowed to have FGS while-in-use permissions.
+     * @hide
+     */
+    public static final int REASON_TEMP_ALLOWED_WHILE_IN_USE = 70;
 
     /* BG-FGS-launch is allowed by temp-allow-list or system-allow-list.
        Reason code for temp and system allow list starts here.
@@ -285,9 +288,10 @@ public class PowerExemptionManager {
      */
     public static final int REASON_PACKAGE_REPLACED = 311;
     /**
-     * LocationProviderManager.
+     * LocationProvider.
      * @hide
      */
+    @SystemApi
     public static final int REASON_LOCATION_PROVIDER = 312;
     /**
      * MediaButtonReceiver.
@@ -344,12 +348,12 @@ public class PowerExemptionManager {
             REASON_INSTR_BACKGROUND_FGS_PERMISSION,
             REASON_SYSTEM_ALERT_WINDOW_PERMISSION,
             REASON_DEVICE_DEMO_MODE,
-            REASON_EXEMPTED_PACKAGE,
             REASON_ALLOWLISTED_PACKAGE,
             REASON_APPOP,
             REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD,
             REASON_OP_ACTIVATE_VPN,
             REASON_OP_ACTIVATE_PLATFORM_VPN,
+            REASON_TEMP_ALLOWED_WHILE_IN_USE,
             // temp and system allow list reasons.
             REASON_GEOFENCING,
             REASON_PUSH_MESSAGING,
@@ -601,8 +605,6 @@ public class PowerExemptionManager {
                 return "SYSTEM_ALERT_WINDOW_PERMISSION";
             case REASON_DEVICE_DEMO_MODE:
                 return "DEVICE_DEMO_MODE";
-            case REASON_EXEMPTED_PACKAGE:
-                return "EXEMPTED_PACKAGE";
             case REASON_ALLOWLISTED_PACKAGE:
                 return "ALLOWLISTED_PACKAGE";
             case REASON_APPOP:
@@ -613,6 +615,8 @@ public class PowerExemptionManager {
                 return "OP_ACTIVATE_VPN";
             case REASON_OP_ACTIVATE_PLATFORM_VPN:
                 return "OP_ACTIVATE_PLATFORM_VPN";
+            case REASON_TEMP_ALLOWED_WHILE_IN_USE:
+                return "TEMP_ALLOWED_WHILE_IN_USE";
             case REASON_GEOFENCING:
                 return "GEOFENCING";
             case REASON_PUSH_MESSAGING:

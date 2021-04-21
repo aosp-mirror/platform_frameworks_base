@@ -439,6 +439,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             taskDisplayArea = mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea();
         }
 
+        // Re-route to default display if the home activity doesn't support multi-display
+        if (taskDisplayArea != null && activityRecord.isActivityTypeHome()
+                && !mSupervisor.mRootWindowContainer.canStartHomeOnDisplayArea(activityRecord.info,
+                        taskDisplayArea, false /* allowInstrumenting */)) {
+            taskDisplayArea = mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea();
+        }
+
         return (taskDisplayArea != null)
                 ? taskDisplayArea
                 : getFallbackDisplayAreaForActivity(activityRecord, request);

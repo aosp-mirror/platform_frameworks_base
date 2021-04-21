@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.expectThrows;
 
+import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -89,8 +90,12 @@ public class AppSearchSessionUnitTest {
                 });
 
         // Verify the NullPointException has been thrown.
-        ExecutionException executionException = expectThrows(ExecutionException.class,
-                putDocumentsFuture::get);
-        assertThat(executionException.getCause()).isInstanceOf(NullPointerException.class);
+        ExecutionException executionException =
+                expectThrows(ExecutionException.class, putDocumentsFuture::get);
+        assertThat(executionException.getCause()).isInstanceOf(AppSearchException.class);
+        AppSearchException appSearchException = (AppSearchException) executionException.getCause();
+        assertThat(appSearchException.getResultCode())
+                .isEqualTo(AppSearchResult.RESULT_INTERNAL_ERROR);
+        assertThat(appSearchException.getMessage()).startsWith("NullPointerException");
     }
 }

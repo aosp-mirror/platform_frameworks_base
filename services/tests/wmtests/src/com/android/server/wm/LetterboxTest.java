@@ -53,19 +53,17 @@ public class LetterboxTest {
 
     private boolean mAreCornersRounded = false;
     private int mColor = Color.BLACK;
+    private boolean mHasWallpaperBackground = false;
+    private int mBlurRadius = 0;
+    private float mDarkScrimAlpha = 0.5f;
 
     @Before
     public void setUp() throws Exception {
         mSurfaces = new SurfaceControlMocker();
         mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
-                () -> mAreCornersRounded, () -> Color.valueOf(mColor));
+                () -> mAreCornersRounded, () -> Color.valueOf(mColor),
+                () -> mHasWallpaperBackground, () -> mBlurRadius, () -> mDarkScrimAlpha);
         mTransaction = spy(StubTransaction.class);
-    }
-
-    @Test
-    public void testOverlappingWith_usesGlobalCoordinates() {
-        mLetterbox.layout(new Rect(0, 0, 10, 50), new Rect(0, 2, 10, 45), new Point(1000, 2000));
-        assertTrue(mLetterbox.isOverlappingWith(new Rect(0, 0, 1, 1)));
     }
 
     private static final int TOP_BAR = 0x1;
@@ -190,6 +188,22 @@ public class LetterboxTest {
     }
 
     @Test
+    public void testNeedsApplySurfaceChanges_wallpaperBackgroundRequested() {
+        mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
+        mLetterbox.applySurfaceChanges(mTransaction);
+
+        verify(mTransaction).setAlpha(mSurfaces.top, 1.0f);
+        assertFalse(mLetterbox.needsApplySurfaceChanges());
+
+        mHasWallpaperBackground = true;
+
+        assertTrue(mLetterbox.needsApplySurfaceChanges());
+
+        mLetterbox.applySurfaceChanges(mTransaction);
+        verify(mTransaction).setAlpha(mSurfaces.top, mDarkScrimAlpha);
+    }
+
+    @Test
     public void testApplySurfaceChanges_cornersNotRounded_surfaceBehindNotCreated() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
         mLetterbox.applySurfaceChanges(mTransaction);
@@ -204,15 +218,6 @@ public class LetterboxTest {
         mLetterbox.applySurfaceChanges(mTransaction);
 
         assertNotNull(mSurfaces.behind);
-    }
-
-    @Test
-    public void testIsOverlappingWith_cornersRounded_doesNotCheckSurfaceBehind() {
-        mAreCornersRounded = true;
-        mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(0, 0));
-        mLetterbox.applySurfaceChanges(mTransaction);
-
-        assertFalse(mLetterbox.isOverlappingWith(new Rect(1, 2, 9, 9)));
     }
 
     @Test

@@ -161,6 +161,17 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     String mRecentCallingPackage;
     // the most recent uid that start/bind this service.
     int mRecentCallingUid;
+    // ApplicationInfo of the most recent callingPackage that start/bind this service.
+    @Nullable ApplicationInfo mRecentCallerApplicationInfo;
+
+    // The uptime when the service enters FGS state.
+    long mFgsEnterTime = 0;
+    // The uptime when the service exits FGS state.
+    long mFgsExitTime = 0;
+    // FGS notification was deferred.
+    boolean mFgsNotificationDeferred;
+    // FGS notification was shown before the FGS finishes, or it wasn't deferred in the first place.
+    boolean mFgsNotificationShown;
 
     // allow the service becomes foreground service? Service started from background may not be
     // allowed to become a foreground service.
@@ -168,7 +179,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // Debug info why mAllowStartForeground is allowed or denied.
     String mInfoAllowStartForeground;
     // Debug info if mAllowStartForeground is allowed because of a temp-allowlist.
-    FgsStartTempAllowList.TempFgsAllowListEntry mInfoTempFgsAllowListReason;
+    ActivityManagerService.FgsTempAllowListItem mInfoTempFgsAllowListReason;
     // Is the same mInfoAllowStartForeground string has been logged before? Used for dedup.
     boolean mLoggedInfoAllowStartForeground;
     // The number of times Service.startForeground() is called;

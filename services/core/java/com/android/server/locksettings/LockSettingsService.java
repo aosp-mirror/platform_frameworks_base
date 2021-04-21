@@ -1261,7 +1261,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         return getCredentialTypeInternal(userId) != CREDENTIAL_TYPE_NONE;
     }
 
-    private void setKeystorePassword(byte[] password, int userHandle) {
+    @VisibleForTesting /** Note: this method is overridden in unit tests */
+    void setKeystorePassword(byte[] password, int userHandle) {
         AndroidKeyStoreMaintenance.onUserPasswordChanged(userHandle, password);
     }
 
@@ -1773,7 +1774,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         } else {
             final byte[] hashFactor = getHashFactor(password, userHandle);
             final byte[] salt = getSalt(userHandle).getBytes();
-            String hash = password.passwordToHistoryHash(hashFactor, salt);
+            String hash = password.passwordToHistoryHash(salt, hashFactor);
             if (hash == null) {
                 Slog.e(TAG, "Compute new style password hash failed, fallback to legacy style");
                 hash = password.legacyPasswordToHash(salt);
@@ -3658,7 +3659,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         @Override
-        public boolean armRebootEscrow() {
+        public @ArmRebootEscrowErrorCode int armRebootEscrow() {
             return mRebootEscrowManager.armRebootEscrowIfNeeded();
         }
 

@@ -1388,6 +1388,12 @@ public class Notification implements Parcelable
     public static final String EXTRA_CALL_TYPE = "android.callType";
 
     /**
+     * {@link #extras} key: whether the  {@link android.app.Notification.CallStyle} notification
+     * is for a call that will activate video when answered. This extra is a boolean.
+     */
+    public static final String EXTRA_CALL_IS_VIDEO = "android.callIsVideo";
+
+    /**
      * {@link #extras} key: the person to be displayed as calling for the
      * {@link android.app.Notification.CallStyle} notification. This extra is a {@link Person}.
      */
@@ -5110,6 +5116,7 @@ public class Notification implements Parcelable
                 TemplateBindResult result) {
             p.headerless(resId == getBaseLayoutResource()
                     || resId == getHeadsUpBaseLayoutResource()
+                    || resId == getMessagingLayoutResource()
                     || resId == R.layout.notification_template_material_media);
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
@@ -6096,6 +6103,9 @@ public class Notification implements Parcelable
                     button.setImageViewIcon(R.id.action0, action.getIcon());
                     boolean priority = action.getExtras().getBoolean(CallStyle.KEY_ACTION_PRIORITY);
                     button.setBoolean(R.id.action0, "setWrapModePriority", priority);
+                    int minWidthDimen =
+                            priority ? R.dimen.call_notification_system_action_min_width : 0;
+                    button.setIntDimen(R.id.action0, "setMinimumWidth", minWidthDimen);
                 }
             } else {
                 button.setTextViewText(R.id.action0, processTextSpans(
@@ -6308,7 +6318,7 @@ public class Notification implements Parcelable
          * Gets the theme's background color
          */
         private @ColorInt int getDefaultBackgroundColor() {
-            return obtainThemeColor(R.attr.colorBackground,
+            return obtainThemeColor(R.attr.colorSurface,
                     mInNightMode ? Color.BLACK : Color.WHITE);
         }
 
@@ -6633,6 +6643,10 @@ public class Notification implements Parcelable
 
         private int getMessagingLayoutResource() {
             return R.layout.notification_template_material_messaging;
+        }
+
+        private int getBigMessagingLayoutResource() {
+            return R.layout.notification_template_material_big_messaging;
         }
 
         private int getConversationLayoutResource() {
@@ -8145,12 +8159,14 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeContentView(boolean increasedHeight) {
+            // All messaging templates contain the actions
             ArrayList<Action> originalActions = mBuilder.mActions;
-            mBuilder.mActions = new ArrayList<>();
-            RemoteViews remoteViews = makeMessagingView(true /* isCollapsed */,
-                    false /* hideLargeIcon */);
-            mBuilder.mActions = originalActions;
-            return remoteViews;
+            try {
+                mBuilder.mActions = new ArrayList<>();
+                return makeMessagingView(StandardTemplateParams.VIEW_TYPE_NORMAL);
+            } finally {
+                mBuilder.mActions = originalActions;
+            }
         }
 
         /**
@@ -8236,18 +8252,24 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeBigContentView() {
-            return makeMessagingView(false /* isCollapsed */, true /* hideLargeIcon */);
+            return makeMessagingView(StandardTemplateParams.VIEW_TYPE_BIG);
         }
 
         /**
          * Create a messaging layout.
          *
-         * @param isCollapsed Should this use the collapsed layout
-         * @param hideRightIcons Should the reply affordance be shown at the end of the notification
+         * @param viewType one of StandardTemplateParams.VIEW_TYPE_NORMAL, VIEW_TYPE_BIG,
+         *                VIEW_TYPE_HEADS_UP
          * @return the created remoteView.
          */
         @NonNull
-        private RemoteViews makeMessagingView(boolean isCollapsed, boolean hideRightIcons) {
+        private RemoteViews makeMessagingView(int viewType) {
+            boolean isCollapsed = viewType != StandardTemplateParams.VIEW_TYPE_BIG;
+            boolean hideRightIcons = viewType != StandardTemplateParams.VIEW_TYPE_NORMAL;
+            boolean isConversationLayout = mConversationType != CONVERSATION_TYPE_LEGACY;
+            boolean isImportantConversation = mConversationType == CONVERSATION_TYPE_IMPORTANT;
+            boolean isHeaderless = !isConversationLayout && isCollapsed;
+
             CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;
@@ -8265,23 +8287,26 @@ public class Notification implements Parcelable
             } else {
                 isOneToOne = !isGroupConversation();
             }
-            boolean isConversationLayout = mConversationType != CONVERSATION_TYPE_LEGACY;
-            boolean isImportantConversation = mConversationType == CONVERSATION_TYPE_IMPORTANT;
+            if (isHeaderless && isOneToOne && TextUtils.isEmpty(conversationTitle)) {
+                conversationTitle = getOtherPersonName();
+            }
+
             Icon largeIcon = mBuilder.mN.mLargeIcon;
             TemplateBindResult bindResult = new TemplateBindResult();
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(isCollapsed ? StandardTemplateParams.VIEW_TYPE_NORMAL
-                            : StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(viewType)
                     .highlightExpander(isConversationLayout)
                     .hideProgress(true)
-                    .title(conversationTitle)
+                    .title(isHeaderless ? conversationTitle : null)
                     .text(null)
                     .hideLargeIcon(hideRightIcons || isOneToOne)
-                    .headerTextSecondary(conversationTitle);
+                    .headerTextSecondary(isHeaderless ? null : conversationTitle);
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     isConversationLayout
                             ? mBuilder.getConversationLayoutResource()
-                            : mBuilder.getMessagingLayoutResource(),
+                            : isCollapsed
+                                    ? mBuilder.getMessagingLayoutResource()
+                                    : mBuilder.getBigMessagingLayoutResource(),
                     p,
                     bindResult);
             if (isConversationLayout) {
@@ -8290,14 +8315,6 @@ public class Notification implements Parcelable
             }
 
             addExtras(mBuilder.mN.extras);
-            if (!isConversationLayout) {
-                // also update the end margin if there is an image
-                // NOTE: This template doesn't support moving this icon to the left, so we don't
-                // need to fully apply the MarginSet
-                contentView.setViewLayoutMargin(R.id.notification_messaging, RemoteViews.MARGIN_END,
-                        bindResult.mHeadingExtraMarginSet.getDpValue(),
-                        TypedValue.COMPLEX_UNIT_DIP);
-            }
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.getSmallIconColor(p));
             contentView.setInt(R.id.status_bar_latest_event_content, "setSenderTextColor",
@@ -8323,11 +8340,31 @@ public class Notification implements Parcelable
                 contentView.setBoolean(R.id.status_bar_latest_event_content,
                         "setIsImportantConversation", isImportantConversation);
             }
+            if (isHeaderless) {
+                // Collapsed legacy messaging style has a 1-line limit.
+                contentView.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
+            }
             contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",
                     largeIcon);
             contentView.setBundle(R.id.status_bar_latest_event_content, "setData",
                     mBuilder.mN.extras);
             return contentView;
+        }
+
+        private CharSequence getKey(Person person) {
+            return person == null ? null
+                    : person.getKey() == null ? person.getName() : person.getKey();
+        }
+
+        private CharSequence getOtherPersonName() {
+            CharSequence userKey = getKey(mUser);
+            for (int i = mMessages.size() - 1; i >= 0; i--) {
+                Person sender = mMessages.get(i).getSenderPerson();
+                if (sender != null && !TextUtils.equals(userKey, getKey(sender))) {
+                    return sender.getName();
+                }
+            }
+            return null;
         }
 
         private boolean hasOnlyWhiteSpaceSenders() {
@@ -8364,12 +8401,7 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            RemoteViews remoteViews = makeMessagingView(true /* isCollapsed */,
-                    true /* hideLargeIcon */);
-            if (mConversationType == CONVERSATION_TYPE_LEGACY) {
-                remoteViews.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
-            }
-            return remoteViews;
+            return makeMessagingView(StandardTemplateParams.VIEW_TYPE_HEADS_UP);
         }
 
         public static final class Message {
@@ -9146,6 +9178,7 @@ public class Notification implements Parcelable
         private PendingIntent mAnswerIntent;
         private PendingIntent mDeclineIntent;
         private PendingIntent mHangUpIntent;
+        private boolean mIsVideo;
         private Integer mAnswerButtonColor;
         private Integer mDeclineButtonColor;
         private Icon mVerificationIcon;
@@ -9235,6 +9268,16 @@ public class Notification implements Parcelable
             mAnswerIntent = answerIntent;
             mDeclineIntent = declineIntent;
             mHangUpIntent = hangUpIntent;
+        }
+
+        /**
+         * Sets whether the call is a video call, which may affect the icons or text used on the
+         * required action buttons.
+         */
+        @NonNull
+        public CallStyle setIsVideo(boolean isVideo) {
+            mIsVideo = isVideo;
+            return this;
         }
 
         /**
@@ -9365,8 +9408,10 @@ public class Notification implements Parcelable
 
         @Nullable
         private Action makeAnswerAction() {
-            return mAnswerIntent == null ? null : makeAction(R.drawable.ic_call_answer,
-                    R.string.call_notification_answer_action,
+            return mAnswerIntent == null ? null : makeAction(
+                    mIsVideo ? R.drawable.ic_call_answer_video : R.drawable.ic_call_answer,
+                    mIsVideo ? R.string.call_notification_answer_video_action
+                            : R.string.call_notification_answer_action,
                     mAnswerButtonColor, R.color.call_notification_answer_color,
                     mAnswerIntent);
         }
@@ -9545,6 +9590,7 @@ public class Notification implements Parcelable
         public void addExtras(Bundle extras) {
             super.addExtras(extras);
             extras.putInt(EXTRA_CALL_TYPE, mCallType);
+            extras.putBoolean(EXTRA_CALL_IS_VIDEO, mIsVideo);
             extras.putParcelable(EXTRA_CALL_PERSON, mPerson);
             if (mVerificationIcon != null) {
                 extras.putParcelable(EXTRA_VERIFICATION_ICON, mVerificationIcon);
@@ -9587,6 +9633,7 @@ public class Notification implements Parcelable
         protected void restoreFromExtras(Bundle extras) {
             super.restoreFromExtras(extras);
             mCallType = extras.getInt(EXTRA_CALL_TYPE);
+            mIsVideo = extras.getBoolean(EXTRA_CALL_IS_VIDEO);
             mPerson = extras.getParcelable(EXTRA_CALL_PERSON);
             mVerificationIcon = extras.getParcelable(EXTRA_VERIFICATION_ICON);
             mVerificationText = extras.getCharSequence(EXTRA_VERIFICATION_TEXT);
@@ -9908,7 +9955,7 @@ public class Notification implements Parcelable
          *
          * @hide
          */
-        public static final int FLAG_SHOULD_SUPPRESS_BUBBLE = 0x00000004;
+        public static final int FLAG_SUPPRESSABLE_BUBBLE = 0x00000004;
 
         /**
          * Indicates whether the bubble is visually suppressed from the bubble stack.
@@ -10070,19 +10117,63 @@ public class Notification implements Parcelable
          * @return whether this bubble should be suppressed when the same content is visible
          * outside of the bubble.
          *
-         * @see BubbleMetadata.Builder#setSuppressBubble(boolean)
+         * @see BubbleMetadata.Builder#setSuppressableBubble(boolean)
          */
         public boolean isBubbleSuppressable() {
-            return (mFlags & FLAG_SHOULD_SUPPRESS_BUBBLE) != 0;
+            return (mFlags & FLAG_SUPPRESSABLE_BUBBLE) != 0;
         }
 
         /**
          * Indicates whether the bubble is currently visually suppressed from the bubble stack.
          *
-         * @see BubbleMetadata.Builder#setSuppressBubble(boolean)
+         * @see BubbleMetadata.Builder#setSuppressableBubble(boolean)
          */
         public boolean isBubbleSuppressed() {
             return (mFlags & FLAG_SUPPRESS_BUBBLE) != 0;
+        }
+
+        /**
+         * Sets whether the notification associated with the bubble is being visually
+         * suppressed from the notification shade. When <code>true</code> the notification is
+         * hidden, when <code>false</code> the notification shows as normal.
+         *
+         * @hide
+         */
+        public void setSuppressNotification(boolean suppressed) {
+            if (suppressed) {
+                mFlags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+            } else {
+                mFlags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+            }
+        }
+
+        /**
+         * Sets whether the bubble should be visually suppressed from the bubble stack if the
+         * user is viewing the same content outside of the bubble. For example, the user has a
+         * bubble with Alice and then opens up the main app and navigates to Alice's page.
+         *
+         * @hide
+         */
+        public void setSuppressBubble(boolean suppressed) {
+            if (suppressed) {
+                mFlags |= Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
+            } else {
+                mFlags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
+            }
+        }
+
+        /**
+         * @hide
+         */
+        public void setFlags(int flags) {
+            mFlags = flags;
+        }
+
+        /**
+         * @hide
+         */
+        public int getFlags() {
+            return mFlags;
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<BubbleMetadata> CREATOR =
@@ -10128,20 +10219,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @hide
-         */
-        public void setFlags(int flags) {
-            mFlags = flags;
-        }
-
-        /**
-         * @hide
-         */
-        public int getFlags() {
-            return mFlags;
-        }
-
-        /**
          * Builder to construct a {@link BubbleMetadata} object.
          */
         public static final class Builder {
@@ -10175,13 +10252,8 @@ public class Notification implements Parcelable
              * <p>The shortcut activity will be used when the bubble is expanded. This will display
              * the shortcut activity in a floating window over the existing foreground activity.</p>
              *
-             * <p>When the shortcut is displayed in a bubble, there will be an intent
-             * extra set on the activity, {@link Intent#EXTRA_IS_BUBBLED}
-             * with {@code true}. You may check this in the onCreate of your activity via:
-             *
-             * <pre class="prettyprint">
-             * boolean isBubbled = getIntent().getBooleanExtra(Intent.EXTRA_IS_BUBBLED, false);
-             * </pre>
+             * <p>When the activity is launched from a bubble,
+             * {@link Activity#isLaunchedFromBubble()} will return with {@code true}.
              * </p>
              *
              * <p>If the shortcut has not been published when the bubble notification is sent,
@@ -10212,13 +10284,8 @@ public class Notification implements Parcelable
              * app content in a floating window over the existing foreground activity. The intent
              * should point to a resizable activity. </p>
              *
-             * <p>When the activity is displayed in a bubble, there will be an intent
-             * extra set on the activity, {@link Intent#EXTRA_IS_BUBBLED}
-             * with {@code true}. You may check this in the onCreate of your activity via:
-             *
-             * <pre class="prettyprint">
-             * boolean isBubbled = getIntent().getBooleanExtra(Intent.EXTRA_IS_BUBBLED, false);
-             * </pre>
+             * <p>When the activity is launched from a bubble,
+             * {@link Activity#isLaunchedFromBubble()} will return with {@code true}.
              * </p>
              *
              * @throws NullPointerException if intent is null.
@@ -10438,8 +10505,8 @@ public class Notification implements Parcelable
              * {@link Activity#setLocusContext(LocusId, Bundle)}
              */
             @NonNull
-            public BubbleMetadata.Builder setSuppressBubble(boolean suppressBubble) {
-                setFlag(FLAG_SHOULD_SUPPRESS_BUBBLE, suppressBubble);
+            public BubbleMetadata.Builder setSuppressableBubble(boolean suppressBubble) {
+                setFlag(FLAG_SUPPRESSABLE_BUBBLE, suppressBubble);
                 return this;
             }
 

@@ -43,4 +43,59 @@ package {
 // done correctly.
 platform_bootclasspath {
     name: "platform-bootclasspath",
+
+    // The bootclasspath_fragments that contribute to the platform
+    // bootclasspath.
+    fragments: [
+        {
+            apex: "com.android.art",
+            module: "art-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.i18n",
+            module: "i18n-bootclasspath-fragment",
+        },
+    ],
+
+    // Additional information needed by hidden api processing.
+    hidden_api: {
+        unsupported: [
+            "hiddenapi/hiddenapi-unsupported.txt",
+        ],
+        removed: [
+            ":combined-removed-dex",
+        ],
+        max_target_r_low_priority: [
+            "hiddenapi/hiddenapi-max-target-r-loprio.txt",
+        ],
+        max_target_q: [
+            "hiddenapi/hiddenapi-max-target-q.txt",
+        ],
+        max_target_p: [
+            "hiddenapi/hiddenapi-max-target-p.txt",
+        ],
+        max_target_o_low_priority: [
+            "hiddenapi/hiddenapi-max-target-o.txt",
+        ],
+        unsupported_packages: [
+            "hiddenapi/hiddenapi-unsupported-packages.txt",
+        ],
+    },
+
+    dists: [
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-flags.csv",
+        },
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-index.csv",
+        },
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-metadata.csv",
+            // Legacy name
+            dest: "hiddenapi-unsupported.csv",
+        },
+    ],
 }

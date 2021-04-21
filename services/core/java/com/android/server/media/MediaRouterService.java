@@ -438,8 +438,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void checkModifyAudioRoutingPermission() {
-        mService2.checkModifyAudioRoutingPermission();
+    public void enforceMediaContentControlPermission() {
+        mService2.enforceMediaContentControlPermission();
     }
 
     // Binder call

@@ -146,21 +146,6 @@ final class TranslationManagerServiceImpl extends
     @GuardedBy("mLock")
     public void updateUiTranslationStateLocked(@UiTranslationState int state,
             TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
-            int taskId) {
-        // deprecated
-        final ActivityTokens taskTopActivityTokens =
-                mActivityTaskManagerInternal.getTopActivityForTask(taskId);
-        if (taskTopActivityTokens == null) {
-            Slog.w(TAG, "Unknown activity to query for update translation state.");
-            return;
-        }
-        updateUiTranslationStateByActivityTokens(taskTopActivityTokens, state, sourceSpec,
-                targetSpec, viewIds);
-    }
-
-    @GuardedBy("mLock")
-    public void updateUiTranslationStateLocked(@UiTranslationState int state,
-            TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
             IBinder token, int taskId) {
         // Get top activity for a given task id
         final ActivityTokens taskTopActivityTokens =
@@ -171,16 +156,10 @@ final class TranslationManagerServiceImpl extends
                     + "translation state for token=" + token + " taskId=" + taskId);
             return;
         }
-        updateUiTranslationStateByActivityTokens(taskTopActivityTokens, state, sourceSpec,
-                targetSpec, viewIds);
-    }
-
-    private void updateUiTranslationStateByActivityTokens(ActivityTokens tokens,
-            @UiTranslationState int state, TranslationSpec sourceSpec, TranslationSpec targetSpec,
-            List<AutofillId> viewIds) {
         try {
-            tokens.getApplicationThread().updateUiTranslationState(tokens.getActivityToken(), state,
-                    sourceSpec, targetSpec, viewIds);
+            taskTopActivityTokens.getApplicationThread().updateUiTranslationState(
+                    taskTopActivityTokens.getActivityToken(), state, sourceSpec, targetSpec,
+                    viewIds);
         } catch (RemoteException e) {
             Slog.w(TAG, "Update UiTranslationState fail: " + e);
         }
@@ -193,8 +172,8 @@ final class TranslationManagerServiceImpl extends
         res.putInt(EXTRA_STATE, state);
         // TODO(177500482): Store the locale pair so it can be sent for RESUME events.
         if (sourceSpec != null) {
-            res.putString(EXTRA_SOURCE_LOCALE, sourceSpec.getLanguage());
-            res.putString(EXTRA_TARGET_LOCALE, targetSpec.getLanguage());
+            res.putSerializable(EXTRA_SOURCE_LOCALE, sourceSpec.getLocale());
+            res.putSerializable(EXTRA_TARGET_LOCALE, targetSpec.getLocale());
         }
         // TODO(177500482): Only support the *current* Input Method.
         List<InputMethodInfo> enabledInputMethods =

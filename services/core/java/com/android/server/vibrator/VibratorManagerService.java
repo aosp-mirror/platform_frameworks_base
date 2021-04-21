@@ -29,7 +29,7 @@ import android.content.pm.PackageManagerInternal;
 import android.hardware.vibrator.IVibrator;
 import android.os.BatteryStats;
 import android.os.Binder;
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.ExternalVibration;
 import android.os.Handler;
 import android.os.IBinder;
@@ -291,7 +291,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     @Override // Binder call
     public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
-            @Nullable CombinedVibrationEffect effect, @Nullable VibrationAttributes attrs) {
+            @Nullable CombinedVibration effect, @Nullable VibrationAttributes attrs) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "setAlwaysOnEffect");
         try {
             mContext.enforceCallingOrSelfPermission(
@@ -332,7 +332,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @Override // Binder call
-    public void vibrate(int uid, String opPkg, @NonNull CombinedVibrationEffect effect,
+    public void vibrate(int uid, String opPkg, @NonNull CombinedVibration effect,
             @Nullable VibrationAttributes attrs, String reason, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate, reason = " + reason);
         try {
@@ -383,7 +383,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @Override // Binder call
-    public void cancelVibrate(IBinder token) {
+    public void cancelVibrate(int usageFilter, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "cancelVibrate");
         try {
             mContext.enforceCallingOrSelfPermission(
@@ -392,16 +392,24 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Canceling vibration.");
+                    Slog.d(TAG, "Canceling vibration");
                 }
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    mNextVibration = null;
+                    if (mNextVibration != null
+                            && shouldCancelVibration(mNextVibration.getVibration(),
+                            usageFilter, token)) {
+                        mNextVibration = null;
+                    }
                     if (mCurrentVibration != null
-                            && mCurrentVibration.getVibration().token == token) {
+                            && shouldCancelVibration(mCurrentVibration.getVibration(),
+                            usageFilter, token)) {
                         mCurrentVibration.cancel();
                     }
-                    if (mCurrentExternalVibration != null) {
+                    if (mCurrentExternalVibration != null
+                            && shouldCancelVibration(
+                            mCurrentExternalVibration.externalVibration.getVibrationAttributes(),
+                            usageFilter)) {
                         mCurrentExternalVibration.end(Vibration.Status.CANCELLED);
                         mVibratorManagerRecords.record(mCurrentExternalVibration);
                         mCurrentExternalVibration.externalVibration.mute();
@@ -603,11 +611,20 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             // Repeating vibrations always take precedence.
             return null;
         }
-        if (mCurrentVibration != null && mCurrentVibration.getVibration().isRepeating()) {
-            if (DEBUG) {
-                Slog.d(TAG, "Ignoring incoming vibration in favor of previous alarm vibration");
+        if (mCurrentVibration != null) {
+            if (mCurrentVibration.getVibration().attrs.getUsage()
+                    == VibrationAttributes.USAGE_ALARM) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of alarm vibration");
+                }
+                return Vibration.Status.IGNORED_FOR_ALARM;
             }
-            return Vibration.Status.IGNORED_FOR_ALARM;
+            if (mCurrentVibration.getVibration().isRepeating()) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of repeating vibration");
+                }
+                return Vibration.Status.IGNORED_FOR_ONGOING;
+            }
         }
         return null;
     }
@@ -684,6 +701,30 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     /**
+     * Return true if the vibration has the same token and usage belongs to given usage class.
+     *
+     * @param vib         The ongoing or pending vibration to be cancelled.
+     * @param usageFilter The vibration usages to be cancelled, any bitwise combination of
+     *                    VibrationAttributes.USAGE_* values.
+     * @param token       The binder token to identify the vibration origin. Only vibrations
+     *                    started with the same token can be cancelled with it.
+     */
+    private boolean shouldCancelVibration(Vibration vib, int usageFilter, IBinder token) {
+        return (vib.token == token) && shouldCancelVibration(vib.attrs, usageFilter);
+    }
+
+    /**
+     * Return true if the external vibration usage belongs to given usage class.
+     *
+     * @param attrs       The attributes of an ongoing or pending vibration to be cancelled.
+     * @param usageFilter The vibration usages to be cancelled, any bitwise combination of
+     *                    VibrationAttributes.USAGE_* values.
+     */
+    private boolean shouldCancelVibration(VibrationAttributes attrs, int usageFilter) {
+        return (usageFilter & attrs.getUsage()) == attrs.getUsage();
+    }
+
+    /**
      * Check which mode should be set for a vibration with given {@code uid}, {@code opPkg} and
      * {@code attrs}. This will return one of the AppOpsManager.MODE_*.
      */
@@ -733,14 +774,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     /**
-     * Validate the incoming {@link CombinedVibrationEffect}.
+     * Validate the incoming {@link CombinedVibration}.
      *
      * We can't throw exceptions here since we might be called from some system_server component,
      * which would bring the whole system down.
      *
      * @return whether the CombinedVibrationEffect is non-null and valid
      */
-    private static boolean isEffectValid(@Nullable CombinedVibrationEffect effect) {
+    private static boolean isEffectValid(@Nullable CombinedVibration effect) {
         if (effect == null) {
             Slog.wtf(TAG, "effect must not be null");
             return false;
@@ -758,18 +799,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      * Sets fallback effects to all prebaked ones in given combination of effects, based on {@link
      * VibrationSettings#getFallbackEffect}.
      */
-    private void fillVibrationFallbacks(Vibration vib, CombinedVibrationEffect effect) {
-        if (effect instanceof CombinedVibrationEffect.Mono) {
-            fillVibrationFallbacks(vib, ((CombinedVibrationEffect.Mono) effect).getEffect());
-        } else if (effect instanceof CombinedVibrationEffect.Stereo) {
+    private void fillVibrationFallbacks(Vibration vib, CombinedVibration effect) {
+        if (effect instanceof CombinedVibration.Mono) {
+            fillVibrationFallbacks(vib, ((CombinedVibration.Mono) effect).getEffect());
+        } else if (effect instanceof CombinedVibration.Stereo) {
             SparseArray<VibrationEffect> effects =
-                    ((CombinedVibrationEffect.Stereo) effect).getEffects();
+                    ((CombinedVibration.Stereo) effect).getEffects();
             for (int i = 0; i < effects.size(); i++) {
                 fillVibrationFallbacks(vib, effects.valueAt(i));
             }
-        } else if (effect instanceof CombinedVibrationEffect.Sequential) {
-            List<CombinedVibrationEffect> effects =
-                    ((CombinedVibrationEffect.Sequential) effect).getEffects();
+        } else if (effect instanceof CombinedVibration.Sequential) {
+            List<CombinedVibration> effects =
+                    ((CombinedVibration.Sequential) effect).getEffects();
             for (int i = 0; i < effects.size(); i++) {
                 fillVibrationFallbacks(vib, effects.get(i));
             }
@@ -816,15 +857,15 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @GuardedBy("mLock")
     @Nullable
     private SparseArray<PrebakedSegment> fixupAlwaysOnEffectsLocked(
-            CombinedVibrationEffect effect) {
+            CombinedVibration effect) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "fixupAlwaysOnEffectsLocked");
         try {
             SparseArray<VibrationEffect> effects;
-            if (effect instanceof CombinedVibrationEffect.Mono) {
-                VibrationEffect syncedEffect = ((CombinedVibrationEffect.Mono) effect).getEffect();
+            if (effect instanceof CombinedVibration.Mono) {
+                VibrationEffect syncedEffect = ((CombinedVibration.Mono) effect).getEffect();
                 effects = transformAllVibratorsLocked(unused -> syncedEffect);
-            } else if (effect instanceof CombinedVibrationEffect.Stereo) {
-                effects = ((CombinedVibrationEffect.Stereo) effect).getEffects();
+            } else if (effect instanceof CombinedVibration.Stereo) {
+                effects = ((CombinedVibration.Stereo) effect).getEffects();
             } else {
                 // Only synced combinations can be used for always-on effects.
                 return null;
@@ -1456,7 +1497,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         private int runMono() {
             CommonOptions commonOptions = new CommonOptions();
-            CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(nextEffect());
+            CombinedVibration effect = CombinedVibration.createParallel(nextEffect());
             VibrationAttributes attrs = createVibrationAttributes(commonOptions);
             vibrate(Binder.getCallingUid(), SHELL_PACKAGE_NAME, effect, attrs,
                     commonOptions.description, mToken);
@@ -1465,8 +1506,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         private int runStereo() {
             CommonOptions commonOptions = new CommonOptions();
-            CombinedVibrationEffect.SyncedCombination combination =
-                    CombinedVibrationEffect.startSynced();
+            CombinedVibration.ParallelCombination combination =
+                    CombinedVibration.startParallel();
             while ("-v".equals(getNextOption())) {
                 int vibratorId = Integer.parseInt(getNextArgRequired());
                 combination.addVibrator(vibratorId, nextEffect());
@@ -1479,8 +1520,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         private int runSequential() {
             CommonOptions commonOptions = new CommonOptions();
-            CombinedVibrationEffect.SequentialCombination combination =
-                    CombinedVibrationEffect.startSequential();
+            CombinedVibration.SequentialCombination combination =
+                    CombinedVibration.startSequential();
             while ("-v".equals(getNextOption())) {
                 int vibratorId = Integer.parseInt(getNextArgRequired());
                 combination.addNext(vibratorId, nextEffect());
@@ -1492,7 +1533,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         private int runCancel() {
-            cancelVibrate(mToken);
+            cancelVibrate(/* usageFilter= */ -1, mToken);
             return 0;
         }
 

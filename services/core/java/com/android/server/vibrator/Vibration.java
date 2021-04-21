@@ -17,7 +17,7 @@
 package com.android.server.vibrator;
 
 import android.annotation.Nullable;
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.VibrationAttributes;
@@ -72,14 +72,14 @@ final class Vibration {
 
     /** The actual effect to be played. */
     @Nullable
-    private CombinedVibrationEffect mEffect;
+    private CombinedVibration mEffect;
 
     /**
      * The original effect that was requested. Typically these two things differ because the effect
      * was scaled based on the users vibration intensity settings.
      */
     @Nullable
-    private CombinedVibrationEffect mOriginalEffect;
+    private CombinedVibration mOriginalEffect;
 
     /**
      * Start/end times in unix epoch time. Only to be used for debugging purposes and to correlate
@@ -90,7 +90,7 @@ final class Vibration {
     private long mEndTimeDebug;
     private Status mStatus;
 
-    Vibration(IBinder token, int id, CombinedVibrationEffect effect,
+    Vibration(IBinder token, int id, CombinedVibration effect,
             VibrationAttributes attrs, int uid, String opPkg, String reason) {
         this.token = token;
         this.mEffect = effect;
@@ -142,7 +142,7 @@ final class Vibration {
      * effect added.
      */
     public void updateEffects(Function<VibrationEffect, VibrationEffect> updateFn) {
-        CombinedVibrationEffect newEffect = transformCombinedEffect(mEffect, updateFn);
+        CombinedVibration newEffect = transformCombinedEffect(mEffect, updateFn);
         if (!newEffect.equals(mEffect)) {
             if (mOriginalEffect == null) {
                 mOriginalEffect = mEffect;
@@ -155,29 +155,29 @@ final class Vibration {
     }
 
     /**
-     * Creates a new {@link CombinedVibrationEffect} by applying the given transformation function
+     * Creates a new {@link CombinedVibration} by applying the given transformation function
      * to each {@link VibrationEffect}.
      */
-    private static CombinedVibrationEffect transformCombinedEffect(
-            CombinedVibrationEffect combinedEffect, Function<VibrationEffect, VibrationEffect> fn) {
-        if (combinedEffect instanceof CombinedVibrationEffect.Mono) {
-            VibrationEffect effect = ((CombinedVibrationEffect.Mono) combinedEffect).getEffect();
-            return CombinedVibrationEffect.createSynced(fn.apply(effect));
-        } else if (combinedEffect instanceof CombinedVibrationEffect.Stereo) {
+    private static CombinedVibration transformCombinedEffect(
+            CombinedVibration combinedEffect, Function<VibrationEffect, VibrationEffect> fn) {
+        if (combinedEffect instanceof CombinedVibration.Mono) {
+            VibrationEffect effect = ((CombinedVibration.Mono) combinedEffect).getEffect();
+            return CombinedVibration.createParallel(fn.apply(effect));
+        } else if (combinedEffect instanceof CombinedVibration.Stereo) {
             SparseArray<VibrationEffect> effects =
-                    ((CombinedVibrationEffect.Stereo) combinedEffect).getEffects();
-            CombinedVibrationEffect.SyncedCombination combination =
-                    CombinedVibrationEffect.startSynced();
+                    ((CombinedVibration.Stereo) combinedEffect).getEffects();
+            CombinedVibration.ParallelCombination combination =
+                    CombinedVibration.startParallel();
             for (int i = 0; i < effects.size(); i++) {
                 combination.addVibrator(effects.keyAt(i), fn.apply(effects.valueAt(i)));
             }
             return combination.combine();
-        } else if (combinedEffect instanceof CombinedVibrationEffect.Sequential) {
-            List<CombinedVibrationEffect> effects =
-                    ((CombinedVibrationEffect.Sequential) combinedEffect).getEffects();
-            CombinedVibrationEffect.SequentialCombination combination =
-                    CombinedVibrationEffect.startSequential();
-            for (CombinedVibrationEffect effect : effects) {
+        } else if (combinedEffect instanceof CombinedVibration.Sequential) {
+            List<CombinedVibration> effects =
+                    ((CombinedVibration.Sequential) combinedEffect).getEffects();
+            CombinedVibration.SequentialCombination combination =
+                    CombinedVibration.startSequential();
+            for (CombinedVibration effect : effects) {
                 combination.addNext(transformCombinedEffect(effect, fn));
             }
             return combination.combine();
@@ -199,7 +199,7 @@ final class Vibration {
 
     /** Return the effect that should be played by this vibration. */
     @Nullable
-    public CombinedVibrationEffect getEffect() {
+    public CombinedVibration getEffect() {
         return mEffect;
     }
 
@@ -214,8 +214,8 @@ final class Vibration {
     static final class DebugInfo {
         private final long mStartTimeDebug;
         private final long mEndTimeDebug;
-        private final CombinedVibrationEffect mEffect;
-        private final CombinedVibrationEffect mOriginalEffect;
+        private final CombinedVibration mEffect;
+        private final CombinedVibration mOriginalEffect;
         private final float mScale;
         private final VibrationAttributes mAttrs;
         private final int mUid;
@@ -223,8 +223,8 @@ final class Vibration {
         private final String mReason;
         private final Status mStatus;
 
-        DebugInfo(long startTimeDebug, long endTimeDebug, CombinedVibrationEffect effect,
-                CombinedVibrationEffect originalEffect, float scale, VibrationAttributes attrs,
+        DebugInfo(long startTimeDebug, long endTimeDebug, CombinedVibration effect,
+                CombinedVibration originalEffect, float scale, VibrationAttributes attrs,
                 int uid, String opPkg, String reason, Status status) {
             mStartTimeDebug = startTimeDebug;
             mEndTimeDebug = endTimeDebug;
@@ -289,24 +289,24 @@ final class Vibration {
         }
 
         private void dumpEffect(
-                ProtoOutputStream proto, long fieldId, CombinedVibrationEffect effect) {
+                ProtoOutputStream proto, long fieldId, CombinedVibration effect) {
             dumpEffect(proto, fieldId,
-                    (CombinedVibrationEffect.Sequential) CombinedVibrationEffect.startSequential()
+                    (CombinedVibration.Sequential) CombinedVibration.startSequential()
                             .addNext(effect)
                             .combine());
         }
 
         private void dumpEffect(
-                ProtoOutputStream proto, long fieldId, CombinedVibrationEffect.Sequential effect) {
+                ProtoOutputStream proto, long fieldId, CombinedVibration.Sequential effect) {
             final long token = proto.start(fieldId);
             for (int i = 0; i < effect.getEffects().size(); i++) {
-                CombinedVibrationEffect nestedEffect = effect.getEffects().get(i);
-                if (nestedEffect instanceof CombinedVibrationEffect.Mono) {
+                CombinedVibration nestedEffect = effect.getEffects().get(i);
+                if (nestedEffect instanceof CombinedVibration.Mono) {
                     dumpEffect(proto, CombinedVibrationEffectProto.EFFECTS,
-                            (CombinedVibrationEffect.Mono) nestedEffect);
-                } else if (nestedEffect instanceof CombinedVibrationEffect.Stereo) {
+                            (CombinedVibration.Mono) nestedEffect);
+                } else if (nestedEffect instanceof CombinedVibration.Stereo) {
                     dumpEffect(proto, CombinedVibrationEffectProto.EFFECTS,
-                            (CombinedVibrationEffect.Stereo) nestedEffect);
+                            (CombinedVibration.Stereo) nestedEffect);
                 }
                 proto.write(CombinedVibrationEffectProto.DELAYS, effect.getDelays().get(i));
             }
@@ -314,14 +314,14 @@ final class Vibration {
         }
 
         private void dumpEffect(
-                ProtoOutputStream proto, long fieldId, CombinedVibrationEffect.Mono effect) {
+                ProtoOutputStream proto, long fieldId, CombinedVibration.Mono effect) {
             final long token = proto.start(fieldId);
             dumpEffect(proto, SyncVibrationEffectProto.EFFECTS, effect.getEffect());
             proto.end(token);
         }
 
         private void dumpEffect(
-                ProtoOutputStream proto, long fieldId, CombinedVibrationEffect.Stereo effect) {
+                ProtoOutputStream proto, long fieldId, CombinedVibration.Stereo effect) {
             final long token = proto.start(fieldId);
             for (int i = 0; i < effect.getEffects().size(); i++) {
                 proto.write(SyncVibrationEffectProto.VIBRATOR_IDS, effect.getEffects().keyAt(i));

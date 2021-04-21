@@ -861,6 +861,19 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
 
     /**
+     * Creates the base {@link Context} of this {@link Service}.
+     * Users may override this API to create customized base context.
+     *
+     * @see android.window.WindowProviderService WindowProviderService class for example
+     * @see ContextWrapper#attachBaseContext(Context)
+     *
+     * @hide
+     */
+    public Context createServiceBaseContext(ActivityThread mainThread, LoadedApk packageInfo) {
+        return ContextImpl.createAppContext(mainThread, packageInfo);
+    }
+
+    /**
      * @hide
      * Clean up any references to avoid leaks.
      */

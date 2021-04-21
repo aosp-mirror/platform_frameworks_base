@@ -32,7 +32,9 @@
         <item name="android:stateListAnimator">@null</item>
     </style>
     <style name="NumPadKey" parent="Theme.SystemUI">
-      <item name="android:colorControlNormal">?android:attr/colorBackground</item>
+      <!-- Studio can't directly reference ?androidprv:attr/colorSurface here, so this value
+           is resolved in {@link NumPadAnimator}. -->
+      <item name="android:colorControlNormal">@null</item>
       <item name="android:colorControlHighlight">?android:attr/colorAccent</item>
       <item name="android:background">@drawable/num_pad_key_background</item>
     </style>

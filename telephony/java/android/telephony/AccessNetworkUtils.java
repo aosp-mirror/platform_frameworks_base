@@ -598,7 +598,8 @@ public class AccessNetworkUtils {
                             : earfcnFrequency.downlinkOffset;
                     break;
                 } else {
-                    Log.e(TAG, "Band and the range of EARFCN are not consistent.");
+                    Rlog.w(TAG,"Band and the range of EARFCN are not consistent: band = " + band
+                            + " ,earfcn = " + earfcn + " ,isUplink = " + isUplink);
                     return INVALID_FREQUENCY;
                 }
             }
@@ -617,7 +618,7 @@ public class AccessNetworkUtils {
     }
 
     private static boolean isInEarfcnRange(int earfcn, EutranBandArfcnFrequency earfcnFrequency,
-                                           boolean isUplink) {
+            boolean isUplink) {
         if (isUplink) {
             return earfcn >= earfcnFrequency.uplinkOffset && earfcn <= earfcnFrequency.uplinkRange;
         } else {
@@ -640,7 +641,8 @@ public class AccessNetworkUtils {
                             : uarfcnFrequency.downlinkOffset;
                     break;
                 } else {
-                    Log.e(TAG, "Band and the range of UARFCN are not consistent.");
+                    Rlog.w(TAG,"Band and the range of UARFCN are not consistent: band = " + band
+                            + " ,uarfcn = " + uarfcn + " ,isUplink = " + isUplink);
                     return INVALID_FREQUENCY;
                 }
             }
@@ -716,7 +718,8 @@ public class AccessNetworkUtils {
                             arfcnOffset);
                     break;
                 } else {
-                    Log.e(TAG, "Band and the range of ARFCN are not consistent.");
+                    Rlog.w(TAG,"Band and the range of ARFCN are not consistent: band = " + band
+                            + " ,arfcn = " + arfcn + " ,isUplink = " + isUplink);
                     return INVALID_FREQUENCY;
                 }
             }
@@ -733,7 +736,7 @@ public class AccessNetworkUtils {
      * Downlink actual frequency(kHz) = Uplink actual frequency + 10
      */
     private static int convertArfcnToFrequency(int arfcn, int uplinkFrequencyFirstKhz,
-                                               int arfcnOffset) {
+            int arfcnOffset) {
         return uplinkFrequencyFirstKhz + 200 * (arfcn - arfcnOffset);
     }
 

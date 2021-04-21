@@ -17,14 +17,18 @@
 package com.android.systemui.navigationbar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.SystemProperties;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -80,6 +84,8 @@ public class NavigationBarController implements Callbacks,
         ConfigurationController.ConfigurationListener,
         NavigationModeController.ModeChangedListener, Dumpable {
 
+    private static final float TABLET_MIN_DPS = 600;
+
     private static final String TAG = NavigationBarController.class.getSimpleName();
 
     private final Context mContext;
@@ -107,6 +113,8 @@ public class NavigationBarController implements Callbacks,
     private final Handler mHandler;
     private final DisplayManager mDisplayManager;
     private final NavigationBarOverlayController mNavBarOverlayController;
+    private int mNavMode;
+    private boolean mIsTablet;
 
     /** A displayId - nav bar maps. */
     @VisibleForTesting
@@ -172,11 +180,30 @@ public class NavigationBarController implements Callbacks,
         configurationController.addCallback(this);
         mConfigChanges.applyNewConfig(mContext.getResources());
         mNavBarOverlayController = navBarOverlayController;
+        mNavMode = mNavigationModeController.addListener(this);
         mNavigationModeController.addListener(this);
     }
 
     @Override
     public void onConfigChanged(Configuration newConfig) {
+        boolean isOldConfigTablet = mIsTablet;
+        mIsTablet = isTablet(newConfig);
+        boolean largeScreenChanged = mIsTablet != isOldConfigTablet;
+        // If we folded/unfolded while in 3 button, show navbar in folded state, hide in unfolded
+        if (isThreeButtonTaskbarFlagEnabled() &&
+                largeScreenChanged && mNavMode == NAV_BAR_MODE_3BUTTON) {
+            if (!mIsTablet) {
+                // Folded state, show 3 button nav bar
+                createNavigationBar(mContext.getDisplay(), null, null);
+            } else {
+                // Unfolded state, hide 3 button nav bars
+                for (int i = 0; i < mNavigationBars.size(); i++) {
+                    removeNavigationBar(mNavigationBars.keyAt(i));
+                }
+            }
+            return;
+        }
+
         if (mConfigChanges.applyNewConfig(mContext.getResources())) {
             for (int i = 0; i < mNavigationBars.size(); i++) {
                 recreateNavigationBar(mNavigationBars.keyAt(i));
@@ -190,7 +217,19 @@ public class NavigationBarController implements Callbacks,
 
     @Override
     public void onNavigationModeChanged(int mode) {
+        final int oldMode = mNavMode;
+        mNavMode = mode;
         mHandler.post(() -> {
+            // create/destroy nav bar based on nav mode only in unfolded state
+            if (isThreeButtonTaskbarFlagEnabled() && oldMode != mNavMode && mIsTablet) {
+                if (oldMode == NAV_BAR_MODE_3BUTTON &&
+                        mNavigationBars.get(mContext.getDisplayId()) == null) {
+                    // We remove navbar for 3 button unfolded, add it back in
+                    createNavigationBar(mContext.getDisplay(), null, null);
+                } else if (mNavMode == NAV_BAR_MODE_3BUTTON) {
+                    removeNavigationBar(mContext.getDisplayId());
+                }
+            }
             for (int i = 0; i < mNavigationBars.size(); i++) {
                 NavigationBar navBar = mNavigationBars.valueAt(i);
                 if (navBar == null) {
@@ -212,6 +251,7 @@ public class NavigationBarController implements Callbacks,
     @Override
     public void onDisplayReady(int displayId) {
         Display display = mDisplayManager.getDisplay(displayId);
+        mIsTablet = isTablet(mContext.getResources().getConfiguration());
         createNavigationBar(display, null /* savedState */, null /* result */);
     }
 
@@ -264,6 +304,10 @@ public class NavigationBarController implements Callbacks,
     @VisibleForTesting
     void createNavigationBar(Display display, Bundle savedState, RegisterStatusBarResult result) {
         if (display == null) {
+            return;
+        }
+
+        if (isThreeButtonTaskbarEnabled()) {
             return;
         }
 
@@ -396,6 +440,24 @@ public class NavigationBarController implements Callbacks,
     @Nullable
     public NavigationBar getDefaultNavigationBar() {
         return mNavigationBars.get(DEFAULT_DISPLAY);
+    }
+
+    private boolean isThreeButtonTaskbarEnabled() {
+        return mIsTablet && mNavMode == NAV_BAR_MODE_3BUTTON &&
+                isThreeButtonTaskbarFlagEnabled();
+    }
+
+    private boolean isThreeButtonTaskbarFlagEnabled() {
+        return SystemProperties.getBoolean("persist.debug.taskbar_three_button", false);
+    }
+
+    private boolean isTablet(Configuration newConfig) {
+        float density = Resources.getSystem().getDisplayMetrics().density;
+        int size = Math.min((int) (density * newConfig.screenWidthDp),
+                (int) (density* newConfig.screenHeightDp));
+        DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+        float densityRatio = (float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT;
+        return (size / densityRatio) >= TABLET_MIN_DPS;
     }
 
     @Override

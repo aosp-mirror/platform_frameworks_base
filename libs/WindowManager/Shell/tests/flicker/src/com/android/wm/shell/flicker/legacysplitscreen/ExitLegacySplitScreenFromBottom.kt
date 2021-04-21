@@ -78,13 +78,7 @@ class ExitLegacySplitScreenFromBottom(
     @Test
     fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(DOCKED_STACK_DIVIDER)
 
-    @FlakyTest(bugId = 178447631)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
-
-    @Presubmit
+    @FlakyTest
     @Test
     fun appWindowBecomesInVisible() =
         testSpec.appWindowBecomesInVisible(secondaryApp.defaultWindowName)
@@ -96,11 +90,6 @@ class ExitLegacySplitScreenFromBottom(
     @Presubmit
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
-
-    @FlakyTest(bugId = 178447631)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

@@ -102,13 +102,6 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "allowed_privapp_com.android.car.secondaryhome",
-    sub_dir: "permissions",
-    src: "com.android.car.secondaryhome.xml",
-    filename_from_src: true,
-}
-
-prebuilt_etc {
     name: "allowed_privapp_com.android.car.settings",
     sub_dir: "permissions",
     src: "com.android.car.settings.xml",

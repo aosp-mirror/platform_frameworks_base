@@ -37,9 +37,9 @@ import android.permission.PermissionManager;
 import android.util.ArraySet;
 import android.util.Base64;
 import android.util.DebugUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;

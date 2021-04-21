@@ -487,6 +487,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     /**
+     * Set bounds for notifications background, all coordinates are absolute
+     */
+    public void setNotificationsBounds(float left, float top, float right, float bottom) {
+        mNotificationsScrim.setDrawableBounds(left, top, right, bottom);
+    }
+
+    /**
      * Current state of the QuickSettings when pulling it from the top.
      *
      * @param expansionFraction From 0 to 1 where 0 means collapsed and 1 expanded.
@@ -496,11 +503,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (isNaN(expansionFraction)) {
             return;
         }
-        shiftNotificationsScrim(qsPanelBottomY);
-        updateNotificationsScrimAlpha(qsPanelBottomY);
+        updateNotificationsScrimAlpha(expansionFraction, qsPanelBottomY);
         if (mQsExpansion != expansionFraction) {
             mQsExpansion = expansionFraction;
-            Log.d(TAG, "set qs fraction");
             boolean relevantState = (mState == ScrimState.SHADE_LOCKED
                     || mState == ScrimState.KEYGUARD
                     || mState == ScrimState.PULSING
@@ -512,22 +517,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
     }
 
-    private void shiftNotificationsScrim(int qsPanelBottomY) {
-        if (qsPanelBottomY > 0) {
-            mNotificationsScrim.setTranslationY(qsPanelBottomY);
-        } else {
-            mNotificationsScrim.setTranslationY(0);
-        }
-    }
-
-    private void updateNotificationsScrimAlpha(int qsPanelBottomY) {
+    private void updateNotificationsScrimAlpha(float qsExpansion, int qsPanelBottomY) {
         float newAlpha = 0;
         if (qsPanelBottomY > 0) {
             float interpolator = 0;
             if (mState == ScrimState.UNLOCKED || mState == ScrimState.SHADE_LOCKED) {
                 interpolator = getInterpolatedFraction();
             } else {
-                interpolator = mQsExpansion;
+                interpolator = qsExpansion;
             }
             newAlpha = MathUtils.lerp(0, 1, interpolator);
         }

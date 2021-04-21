@@ -126,6 +126,8 @@
     <attr name="wallpaperTextColorSecondary" format="reference|color" />
     <attr name="wallpaperTextColorAccent" format="reference|color" />
     <attr name="backgroundProtectedStyle" format="reference" />
+    <attr name="offStateColor" format="reference|color" />
+    <attr name="underSurfaceColor" format="reference|color" />
 
     <declare-styleable name="SmartReplyView">
         <attr name="spacing" format="dimension" />
@@ -172,10 +174,6 @@
     <declare-styleable name="AlphaTintDrawableWrapper">
         <attr name="android:tint" />
         <attr name="android:alpha" />
-    </declare-styleable>
-
-    <declare-styleable name="PagedTileLayout">
-        <attr name="sideLabels" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="CropView">

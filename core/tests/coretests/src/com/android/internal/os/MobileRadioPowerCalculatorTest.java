@@ -57,7 +57,7 @@ public class MobileRadioPowerCalculatorTest {
             .setAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_RX, 1440.0)
             .setAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_TX,
                     new double[] {720.0, 1080.0, 1440.0, 1800.0, 2160.0})
-            .initMeasuredEnergyStatsLocked(0);
+            .initMeasuredEnergyStatsLocked();
 
     @Test
     public void testCounterBasedModel() {

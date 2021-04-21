@@ -38,6 +38,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.IWallpaperManager;
 import android.app.Notification;
 import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
@@ -113,6 +114,8 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.charging.WiredChargingRippleController;
+import com.android.systemui.statusbar.events.PrivacyDotViewController;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -263,8 +266,11 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private BrightnessSlider.Factory mBrightnessSliderFactory;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
     @Mock private OngoingCallController mOngoingCallController;
+    @Mock private SystemStatusAnimationScheduler mAnimationScheduler;
+    @Mock private PrivacyDotViewController mDotViewController;
     @Mock private TunerService mTunerService;
     @Mock private FeatureFlags mFeatureFlags;
+    @Mock private IWallpaperManager mWallpaperManager;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -323,7 +329,8 @@ public class StatusBarTest extends SysuiTestCase {
 
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
-        WakefulnessLifecycle wakefulnessLifecycle = new WakefulnessLifecycle();
+        WakefulnessLifecycle wakefulnessLifecycle =
+                new WakefulnessLifecycle(mContext, mWallpaperManager);
         wakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         wakefulnessLifecycle.dispatchFinishedWakingUp();
 
@@ -429,6 +436,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mBrightnessSliderFactory,
                 mWiredChargingRippleController,
                 mOngoingCallController,
+                mAnimationScheduler,
+                mDotViewController,
                 mTunerService,
                 mFeatureFlags);
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),

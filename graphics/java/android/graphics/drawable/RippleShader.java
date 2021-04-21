@@ -39,6 +39,7 @@ final class RippleShader extends RuntimeShader {
             + "uniform vec2 in_tRotation2;\n"
             + "uniform vec2 in_tRotation3;\n"
             + "uniform vec4 in_color;\n"
+            + "uniform vec4 in_sparkleColor;\n"
             + "uniform shader in_shader;\n";
     private static final String SHADER_LIB =
             "float triangleNoise(vec2 n) {\n"
@@ -48,7 +49,6 @@ final class RippleShader extends RuntimeShader {
             + "    return fract(xy * 95.4307) + fract(xy * 75.04961) - 1.0;\n"
             + "}"
             + "const float PI = 3.1415926535897932384626;\n"
-            + "const float SPARKLE_OPACITY = 0.75;\n"
             + "\n"
             + "float sparkles(vec2 uv, float t) {\n"
             + "  float n = triangleNoise(uv);\n"
@@ -60,7 +60,7 @@ final class RippleShader extends RuntimeShader {
             + "    o *= abs(sin(PI * o * (t + 0.55 * i)));\n"
             + "    s += o;\n"
             + "  }\n"
-            + "  return saturate(s) * SPARKLE_OPACITY;\n"
+            + "  return saturate(s) * in_sparkleColor.a;\n"
             + "}\n"
             + "float softCircle(vec2 uv, vec2 xy, float radius, float blur) {\n"
             + "  float blurHalf = blur * 0.5;\n"
@@ -102,8 +102,8 @@ final class RippleShader extends RuntimeShader {
     private static final String SHADER_MAIN = "vec4 main(vec2 p) {\n"
             + "    float fadeIn = subProgress(0., 0.1, in_progress);\n"
             + "    float scaleIn = subProgress(0., 0.45, in_progress);\n"
-            + "    float fadeOutNoise = subProgress(0.5, 1., in_progress);\n"
-            + "    float fadeOutRipple = subProgress(0.5, 0.75, in_progress);\n"
+            + "    float fadeOutNoise = subProgress(0.5, 0.95, in_progress);\n"
+            + "    float fadeOutRipple = subProgress(0.5, 1., in_progress);\n"
             + "    vec2 center = mix(in_touch, in_origin, scaleIn);\n"
             + "    float ring = softRing(p, center, in_maxRadius, scaleIn, 0.45);\n"
             + "    float alpha = min(fadeIn, 1. - fadeOutNoise);\n"
@@ -116,7 +116,7 @@ final class RippleShader extends RuntimeShader {
             + "    vec4 circle = in_color * (softCircle(p, center, in_maxRadius "
             + "      * scaleIn, 0.2) * fade);\n"
             + "    float mask = in_hasMask == 1. ? sample(in_shader).a > 0. ? 1. : 0. : 1.;\n"
-            + "    return mix(circle, vec4(sparkle), sparkle) * mask;\n"
+            + "    return mix(circle, in_sparkleColor, sparkle) * mask;\n"
             + "}";
     private static final String SHADER = SHADER_UNIFORMS + SHADER_LIB + SHADER_MAIN;
     private static final double PI_ROTATE_RIGHT = Math.PI * 0.0078125;
@@ -167,6 +167,9 @@ final class RippleShader extends RuntimeShader {
         final float turbulencePhase = (float) ((mProgress + mNoisePhase * 0.333f) * 5f * Math.PI);
         setUniform("in_turbulencePhase", turbulencePhase);
 
+        //
+        // Keep in sync with: frameworks/base/libs/hwui/pipeline/skia/AnimatedDrawables.h
+        //
         final float scale = 1.5f;
         setUniform("in_tCircle1", new float[]{
                 (float) (scale * 0.5 + (turbulencePhase * 0.01 * Math.cos(scale * 0.55))),
@@ -197,14 +200,17 @@ final class RippleShader extends RuntimeShader {
     /**
      * Color of the circle that's under the sparkles. Sparkles will always be white.
      */
-    public void setColor(@ColorInt int colorIn) {
-        Color color = Color.valueOf(colorIn);
-        this.setUniform("in_color", new float[] {color.red(),
+    public void setColor(@ColorInt int colorInt, @ColorInt int sparkleColorInt) {
+        Color color = Color.valueOf(colorInt);
+        Color sparkleColor = Color.valueOf(sparkleColorInt);
+        setUniform("in_color", new float[] {color.red(),
                 color.green(), color.blue(), color.alpha()});
+        setUniform("in_sparkleColor", new float[] {sparkleColor.red(),
+                sparkleColor.green(), sparkleColor.blue(), sparkleColor.alpha()});
     }
 
     public void setResolution(float w, float h, int density) {
-        final float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE * 1.25f;
+        final float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE;
         setUniform("in_resolutionScale", new float[] {1f / w, 1f / h});
         setUniform("in_noiseScale", new float[] {densityScale / w, densityScale / h});
     }

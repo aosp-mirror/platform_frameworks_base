@@ -42,6 +42,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
+import java.util.concurrent.Executor;
+
 /**
  * Wrapper to expose RemoteTransition (shell transitions) to Launcher.
  *
@@ -59,7 +61,8 @@ public class RemoteTransitionCompat implements Parcelable {
         mTransition = transition;
     }
 
-    public RemoteTransitionCompat(RemoteTransitionRunner runner) {
+    public RemoteTransitionCompat(@NonNull RemoteTransitionRunner runner,
+            @NonNull Executor executor) {
         mTransition = new IRemoteTransition.Stub() {
             @Override
             public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
@@ -71,7 +74,7 @@ public class RemoteTransitionCompat implements Parcelable {
                         Log.e(TAG, "Failed to call transition finished callback", e);
                     }
                 };
-                runner.startAnimation(info, t, finishAdapter);
+                executor.execute(() -> runner.startAnimation(info, t, finishAdapter));
             }
         };
     }

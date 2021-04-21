@@ -16,7 +16,6 @@
 
 package com.android.server.alarm;
 
-import static com.android.server.alarm.AlarmManagerService.TAG;
 import static com.android.server.alarm.AlarmManagerService.dumpAlarmList;
 import static com.android.server.alarm.AlarmManagerService.isTimeTickAlarm;
 

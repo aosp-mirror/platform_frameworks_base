@@ -43,8 +43,8 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.TextViewInputDisabler;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 /**
  * Displays an alphanumeric (latin-1) key entry for the user to enter
  * an unlock password

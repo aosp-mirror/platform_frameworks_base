@@ -19,7 +19,7 @@ package com.android.server.vibrator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.vibrator.IVibratorManager;
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
@@ -112,7 +112,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         mWakeLock.setWorkSource(mWorkSource);
         mBatteryStatsService = batteryStatsService;
 
-        CombinedVibrationEffect effect = vib.getEffect();
+        CombinedVibration effect = vib.getEffect();
         for (int i = 0; i < availableVibrators.size(); i++) {
             if (effect.hasVibrator(availableVibrators.keyAt(i))) {
                 mVibrators.put(availableVibrators.keyAt(i), availableVibrators.valueAt(i));
@@ -191,7 +191,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private Vibration.Status playVibration() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playVibration");
         try {
-            CombinedVibrationEffect.Sequential effect = toSequential(mVibration.getEffect());
+            CombinedVibration.Sequential effect = toSequential(mVibration.getEffect());
             int stepsPlayed = 0;
 
             synchronized (mLock) {
@@ -255,9 +255,6 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     @Nullable
     private SingleVibratorStep nextVibrateStep(long startTime, VibratorController controller,
             VibrationEffect.Composed effect, int segmentIndex, long vibratorOffTimeout) {
-        // Some steps should only start after the vibrator has finished the previous vibration, so
-        // make sure we take the latest between both timings.
-        long latestStartTime = Math.max(startTime, vibratorOffTimeout);
         if (segmentIndex >= effect.getSegments().size()) {
             segmentIndex = effect.getRepeatIndex();
         }
@@ -272,25 +269,24 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         VibrationEffectSegment segment = effect.getSegments().get(segmentIndex);
         if (segment instanceof PrebakedSegment) {
-            return new PerformStep(latestStartTime, controller, effect, segmentIndex,
-                    vibratorOffTimeout);
+            return new PerformStep(startTime, controller, effect, segmentIndex, vibratorOffTimeout);
         }
         if (segment instanceof PrimitiveSegment) {
-            return new ComposePrimitivesStep(latestStartTime, controller, effect, segmentIndex,
+            return new ComposePrimitivesStep(startTime, controller, effect, segmentIndex,
                     vibratorOffTimeout);
         }
         if (segment instanceof RampSegment) {
-            return new ComposePwleStep(latestStartTime, controller, effect, segmentIndex,
+            return new ComposePwleStep(startTime, controller, effect, segmentIndex,
                     vibratorOffTimeout);
         }
         return new AmplitudeStep(startTime, controller, effect, segmentIndex, vibratorOffTimeout);
     }
 
-    private static CombinedVibrationEffect.Sequential toSequential(CombinedVibrationEffect effect) {
-        if (effect instanceof CombinedVibrationEffect.Sequential) {
-            return (CombinedVibrationEffect.Sequential) effect;
+    private static CombinedVibration.Sequential toSequential(CombinedVibration effect) {
+        if (effect instanceof CombinedVibration.Sequential) {
+            return (CombinedVibration.Sequential) effect;
         }
-        return (CombinedVibrationEffect.Sequential) CombinedVibrationEffect.startSequential()
+        return (CombinedVibration.Sequential) CombinedVibration.startSequential()
                 .addNext(effect)
                 .combine();
     }
@@ -419,14 +415,14 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
      * sequential effect isn't finished yet.
      */
     private final class StartVibrateStep extends Step {
-        public final CombinedVibrationEffect.Sequential sequentialEffect;
+        public final CombinedVibration.Sequential sequentialEffect;
         public final int currentIndex;
 
-        StartVibrateStep(CombinedVibrationEffect.Sequential effect) {
+        StartVibrateStep(CombinedVibration.Sequential effect) {
             this(SystemClock.uptimeMillis() + effect.getDelays().get(0), effect, /* index= */ 0);
         }
 
-        StartVibrateStep(long startTime, CombinedVibrationEffect.Sequential effect, int index) {
+        StartVibrateStep(long startTime, CombinedVibration.Sequential effect, int index) {
             super(startTime);
             sequentialEffect = effect;
             currentIndex = index;
@@ -441,7 +437,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 if (DEBUG) {
                     Slog.d(TAG, "StartVibrateStep for effect #" + currentIndex);
                 }
-                CombinedVibrationEffect effect = sequentialEffect.getEffects().get(currentIndex);
+                CombinedVibration effect = sequentialEffect.getEffects().get(currentIndex);
                 DeviceEffectMap effectMapping = createEffectToVibratorMapping(effect);
                 if (effectMapping == null) {
                     // Unable to map effects to vibrators, ignore this step.
@@ -485,12 +481,12 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         /** Create a mapping of individual {@link VibrationEffect} to available vibrators. */
         @Nullable
         private DeviceEffectMap createEffectToVibratorMapping(
-                CombinedVibrationEffect effect) {
-            if (effect instanceof CombinedVibrationEffect.Mono) {
-                return new DeviceEffectMap((CombinedVibrationEffect.Mono) effect);
+                CombinedVibration effect) {
+            if (effect instanceof CombinedVibration.Mono) {
+                return new DeviceEffectMap((CombinedVibration.Mono) effect);
             }
-            if (effect instanceof CombinedVibrationEffect.Stereo) {
-                return new DeviceEffectMap((CombinedVibrationEffect.Stereo) effect);
+            if (effect instanceof CombinedVibration.Stereo) {
+                return new DeviceEffectMap((CombinedVibration.Stereo) effect);
             }
             return null;
         }
@@ -498,11 +494,11 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         /**
          * Starts playing effects on designated vibrators, in sync.
          *
-         * @param effectMapping The {@link CombinedVibrationEffect} mapped to this device vibrators
+         * @param effectMapping The {@link CombinedVibration} mapped to this device vibrators
          * @param nextSteps     An output list to accumulate the future {@link Step Steps} created
          *                      by this method, typically one for each vibrator that has
          *                      successfully started vibrating on this step.
-         * @return The duration, in millis, of the {@link CombinedVibrationEffect}. Repeating
+         * @return The duration, in millis, of the {@link CombinedVibration}. Repeating
          * waveforms return {@link Long#MAX_VALUE}. Zero or negative values indicate the vibrators
          * have ignored all effects.
          */
@@ -572,7 +568,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         private long startVibrating(SingleVibratorStep step, List<Step> nextSteps) {
             nextSteps.addAll(step.play());
-            long stepDuration = step.getOnResult();
+            long stepDuration = step.getVibratorOnDuration();
             if (stepDuration < 0) {
                 // Step failed, so return negative duration to propagate failure.
                 return stepDuration;
@@ -649,14 +645,13 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
 
         /**
-         * Return the result a call to {@link VibratorController#on} method triggered by
-         * {@link #play()}.
+         * Return the duration the vibrator was turned on when this step was played.
          *
          * @return A positive duration that the vibrator was turned on for by this step;
-         * Zero if the segment is not supported or vibrator was never turned on;
-         * A negative value if the vibrator call has failed.
+         * Zero if the segment is not supported, the step was not played yet or vibrator was never
+         * turned on by this step; A negative value if the vibrator call has failed.
          */
-        public long getOnResult() {
+        public long getVibratorOnDuration() {
             return mVibratorOnResult;
         }
 
@@ -690,7 +685,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         /**
          * Return the {@link #nextVibrateStep} with same start and off timings calculated from
-         * {@link #getOnResult()}, jumping all played segments.
+         * {@link #getVibratorOnDuration()}, jumping all played segments.
          *
          * <p>This method has same behavior as {@link #skipToNextSteps(int)} when the vibrator
          * result is non-positive, meaning the vibrator has either ignored or failed to turn on.
@@ -730,7 +725,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         PerformStep(long startTime, VibratorController controller,
                 VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
-            super(startTime, controller, effect, index, vibratorOffTimeout);
+            // This step should wait for the last vibration to finish (with the timeout) and for the
+            // intended step start time (to respect the effect delays).
+            super(Math.max(startTime, vibratorOffTimeout), controller, effect, index,
+                    vibratorOffTimeout);
         }
 
         @Override
@@ -765,7 +763,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     List<Step> fallbackResult = fallbackStep.play();
                     // Update the result with the fallback result so this step is seamlessly
                     // replaced by the fallback to any outer application of this.
-                    mVibratorOnResult = fallbackStep.getOnResult();
+                    mVibratorOnResult = fallbackStep.getVibratorOnDuration();
                     return fallbackResult;
                 }
 
@@ -802,7 +800,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         ComposePrimitivesStep(long startTime, VibratorController controller,
                 VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
-            super(startTime, controller, effect, index, vibratorOffTimeout);
+            // This step should wait for the last vibration to finish (with the timeout) and for the
+            // intended step start time (to respect the effect delays).
+            super(Math.max(startTime, vibratorOffTimeout), controller, effect, index,
+                    vibratorOffTimeout);
         }
 
         @Override
@@ -851,7 +852,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         ComposePwleStep(long startTime, VibratorController controller,
                 VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
-            super(startTime, controller, effect, index, vibratorOffTimeout);
+            // This step should wait for the last vibration to finish (with the timeout) and for the
+            // intended step start time (to respect the effect delays).
+            super(Math.max(startTime, vibratorOffTimeout), controller, effect, index,
+                    vibratorOffTimeout);
         }
 
         @Override
@@ -924,6 +928,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         AmplitudeStep(long startTime, VibratorController controller,
                 VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
+            // This step has a fixed startTime coming from the timings of the waveform it's playing.
             super(startTime, controller, effect, index, vibratorOffTimeout);
             mNextOffTime = vibratorOffTimeout;
         }
@@ -1036,7 +1041,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     }
 
     /**
-     * Map a {@link CombinedVibrationEffect} to the vibrators available on the device.
+     * Map a {@link CombinedVibration} to the vibrators available on the device.
      *
      * <p>This contains the logic to find the capabilities required from {@link IVibratorManager} to
      * play all of the effects in sync.
@@ -1046,7 +1051,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         private final int[] mVibratorIds;
         private final long mRequiredSyncCapabilities;
 
-        DeviceEffectMap(CombinedVibrationEffect.Mono mono) {
+        DeviceEffectMap(CombinedVibration.Mono mono) {
             mVibratorEffects = new SparseArray<>(mVibrators.size());
             mVibratorIds = new int[mVibrators.size()];
             for (int i = 0; i < mVibrators.size(); i++) {
@@ -1061,7 +1066,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             mRequiredSyncCapabilities = calculateRequiredSyncCapabilities(mVibratorEffects);
         }
 
-        DeviceEffectMap(CombinedVibrationEffect.Stereo stereo) {
+        DeviceEffectMap(CombinedVibration.Stereo stereo) {
             SparseArray<VibrationEffect> stereoEffects = stereo.getEffects();
             mVibratorEffects = new SparseArray<>();
             for (int i = 0; i < stereoEffects.size(); i++) {
@@ -1083,7 +1088,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
 
         /**
-         * Return the number of vibrators mapped to play the {@link CombinedVibrationEffect} on this
+         * Return the number of vibrators mapped to play the {@link CombinedVibration} on this
          * device.
          */
         public int size() {
@@ -1091,7 +1096,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
 
         /**
-         * Return all capabilities required to play the {@link CombinedVibrationEffect} in
+         * Return all capabilities required to play the {@link CombinedVibration} in
          * between calls to {@link IVibratorManager#prepareSynced} and
          * {@link IVibratorManager#triggerSynced}.
          */
@@ -1099,7 +1104,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             return mRequiredSyncCapabilities;
         }
 
-        /** Return all vibrator ids mapped to play the {@link CombinedVibrationEffect}. */
+        /** Return all vibrator ids mapped to play the {@link CombinedVibration}. */
         public int[] getVibratorIds() {
             return mVibratorIds;
         }

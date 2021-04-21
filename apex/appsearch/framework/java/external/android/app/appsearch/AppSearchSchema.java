@@ -51,7 +51,7 @@ public final class AppSearchSchema {
 
     /** @hide */
     public AppSearchSchema(@NonNull Bundle bundle) {
-        Preconditions.checkNotNull(bundle);
+        Objects.requireNonNull(bundle);
         mBundle = bundle;
     }
 
@@ -125,7 +125,7 @@ public final class AppSearchSchema {
 
         /** Creates a new {@link AppSearchSchema.Builder}. */
         public Builder(@NonNull String schemaType) {
-            Preconditions.checkNotNull(schemaType);
+            Objects.requireNonNull(schemaType);
             mSchemaType = schemaType;
         }
 
@@ -133,7 +133,7 @@ public final class AppSearchSchema {
         @NonNull
         public AppSearchSchema.Builder addProperty(@NonNull PropertyConfig propertyConfig) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(propertyConfig);
+            Objects.requireNonNull(propertyConfig);
             String name = propertyConfig.getName();
             if (!mPropertyNames.add(name)) {
                 throw new IllegalSchemaException("Property defined more than once: " + name);
@@ -246,7 +246,7 @@ public final class AppSearchSchema {
         @Nullable private Integer mHashCode;
 
         PropertyConfig(@NonNull Bundle bundle) {
-            mBundle = Preconditions.checkNotNull(bundle);
+            mBundle = Objects.requireNonNull(bundle);
         }
 
         @Override
@@ -712,7 +712,7 @@ public final class AppSearchSchema {
         /** Returns the logical schema-type of the contents of this document property. */
         @NonNull
         public String getSchemaType() {
-            return Preconditions.checkNotNull(mBundle.getString(SCHEMA_TYPE_FIELD));
+            return Objects.requireNonNull(mBundle.getString(SCHEMA_TYPE_FIELD));
         }
 
         /**
@@ -755,7 +755,7 @@ public final class AppSearchSchema {
             @NonNull
             public DocumentPropertyConfig.Builder setSchemaType(@NonNull String schemaType) {
                 Preconditions.checkState(!mBuilt, "Builder has already been used");
-                Preconditions.checkNotNull(schemaType);
+                Objects.requireNonNull(schemaType);
                 mBundle.putString(SCHEMA_TYPE_FIELD, schemaType);
                 return this;
             }

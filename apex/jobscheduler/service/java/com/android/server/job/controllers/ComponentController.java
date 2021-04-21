@@ -34,6 +34,7 @@ import android.util.Slog;
 import android.util.SparseArrayMap;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.job.JobSchedulerService;
 
 import java.util.Objects;
@@ -58,13 +59,28 @@ public class ComponentController extends StateController {
                 return;
             }
             switch (action) {
+                case Intent.ACTION_PACKAGE_ADDED:
+                    if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                        // Only do this for app updates since new installs won't have any jobs
+                        // scheduled.
+                        final Uri uri = intent.getData();
+                        final String pkg = uri != null ? uri.getSchemeSpecificPart() : null;
+                        if (pkg != null) {
+                            final int pkgUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                            final int userId = UserHandle.getUserId(pkgUid);
+                            updateComponentStateForPackage(userId, pkg);
+                        }
+                    }
+                    break;
                 case Intent.ACTION_PACKAGE_CHANGED:
                     final Uri uri = intent.getData();
                     final String pkg = uri != null ? uri.getSchemeSpecificPart() : null;
                     final String[] changedComponents = intent.getStringArrayExtra(
                             Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
                     if (pkg != null && changedComponents != null && changedComponents.length > 0) {
-                        updateComponentStateForPackage(pkg);
+                        final int pkgUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                        final int userId = UserHandle.getUserId(pkgUid);
+                        updateComponentStateForPackage(userId, pkg);
                     }
                     break;
                 case Intent.ACTION_USER_UNLOCKED:
@@ -86,6 +102,7 @@ public class ComponentController extends StateController {
         super(service);
 
         final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         mContext.registerReceiverAsUser(
@@ -99,6 +116,7 @@ public class ComponentController extends StateController {
     }
 
     @Override
+    @GuardedBy("mLock")
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         updateComponentEnabledStateLocked(jobStatus);
     }
@@ -108,30 +126,53 @@ public class ComponentController extends StateController {
             boolean forUpdate) {
     }
 
+    @Override
+    @GuardedBy("mLock")
+    public void onAppRemovedLocked(String packageName, int uid) {
+        clearComponentsForPackageLocked(UserHandle.getUserId(uid), packageName);
+    }
+
+    @Override
+    @GuardedBy("mLock")
+    public void onUserRemovedLocked(int userId) {
+        mServiceInfoCache.delete(userId);
+    }
+
     @Nullable
-    private ServiceInfo getServiceInfo(JobStatus jobStatus) {
+    @GuardedBy("mLock")
+    private ServiceInfo getServiceInfoLocked(JobStatus jobStatus) {
         final ComponentName service = jobStatus.getServiceComponent();
         final int userId = jobStatus.getUserId();
-        ServiceInfo si = mServiceInfoCache.get(userId, service);
-        if (si == null) {
-            try {
-                // createContextAsUser may potentially be expensive
-                // TODO: cache user context or improve ContextImpl implementation if this becomes
-                // a problem
-                si = mContext.createContextAsUser(UserHandle.of(userId), 0)
-                        .getPackageManager()
-                        .getServiceInfo(service, PackageManager.MATCH_DIRECT_BOOT_AUTO);
-            } catch (NameNotFoundException e) {
-                Slog.e(TAG, "Job exists for non-existent package: " + service.getPackageName());
-                return null;
-            }
-            mServiceInfoCache.add(userId, service, si);
+        if (mServiceInfoCache.contains(userId, service)) {
+            // Return whatever is in the cache, even if it's null. When something changes, we
+            // clear the cache.
+            return mServiceInfoCache.get(userId, service);
         }
+
+        ServiceInfo si;
+        try {
+            // createContextAsUser may potentially be expensive
+            // TODO: cache user context or improve ContextImpl implementation if this becomes
+            // a problem
+            si = mContext.createContextAsUser(UserHandle.of(userId), 0)
+                    .getPackageManager()
+                    .getServiceInfo(service, PackageManager.MATCH_DIRECT_BOOT_AUTO);
+        } catch (NameNotFoundException e) {
+            if (mService.areUsersStartedLocked(jobStatus)) {
+                // User is fully unlocked but PM still says the package doesn't exist.
+                Slog.e(TAG, "Job exists for non-existent package: " + service.getPackageName());
+            }
+            // Write null to the cache so we don't keep querying PM.
+            si = null;
+        }
+        mServiceInfoCache.add(userId, service, si);
+
         return si;
     }
 
+    @GuardedBy("mLock")
     private boolean updateComponentEnabledStateLocked(JobStatus jobStatus) {
-        final ServiceInfo service = getServiceInfo(jobStatus);
+        final ServiceInfo service = getServiceInfoLocked(jobStatus);
 
         if (DEBUG && service == null) {
             Slog.v(TAG, jobStatus.toShortString() + " component not present");
@@ -141,20 +182,26 @@ public class ComponentController extends StateController {
         return !Objects.equals(ogService, service);
     }
 
-    private void updateComponentStateForPackage(final String pkg) {
-        synchronized (mLock) {
-            for (int u = mServiceInfoCache.numMaps() - 1; u >= 0; --u) {
-                final int userId = mServiceInfoCache.keyAt(u);
-
-                for (int c = mServiceInfoCache.numElementsForKey(userId) - 1; c >= 0; --c) {
-                    final ComponentName cn = mServiceInfoCache.keyAt(u, c);
-                    if (cn.getPackageName().equals(pkg)) {
-                        mServiceInfoCache.delete(userId, cn);
-                    }
-                }
+    @GuardedBy("mLock")
+    private void clearComponentsForPackageLocked(final int userId, final String pkg) {
+        final int uIdx = mServiceInfoCache.indexOfKey(userId);
+        for (int c = mServiceInfoCache.numElementsForKey(userId) - 1; c >= 0; --c) {
+            final ComponentName cn = mServiceInfoCache.keyAt(uIdx, c);
+            if (cn.getPackageName().equals(pkg)) {
+                mServiceInfoCache.delete(userId, cn);
             }
-            updateComponentStatesLocked(
-                    jobStatus -> jobStatus.getServiceComponent().getPackageName().equals(pkg));
+        }
+    }
+
+    private void updateComponentStateForPackage(final int userId, final String pkg) {
+        synchronized (mLock) {
+            clearComponentsForPackageLocked(userId, pkg);
+            updateComponentStatesLocked(jobStatus -> {
+                // Using user ID instead of source user ID because the service will run under the
+                // user ID, not source user ID.
+                return jobStatus.getUserId() == userId
+                        && jobStatus.getServiceComponent().getPackageName().equals(pkg);
+            });
         }
     }
 
@@ -169,6 +216,7 @@ public class ComponentController extends StateController {
         }
     }
 
+    @GuardedBy("mLock")
     private void updateComponentStatesLocked(@NonNull Predicate<JobStatus> filter) {
         mComponentStateUpdateFunctor.reset();
         mService.getJobStore().forEachJob(filter, mComponentStateUpdateFunctor);
@@ -178,24 +226,40 @@ public class ComponentController extends StateController {
     }
 
     final class ComponentStateUpdateFunctor implements Consumer<JobStatus> {
+        @GuardedBy("mLock")
         boolean mChanged;
 
         @Override
+        @GuardedBy("mLock")
         public void accept(JobStatus jobStatus) {
             mChanged |= updateComponentEnabledStateLocked(jobStatus);
         }
 
+        @GuardedBy("mLock")
         private void reset() {
             mChanged = false;
         }
     }
 
     @Override
+    @GuardedBy("mLock")
     public void dumpControllerStateLocked(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
-
+        for (int u = 0; u < mServiceInfoCache.numMaps(); ++u) {
+            final int userId = mServiceInfoCache.keyAt(u);
+            for (int p = 0; p < mServiceInfoCache.numElementsForKey(userId); ++p) {
+                final ComponentName componentName = mServiceInfoCache.keyAt(u, p);
+                pw.print(userId);
+                pw.print("-");
+                pw.print(componentName);
+                pw.print(": ");
+                pw.print(mServiceInfoCache.valueAt(u, p));
+                pw.println();
+            }
+        }
     }
 
     @Override
+    @GuardedBy("mLock")
     public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
             Predicate<JobStatus> predicate) {
 

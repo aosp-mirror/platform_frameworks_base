@@ -527,6 +527,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             throw new SecurityException("User restriction prevents installing");
         }
 
+        if (params.dataLoaderParams != null
+                && mContext.checkCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2)
+                        != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the "
+                    + "com.android.permission.USE_INSTALLER_V2 permission "
+                    + "to use a data loader");
+        }
+
         // INSTALL_REASON_ROLLBACK allows an app to be rolled back without requiring the ROLLBACK
         // capability; ensure if this is set as the install reason the app has one of the necessary
         // signature permissions to perform the rollback.
@@ -576,11 +584,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
             params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
             params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
-            params.installFlags &= ~PackageManager.INSTALL_ALLOW_TEST;
             params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
             if ((params.installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0
                     && !mPm.isCallerVerifier(callingUid)) {
                 params.installFlags &= ~PackageManager.INSTALL_VIRTUAL_PRELOAD;
+            }
+            if (mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.INSTALL_TEST_ONLY_PACKAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                params.installFlags &= ~PackageManager.INSTALL_ALLOW_TEST;
             }
         }
 

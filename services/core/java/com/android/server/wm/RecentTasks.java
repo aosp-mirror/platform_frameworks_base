@@ -58,8 +58,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -1345,6 +1343,7 @@ class RecentTasks {
                     + " inactiveDuration=" + task.getInactiveDuration()
                     + " activityType=" + task.getActivityType()
                     + " windowingMode=" + task.getWindowingMode()
+                    + " isAlwaysOnTopWhenVisible=" + task.isAlwaysOnTopWhenVisible()
                     + " intentFlags=" + task.getBaseIntent().getFlags());
         }
 
@@ -1380,7 +1379,7 @@ class RecentTasks {
                 break;
             case WINDOWING_MODE_MULTI_WINDOW:
                 // Ignore tasks that are always on top
-                if (task.isAlwaysOnTop()) {
+                if (task.isAlwaysOnTopWhenVisible()) {
                     return false;
                 }
                 break;
@@ -1416,6 +1415,9 @@ class RecentTasks {
             return true;
         }
 
+        // The given task if always treated as in visible range if it is the origin of pinned task.
+        if (task.mChildPipActivity != null) return true;
+
         if (mMaxNumVisibleTasks >= 0) {
             // Always keep up to the max number of recent tasks, but return false afterwards
             return numVisibleTasks <= mMaxNumVisibleTasks;
@@ -1434,20 +1436,18 @@ class RecentTasks {
 
     /** @return whether the given task can be trimmed even if it is outside the visible range. */
     protected boolean isTrimmable(Task task) {
-        final Task rootTask = task.getRootTask();
-
-        // No stack for task, just trim it
-        if (rootTask == null) {
+        // The task was detached, just trim it.
+        if (!task.isAttached()) {
             return true;
         }
 
         // Ignore tasks from different displays
         // TODO (b/115289124): No Recents on non-default displays.
-        if (!rootTask.isOnHomeDisplay()) {
+        if (!task.isOnHomeDisplay()) {
             return false;
         }
 
-        final Task rootHomeTask = rootTask.getDisplayArea().getRootHomeTask();
+        final Task rootHomeTask = task.getDisplayArea().getRootHomeTask();
         // Home task does not exist. Don't trim the task.
         if (rootHomeTask == null) {
             return false;

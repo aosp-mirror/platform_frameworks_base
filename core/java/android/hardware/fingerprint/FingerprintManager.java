@@ -1268,12 +1268,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 return context.getString(
                         com.android.internal.R.string.fingerprint_error_security_update_required);
             case FINGERPRINT_ERROR_VENDOR: {
-                    String[] msgArray = context.getResources().getStringArray(
-                            com.android.internal.R.array.fingerprint_error_vendor);
-                    if (vendorCode < msgArray.length) {
+                String[] msgArray = context.getResources().getStringArray(
+                        com.android.internal.R.array.fingerprint_error_vendor);
+                if (vendorCode < msgArray.length) {
+                    if (Build.IS_ENG || Build.IS_USERDEBUG) {
                         return msgArray[vendorCode];
+                    } else {
+                        return context.getString(
+                            com.android.internal.R.string.fingerprint_error_unable_to_process);
                     }
                 }
+            }
         }
         Slog.w(TAG, "Invalid error message: " + errMsg + ", " + vendorCode);
         return null;
@@ -1302,12 +1307,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 return context.getString(
                     com.android.internal.R.string.fingerprint_acquired_too_fast);
             case FINGERPRINT_ACQUIRED_VENDOR: {
-                    String[] msgArray = context.getResources().getStringArray(
-                            com.android.internal.R.array.fingerprint_acquired_vendor);
-                    if (vendorCode < msgArray.length) {
+                String[] msgArray = context.getResources().getStringArray(
+                        com.android.internal.R.array.fingerprint_acquired_vendor);
+                if (vendorCode < msgArray.length) {
+                    if (Build.IS_ENG || Build.IS_USERDEBUG) {
                         return msgArray[vendorCode];
+                    } else {
+                        return context.getString(
+                            com.android.internal.R.string.fingerprint_error_unable_to_process);
                     }
                 }
+            }
                 break;
             case FINGERPRINT_ACQUIRED_START:
                 return null;

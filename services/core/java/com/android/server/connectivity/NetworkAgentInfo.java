@@ -59,6 +59,7 @@ import com.android.internal.util.WakeupMessage;
 import com.android.server.ConnectivityService;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -281,6 +282,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
      */
     public static final int ARG_AGENT_SUCCESS = 1;
 
+    // How long this network should linger for.
+    private int mLingerDurationMs;
+
     // All inactivity timers for this network, sorted by expiry time. A timer is added whenever
     // a request is moved to a network with a better score, regardless of whether the network is or
     // was lingering or not. An inactivity timer is also added when a network connects
@@ -349,7 +353,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
             @NonNull NetworkScore score, Context context,
             Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
             IDnsResolver dnsResolver, int factorySerialNumber, int creatorUid,
-            QosCallbackTracker qosCallbackTracker, ConnectivityService.Dependencies deps) {
+            int lingerDurationMs, QosCallbackTracker qosCallbackTracker,
+            ConnectivityService.Dependencies deps) {
         Objects.requireNonNull(net);
         Objects.requireNonNull(info);
         Objects.requireNonNull(lp);
@@ -370,6 +375,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
         mHandler = handler;
         this.factorySerialNumber = factorySerialNumber;
         this.creatorUid = creatorUid;
+        mLingerDurationMs = lingerDurationMs;
         mQosCallbackTracker = qosCallbackTracker;
     }
 
@@ -685,6 +691,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
             mHandler.obtainMessage(NetworkAgent.EVENT_TEARDOWN_DELAY_CHANGED,
                     teardownDelayMs, 0, new Pair<>(NetworkAgentInfo.this, null)).sendToTarget();
         }
+
+        @Override
+        public void sendLingerDuration(final int durationMs) {
+            mHandler.obtainMessage(NetworkAgent.EVENT_LINGER_DURATION_CHANGED,
+                    new Pair<>(NetworkAgentInfo.this, durationMs)).sendToTarget();
+        }
     }
 
     /**
@@ -707,7 +719,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
             @NonNull final NetworkCapabilities nc) {
         final NetworkCapabilities oldNc = networkCapabilities;
         networkCapabilities = nc;
-        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig, yieldToBadWiFi());
+        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig, everValidatedForYield(),
+                yieldToBadWiFi());
         final NetworkMonitorManager nm = mNetworkMonitor;
         if (nm != null) {
             nm.notifyNetworkCapabilitiesChanged(nc);
@@ -893,7 +906,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
     // Caller must not mutate. This method is called frequently and making a defensive copy
     // would be too expensive. This is used by NetworkRanker.Scoreable, so it can be compared
     // against other scoreables.
-    @Override public NetworkCapabilities getCaps() {
+    @Override public NetworkCapabilities getCapsNoCopy() {
         return networkCapabilities;
     }
 
@@ -919,7 +932,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
      */
     public void setScore(final NetworkScore score) {
         mScore = FullScore.fromNetworkScore(score, networkCapabilities, networkAgentConfig,
-                yieldToBadWiFi());
+                everValidatedForYield(), yieldToBadWiFi());
     }
 
     /**
@@ -927,8 +940,33 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
      *
      * Call this after updating the network agent config.
      */
-    public void updateScoreForNetworkAgentConfigUpdate() {
-        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig, yieldToBadWiFi());
+    public void updateScoreForNetworkAgentUpdate() {
+        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig,
+                everValidatedForYield(), yieldToBadWiFi());
+    }
+
+    private boolean everValidatedForYield() {
+        return everValidated && !avoidUnvalidated;
+    }
+
+    /**
+     * Returns a Scoreable identical to this NAI, but validated.
+     *
+     * This is useful to probe what scoring would be if this network validated, to know
+     * whether to provisionally keep a network that may or may not validate.
+     *
+     * @return a Scoreable identical to this NAI, but validated.
+     */
+    public NetworkRanker.Scoreable getValidatedScoreable() {
+        return new NetworkRanker.Scoreable() {
+            @Override public FullScore getScore() {
+                return mScore.asValidated();
+            }
+
+            @Override public NetworkCapabilities getCapsNoCopy() {
+                return networkCapabilities;
+            }
+        };
     }
 
     /**
@@ -948,13 +986,14 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
 
     /**
      * Sets the specified requestId to linger on this network for the specified time. Called by
-     * ConnectivityService when the request is moved to another network with a higher score, or
+     * ConnectivityService when any request is moved to another network with a higher score, or
      * when a network is newly created.
      *
      * @param requestId The requestId of the request that no longer need to be served by this
      *                  network. Or {@link NetworkRequest.REQUEST_ID_NONE} if this is the
-     *                  {@code LingerTimer} for a newly created network.
+     *                  {@code InactivityTimer} for a newly created network.
      */
+    // TODO: Consider creating a dedicated function for nascent network, e.g. start/stopNascent.
     public void lingerRequest(int requestId, long now, long duration) {
         if (mInactivityTimerForRequest.get(requestId) != null) {
             // Cannot happen. Once a request is lingering on a particular network, we cannot
@@ -967,6 +1006,19 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
         if (VDBG) Log.d(TAG, "Adding InactivityTimer " + timer + " to " + toShortString());
         mInactivityTimers.add(timer);
         mInactivityTimerForRequest.put(requestId, timer);
+    }
+
+    /**
+     * Sets the specified requestId to linger on this network for the timeout set when
+     * initializing or modified by {@link #setLingerDuration(int)}. Called by
+     * ConnectivityService when any request is moved to another network with a higher score.
+     *
+     * @param requestId The requestId of the request that no longer need to be served by this
+     *                  network.
+     * @param now current system timestamp obtained by {@code SystemClock.elapsedRealtime}.
+     */
+    public void lingerRequest(int requestId, long now) {
+        lingerRequest(requestId, now, mLingerDurationMs);
     }
 
     /**
@@ -1006,6 +1058,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
         }
 
         if (newExpiry > 0) {
+            // If the newExpiry timestamp is in the past, the wakeup message will fire immediately.
             mInactivityMessage = new WakeupMessage(
                     mContext, mHandler,
                     "NETWORK_LINGER_COMPLETE." + network.getNetId() /* cmdName */,
@@ -1035,8 +1088,33 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
     }
 
     /**
-     * Return whether the network is just connected and about to be torn down because of not
-     * satisfying any request.
+     * Set the linger duration for this NAI.
+     * @param durationMs The new linger duration, in milliseconds.
+     */
+    public void setLingerDuration(final int durationMs) {
+        final long diff = durationMs - mLingerDurationMs;
+        final ArrayList<InactivityTimer> newTimers = new ArrayList<>();
+        for (final InactivityTimer timer : mInactivityTimers) {
+            if (timer.requestId == NetworkRequest.REQUEST_ID_NONE) {
+                // Don't touch nascent timer, re-add as is.
+                newTimers.add(timer);
+            } else {
+                newTimers.add(new InactivityTimer(timer.requestId, timer.expiryMs + diff));
+            }
+        }
+        mInactivityTimers.clear();
+        mInactivityTimers.addAll(newTimers);
+        updateInactivityTimer();
+        mLingerDurationMs = durationMs;
+    }
+
+    /**
+     * Return whether the network satisfies no request, but is still being kept up
+     * because it has just connected less than
+     * {@code ConnectivityService#DEFAULT_NASCENT_DELAY_MS}ms ago and is thus still considered
+     * nascent. Note that nascent mechanism uses inactivity timer which isn't
+     * associated with a request. Thus, use {@link NetworkRequest#REQUEST_ID_NONE} to identify it.
+     *
      */
     public boolean isNascent() {
         return mInactive && mInactivityTimers.size() == 1

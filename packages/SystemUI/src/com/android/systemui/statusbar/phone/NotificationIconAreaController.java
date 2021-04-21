@@ -17,8 +17,8 @@ import androidx.collection.ArrayMap;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.settingslib.Utils;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
@@ -161,15 +161,14 @@ public class NotificationIconAreaController implements
     /**
      * Called by the Keyguard*ViewController whose view contains the aod icons.
      */
-    public void setupAodIcons(@NonNull NotificationIconContainer aodIcons,
-            int lockScreenMode) {
+    public void setupAodIcons(@NonNull NotificationIconContainer aodIcons) {
         boolean changed = mAodIcons != null;
         if (changed) {
             mAodIcons.setAnimationsEnabled(false);
             mAodIcons.removeAllViews();
         }
         mAodIcons = aodIcons;
-        mAodIcons.setOnLockScreen(true, lockScreenMode);
+        mAodIcons.setOnLockScreen(true);
         updateAodIconsVisibility(false /* animate */);
         updateAnimations();
         if (changed) {

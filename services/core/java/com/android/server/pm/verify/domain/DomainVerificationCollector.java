@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Patterns;
 
@@ -32,7 +33,6 @@ import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -251,6 +251,10 @@ public class DomainVerificationCollector {
      * improve the reliability of any legacy verifiers.
      */
     private boolean isValidHost(String host) {
+        if (TextUtils.isEmpty(host)) {
+            return false;
+        }
+
         mDomainMatcher.reset(host);
         return mDomainMatcher.matches();
     }

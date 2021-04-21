@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.notification.NotificationListenerService;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -83,6 +84,8 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
     private BubblesManager mBubblesManager;
     @Mock
     private NotificationListenerService.Ranking mRanking;
+    @Mock
+    private UserManager mUserManager;
 
     @Captor
     private ArgumentCaptor<NotificationVisibility> mNotificationVisibilityCaptor;
@@ -93,7 +96,7 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mActivity = new LaunchConversationActivity(mNotificationEntryManager,
-                Optional.of(mBubblesManager));
+                Optional.of(mBubblesManager), mUserManager);
         mActivity.setIsForTesting(true, mIStatusBarService);
         mIntent = new Intent();
         mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, "tile ID");
@@ -113,6 +116,7 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
         when(mNotifEntryCanBubble.canBubble()).thenReturn(true);
         when(mNotifEntryNoRanking.getRanking()).thenReturn(null);
         when(mRanking.getRank()).thenReturn(NOTIF_RANK);
+        when(mUserManager.isQuietModeEnabled(any(UserHandle.class))).thenReturn(false);
     }
 
     @Test
@@ -175,5 +179,19 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
         verify(mIStatusBarService, never()).onNotificationClear(any(),
                 anyInt(), any(), anyInt(), anyInt(), any());
         verify(mBubblesManager, times(1)).expandStackAndSelectBubble(eq(mNotifEntryCanBubble));
+    }
+
+    @Test
+    public void testQuietModeOpensQuietModeDialog() throws Exception {
+        mIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY,
+                NOTIF_KEY);
+        when(mUserManager.isQuietModeEnabled(eq(USER_HANDLE))).thenReturn(true);
+        mActivity.setIntent(mIntent);
+        mActivity.onCreate(new Bundle());
+
+        assertThat(mActivity.isFinishing()).isTrue();
+        verify(mIStatusBarService, never()).onNotificationClear(any(),
+                anyInt(), any(), anyInt(), anyInt(), any());
+        verify(mBubblesManager, never()).expandStackAndSelectBubble(any());
     }
 }

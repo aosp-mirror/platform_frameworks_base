@@ -70,7 +70,6 @@ import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
@@ -160,7 +159,7 @@ import dagger.Lazy;
  */
 public class NavigationBar implements View.OnAttachStateChangeListener,
         Callbacks, NavigationModeController.ModeChangedListener,
-        AccessibilityButtonModeObserver.ModeChangedListener, DisplayManager.DisplayListener {
+        AccessibilityButtonModeObserver.ModeChangedListener {
 
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
@@ -660,7 +659,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
         if (mOrientationHandle != null) {
             resetSecondaryHandle();
-            mContext.getSystemService(DisplayManager.class).unregisterDisplayListener(this);
             getBarTransitions().removeDarkIntensityListener(mOrientationHandleIntensityListener);
             mWindowManager.removeView(mOrientationHandle);
             mOrientationHandle.getViewTreeObserver().removeOnGlobalLayoutListener(
@@ -699,16 +697,21 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             mLayoutDirection = ld;
             refreshLayout(ld);
         }
+
         repositionNavigationBar();
+        if (canShowSecondaryHandle()) {
+            int rotation = newConfig.windowConfiguration.getRotation();
+            if (rotation != mCurrentRotation) {
+                mCurrentRotation = rotation;
+                orientSecondaryHomeHandle();
+            }
+        }
     }
 
     private void initSecondaryHomeHandleForRotation() {
         if (mNavBarMode != NAV_BAR_MODE_GESTURAL) {
             return;
         }
-
-        mContext.getSystemService(DisplayManager.class)
-                .registerDisplayListener(this, new Handler(Looper.getMainLooper()));
 
         mOrientationHandle = new QuickswitchOrientedNavHandle(mContext);
         mOrientationHandle.setId(R.id.secondary_home_handle);
@@ -1603,30 +1606,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     private final AccessibilityServicesStateChangeListener mAccessibilityListener =
             this::updateAccessibilityServicesState;
-
-    @Override
-    public void onDisplayAdded(int displayId) {
-
-    }
-
-    @Override
-    public void onDisplayRemoved(int displayId) {
-
-    }
-
-    @Override
-    public void onDisplayChanged(int displayId) {
-        if (!canShowSecondaryHandle()) {
-            return;
-        }
-
-        int rotation = mContext.getResources().getConfiguration()
-                .windowConfiguration.getRotation();
-        if (rotation != mCurrentRotation) {
-            mCurrentRotation = rotation;
-            orientSecondaryHomeHandle();
-        }
-    }
 
     private boolean canShowSecondaryHandle() {
         return mNavBarMode == NAV_BAR_MODE_GESTURAL && mOrientationHandle != null;

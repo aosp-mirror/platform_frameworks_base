@@ -19,8 +19,14 @@ package com.android.internal.view;
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.view.View;
+import android.view.ViewGroup;
 
-interface ScrollCaptureViewHelper<V extends View> {
+/**
+ * Provides view-specific handling to ScrollCaptureViewSupport.
+ *
+ * @param <V> the View subclass
+ */
+public interface ScrollCaptureViewHelper<V extends View> {
     int UP = -1;
     int DOWN = 1;
 
@@ -73,9 +79,12 @@ interface ScrollCaptureViewHelper<V extends View> {
      * @param view the view being captured
      */
     @NonNull default Rect onComputeScrollBounds(@NonNull V view) {
-        return new Rect(view.getPaddingLeft(), view.getPaddingTop(),
-                view.getWidth() - view.getPaddingRight(),
-                view.getHeight() - view.getPaddingBottom());
+        Rect bounds = new Rect(0, 0, view.getWidth(), view.getHeight());
+        if (view instanceof ViewGroup && ((ViewGroup) view).getClipToPadding()) {
+            bounds.inset(view.getPaddingLeft(), view.getPaddingTop(),
+                    view.getPaddingRight(), view.getPaddingBottom());
+        }
+        return bounds;
     }
 
     /**

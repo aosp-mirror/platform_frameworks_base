@@ -34,6 +34,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -640,7 +641,6 @@ public class RecentTasksTest extends WindowTestsBase {
 
     @Test
     public void testVisibleTasks_excludedFromRecents() {
-        mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(-1 /* min */, 4 /* max */, -1 /* ms */);
 
         Task excludedTask1 = createTaskBuilder(".ExcludedTask1")
@@ -649,15 +649,26 @@ public class RecentTasksTest extends WindowTestsBase {
         Task excludedTask2 = createTaskBuilder(".ExcludedTask2")
                 .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                 .build();
+        Task detachedExcludedTask = createTaskBuilder(".DetachedExcludedTask")
+                .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .build();
 
+        // Move home to front so other task can satisfy the condition in RecentTasks#isTrimmable.
+        mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask().moveToFront("test");
+        // Avoid Task#autoRemoveFromRecents when removing from parent.
+        detachedExcludedTask.setHasBeenVisible(true);
+        detachedExcludedTask.removeImmediately();
+        assertFalse(detachedExcludedTask.isAttached());
+
+        mRecentTasks.add(detachedExcludedTask);
         mRecentTasks.add(excludedTask1);
         mRecentTasks.add(mTasks.get(0));
         mRecentTasks.add(mTasks.get(1));
         mRecentTasks.add(mTasks.get(2));
         mRecentTasks.add(excludedTask2);
 
-        // The last excluded task should be trimmed, while the first-most excluded task should not
-        triggerTrimAndAssertTrimmed(excludedTask1);
+        // Except the first-most excluded task, other excluded tasks should be trimmed.
+        triggerTrimAndAssertTrimmed(excludedTask1, detachedExcludedTask);
     }
 
     @Test
@@ -754,6 +765,7 @@ public class RecentTasksTest extends WindowTestsBase {
         final Task alwaysOnTopTask = taskDisplayArea.createRootTask(WINDOWING_MODE_MULTI_WINDOW,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         alwaysOnTopTask.setAlwaysOnTop(true);
+        alwaysOnTopTask.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, true);
 
         assertFalse("Always on top tasks should not be visible recents",
                 mRecentTasks.isVisibleRecentTask(alwaysOnTopTask));
@@ -1030,9 +1042,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertNotRestoreTask(() -> mAtm.cancelTaskWindowTransition(taskId));
         assertNotRestoreTask(
                 () -> mAtm.resizeTask(taskId, null /* bounds */, 0 /* resizeMode */));
-        assertNotRestoreTask(
-                () -> mAtm.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
-                        false/* toTop */));
     }
 
     @Test
@@ -1196,8 +1205,6 @@ public class RecentTasksTest extends WindowTestsBase {
                 () -> mAtm.removeRootTasksWithActivityTypes(
                         new int[]{ACTIVITY_TYPE_UNDEFINED}));
         assertSecurityException(expectCallable, () -> mAtm.removeTask(0));
-        assertSecurityException(expectCallable,
-                () -> mAtm.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
                 () -> mAtm.moveTaskToRootTask(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable, () -> mAtm.getAllRootTaskInfos());

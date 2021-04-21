@@ -29,6 +29,7 @@ import android.content.pm.verify.domain.IDomainVerificationManager;
 import android.os.ServiceSpecificException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class DomainVerificationManagerStub extends IDomainVerificationManager.Stub {
@@ -110,6 +111,7 @@ public class DomainVerificationManagerStub extends IDomainVerificationManager.St
     public List<DomainOwner> getOwnersForDomain(@NonNull String domain,
             @UserIdInt int userId) {
         try {
+            Objects.requireNonNull(domain);
             return mService.getOwnersForDomain(domain, userId);
         } catch (Exception e) {
             throw rethrow(e);

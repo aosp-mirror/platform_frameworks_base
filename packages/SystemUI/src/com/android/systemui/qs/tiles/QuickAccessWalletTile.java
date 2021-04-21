@@ -30,12 +30,15 @@ import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.WalletCard;
 import android.service.quicksettings.Tile;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -117,33 +120,36 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
+        ActivityLaunchAnimator.Controller animationController =
+                view == null ? null : ActivityLaunchAnimator.Controller.fromView(view);
+
         mUiHandler.post(() -> {
-            mHost.collapsePanels();
             if (mHasCard) {
                 Intent intent = new Intent(mContext, WalletActivity.class)
                         .setAction(Intent.ACTION_VIEW)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
+                mActivityStarter.startActivity(intent, true /* dismissShade */,
+                        animationController);
             } else {
                 if (mQuickAccessWalletClient.createWalletIntent() == null) {
                     Log.w(TAG, "Could not get intent of the wallet app.");
                     return;
                 }
                 mActivityStarter.postStartActivityDismissingKeyguard(
-                        mQuickAccessWalletClient.createWalletIntent(), /* delay= */ 0);
+                        mQuickAccessWalletClient.createWalletIntent(), /* delay= */ 0,
+                        animationController);
             }
         });
     }
 
     @Override
     protected void handleUpdateState(State state, Object arg) {
-        CharSequence qawLabel = mQuickAccessWalletClient.getServiceLabel();
-        state.label = qawLabel == null ? mLabel : qawLabel;
+        state.label = mLabel;
         state.contentDescription = state.label;
         state.icon = ResourceIcon.get(R.drawable.ic_qs_wallet);
         boolean isDeviceLocked = !mKeyguardStateController.isUnlocked();
-        if (mQuickAccessWalletClient.isWalletFeatureAvailable()) {
+        if (mQuickAccessWalletClient.isWalletServiceAvailable()) {
             if (mHasCard) {
                 if (isDeviceLocked) {
                     state.state = Tile.STATE_INACTIVE;
@@ -185,8 +191,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
     @Override
     public CharSequence getTileLabel() {
-        CharSequence qawLabel = mQuickAccessWalletClient.getServiceLabel();
-        return qawLabel == null ? mLabel : qawLabel;
+        return mLabel;
     }
 
     private void queryWalletCards() {

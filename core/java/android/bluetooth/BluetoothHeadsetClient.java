@@ -16,9 +16,10 @@
 
 package android.bluetooth;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
@@ -447,6 +448,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothHeadsetClient service =
@@ -473,6 +476,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothHeadsetClient service =
@@ -495,6 +500,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return list of connected devices; empty list if nothing is connected.
      */
     @Override
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         final IBluetoothHeadsetClient service =
@@ -519,6 +526,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * list if nothing matches the <code>states</code>
      */
     @Override
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         final IBluetoothHeadsetClient service =
@@ -542,6 +551,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return the state of connection of the device
      */
     @Override
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getConnectionState(" + device + ")");
         final IBluetoothHeadsetClient service =
@@ -569,7 +580,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
         return setConnectionPolicy(device, BluetoothAdapter.priorityToConnectionPolicy(priority));
@@ -587,7 +599,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return true if connectionPolicy is set, false on error
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
@@ -619,7 +632,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
         return BluetoothAdapter.connectionPolicyToPriority(getConnectionPolicy(device));
@@ -636,7 +651,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return connection policy of the device
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         final IBluetoothHeadsetClient service =
@@ -664,6 +681,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * #EXTRA_AG_FEATURE_VOICE_RECOGNITION}. This method invocation will fail silently when feature
      * is not supported.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean startVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("startVoiceRecognition()");
         final IBluetoothHeadsetClient service =
@@ -688,6 +707,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise.
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean sendVendorAtCommand(BluetoothDevice device, int vendorId,
                                              String atCommand) {
         if (DBG) log("sendVendorSpecificCommand()");
@@ -715,6 +736,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * #EXTRA_AG_FEATURE_VOICE_RECOGNITION}. This method invocation will fail silently when feature
      * is not supported.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean stopVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("stopVoiceRecognition()");
         final IBluetoothHeadsetClient service =
@@ -736,6 +759,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @param device remote device
      * @return list of calls; empty list if none call exists
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothHeadsetClientCall> getCurrentCalls(BluetoothDevice device) {
         if (DBG) log("getCurrentCalls()");
         final IBluetoothHeadsetClient service =
@@ -757,6 +782,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @param device remote device
      * @return bundle of AG  indicators; null if device is not in CONNECTED state
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public Bundle getCurrentAgEvents(BluetoothDevice device) {
         if (DBG) log("getCurrentCalls()");
         final IBluetoothHeadsetClient service =
@@ -782,6 +809,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * otherwise; upon completion HFP sends {@link #ACTION_CALL_CHANGED} intent.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean acceptCall(BluetoothDevice device, int flag) {
         if (DBG) log("acceptCall()");
         final IBluetoothHeadsetClient service =
@@ -804,6 +833,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise; upon completion HFP sends {@link #ACTION_CALL_CHANGED} intent.
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean holdCall(BluetoothDevice device) {
         if (DBG) log("holdCall()");
         final IBluetoothHeadsetClient service =
@@ -831,6 +862,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * supported.</p>
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean rejectCall(BluetoothDevice device) {
         if (DBG) log("rejectCall()");
         final IBluetoothHeadsetClient service =
@@ -862,6 +895,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * #EXTRA_AG_FEATURE_ECC}. This method invocation will fail silently when feature is not
      * supported.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean terminateCall(BluetoothDevice device, BluetoothHeadsetClientCall call) {
         if (DBG) log("terminateCall()");
         final IBluetoothHeadsetClient service =
@@ -891,6 +926,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * #EXTRA_AG_FEATURE_ECC}. This method invocation will fail silently when feature is not
      * supported.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean enterPrivateMode(BluetoothDevice device, int index) {
         if (DBG) log("enterPrivateMode()");
         final IBluetoothHeadsetClient service =
@@ -919,6 +956,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * #EXTRA_AG_FEATURE_MERGE_AND_DETACH}. This method invocation will fail silently when feature
      * is not supported.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean explicitCallTransfer(BluetoothDevice device) {
         if (DBG) log("explicitCallTransfer()");
         final IBluetoothHeadsetClient service =
@@ -943,6 +982,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * successfully; <code>{@link null}</code> otherwise; upon completion HFP sends {@link
      * #ACTION_CALL_CHANGED} intent in case of success; {@link #ACTION_RESULT} is sent otherwise;
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothHeadsetClientCall dial(BluetoothDevice device, String number) {
         if (DBG) log("dial()");
         final IBluetoothHeadsetClient service =
@@ -968,6 +1009,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise; upon completion HFP sends {@link #ACTION_RESULT} intent;
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean sendDTMF(BluetoothDevice device, byte code) {
         if (DBG) log("sendDTMF()");
         final IBluetoothHeadsetClient service =
@@ -995,6 +1038,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * #EXTRA_AG_FEATURE_ATTACH_NUMBER_TO_VT}. This method invocation will fail silently when
      * feature is not supported.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean getLastVoiceTagNumber(BluetoothDevice device) {
         if (DBG) log("getLastVoiceTagNumber()");
         final IBluetoothHeadsetClient service =
@@ -1016,6 +1061,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * Note: This is an internal function and shouldn't be exposed
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getAudioState(BluetoothDevice device) {
         if (VDBG) log("getAudioState");
         final IBluetoothHeadsetClient service =
@@ -1040,6 +1087,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @param allowed if routing is allowed to the device Note: This is an internal function and
      * shouldn't be exposed
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void setAudioRouteAllowed(BluetoothDevice device, boolean allowed) {
         if (VDBG) log("setAudioRouteAllowed");
         final IBluetoothHeadsetClient service =
@@ -1063,6 +1112,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return whether the command succeeded Note: This is an internal function and shouldn't be
      * exposed
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean getAudioRouteAllowed(BluetoothDevice device) {
         if (VDBG) log("getAudioRouteAllowed");
         final IBluetoothHeadsetClient service =
@@ -1089,6 +1140,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise; upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED} intent;
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean connectAudio(BluetoothDevice device) {
         final IBluetoothHeadsetClient service =
                 getService();
@@ -1114,6 +1167,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return <code>true</code> if command has been issued successfully; <code>false</code>
      * otherwise; upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED} intent;
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disconnectAudio(BluetoothDevice device) {
         final IBluetoothHeadsetClient service =
                 getService();
@@ -1136,6 +1191,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @param device remote device
      * @return bundle of AG features; null if no service or AG not connected
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public Bundle getCurrentAgFeatures(BluetoothDevice device) {
         final IBluetoothHeadsetClient service =
                 getService();

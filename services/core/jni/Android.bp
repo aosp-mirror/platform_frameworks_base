@@ -34,6 +34,7 @@ cc_library_static {
         "gnss/GnssMeasurement.cpp",
         "gnss/GnssMeasurementCallback.cpp",
         "gnss/Utils.cpp",
+        "stats/SurfaceFlingerPuller.cpp",
         "com_android_server_adb_AdbDebuggingManager.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_biometrics_SurfaceToNativeHandleConverter.cpp",
@@ -49,9 +50,11 @@ cc_library_static {
         "com_android_server_net_NetworkStatsService.cpp",
         "com_android_server_power_PowerManagerService.cpp",
         "com_android_server_powerstats_PowerStatsService.cpp",
+        "com_android_server_hint_HintManagerService.cpp",
         "com_android_server_SerialService.cpp",
         "com_android_server_soundtrigger_middleware_AudioSessionProviderImpl.cpp",
         "com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker.cpp",
+        "com_android_server_stats_pull_StatsPullAtomService.cpp",
         "com_android_server_storage_AppFuseBridge.cpp",
         "com_android_server_SystemServer.cpp",
         "com_android_server_tv_TvUinputBridge.cpp",
@@ -126,6 +129,7 @@ cc_defaults {
         "libsensorservice",
         "libsensorservicehidl",
         "libgui",
+        "libtimestats_atoms_proto",
         "libusbhost",
         "libtinyalsa",
         "libEGL",
@@ -158,7 +162,7 @@ cc_defaults {
         "android.hardware.memtrack-V1-ndk_platform",
         "android.hardware.power@1.0",
         "android.hardware.power@1.1",
-        "android.hardware.power-V1-cpp",
+        "android.hardware.power-V2-cpp",
         "android.hardware.power.stats@1.0",
         "android.hardware.power.stats-V1-ndk_platform",
         "android.hardware.thermal@1.0",
@@ -189,14 +193,13 @@ cc_defaults {
             shared_libs: [
                 "libarcbridge",
                 "libarcbridgeservice",
-                "libarctimer",
                 "libbase",
                 "libcap",
                 "libchrome",
                 "libmojo",
             ],
-        }
-    }
+        },
+    },
 }
 
 filegroup {

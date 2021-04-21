@@ -60,7 +60,7 @@ public class AmbientState {
     private NotificationShelf mShelf;
     private int mZDistanceBetweenElements;
     private int mBaseZHeight;
-    private int mMaxLayoutHeight;
+    private int mContentHeight;
     private ExpandableView mLastVisibleBackgroundChild;
     private float mCurrentScrollVelocity;
     private int mStatusBarState;
@@ -83,6 +83,75 @@ public class AmbientState {
     private float mAppearFraction;
     private boolean mIsShadeOpening;
     private float mSectionPadding;
+
+    /** Distance of top of notifications panel from top of screen. */
+    private float mStackY = 0;
+
+    /** Height of notifications panel. */
+    private float mStackHeight = 0;
+
+    /** Fraction of shade expansion. */
+    private float mExpansionFraction;
+
+    /** Height of the notifications panel without top padding when expansion completes. */
+    private float mStackEndHeight;
+
+    /**
+     * @return Height of the notifications panel without top padding when expansion completes.
+     */
+    public float getStackEndHeight() {
+        return mStackEndHeight;
+    }
+
+    /**
+     * @param stackEndHeight Height of the notifications panel without top padding
+     *                       when expansion completes.
+     */
+    public void setStackEndHeight(float stackEndHeight) {
+        mStackEndHeight = stackEndHeight;
+    }
+
+    /**
+     * @param stackY Distance of top of notifications panel from top of screen.
+     */
+    public void setStackY(float stackY) {
+        mStackY = stackY;
+    }
+
+    /**
+     * @return Distance of top of notifications panel from top of screen.
+     */
+    public float getStackY() {
+        return mStackY;
+    }
+
+    /**
+     * @param expansionFraction Fraction of shade expansion.
+     */
+    public void setExpansionFraction(float expansionFraction) {
+        mExpansionFraction = expansionFraction;
+    }
+
+    /**
+     * @return Fraction of shade expansion.
+     */
+    public float getExpansionFraction() {
+        return mExpansionFraction;
+    }
+
+    /**
+     * @param stackHeight Height of notifications panel.
+     */
+    public void setStackHeight(float stackHeight) {
+        mStackHeight = stackHeight;
+    }
+
+    /**
+     * @return Height of notifications panel.
+     */
+    public float getStackHeight() {
+        return mStackHeight;
+    }
 
     /** Tracks the state from AlertingNotificationManager#hasNotifications() */
     private boolean mHasAlertEntries;
@@ -263,8 +332,8 @@ public class AmbientState {
         if (mDozeAmount == 1.0f && !isPulseExpanding()) {
             return mShelf.getHeight();
         }
-        int height = Math.max(mLayoutMinHeight,
-                Math.min(mLayoutHeight, mMaxLayoutHeight) - mTopPadding);
+        int height = (int) Math.max(mLayoutMinHeight,
+                Math.min(mLayoutHeight, mContentHeight) - mTopPadding);
         if (ignorePulseHeight) {
             return height;
         }
@@ -313,8 +382,12 @@ public class AmbientState {
         return mShelf;
     }
 
-    public void setLayoutMaxHeight(int maxLayoutHeight) {
-        mMaxLayoutHeight = maxLayoutHeight;
+    public void setContentHeight(int contentHeight) {
+        mContentHeight = contentHeight;
+    }
+
+    public float getContentHeight() {
+        return mContentHeight;
     }
 
     /**

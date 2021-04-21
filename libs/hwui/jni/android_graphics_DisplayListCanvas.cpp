@@ -141,20 +141,22 @@ static void android_view_DisplayListCanvas_drawCircleProps(CRITICAL_JNI_PARAMS_C
     canvas->drawCircle(xProp, yProp, radiusProp, paintProp);
 }
 
-static void android_view_DisplayListCanvas_drawRippleProps(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,
-                                                           jlong xPropPtr, jlong yPropPtr,
-                                                           jlong radiusPropPtr, jlong paintPropPtr,
-                                                           jlong progressPropPtr,
-                                                           jlong builderPtr) {
+static void android_view_DisplayListCanvas_drawRippleProps(
+        CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jlong xPropPtr, jlong yPropPtr,
+        jlong radiusPropPtr, jlong paintPropPtr, jlong progressPropPtr, jlong turbulencePhasePtr,
+        jlong builderPtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     CanvasPropertyPrimitive* xProp = reinterpret_cast<CanvasPropertyPrimitive*>(xPropPtr);
     CanvasPropertyPrimitive* yProp = reinterpret_cast<CanvasPropertyPrimitive*>(yPropPtr);
     CanvasPropertyPrimitive* radiusProp = reinterpret_cast<CanvasPropertyPrimitive*>(radiusPropPtr);
+    CanvasPropertyPrimitive* turbulencePhaseProp =
+            reinterpret_cast<CanvasPropertyPrimitive*>(turbulencePhasePtr);
     CanvasPropertyPaint* paintProp = reinterpret_cast<CanvasPropertyPaint*>(paintPropPtr);
     CanvasPropertyPrimitive* progressProp =
             reinterpret_cast<CanvasPropertyPrimitive*>(progressPropPtr);
     SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(builderPtr);
-    canvas->drawRipple(xProp, yProp, radiusProp, paintProp, progressProp, *builder);
+    canvas->drawRipple(xProp, yProp, radiusProp, paintProp, progressProp, turbulencePhaseProp,
+                       *builder);
 }
 
 static void android_view_DisplayListCanvas_drawWebViewFunctor(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jint functor) {
@@ -169,19 +171,22 @@ static void android_view_DisplayListCanvas_drawWebViewFunctor(CRITICAL_JNI_PARAM
 const char* const kClassPathName = "android/graphics/RecordingCanvas";
 
 static JNINativeMethod gMethods[] = {
-    // ------------ @CriticalNative --------------
-    { "nCreateDisplayListCanvas", "(JII)J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
-    { "nResetDisplayListCanvas",  "(JJII)V",    (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },
-    { "nGetMaximumTextureWidth",  "()I",        (void*) android_view_DisplayListCanvas_getMaxTextureSize },
-    { "nGetMaximumTextureHeight", "()I",        (void*) android_view_DisplayListCanvas_getMaxTextureSize },
-    { "nEnableZ",                 "(JZ)V",      (void*) android_view_DisplayListCanvas_enableZ },
-    { "nFinishRecording",         "(JJ)V",      (void*) android_view_DisplayListCanvas_finishRecording },
-    { "nDrawRenderNode",          "(JJ)V",      (void*) android_view_DisplayListCanvas_drawRenderNode },
-    { "nDrawTextureLayer",        "(JJ)V",      (void*) android_view_DisplayListCanvas_drawTextureLayer },
-    { "nDrawCircle",              "(JJJJJ)V",   (void*) android_view_DisplayListCanvas_drawCircleProps },
-    { "nDrawRoundRect",           "(JJJJJJJJ)V",(void*) android_view_DisplayListCanvas_drawRoundRectProps },
-    { "nDrawWebViewFunctor",      "(JI)V",      (void*) android_view_DisplayListCanvas_drawWebViewFunctor },
-    { "nDrawRipple",              "(JJJJJJJ)V", (void*) android_view_DisplayListCanvas_drawRippleProps },
+        // ------------ @CriticalNative --------------
+        {"nCreateDisplayListCanvas", "(JII)J",
+         (void*)android_view_DisplayListCanvas_createDisplayListCanvas},
+        {"nResetDisplayListCanvas", "(JJII)V",
+         (void*)android_view_DisplayListCanvas_resetDisplayListCanvas},
+        {"nGetMaximumTextureWidth", "()I", (void*)android_view_DisplayListCanvas_getMaxTextureSize},
+        {"nGetMaximumTextureHeight", "()I",
+         (void*)android_view_DisplayListCanvas_getMaxTextureSize},
+        {"nEnableZ", "(JZ)V", (void*)android_view_DisplayListCanvas_enableZ},
+        {"nFinishRecording", "(JJ)V", (void*)android_view_DisplayListCanvas_finishRecording},
+        {"nDrawRenderNode", "(JJ)V", (void*)android_view_DisplayListCanvas_drawRenderNode},
+        {"nDrawTextureLayer", "(JJ)V", (void*)android_view_DisplayListCanvas_drawTextureLayer},
+        {"nDrawCircle", "(JJJJJ)V", (void*)android_view_DisplayListCanvas_drawCircleProps},
+        {"nDrawRoundRect", "(JJJJJJJJ)V", (void*)android_view_DisplayListCanvas_drawRoundRectProps},
+        {"nDrawWebViewFunctor", "(JI)V", (void*)android_view_DisplayListCanvas_drawWebViewFunctor},
+        {"nDrawRipple", "(JJJJJJJJ)V", (void*)android_view_DisplayListCanvas_drawRippleProps},
 };
 
 int register_android_view_DisplayListCanvas(JNIEnv* env) {

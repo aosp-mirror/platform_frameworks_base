@@ -1206,10 +1206,10 @@ public class ContentProviderHelper {
             }
         }
 
+        if (providers != null) {
+            mService.mSystemThread.installSystemProviders(providers);
+        }
         synchronized (this) {
-            if (providers != null) {
-                mService.mSystemThread.installSystemProviders(providers);
-            }
             mSystemProvidersInstalled = true;
         }
 

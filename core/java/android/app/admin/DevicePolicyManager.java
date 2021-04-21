@@ -119,6 +119,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -991,8 +992,8 @@ public class DevicePolicyManager {
      * <p>Use only for device owner provisioning.
      * @see #ACTION_GET_PROVISIONING_MODE
      */
-    public static final String EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT =
-            "android.app.extra.PROVISIONING_PERMISSION_GRANT_OPT_OUT";
+    public static final String EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT =
+            "android.app.extra.PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT";
 
     /**
      * A String extra holding the URL-safe base64 encoded SHA-256 checksum of any signature of the
@@ -1214,15 +1215,14 @@ public class DevicePolicyManager {
     public @interface ProvisioningTrigger {}
 
     /**
-     * Possible values for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES}.
+     * Flags for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES}.
      *
      * @hide
      */
-    @IntDef(prefix = { "SUPPORTED_MODES_" }, value = {
-            SUPPORTED_MODES_ORGANIZATION_OWNED,
-            SUPPORTED_MODES_PERSONALLY_OWNED,
-            SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED,
-            SUPPORTED_MODES_DEVICE_OWNER
+    @IntDef(flag = true, prefix = { "FLAG_SUPPORTED_MODES_" }, value = {
+            FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED,
+            FLAG_SUPPORTED_MODES_PERSONALLY_OWNED,
+            FLAG_SUPPORTED_MODES_DEVICE_OWNER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProvisioningConfiguration {}
@@ -1307,7 +1307,7 @@ public class DevicePolicyManager {
     public static final int PROVISIONING_TRIGGER_MANAGED_ACCOUNT = 4;
 
     /**
-     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
+     * Flag for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
      * organization-owned.
      *
      * <p>Using this value indicates the admin app can only be provisioned in either a
@@ -1316,55 +1316,48 @@ public class DevicePolicyManager {
      * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
      * #PROVISIONING_MODE_MANAGED_PROFILE} and {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}.
      *
-     * <p>Also, if this value is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
+     * <p>Also, if this flag is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
      * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
      * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
      *
-     * @hide
-     */
-    @SystemApi
-    public static final int SUPPORTED_MODES_ORGANIZATION_OWNED = 1;
-
-    /**
-     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
-     * personally-owned.
-     *
-     * <p>Using this value will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
-     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
-     * contain only {@link #PROVISIONING_MODE_MANAGED_PROFILE}.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int SUPPORTED_MODES_PERSONALLY_OWNED = 2;
-
-    /**
-     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning could
-     * be organization-owned or personally-owned.
-     *
-     * <p>Using this value will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
-     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
-     * contain {@link
+     * <p>This flag can be combined with {@link #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED}. In
+     * that case, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity will have
+     * the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
      * #PROVISIONING_MODE_MANAGED_PROFILE}, {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE} and
      * {@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_PERSONAL_DEVICE}.
      *
-     * <p>Also, if this value is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
-     * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
-     * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
-     *
      * @hide
      */
     @SystemApi
-    public static final int SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED = 3;
+    public static final int FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED = 1;
 
     /**
-     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that the only supported
-     * provisioning mode is device owner.
+     * Flag for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning
+     * is personally-owned.
+     *
+     * <p>Using this flag will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
+     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
+     * contain only {@link #PROVISIONING_MODE_MANAGED_PROFILE}.
+     *
+     * <p>This flag can be combined with {@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}. In
+     * that case, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity will have the
+     * {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
+     * #PROVISIONING_MODE_MANAGED_PROFILE}, {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE} and
+     * {@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_PERSONAL_DEVICE}.
      *
      * @hide
      */
     @SystemApi
-    public static final int SUPPORTED_MODES_DEVICE_OWNER = 4;
+    public static final int FLAG_SUPPORTED_MODES_PERSONALLY_OWNED = 1 << 1;
+
+    /**
+     * Flag for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that the only
+     * supported provisioning mode is device owner.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_SUPPORTED_MODES_DEVICE_OWNER = 1 << 2;
 
     /**
      * This MIME type is used for starting the device owner provisioning.
@@ -2637,7 +2630,7 @@ public class DevicePolicyManager {
      * An integer extra indication what provisioning modes should be available for the admin app
      * to pick.
      *
-     * <p>The default value is {@link #SUPPORTED_MODES_ORGANIZATION_OWNED}.
+     * <p>The default value is {@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}.
      *
      * <p>The value of this extra will determine the contents of the {@link
      * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array that is passed to the admin app as an
@@ -2648,13 +2641,21 @@ public class DevicePolicyManager {
      * #ACTION_GET_PROVISIONING_MODE} activity via the {@link #EXTRA_PROVISIONING_IMEI} and {@link
      * #EXTRA_PROVISIONING_SERIAL_NUMBER} respectively.
      *
+     * <p>The allowed flag combinations are:
+     * <ul>
+     *     <li>{@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}</li>
+     *     <li>{@link #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED}</li>
+     *     <li>{@link #FLAG_SUPPORTED_MODES_DEVICE_OWNER}</li>
+     *     <li>{@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}
+     *             | {@link #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED}</li>
+     * </ul>
+     *
      * <p>This extra is only respected when provided alongside the {@link
      * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.
      *
-     * @see #SUPPORTED_MODES_ORGANIZATION_OWNED
-     * @see #SUPPORTED_MODES_PERSONALLY_OWNED
-     * @see #SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED
-     * @see #SUPPORTED_MODES_DEVICE_OWNER
+     * @see #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED
+     * @see #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED
+     * @see #FLAG_SUPPORTED_MODES_DEVICE_OWNER
      * @hide
      */
     @SystemApi
@@ -5297,7 +5298,8 @@ public class DevicePolicyManager {
      *            {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA},
      *            {@link #WIPE_EUICC} and {@link #WIPE_SILENTLY}.
      * @throws SecurityException if the calling application does not own an active administrator
-     *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
+     *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} or is not granted the
+     *            {@link android.Manifest.permission#MASTER_CLEAR} permission.
      */
     public void wipeData(int flags) {
         wipeDataInternal(flags, "");
@@ -5325,7 +5327,8 @@ public class DevicePolicyManager {
      * @param reason a string that contains the reason for wiping data, which can be
      *            presented to the user.
      * @throws SecurityException if the calling application does not own an active administrator
-     *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
+     *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} or is not granted the
+     *            {@link android.Manifest.permission#MASTER_CLEAR} permission.
      * @throws IllegalArgumentException if the input reason string is null or empty, or if
      *            {@link #WIPE_SILENTLY} is set.
      */
@@ -6458,12 +6461,14 @@ public class DevicePolicyManager {
      * to a given KeyChain key.
      *
      * Key are granted on a per-UID basis, so if several apps share the same UID, granting access to
-     * one of them automatically grants it to others. This method returns a set of sets of package
-     * names, where each internal set contains all packages sharing the same UID. Grantee packages
-     * that don't share UID with other packages are represented by singleton sets.
+     * one of them automatically grants it to others. This method returns a map containing one entry
+     * per grantee UID. Entries have UIDs as keys and sets of corresponding package names as values.
+     * In particular, grantee packages that don't share UID with other packages are represented by
+     * entries having singleton sets as values.
      *
      * @param alias The alias of the key to grant access to.
-     * @return package names of apps that have access to a given key, grouped by UIDs
+     * @return apps that have access to a given key, arranged in a map from UID to sets of
+     *       package names.
      *
      * @throws SecurityException if the caller is not a device owner, a profile owner or
      *         delegated certificate chooser.
@@ -6471,26 +6476,11 @@ public class DevicePolicyManager {
      *
      * @see #grantKeyPairToApp(ComponentName, String, String)
      */
-    public @NonNull Set<Set<String>> getKeyPairGrants(@NonNull String alias) {
+    public @NonNull Map<Integer, Set<String>> getKeyPairGrants(@NonNull String alias) {
         throwIfParentInstance("getKeyPairGrants");
         try {
-            // Set of sets is flattened into a null-separated list.
-            final List<String> flattened =
-                    mService.getKeyPairGrants(mContext.getPackageName(), alias);
-            final Set<Set<String>> result = new HashSet<>();
-            Set<String> pkgsForOneUid = new HashSet<>();
-            for (final String pkg : flattened) {
-                if (pkg == null) {
-                    result.add(pkgsForOneUid);
-                    pkgsForOneUid = new HashSet<>();
-                } else {
-                    pkgsForOneUid.add(pkg);
-                }
-            }
-            if (!pkgsForOneUid.isEmpty()) {
-                result.add(pkgsForOneUid);
-            }
-            return result;
+            // The result is wrapped into intermediate parcelable representation.
+            return mService.getKeyPairGrants(mContext.getPackageName(), alias).getPackagesByUid();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -10121,45 +10111,51 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets whether enterprise network preference is enabled on the work profile.
+     * Sets whether preferential network service is enabled on the work profile.
+     * For example, an organization can have a deal/agreement with a carrier that all of
+     * the work data from its employees’ devices will be sent via a network service dedicated
+     * for enterprise use.
      *
-     * For example, a corporation can have a deal/agreement with a carrier that all of its
-     * employees’ devices use data on a network preference dedicated for enterprise use.
+     * An example of a supported preferential network service is the Enterprise
+     * slice on 5G networks.
      *
-     * By default, enterprise network preference is enabled on the work profile on supported
+     * By default, preferential network service is enabled on the work profile on supported
      * carriers and devices. Admins can explicitly disable it with this API.
+     * On fully-managed devices this method is unsupported because all traffic is considered
+     * work traffic.
      *
      * <p>This method can only be called by the profile owner of a managed profile.
-     *
-     * @param enabled whether enterprise network preference should be enabled.
+     * @param enabled whether preferential network service should be enabled.
      * @throws SecurityException if the caller is not the profile owner.
      **/
-    public void setEnterpriseNetworkPreferenceEnabled(boolean enabled) {
-        throwIfParentInstance("setEnterpriseNetworkPreferenceEnabled");
-        if (mService != null) {
-            try {
-                mService.setEnterpriseNetworkPreferenceEnabled(enabled);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+    public void setPreferentialNetworkServiceEnabled(boolean enabled) {
+        throwIfParentInstance("setPreferentialNetworkServiceEnabled");
+        if (mService == null) {
+            return;
+        }
+
+        try {
+            mService.setPreferentialNetworkServiceEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Indicates whether whether enterprise network preference is enabled.
+     * Indicates whether preferential network service is enabled.
      *
      * <p>This method can be called by the profile owner of a managed profile.
      *
-     * @return whether whether enterprise network preference is enabled.
+     * @return whether preferential network service is enabled.
      * @throws SecurityException if the caller is not the profile owner.
      */
-    public boolean isEnterpriseNetworkPreferenceEnabled() {
-        throwIfParentInstance("isEnterpriseNetworkPreferenceEnabled");
+    public boolean isPreferentialNetworkServiceEnabled() {
+        throwIfParentInstance("isPreferentialNetworkServiceEnabled");
         if (mService == null) {
             return false;
         }
         try {
-            return mService.isEnterpriseNetworkPreferenceEnabled(myUserId());
+            return mService.isPreferentialNetworkServiceEnabled(myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -10963,8 +10959,8 @@ public class DevicePolicyManager {
      * <p>
      * A device owner, by default, may continue granting these permissions. However, for increased
      * user control, the admin may opt out of controlling grants for these permissions by including
-     * {@link #EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters. In that
-     * case the device owner's control will be limited do denying these permissions.
+     * {@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters.
+     * In that case the device owner's control will be limited do denying these permissions.
      * <p>
      * Attempts by the admin to grant these permissions, when the admin is restricted from doing
      * so, will be silently ignored (no exception will be thrown).

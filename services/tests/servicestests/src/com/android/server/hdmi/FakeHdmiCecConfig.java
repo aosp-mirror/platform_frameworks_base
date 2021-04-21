@@ -65,7 +65,7 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                 R.bool.config_cecHdmiCecVersion20_default);
 
         doReturn(true).when(resources).getBoolean(
-                R.bool.config_cecSendStandbyOnSleep_userConfigurable);
+                R.bool.config_cecPowerControlMode_userConfigurable);
         doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecPowerControlModeTv_allowed);
         doReturn(true).when(resources).getBoolean(

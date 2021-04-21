@@ -22,12 +22,12 @@ import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchResultsShim;
 
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -40,8 +40,8 @@ public class SearchResultsShimImpl implements SearchResultsShim {
     private final SearchResults mSearchResults;
 
     SearchResultsShimImpl(@NonNull SearchResults searchResults, @NonNull Executor executor) {
-        mExecutor = Preconditions.checkNotNull(executor);
-        mSearchResults = Preconditions.checkNotNull(searchResults);
+        mExecutor = Objects.requireNonNull(executor);
+        mSearchResults = Objects.requireNonNull(searchResults);
     }
 
     @NonNull

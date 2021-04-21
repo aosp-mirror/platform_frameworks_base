@@ -18,6 +18,7 @@ package com.android.wm.shell.transition;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -69,6 +70,12 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Set to {@code true} to enable shell transitions. */
     public static final boolean ENABLE_SHELL_TRANSITIONS =
             SystemProperties.getBoolean("persist.debug.shell_transit", false);
+
+    /** Transition type for dismissing split-screen via dragging the divider off the screen. */
+    public static final int TRANSIT_SPLIT_DISMISS_SNAP = TRANSIT_FIRST_CUSTOM + 1;
+
+    /** Transition type for launching 2 tasks simultaneously. */
+    public static final int TRANSIT_SPLIT_SCREEN_PAIR_OPEN = TRANSIT_FIRST_CUSTOM + 2;
 
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
@@ -207,6 +214,11 @@ public class Transitions implements RemoteCallable<Transitions> {
         return type == TRANSIT_OPEN
                 || type == TRANSIT_TO_FRONT
                 || type == WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+    }
+
+    /** @return true if the transition was triggered by closing something vs opening something */
+    public static boolean isClosingType(@WindowManager.TransitionType int type) {
+        return type == TRANSIT_CLOSE || type == TRANSIT_TO_BACK;
     }
 
     /**

@@ -26,6 +26,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
+import static android.os.PowerExemptionManager.REASON_TEMP_ALLOWED_WHILE_IN_USE;
 import static android.os.PowerWhitelistManager.REASON_ACTIVITY_STARTER;
 import static android.os.PowerWhitelistManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerWhitelistManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
@@ -34,7 +35,6 @@ import static android.os.PowerWhitelistManager.REASON_COMPANION_DEVICE_MANAGER;
 import static android.os.PowerWhitelistManager.REASON_DENIED;
 import static android.os.PowerWhitelistManager.REASON_DEVICE_DEMO_MODE;
 import static android.os.PowerWhitelistManager.REASON_DEVICE_OWNER;
-import static android.os.PowerWhitelistManager.REASON_EXEMPTED_PACKAGE;
 import static android.os.PowerWhitelistManager.REASON_FGS_BINDING;
 import static android.os.PowerWhitelistManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerWhitelistManager.REASON_INSTR_BACKGROUND_FGS_PERMISSION;
@@ -289,69 +289,12 @@ public final class ActiveServices {
     static final long FGS_BG_START_RESTRICTION_CHANGE_ID = 170668199L;
 
     /**
-     * If set to false for a package, the system will *not* exempt it from FGS-BG-start,
-     * even if it's in {#code ActiveServices.sFgsBgStartExemptedPackages}.
-     */
-    @ChangeId
-    static final long FGS_BG_START_USE_EXEMPTION_LIST_CHANGE_ID = 175801883;
-
-    /**
      * If a service can not become foreground service due to BG-FGS-launch restriction or other
      * reasons, throws an IllegalStateException.
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.S)
     static final long FGS_START_EXCEPTION_CHANGE_ID = 174041399L;
-
-    /**
-     * Special allowlist that contains packages that are allowed to start FGS even if they target S,
-     * without using START_FOREGROUND_SERVICES_FROM_BACKGROUND.
-     *
-     * Note: we exempt FGS starts if either the "callee" or "caller" match any of the emempted
-     * packages. This means:
-     * - Exempted apps could call Context.startForegroundService() for services owned by any other
-     *   apps.
-     * - Any apps could call Context.startForegroundService() for services owned by any exempted
-     *   apps.
-     * And the call would succeed.
-     */
-    private static final ArraySet<String> sFgsBgStartExemptedPackages = new ArraySet<>();
-
-    private static final ArrayList<String> sFgsBgStartExemptedPackagePrefixes = new ArrayList<>();
-
-    /**
-     * List of packages that are exempted from the FGS restriction *for now*.
-     *
-     * STOPSHIP(/b/176844961) Remove it. Also update ActiveServicesTest.java.
-     */
-    private static final String[] FGS_BG_START_EXEMPTED_PACKAGES = {
-            "com.google.pixel.exo.bootstrapping",
-    };
-
-    /**
-     * List of packages that are exempted from the FGS restriction *for now*. We also allow
-     * any packages that
-     *
-     * STOPSHIP(/b/176844961) Remove it. Also update ActiveServicesTest.java.
-     */
-    private static final String[] FGS_BG_START_EXEMPTED_PACKAGES_PREFIXED_ALLOWED = {
-            "com.android.webview",
-            "com.google.android.webview",
-            "com.android.chrome",
-            "com.google.android.apps.chrome",
-            "com.chrome",
-    };
-
-    static {
-        for (String s : FGS_BG_START_EXEMPTED_PACKAGES) {
-            sFgsBgStartExemptedPackages.add(s);
-        }
-
-        for (String s : FGS_BG_START_EXEMPTED_PACKAGES_PREFIXED_ALLOWED) {
-            sFgsBgStartExemptedPackages.add(s); // Add it for an exact match.
-            sFgsBgStartExemptedPackagePrefixes.add(s + "."); // Add it for an prefix match.
-        }
-    }
 
     final Runnable mLastAnrDumpClearer = new Runnable() {
         @Override public void run() {
@@ -1850,6 +1793,9 @@ public final class ActiveServices {
                         showFgsBgRestrictedNotificationLocked(r);
                         updateServiceForegroundLocked(psr, true);
                         ignoreForeground = true;
+                        logForegroundServiceStateChanged(r,
+                                FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED,
+                                0);
                         if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID,
                                 r.appInfo.uid)) {
                             throw new ForegroundServiceStartNotAllowedException(msg);
@@ -1895,6 +1841,7 @@ public final class ActiveServices {
                         }
                         r.isForeground = true;
                         r.mStartForegroundCount++;
+                        r.mFgsEnterTime = SystemClock.uptimeMillis();
                         if (!stopProcStatsOp) {
                             ServiceState stracker = r.getTracker();
                             if (stracker != null) {
@@ -1904,18 +1851,17 @@ public final class ActiveServices {
                         } else {
                             stopProcStatsOp = false;
                         }
+                        postFgsNotificationLocked(r);
                         mAm.mAppOpsService.startOperation(
                                 AppOpsManager.getToken(mAm.mAppOpsService),
                                 AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName,
                                 null, true, false, "", false);
-                        FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
-                                r.appInfo.uid, r.shortInstanceName,
+                        logForegroundServiceStateChanged(r,
                                 FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
-                                r.mAllowWhileInUsePermissionInFgs);
+                                0);
                         registerAppOpCallbackLocked(r);
                         mAm.updateForegroundServiceUsageStats(r.name, r.userId, true);
                     }
-                    postFgsNotificationLocked(r);
                     if (r.app != null) {
                         updateServiceForegroundLocked(psr, true);
                     }
@@ -1954,6 +1900,7 @@ public final class ActiveServices {
                 }
                 r.isForeground = false;
                 resetFgsRestrictionLocked(r);
+                r.mFgsExitTime = SystemClock.uptimeMillis();
                 ServiceState stracker = r.getTracker();
                 if (stracker != null) {
                     stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(),
@@ -1963,10 +1910,10 @@ public final class ActiveServices {
                         AppOpsManager.getToken(mAm.mAppOpsService),
                         AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
                 unregisterAppOpCallbackLocked(r);
-                FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
-                        r.appInfo.uid, r.shortInstanceName,
+                logForegroundServiceStateChanged(r,
                         FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT,
-                        r.mAllowWhileInUsePermissionInFgs);
+                        r.mFgsExitTime > r.mFgsEnterTime
+                                ? (int)(r.mFgsExitTime - r.mFgsEnterTime) : 0);
                 mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
                 if (r.app != null) {
                     mAm.updateLruProcessLocked(r.app, false, null);
@@ -2050,9 +1997,13 @@ public final class ActiveServices {
                 Slog.d(TAG_SERVICE, "FGS " + r + " non-deferred notification");
             }
             r.postNotification();
+            r.mFgsNotificationDeferred = false;
+            r.mFgsNotificationShown = true;
             return;
         }
 
+        r.mFgsNotificationDeferred = true;
+        r.mFgsNotificationShown = false;
         // schedule the actual notification post
         long when = now + mAm.mConstants.mFgsNotificationDeferralInterval;
         // If there are already deferred FGS notifications for this app,
@@ -2110,6 +2061,7 @@ public final class ActiveServices {
                         // the notification.
                         if (r.isForeground && r.app != null) {
                             r.postNotification();
+                            r.mFgsNotificationShown = true;
                         } else if (DEBUG_FOREGROUND_SERVICE) {
                             Slog.d(TAG_SERVICE, "  - service no longer running/fg, ignoring");
                         }
@@ -3085,6 +3037,12 @@ public final class ActiveServices {
         if (r != null) {
             r.mRecentCallingPackage = callingPackage;
             r.mRecentCallingUid = callingUid;
+            try {
+                r.mRecentCallerApplicationInfo =
+                        mAm.mContext.getPackageManager().getApplicationInfoAsUser(callingPackage,
+                                0, UserHandle.getUserId(callingUid));
+            } catch (PackageManager.NameNotFoundException e) {
+            }
             if (!mAm.validateAssociationAllowedLocked(callingPackage, callingUid, r.packageName,
                     r.appInfo.uid)) {
                 String msg = "association not allowed between packages "
@@ -4021,10 +3979,11 @@ public final class ActiveServices {
                     AppOpsManager.getToken(mAm.mAppOpsService),
                     AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
             unregisterAppOpCallbackLocked(r);
-            FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
-                    r.appInfo.uid, r.shortInstanceName,
+            r.mFgsExitTime = SystemClock.uptimeMillis();
+            logForegroundServiceStateChanged(r,
                     FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT,
-                    r.mAllowWhileInUsePermissionInFgs);
+                    r.mFgsExitTime > r.mFgsEnterTime
+                            ? (int)(r.mFgsExitTime - r.mFgsEnterTime) : 0);
             mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
         }
 
@@ -5686,6 +5645,12 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
+            if (mAm.mInternal.isTempAllowlistedForFgsWhileInUse(callingUid)) {
+                return REASON_TEMP_ALLOWED_WHILE_IN_USE;
+            }
+        }
+
+        if (ret == REASON_DENIED) {
             if (targetService != null && targetService.app != null) {
                 ActiveInstrumentation instr = targetService.app.getActiveInstrumentation();
                 if (instr != null && instr.mHasBackgroundActivityStartsPermission) {
@@ -5733,7 +5698,7 @@ public final class ActiveServices {
     private @ReasonCode int shouldAllowFgsStartForegroundLocked(
             @ReasonCode int allowWhileInUse, String callingPackage, int callingPid,
             int callingUid, Intent intent, ServiceRecord r, int userId) {
-        FgsStartTempAllowList.TempFgsAllowListEntry tempAllowListReason =
+        ActivityManagerService.FgsTempAllowListItem tempAllowListReason =
                 r.mInfoTempFgsAllowListReason = mAm.isAllowlistedForFgsStartLOSP(callingUid);
         int ret = shouldAllowFgsStartForegroundLocked(allowWhileInUse, callingPid, callingUid,
                 callingPackage, r);
@@ -5832,13 +5797,13 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
-            FgsStartTempAllowList.TempFgsAllowListEntry entry =
+            ActivityManagerService.FgsTempAllowListItem item =
                     mAm.isAllowlistedForFgsStartLOSP(callingUid);
-            if (entry != null) {
-                if (entry == ActivityManagerService.FAKE_TEMP_ALLOWLIST_ENTRY) {
+            if (item != null) {
+                if (item == ActivityManagerService.FAKE_TEMP_ALLOW_LIST_ITEM) {
                     ret = REASON_SYSTEM_ALLOW_LISTED;
                 } else {
-                    ret = entry.mReasonCode;
+                    ret = item.mReasonCode;
                 }
             }
         }
@@ -5854,16 +5819,6 @@ public final class ActiveServices {
             final boolean isProfileOwner = mAm.mInternal.isProfileOwner(callingUid);
             if (isProfileOwner) {
                 ret = REASON_PROFILE_OWNER;
-            }
-        }
-
-        // NOTE this should always be the last check.
-        if (ret == REASON_DENIED) {
-            if (isPackageExemptedFromFgsRestriction(callingPackage, callingUid)) {
-                ret = REASON_EXEMPTED_PACKAGE;
-            } else if (targetService != null && isPackageExemptedFromFgsRestriction(
-                    targetService.appInfo.packageName, targetService.appInfo.uid)) {
-                ret = REASON_EXEMPTED_PACKAGE;
             }
         }
 
@@ -5887,28 +5842,6 @@ public final class ActiveServices {
         }
 
         return ret;
-    }
-
-    @VisibleForTesting
-    static boolean isPackageExemptedFromFgsRestriction(String packageName, int uid) {
-        boolean exempted = false;
-        if (sFgsBgStartExemptedPackages.contains(packageName)) {
-            exempted = true;
-        } else {
-            for (String pkg : sFgsBgStartExemptedPackagePrefixes) {
-                if (packageName.startsWith(pkg)) {
-                    exempted = true;
-                    break;
-                }
-            }
-        }
-        if (!exempted) {
-            return false; // Package isn't exempted.
-        }
-        // Allow exempted packages to be subject to the restriction using this compat ID.
-        // (so that, for example, the webview developer will be able to test the restriction
-        // locally.)
-        return CompatChanges.isChangeEnabled(FGS_BG_START_USE_EXEMPTION_LIST_CHANGE_ID, uid);
     }
 
     private static boolean isFgsBgStart(@ReasonCode int code) {
@@ -5969,5 +5902,38 @@ public final class ActiveServices {
             }
             r.mLoggedInfoAllowStartForeground = true;
         }
+    }
+
+    /**
+     * Log the statsd event for FGS.
+     * @param r ServiceRecord
+     * @param state one of ENTER/EXIT/DENIED event.
+     * @param durationMs Only meaningful for EXIT event, the duration from ENTER and EXIT state.
+     */
+    private void logForegroundServiceStateChanged(ServiceRecord r, int state, int durationMs) {
+        FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
+                r.appInfo.uid,
+                r.shortInstanceName,
+                state,
+                r.mAllowWhileInUsePermissionInFgs,
+                r.mAllowStartForeground,
+                r.appInfo.targetSdkVersion,
+                r.mRecentCallingUid,
+                r.mRecentCallerApplicationInfo != null
+                        ? r.mRecentCallerApplicationInfo.targetSdkVersion : 0,
+                r.mInfoTempFgsAllowListReason != null
+                        ? r.mInfoTempFgsAllowListReason.mCallingUid : INVALID_UID,
+                r.mFgsNotificationDeferred,
+                r.mFgsNotificationShown,
+                durationMs,
+                r.mStartForegroundCount);
+    }
+
+    boolean canAllowWhileInUsePermissionInFgsLocked(int callingPid, int callingUid,
+            String callingPackage) {
+        return shouldAllowFgsWhileInUsePermissionLocked(callingPackage, callingPid, callingUid,
+                /* targetService */ null,
+                /* allowBackgroundActivityStarts */ false)
+                != REASON_DENIED;
     }
 }

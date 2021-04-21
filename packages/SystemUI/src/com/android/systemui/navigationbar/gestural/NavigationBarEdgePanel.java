@@ -51,8 +51,8 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.NavigationEdgeBackPlugin;
 import com.android.systemui.statusbar.VibratorHelper;
 

@@ -16,11 +16,13 @@
 
 package com.android.wm.shell.flicker.pip
 
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -41,4 +43,16 @@ class PipCloseWithDismissButtonTest(testSpec: FlickerTestParameter) : PipCloseTr
                 pipApp.closePipWindow(wmHelper)
             }
         }
+
+    @FlakyTest
+    @Test
+    override fun pipLayerBecomesInvisible() {
+        super.pipLayerBecomesInvisible()
+    }
+
+    @FlakyTest
+    @Test
+    override fun pipWindowBecomesInvisible() {
+        super.pipWindowBecomesInvisible()
+    }
 }

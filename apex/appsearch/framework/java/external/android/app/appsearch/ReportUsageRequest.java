@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
+
 /**
  * A request to report usage of a document.
  *
@@ -33,8 +35,8 @@ public final class ReportUsageRequest {
     private final long mUsageTimeMillis;
 
     ReportUsageRequest(@NonNull String namespace, @NonNull String uri, long usageTimeMillis) {
-        mNamespace = Preconditions.checkNotNull(namespace);
-        mUri = Preconditions.checkNotNull(uri);
+        mNamespace = Objects.requireNonNull(namespace);
+        mUri = Objects.requireNonNull(uri);
         mUsageTimeMillis = usageTimeMillis;
     }
 
@@ -69,7 +71,7 @@ public final class ReportUsageRequest {
 
         /** Creates a {@link ReportUsageRequest.Builder} instance. */
         public Builder(@NonNull String namespace) {
-            mNamespace = Preconditions.checkNotNull(namespace);
+            mNamespace = Objects.requireNonNull(namespace);
         }
 
         /**
@@ -82,7 +84,7 @@ public final class ReportUsageRequest {
         @NonNull
         public ReportUsageRequest.Builder setUri(@NonNull String uri) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(uri);
+            Objects.requireNonNull(uri);
             mUri = uri;
             return this;
         }
@@ -114,7 +116,7 @@ public final class ReportUsageRequest {
         @NonNull
         public ReportUsageRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(mUri, "ReportUsageRequest is missing a URI");
+            Objects.requireNonNull(mUri, "ReportUsageRequest is missing a URI");
             if (mUsageTimeMillis == null) {
                 mUsageTimeMillis = System.currentTimeMillis();
             }

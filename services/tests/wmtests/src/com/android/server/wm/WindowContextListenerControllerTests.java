@@ -17,7 +17,10 @@
 package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -130,36 +133,56 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCanCallerRemoveListener_NullListener_ReturnFalse() {
-        assertFalse(mController.assertCallerCanRemoveListener(mClientToken,
+    public void testAssertCallerCanModifyListener_NullListener_ReturnFalse() {
+        assertFalse(mController.assertCallerCanModifyListener(mClientToken,
                 true /* callerCanManagerAppTokens */, TEST_UID));
     }
 
     @Test
-    public void testCanCallerRemoveListener_CanManageAppTokens_ReturnTrue() {
+    public void testAssertCallerCanModifyListener_CanManageAppTokens_ReturnTrue() {
         mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID,
                 TYPE_APPLICATION_OVERLAY, null /* options */);
 
-        assertTrue(mController.assertCallerCanRemoveListener(mClientToken,
+        assertTrue(mController.assertCallerCanModifyListener(mClientToken,
                 true /* callerCanManagerAppTokens */, ANOTHER_UID));
     }
 
     @Test
-    public void testCanCallerRemoveListener_SameUid_ReturnTrue() {
+    public void testAssertCallerCanModifyListener_SameUid_ReturnTrue() {
         mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID,
                 TYPE_APPLICATION_OVERLAY, null /* options */);
 
-        assertTrue(mController.assertCallerCanRemoveListener(mClientToken,
+        assertTrue(mController.assertCallerCanModifyListener(mClientToken,
                 false /* callerCanManagerAppTokens */, TEST_UID));
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testCanCallerRemoveListener_DifferentUid_ThrowException() {
+    public void testAssertCallerCanModifyListener_DifferentUid_ThrowException() {
         mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID,
                 TYPE_APPLICATION_OVERLAY, null /* options */);
 
-        mController.assertCallerCanRemoveListener(mClientToken,
+        mController.assertCallerCanModifyListener(mClientToken,
                 false /* callerCanManagerAppTokens */, ANOTHER_UID);
+    }
+
+    @Test
+    public void testWindowContextCreatedWindowTokenRemoved_SwitchToListenToDA() {
+        WindowToken windowContextCreatedToken = new WindowToken.Builder(mWm, mClientToken,
+                TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                .setDisplayContent(mDefaultDisplay)
+                .setFromClientToken(true)
+                .build();
+        final DisplayArea da = windowContextCreatedToken.getDisplayArea();
+
+        mController.registerWindowContainerListener(mClientToken, windowContextCreatedToken,
+                TEST_UID, TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, null /* options */);
+
+        assertThat(mController.getContainer(mClientToken)).isEqualTo(windowContextCreatedToken);
+
+        // Remove WindowToken
+        windowContextCreatedToken.removeImmediately();
+
+        assertThat(mController.getContainer(mClientToken)).isEqualTo(da);
     }
 
     private class TestWindowTokenClient extends IWindowToken.Stub {

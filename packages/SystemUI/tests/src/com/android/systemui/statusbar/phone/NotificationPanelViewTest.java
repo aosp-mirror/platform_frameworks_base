@@ -39,6 +39,7 @@ import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.PowerManager;
 import android.os.UserManager;
+import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
@@ -98,6 +99,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import org.junit.Before;
@@ -235,6 +238,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private UiEventLogger mUiEventLogger;
     @Mock
     private LockIconViewController mLockIconViewController;
+    @Mock
+    private QuickAccessWalletClient mQuickAccessWalletClient;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -339,7 +344,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mNotificationShadeDepthController,
                 mAmbientState,
                 mLockIconViewController,
-                mFeatureFlags);
+                mFeatureFlags,
+                mQuickAccessWalletClient,
+                new FakeExecutor(new FakeSystemClock()));
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);

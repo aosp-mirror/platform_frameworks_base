@@ -197,7 +197,7 @@ public class PermissionMonitorTest {
         } else {
             pkgInfo = packageInfoWithPermissions(REQUESTED_PERMISSION_GRANTED, new String[] {}, "");
         }
-        pkgInfo.applicationInfo.uid = UserHandle.getUid(user, UserHandle.getAppId(uid));
+        pkgInfo.applicationInfo.uid = user.getUid(UserHandle.getAppId(uid));
         return pkgInfo;
     }
 
@@ -390,7 +390,7 @@ public class PermissionMonitorTest {
         public void expectPermission(Boolean permission, UserHandle[] users, int[] apps) {
             for (final UserHandle user : users) {
                 for (final int app : apps) {
-                    final int uid = UserHandle.getUid(user, app);
+                    final int uid = user.getUid(app);
                     if (!mApps.containsKey(uid)) {
                         fail("uid " + uid + " does not exist.");
                     }
@@ -404,7 +404,7 @@ public class PermissionMonitorTest {
         public void expectNoPermission(UserHandle[] users, int[] apps) {
             for (final UserHandle user : users) {
                 for (final int app : apps) {
-                    final int uid = UserHandle.getUid(user, app);
+                    final int uid = user.getUid(app);
                     if (mApps.containsKey(uid)) {
                         fail("uid " + uid + " has listed permissions, expected none.");
                     }
@@ -502,9 +502,9 @@ public class PermissionMonitorTest {
 
         // When MOCK_UID1 package is uninstalled and reinstalled, expect Netd to be updated
         mPermissionMonitor.onPackageRemoved(
-                MOCK_PACKAGE1, UserHandle.getUid(MOCK_USER1, MOCK_UID1));
+                MOCK_PACKAGE1, MOCK_USER1.getUid(MOCK_UID1));
         verify(mNetdService).firewallRemoveUidInterfaceRules(aryEq(new int[] {MOCK_UID1}));
-        mPermissionMonitor.onPackageAdded(MOCK_PACKAGE1, UserHandle.getUid(MOCK_USER1, MOCK_UID1));
+        mPermissionMonitor.onPackageAdded(MOCK_PACKAGE1, MOCK_USER1.getUid(MOCK_UID1));
         verify(mNetdService).firewallAddUidInterfaceRules(eq("tun0"),
                 aryEq(new int[] {MOCK_UID1}));
 
@@ -541,13 +541,13 @@ public class PermissionMonitorTest {
         mPermissionMonitor.onVpnUidRangesAdded("tun0", vpnRange, VPN_UID);
 
         // Newly-installed package should have uid rules added
-        mPermissionMonitor.onPackageAdded(MOCK_PACKAGE1, UserHandle.getUid(MOCK_USER1, MOCK_UID1));
+        mPermissionMonitor.onPackageAdded(MOCK_PACKAGE1, MOCK_USER1.getUid(MOCK_UID1));
         verify(mNetdService).firewallAddUidInterfaceRules(eq("tun0"),
                 aryEq(new int[] {MOCK_UID1}));
 
         // Removed package should have its uid rules removed
         mPermissionMonitor.onPackageRemoved(
-                MOCK_PACKAGE1, UserHandle.getUid(MOCK_USER1, MOCK_UID1));
+                MOCK_PACKAGE1, MOCK_USER1.getUid(MOCK_UID1));
         verify(mNetdService).firewallRemoveUidInterfaceRules(aryEq(new int[] {MOCK_UID1}));
     }
 
@@ -557,13 +557,13 @@ public class PermissionMonitorTest {
     // called multiple times with the uid corresponding to each user.
     private void addPackageForUsers(UserHandle[] users, String packageName, int uid) {
         for (final UserHandle user : users) {
-            mPermissionMonitor.onPackageAdded(packageName, UserHandle.getUid(user, uid));
+            mPermissionMonitor.onPackageAdded(packageName, user.getUid(uid));
         }
     }
 
     private void removePackageForUsers(UserHandle[] users, String packageName, int uid) {
         for (final UserHandle user : users) {
-            mPermissionMonitor.onPackageRemoved(packageName, UserHandle.getUid(user, uid));
+            mPermissionMonitor.onPackageRemoved(packageName, user.getUid(uid));
         }
     }
 

@@ -686,8 +686,8 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
-     * Adds a {@link RouteInfo} to this {@code LinkProperties}, if a {@link RouteInfo}
-     * with the same {@link RouteInfo.RouteKey} with different properties
+     * Adds a {@link RouteInfo} to this {@code LinkProperties}. If there is a {@link RouteInfo}
+     * with the same destination, gateway and interface with different properties
      * (e.g., different MTU), it will be updated. If the {@link RouteInfo} had an
      * interface name set and that differs from the interface set for this
      * {@code LinkProperties} an {@link IllegalArgumentException} will be thrown.

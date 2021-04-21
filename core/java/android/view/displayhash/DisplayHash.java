@@ -16,6 +16,7 @@
 
 package android.view.displayhash;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.graphics.Rect;
@@ -31,6 +32,7 @@ public final class DisplayHash implements Parcelable {
     /**
      * The timestamp when the hash was generated.
      */
+    @CurrentTimeMillisLong
     private final long mTimeMillis;
 
     /**
@@ -73,7 +75,7 @@ public final class DisplayHash implements Parcelable {
      * @hide
      */
     @SystemApi
-    public DisplayHash(long timeMillis, @NonNull Rect boundsInWindow,
+    public DisplayHash(@CurrentTimeMillisLong long timeMillis, @NonNull Rect boundsInWindow,
             @NonNull String hashAlgorithm, @NonNull byte[] imageHash, @NonNull byte[] hmac) {
         mTimeMillis = timeMillis;
         mBoundsInWindow = boundsInWindow;
@@ -92,6 +94,7 @@ public final class DisplayHash implements Parcelable {
      * @hide
      */
     @SystemApi
+    @CurrentTimeMillisLong
     public long getTimeMillis() {
         return mTimeMillis;
     }

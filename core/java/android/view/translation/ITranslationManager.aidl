@@ -40,9 +40,6 @@ oneway interface ITranslationManager {
     void updateUiTranslationState(int state, in TranslationSpec sourceSpec,
          in TranslationSpec targetSpec, in List<AutofillId> viewIds, IBinder token, int taskId,
          int userId);
-    // deprecated
-    void updateUiTranslationStateByTaskId(int state, in TranslationSpec sourceSpec,
-         in TranslationSpec targetSpec, in List<AutofillId> viewIds, int taskId, int userId);
 
     void registerUiTranslationStateCallback(in IRemoteCallback callback, int userId);
     void unregisterUiTranslationStateCallback(in IRemoteCallback callback, int userId);

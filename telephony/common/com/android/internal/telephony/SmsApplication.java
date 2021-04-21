@@ -760,6 +760,7 @@ public final class SmsApplication {
     private static void assignExclusiveSmsPermissionsToSystemApp(Context context,
             PackageManager packageManager, AppOpsManager appOps, String packageName,
             boolean sigatureMatch) {
+        if (packageName == null) return;
         // First check package signature matches the caller's package signature.
         // Since this class is only used internally by the system, this check makes sure
         // the package signature matches system signature.

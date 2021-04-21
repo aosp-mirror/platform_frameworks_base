@@ -20,4 +20,7 @@ public class Context {
     public int getUserId() {
         return 0;
     }
+
+    public void enforceCallingOrSelfPermission(String permission, String message) {
+    }
 }

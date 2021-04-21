@@ -18,6 +18,8 @@ package com.android.server.am;
 
 import static com.android.server.am.MeasuredEnergySnapshot.UNAVAILABLE;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -50,7 +52,7 @@ public final class MeasuredEnergySnapshotTest {
     private static final  EnergyConsumer CONSUMER_OTHER_1 = createEnergyConsumer(
             1, 1, EnergyConsumerType.OTHER, "HPU");
     private static final  EnergyConsumer CONSUMER_OTHER_2 = createEnergyConsumer(
-            436, 2, EnergyConsumerType.OTHER, "IPU");
+            436, 2, EnergyConsumerType.OTHER, "IPU\n&\005");
 
     private static final SparseArray<EnergyConsumer> ALL_ID_CONSUMER_MAP = createIdToConsumerMap(
             CONSUMER_DISPLAY, CONSUMER_OTHER_0, CONSUMER_OTHER_1, CONSUMER_OTHER_2);
@@ -224,15 +226,16 @@ public final class MeasuredEnergySnapshotTest {
     }
 
     @Test
-    public void testGetNumOtherOrdinals() {
+    public void testGetOtherOrdinalNames() {
         final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
-        assertEquals(3, snapshot.getNumOtherOrdinals());
+        assertThat(snapshot.getOtherOrdinalNames()).asList()
+                .containsExactly("GPU", "HPU", "IPU &_");
     }
 
     @Test
-    public void testGetNumOtherOrdinals_none() {
+    public void testGetOtherOrdinalNames_none() {
         final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(SOME_ID_CONSUMER_MAP);
-        assertEquals(0, snapshot.getNumOtherOrdinals());
+        assertEquals(0, snapshot.getOtherOrdinalNames().length);
     }
 
     private static EnergyConsumer createEnergyConsumer(int id, int ord, byte type, String name) {

@@ -1679,9 +1679,13 @@ public class AppTransition implements Dump {
                 || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
     }
 
-    static boolean isKeyguardTransitOld(@TransitionOldType int transit) {
-        return isKeyguardGoingAwayTransitOld(transit) || transit == TRANSIT_OLD_KEYGUARD_OCCLUDE
+    static boolean isKeyguardOccludeTransitOld(@TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_KEYGUARD_OCCLUDE
                 || transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
+    }
+
+    static boolean isKeyguardTransitOld(@TransitionOldType int transit) {
+        return isKeyguardGoingAwayTransitOld(transit) || isKeyguardOccludeTransitOld(transit);
     }
 
     static boolean isTaskTransitOld(@TransitionOldType int transit) {

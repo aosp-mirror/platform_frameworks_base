@@ -96,7 +96,7 @@ public class CpuPowerCalculatorTest {
                 .setKernelCpuUidUserSysTimeReader(mMockKernelCpuUidUserSysTimeReader)
                 .setKernelCpuUidActiveTimeReader(mMockKerneCpuUidActiveTimeReader)
                 .setSystemServerCpuThreadReader(mMockSystemServerCpuThreadReader)
-                .initMeasuredEnergyStatsLocked(supportedPowerBuckets, 0);
+                .initMeasuredEnergyStatsLocked(supportedPowerBuckets, new String[0]);
     }
 
     @Test

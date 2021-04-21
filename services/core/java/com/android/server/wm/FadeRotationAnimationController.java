@@ -39,6 +39,9 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     private final Runnable mFrozenTimeoutRunnable;
     private final WindowToken mNavBarToken;
 
+    /** A runnable which gets called when the {@link #show()} is called. */
+    private Runnable mOnShowRunnable;
+
     public FadeRotationAnimationController(DisplayContent displayContent) {
         super(displayContent);
         mService = displayContent.mWmService;
@@ -63,9 +66,14 @@ public class FadeRotationAnimationController extends FadeAnimationController {
         } else {
             mNavBarToken = null;
         }
+        // Do not fade notification shade when running fixed rotation (not frozen) because it may
+        // need to animate with the launching app.
+        final WindowState notificationShade = mFrozenTimeoutRunnable == null
+                ? displayPolicy.getNotificationShade() : null;
         displayContent.forAllWindows(w -> {
             if (w.mActivityRecord == null && w.mHasSurface && !w.mForceSeamlesslyRotate
-                    && !w.mIsWallpaper && !w.mIsImWindow && w != navigationBar) {
+                    && !w.mIsWallpaper && !w.mIsImWindow && w != navigationBar
+                    && w != notificationShade) {
                 mTargetWindowTokens.add(w.mToken);
             }
         }, true /* traverseTopToBottom */);
@@ -80,6 +88,10 @@ public class FadeRotationAnimationController extends FadeAnimationController {
         mTargetWindowTokens.clear();
         if (mFrozenTimeoutRunnable != null) {
             mService.mH.removeCallbacks(mFrozenTimeoutRunnable);
+        }
+        if (mOnShowRunnable != null) {
+            mOnShowRunnable.run();
+            mOnShowRunnable = null;
         }
     }
 
@@ -113,6 +125,10 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     /** Returns {@code true} if the window is handled by this controller. */
     boolean isTargetToken(WindowToken token) {
         return token == mNavBarToken || mTargetWindowTokens.contains(token);
+    }
+
+    void setOnShowRunnable(Runnable onShowRunnable) {
+        mOnShowRunnable = onShowRunnable;
     }
 
     @Override

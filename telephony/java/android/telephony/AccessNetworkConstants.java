@@ -62,6 +62,7 @@ public final class AccessNetworkConstants {
         switch (transportType) {
             case TRANSPORT_TYPE_WWAN: return "WWAN";
             case TRANSPORT_TYPE_WLAN: return "WLAN";
+            case TRANSPORT_TYPE_INVALID: return "INVALID";
             default: return Integer.toString(transportType);
         }
     }
@@ -637,18 +638,18 @@ public final class AccessNetworkConstants {
             this.band = band;
             this.downlinkLowKhz = downlinkLowKhz;
             this.downlinkOffset = downlinkOffset;
+            this.downlinkRange = downlinkRange;
             this.uplinkLowKhz = uplinkLowKhz;
             this.uplinkOffset = uplinkOffset;
-            this.downlinkRange = downlinkRange;
             this.uplinkRange = uplinkRange;
         }
 
         int band;
         int downlinkLowKhz;
         int downlinkOffset;
+        int downlinkRange;
         int uplinkLowKhz;
         int uplinkOffset;
-        int downlinkRange;
         int uplinkRange;
     }
 

@@ -8923,6 +8923,8 @@ public class PackageParser {
         private final @ParseFlags int mFlags;
         private AssetManager mCachedAssetManager;
 
+        private ApkAssets mBaseApkAssets;
+
         DefaultSplitAssetLoader(PackageLite pkg, @ParseFlags int flags) {
             mBaseCodePath = pkg.baseCodePath;
             mSplitCodePaths = pkg.splitCodePaths;
@@ -8953,9 +8955,11 @@ public class PackageParser {
             ApkAssets[] apkAssets = new ApkAssets[(mSplitCodePaths != null
                     ? mSplitCodePaths.length : 0) + 1];
 
+            mBaseApkAssets = loadApkAssets(mBaseCodePath, mFlags);
+
             // Load the base.
             int splitIdx = 0;
-            apkAssets[splitIdx++] = loadApkAssets(mBaseCodePath, mFlags);
+            apkAssets[splitIdx++] = mBaseApkAssets;
 
             // Load any splits.
             if (!ArrayUtils.isEmpty(mSplitCodePaths)) {
@@ -8981,6 +8985,11 @@ public class PackageParser {
         @Override
         public void close() throws Exception {
             IoUtils.closeQuietly(mCachedAssetManager);
+        }
+
+        @Override
+        public ApkAssets getBaseApkAssets() {
+            return mBaseApkAssets;
         }
     }
 
@@ -9084,6 +9093,11 @@ public class PackageParser {
             for (AssetManager assets : mCachedAssetManagers) {
                 IoUtils.closeQuietly(assets);
             }
+        }
+
+        @Override
+        public ApkAssets getBaseApkAssets() {
+            return mCachedSplitApks[0][0];
         }
     }
 }

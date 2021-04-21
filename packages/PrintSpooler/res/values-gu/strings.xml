@@ -65,7 +65,7 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"નિષ્ફળ થયેલ છાપવાના Tasks"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"ફાઇલ બનાવી શક્યાં નથી"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"કેટલીક છાપવાની સેવાઓ અક્ષમ કરેલ છે"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"પ્રિન્ટર્સ માટે શોધી રહ્યું છે"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"પ્રિન્ટર માટે શોધી રહ્યું છે"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"કોઈ છાપ સેવાઓ સક્ષમ કરેલ નથી"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"કોઈ પ્રિન્ટર મળ્યા નથી"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"પ્રિન્ટર્સ ઉમેરી શકતાં નથી"</string>

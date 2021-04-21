@@ -21,12 +21,14 @@ import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Looper;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.View;
 
 import androidx.annotation.IntDef;
@@ -140,7 +142,7 @@ public interface Bubbles {
      * @return true if we want to intercept the dismissal of the entry, else false.
      */
     boolean handleDismissalInterception(BubbleEntry entry, @Nullable List<BubbleEntry> children,
-            IntConsumer removeCallback);
+            IntConsumer removeCallback, Executor callbackExecutor);
 
     /** Set the proxy to commnuicate with SysUi side components. */
     void setSysuiProxy(SysuiProxy proxy);
@@ -214,6 +216,13 @@ public interface Bubbles {
     void onUserChanged(int newUserId);
 
     /**
+     * Called when the current user profiles change.
+     *
+     * @param currentProfiles the user infos for the current profile.
+     */
+    void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles);
+
+    /**
      * Called when config changed.
      *
      * @param newConfig the new config.
@@ -248,6 +257,8 @@ public interface Bubbles {
 
     /** Callback to tell SysUi components execute some methods. */
     interface SysuiProxy {
+        void isNotificationShadeExpand(Consumer<Boolean> callback);
+
         void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback);
 
         void getShouldRestoredEntries(ArraySet<String> savedBubbleKeys,

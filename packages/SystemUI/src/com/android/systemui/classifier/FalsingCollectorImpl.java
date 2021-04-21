@@ -24,10 +24,12 @@ import android.view.MotionEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
 import com.android.systemui.util.time.SystemClock;
@@ -42,6 +44,7 @@ class FalsingCollectorImpl implements FalsingCollector {
     private static final boolean DEBUG = false;
     private static final String TAG = "FalsingManager";
     private static final String PROXIMITY_SENSOR_TAG = "FalsingManager";
+    private static final long GESTURE_PROCESSING_DELAY_MS = 100;
 
     private final FalsingDataProvider mFalsingDataProvider;
     private final FalsingManager mFalsingManager;
@@ -50,6 +53,7 @@ class FalsingCollectorImpl implements FalsingCollector {
     private final ProximitySensor mProximitySensor;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
+    private final DelayableExecutor mMainExecutor;
     private final SystemClock mSystemClock;
 
     private int mState;
@@ -89,7 +93,8 @@ class FalsingCollectorImpl implements FalsingCollector {
     FalsingCollectorImpl(FalsingDataProvider falsingDataProvider, FalsingManager falsingManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor, HistoryTracker historyTracker,
             ProximitySensor proximitySensor, StatusBarStateController statusBarStateController,
-            KeyguardStateController keyguardStateController, SystemClock systemClock) {
+            KeyguardStateController keyguardStateController,
+            @Main DelayableExecutor mainExecutor, SystemClock systemClock) {
         mFalsingDataProvider = falsingDataProvider;
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -97,6 +102,7 @@ class FalsingCollectorImpl implements FalsingCollector {
         mProximitySensor = proximitySensor;
         mStatusBarStateController = statusBarStateController;
         mKeyguardStateController = keyguardStateController;
+        mMainExecutor = mainExecutor;
         mSystemClock = systemClock;
 
 
@@ -276,7 +282,18 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onMotionEventComplete() {
-        mFalsingDataProvider.onMotionEventComplete();
+        // We must delay processing the completion because of the way Android handles click events.
+        // It generally delays executing them immediately, instead choosing to give the UI a chance
+        // to respond to touch events before acknowledging the click. As such, we must also delay,
+        // giving click handlers a chance to analyze it.
+        // You might think we could do something clever to remove this delay - adding non-committed
+        // results that can later be changed - but this won't help. Calling the code
+        // below can eventually end up in a "Falsing Event" being fired. If we remove the delay
+        // here, we would still have to add the delay to the event, but we'd also have to make all
+        // the intervening code more complicated in the process. This is the simplest insertion
+        // point for the delay.
+        mMainExecutor.executeDelayed(
+                mFalsingDataProvider::onMotionEventComplete, GESTURE_PROCESSING_DELAY_MS);
     }
 
     @Override

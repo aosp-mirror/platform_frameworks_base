@@ -64,7 +64,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemProperties;
@@ -90,7 +89,7 @@ import android.telephony.CallForwardingInfo.CallForwardingReason;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import android.telephony.data.ApnSetting;
 import android.telephony.data.ApnSetting.MvnoType;
-import android.telephony.data.SlicingConfig;
+import android.telephony.data.NetworkSlicingConfig;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
@@ -426,10 +425,6 @@ public class TelephonyManager {
             return mContext.getAttributionTag();
         }
         return null;
-    }
-
-    private boolean isSystemProcess() {
-        return Process.myUid() == Process.SYSTEM_UID;
     }
 
     /**
@@ -4205,19 +4200,12 @@ public class TelephonyManager {
         try {
             IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null) {
-                Rlog.e(TAG, "IMSI error: Subscriber Info is null");
-                if (!isSystemProcess()) {
-                    throw new RuntimeException("IMSI error: Subscriber Info is null");
-                }
-                return;
+                throw new RuntimeException("IMSI error: Subscriber Info is null");
             }
             int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
             info.resetCarrierKeysForImsiEncryption(subId, mContext.getOpPackageName());
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getCarrierInfoForImsiEncryption RemoteException" + ex);
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#getCarrierInfoForImsiEncryption RemoteException" + ex);
         }
     }
 
@@ -4883,11 +4871,11 @@ public class TelephonyManager {
 
     /**
      * Return the set of IMSIs that should be considered "merged together" for data usage
-     * purposes. Unlike {@link #getMergedSubscriberIds()} this API merge IMSIs based on
-     * subscription grouping: IMSI of those in the same group will all be returned.
-     * Return the current IMSI if there is no subscription group.
-     *
-     * <p>Requires the calling app to have READ_PRIVILEGED_PHONE_STATE permission.
+     * purposes. This API merges IMSIs based on subscription grouping: IMSI of those in the same
+     * group will all be returned.
+     * Return the current IMSI if there is no subscription group, see
+     * {@link SubscriptionManager#createSubscriptionGroup(List)} for the definition of a group,
+     * otherwise return an empty array if there is a failure.
      *
      * @hide
      */
@@ -4900,7 +4888,6 @@ public class TelephonyManager {
                 return telephony.getMergedImsisFromGroup(getSubId(), getOpPackageName());
             }
         } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
         }
         return new String[0];
     }
@@ -5613,17 +5600,11 @@ public class TelephonyManager {
         try {
             final ITelephony telephony = getITelephony();
             if (telephony == null) {
-                if (!isSystemProcess()) {
-                    throw new RuntimeException("Telephony service unavailable");
-                }
                 return;
             }
             telephony.sendDialerSpecialCode(mContext.getOpPackageName(), inputCode);
         } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#sendDialerSpecialCode RemoteException" + ex);
         }
     }
 
@@ -9942,9 +9923,7 @@ public class TelephonyManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#getMobileProvisioningUrl RemoteException" + ex);
         }
         return null;
     }
@@ -10096,14 +10075,15 @@ public class TelephonyManager {
 
     /**
      * Sets the roaming mode for CDMA phone to the given mode {@code mode}. If the phone is not
-     * CDMA capable, this method does nothing.
+     * CDMA capable, this method throws an IllegalStateException.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
      *
      * @param mode CDMA roaming mode.
      * @throws SecurityException if the caller does not have the permission.
-     * @throws IllegalStateException if the Telephony process or radio is not currently available.
+     * @throws IllegalStateException if the Telephony process or radio is not currently available,
+     *         the device is not CDMA capable, or the request fails.
      *
      * @see #CDMA_ROAMING_MODE_RADIO_DEFAULT
      * @see #CDMA_ROAMING_MODE_HOME
@@ -10119,7 +10099,9 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setCdmaRoamingMode(@CdmaRoamingMode int mode) {
-        if (getPhoneType() != PHONE_TYPE_CDMA) return;
+        if (getPhoneType() != PHONE_TYPE_CDMA) {
+            throw new IllegalStateException("Phone does not support CDMA.");
+        }
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -10201,11 +10183,12 @@ public class TelephonyManager {
 
     /**
      * Sets the subscription mode for CDMA phone to the given mode {@code mode}. If the phone is not
-     * CDMA capable, this method does nothing.
+     * CDMA capable, this method throws an IllegalStateException.
      *
      * @param mode CDMA subscription mode.
      * @throws SecurityException if the caller does not have the permission.
-     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws IllegalStateException if the Telephony process or radio is not currently available,
+     *         the device is not CDMA capable, or the request fails.
      *
      * @see #CDMA_SUBSCRIPTION_UNKNOWN
      * @see #CDMA_SUBSCRIPTION_RUIM_SIM
@@ -10220,7 +10203,9 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setCdmaSubscriptionMode(@CdmaSubscription int mode) {
-        if (getPhoneType() != PHONE_TYPE_CDMA) return;
+        if (getPhoneType() != PHONE_TYPE_CDMA) {
+            throw new IllegalStateException("Phone does not support CDMA.");
+        }
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -13928,9 +13913,7 @@ public class TelephonyManager {
                 return service.isDataEnabledForApn(apnType, getSubId(), pkgForDebug);
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#isDataEnabledForApn RemoteException" + ex);
         }
         return false;
     }
@@ -13950,9 +13933,7 @@ public class TelephonyManager {
                 return service.isApnMetered(apnType, getSubId());
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#isApnMetered RemoteException" + ex);
         }
         return true;
     }
@@ -14012,9 +13993,7 @@ public class TelephonyManager {
                 service.setSystemSelectionChannels(specifiers, getSubId(), aidlConsumer);
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#setSystemSelectionChannels RemoteException" + ex);
         }
     }
 
@@ -14042,9 +14021,7 @@ public class TelephonyManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#getSystemSelectionChannels RemoteException" + ex);
         }
         return new ArrayList<>();
     }
@@ -14073,9 +14050,7 @@ public class TelephonyManager {
                 return service.isMvnoMatched(getSubId(), mvnoType, mvnoMatchData);
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#matchesCurrentSimOperator RemoteException" + ex);
         }
         return false;
     }
@@ -14476,10 +14451,7 @@ public class TelephonyManager {
                 service.setMobileDataPolicyEnabled(getSubId(), policy, enabled);
             }
         } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#setMobileDataPolicyEnabled RemoteException" + ex);
         }
     }
 
@@ -14499,10 +14471,7 @@ public class TelephonyManager {
                 return service.isMobileDataPolicyEnabled(getSubId(), policy);
             }
         } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#isMobileDataPolicyEnabled RemoteException" + ex);
         }
         return false;
     }
@@ -15006,9 +14975,7 @@ public class TelephonyManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#getEquivalentHomePlmns RemoteException" + ex);
         }
 
         return Collections.emptyList();
@@ -15066,13 +15033,20 @@ public class TelephonyManager {
     public static final String CAPABILITY_SLICING_CONFIG_SUPPORTED =
             "CAPABILITY_SLICING_CONFIG_SUPPORTED";
 
-    /** @hide */
+    /**
+     * A list of the radio interface capability values with public valid constants.
+     *
+     * Here is a related list for the systemapi-only valid constants:
+     *     CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE
+     *     CAPABILITY_ALLOWED_NETWORK_TYPES_USED
+     *     CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE
+     *     CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING
+     *
+     * @hide
+     * TODO(b/185508047): Doc generation for mixed public/systemapi StringDefs formats badly.
+     */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = "CAPABILITY_", value = {
-            CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE,
-            CAPABILITY_ALLOWED_NETWORK_TYPES_USED,
-            CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE,
-            CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING,
             CAPABILITY_SLICING_CONFIG_SUPPORTED,
     })
     public @interface RadioInterfaceCapability {}
@@ -15084,10 +15058,7 @@ public class TelephonyManager {
      *
      * @param capability the name of the capability to check for
      * @return the availability of the capability
-     *
-     * @hide
      */
-    @SystemApi
     public boolean isRadioInterfaceCapabilitySupported(
             @NonNull @RadioInterfaceCapability String capability) {
         try {
@@ -15100,9 +15071,7 @@ public class TelephonyManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            Rlog.e(TAG, "Telephony#isRadioInterfaceCapabilitySupported RemoteException" + ex);
         }
         return false;
     }
@@ -15671,7 +15640,7 @@ public class TelephonyManager {
      * Exception that may be supplied to the callback in {@link #getNetworkSlicingConfiguration} if
      * something goes awry.
      */
-    public static class SlicingException extends Exception {
+    public static class NetworkSlicingException extends Exception {
         /**
          * Getting the current slicing configuration successfully. Used internally only.
          * @hide
@@ -15680,11 +15649,13 @@ public class TelephonyManager {
 
         /**
          * The system timed out waiting for a response from the Radio.
+         * @hide
          */
         public static final int ERROR_TIMEOUT = 1;
 
         /**
          * The modem returned a failure.
+         * @hide
          */
         public static final int ERROR_MODEM_ERROR = 2;
 
@@ -15694,20 +15665,44 @@ public class TelephonyManager {
                 ERROR_MODEM_ERROR,
         })
         @Retention(RetentionPolicy.SOURCE)
-        public @interface SlicingError {}
+        public @interface NetworkSlicingError {}
 
         private final int mErrorCode;
 
-        public SlicingException(@SlicingError int errorCode) {
+        /** @hide */
+        public NetworkSlicingException(@NetworkSlicingError int errorCode) {
             mErrorCode = errorCode;
         }
 
-        /**
-         * Fetches the error code associated with this exception.
-         * @return An error code.
-         */
-        public @SlicingError int getErrorCode() {
-            return mErrorCode;
+        @Override
+        public String toString() {
+            switch (mErrorCode) {
+                case ERROR_TIMEOUT: return "ERROR_TIMEOUT";
+                case ERROR_MODEM_ERROR: return "ERROR_MODEM_ERROR";
+                default: return "UNDEFINED";
+            }
+        }
+    }
+
+    /**
+     * Exception that is supplied to the callback in {@link #getNetworkSlicingConfiguration} if the
+     * system timed out waiting for a response from the Radio.
+     */
+    public class TimeoutException extends NetworkSlicingException {
+        /** @hide */
+        public TimeoutException(int errorCode) {
+            super(errorCode);
+        }
+    }
+
+    /**
+     * Exception that is supplied to the callback in {@link #getNetworkSlicingConfiguration} if the
+     * modem returned a failure.
+     */
+    public class ModemErrorException extends NetworkSlicingException {
+        /** @hide */
+        public ModemErrorException(int errorCode) {
+            super(errorCode);
         }
     }
 
@@ -15738,7 +15733,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getNetworkSlicingConfiguration(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OutcomeReceiver<SlicingConfig, SlicingException> callback) {
+            @NonNull OutcomeReceiver<NetworkSlicingConfig, NetworkSlicingException> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
@@ -15750,12 +15745,17 @@ public class TelephonyManager {
             telephony.getSlicingConfig(new ResultReceiver(null) {
                     @Override
                     protected void onReceiveResult(int resultCode, Bundle result) {
-                        if (resultCode != SlicingException.SUCCESS) {
+                        if (resultCode == NetworkSlicingException.ERROR_TIMEOUT) {
                             executor.execute(() -> callback.onError(
-                                    new SlicingException(resultCode)));
+                                    new TimeoutException(resultCode)));
+                            return;
+                        } else if (resultCode == NetworkSlicingException.ERROR_MODEM_ERROR) {
+                            executor.execute(() -> callback.onError(
+                                    new ModemErrorException(resultCode)));
                             return;
                         }
-                        SlicingConfig slicingConfig =
+
+                        NetworkSlicingConfig slicingConfig =
                                 result.getParcelable(KEY_SLICING_CONFIG_HANDLE);
                         executor.execute(() -> callback.onResult(slicingConfig));
                     }

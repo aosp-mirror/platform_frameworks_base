@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.app.appsearch.util.BundleUtil;
 import android.os.Bundle;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /** This class represents a uniquely identifiable package. */
 public class PackageIdentifier {
@@ -43,7 +43,7 @@ public class PackageIdentifier {
 
     /** @hide */
     public PackageIdentifier(@NonNull Bundle bundle) {
-        mBundle = Preconditions.checkNotNull(bundle);
+        mBundle = Objects.requireNonNull(bundle);
     }
 
     /** @hide */
@@ -54,12 +54,12 @@ public class PackageIdentifier {
 
     @NonNull
     public String getPackageName() {
-        return Preconditions.checkNotNull(mBundle.getString(PACKAGE_NAME_FIELD));
+        return Objects.requireNonNull(mBundle.getString(PACKAGE_NAME_FIELD));
     }
 
     @NonNull
     public byte[] getSha256Certificate() {
-        return Preconditions.checkNotNull(mBundle.getByteArray(SHA256_CERTIFICATE_FIELD));
+        return Objects.requireNonNull(mBundle.getByteArray(SHA256_CERTIFICATE_FIELD));
     }
 
     @Override

@@ -636,9 +636,25 @@ public class LauncherAppsService extends SystemService {
             Objects.requireNonNull(component);
 
             // All right, create the sender.
-            Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT).setComponent(component);
+            final int callingUid = injectBinderCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
+                final PackageManagerInternal pmInt =
+                        LocalServices.getService(PackageManagerInternal.class);
+                Intent packageIntent = new Intent(Intent.ACTION_CREATE_SHORTCUT)
+                        .setPackage(component.getPackageName());
+                List<ResolveInfo> apps = pmInt.queryIntentActivities(packageIntent,
+                        packageIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                        callingUid, user.getIdentifier());
+                // ensure that the component is present in the list
+                if (!apps.stream().anyMatch(
+                        ri -> component.getClassName().equals(ri.activityInfo.name))) {
+                    return null;
+                }
+
+                Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT).setComponent(component);
                 final PendingIntent pi = PendingIntent.getActivityAsUser(
                         mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
                                 | PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT,
@@ -978,7 +994,6 @@ public class LauncherAppsService extends SystemService {
                 // Flag for bubble to make behaviour match documentLaunchMode=always.
                 intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
                 intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
-                intents[0].putExtra(Intent.EXTRA_IS_BUBBLED, true);
             }
 
             intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1028,22 +1043,24 @@ public class LauncherAppsService extends SystemService {
                 return false;
             }
 
+            final PackageManagerInternal pmInt =
+                    LocalServices.getService(PackageManagerInternal.class);
             final int callingUid = injectBinderCallingUid();
+            final int state = pmInt.getComponentEnabledSetting(component, callingUid,
+                    user.getIdentifier());
+            switch (state) {
+                case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                    break; // Need to check the manifest's enabled state.
+                case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+                    return true;
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                    return false;
+            }
+
             final long ident = Binder.clearCallingIdentity();
             try {
-                final int state = mIPM.getComponentEnabledSetting(component, user.getIdentifier());
-                switch (state) {
-                    case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
-                        break; // Need to check the manifest's enabled state.
-                    case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
-                        return true;
-                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
-                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
-                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
-                        return false;
-                }
-                final PackageManagerInternal pmInt =
-                        LocalServices.getService(PackageManagerInternal.class);
                 ActivityInfo info = pmInt.getActivityInfo(component,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,

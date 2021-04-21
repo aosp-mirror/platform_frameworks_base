@@ -222,6 +222,11 @@ public class WalletScreenController implements
         if (mIsDismissed) {
             return;
         }
+        int cardWidthPx = mCardCarousel.getCardWidthPx();
+        int cardHeightPx = mCardCarousel.getCardHeightPx();
+        if (cardWidthPx == 0 || cardHeightPx == 0) {
+            return;
+        }
         if (!mHasRegisteredListener) {
             // Listener is registered even when device is locked. Should only be registered once.
             mWalletClient.addWalletServiceEventListener(this);
@@ -231,8 +236,6 @@ public class WalletScreenController implements
         mWalletView.show();
         mWalletView.hideErrorMessage();
         int iconSizePx = mContext.getResources().getDimensionPixelSize(R.dimen.wallet_icon_size);
-        int cardWidthPx = mCardCarousel.getCardWidthPx();
-        int cardHeightPx = mCardCarousel.getCardHeightPx();
         GetWalletCardsRequest request =
                 new GetWalletCardsRequest(cardWidthPx, cardHeightPx, iconSizePx, MAX_CARDS);
         mWalletClient.getWalletCards(mExecutor, request, this);

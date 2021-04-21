@@ -132,6 +132,7 @@ import static com.android.server.wm.MoveAnimationSpecProto.FROM;
 import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -452,10 +453,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** The frames used to compute a temporal layout appearance. */
     private WindowFrames mSimulatedWindowFrames;
 
-    /**
-     * Usually empty. Set to the task's tempInsetFrame. See
-     *{@link android.app.IActivityTaskManager#resizePrimarySplitScreen}.
-     */
+    /** Usually the same as {@link #getBounds()}. */
     private final Rect mInsetFrame = new Rect();
 
     /**
@@ -519,6 +517,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * in layout if mLayoutNeeded is set until surface placement is done.
      */
     boolean mSurfacePlacementNeeded;
+
+    /**
+     * The animation types that will call {@link #onExitAnimationDone} so {@link #mAnimatingExit}
+     * is guaranteed to be cleared.
+     */
+    static final int EXIT_ANIMATING_TYPES = ANIMATION_TYPE_APP_TRANSITION
+            | ANIMATION_TYPE_WINDOW_ANIMATION | ANIMATION_TYPE_RECENTS;
 
     /** Currently running an exit animation? */
     boolean mAnimatingExit;
@@ -1143,7 +1148,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void attach() {
         if (DEBUG) Slog.v(TAG, "Attaching " + this + " token=" + mToken);
-        mSession.windowAddedLocked(mAttrs.packageName);
+        mSession.windowAddedLocked();
     }
 
     /**
@@ -2459,8 +2464,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController.onWindowTransition(this, transit);
                     }
                 }
-                final boolean isAnimating = mAnimatingExit || isAnimating(TRANSITION | PARENTS,
-                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION)
+                final boolean isAnimating = mAnimatingExit
+                        || isAnimating(TRANSITION | PARENTS, EXIT_ANIMATING_TYPES)
                         && (mActivityRecord == null || !mActivityRecord.isWaitingForTransitionStart());
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
@@ -2917,21 +2922,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final Configuration processConfig =
                 mWmService.mAtmService.getGlobalConfigurationForPid(pid);
         return processConfig;
-    }
-
-    void getMergedConfiguration(MergedConfiguration outConfiguration) {
-        final Configuration globalConfig = getProcessGlobalConfiguration();
-        final Configuration overrideConfig = getMergedOverrideConfiguration();
-        outConfiguration.setConfiguration(globalConfig, overrideConfig);
-    }
-
-    void setLastReportedMergedConfiguration(MergedConfiguration config) {
-        mLastReportedConfiguration.setTo(config);
-        mLastConfigReportedToClient = true;
-    }
-
-    void getLastReportedMergedConfiguration(MergedConfiguration config) {
-        config.setTo(mLastReportedConfiguration);
     }
 
     private Configuration getLastReportedConfiguration() {
@@ -3712,7 +3702,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return wpc != null && wpc.registeredForDisplayAreaConfigChanges();
     }
 
-    void fillClientWindowFrames(ClientWindowFrames outFrames) {
+    /**
+     * Fills the given window frames and merged configuration for the client.
+     *
+     * @param outFrames The frames that will be sent to the client.
+     * @param outMergedConfiguration The configuration that will be sent to the client.
+     * @param useLatestConfig Whether to use the latest configuration.
+     * @param relayoutVisible Whether to consider visibility to use the latest configuration.
+     */
+    void fillClientWindowFramesAndConfiguration(ClientWindowFrames outFrames,
+            MergedConfiguration outMergedConfiguration, boolean useLatestConfig,
+            boolean relayoutVisible) {
         outFrames.frame.set(mWindowFrames.mCompatFrame);
         outFrames.displayFrame.set(mWindowFrames.mDisplayFrame);
         if (mInvGlobalScale != 1.0f && hasCompatScale()) {
@@ -3737,6 +3737,23 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final DisplayInfo displayInfo = getDisplayInfo();
             backdropFrame.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
         }
+
+        // Note: in the cases where the window is tied to an activity, we should not send a
+        // configuration update when the window has requested to be hidden. Doing so can lead to
+        // the client erroneously accepting a configuration that would have otherwise caused an
+        // activity restart. We instead hand back the last reported {@link MergedConfiguration}.
+        if (useLatestConfig || (relayoutVisible && (shouldCheckTokenVisibleRequested()
+                || mToken.isVisibleRequested()))) {
+            final Configuration globalConfig = getProcessGlobalConfiguration();
+            final Configuration overrideConfig = getMergedOverrideConfiguration();
+            outMergedConfiguration.setConfiguration(globalConfig, overrideConfig);
+            if (outMergedConfiguration != mLastReportedConfiguration) {
+                mLastReportedConfiguration.setTo(outMergedConfiguration);
+            }
+        } else {
+            outMergedConfiguration.setTo(mLastReportedConfiguration);
+        }
+        mLastConfigReportedToClient = true;
     }
 
     void reportResized() {
@@ -3764,9 +3781,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.i(WM_DEBUG_ORIENTATION, "Resizing %s WITH DRAW PENDING", this);
         }
 
-        getMergedConfiguration(mLastReportedConfiguration);
-        mLastConfigReportedToClient = true;
-
         final boolean reportOrientation = mReportOrientationChanged;
         // Always reset these states first, so if {@link IWindow#resized} fails, this
         // window won't be added to {@link WindowManagerService#mResizingWindows} and set
@@ -3776,18 +3790,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mDragResizingChangeReported = true;
         mWindowFrames.clearReportResizeHints();
 
-        final MergedConfiguration mergedConfiguration = mLastReportedConfiguration;
+        fillClientWindowFramesAndConfiguration(mClientWindowFrames, mLastReportedConfiguration,
+                true /* useLatestConfig */, false /* relayoutVisible */);
         final boolean reportDraw = drawPending || useBLASTSync() || !mRedrawForSyncReported;
         final boolean forceRelayout = reportOrientation || isDragResizeChanged() || !mRedrawForSyncReported;
-        final int displayId = getDisplayId();
-        fillClientWindowFrames(mClientWindowFrames);
+        final DisplayContent displayContent = getDisplayContent();
+        final boolean alwaysConsumeSystemBars =
+                displayContent.getDisplayPolicy().areSystemBarsForcedShownLw(this);
+        final int displayId = displayContent.getDisplayId();
 
         markRedrawForSyncReported();
 
         try {
-            mClient.resized(mClientWindowFrames, reportDraw, mergedConfiguration, forceRelayout,
-                    getDisplayContent().getDisplayPolicy().areSystemBarsForcedShownLw(this),
-                    displayId);
+            mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
+                    forceRelayout, alwaysConsumeSystemBars, displayId);
             if (drawPending && reportOrientation && mOrientationChanging) {
                 mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -3991,10 +4007,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean isFullyTransparentBarAllowed(Rect frame) {
         return mActivityRecord == null || mActivityRecord.isFullyTransparentBarAllowed(frame);
-    }
-
-    public boolean isLetterboxedOverlappingWith(Rect rect) {
-        return mActivityRecord != null && mActivityRecord.isLetterboxOverlappingWith(rect);
     }
 
     boolean isDragResizeChanged() {
@@ -4507,7 +4519,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void requestUpdateWallpaperIfNeeded() {
         final DisplayContent dc = getDisplayContent();
-        if (dc != null && (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+        if (dc != null && hasWallpaper()) {
             dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             dc.setLayoutNeeded();
             mWmService.mWindowPlacerLocked.requestTraversal();
@@ -5867,7 +5879,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || inMultiWindowMode()) {
             return false;
         }
-        return (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
+        return hasWallpaper();
+    }
+
+    boolean hasWallpaper() {
+        return (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
+                || (mActivityRecord != null && mActivityRecord.hasWallpaperBackgroudForLetterbox());
     }
 
     /**

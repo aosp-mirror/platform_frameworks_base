@@ -31,6 +31,7 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
@@ -403,7 +404,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         sb.append("TransitionRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(" id=" + mSyncId);
-        sb.append(" type=" + mType);
+        sb.append(" type=" + transitTypeToString(mType));
         sb.append(" flags=" + mFlags);
         sb.append('}');
         return sb.toString();

@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -49,6 +50,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.service.voice.HotwordDetectionService.InitializationStatus;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -276,7 +278,6 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     private final IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
     private final SoundTriggerListener mInternalCallback;
     private final Callback mExternalCallback;
-    private final Object mLock = new Object();
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
     private final int mTargetSdkVersion;
@@ -584,24 +585,15 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     }
 
     /**
-     * Set configuration and pass read-only data to hotword detection service.
-     *
-     * @param options Application configuration data to provide to the
-     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
-     * other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob to provide to the
-     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
-     * such data to the trusted process.
+     * {@inheritDoc}
      *
      * @throws IllegalStateException if this AlwaysOnHotwordDetector wasn't specified to use a
      * {@link HotwordDetectionService} when it was created. In addition, if this
      * AlwaysOnHotwordDetector is in an invalid or error state.
      */
+    @Override
     public final void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
-        if (DBG) {
-            Slog.d(TAG, "updateState()");
-        }
         synchronized (mLock) {
             if (!mSupportHotwordDetectionService) {
                 throw new IllegalStateException(
@@ -611,19 +603,36 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                 throw new IllegalStateException(
                         "updateState called on an invalid detector or error state");
             }
-            updateStateLocked(options, sharedMemory, null /* callback */);
         }
+
+        super.updateState(options, sharedMemory);
     }
 
-    private void updateStateLocked(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
-        if (DBG) {
-            Slog.d(TAG, "updateStateLocked()");
-        }
-        try {
-            mModelManagementService.updateState(options, sharedMemory, callback);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+    /**
+     * Test API to simulate to trigger hardware recognition event for test.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    public void triggerHardwareRecognitionEventForTest(int status, int soundModelHandle,
+            boolean captureAvailable, int captureSession, int captureDelayMs, int capturePreambleMs,
+            boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data) {
+        Log.d(TAG, "triggerHardwareRecognitionEventForTest()");
+        synchronized (mLock) {
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException("triggerHardwareRecognitionEventForTest called on"
+                        + " an invalid detector or error state");
+            }
+            try {
+                mModelManagementService.triggerHardwareRecognitionEventForTest(
+                        new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
+                                captureSession, captureDelayMs, capturePreambleMs, triggerInData,
+                                captureFormat, data, null /* keyphraseExtras */),
+                        mInternalCallback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 

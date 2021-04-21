@@ -44,6 +44,9 @@ class NetworkAgentConfigTest {
             setSubscriberId("MySubId")
             setPartialConnectivityAcceptable(false)
             setUnvalidatedConnectivityAcceptable(true)
+            if (isAtLeastS()) {
+                setBypassableVpn(true)
+            }
         }.build()
         if (isAtLeastS()) {
             // From S, the config will have 12 items
@@ -63,8 +66,11 @@ class NetworkAgentConfigTest {
             setPartialConnectivityAcceptable(false)
             setUnvalidatedConnectivityAcceptable(true)
             setLegacyTypeName("TEST_NETWORK")
-            disableNat64Detection()
-            disableProvisioningNotification()
+            if (isAtLeastS()) {
+                setNat64DetectionEnabled(false)
+                setProvisioningNotificationEnabled(false)
+                setBypassableVpn(true)
+            }
         }.build()
 
         assertTrue(config.isExplicitlySelected())
@@ -73,7 +79,13 @@ class NetworkAgentConfigTest {
         assertFalse(config.isPartialConnectivityAcceptable())
         assertTrue(config.isUnvalidatedConnectivityAcceptable())
         assertEquals("TEST_NETWORK", config.getLegacyTypeName())
-        assertFalse(config.isNat64DetectionEnabled())
-        assertFalse(config.isProvisioningNotificationEnabled())
+        if (isAtLeastS()) {
+            assertFalse(config.isNat64DetectionEnabled())
+            assertFalse(config.isProvisioningNotificationEnabled())
+            assertTrue(config.isBypassableVpn())
+        } else {
+            assertTrue(config.isNat64DetectionEnabled())
+            assertTrue(config.isProvisioningNotificationEnabled())
+        }
     }
 }

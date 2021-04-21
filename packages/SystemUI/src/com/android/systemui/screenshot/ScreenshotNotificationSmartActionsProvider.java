@@ -57,6 +57,13 @@ public class ScreenshotNotificationSmartActionsProvider {
         ERROR,
         TIMEOUT
     }
+
+    /* Enum to define screenshot smart action types. */
+    public enum ScreenshotSmartActionType {
+        REGULAR_SMART_ACTIONS,
+        QUICK_SHARE_ACTION
+    }
+
     /**
      * Default implementation that returns an empty list.
      * This method is overridden in vendor-specific Sys UI implementation.
@@ -68,7 +75,8 @@ public class ScreenshotNotificationSmartActionsProvider {
      * @param userHandle         user handle of the foreground task owner
      */
     public CompletableFuture<List<Notification.Action>> getActions(String screenshotId,
-            Uri screenshotUri, Bitmap bitmap, ComponentName componentName, UserHandle userHandle) {
+            Uri screenshotUri, Bitmap bitmap, ComponentName componentName,
+            ScreenshotSmartActionType actionType, UserHandle userHandle) {
         if (DEBUG_ACTIONS) {
             Log.d(TAG, "Returning empty smart action list.");
         }

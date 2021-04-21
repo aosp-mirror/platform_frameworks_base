@@ -220,7 +220,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"വയർലെസ് ഓണാക്കുക"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"വയർലെസ്സ് ഓഫാക്കുക"</string>
     <string name="screen_lock" msgid="2072642720826409809">"സ്‌ക്രീൻ ലോക്ക്"</string>
-    <string name="power_off" msgid="4111692782492232778">"പവർ ഓഫാക്കുക"</string>
+    <string name="power_off" msgid="4111692782492232778">"പവർ ഓഫ്"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"റിംഗർ ഓഫുചെയ്യുക"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"റിംഗർ വൈബ്രേറ്റുചെയ്യുക"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"റിംഗർ ഓൺചെയ്യുക"</string>
@@ -244,10 +244,10 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ഓപ്‌ഷനുകൾ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ഫോൺ ഓപ്‌ഷനുകൾ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"സ്‌ക്രീൻ ലോക്ക്"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"പവർ ഓഫാക്കുക"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"പവർ ഓഫ്"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"പവർ"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"റീസ്റ്റാർട്ട് ചെയ്യുക"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"അടിയന്തരാവശ്യം"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"എമർജൻസി"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"സെഷൻ അവസാനിപ്പിക്കുക"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"സ്‌ക്രീൻഷോട്ട്"</string>
@@ -307,7 +307,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ലൊക്കേഷൻ"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ഈ ഉപകരണത്തിന്റെ ലൊക്കേഷൻ ആക്സസ് ചെയ്യാൻ"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"കലണ്ടർ"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുകയും കാണുകയും ചെയ്യുക"</string>
@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ശാരീരിക പ്രവർത്തനം ആക്‌സസ് ചെയ്യുക"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ക്യാമറ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ചിത്രങ്ങളെടുത്ത് വീഡിയോ റെക്കോർഡുചെയ്യുക"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"സമീപമുള്ള Bluetooth ഉപകരണങ്ങൾ"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"സമീപമുള്ള Bluetooth ഉപകരണങ്ങൾ കണ്ടെത്തി കണക്റ്റ് ചെയ്യുക"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"സമീപമുള്ള ഉപകരണങ്ങൾ"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"സമീപമുള്ള ഉപകരണങ്ങൾ കണ്ടെത്തി അവയിലേക്ക് കണക്റ്റ് ചെയ്യുക"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"കോൾ ലോഗ്"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ഫോൺ കോൾ ലോഗ് വായിക്കുകയും എഴുതുകയും ചെയ്യുക"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ഫോണ്‍"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"സമീപമുള്ള Bluetooth ഉപകരണങ്ങൾ കണ്ടെത്താനും ജോടിയാക്കാനും ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ജോടിയായ Bluetooth ഉപകരണങ്ങളിലേക്ക് കണക്റ്റ് ചെയ്യൂ"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ജോടിയാക്കിയ Bluetooth ഉപകരണങ്ങളിലേക്ക് കണക്റ്റ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"സമീപമുള്ള Bluetooth ഉപകരണങ്ങളിലേക്ക് പരസ്യം ചെയ്യൂ"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"സമീപമുള്ള Bluetooth ഉപകരണങ്ങളിലേക്ക് പരസ്യം ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"സമീപമുള്ള അൾട്രാ-വെെഡ്ബാൻഡ് ഉപകരണങ്ങൾ തമ്മിലുള്ള ആപേക്ഷിക സ്ഥാനം നിർണ്ണയിക്കൂ"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"സമീപമുള്ള അൾട്രാ-വെെഡ്ബാൻഡ് ഉപകരണങ്ങൾ തമ്മിലുള്ള ആപേക്ഷിക സ്ഥാനം നിർണ്ണയിക്കാൻ ആപ്പിനെ അനുവദിക്കുക"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"തിരഞ്ഞെടുത്ത NFC പേയ്‌മെന്റ് സേവനത്തെ സംബന്ധിച്ച വിവരങ്ങൾ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"റൂട്ട് ലക്ഷ്യസ്ഥാനം, രജിസ്‌റ്റർ ചെയ്തിരിക്കുന്ന സഹായങ്ങൾ എന്നിവ പോലുള്ള, തിരഞ്ഞെടുത്ത NFC പേയ്‌മെന്റ് സേവനത്തെ സംബന്ധിച്ച വിവരങ്ങൾ ലഭിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"സമീപ ഫീൽഡുമായുള്ള ആശയവിനിമയം നിയന്ത്രിക്കുക"</string>
@@ -1194,7 +1194,7 @@
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ആക്‌സസ് നൽകുക"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"ഇത് ഉപയോഗിച്ച് എഡിറ്റുചെയ്യുക"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s ഉപയോഗിച്ച് എഡിറ്റുചെയ്യുക"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"എഡിറ്റുചെയ്യുക"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"പങ്കിടുക"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$s എന്നതുമായി പങ്കിടുക"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"പങ്കിടുക"</string>
@@ -1497,7 +1497,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"നെറ്റ്‍വര്‍ക്ക് അല്ലെങ്കിൽ VPN ക്രമീകരണം മാറ്റുക"</string>
     <string name="upload_file" msgid="8651942222301634271">"ഫയല്‍‌ തിരഞ്ഞെടുക്കുക"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"ഫയലൊന്നും തിരഞ്ഞെടുത്തില്ല"</string>
-    <string name="reset" msgid="3865826612628171429">"പുനഃസജ്ജമാക്കുക"</string>
+    <string name="reset" msgid="3865826612628171429">"റീസെറ്റ് ചെയ്യുക"</string>
     <string name="submit" msgid="862795280643405865">"സമർപ്പിക്കുക"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"ഡ്രൈവിംഗ് ആപ്പ് റൺ ചെയ്യുകയാണ്"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ഡ്രൈവിംഗ് ആപ്പിൽ നിന്ന് പുറത്തുകടക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
@@ -1572,7 +1572,7 @@
     <string name="storage_usb_drive" msgid="448030813201444573">"USB ഡ്രൈവ്"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ഡ്രൈവ്"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB സ്റ്റോറേജ്"</string>
-    <string name="extract_edit_menu_button" msgid="63954536535863040">"എഡിറ്റുചെയ്യുക"</string>
+    <string name="extract_edit_menu_button" msgid="63954536535863040">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"ഡാറ്റാ മുന്നറിയിപ്പ്"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"നിങ്ങൾ ഡാറ്റയുടെ <xliff:g id="APP">%s</xliff:g> ഉപയോഗിച്ചു"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"മൊബൈൽ ഡാറ്റ പരിധി എത്തി"</string>
@@ -1852,8 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ശരി"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"ബാറ്ററി ലെെഫ് വർദ്ധിപ്പിക്കാൻ, \'ബാറ്ററി ലാഭിക്കൽ\' ഇനിപ്പറയുന്നവ ചെയ്യുന്നു:\n\n•ഡാർക്ക് തീം ഓണാക്കുന്നു\n•പശ്ചാത്തല ആക്‌റ്റിവിറ്റി, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, “Ok Google” പോലുള്ള മറ്റ് ഫീച്ചറുകൾ എന്നിവ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യന്നു\n\n"<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"ബാറ്ററി ലെെഫ് വർദ്ധിപ്പിക്കാൻ, \'ബാറ്ററി ലാഭിക്കൽ\' ഇനിപ്പറയുന്നവ ചെയ്യുന്നു:\n\n• ഡാർക്ക് തീം ഓണാക്കുന്നു\n• പശ്ചാത്തല ആക്റ്റിവിറ്റി, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, “Ok Google” പോലുള്ള മറ്റ് ഫീച്ചറുകൾ എന്നിവ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യുന്നു"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"ബാറ്ററി ലാഭിക്കൽ, ഡാർക്ക് തീം ഓണാക്കുന്നു, പശ്ചാത്തല പ്രവർത്തനവും ചില വിഷ്വൽ ഇഫക്‌റ്റുകളും “Ok Google” പോലുള്ള ഫീച്ചറുകളും നിയന്ത്രിക്കുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു\n\n"<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
+    <string name="battery_saver_description" msgid="7695751399533397741">"ബാറ്ററി ലാഭിക്കൽ, ഡാർക്ക് തീം ഓണാക്കുന്നു, പശ്ചാത്തല പ്രവർത്തനവും ചില വിഷ്വൽ ഇഫക്‌റ്റുകളും “Ok Google” പോലുള്ള ഫീച്ചറുകളും നിയന്ത്രിക്കുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ഓണാക്കുക"</string>
@@ -1929,6 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"അവസാനിപ്പിക്കുക"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"മറുപടി നൽകുക"</string>
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"വീഡിയോ"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"നിരസിക്കുക"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"കോൾ നിർത്തുക"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ഇൻകമിംഗ് കോൾ"</string>
@@ -1946,7 +1947,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> എന്ന അക്കൗണ്ട് ഉപയോഗിച്ച് പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാൻ <xliff:g id="APP">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ഒരു ഭാഷ ചേർക്കുക"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"മേഖലാ മുൻഗണന"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"ഭാഷയുടെ പേര് ടൈപ്പുചെയ്യുക"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"ഭാഷ ടൈപ്പ് ചെയ്യുക"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"എല്ലാ പ്രദേശങ്ങളും"</string>
@@ -2072,6 +2073,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ഈ അറിയിപ്പിനെ നിശബ്‌ദമാക്കി തരം താഴ്‌ത്തി. ഫീഡ്ബാക്ക് നൽകാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ഈ അറിയിപ്പിന് ഉയർന്ന റാങ്ക് നൽകി. ഫീഡ്ബാക്ക് നൽകാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ഈ അറിയിപ്പിന് താഴ്‌ന്ന റാങ്ക് നൽകി. ഫീഡ്ബാക്ക് നൽകാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ പരീക്ഷിക്കൂ"</string>
+    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"നിർദ്ദേശിച്ച പ്രവർത്തനങ്ങളും മറുപടികളും മറ്റും ലഭിക്കുന്നത് തുടരാൻ, മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ ഓണാക്കുക. Android അഡാപ്റ്റീവ് അറിയിപ്പുകൾക്ക് ഇനി പിന്തുണയില്ല."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ഓണാക്കുക"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"ഇപ്പോൾ വേണ്ട"</string>
+    <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"കൂടുതലറിയുക"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾക്ക്, കോൺടാക്‌റ്റ് പേരുകളും സന്ദേശങ്ങളും പോലുള്ള വ്യക്തിപരമായ വിവരങ്ങൾ ഉൾപ്പെടെ എല്ലാ അറിയിപ്പ് ഉള്ളടക്കവും വായിക്കാനാകും. അറിയിപ്പുകൾ ഡിസ്‌മിസ് ചെയ്യാനോ ഫോൺ കോളുകൾക്ക് മറുപടി നൽകുന്നത് പോലെ അറിയിപ്പുകളിലെ ബട്ടണുകളിൽ നടപടിയെടുക്കാനോ ഈ ഫീച്ചറിന് കഴിയും.\n\nമുൻഗണനാ മോഡ് ഓണാക്കാനോ ഓഫാക്കാനോ ബന്ധപ്പെട്ട ക്രമീകരണം മാറ്റാനോ ഈ ഫീച്ചറിന് കഴിയും."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"സാധാരണയുള്ളതിലും നേരത്തെ ബാറ്ററിയുടെ ചാർജ് തീർന്നേക്കാം"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ബാറ്ററി ലൈഫ് വര്‍ദ്ധിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ സജീവമാക്കി"</string>
@@ -2259,9 +2266,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"നിങ്ങളുടെ സ്ക്രീനിന്റെ ഒരു ഭാഗം ഇപ്പോൾ മാഗ്നിഫൈ ചെയ്യാനാകും"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ക്രമീകരണത്തിൽ ഓണാക്കുക"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"തുടരാൻ, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ആപ്പിന് നിങ്ങളുടെ ഉപകരണത്തിന്റെ മൈക്രോഫോണിലേക്ക് ആക്‌സസ് നൽകേണ്ടതുണ്ട്."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"തുടരാൻ, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ആപ്പിന് നിങ്ങളുടെ ഉപകരണത്തിന്റെ ക്യാമറയിലേക്ക് ആക്‌സസ് നൽകേണ്ടതുണ്ട്."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ഓണാക്കുക"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ഉപകരണ മൈക്രോഫോൺ അൺബ്ലോക്ക് ചെയ്യുക"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ഉപകരണ ക്യാമറ അൺബ്ലോക്ക് ചെയ്യുക"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; എന്നതിനും എല്ലാ ആപ്പുകൾക്കും സേവനങ്ങൾക്കും"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"അൺബ്ലോക്ക് ചെയ്യുക"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"സെൻസർ സ്വകാര്യത"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ആപ്പ് ഐക്കൺ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"അപ്ലിക്കേഷൻ ബ്രാൻഡിംഗ് ഇമേജ്"</string>

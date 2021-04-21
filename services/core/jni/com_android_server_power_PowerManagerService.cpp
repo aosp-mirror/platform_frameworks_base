@@ -100,7 +100,7 @@ static bool setPowerMode(Mode mode, bool enabled) {
         ALOGD("Excessive delay in setting interactive mode to %s while turning screen %s",
               enabled ? "true" : "false", enabled ? "on" : "off");
     }
-    return result == power::HalResult::SUCCESSFUL;
+    return result.isOk();
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType,

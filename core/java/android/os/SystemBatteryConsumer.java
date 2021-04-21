@@ -104,6 +104,13 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
     }
 
     /**
+     * Returns the amount of time this consumer was operating.
+     */
+    public long getUsageDurationMillis() {
+        return mPowerComponents.getMaxComponentUsageDurationMillis();
+    }
+
+    /**
      * Writes the contents into a Parcel.
      */
     @Override
@@ -140,9 +147,9 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
         private double mPowerConsumedByAppsMah;
         private List<UidBatteryConsumer.Builder> mUidBatteryConsumers;
 
-        Builder(int customPowerComponentCount, int customTimeComponentCount,
+        Builder(@NonNull String[] customPowerComponentNames, int customTimeComponentCount,
                 boolean includePowerModels, @DrainType int drainType) {
-            super(customPowerComponentCount, customTimeComponentCount, includePowerModels);
+            super(customPowerComponentNames, customTimeComponentCount, includePowerModels);
             mDrainType = drainType;
         }
 

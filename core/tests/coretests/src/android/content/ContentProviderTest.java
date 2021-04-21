@@ -89,9 +89,9 @@ public class ContentProviderTest {
     }
 
     @Test
-    public void testCreateContentUriAsUser() {
+    public void testCreateContentUriForUser() {
         Uri uri = Uri.parse("content://com.example/foo/bar");
         Uri expectedUri = Uri.parse("content://7@com.example/foo/bar");
-        assertEquals(expectedUri, ContentProvider.createContentUriAsUser(uri, UserHandle.of(7)));
+        assertEquals(expectedUri, ContentProvider.createContentUriForUser(uri, UserHandle.of(7)));
     }
 }

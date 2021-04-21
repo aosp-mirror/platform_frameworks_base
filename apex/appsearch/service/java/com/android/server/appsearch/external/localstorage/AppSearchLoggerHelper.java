@@ -18,10 +18,11 @@ package com.android.server.appsearch.external.localstorage;
 
 import android.annotation.NonNull;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 
 import com.google.android.icing.proto.PutDocumentStatsProto;
+
+import java.util.Objects;
 
 /**
  * Class contains helper functions for logging.
@@ -42,8 +43,8 @@ public final class AppSearchLoggerHelper {
     static void copyNativeStats(
             @NonNull PutDocumentStatsProto fromNativeStats,
             @NonNull PutDocumentStats.Builder toStatsBuilder) {
-        Preconditions.checkNotNull(fromNativeStats);
-        Preconditions.checkNotNull(toStatsBuilder);
+        Objects.requireNonNull(fromNativeStats);
+        Objects.requireNonNull(toStatsBuilder);
         toStatsBuilder
                 .setNativeLatencyMillis(fromNativeStats.getLatencyMs())
                 .setNativeDocumentStoreLatencyMillis(fromNativeStats.getDocumentStoreLatencyMs())

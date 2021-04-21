@@ -319,7 +319,7 @@ public class HdmiCecConfig {
 
         Setting powerControlMode = registerSetting(
                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
-                R.bool.config_cecSendStandbyOnSleep_userConfigurable);
+                R.bool.config_cecPowerControlMode_userConfigurable);
         powerControlMode.registerValue(HdmiControlManager.POWER_CONTROL_MODE_TV,
                 R.bool.config_cecPowerControlModeTv_allowed,
                 R.bool.config_cecPowerControlModeTv_default);

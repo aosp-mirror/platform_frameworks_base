@@ -1079,10 +1079,13 @@ public abstract class WindowOrientationListener {
         private int mDesiredRotation = -1;
         private boolean mRotationEvaluationScheduled;
         private long mRotationResolverTimeoutMillis;
-
+        private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
         OrientationSensorJudge() {
             super();
             setupRotationResolverParameters();
+
+            mActivityTaskManagerInternal =
+                    LocalServices.getService(ActivityTaskManagerInternal.class);
         }
 
         private void setupRotationResolverParameters() {
@@ -1149,6 +1152,18 @@ public abstract class WindowOrientationListener {
                 }
 
                 final CancellationSignal cancellationSignal = new CancellationSignal();
+
+                String packageName = null;
+                if (mActivityTaskManagerInternal != null) {
+                    final WindowProcessController controller =
+                            mActivityTaskManagerInternal.getTopApp();
+                    if (controller != null
+                            && controller.mInfo != null
+                            && controller.mInfo.packageName != null) {
+                        packageName = controller.mInfo.packageName;
+                    }
+                }
+
                 mRotationResolverService.resolveRotation(
                         new RotationResolverInternal.RotationResolverCallbackInternal() {
                             @Override
@@ -1161,6 +1176,7 @@ public abstract class WindowOrientationListener {
                                 finalizeRotation(reportedRotation);
                             }
                         },
+                        packageName,
                         reportedRotation,
                         mCurrentRotation,
                         mRotationResolverTimeoutMillis,

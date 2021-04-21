@@ -614,7 +614,7 @@ public final class ApplicationExitInfo implements Parcelable {
      * tombstone traces will be returned for
      * {@link #REASON_CRASH_NATIVE}, with an InputStream containing a protobuf with
      * <a href="https://android.googlesource.com/platform/system/core/+/refs/heads/master/debuggerd/proto/tombstone.proto">this schema</a>.
-     * Note thatbecause these traces are kept in a separate global circular buffer, crashes may be
+     * Note that because these traces are kept in a separate global circular buffer, crashes may be
      * overwritten by newer crashes (including from other applications), so this may still return
      * null.
      *

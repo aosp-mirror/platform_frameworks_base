@@ -20,7 +20,13 @@ import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_RESTING;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -29,6 +35,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -70,6 +78,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
@@ -130,6 +139,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private DockManager mDockManager;
     @Mock
     private KeyguardIndicationRotateTextViewController mRotateTextViewController;
+    @Mock
+    private FalsingManager mFalsingManager;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     @Captor
@@ -197,7 +208,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController = new KeyguardIndicationController(mContext, mWakeLockBuilder,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
-                mUserManager, mExecutor);
+                mUserManager, mExecutor, mFalsingManager);
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
         mStatusBarStateListener = mStatusBarStateListenerCaptor.getValue();
@@ -227,10 +238,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         });
         mInstrumentation.waitForIdleSync();
 
-        assertThat(mTextView.getText()).isEqualTo(
+
+        verifyIndicationMessage(INDICATION_TYPE_ALIGNMENT,
                 mContext.getResources().getString(R.string.dock_alignment_slow_charging));
-        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
-                Utils.getColorError(mContext).getDefaultColor());
+        assertThat(mKeyguardIndicationCaptor.getValue().getTextColor())
+                .isEqualTo(Utils.getColorError(mContext));
     }
 
     @Test
@@ -244,10 +256,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         });
         mInstrumentation.waitForIdleSync();
 
-        assertThat(mTextView.getText()).isEqualTo(
+        verifyIndicationMessage(INDICATION_TYPE_ALIGNMENT,
                 mContext.getResources().getString(R.string.dock_alignment_not_charging));
-        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
-                Utils.getColorError(mContext).getDefaultColor());
+        assertThat(mKeyguardIndicationCaptor.getValue().getTextColor())
+                .isEqualTo(Utils.getColorError(mContext));
     }
 
     @Test
@@ -293,9 +305,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(false);
         sendUpdateDisclosureBroadcast();
 
-        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_DISCLOSURE);
-        verify(mRotateTextViewController, never()).updateIndication(eq(INDICATION_TYPE_DISCLOSURE),
-                any(), anyBoolean());
+        verifyHideIndication(INDICATION_TYPE_DISCLOSURE);
     }
 
     @Test
@@ -305,10 +315,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
         sendUpdateDisclosureBroadcast();
 
-        verify(mRotateTextViewController).updateIndication(eq(INDICATION_TYPE_DISCLOSURE),
-                mKeyguardIndicationCaptor.capture(), eq(false));
-        assertThat(mKeyguardIndicationCaptor.getValue().getMessage())
-                .isEqualTo(mDisclosureGeneric);
+        verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureGeneric);
     }
 
     @Test
@@ -320,10 +327,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.getOrganizationNameForUser(eq(10))).thenReturn(null);
         sendUpdateDisclosureBroadcast();
 
-        verify(mRotateTextViewController).updateIndication(eq(INDICATION_TYPE_DISCLOSURE),
-                mKeyguardIndicationCaptor.capture(), eq(false));
-        assertThat(mKeyguardIndicationCaptor.getValue().getMessage())
-                .isEqualTo(mDisclosureGeneric);
+        verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureGeneric);
     }
 
     @Test
@@ -333,10 +337,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
         sendUpdateDisclosureBroadcast();
 
-        verify(mRotateTextViewController).updateIndication(eq(INDICATION_TYPE_DISCLOSURE),
-                mKeyguardIndicationCaptor.capture(), eq(false));
-        assertThat(mKeyguardIndicationCaptor.getValue().getMessage())
-                .isEqualTo(mDisclosureWithOrganization);
+        verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureWithOrganization);
     }
 
     @Test
@@ -348,10 +349,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.getOrganizationNameForUser(eq(10))).thenReturn(ORGANIZATION_NAME);
         sendUpdateDisclosureBroadcast();
 
-        verify(mRotateTextViewController).updateIndication(eq(INDICATION_TYPE_DISCLOSURE),
-                mKeyguardIndicationCaptor.capture(), eq(false));
-        assertThat(mKeyguardIndicationCaptor.getValue().getMessage())
-                .isEqualTo(mDisclosureWithOrganization);
+        verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureWithOrganization);
     }
 
     @Test
@@ -363,26 +361,20 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
         sendUpdateDisclosureBroadcast();
 
-        verify(mRotateTextViewController).updateIndication(eq(INDICATION_TYPE_DISCLOSURE),
-                mKeyguardIndicationCaptor.capture(), eq(false));
-        assertThat(mKeyguardIndicationCaptor.getValue().getMessage())
-                .isEqualTo(mDisclosureGeneric);
+        verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureGeneric);
         reset(mRotateTextViewController);
 
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
         sendUpdateDisclosureBroadcast();
 
-        verify(mRotateTextViewController).updateIndication(eq(INDICATION_TYPE_DISCLOSURE),
-                mKeyguardIndicationCaptor.capture(), eq(false));
-        assertThat(mKeyguardIndicationCaptor.getValue().getMessage())
-                .isEqualTo(mDisclosureWithOrganization);
+        verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureWithOrganization);
         reset(mRotateTextViewController);
 
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
         sendUpdateDisclosureBroadcast();
 
-        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_DISCLOSURE);
+        verifyHideIndication(INDICATION_TYPE_DISCLOSURE);
     }
 
     @Test
@@ -395,10 +387,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
         sendUpdateDisclosureBroadcast();
 
-        verify(mRotateTextViewController).updateIndication(eq(INDICATION_TYPE_DISCLOSURE),
-                mKeyguardIndicationCaptor.capture(), eq(false));
-        assertThat(mKeyguardIndicationCaptor.getValue().getMessage())
-                .isEqualTo(mFinancedDisclosureWithOrganization);
+        verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mFinancedDisclosureWithOrganization);
     }
 
     @Test
@@ -462,10 +451,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onBiometricHelp(
                 KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, message,
                 BiometricSourceType.FACE);
-        assertThat(mTextView.getText()).isEqualTo(message);
+        verifyTransientMessage(message);
+        reset(mRotateTextViewController);
         mStatusBarStateListener.onDozingChanged(true);
 
-        assertThat(mTextView.getText()).isNotEqualTo(message);
+        verifyHideIndication(INDICATION_TYPE_TRANSIENT);
     }
 
     @Test
@@ -477,7 +467,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
                 "A message", BiometricSourceType.FACE);
 
-        assertThat(mTextView.getText()).isEqualTo(message);
+        verifyTransientMessage(message);
         mStatusBarStateListener.onDozingChanged(true);
 
         assertThat(mTextView.getText()).isNotEqualTo(message);
@@ -503,19 +493,22 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         reset(mKeyguardUpdateMonitor);
 
         mController.setVisible(true);
-        assertThat(mTextView.getText()).isEqualTo(
+        verifyIndicationMessage(INDICATION_TYPE_USER_LOCKED,
                 mContext.getString(com.android.internal.R.string.lockscreen_storage_locked));
 
+        reset(mRotateTextViewController);
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
         when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
         mController.setRestingIndication(restingIndication);
-        assertThat(mTextView.getText()).isEqualTo(mController.getTrustGrantedIndication());
+        verifyHideIndication(INDICATION_TYPE_USER_LOCKED);
+        verifyIndicationMessage(INDICATION_TYPE_RESTING, restingIndication);
 
+        reset(mRotateTextViewController);
         reset(mKeyguardUpdateMonitor);
         when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
         mController.onUnlockedChanged();
-        assertThat(mTextView.getText()).isEqualTo(restingIndication);
+        verifyIndicationMessage(INDICATION_TYPE_RESTING, restingIndication);
     }
 
     @Test
@@ -567,12 +560,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
         mController.setPowerPluggedIn(true);
         mController.setVisible(true);
-        String powerIndication = mController.computePowerIndication();
-        String pluggedIndication = mContext.getString(R.string.keyguard_indication_trust_unlocked);
-        pluggedIndication = mContext.getString(
-                R.string.keyguard_indication_trust_unlocked_plugged_in,
-                pluggedIndication, powerIndication);
-        assertThat(mTextView.getText()).isEqualTo(pluggedIndication);
+
+        verifyIndicationMessage(
+                INDICATION_TYPE_TRUST,
+                mContext.getString(R.string.keyguard_indication_trust_unlocked));
     }
 
     @Test
@@ -586,10 +577,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);
         mController.setVisible(true);
 
-        String percentage = NumberFormat.getPercentInstance().format(80 / 100f);
-        String pluggedIndication = mContext.getString(
-                R.string.keyguard_plugged_in_charging_limited, percentage);
-        assertThat(mTextView.getText()).isEqualTo(pluggedIndication);
+        verifyIndicationMessage(
+                INDICATION_TYPE_BATTERY,
+                mContext.getString(
+                        R.string.keyguard_plugged_in_charging_limited,
+                        NumberFormat.getPercentInstance().format(80 / 100f)));
     }
 
     @Test
@@ -603,10 +595,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);
         mController.setVisible(true);
 
-        String percentage = NumberFormat.getPercentInstance().format(80 / 100f);
-        String pluggedIndication = mContext.getString(
-                R.string.keyguard_plugged_in_charging_limited, percentage);
-        assertThat(mTextView.getText()).isEqualTo(pluggedIndication);
+        verifyIndicationMessage(
+                INDICATION_TYPE_BATTERY,
+                mContext.getString(
+                        R.string.keyguard_plugged_in_charging_limited,
+                        NumberFormat.getPercentInstance().format(80 / 100f)));
     }
 
     @Test
@@ -620,12 +613,13 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);
         mController.setVisible(true);
 
-        String chargedIndication = mContext.getString(R.string.keyguard_charged);
-        assertThat(mTextView.getText()).isEqualTo(chargedIndication);
+        verifyIndicationMessage(
+                INDICATION_TYPE_BATTERY,
+                mContext.getString(R.string.keyguard_charged));
     }
 
     @Test
-    public void onRefreshBatteryInfo_dischargingWithOverheat_presentBatteryPercentage() {
+    public void onRefreshBatteryInfo_dozing_dischargingWithOverheat_presentBatteryPercentage() {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_DISCHARGING,
                 90 /* level */, 0 /* plugged */, BatteryManager.BATTERY_HEALTH_OVERHEAT,
@@ -646,10 +640,32 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onRequireUnlockForNfc();
         mController.setVisible(true);
 
-        assertThat(mTextView.getText()).isEqualTo(message);
+        verifyTransientMessage(message);
     }
 
     private void sendUpdateDisclosureBroadcast() {
         mBroadcastReceiver.onReceive(mContext, new Intent());
+    }
+
+    private void verifyIndicationMessage(int type, String message) {
+        verify(mRotateTextViewController).updateIndication(eq(type),
+                mKeyguardIndicationCaptor.capture(), anyBoolean());
+        assertThat(mKeyguardIndicationCaptor.getValue().getMessage())
+                .isEqualTo(message);
+    }
+
+    private void verifyHideIndication(int type) {
+        if (type == INDICATION_TYPE_TRANSIENT) {
+            verify(mRotateTextViewController).hideTransient();
+            verify(mRotateTextViewController, never()).showTransient(anyString(), anyBoolean());
+        } else {
+            verify(mRotateTextViewController).hideIndication(type);
+            verify(mRotateTextViewController, never()).updateIndication(eq(type),
+                    anyObject(), anyBoolean());
+        }
+    }
+
+    private void verifyTransientMessage(String message) {
+        verify(mRotateTextViewController).showTransient(eq(message), anyBoolean());
     }
 }

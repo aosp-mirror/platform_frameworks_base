@@ -1749,7 +1749,7 @@ public final class NetworkCapabilities implements Parcelable {
         combineSSIDs(nc);
         combineRequestor(nc);
         combineAdministratorUids(nc);
-        combineSubIds(nc);
+        combineSubscriptionIds(nc);
     }
 
     /**
@@ -1771,7 +1771,7 @@ public final class NetworkCapabilities implements Parcelable {
                 && (onlyImmutable || satisfiedByUids(nc))
                 && (onlyImmutable || satisfiedBySSID(nc))
                 && (onlyImmutable || satisfiedByRequestor(nc))
-                && (onlyImmutable || satisfiedBySubIds(nc)));
+                && (onlyImmutable || satisfiedBySubscriptionIds(nc)));
     }
 
     /**
@@ -1868,7 +1868,7 @@ public final class NetworkCapabilities implements Parcelable {
                 && equalsPrivateDnsBroken(that)
                 && equalsRequestor(that)
                 && equalsAdministratorUids(that)
-                && equalsSubIds(that);
+                && equalsSubscriptionIds(that);
     }
 
     @Override
@@ -2346,7 +2346,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     @NonNull
-    public NetworkCapabilities setSubIds(@NonNull Set<Integer> subIds) {
+    public NetworkCapabilities setSubscriptionIds(@NonNull Set<Integer> subIds) {
         mSubIds = new ArraySet(Objects.requireNonNull(subIds));
         return this;
     }
@@ -2362,14 +2362,14 @@ public final class NetworkCapabilities implements Parcelable {
      */
     @NonNull
     @SystemApi
-    public Set<Integer> getSubIds() {
+    public Set<Integer> getSubscriptionIds() {
         return new ArraySet<>(mSubIds);
     }
 
     /**
      * Tests if the subscription ID set of this network is the same as that of the passed one.
      */
-    private boolean equalsSubIds(@NonNull NetworkCapabilities nc) {
+    private boolean equalsSubscriptionIds(@NonNull NetworkCapabilities nc) {
         return Objects.equals(mSubIds, nc.mSubIds);
     }
 
@@ -2378,7 +2378,7 @@ public final class NetworkCapabilities implements Parcelable {
      * If specified in the request, the passed one need to have at least one subId and at least
      * one of them needs to be in the request set.
      */
-    private boolean satisfiedBySubIds(@NonNull NetworkCapabilities nc) {
+    private boolean satisfiedBySubscriptionIds(@NonNull NetworkCapabilities nc) {
         if (mSubIds.isEmpty()) return true;
         if (nc.mSubIds.isEmpty()) return false;
         for (final Integer subId : nc.mSubIds) {
@@ -2395,7 +2395,7 @@ public final class NetworkCapabilities implements Parcelable {
      * <p>If both subscription IDs are not equal, they belong to different subscription
      * (or no subscription). In this case, it would not make sense to add them together.
      */
-    private void combineSubIds(@NonNull NetworkCapabilities nc) {
+    private void combineSubscriptionIds(@NonNull NetworkCapabilities nc) {
         if (!Objects.equals(mSubIds, nc.mSubIds)) {
             throw new IllegalStateException("Can't combine two subscription ID sets");
         }
@@ -2737,8 +2737,8 @@ public final class NetworkCapabilities implements Parcelable {
          */
         @NonNull
         @SystemApi
-        public Builder setSubIds(@NonNull final Set<Integer> subIds) {
-            mCaps.setSubIds(subIds);
+        public Builder setSubscriptionIds(@NonNull final Set<Integer> subIds) {
+            mCaps.setSubscriptionIds(subIds);
             return this;
         }
 

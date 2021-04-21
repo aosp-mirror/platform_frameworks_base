@@ -24,6 +24,7 @@ import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.LOCUS_ID_SET;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_INTERRUPTION;
 import static android.app.usage.UsageEvents.Event.SHORTCUT_INVOCATION;
+import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 import static android.app.usage.UsageEvents.Event.USER_STOPPED;
 import static android.app.usage.UsageEvents.Event.USER_UNLOCKED;
 import static android.app.usage.UsageStatsManager.USAGE_SOURCE_CURRENT_ACTIVITY;
@@ -112,6 +113,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
@@ -1984,6 +1986,17 @@ public class UsageStatsService extends SystemService implements
             event.mAction = action;
             event.mContentType = contentType;
             event.mContentAnnotations = annotations;
+            reportEventOrAddToQueue(userId, event);
+        }
+
+        @Override
+        public void reportUserInteraction(String packageName, int userId) {
+            Objects.requireNonNull(packageName);
+            if (!isCallingUidSystem()) {
+                throw new SecurityException("Only system is allowed to call reportUserInteraction");
+            }
+            final Event event = new Event(USER_INTERACTION, SystemClock.elapsedRealtime());
+            event.mPackage = packageName;
             reportEventOrAddToQueue(userId, event);
         }
 

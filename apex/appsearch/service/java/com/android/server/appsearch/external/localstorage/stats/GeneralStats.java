@@ -19,7 +19,7 @@ package com.android.server.appsearch.external.localstorage.stats;
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchResult;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
  * A class for holding general logging information.
@@ -48,9 +48,9 @@ public final class GeneralStats {
     private final int mTotalLatencyMillis;
 
     GeneralStats(@NonNull Builder builder) {
-        Preconditions.checkNotNull(builder);
-        mPackageName = Preconditions.checkNotNull(builder.mPackageName);
-        mDatabase = Preconditions.checkNotNull(builder.mDatabase);
+        Objects.requireNonNull(builder);
+        mPackageName = Objects.requireNonNull(builder.mPackageName);
+        mDatabase = Objects.requireNonNull(builder.mDatabase);
         mStatusCode = builder.mStatusCode;
         mTotalLatencyMillis = builder.mTotalLatencyMillis;
     }
@@ -92,8 +92,8 @@ public final class GeneralStats {
          * @param database name of the database logging stats
          */
         public Builder(@NonNull String packageName, @NonNull String database) {
-            mPackageName = Preconditions.checkNotNull(packageName);
-            mDatabase = Preconditions.checkNotNull(database);
+            mPackageName = Objects.requireNonNull(packageName);
+            mDatabase = Objects.requireNonNull(database);
         }
 
         /** Sets status code returned from {@link AppSearchResult#getResultCode()} */

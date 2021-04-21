@@ -536,13 +536,12 @@ public class AppTimeLimitController {
         long getUsageRemaining() {
             // If there is currently an active session, account for its usage
             if (mActives > 0) {
-                return mTimeLimitMs - mUsageTimeMs - (getUptimeMillis() - mLastKnownUsageTimeMs);
+                return mTimeLimitMs - mUsageTimeMs - (getElapsedRealtime() - mLastKnownUsageTimeMs);
             } else {
                 return mTimeLimitMs - mUsageTimeMs;
             }
         }
     }
-
 
     private class MyHandler extends Handler {
         static final int MSG_CHECK_TIMEOUT = 1;
@@ -558,7 +557,7 @@ public class AppTimeLimitController {
             switch (msg.what) {
                 case MSG_CHECK_TIMEOUT:
                     synchronized (mLock) {
-                        ((UsageGroup) msg.obj).checkTimeout(getUptimeMillis());
+                        ((UsageGroup) msg.obj).checkTimeout(getElapsedRealtime());
                     }
                     break;
                 case MSG_INFORM_LIMIT_REACHED_LISTENER:
@@ -585,8 +584,8 @@ public class AppTimeLimitController {
 
     /** Overrideable by a test */
     @VisibleForTesting
-    protected long getUptimeMillis() {
-        return SystemClock.uptimeMillis();
+    protected long getElapsedRealtime() {
+        return SystemClock.elapsedRealtime();
     }
 
     /** Overrideable for testing purposes */
@@ -760,7 +759,7 @@ public class AppTimeLimitController {
             }
 
             user.addUsageGroup(group);
-            noteActiveLocked(user, group, getUptimeMillis());
+            noteActiveLocked(user, group, getElapsedRealtime());
         }
     }
 
@@ -813,7 +812,7 @@ public class AppTimeLimitController {
             observerApp.sessionUsageGroups.append(observerId, group);
 
             user.addUsageGroup(group);
-            noteActiveLocked(user, group, getUptimeMillis());
+            noteActiveLocked(user, group, getElapsedRealtime());
         }
     }
 
@@ -869,7 +868,7 @@ public class AppTimeLimitController {
             }
 
             user.addUsageGroup(group);
-            noteActiveLocked(user, group, getUptimeMillis());
+            noteActiveLocked(user, group, getElapsedRealtime());
         }
     }
 
@@ -914,7 +913,7 @@ public class AppTimeLimitController {
                     return;
                 }
             }
-            final long currentTime = getUptimeMillis();
+            final long currentTime = getElapsedRealtime();
 
             user.currentlyActive.put(name, ONE);
 
@@ -964,7 +963,7 @@ public class AppTimeLimitController {
             }
 
             user.currentlyActive.removeAt(index);
-            final long currentTime = getUptimeMillis();
+            final long currentTime = getElapsedRealtime();
 
             // Check if any of the groups need to watch for this entity
             ArrayList<UsageGroup> groups = user.observedMap.get(name);

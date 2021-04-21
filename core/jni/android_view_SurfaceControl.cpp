@@ -30,6 +30,7 @@
 #include <android/hardware/display/IDeviceProductInfoConstants.h>
 #include <android/os/IInputConstants.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
@@ -253,6 +254,15 @@ constexpr jint fromDataspaceToNamedColorSpaceValue(const ui::Dataspace dataspace
     }
 }
 
+constexpr ui::Dataspace fromNamedColorSpaceValueToDataspace(const jint colorSpace) {
+    switch (colorSpace) {
+        case JNamedColorSpace::DISPLAY_P3:
+            return ui::Dataspace::DISPLAY_P3;
+        default:
+            return ui::Dataspace::V0_SRGB;
+    }
+}
+
 constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode) {
     switch (colorMode) {
         case ui::ColorMode::DISPLAY_P3:
@@ -381,6 +391,14 @@ static void nativeDisconnect(JNIEnv* env, jclass clazz, jlong nativeObject) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     if (ctrl != NULL) {
         ctrl->disconnect();
+    }
+}
+
+static void nativeSetDefaultBufferSize(JNIEnv* env, jclass clazz, jlong nativeObject,
+                                       jint width, jint height) {
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    if (ctrl != NULL) {
+        ctrl->updateDefaultBufferSize(width, height);
     }
 }
 
@@ -551,6 +569,23 @@ static void nativeSetGeometry(JNIEnv* env, jclass clazz, jlong transactionObj, j
         dst.makeInvalid();
     }
     transaction->setGeometry(ctrl, source, dst, orientation);
+}
+
+static void nativeSetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                            jobject bufferObject) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    sp<GraphicBuffer> buffer(
+            android_graphics_GraphicBuffer_getNativeGraphicsBuffer(env, bufferObject));
+    transaction->setBuffer(ctrl, buffer);
+}
+
+static void nativeSetColorSpace(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                                jint colorSpace) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    ui::Dataspace dataspace = fromNamedColorSpaceValueToDataspace(colorSpace);
+    transaction->setDataspace(ctrl, dataspace);
 }
 
 static void nativeSetBlurRegions(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1072,7 +1107,7 @@ static jobject convertDisplayModeToJavaObject(JNIEnv* env, const ui::DisplayMode
     return object;
 }
 
-jobject convertDeviceProductInfoToJavaObject(JNIEnv* env, const HdrCapabilities& capabilities) {
+jobject convertHdrCapabilitiesToJavaObject(JNIEnv* env, const HdrCapabilities& capabilities) {
     const auto& types = capabilities.getSupportedHdrTypes();
     std::vector<int32_t> intTypes;
     for (auto type : types) {
@@ -1129,7 +1164,7 @@ static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jobject to
                      static_cast<jint>(info.activeColorMode));
 
     env->SetObjectField(object, gDynamicDisplayInfoClassInfo.hdrCapabilities,
-                        convertDeviceProductInfoToJavaObject(env, info.hdrCapabilities));
+                        convertHdrCapabilitiesToJavaObject(env, info.hdrCapabilities));
 
     env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.autoLowLatencyModeSupported,
                          info.autoLowLatencyModeSupported);
@@ -1443,14 +1478,6 @@ static jboolean nativeGetAnimationFrameStats(JNIEnv* env, jclass clazz, jobject 
     return JNI_TRUE;
 }
 
-static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong transactionObj,
-        jlong nativeObject, jlong barrierObject, jlong frameNumber) {
-    sp<SurfaceControl> ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
-    sp<SurfaceControl> barrier = reinterpret_cast<SurfaceControl*>(barrierObject);
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    transaction->deferTransactionUntil_legacy(ctrl, barrier, frameNumber);
-}
-
 static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject,
         jlong newParentObject) {
@@ -1570,6 +1597,13 @@ static void nativeWriteTransactionToParcel(JNIEnv* env, jclass clazz, jlong nati
             reinterpret_cast<SurfaceComposerClient::Transaction *>(nativeObject);
     if (self != nullptr) {
         self->writeToParcel(parcel);
+    }
+}
+
+static void nativeClearTransaction(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    SurfaceComposerClient::Transaction* const self =
+            reinterpret_cast<SurfaceComposerClient::Transaction*>(nativeObject);
+    if (self != nullptr) {
         self->clear();
     }
 }
@@ -1745,6 +1779,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeRelease },
     {"nativeDisconnect", "(J)V",
             (void*)nativeDisconnect },
+    {"nativeUpdateDefaultBufferSize", "(JII)V",
+            (void*)nativeSetDefaultBufferSize},
     {"nativeCreateTransaction", "()J",
             (void*)nativeCreateTransaction },
     {"nativeApplyTransaction", "(JZ)V",
@@ -1856,8 +1892,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayPowerMode },
     {"nativeGetProtectedContentSupport", "()Z",
             (void*)nativeGetProtectedContentSupport },
-    {"nativeDeferTransactionUntil", "(JJJJ)V",
-            (void*)nativeDeferTransactionUntil },
     {"nativeReparent", "(JJJ)V",
             (void*)nativeReparent },
     {"nativeCaptureDisplay",
@@ -1880,6 +1914,10 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetDisplayedContentSample },
     {"nativeSetGeometry", "(JJLandroid/graphics/Rect;Landroid/graphics/Rect;J)V",
             (void*)nativeSetGeometry },
+    {"nativeSetBuffer", "(JJLandroid/graphics/GraphicBuffer;)V",
+            (void*)nativeSetBuffer },
+    {"nativeSetColorSpace", "(JJI)V",
+            (void*)nativeSetColorSpace },
     {"nativeSyncInputWindows", "(J)V",
             (void*)nativeSyncInputWindows },
     {"nativeGetDisplayBrightnessSupport", "(Landroid/os/IBinder;)Z",
@@ -1890,6 +1928,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeReadTransactionFromParcel },
     {"nativeWriteTransactionToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteTransactionToParcel },
+    {"nativeClearTransaction", "(J)V",
+            (void*)nativeClearTransaction },
     {"nativeMirrorSurface", "(J)J",
             (void*)nativeMirrorSurface },
     {"nativeSetGlobalShadowSettings", "([F[FFFF)V",

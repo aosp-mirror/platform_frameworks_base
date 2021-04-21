@@ -185,7 +185,8 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
             }
             Log.w(TAG, "close(): capture session still active! Ending now.");
             // -> UiThread
-            mUiThread.execute(() -> mLocal.onScrollCaptureEnd(() -> { /* ignore */ }));
+            final ScrollCaptureCallback callback = mLocal;
+            mUiThread.execute(() -> callback.onScrollCaptureEnd(() -> { /* ignore */ }));
             mActive = false;
         }
         mActive = false;

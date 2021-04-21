@@ -22,8 +22,7 @@ import android.annotation.IntDef;
 import android.content.Context;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
-import android.view.animation.Interpolator;
-import android.view.animation.OvershootInterpolator;
+import android.view.animation.BaseInterpolator;
 import android.window.WindowContainerToken;
 
 import androidx.annotation.VisibleForTesting;
@@ -54,7 +53,7 @@ public class OneHandedAnimationController {
     public @interface TransitionDirection {
     }
 
-    private final Interpolator mOvershootInterpolator;
+    private final OneHandedInterpolator mInterpolator;
     private final OneHandedSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final HashMap<WindowContainerToken, OneHandedTransitionAnimator> mAnimatorMap =
             new HashMap<>();
@@ -64,7 +63,7 @@ public class OneHandedAnimationController {
      */
     public OneHandedAnimationController(Context context) {
         mSurfaceTransactionHelper = new OneHandedSurfaceTransactionHelper(context);
-        mOvershootInterpolator = new OvershootInterpolator();
+        mInterpolator = new OneHandedInterpolator();
     }
 
     @SuppressWarnings("unchecked")
@@ -102,7 +101,7 @@ public class OneHandedAnimationController {
     OneHandedTransitionAnimator setupOneHandedTransitionAnimator(
             OneHandedTransitionAnimator animator) {
         animator.setSurfaceTransactionHelper(mSurfaceTransactionHelper);
-        animator.setInterpolator(mOvershootInterpolator);
+        animator.setInterpolator(mInterpolator);
         animator.setFloatValues(FRACTION_START, FRACTION_END);
         return animator;
     }
@@ -112,6 +111,8 @@ public class OneHandedAnimationController {
      *
      * @param <T> Type of property to animate, either offset (float)
      */
+    // TODO: Refactoring to use SpringAnimation and DynamicAnimation instead of using ValueAnimator
+    //  to implement One-Handed transition animation. (b/185129031)
     public abstract static class OneHandedTransitionAnimator<T> extends ValueAnimator implements
             ValueAnimator.AnimatorUpdateListener,
             ValueAnimator.AnimatorListener {
@@ -295,6 +296,17 @@ public class OneHandedAnimationController {
                     tx.apply();
                 }
             };
+        }
+    }
+
+    /**
+     * An Interpolator for One-Handed transition animation.
+     */
+    public class OneHandedInterpolator extends BaseInterpolator {
+        @Override
+        public float getInterpolation(float input) {
+            return (float) (Math.pow(2, -10 * input) * Math.sin(((input - 4.0f) / 4.0f)
+                    * (2.0f * Math.PI) / 4.0f) + 1);
         }
     }
 }

@@ -35,12 +35,10 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.GlobalActions;
-import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
@@ -50,18 +48,17 @@ import dagger.Lazy;
 public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks {
 
     private final Context mContext;
-    private final Lazy<GlobalActionsDialog> mGlobalActionsDialogLazy;
+    private final Lazy<GlobalActionsDialogLite> mGlobalActionsDialogLazy;
     private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
-    private final ExtensionController.Extension<GlobalActionsPanelPlugin> mWalletPluginProvider;
     private final BlurUtils mBlurUtils;
     private final CommandQueue mCommandQueue;
-    private GlobalActionsDialog mGlobalActionsDialog;
+    private GlobalActionsDialogLite mGlobalActionsDialog;
     private boolean mDisabled;
 
     @Inject
     public GlobalActionsImpl(Context context, CommandQueue commandQueue,
-            Lazy<GlobalActionsDialog> globalActionsDialogLazy, BlurUtils blurUtils) {
+            Lazy<GlobalActionsDialogLite> globalActionsDialogLazy, BlurUtils blurUtils) {
         mContext = context;
         mGlobalActionsDialogLazy = globalActionsDialogLazy;
         mKeyguardStateController = Dependency.get(KeyguardStateController.class);
@@ -69,10 +66,6 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         mCommandQueue = commandQueue;
         mBlurUtils = blurUtils;
         mCommandQueue.addCallback(this);
-        mWalletPluginProvider = Dependency.get(ExtensionController.class)
-                .newExtension(GlobalActionsPanelPlugin.class)
-                .withPlugin(GlobalActionsPanelPlugin.class)
-                .build();
     }
 
     @Override
@@ -89,8 +82,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         if (mDisabled) return;
         mGlobalActionsDialog = mGlobalActionsDialogLazy.get();
         mGlobalActionsDialog.showOrHideDialog(mKeyguardStateController.isShowing(),
-                mDeviceProvisionedController.isDeviceProvisioned(),
-                mWalletPluginProvider.get());
+                mDeviceProvisionedController.isDeviceProvisioned());
         Dependency.get(KeyguardUpdateMonitor.class).requestFaceAuth();
     }
 

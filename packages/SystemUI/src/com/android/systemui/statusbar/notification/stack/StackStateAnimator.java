@@ -24,8 +24,8 @@ import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.keyguard.KeyguardSliceView;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -65,6 +65,8 @@ public class StackStateAnimator {
     public static final int ANIMATION_DELAY_HEADS_UP = 120;
     public static final int ANIMATION_DELAY_HEADS_UP_CLICKED= 120;
     private static final int MAX_STAGGER_COUNT = 5;
+    private static final HeadsUpAppearInterpolator HEADS_UP_APPEAR_INTERPOLATOR =
+            new HeadsUpAppearInterpolator();
 
     private final int mGoToFullShadeAppearingTranslation;
     private final int mPulsingAppearingTranslation;
@@ -118,7 +120,7 @@ public class StackStateAnimator {
             @Override
             public Interpolator getCustomInterpolator(View child, Property property) {
                 if (mHeadsUpAppearChildren.contains(child) && View.TRANSLATION_Y.equals(property)) {
-                    return Interpolators.HEADS_UP_APPEAR;
+                    return HEADS_UP_APPEAR_INTERPOLATOR;
                 }
                 return null;
             }

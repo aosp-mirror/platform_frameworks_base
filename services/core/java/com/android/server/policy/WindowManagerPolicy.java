@@ -897,12 +897,13 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public boolean isScreenOn();
 
     /**
+     * @param ignoreScreenOn {@code true} if screen state should be ignored.
      * @return whether the device is currently allowed to animate.
      *
      * Note: this can be true even if it is not appropriate to animate for reasons that are outside
      *       of the policy's authority.
      */
-    boolean okToAnimate();
+    boolean okToAnimate(boolean ignoreScreenOn);
 
     /**
      * Tell the policy that the lid switch has changed state.

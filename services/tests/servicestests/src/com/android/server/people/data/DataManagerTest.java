@@ -135,24 +135,41 @@ public final class DataManagerTest {
     private static final String PARENT_NOTIFICATION_CHANNEL_ID = "test";
     private static final long MILLIS_PER_MINUTE = 1000L * 60L;
 
-    @Mock private Context mContext;
-    @Mock private ShortcutServiceInternal mShortcutServiceInternal;
-    @Mock private UsageStatsManagerInternal mUsageStatsManagerInternal;
-    @Mock private PackageManagerInternal mPackageManagerInternal;
-    @Mock private NotificationManagerInternal mNotificationManagerInternal;
-    @Mock private UserManager mUserManager;
-    @Mock private PackageManager mPackageManager;
-    @Mock private TelephonyManager mTelephonyManager;
-    @Mock private TelecomManager mTelecomManager;
-    @Mock private ContentResolver mContentResolver;
-    @Mock private JobScheduler mJobScheduler;
-    @Mock private StatusBarNotification mStatusBarNotification;
-    @Mock private Notification mNotification;
-    @Mock private AlarmManager mAlarmManager;
+    @Mock
+    private Context mContext;
+    @Mock
+    private ShortcutServiceInternal mShortcutServiceInternal;
+    @Mock
+    private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    @Mock
+    private PackageManagerInternal mPackageManagerInternal;
+    @Mock
+    private NotificationManagerInternal mNotificationManagerInternal;
+    @Mock
+    private UserManager mUserManager;
+    @Mock
+    private PackageManager mPackageManager;
+    @Mock
+    private TelephonyManager mTelephonyManager;
+    @Mock
+    private TelecomManager mTelecomManager;
+    @Mock
+    private ContentResolver mContentResolver;
+    @Mock
+    private JobScheduler mJobScheduler;
+    @Mock
+    private StatusBarNotification mStatusBarNotification;
+    @Mock
+    private Notification mNotification;
+    @Mock
+    private AlarmManager mAlarmManager;
 
-    @Captor private ArgumentCaptor<ShortcutChangeCallback> mShortcutChangeCallbackCaptor;
-    @Captor private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverCaptor;
-    @Captor private ArgumentCaptor<Integer> mQueryFlagsCaptor;
+    @Captor
+    private ArgumentCaptor<ShortcutChangeCallback> mShortcutChangeCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverCaptor;
+    @Captor
+    private ArgumentCaptor<Integer> mQueryFlagsCaptor;
 
     private ScheduledExecutorService mExecutorService;
     private NotificationChannel mNotificationChannel;
@@ -556,6 +573,7 @@ public final class DataManagerTest {
                 TEST_SHORTCUT_ID_2,
                 buildPerson());
         mDataManager.addOrUpdateConversationInfo(shortcut2);
+        mLooper.dispatchAll();
         ConversationChannel conversationChannel2 = mDataManager.getConversation(TEST_PKG_NAME,
                 USER_ID_PRIMARY,
                 TEST_SHORTCUT_ID_2);
@@ -583,6 +601,7 @@ public final class DataManagerTest {
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
         mDataManager.addOrUpdateConversationInfo(shortcut);
+        mLooper.dispatchAll();
         PeopleService.ConversationsListener listener = mock(
                 PeopleService.ConversationsListener.class);
         mDataManager.addConversationsListener(listener);
@@ -631,7 +650,7 @@ public final class DataManagerTest {
     public void testGetConversation() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
         assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
-            TEST_SHORTCUT_ID)).isNull();
+                TEST_SHORTCUT_ID)).isNull();
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
@@ -781,16 +800,25 @@ public final class DataManagerTest {
     @Test
     public void testShortcutAddedOrUpdated() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        PeopleService.ConversationsListener listener = mock(
+                PeopleService.ConversationsListener.class);
+        mDataManager.addConversationsListener(listener);
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
         mShortcutChangeCallback.onShortcutsAddedOrUpdated(TEST_PKG_NAME,
                 Collections.singletonList(shortcut), UserHandle.of(USER_ID_PRIMARY));
+        mLooper.dispatchAll();
 
         List<ConversationInfo> conversations = getConversationsInPrimary();
 
         assertEquals(1, conversations.size());
         assertEquals(TEST_SHORTCUT_ID, conversations.get(0).getShortcutId());
+        ArgumentCaptor<List<ConversationChannel>> capturedConversation = ArgumentCaptor.forClass(
+                List.class);
+        verify(listener, times(1)).onConversationsUpdate(capturedConversation.capture());
+        ConversationChannel result = Iterables.getOnlyElement(capturedConversation.getValue());
+        assertEquals(result.getShortcutInfo().getId(), TEST_SHORTCUT_ID);
     }
 
     @Test
@@ -978,8 +1006,13 @@ public final class DataManagerTest {
         mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs1);
         mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs2);
         mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs3);
+        mLooper.dispatchAll();
 
+        PeopleService.ConversationsListener listener = mock(
+                PeopleService.ConversationsListener.class);
+        mDataManager.addConversationsListener(listener);
         mDataManager.pruneDataForUser(USER_ID_PRIMARY, mCancellationSignal);
+        mLooper.dispatchAll();
 
         assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
                 .doesNotContain(cs1);
@@ -987,6 +1020,13 @@ public final class DataManagerTest {
                 .contains(cs2);
         assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
                 .contains(cs3);
+        ArgumentCaptor<List<ConversationChannel>> capturedConversation = ArgumentCaptor.forClass(
+                List.class);
+        verify(listener, times(1)).onConversationsUpdate(capturedConversation.capture());
+        List<ConversationChannel> results = capturedConversation.getValue();
+        ConversationChannel result = Iterables.getOnlyElement(capturedConversation.getValue());
+        // CHeck cs1 has been removed and only cs2 and cs3 remain.
+        assertThat(result.getStatuses()).containsExactly(cs2, cs3);
     }
 
     @Test
@@ -1236,13 +1276,23 @@ public final class DataManagerTest {
         ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
         mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs);
         mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs2);
+        mLooper.dispatchAll();
 
+        PeopleService.ConversationsListener listener = mock(
+                PeopleService.ConversationsListener.class);
+        mDataManager.addConversationsListener(listener);
         mDataManager.clearStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs2.getId());
+        mLooper.dispatchAll();
 
         assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
                 .contains(cs);
         assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
                 .doesNotContain(cs2);
+        ArgumentCaptor<List<ConversationChannel>> capturedConversation = ArgumentCaptor.forClass(
+                List.class);
+        verify(listener, times(1)).onConversationsUpdate(capturedConversation.capture());
+        ConversationChannel result = Iterables.getOnlyElement(capturedConversation.getValue());
+        assertThat(result.getStatuses()).containsExactly(cs);
     }
 
     @Test
@@ -1257,11 +1307,21 @@ public final class DataManagerTest {
         ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
         mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs);
         mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs2);
+        mLooper.dispatchAll();
 
+        PeopleService.ConversationsListener listener = mock(
+                PeopleService.ConversationsListener.class);
+        mDataManager.addConversationsListener(listener);
         mDataManager.clearStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID);
+        mLooper.dispatchAll();
 
         assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
                 .isEmpty();
+        ArgumentCaptor<List<ConversationChannel>> capturedConversation = ArgumentCaptor.forClass(
+                List.class);
+        verify(listener, times(1)).onConversationsUpdate(capturedConversation.capture());
+        ConversationChannel result = Iterables.getOnlyElement(capturedConversation.getValue());
+        assertThat(result.getStatuses()).isEmpty();
     }
 
     @Test
@@ -1403,7 +1463,7 @@ public final class DataManagerTest {
                 .setLongLived(true)
                 .setIntent(new Intent("TestIntent"));
         if (person != null) {
-            builder.setPersons(new Person[] {person});
+            builder.setPersons(new Person[]{person});
         }
         return builder.build();
     }

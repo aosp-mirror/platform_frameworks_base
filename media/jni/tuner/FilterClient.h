@@ -264,8 +264,8 @@ private:
      */
     sp<::android::hardware::tv::tuner::V1_1::IFilter> mFilter_1_1;
 
-    AidlMQ* mFilterMQ;
-    EventFlag* mFilterMQEventFlag;
+    AidlMQ* mFilterMQ = NULL;
+    EventFlag* mFilterMQEventFlag = NULL;
 
     native_handle_t* mAvSharedHandle;
     uint64_t mAvSharedMemSize;

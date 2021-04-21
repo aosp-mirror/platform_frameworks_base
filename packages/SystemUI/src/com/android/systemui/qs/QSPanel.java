@@ -27,12 +27,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
@@ -72,8 +70,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     private final H mHandler = new H();
     /** Whether or not the QS media player feature is enabled. */
     protected boolean mUsingMediaPlayer;
-    private int mVisualMarginStart;
-    private int mVisualMarginEnd;
 
     protected boolean mExpanded;
     protected boolean mListening;
@@ -96,7 +92,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     private PageIndicator mFooterPageIndicator;
     private int mContentMarginStart;
     private int mContentMarginEnd;
-    private int mVisualTilePadding;
     private boolean mUsingHorizontalLayout;
 
     private Record mDetailRecord;
@@ -111,9 +106,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected QSTileLayout mTileLayout;
     private int mLastOrientation = -1;
     private int mMediaTotalBottomMargin;
-    private int mFooterMarginStartHorizontal;
     private Consumer<Boolean> mMediaVisibilityChangedListener;
-    protected boolean mSideLabels;
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -128,21 +121,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     }
 
-    protected void inflateQSFooter(boolean newFooter) {
-        ViewStub stub = findViewById(R.id.qs_footer_stub);
-        if (stub != null) {
-            stub.setLayoutResource(
-                    newFooter ? R.layout.qs_footer_impl_two_lines : R.layout.qs_footer_impl);
-            stub.inflate();
-            mFooter = findViewById(R.id.qs_footer);
-        }
-    }
-
-    void initialize(boolean sideLabels) {
-        mSideLabels = sideLabels;
-
-        inflateQSFooter(sideLabels);
-
+    void initialize() {
         mRegularTileLayout = createRegularTileLayout();
         mTileLayout = mRegularTileLayout;
 
@@ -195,8 +174,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     public QSTileLayout createRegularTileLayout() {
         if (mRegularTileLayout == null) {
             mRegularTileLayout = (QSTileLayout) LayoutInflater.from(mContext)
-                    .inflate(mSideLabels ? R.layout.qs_paged_tile_layout_side_labels
-                            : R.layout.qs_paged_tile_layout, this, false);
+                    .inflate(R.layout.qs_paged_tile_layout, this, false);
         }
         return mRegularTileLayout;
     }
@@ -311,11 +289,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     public void updateResources() {
-        int tileSize = getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-        int tileBg = getResources().getDimensionPixelSize(R.dimen.qs_tile_background_size);
-        mFooterMarginStartHorizontal = getResources().getDimensionPixelSize(
-                R.dimen.qs_footer_horizontal_margin);
-        mVisualTilePadding = mSideLabels ? 0 : (int) ((tileSize - tileBg) / 2.0f);
         updatePadding();
 
         updatePageIndicator();
@@ -358,6 +331,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mFooter = findViewById(R.id.qs_footer);
         mDivider = findViewById(R.id.divider);
     }
 
@@ -638,58 +612,8 @@ public class QSPanel extends LinearLayout implements Tunable {
         // to the edge like the brightness slider
         mContentMarginStart = startMargin;
         mContentMarginEnd = endMargin;
-        updateTileLayoutMargins(mContentMarginStart - mVisualTilePadding,
-                mContentMarginEnd - mVisualTilePadding);
         updateMediaHostContentMargins(mediaHostView);
-        updateFooterMargin();
         updateDividerMargin();
-    }
-
-    private void updateFooterMargin() {
-        if (mFooter != null) {
-            int footerMargin = 0;
-            int indicatorMargin = 0;
-            if (mUsingHorizontalLayout && !mSideLabels) {
-                footerMargin = mFooterMarginStartHorizontal;
-                indicatorMargin = footerMargin - mVisualMarginEnd;
-            }
-            updateMargins(mFooter, footerMargin, 0);
-            // The page indicator isn't centered anymore because of the visual positioning.
-            // Let's fix it by adding some margin
-            if (mFooterPageIndicator != null) {
-                updateMargins(mFooterPageIndicator, 0, indicatorMargin);
-            }
-        }
-    }
-
-    /**
-     * Update the margins of all tile Layouts.
-     *
-     * @param visualMarginStart the visual start margin of the tile, adjusted for local insets
-     *                          to the tile. This can be set on a tileLayout
-     * @param visualMarginEnd the visual end margin of the tile, adjusted for local insets
-     *                        to the tile. This can be set on a tileLayout
-     */
-    private void updateTileLayoutMargins(int visualMarginStart, int visualMarginEnd) {
-        mVisualMarginStart = visualMarginStart;
-        mVisualMarginEnd = visualMarginEnd;
-        updateTileLayoutMargins();
-    }
-
-    public Pair<Integer, Integer> getVisualSideMargins() {
-        if (mSideLabels) {
-            return new Pair(0, 0);
-        } else {
-            return new Pair(mVisualMarginStart, mUsingHorizontalLayout ? 0 : mVisualMarginEnd);
-        }
-    }
-
-    private void updateTileLayoutMargins() {
-        int marginEnd = mVisualMarginEnd;
-        if (mUsingHorizontalLayout || mSideLabels) {
-            marginEnd = 0;
-        }
-        updateMargins((View) mTileLayout, mSideLabels ? 0 : mVisualMarginStart, marginEnd);
     }
 
     private void updateDividerMargin() {
@@ -769,22 +693,13 @@ public class QSPanel extends LinearLayout implements Tunable {
             newLayout.setListening(mListening, uiEventLogger);
             if (needsDynamicRowsAndColumns()) {
                 newLayout.setMinRows(horizontal ? 2 : 1);
-                // Let's use 3 columns to match the current layout
-                int columns;
-                if (mSideLabels) {
-                    columns = horizontal ? 2 : 4;
-                } else {
-                    columns = horizontal ? 3 : TileLayout.NO_MAX_COLUMNS;
-                }
-                newLayout.setMaxColumns(columns);
+                newLayout.setMaxColumns(horizontal ? 2 : 4);
             }
             updateMargins(mediaHostView);
         }
     }
 
     private void updateMargins(ViewGroup mediaHostView) {
-        updateTileLayoutMargins();
-        updateFooterMargin();
         updateDividerMargin();
         updateMediaHostContentMargins(mediaHostView);
         updateHorizontalLinearLayoutMargins();

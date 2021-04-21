@@ -128,7 +128,6 @@ public class BluetoothGattDescriptor implements Parcelable {
 
     /**
      * Create a new BluetoothGattDescriptor.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param uuid The UUID for this descriptor
      * @param permissions Permissions for this descriptor
@@ -139,7 +138,6 @@ public class BluetoothGattDescriptor implements Parcelable {
 
     /**
      * Create a new BluetoothGattDescriptor.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param characteristic The characteristic this descriptor belongs to
      * @param uuid The UUID for this descriptor
@@ -227,8 +225,6 @@ public class BluetoothGattDescriptor implements Parcelable {
      *
      * <p>If a remote device offers multiple descriptors with the same UUID,
      * the instance ID is used to distuinguish between descriptors.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return Instance ID of this descriptor
      * @hide

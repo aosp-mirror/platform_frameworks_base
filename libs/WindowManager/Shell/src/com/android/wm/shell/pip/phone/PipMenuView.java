@@ -44,6 +44,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
@@ -130,7 +131,12 @@ public class PipMenuView extends FrameLayout {
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         inflate(context, R.layout.pip_menu, this);
 
-        mBackgroundDrawable = new ColorDrawable(Color.BLACK);
+        final boolean enableCornerRadius = mContext.getResources()
+                .getBoolean(R.bool.config_pipEnableRoundCorner)
+                || SystemProperties.getBoolean("debug.sf.enable_hole_punch_pip", false);
+        mBackgroundDrawable = enableCornerRadius
+                ? mContext.getDrawable(R.drawable.pip_menu_background)
+                : new ColorDrawable(Color.BLACK);
         mBackgroundDrawable.setAlpha(0);
         mViewRoot = findViewById(R.id.background);
         mViewRoot.setBackground(mBackgroundDrawable);

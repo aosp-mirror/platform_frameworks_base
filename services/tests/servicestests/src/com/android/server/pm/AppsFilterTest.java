@@ -799,10 +799,18 @@ public class AppsFilterTest {
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
-        PackageSetting targetSetting = simulateAddPackage(appsFilter, target, DUMMY_TARGET_APPID);
+        // Packages must be added in actor -> overlay -> target order so that the implicit
+        // visibility of the actor into the overlay can be tested
+
+        PackageSetting actorSetting = simulateAddPackage(appsFilter, actor, DUMMY_ACTOR_APPID);
         PackageSetting overlaySetting =
                 simulateAddPackage(appsFilter, overlay, DUMMY_OVERLAY_APPID);
-        PackageSetting actorSetting = simulateAddPackage(appsFilter, actor, DUMMY_ACTOR_APPID);
+
+        // Actor can not see overlay (yet)
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_ACTOR_APPID, actorSetting,
+                overlaySetting, SYSTEM_USER));
+
+        PackageSetting targetSetting = simulateAddPackage(appsFilter, target, DUMMY_TARGET_APPID);
 
         // Actor can see both target and overlay
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_APPID, actorSetting,
@@ -821,6 +829,12 @@ public class AppsFilterTest {
                 actorSetting, SYSTEM_USER));
         assertTrue(appsFilter.shouldFilterApplication(DUMMY_OVERLAY_APPID, overlaySetting,
                 actorSetting, SYSTEM_USER));
+
+        appsFilter.removePackage(targetSetting);
+
+        // Actor loses visibility to the overlay via removal of the target
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_ACTOR_APPID, actorSetting,
+                overlaySetting, SYSTEM_USER));
     }
 
     @Test

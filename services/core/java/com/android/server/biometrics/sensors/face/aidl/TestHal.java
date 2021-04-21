@@ -32,6 +32,7 @@ import android.util.Slog;
  */
 public class TestHal extends IFace.Stub {
     private static final String TAG = "face.aidl.TestHal";
+
     @Override
     public SensorProps[] getSensorProps() {
         Slog.w(TAG, "getSensorProps");
@@ -102,16 +103,16 @@ public class TestHal extends IFace.Stub {
             }
 
             @Override
-            public void getFeatures(int enrollmentId) throws RemoteException {
+            public void getFeatures() throws RemoteException {
                 Slog.w(TAG, "getFeatures");
-                cb.onFeaturesRetrieved(new byte[0], enrollmentId);
+                cb.onFeaturesRetrieved(new byte[0]);
             }
 
             @Override
-            public void setFeature(HardwareAuthToken hat, int enrollmentId,
-                    byte feature, boolean enabled) throws RemoteException {
+            public void setFeature(HardwareAuthToken hat, byte feature, boolean enabled)
+                    throws RemoteException {
                 Slog.w(TAG, "setFeature");
-                cb.onFeatureSet(enrollmentId, feature);
+                cb.onFeatureSet(feature);
             }
 
             @Override

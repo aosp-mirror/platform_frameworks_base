@@ -18,7 +18,7 @@ package com.android.server.appsearch.external.localstorage.stats;
 
 import android.annotation.NonNull;
 
-import com.android.internal.util.Preconditions;
+import java.util.Objects;
 
 /**
  * A class for holding detailed stats to log for each individual document put by a {@link
@@ -60,8 +60,8 @@ public final class PutDocumentStats {
     private final boolean mNativeExceededMaxNumTokens;
 
     PutDocumentStats(@NonNull Builder builder) {
-        Preconditions.checkNotNull(builder);
-        mGeneralStats = Preconditions.checkNotNull(builder.mGeneralStatsBuilder).build();
+        Objects.requireNonNull(builder);
+        mGeneralStats = Objects.requireNonNull(builder.mGeneralStatsBuilder).build();
         mGenerateDocumentProtoLatencyMillis = builder.mGenerateDocumentProtoLatencyMillis;
         mRewriteDocumentTypesLatencyMillis = builder.mRewriteDocumentTypesLatencyMillis;
         mNativeLatencyMillis = builder.mNativeLatencyMillis;
@@ -142,8 +142,8 @@ public final class PutDocumentStats {
 
         /** Builder takes {@link GeneralStats.Builder}. */
         public Builder(@NonNull String packageName, @NonNull String database) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(database);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(database);
             mGeneralStatsBuilder = new GeneralStats.Builder(packageName, database);
         }
 

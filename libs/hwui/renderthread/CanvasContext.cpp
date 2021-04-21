@@ -56,6 +56,22 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
+namespace {
+class ScopedActiveContext {
+public:
+    ScopedActiveContext(CanvasContext* context) { sActiveContext = context; }
+
+    ~ScopedActiveContext() { sActiveContext = nullptr; }
+
+    static CanvasContext* getActiveContext() { return sActiveContext; }
+
+private:
+    static CanvasContext* sActiveContext;
+};
+
+CanvasContext* ScopedActiveContext::sActiveContext = nullptr;
+} /* namespace */
+
 CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
                                      RenderNode* rootRenderNode, IContextFactory* contextFactory) {
     auto renderType = Properties::getRenderPipelineType();
@@ -473,6 +489,10 @@ void CanvasContext::draw() {
         return;
     }
 
+    ScopedActiveContext activeContext(this);
+    mCurrentFrameInfo->set(FrameInfoIndex::FrameInterval) =
+            mRenderThread.timeLord().frameIntervalNanos();
+
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
     Frame frame = mRenderPipeline->getFrame();
@@ -591,23 +611,11 @@ void CanvasContext::draw() {
             mCurrentFrameInfo->markFrameCompleted();
             mCurrentFrameInfo->set(FrameInfoIndex::GpuCompleted)
                     = mCurrentFrameInfo->get(FrameInfoIndex::FrameCompleted);
-            finishFrame(mCurrentFrameInfo);
+            mJankTracker.finishFrame(*mCurrentFrameInfo, mFrameMetricsReporter);
         }
     }
 
     mRenderThread.cacheManager().onFrameCompleted();
-}
-
-void CanvasContext::finishFrame(FrameInfo* frameInfo) {
-    // TODO (b/169858044): Consolidate this into a single call.
-    mJankTracker.finishFrame(*frameInfo);
-    mJankTracker.finishGpuDraw(*frameInfo);
-
-    // TODO (b/169858044): Move this into JankTracker to adjust deadline when queue is
-    // double-stuffed.
-    if (CC_UNLIKELY(mFrameMetricsReporter.get() != nullptr)) {
-        mFrameMetricsReporter->reportFrameMetrics(frameInfo->data(), false /*hasPresentTime*/);
-    }
 }
 
 void CanvasContext::reportMetricsWithPresentTime() {
@@ -667,15 +675,19 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* cont
         if (gpuCompleteTime == -1) {
             gpuCompleteTime = frameInfo->get(FrameInfoIndex::SwapBuffersCompleted);
         }
-        if (gpuCompleteTime < frameInfo->get(FrameInfoIndex::SwapBuffers)) {
-            // TODO (b/180488606): Investigate why this can happen for first frames.
-            ALOGW("Impossible GPU complete time swapBuffers=%" PRIi64 " gpuComplete=%" PRIi64,
-                    frameInfo->get(FrameInfoIndex::SwapBuffers), gpuCompleteTime);
+        if (gpuCompleteTime < frameInfo->get(FrameInfoIndex::IssueDrawCommandsStart)) {
+            // On Vulkan the GPU commands are flushed to the GPU during IssueDrawCommands rather
+            // than after SwapBuffers. So if the GPU signals before issue draw commands, then
+            // something probably went wrong. Anything after that could just be expected
+            // pipeline differences
+            ALOGW("Impossible GPU complete time issueCommandsStart=%" PRIi64
+                  " gpuComplete=%" PRIi64,
+                  frameInfo->get(FrameInfoIndex::IssueDrawCommandsStart), gpuCompleteTime);
             gpuCompleteTime = frameInfo->get(FrameInfoIndex::SwapBuffersCompleted);
         }
         frameInfo->set(FrameInfoIndex::FrameCompleted) = gpuCompleteTime;
         frameInfo->set(FrameInfoIndex::GpuCompleted) = gpuCompleteTime;
-        instance->finishFrame(frameInfo);
+        instance->mJankTracker.finishFrame(*frameInfo, instance->mFrameMetricsReporter);
     }
 }
 
@@ -704,10 +716,11 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
     nsecs_t vsync = mRenderThread.timeLord().computeFrameTimeNanos();
     int64_t vsyncId = mRenderThread.timeLord().lastVsyncId();
     int64_t frameDeadline = mRenderThread.timeLord().lastFrameDeadline();
+    int64_t frameInterval = mRenderThread.timeLord().frameIntervalNanos();
     int64_t frameInfo[UI_THREAD_FRAME_INFO_SIZE];
     UiFrameInfoBuilder(frameInfo)
         .addFlag(FrameInfoFlags::RTAnimation)
-        .setVsync(vsync, vsync, vsyncId, frameDeadline);
+        .setVsync(vsync, vsync, vsyncId, frameDeadline, frameInterval);
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *this);
     prepareTree(info, frameInfo, systemTime(SYSTEM_TIME_MONOTONIC), node);
@@ -882,6 +895,17 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
     }
 
     return windowDirty;
+}
+
+CanvasContext* CanvasContext::getActiveContext() {
+    return ScopedActiveContext::getActiveContext();
+}
+
+bool CanvasContext::mergeTransaction(ASurfaceTransaction* transaction, ASurfaceControl* control) {
+    if (!mASurfaceTransactionCallback) return false;
+    std::invoke(mASurfaceTransactionCallback, reinterpret_cast<int64_t>(transaction),
+                reinterpret_cast<int64_t>(control), getFrameNumber());
+    return true;
 }
 
 } /* namespace renderthread */

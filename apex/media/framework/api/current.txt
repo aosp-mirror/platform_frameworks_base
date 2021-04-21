@@ -10,7 +10,6 @@ package android.media {
     method @NonNull public java.util.List<java.lang.String> getUnsupportedVideoMimeTypes();
     method public boolean isFormatSpecified(@NonNull String);
     method public boolean isHdrTypeSupported(@NonNull String);
-    method public boolean isSlowMotionSupported();
     method public boolean isVideoMimeTypeSupported(@NonNull String);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.ApplicationMediaCapabilities> CREATOR;

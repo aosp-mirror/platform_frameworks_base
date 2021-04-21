@@ -26,7 +26,8 @@
         android:theme="@style/Theme"
         android:label="Battery Stats Viewer">
         <activity android:name=".BatteryStatsViewerActivity"
-                  android:label="Battery Stats Viewer"
+                  android:icon="@mipmap/ic_launcher"
+                  android:label="Battery Stats"
                   android:launchMode="singleTop"
                   android:exported="true">
             <intent-filter>

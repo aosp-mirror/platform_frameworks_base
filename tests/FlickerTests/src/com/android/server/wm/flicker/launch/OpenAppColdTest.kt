@@ -66,6 +66,18 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
+    @FlakyTest
+    @Test
+    override fun navBarLayerRotatesAndScales() {
+        super.navBarLayerRotatesAndScales()
+    }
+
+    @FlakyTest
+    @Test
+    override fun focusChanges() {
+        super.focusChanges()
+    }
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

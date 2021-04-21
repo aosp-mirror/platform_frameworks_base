@@ -17,11 +17,13 @@
 package com.android.wm.shell.flicker.apppairs
 
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import org.junit.Test
 
 abstract class RotateTwoLaunchedAppsTransition(
     testSpec: FlickerTestParameter
@@ -49,4 +51,16 @@ abstract class RotateTwoLaunchedAppsTransition(
                 }
             }
         }
+
+    @FlakyTest
+    @Test
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
+
+    @FlakyTest
+    @Test
+    override fun navBarLayerRotatesAndScales() {
+        super.navBarLayerRotatesAndScales()
+    }
 }

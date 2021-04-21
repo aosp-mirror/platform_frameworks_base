@@ -4272,7 +4272,8 @@ public class ActivityManager {
         try {
             getService().broadcastIntentWithFeature(
                     null, null, intent, null, null, Activity.RESULT_OK, null, null,
-                    null /*permission*/, appOp, null, false, true, userId);
+                    null /*requiredPermissions*/, null /*excludedPermissions*/, appOp, null, false,
+                    true, userId);
         } catch (RemoteException ex) {
         }
     }

@@ -76,6 +76,12 @@ void RenderProxy::setName(const char* name) {
     mRenderThread.queue().runSync([this, name]() { mContext->setName(std::string(name)); });
 }
 
+void RenderProxy::setHintSessionCallbacks(std::function<void(int64_t)> updateTargetWorkDuration,
+                                          std::function<void(int64_t)> reportActualWorkDuration) {
+    mDrawFrameTask.setHintSessionCallbacks(std::move(updateTargetWorkDuration),
+                                           std::move(reportActualWorkDuration));
+}
+
 void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
     if (window) { ANativeWindow_acquire(window); }
     mRenderThread.queue().post([this, win = window, enableTimeout]() mutable {
@@ -287,6 +293,12 @@ void RenderProxy::setPictureCapturedCallback(
         const std::function<void(sk_sp<SkPicture>&&)>& callback) {
     mRenderThread.queue().post(
             [this, cb = callback]() { mContext->setPictureCapturedCallback(cb); });
+}
+
+void RenderProxy::setASurfaceTransactionCallback(
+        const std::function<void(int64_t, int64_t, int64_t)>& callback) {
+    mRenderThread.queue().post(
+            [this, cb = callback]() { mContext->setASurfaceTransactionCallback(cb); });
 }
 
 void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {

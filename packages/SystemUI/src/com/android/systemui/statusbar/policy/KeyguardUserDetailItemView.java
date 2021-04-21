@@ -25,8 +25,8 @@ import android.view.View;
 import androidx.core.graphics.ColorUtils;
 
 import com.android.keyguard.KeyguardConstants;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.qs.tiles.UserDetailItemView;
 
 /**

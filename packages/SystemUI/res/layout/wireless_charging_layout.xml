@@ -27,14 +27,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <!-- Circle animation -->
-    <ImageView
-        android:id="@+id/wireless_charging_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:src="@drawable/wireless_charging_animation"/>
-
     <!-- Text inside circle -->
     <LinearLayout
         android:id="@+id/wireless_charging_text_layout"

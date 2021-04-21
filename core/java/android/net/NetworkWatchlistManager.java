@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -31,6 +32,7 @@ import com.android.internal.util.Preconditions;
  * Class that manage network watchlist in system.
  * @hide
  */
+@TestApi
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 @SystemService(Context.NETWORK_WATCHLIST_SERVICE)
 public class NetworkWatchlistManager {

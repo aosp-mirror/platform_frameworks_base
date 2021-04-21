@@ -32,6 +32,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.ICancellationSignal;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -189,4 +190,15 @@ public class ScrollCaptureConnectionTest {
         verifyNoMoreInteractions(mRemote);
     }
 
+    @Test
+    public void testClose_whileActive() throws RemoteException {
+        mConnection.startCapture(mSurface, mRemote);
+
+        mCallback.completeStartRequest();
+        assertTrue(mConnection.isActive());
+
+        mConnection.close();
+        mCallback.completeEndRequest();
+        assertFalse(mConnection.isActive());
+    }
 }

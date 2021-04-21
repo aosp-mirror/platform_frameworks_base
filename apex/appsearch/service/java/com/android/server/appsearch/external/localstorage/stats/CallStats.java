@@ -19,10 +19,9 @@ package com.android.server.appsearch.external.localstorage.stats;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * A class for setting basic information to log for all function calls.
@@ -75,8 +74,8 @@ public class CallStats {
     private final int mNumOperationsFailed;
 
     CallStats(@NonNull Builder builder) {
-        Preconditions.checkNotNull(builder);
-        mGeneralStats = Preconditions.checkNotNull(builder.mGeneralStatsBuilder).build();
+        Objects.requireNonNull(builder);
+        mGeneralStats = Objects.requireNonNull(builder.mGeneralStatsBuilder).build();
         mCallType = builder.mCallType;
         mEstimatedBinderLatencyMillis = builder.mEstimatedBinderLatencyMillis;
         mNumOperationsSucceeded = builder.mNumOperationsSucceeded;
@@ -140,8 +139,8 @@ public class CallStats {
 
         /** Builder takes {@link GeneralStats.Builder}. */
         public Builder(@NonNull String packageName, @NonNull String database) {
-            Preconditions.checkNotNull(packageName);
-            Preconditions.checkNotNull(database);
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(database);
             mGeneralStatsBuilder = new GeneralStats.Builder(packageName, database);
         }
 

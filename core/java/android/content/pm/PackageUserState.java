@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.pm.overlay.OverlayPaths;
+import android.content.pm.parsing.ParsingPackageRead;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.BaseBundle;
 import android.os.Debug;
@@ -53,7 +54,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
@@ -308,6 +308,20 @@ public class PackageUserState {
                     + Debug.getCaller());
         }
         return result;
+    }
+
+    public boolean isPackageEnabled(@NonNull ParsingPackageRead pkg) {
+        switch (this.enabled) {
+            case COMPONENT_ENABLED_STATE_ENABLED:
+                return true;
+            case COMPONENT_ENABLED_STATE_DISABLED:
+            case COMPONENT_ENABLED_STATE_DISABLED_USER:
+            case COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                return false;
+            default:
+            case COMPONENT_ENABLED_STATE_DEFAULT:
+                return pkg.isEnabled();
+        }
     }
 
     public boolean isEnabled(ComponentInfo componentInfo, int flags) {

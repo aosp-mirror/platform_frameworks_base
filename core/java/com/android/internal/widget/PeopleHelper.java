@@ -21,6 +21,7 @@ import static com.android.internal.widget.MessagingPropertyAnimator.ALPHA_OUT;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -28,12 +29,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.view.View;
 
 import com.android.internal.R;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ContrastColorUtil;
 
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -175,5 +179,59 @@ public class PeopleHelper {
             }
         }
         return findNamePrefix(name, "");
+    }
+
+    /**
+     * Creates a mapping of the unique sender names in the groups to the string 1- or 2-character
+     * prefix strings for the names, which are extracted as the initials, and should be used for
+     * generating the avatar.  Senders not requiring a generated avatar, or with an empty name are
+     * omitted.
+     */
+    public Map<CharSequence, String> mapUniqueNamesToPrefix(List<MessagingGroup> groups) {
+        // Map of unique names to their prefix
+        ArrayMap<CharSequence, String> uniqueNames = new ArrayMap<>();
+        // Map of single-character string prefix to the only name which uses it, or null if multiple
+        ArrayMap<String, CharSequence> uniqueCharacters = new ArrayMap<>();
+        for (int i = 0; i < groups.size(); i++) {
+            MessagingGroup group = groups.get(i);
+            CharSequence senderName = group.getSenderName();
+            if (!group.needsGeneratedAvatar() || TextUtils.isEmpty(senderName)) {
+                continue;
+            }
+            if (!uniqueNames.containsKey(senderName)) {
+                String charPrefix = findNamePrefix(senderName, null);
+                if (charPrefix == null) {
+                    continue;
+                }
+                if (uniqueCharacters.containsKey(charPrefix)) {
+                    // this character was already used, lets make it more unique. We first need to
+                    // resolve the existing character if it exists
+                    CharSequence existingName = uniqueCharacters.get(charPrefix);
+                    if (existingName != null) {
+                        uniqueNames.put(existingName, findNameSplit(existingName));
+                        uniqueCharacters.put(charPrefix, null);
+                    }
+                    uniqueNames.put(senderName, findNameSplit(senderName));
+                } else {
+                    uniqueNames.put(senderName, charPrefix);
+                    uniqueCharacters.put(charPrefix, senderName);
+                }
+            }
+        }
+        return uniqueNames;
+    }
+
+    /**
+     * Update whether the groups can hide the sender if they are first
+     * (happens only for 1:1 conversations where the given title matches the sender's name)
+     */
+    public void maybeHideFirstSenderName(@NonNull List<MessagingGroup> groups,
+            boolean isOneToOne, @Nullable CharSequence conversationTitle) {
+        for (int i = groups.size() - 1; i >= 0; i--) {
+            MessagingGroup messagingGroup = groups.get(i);
+            CharSequence messageSender = messagingGroup.getSenderName();
+            boolean canHide = isOneToOne && TextUtils.equals(conversationTitle, messageSender);
+            messagingGroup.setCanHideSenderIfFirst(canHide);
+        }
     }
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import android.app.smartspace.SmartspaceTarget
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -50,6 +51,7 @@ class MediaDataFilter @Inject constructor(
     private val allEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
     // The filtered userEntries, which will be a subset of all userEntries in MediaDataManager
     private val userEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
+    private var hasSmartspace: Boolean = false
 
     init {
         userTracker = object : CurrentUserTracker(broadcastDispatcher) {
@@ -82,6 +84,11 @@ class MediaDataFilter @Inject constructor(
         }
     }
 
+    override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
+        hasSmartspace = true
+        listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data) }
+    }
+
     override fun onMediaDataRemoved(key: String) {
         allEntries.remove(key)
         userEntries.remove(key)?.let {
@@ -90,6 +97,11 @@ class MediaDataFilter @Inject constructor(
                 it.onMediaDataRemoved(key)
             }
         }
+    }
+
+    override fun onSmartspaceMediaDataRemoved(key: String) {
+        hasSmartspace = false
+        listeners.forEach { it.onSmartspaceMediaDataRemoved(key) }
     }
 
     @VisibleForTesting
@@ -127,17 +139,20 @@ class MediaDataFilter @Inject constructor(
         mediaKeys.forEach {
             mediaDataManager.setTimedOut(it, timedOut = true)
         }
+        if (hasSmartspace) {
+            mediaDataManager.dismissSmartspaceRecommendation()
+        }
     }
 
     /**
      * Are there any media notifications active?
      */
-    fun hasActiveMedia() = userEntries.any { it.value.active }
+    fun hasActiveMedia() = userEntries.any { it.value.active } || hasSmartspace
 
     /**
      * Are there any media entries we should display?
      */
-    fun hasAnyMedia() = userEntries.isNotEmpty()
+    fun hasAnyMedia() = userEntries.isNotEmpty() || hasSmartspace
 
     /**
      * Add a listener for filtered [MediaData] changes

@@ -19,7 +19,7 @@ package com.android.server.vibrator;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.input.InputManager;
-import android.os.CombinedVibrationEffect;
+import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.VibrationAttributes;
 import android.os.VibratorManager;
@@ -94,7 +94,7 @@ final class InputDeviceDelegate implements InputManager.InputDeviceListener {
      *
      * @return {@link #isAvailable()}
      */
-    public boolean vibrateIfAvailable(int uid, String opPkg, CombinedVibrationEffect effect,
+    public boolean vibrateIfAvailable(int uid, String opPkg, CombinedVibration effect,
             String reason, VibrationAttributes attrs) {
         synchronized (mLock) {
             for (int i = 0; i < mInputDeviceVibrators.size(); i++) {

@@ -55,9 +55,9 @@ public class MemoryPowerCalculatorTest {
 
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_MEMORY);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_MEMORY))
                 .isEqualTo(3000);
-        assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE))
+        assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MEMORY))
                 .isWithin(PRECISION).of(0.7);
     }
 }

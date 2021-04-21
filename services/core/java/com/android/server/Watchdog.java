@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -585,10 +586,12 @@ public class Watchdog {
     private void run() {
         boolean waitedHalf = false;
         while (true) {
-            final List<HandlerChecker> blockedCheckers;
-            final String subject;
-            final boolean allowRestart;
+            List<HandlerChecker> blockedCheckers = Collections.emptyList();
+            String subject = "";
+            boolean allowRestart = true;
             int debuggerWasConnected = 0;
+            boolean doWaitedHalfDump = false;
+            final ArrayList<Integer> pids;
             synchronized (mLock) {
                 long timeout = CHECK_INTERVAL;
                 // Make sure we (re)spin the checkers that have become idle within
@@ -634,28 +637,34 @@ public class Watchdog {
                 } else if (waitState == WAITED_HALF) {
                     if (!waitedHalf) {
                         Slog.i(TAG, "WAITED_HALF");
-                        // We've waited half the deadlock-detection interval.  Pull a stack
-                        // trace and wait another half.
-                        ArrayList<Integer> pids = new ArrayList<>(mInterestingJavaPids);
-                        ActivityManagerService.dumpStackTraces(pids, null, null,
-                                getInterestingNativePids(), null);
                         waitedHalf = true;
+                        // We've waited half, but we'd need to do the stack trace dump w/o the lock.
+                        pids = new ArrayList<>(mInterestingJavaPids);
+                        doWaitedHalfDump = true;
+                    } else {
+                        continue;
                     }
-                    continue;
+                } else {
+                    // something is overdue!
+                    blockedCheckers = getBlockedCheckersLocked();
+                    subject = describeCheckersLocked(blockedCheckers);
+                    allowRestart = mAllowRestart;
+                    pids = new ArrayList<>(mInterestingJavaPids);
                 }
+            } // END synchronized (mLock)
 
-                // something is overdue!
-                blockedCheckers = getBlockedCheckersLocked();
-                subject = describeCheckersLocked(blockedCheckers);
-                allowRestart = mAllowRestart;
+            if (doWaitedHalfDump) {
+                // We've waited half the deadlock-detection interval.  Pull a stack
+                // trace and wait another half.
+                ActivityManagerService.dumpStackTraces(pids, null, null,
+                        getInterestingNativePids(), null);
+                continue;
             }
 
             // If we got here, that means that the system is most likely hung.
             // First collect stack traces from all threads of the system process.
             // Then kill this process so that the system will restart.
             EventLog.writeEvent(EventLogTags.WATCHDOG, subject);
-
-            ArrayList<Integer> pids = new ArrayList<>(mInterestingJavaPids);
 
             long anrTime = SystemClock.uptimeMillis();
             StringBuilder report = new StringBuilder();
@@ -681,6 +690,7 @@ public class Watchdog {
             // Try to add the error to the dropbox, but assuming that the ActivityManager
             // itself may be deadlocked.  (which has happened, causing this statement to
             // deadlock and the watchdog as a whole to be ineffective)
+            final String localSubject = subject;
             Thread dropboxThread = new Thread("watchdogWriteToDropbox") {
                     public void run() {
                         // If a watched thread hangs before init() is called, we don't have a
@@ -688,10 +698,10 @@ public class Watchdog {
                         if (mActivity != null) {
                             mActivity.addErrorToDropBox(
                                     "watchdog", null, "system_server", null, null, null,
-                                    subject, report.toString(), stack, null, null, null);
+                                    localSubject, report.toString(), stack, null, null, null);
                         }
                         FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED,
-                                subject);
+                                localSubject);
                     }
                 };
             dropboxThread.start();

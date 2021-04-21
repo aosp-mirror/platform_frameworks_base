@@ -125,6 +125,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -691,7 +692,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         public void putDocuments(String packageName, String databaseName,
-                List<Bundle> documentBundles, int userId, IAppSearchBatchResultCallback callback)
+                List<Bundle> documentBundles, int userId, long binderCallStartTimeMillis,
+                IAppSearchBatchResultCallback callback)
                 throws RemoteException {
             final List<GenericDocument> docs = new ArrayList<>(documentBundles.size());
             for (Bundle bundle : documentBundles) {
@@ -2041,6 +2043,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return mService.getPackageShortcutForTest(packageName, shortcutId, userId);
     }
 
+    protected void updatePackageShortcut(String packageName, String shortcutId, int userId,
+            Consumer<ShortcutInfo> cb) {
+        mService.updatePackageShortcutForTest(packageName, shortcutId, userId, cb);
+    }
+
     protected void assertShortcutExists(String packageName, String shortcutId, int userId) {
         assertTrue(getPackageShortcut(packageName, shortcutId, userId) != null);
     }
@@ -2236,6 +2243,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return getPackageShortcut(getCallingPackage(), shortcutId, getCallingUserId());
     }
 
+    protected void updateCallerShortcut(String shortcutId, Consumer<ShortcutInfo> cb) {
+        updatePackageShortcut(getCallingPackage(), shortcutId, getCallingUserId(), cb);
+    }
+
     protected List<ShortcutInfo> getLauncherShortcuts(String launcher, int userId, int queryFlags) {
         final List<ShortcutInfo>[] ret = new List[1];
         runWithCaller(launcher, userId, () -> {
@@ -2394,6 +2405,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         shutdownServices();
 
         deleteAllSavedFiles();
+
+        mMockAppSearchManager.removeShortcuts();
 
         initService();
         mService.applyRestore(payload, USER_0);
@@ -2584,6 +2597,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             ((List) inv.getArguments()[0]).addAll(candidates);
             return preferred;
         }).when(mMockPackageManagerInternal).getHomeActivitiesAsUser(any(List.class), eq(userId));
+    }
+
+    protected void prepareIntentActivities(ComponentName cn) {
+        when(mMockPackageManagerInternal.queryIntentActivities(
+                anyOrNull(Intent.class), anyStringOrNull(), anyInt(), anyInt(), anyInt()))
+                .thenReturn(Collections.singletonList(
+                        ri(cn.getPackageName(), cn.getClassName(), false, 0)));
     }
 
     protected static ComponentName cn(String packageName, String name) {

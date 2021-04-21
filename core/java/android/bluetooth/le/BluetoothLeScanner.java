@@ -16,16 +16,20 @@
 
 package android.bluetooth.le;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
+import android.bluetooth.annotations.RequiresBluetoothLocationPermission;
+import android.bluetooth.annotations.RequiresBluetoothScanPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.content.AttributionSource;
 import android.os.Handler;
 import android.os.Looper;
@@ -45,9 +49,6 @@ import java.util.Map;
  * <p>
  * Use {@link BluetoothAdapter#getBluetoothLeScanner()} to get an instance of
  * {@link BluetoothLeScanner}.
- * <p>
- * <b>Note:</b> Most of the scan methods here require
- * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
  *
  * @see ScanFilter
  */
@@ -117,7 +118,10 @@ public final class BluetoothLeScanner {
      * @param callback Callback used to deliver scan results.
      * @throws IllegalArgumentException If {@code callback} is null.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresBluetoothLocationPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void startScan(final ScanCallback callback) {
         startScan(null, new ScanSettings.Builder().build(), callback);
     }
@@ -139,7 +143,10 @@ public final class BluetoothLeScanner {
      * @param callback Callback used to deliver scan results.
      * @throws IllegalArgumentException If {@code settings} or {@code callback} is null.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresBluetoothLocationPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void startScan(List<ScanFilter> filters, ScanSettings settings,
             final ScanCallback callback) {
         startScan(filters, settings, null, callback, /*callbackIntent=*/ null, null);
@@ -168,7 +175,10 @@ public final class BluetoothLeScanner {
      * could not be sent.
      * @see #stopScan(PendingIntent)
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresBluetoothLocationPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public int startScan(@Nullable List<ScanFilter> filters, @Nullable ScanSettings settings,
             @NonNull PendingIntent callbackIntent) {
         return startScan(filters,
@@ -186,8 +196,13 @@ public final class BluetoothLeScanner {
      * @hide
      */
     @SystemApi
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresBluetoothLocationPermission
     @RequiresPermission(allOf = {
-            Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.UPDATE_DEVICE_STATS})
+            android.Manifest.permission.BLUETOOTH_SCAN,
+            android.Manifest.permission.UPDATE_DEVICE_STATS
+    })
     public void startScanFromSource(final WorkSource workSource, final ScanCallback callback) {
         startScanFromSource(null, new ScanSettings.Builder().build(), workSource, callback);
     }
@@ -204,13 +219,20 @@ public final class BluetoothLeScanner {
      * @hide
      */
     @SystemApi
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresBluetoothLocationPermission
     @RequiresPermission(allOf = {
-            Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.UPDATE_DEVICE_STATS})
+            android.Manifest.permission.BLUETOOTH_SCAN,
+            android.Manifest.permission.UPDATE_DEVICE_STATS
+    })
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     public void startScanFromSource(List<ScanFilter> filters, ScanSettings settings,
             final WorkSource workSource, final ScanCallback callback) {
         startScan(filters, settings, workSource, callback, null, null);
     }
 
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     private int startScan(List<ScanFilter> filters, ScanSettings settings,
             final WorkSource workSource, final ScanCallback callback,
             final PendingIntent callbackIntent,
@@ -268,7 +290,9 @@ public final class BluetoothLeScanner {
      *
      * @param callback
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void stopScan(ScanCallback callback) {
         BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
         synchronized (mLeScanClients) {
@@ -289,7 +313,9 @@ public final class BluetoothLeScanner {
      * @param callbackIntent The PendingIntent that was used to start the scan.
      * @see #startScan(List, ScanSettings, PendingIntent)
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void stopScan(PendingIntent callbackIntent) {
         BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
         IBluetoothGatt gatt;
@@ -308,6 +334,9 @@ public final class BluetoothLeScanner {
      * @param callback Callback of the Bluetooth LE Scan, it has to be the same instance as the one
      * used to start scan.
      */
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void flushPendingScanResults(ScanCallback callback) {
         BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
         if (callback == null) {
@@ -328,6 +357,8 @@ public final class BluetoothLeScanner {
      * @hide
      */
     @SystemApi
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void startTruncatedScan(List<TruncatedFilter> truncatedFilters, ScanSettings settings,
             final ScanCallback callback) {
         int filterSize = truncatedFilters.size();
@@ -346,6 +377,7 @@ public final class BluetoothLeScanner {
      *
      * @hide
      */
+    @RequiresNoPermission
     public void cleanup() {
         mLeScanClients.clear();
     }
@@ -353,6 +385,7 @@ public final class BluetoothLeScanner {
     /**
      * Bluetooth GATT interface callbacks
      */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     private class BleScanCallbackWrapper extends IScannerCallback.Stub {
         private static final int REGISTRATION_CALLBACK_TIMEOUT_MILLIS = 2000;
 
@@ -409,6 +442,7 @@ public final class BluetoothLeScanner {
             }
         }
 
+        @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
         public void stopLeScan() {
             synchronized (this) {
                 if (mScannerId <= 0) {
@@ -425,6 +459,7 @@ public final class BluetoothLeScanner {
             }
         }
 
+        @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
         void flushPendingBatchResults() {
             synchronized (this) {
                 if (mScannerId <= 0) {
@@ -555,6 +590,7 @@ public final class BluetoothLeScanner {
         }
     }
 
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private void postCallbackError(final ScanCallback callback, final int errorCode) {
         mHandler.post(new Runnable() {
             @Override
@@ -595,6 +631,7 @@ public final class BluetoothLeScanner {
         return true;
     }
 
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     private boolean isHardwareResourcesAvailableForScan(ScanSettings settings) {
         final int callbackType = settings.getCallbackType();
         if ((callbackType & ScanSettings.CALLBACK_TYPE_FIRST_MATCH) != 0

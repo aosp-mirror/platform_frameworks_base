@@ -172,9 +172,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull
     private final TrackingNetworkCallback mTrackingNetworkCallback = new TrackingNetworkCallback();
 
-    /** Can only be assigned when {@link #systemReady()} is called, since it uses AppOpsManager. */
-    @Nullable private LocationPermissionChecker mLocationPermissionChecker;
-
     @GuardedBy("mLock")
     @NonNull
     private final Map<ParcelUuid, VcnConfig> mConfigs = new ArrayMap<>();
@@ -365,14 +362,12 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     /** Notifies the VcnManagementService that external dependencies can be set up. */
     public void systemReady() {
-        mContext.getSystemService(ConnectivityManager.class)
-                .registerNetworkProvider(mNetworkProvider);
+        mNetworkProvider.register();
         mContext.getSystemService(ConnectivityManager.class)
                 .registerNetworkCallback(
                         new NetworkRequest.Builder().clearCapabilities().build(),
                         mTrackingNetworkCallback);
         mTelephonySubscriptionTracker.register();
-        mLocationPermissionChecker = mDeps.newLocationPermissionChecker(mVcnContext.getContext());
     }
 
     private void enforcePrimaryUser() {
@@ -734,7 +729,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         // If multiple subscription IDs exist, they MUST all point to the same subscription
         // group. Otherwise undefined behavior may occur.
-        for (int subId : networkCapabilities.getSubIds()) {
+        for (int subId : networkCapabilities.getSubscriptionIds()) {
             // Verify that all subscriptions point to the same group
             if (subGrp != null && !subGrp.equals(snapshot.getGroupForSubId(subId))) {
                 Slog.wtf(TAG, "Got multiple subscription groups for a single network");
@@ -839,13 +834,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             return false;
         }
 
-        if (!mLocationPermissionChecker.checkLocationPermission(
-                cbInfo.mPkgName,
-                "VcnStatusCallback" /* featureId */,
-                cbInfo.mUid,
-                null /* message */)) {
-            return false;
-        }
         return true;
     }
 
@@ -946,13 +934,39 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         pw.println("VcnManagementService dump:");
         pw.increaseIndent();
 
+        pw.println("mNetworkProvider:");
+        pw.increaseIndent();
         mNetworkProvider.dump(pw);
+        pw.decreaseIndent();
+        pw.println();
+
+        pw.println("mTrackingNetworkCallback:");
+        pw.increaseIndent();
+        mTrackingNetworkCallback.dump(pw);
+        pw.decreaseIndent();
+        pw.println();
 
         synchronized (mLock) {
+            pw.println("mLastSnapshot:");
+            pw.increaseIndent();
+            mLastSnapshot.dump(pw);
+            pw.decreaseIndent();
+            pw.println();
+
+            pw.println("mConfigs:");
+            pw.increaseIndent();
+            for (Entry<ParcelUuid, VcnConfig> entry : mConfigs.entrySet()) {
+                pw.println(entry.getKey() + ": " + entry.getValue().getProvisioningPackageName());
+            }
+            pw.decreaseIndent();
+            pw.println();
+
             pw.println("mVcns:");
+            pw.increaseIndent();
             for (Vcn vcn : mVcns.values()) {
                 vcn.dump(pw);
             }
+            pw.decreaseIndent();
             pw.println();
         }
 
@@ -997,14 +1011,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
 
         private boolean requiresRestartForCarrierWifi(NetworkCapabilities caps) {
-            if (!caps.hasTransport(TRANSPORT_WIFI) || caps.getSubIds() == null) {
+            if (!caps.hasTransport(TRANSPORT_WIFI) || caps.getSubscriptionIds() == null) {
                 return false;
             }
 
             synchronized (mCaps) {
                 for (NetworkCapabilities existing : mCaps.values()) {
                     if (existing.hasTransport(TRANSPORT_WIFI)
-                            && caps.getSubIds().equals(existing.getSubIds())) {
+                            && caps.getSubscriptionIds().equals(existing.getSubscriptionIds())) {
                         // Restart if any immutable capabilities have changed
                         return existing.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
                                 != caps.hasCapability(NET_CAPABILITY_NOT_RESTRICTED);
@@ -1013,6 +1027,24 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             }
 
             return false;
+        }
+
+        /** Dumps the state of this snapshot for logging and debugging purposes. */
+        public void dump(IndentingPrintWriter pw) {
+            pw.println("TrackingNetworkCallback:");
+            pw.increaseIndent();
+
+            pw.println("mCaps:");
+            pw.increaseIndent();
+            synchronized (mCaps) {
+                for (Entry<Network, NetworkCapabilities> entry : mCaps.entrySet()) {
+                    pw.println(entry.getKey() + ": " + entry.getValue());
+                }
+            }
+            pw.decreaseIndent();
+            pw.println();
+
+            pw.decreaseIndent();
         }
     }
 

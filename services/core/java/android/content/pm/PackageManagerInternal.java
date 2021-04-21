@@ -825,6 +825,12 @@ public abstract class PackageManagerInternal {
             String packageName, int userId);
 
     /**
+     * Return the enabled setting for a package component (activity, receiver, service, provider).
+     */
+    public abstract @PackageManager.EnabledState int getComponentEnabledSetting(
+            @NonNull ComponentName componentName, int callingUid, int userId);
+
+    /**
      * Extra field name for the token of a request to enable rollback for a
      * package.
      */
@@ -1112,11 +1118,6 @@ public abstract class PackageManagerInternal {
      */
     public abstract IncrementalStatesInfo getIncrementalStatesInfo(String packageName,
             int filterCallingUid, int userId);
-
-    /**
-     * Notifies that a package has crashed or ANR'd.
-     */
-    public abstract void notifyPackageCrashOrAnr(String packageName);
 
     /**
      * Requesting the checksums for APKs within a package.

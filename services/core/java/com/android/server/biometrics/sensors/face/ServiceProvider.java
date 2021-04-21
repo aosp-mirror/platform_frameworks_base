@@ -101,11 +101,16 @@ public interface ServiceProvider {
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);
 
+    void scheduleFaceDetect(int sensorId, @NonNull IBinder token, int userId,
+            @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
+            int statsClient);
+
+    void cancelFaceDetect(int sensorId, @NonNull IBinder token);
+
     void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication);
-
 
     void cancelAuthentication(int sensorId, @NonNull IBinder token);
 

@@ -20,9 +20,9 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Optional;
@@ -88,6 +88,13 @@ public class ActivityStarterDelegate implements ActivityStarter {
     @Override
     public void startActivity(Intent intent, boolean dismissShade) {
         mActualStarter.ifPresent(starter -> starter.get().startActivity(intent, dismissShade));
+    }
+
+    @Override
+    public void startActivity(Intent intent, boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController) {
+        mActualStarter.ifPresent(
+                starter -> starter.get().startActivity(intent, dismissShade, animationController));
     }
 
     @Override

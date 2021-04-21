@@ -25,8 +25,8 @@ import android.util.MathUtils;
 
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
 
 /**

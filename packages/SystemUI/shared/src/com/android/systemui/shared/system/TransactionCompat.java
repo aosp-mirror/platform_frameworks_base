@@ -92,21 +92,9 @@ public class TransactionCompat {
         return this;
     }
 
-    public TransactionCompat deferTransactionUntil(SurfaceControlCompat surfaceControl,
-            SurfaceControl barrier, long frameNumber) {
-        mTransaction.deferTransactionUntil(surfaceControl.mSurfaceControl, barrier,
-                frameNumber);
-        return this;
-    }
-
     public TransactionCompat setColor(SurfaceControlCompat surfaceControl, float[] color) {
         mTransaction.setColor(surfaceControl.mSurfaceControl, color);
         return this;
-    }
-
-    public static void deferTransactionUntil(Transaction t, SurfaceControl surfaceControl,
-            SurfaceControl barrier, long frameNumber) {
-        t.deferTransactionUntil(surfaceControl, barrier, frameNumber);
     }
 
     public static void setRelativeLayer(Transaction t, SurfaceControl surfaceControl,

@@ -23,6 +23,5 @@
 ** Recommended: font with variable width to support AOD => LS animations
 -->
 <font-family xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- TODO (b/171376810): switch this font with a variable width clock font for AOSP -->
-    <font android:typeface="monospace" android:font="@*android:string/config_headlineFontFamily" />
+    <font android:typeface="monospace"/>
 </font-family>

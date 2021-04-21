@@ -85,12 +85,11 @@ interface IInputMethodManager {
     oneway void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
             in float[] matrixValues, in IVoidResultCallback resultCallback);
 
-    oneway void reportPerceptible(in IBinder windowToken, boolean perceptible);
+    oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
     /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
     oneway void removeImeSurface(in IVoidResultCallback resultCallback);
     /** Remove the IME surface. Requires passing the currently focused window. */
-    oneway void removeImeSurfaceFromWindow(in IBinder windowToken,
-            in IVoidResultCallback resultCallback);
+    oneway void removeImeSurfaceFromWindowAsync(in IBinder windowToken);
     oneway void startProtoDump(in byte[] protoDump, int source, String where,
             in IVoidResultCallback resultCallback);
     oneway void isImeTraceEnabled(in IBooleanResultCallback resultCallback);

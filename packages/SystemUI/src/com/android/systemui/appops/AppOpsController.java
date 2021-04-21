@@ -60,17 +60,31 @@ public interface AppOpsController {
     /**
      * Returns a copy of the list containing all the active AppOps that the controller tracks.
      *
-     * @return List of active AppOps information
+     * @return List of active AppOps information, without paused elements.
      */
     List<AppOpItem> getActiveAppOps();
+
+    /**
+     * Returns a copy of the list containing all the active AppOps that the controller tracks.
+     *
+     * @param showPaused {@code true} to also obtain paused items. {@code false} otherwise.
+     * @return List of active AppOps information
+     */
+    List<AppOpItem> getActiveAppOps(boolean showPaused);
 
     /**
      * Returns a copy of the list containing all the active AppOps that the controller tracks, for
      * a given user id.
      *
      * @param userId User id to track
+     * @param showPaused {@code true} to also obtain paused items. {@code false} otherwise.
      *
      * @return List of active AppOps information for that user id
      */
-    List<AppOpItem> getActiveAppOpsForUser(int userId);
+    List<AppOpItem> getActiveAppOpsForUser(int userId, boolean showPaused);
+
+    /**
+     * @return whether this controller is considering the microphone as muted.
+     */
+    boolean isMicMuted();
 }

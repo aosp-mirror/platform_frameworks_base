@@ -27,12 +27,11 @@ import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Handler;
-import android.provider.Settings;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -64,7 +63,16 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
 
         @Override
         public void onStart() {
-            TimeDetectorService service = TimeDetectorService.create(getContext());
+            Context context = getContext();
+            Handler handler = FgThread.getHandler();
+
+            ServiceConfigAccessor serviceConfigAccessor =
+                    ServiceConfigAccessor.getInstance(context);
+            TimeDetectorStrategy timeDetectorStrategy =
+                    TimeDetectorStrategyImpl.create(context, handler, serviceConfigAccessor);
+
+            TimeDetectorService service =
+                    new TimeDetectorService(context, handler, timeDetectorStrategy);
 
             // Publish the binder service so it can be accessed from other (appropriately
             // permissioned) processes.
@@ -76,28 +84,6 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     @NonNull private final Context mContext;
     @NonNull private final TimeDetectorStrategy mTimeDetectorStrategy;
     @NonNull private final CallerIdentityInjector mCallerIdentityInjector;
-
-    private static TimeDetectorService create(@NonNull Context context) {
-        TimeDetectorStrategyImpl.Environment environment = new EnvironmentImpl(context);
-        TimeDetectorStrategy timeDetectorStrategy = new TimeDetectorStrategyImpl(environment);
-
-        Handler handler = FgThread.getHandler();
-        TimeDetectorService timeDetectorService =
-                new TimeDetectorService(context, handler, timeDetectorStrategy);
-
-        // Wire up event listening.
-        ContentResolver contentResolver = context.getContentResolver();
-        contentResolver.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.AUTO_TIME), true,
-                new ContentObserver(handler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        timeDetectorService.handleAutoTimeDetectionChanged();
-                    }
-                });
-
-        return timeDetectorService;
-    }
 
     @VisibleForTesting
     public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
@@ -116,6 +102,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     @Override
+    @NonNull
     public TimeCapabilitiesAndConfig getCapabilitiesAndConfig() {
         int userId = mCallerIdentityInjector.getCallingUserId();
         return getTimeCapabilitiesAndConfig(userId);
@@ -135,7 +122,8 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     @Override
-    public boolean updateConfiguration(TimeConfiguration timeConfiguration) {
+    public boolean updateConfiguration(@NonNull TimeConfiguration timeConfiguration) {
+        enforceManageTimeDetectorPermission();
         // TODO(b/172891783) Add actual logic
         return false;
     }
@@ -185,12 +173,6 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         mHandler.post(() -> mTimeDetectorStrategy.suggestExternalTime(timeSignal));
     }
 
-    /** Internal method for handling the auto time setting being changed. */
-    @VisibleForTesting
-    public void handleAutoTimeDetectionChanged() {
-        mHandler.post(mTimeDetectorStrategy::handleAutoTimeConfigChanged);
-    }
-
     @Override
     protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
             @Nullable String[] args) {
@@ -199,6 +181,13 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         mTimeDetectorStrategy.dump(ipw, args);
         ipw.flush();
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+        new TimeDetectorShellCommand(this).exec(
+                this, in, out, err, args, callback, resultReceiver);
     }
 
     private void enforceSuggestTelephonyTimePermission() {

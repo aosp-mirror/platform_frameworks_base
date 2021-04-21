@@ -21,7 +21,10 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
@@ -37,14 +40,24 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.view.IWindowSessionCallback;
+import android.view.InsetsSourceControl;
+import android.view.InsetsState;
+import android.view.View;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -178,5 +191,97 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.moveWindowTokenToDisplay(windowToken.token, DEFAULT_DISPLAY);
 
         assertThat(windowToken.getDisplayContent()).isEqualTo(mDefaultDisplay);
+    }
+
+    @Test
+    public void testAttachWindowContextToWindowToken_InvalidToken_EarlyReturn() {
+        spyOn(mWm.mWindowContextListenerController);
+
+        mWm.attachWindowContextToWindowToken(new Binder(), new Binder());
+
+        verify(mWm.mWindowContextListenerController, never()).getWindowType(any());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAttachWindowContextToWindowToken_InvalidWindowType_ThrowException() {
+        spyOn(mWm.mWindowContextListenerController);
+
+        final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
+        doReturn(INVALID_WINDOW_TYPE).when(mWm.mWindowContextListenerController)
+                .getWindowType(any());
+
+        mWm.attachWindowContextToWindowToken(new Binder(), windowToken.token);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAttachWindowContextToWindowToken_DifferentWindowType_ThrowException() {
+        spyOn(mWm.mWindowContextListenerController);
+
+        final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
+        doReturn(TYPE_APPLICATION).when(mWm.mWindowContextListenerController)
+                .getWindowType(any());
+
+        mWm.attachWindowContextToWindowToken(new Binder(), windowToken.token);
+    }
+
+    @Test
+    public void testAttachWindowContextToWindowToken_CallerNotValid_EarlyReturn() {
+        spyOn(mWm.mWindowContextListenerController);
+
+        final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
+        doReturn(TYPE_INPUT_METHOD).when(mWm.mWindowContextListenerController)
+                .getWindowType(any());
+        doReturn(false).when(mWm.mWindowContextListenerController)
+                .assertCallerCanModifyListener(any(), anyBoolean(), anyInt());
+
+        mWm.attachWindowContextToWindowToken(new Binder(), windowToken.token);
+
+        verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(
+                any(), any(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testAttachWindowContextToWindowToken_CallerValid_DoRegister() {
+        spyOn(mWm.mWindowContextListenerController);
+
+        final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
+        doReturn(TYPE_INPUT_METHOD).when(mWm.mWindowContextListenerController)
+                .getWindowType(any());
+        doReturn(true).when(mWm.mWindowContextListenerController)
+                .assertCallerCanModifyListener(any(), anyBoolean(), anyInt());
+
+        final IBinder clientToken = new Binder();
+        mWm.attachWindowContextToWindowToken(clientToken, windowToken.token);
+
+        verify(mWm.mWindowContextListenerController).registerWindowContainerListener(
+                eq(clientToken), eq(windowToken), anyInt(), eq(TYPE_INPUT_METHOD),
+                eq(windowToken.mOptions));
+    }
+
+    @Test
+    public void testAddWindowWithSubWindowTypeByWindowContext() {
+        spyOn(mWm.mWindowContextListenerController);
+
+        final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float v) throws RemoteException {}
+        });
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                TYPE_APPLICATION_ATTACHED_DIALOG);
+        params.token = windowToken.token;
+        final IBinder windowContextToken = new Binder();
+        params.setWindowContextToken(windowContextToken);
+        doReturn(true).when(mWm.mWindowContextListenerController)
+                .hasListener(eq(windowContextToken));
+        doReturn(TYPE_INPUT_METHOD).when(mWm.mWindowContextListenerController)
+                .getWindowType(eq(windowContextToken));
+
+        mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
+                UserHandle.USER_SYSTEM, new InsetsState(), null, new InsetsState(),
+                new InsetsSourceControl[0]);
+
+        verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
+                any(), anyInt(), anyInt(), any());
     }
 }

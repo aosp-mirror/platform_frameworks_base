@@ -715,7 +715,7 @@ public final class HdmiControlManager {
      * @hide
      */
     @SystemApi
-    public static final String CEC_SETTING_NAME_POWER_CONTROL_MODE = "send_standby_on_sleep";
+    public static final String CEC_SETTING_NAME_POWER_CONTROL_MODE = "power_control_mode";
     /**
      * Name of a setting deciding on power state action when losing Active Source.
      *
@@ -1009,7 +1009,6 @@ public final class HdmiControlManager {
      *
      * @return {@link HdmiAudioSystemClient} instance. {@code null} on failure.
      *
-     * TODO(b/110094868): unhide for Q
      * @hide
      */
     @Nullable

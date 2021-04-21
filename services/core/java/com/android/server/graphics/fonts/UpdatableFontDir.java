@@ -184,7 +184,7 @@ final class UpdatableFontDir {
                     return;
                 }
                 FontFileInfo fontFileInfo = validateFontFile(files[0]);
-                addFileToMapIfNewer(fontFileInfo, true /* deleteOldFile */);
+                addFileToMapIfSameOrNewer(fontFileInfo, true /* deleteOldFile */);
             }
             success = true;
         } catch (Throwable t) {
@@ -261,15 +261,15 @@ final class UpdatableFontDir {
             // Write config file.
             mLastModifiedMillis = mCurrentTimeSupplier.get();
 
-            curConfig.lastModifiedMillis = mLastModifiedMillis;
+            PersistentSystemFontConfig.Config newConfig = new PersistentSystemFontConfig.Config();
+            newConfig.lastModifiedMillis = mLastModifiedMillis;
             for (FontFileInfo info : mFontFileInfoMap.values()) {
-                curConfig.updatedFontDirs.add(info.getRandomizedFontDir().getName());
+                newConfig.updatedFontDirs.add(info.getRandomizedFontDir().getName());
             }
-            curConfig.fontFamilies.clear();
-            curConfig.fontFamilies.addAll(familyMap.values());
+            newConfig.fontFamilies.addAll(familyMap.values());
 
             try (FileOutputStream fos = new FileOutputStream(mTmpConfigFile)) {
-                PersistentSystemFontConfig.writeToXml(fos, curConfig);
+                PersistentSystemFontConfig.writeToXml(fos, newConfig);
             } catch (Exception e) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_FAILED_UPDATE_CONFIG,
@@ -367,7 +367,7 @@ final class UpdatableFontDir {
                         "Failed to change mode to 711", e);
             }
             FontFileInfo fontFileInfo = validateFontFile(newFontFile);
-            if (!addFileToMapIfNewer(fontFileInfo, false)) {
+            if (!addFileToMapIfSameOrNewer(fontFileInfo, false)) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_DOWNGRADING,
                         "Downgrading font file is forbidden.");
@@ -408,10 +408,10 @@ final class UpdatableFontDir {
 
     /**
      * Add the given {@link FontFileInfo} to {@link #mFontFileInfoMap} if its font revision is
-     * higher than the currently used font file (either in {@link #mFontFileInfoMap} or {@link
-     * #mPreinstalledFontDirs}).
+     * equal to or higher than the revision of currently used font file (either in
+     * {@link #mFontFileInfoMap} or {@link #mPreinstalledFontDirs}).
      */
-    private boolean addFileToMapIfNewer(FontFileInfo fontFileInfo, boolean deleteOldFile) {
+    private boolean addFileToMapIfSameOrNewer(FontFileInfo fontFileInfo, boolean deleteOldFile) {
         FontFileInfo existingInfo = lookupFontFileInfo(fontFileInfo.getPostScriptName());
         final boolean shouldAddToMap;
         if (existingInfo == null) {
@@ -419,9 +419,9 @@ final class UpdatableFontDir {
             // Note that getPreinstalledFontRevision() returns -1 if there is no preinstalled font
             // with 'name'.
             long preInstalledRev = getPreinstalledFontRevision(fontFileInfo.getFile().getName());
-            shouldAddToMap = preInstalledRev < fontFileInfo.getRevision();
+            shouldAddToMap = preInstalledRev <= fontFileInfo.getRevision();
         } else {
-            shouldAddToMap = existingInfo.getRevision() < fontFileInfo.getRevision();
+            shouldAddToMap = existingInfo.getRevision() <= fontFileInfo.getRevision();
         }
         if (shouldAddToMap) {
             if (deleteOldFile && existingInfo != null) {
@@ -502,8 +502,8 @@ final class UpdatableFontDir {
                 Slog.e(TAG, "Failed to lookup font file that has " + font.getPostScriptName());
                 return null;
             }
-            resolvedFonts.add(new FontConfig.Font(info.mFile, null, font.getFontStyle(),
-                    font.getIndex(), font.getFontVariationSettings(), null));
+            resolvedFonts.add(new FontConfig.Font(info.mFile, null, info.getPostScriptName(),
+                    font.getFontStyle(), font.getIndex(), font.getFontVariationSettings(), null));
         }
         return new FontConfig.FontFamily(resolvedFonts, fontFamily.getName(),
                 null, FontConfig.FontFamily.VARIANT_DEFAULT);

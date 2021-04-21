@@ -184,49 +184,28 @@ public class WindowTokenTests extends WindowTestsBase {
     }
 
     /**
-     * Test that {@link WindowToken} constructor parameters is set with expectation.
-     */
-    @Test
-    public void testWindowTokenConstructorValidity() {
-        WindowToken token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class),
-                TYPE_TOAST, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */);
-        assertFalse(token.mRoundedCornerOverlay);
-        assertFalse(token.isFromClient());
-
-        token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class), TYPE_TOAST,
-                true /* persistOnEmpty */, mDisplayContent, true /* ownerCanManageAppTokens */,
-                true /* roundedCornerOverlay */);
-        assertTrue(token.mRoundedCornerOverlay);
-        assertFalse(token.isFromClient());
-
-        token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class), TYPE_TOAST,
-                true /* persistOnEmpty */, mDisplayContent, true /* ownerCanManageAppTokens */,
-                true /* roundedCornerOverlay */, true /* fromClientToken */, null /* options */);
-        assertTrue(token.mRoundedCornerOverlay);
-        assertTrue(token.isFromClient());
-    }
-
-    /**
      * Test that {@link android.view.SurfaceControl} should not be created for the
      * {@link WindowToken} which was created for {@link WindowContext} initially, the
      * surface should be create after addWindow for this token.
      */
     @Test
     public void testSurfaceCreatedForWindowToken() {
-        final WindowToken fromClientToken = new WindowToken(mDisplayContent.mWmService,
-                mock(IBinder.class), TYPE_APPLICATION_OVERLAY, true /* persistOnEmpty */,
-                mDisplayContent, true /* ownerCanManageAppTokens */,
-                true /* roundedCornerOverlay */, true /* fromClientToken */, null /* options */);
+        final WindowToken fromClientToken = new WindowToken.Builder(mDisplayContent.mWmService,
+                mock(IBinder.class), TYPE_APPLICATION_OVERLAY)
+                .setDisplayContent(mDisplayContent)
+                .setFromClientToken(true)
+                .build();
+
         assertNull(fromClientToken.mSurfaceControl);
 
         createWindow(null, TYPE_APPLICATION_OVERLAY, fromClientToken, "window");
         assertNotNull(fromClientToken.mSurfaceControl);
 
-        final WindowToken nonClientToken = new WindowToken(mDisplayContent.mWmService,
-                mock(IBinder.class), TYPE_TOAST, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, true /* roundedCornerOverlay */,
-                false /* fromClientToken */, null /* options */);
+        final WindowToken nonClientToken = new WindowToken.Builder(mDisplayContent.mWmService,
+                mock(IBinder.class), TYPE_APPLICATION_OVERLAY)
+                .setDisplayContent(mDisplayContent)
+                .setFromClientToken(false)
+                .build();
         assertNotNull(nonClientToken.mSurfaceControl);
     }
 
@@ -237,18 +216,23 @@ public class WindowTokenTests extends WindowTestsBase {
                         .mSelectRootForWindowFunc;
         spyOn(selectFunc);
 
-        final WindowToken token1 = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class),
-                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, true /* roundedCornerOverlay */,
-                false /* fromClientToken */, null /* options */);
+        final WindowToken token1 = new WindowToken.Builder(mDisplayContent.mWmService,
+                mock(IBinder.class), TYPE_STATUS_BAR)
+                .setDisplayContent(mDisplayContent)
+                .setPersistOnEmpty(true)
+                .setOwnerCanManageAppTokens(true)
+                .build();
 
         verify(selectFunc).apply(token1.windowType, null);
 
         final Bundle options = new Bundle();
-        final WindowToken token2 = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class),
-                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, true /* roundedCornerOverlay */,
-                false /* fromClientToken */, options /* options */);
+        final WindowToken token2 = new WindowToken.Builder(mDisplayContent.mWmService,
+                mock(IBinder.class), TYPE_STATUS_BAR)
+                .setDisplayContent(mDisplayContent)
+                .setPersistOnEmpty(true)
+                .setOwnerCanManageAppTokens(true)
+                .setOptions(options)
+                .build();
 
         verify(selectFunc).apply(token2.windowType, options);
     }

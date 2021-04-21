@@ -30,6 +30,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.BLASTBufferQueue;
 import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -938,6 +939,7 @@ public final class Magnifier {
         // The surface we allocate for the magnifier content + shadow.
         private final SurfaceSession mSurfaceSession;
         private final SurfaceControl mSurfaceControl;
+        private final BLASTBufferQueue mBBQ;
         private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
         private final Surface mSurface;
         // The renderer used for the allocated surface.
@@ -1004,15 +1006,15 @@ public final class Magnifier {
             final int surfaceHeight = mContentHeight + 2 * mOffsetY;
             mSurfaceSession = new SurfaceSession();
             mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
-                    .setFormat(PixelFormat.TRANSLUCENT)
-                    .setBufferSize(surfaceWidth, surfaceHeight)
                     .setName("magnifier surface")
                     .setFlags(SurfaceControl.HIDDEN)
+                    .setBLASTLayer()
                     .setParent(parentSurfaceControl)
                     .setCallsite("InternalPopupWindow")
                     .build();
-            mSurface = new Surface();
-            mSurface.copyFrom(mSurfaceControl);
+            mBBQ = new BLASTBufferQueue("magnifier surface", mSurfaceControl,
+                surfaceWidth, surfaceHeight, PixelFormat.TRANSLUCENT);
+            mSurface = mBBQ.createSurface();
 
             // Setup the RenderNode tree. The root has two children, one containing the bitmap
             // and one containing the overlay. We use a separate render node for the overlay
@@ -1071,9 +1073,8 @@ public final class Magnifier {
             }
             if (mContentHeight < contentHeight) {
                 // Grows the surface height as necessary.
-                new SurfaceControl.Transaction().setBufferSize(
-                        mSurfaceControl, mContentWidth, contentHeight).apply();
-                mSurface.copyFrom(mSurfaceControl);
+                mBBQ.update(mSurfaceControl, mContentWidth, contentHeight,
+                    PixelFormat.TRANSLUCENT);
                 mRenderer.setSurface(mSurface);
 
                 final Outline outline = new Outline();
@@ -1268,6 +1269,7 @@ public final class Magnifier {
             // Destroy the renderer. This will not proceed until pending frame callbacks complete.
             mRenderer.destroy();
             mSurface.destroy();
+            mBBQ.destroy();
             new SurfaceControl.Transaction().remove(mSurfaceControl).apply();
             mSurfaceSession.kill();
             mHandler.removeCallbacks(mMagnifierUpdater);
@@ -1334,9 +1336,6 @@ public final class Magnifier {
                         if (!mSurface.isValid()) {
                             return;
                         }
-                        // Show or move the window at the content draw frame.
-                        mTransaction.deferTransactionUntil(mSurfaceControl, mSurfaceControl,
-                                frame);
                         if (updateWindowPosition) {
                             mTransaction.setPosition(mSurfaceControl, pendingX, pendingY);
                         }
@@ -1345,7 +1344,8 @@ public final class Magnifier {
                                 .show(mSurfaceControl);
 
                         }
-                        mTransaction.apply();
+                        // Show or move the window at the content draw frame.
+                        mBBQ.mergeWithNextTransaction(mTransaction, frame);
                     };
                     if (!mIsFishEyeStyle) {
                         // The new style magnifier doesn't need the light/shadow.

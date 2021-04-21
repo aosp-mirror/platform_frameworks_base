@@ -16,6 +16,11 @@
 
 package android.bluetooth;
 
+import android.annotation.RequiresNoPermission;
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Handler;
@@ -150,6 +155,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     /**
      * Bluetooth GATT callbacks. Overrides the default BluetoothGattCallback implementation.
      */
+    @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final IBluetoothGattCallback mBluetoothGattCallback =
             new IBluetoothGattCallback.Stub() {
                 /**
@@ -157,6 +163,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                  * @hide
                  */
                 @Override
+                @SuppressLint("AndroidFrameworkRequiresPermission")
                 public void onClientRegistered(int status, int clientIf) {
                     if (DBG) {
                         Log.d(TAG, "onClientRegistered() - status=" + status
@@ -347,6 +354,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                  * @hide
                  */
                 @Override
+                @SuppressLint("AndroidFrameworkRequiresPermission")
                 public void onCharacteristicRead(String address, int status, int handle,
                         byte[] value) {
                     if (VDBG) {
@@ -404,6 +412,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                  * @hide
                  */
                 @Override
+                @SuppressLint("AndroidFrameworkRequiresPermission")
                 public void onCharacteristicWrite(String address, int status, int handle) {
                     if (VDBG) {
                         Log.d(TAG, "onCharacteristicWrite() - Device=" + address
@@ -487,6 +496,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                  * @hide
                  */
                 @Override
+                @SuppressLint("AndroidFrameworkRequiresPermission")
                 public void onDescriptorRead(String address, int status, int handle, byte[] value) {
                     if (VDBG) {
                         Log.d(TAG,
@@ -538,6 +548,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                  * @hide
                  */
                 @Override
+                @SuppressLint("AndroidFrameworkRequiresPermission")
                 public void onDescriptorWrite(String address, int status, int handle) {
                     if (VDBG) {
                         Log.d(TAG,
@@ -734,6 +745,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Application should call this method as early as possible after it is done with
      * this GATT client.
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void close() {
         if (DBG) Log.d(TAG, "close()");
 
@@ -817,12 +830,13 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>This is an asynchronous call. The callback {@link BluetoothGattCallback#onAppRegistered}
      * is used to notify success or failure if the function returns true.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param callback GATT callback handler that will receive asynchronous callbacks.
      * @return If true, the callback will be called to notify success or failure, false on immediate
      * error
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     private boolean registerApp(BluetoothGattCallback callback, Handler handler) {
         return registerApp(callback, handler, false);
     }
@@ -833,14 +847,15 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>This is an asynchronous call. The callback {@link BluetoothGattCallback#onAppRegistered}
      * is used to notify success or failure if the function returns true.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param callback GATT callback handler that will receive asynchronous callbacks.
      * @param eatt_support indicate to allow for eatt support
      * @return If true, the callback will be called to notify success or failure, false on immediate
      * error
      * @hide
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     private boolean registerApp(BluetoothGattCallback callback, Handler handler,
                                 boolean eatt_support) {
         if (DBG) Log.d(TAG, "registerApp()");
@@ -865,6 +880,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Unregister the current application and callbacks.
      */
     @UnsupportedAppUsage
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     private void unregisterApp() {
         if (DBG) Log.d(TAG, "unregisterApp() - mClientIf=" + mClientIf);
         if (mService == null || mClientIf == 0) return;
@@ -893,14 +910,15 @@ public final class BluetoothGatt implements BluetoothProfile {
      * subsequent connections to known devices should be invoked with the
      * autoConnect parameter set to true.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param device Remote device to connect to
      * @param autoConnect Whether to directly connect to the remote device (false) or to
      * automatically connect as soon as the remote device becomes available (true).
      * @return true, if the connection attempt was initiated successfully
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     /*package*/ boolean connect(Boolean autoConnect, BluetoothGattCallback callback,
             Handler handler) {
         if (DBG) {
@@ -931,9 +949,10 @@ public final class BluetoothGatt implements BluetoothProfile {
     /**
      * Disconnects an established connection, or cancels a connection attempt
      * currently in progress.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void disconnect() {
         if (DBG) Log.d(TAG, "cancelOpen() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return;
@@ -954,6 +973,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      *
      * @return true, if the connection attempt was initiated successfully
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean connect() {
         try {
             mService.clientConnect(mClientIf, mDevice.getAddress(), false, mTransport,
@@ -983,6 +1004,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * of {@link BluetoothDevice#PHY_OPTION_NO_PREFERRED}, {@link BluetoothDevice#PHY_OPTION_S2} or
      * {@link BluetoothDevice#PHY_OPTION_S8}
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void setPreferredPhy(int txPhy, int rxPhy, int phyOptions) {
         try {
             mService.clientSetPreferredPhy(mClientIf, mDevice.getAddress(), txPhy, rxPhy,
@@ -996,6 +1019,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Read the current transmitter PHY and receiver PHY of the connection. The values are returned
      * in {@link BluetoothGattCallback#onPhyRead}
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void readPhy() {
         try {
             mService.clientReadPhy(mClientIf, mDevice.getAddress());
@@ -1009,6 +1034,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      *
      * @return remote bluetooth device
      */
+    @RequiresNoPermission
     public BluetoothDevice getDevice() {
         return mDevice;
     }
@@ -1022,10 +1048,11 @@ public final class BluetoothGatt implements BluetoothProfile {
      * triggered. If the discovery was successful, the remote services can be
      * retrieved using the {@link #getServices} function.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return true, if the remote service discovery has been started
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean discoverServices() {
         if (DBG) Log.d(TAG, "discoverServices() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return false;
@@ -1047,11 +1074,12 @@ public final class BluetoothGatt implements BluetoothProfile {
      * It should never be used by real applications. The service is not searched
      * for characteristics and descriptors, or returned in any callback.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return true, if the remote service discovery has been started
      * @hide
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean discoverServiceByUuid(UUID uuid) {
         if (DBG) Log.d(TAG, "discoverServiceByUuid() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return false;
@@ -1073,11 +1101,11 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>This function requires that service discovery has been completed
      * for the given device.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return List of services on the remote device. Returns an empty list if service discovery has
      * not yet been performed.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public List<BluetoothGattService> getServices() {
         List<BluetoothGattService> result =
                 new ArrayList<BluetoothGattService>();
@@ -1101,12 +1129,12 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>If multiple instances of the same service (as identified by UUID)
      * exist, the first instance of the service is returned.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param uuid UUID of the requested service
      * @return BluetoothGattService if supported, or null if the requested service is not offered by
      * the remote device.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresNoPermission
     public BluetoothGattService getService(UUID uuid) {
         for (BluetoothGattService service : mServices) {
             if (service.getDevice().equals(mDevice) && service.getUuid().equals(uuid)) {
@@ -1124,11 +1152,12 @@ public final class BluetoothGatt implements BluetoothProfile {
      * is reported by the {@link BluetoothGattCallback#onCharacteristicRead}
      * callback.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param characteristic Characteristic to read from the remote device
      * @return true, if the read operation was initiated successfully
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean readCharacteristic(BluetoothGattCharacteristic characteristic) {
         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ) == 0) {
             return false;
@@ -1167,12 +1196,13 @@ public final class BluetoothGatt implements BluetoothProfile {
      * is reported by the {@link BluetoothGattCallback#onCharacteristicRead}
      * callback.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param uuid UUID of characteristic to read from the remote device
      * @return true, if the read operation was initiated successfully
      * @hide
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean readUsingCharacteristicUuid(UUID uuid, int startHandle, int endHandle) {
         if (VDBG) Log.d(TAG, "readUsingCharacteristicUuid() - uuid: " + uuid);
         if (mService == null || mClientIf == 0) return false;
@@ -1202,11 +1232,12 @@ public final class BluetoothGatt implements BluetoothProfile {
      * {@link BluetoothGattCallback#onCharacteristicWrite} callback is invoked,
      * reporting the result of the operation.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param characteristic Characteristic to write on the remote device
      * @return true, if the write operation was initiated successfully
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic) {
         if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) == 0
                 && (characteristic.getProperties()
@@ -1248,11 +1279,12 @@ public final class BluetoothGatt implements BluetoothProfile {
      * {@link BluetoothGattCallback#onDescriptorRead} callback is
      * triggered, signaling the result of the operation.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param descriptor Descriptor value to read from the remote device
      * @return true, if the read operation was initiated successfully
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean readDescriptor(BluetoothGattDescriptor descriptor) {
         if (VDBG) Log.d(TAG, "readDescriptor() - uuid: " + descriptor.getUuid());
         if (mService == null || mClientIf == 0) return false;
@@ -1289,11 +1321,12 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>A {@link BluetoothGattCallback#onDescriptorWrite} callback is
      * triggered to report the result of the write operation.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param descriptor Descriptor to write to the associated remote device
      * @return true, if the write operation was initiated successfully
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean writeDescriptor(BluetoothGattDescriptor descriptor) {
         if (VDBG) Log.d(TAG, "writeDescriptor() - uuid: " + descriptor.getUuid());
         if (mService == null || mClientIf == 0 || descriptor.getValue() == null) return false;
@@ -1340,10 +1373,11 @@ public final class BluetoothGatt implements BluetoothProfile {
      * cancel the current transaction without committing any values on the
      * remote device.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return true, if the reliable write transaction has been initiated
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean beginReliableWrite() {
         if (VDBG) Log.d(TAG, "beginReliableWrite() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return false;
@@ -1367,10 +1401,11 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>A {@link BluetoothGattCallback#onReliableWriteCompleted} callback is
      * invoked to indicate whether the transaction has been executed correctly.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return true, if the request to execute the transaction has been sent
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean executeReliableWrite() {
         if (VDBG) Log.d(TAG, "executeReliableWrite() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return false;
@@ -1396,9 +1431,10 @@ public final class BluetoothGatt implements BluetoothProfile {
      *
      * <p>Calling this function will discard all queued characteristic write
      * operations for a given remote device.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void abortReliableWrite() {
         if (VDBG) Log.d(TAG, "abortReliableWrite() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return;
@@ -1414,6 +1450,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @deprecated Use {@link #abortReliableWrite()}
      */
     @Deprecated
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void abortReliableWrite(BluetoothDevice mDevice) {
         abortReliableWrite();
     }
@@ -1426,12 +1464,13 @@ public final class BluetoothGatt implements BluetoothProfile {
      * triggered if the remote device indicates that the given characteristic
      * has changed.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @param characteristic The characteristic for which to enable notifications
      * @param enable Set to true to enable notifications/indications
      * @return true, if the requested notification status was set successfully
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean setCharacteristicNotification(BluetoothGattCharacteristic characteristic,
             boolean enable) {
         if (DBG) {
@@ -1464,6 +1503,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean refresh() {
         if (DBG) Log.d(TAG, "refresh() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return false;
@@ -1484,10 +1525,11 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>The {@link BluetoothGattCallback#onReadRemoteRssi} callback will be
      * invoked when the RSSI value has been read.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return true, if the RSSI value has been requested successfully
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean readRemoteRssi() {
         if (DBG) Log.d(TAG, "readRssi() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return false;
@@ -1512,10 +1554,11 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>A {@link BluetoothGattCallback#onMtuChanged} callback will indicate
      * whether this operation was successful.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
-     *
      * @return true, if the new MTU value has been requested successfully
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean requestMtu(int mtu) {
         if (DBG) {
             Log.d(TAG, "configureMTU() - device: " + mDevice.getAddress()
@@ -1544,6 +1587,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * or {@link BluetoothGatt#CONNECTION_PRIORITY_LOW_POWER}.
      * @throws IllegalArgumentException If the parameters are outside of their specified range.
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean requestConnectionPriority(int connectionPriority) {
         if (connectionPriority < CONNECTION_PRIORITY_BALANCED
                 || connectionPriority > CONNECTION_PRIORITY_LOW_POWER) {
@@ -1571,6 +1616,8 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @return true, if the request is send to the Bluetooth stack.
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean requestLeConnectionUpdate(int minConnectionInterval, int maxConnectionInterval,
                                              int slaveLatency, int supervisionTimeout,
                                              int minConnectionEventLen, int maxConnectionEventLen) {
@@ -1604,6 +1651,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @throws UnsupportedOperationException
      */
     @Override
+    @RequiresNoPermission
     public int getConnectionState(BluetoothDevice device) {
         throw new UnsupportedOperationException("Use BluetoothManager#getConnectionState instead.");
     }
@@ -1615,6 +1663,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @throws UnsupportedOperationException
      */
     @Override
+    @RequiresNoPermission
     public List<BluetoothDevice> getConnectedDevices() {
         throw new UnsupportedOperationException(
                 "Use BluetoothManager#getConnectedDevices instead.");
@@ -1628,6 +1677,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @throws UnsupportedOperationException
      */
     @Override
+    @RequiresNoPermission
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         throw new UnsupportedOperationException(
                 "Use BluetoothManager#getDevicesMatchingConnectionStates instead.");

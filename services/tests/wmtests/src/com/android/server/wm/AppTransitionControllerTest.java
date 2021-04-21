@@ -23,17 +23,27 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doCallRealMethod;
 
+import android.os.Binder;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
+import android.view.IRemoteAnimationFinishedCallback;
+import android.view.IRemoteAnimationRunner;
+import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationDefinition;
+import android.view.RemoteAnimationTarget;
 import android.view.WindowManager;
 
 import androidx.test.filters.FlakyTest;
@@ -425,5 +435,105 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                 new ArraySet<>(new WindowContainer[]{activity2.getTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, false /* visible */));
+    }
+
+    static class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
+        @Override
+        public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
+                IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
+        }
+
+        @Override
+        public void onAnimationCancelled() throws RemoteException {
+        }
+
+        @Override
+        public IBinder asBinder() {
+            return new Binder();
+        }
+    }
+
+    @Test
+    public void testGetRemoteAnimationOverrideEmpty() {
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        assertNull(mAppTransitionController.getRemoteAnimationOverride(activity,
+                TRANSIT_OLD_ACTIVITY_OPEN, new ArraySet<Integer>()));
+    }
+
+    @Test
+    public void testGetRemoteAnimationOverrideWindowContainer() {
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        final RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
+        final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, adapter);
+        activity.registerRemoteAnimations(definition);
+
+        assertEquals(adapter,
+                mAppTransitionController.getRemoteAnimationOverride(
+                        activity, TRANSIT_OLD_ACTIVITY_OPEN, new ArraySet<Integer>()));
+        assertNull(mAppTransitionController.getRemoteAnimationOverride(
+                        null, TRANSIT_OLD_ACTIVITY_OPEN, new ArraySet<Integer>()));
+    }
+
+    @Test
+    public void testGetRemoteAnimationOverrideTransitionController() {
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        final RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
+        final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, adapter);
+        mAppTransitionController.registerRemoteAnimations(definition);
+
+        assertEquals(adapter,
+                mAppTransitionController.getRemoteAnimationOverride(
+                        activity, TRANSIT_OLD_ACTIVITY_OPEN, new ArraySet<Integer>()));
+        assertEquals(adapter,
+                mAppTransitionController.getRemoteAnimationOverride(
+                        null, TRANSIT_OLD_ACTIVITY_OPEN, new ArraySet<Integer>()));
+    }
+
+    @Test
+    public void testGetRemoteAnimationOverrideBoth() {
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        final RemoteAnimationDefinition definition1 = new RemoteAnimationDefinition();
+        final RemoteAnimationAdapter adapter1 = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        definition1.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, adapter1);
+        activity.registerRemoteAnimations(definition1);
+
+        final RemoteAnimationDefinition definition2 = new RemoteAnimationDefinition();
+        final RemoteAnimationAdapter adapter2 = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        definition2.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_UNOCCLUDE, adapter2);
+        mAppTransitionController.registerRemoteAnimations(definition2);
+
+        assertEquals(adapter2,
+                mAppTransitionController.getRemoteAnimationOverride(
+                        activity, TRANSIT_OLD_KEYGUARD_UNOCCLUDE, new ArraySet<Integer>()));
+        assertEquals(adapter2,
+                mAppTransitionController.getRemoteAnimationOverride(
+                        null, TRANSIT_OLD_KEYGUARD_UNOCCLUDE, new ArraySet<Integer>()));
+    }
+
+    @Test
+    public void testGetRemoteAnimationOverrideWindowContainerHasPriority() {
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        final RemoteAnimationDefinition definition1 = new RemoteAnimationDefinition();
+        final RemoteAnimationAdapter adapter1 = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        definition1.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, adapter1);
+        activity.registerRemoteAnimations(definition1);
+
+        final RemoteAnimationDefinition definition2 = new RemoteAnimationDefinition();
+        final RemoteAnimationAdapter adapter2 = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        definition2.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, adapter2);
+        mAppTransitionController.registerRemoteAnimations(definition2);
+
+        assertEquals(adapter1,
+                mAppTransitionController.getRemoteAnimationOverride(
+                        activity, TRANSIT_OLD_ACTIVITY_OPEN, new ArraySet<Integer>()));
     }
 }

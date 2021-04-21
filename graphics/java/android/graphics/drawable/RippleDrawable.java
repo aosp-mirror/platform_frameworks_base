@@ -23,6 +23,7 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.ValueAnimator;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -150,6 +151,7 @@ public class RippleDrawable extends LayerDrawable {
     /** The maximum number of ripples supported. */
     private static final int MAX_RIPPLES = 10;
     private static final LinearInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
+    private static final int DEFAULT_EFFECT_COLOR = 0x80ffffff;
     /** Temporary flag for teamfood. **/
     private static final boolean FORCE_PATTERNED_STYLE = true;
 
@@ -465,9 +467,34 @@ public class RippleDrawable extends LayerDrawable {
      *
      * @attr ref android.R.styleable#RippleDrawable_color
      */
-    public void setColor(ColorStateList color) {
+    public void setColor(@NonNull ColorStateList color) {
+        if (color == null) {
+            throw new IllegalArgumentException("color cannot be null");
+        }
         mState.mColor = color;
         invalidateSelf(false);
+    }
+
+    /**
+     * Sets the ripple effect color.
+     *
+     * @param color Ripple color as a color state list.
+     *
+     * @attr ref android.R.styleable#RippleDrawable_effectColor
+     */
+    public void setEffectColor(@NonNull ColorStateList color) {
+        if (color == null) {
+            throw new IllegalArgumentException("color cannot be null");
+        }
+        mState.mEffectColor = color;
+        invalidateSelf(false);
+    }
+
+    /**
+     * @return The ripple effect color as a color state list.
+     */
+    public @NonNull ColorStateList getEffectColor() {
+        return mState.mEffectColor;
     }
 
     /**
@@ -561,13 +588,14 @@ public class RippleDrawable extends LayerDrawable {
             mState.mColor = color;
         }
 
+        final ColorStateList effectColor =
+                a.getColorStateList(R.styleable.RippleDrawable_effectColor);
+        if (effectColor != null) {
+            mState.mEffectColor = effectColor;
+        }
+
         mState.mMaxRadius = a.getDimensionPixelSize(
                 R.styleable.RippleDrawable_radius, mState.mMaxRadius);
-
-        if (!FORCE_PATTERNED_STYLE) {
-            mState.mRippleStyle = a.getInteger(R.styleable.RippleDrawable_rippleStyle,
-                    mState.mRippleStyle);
-        }
     }
 
     private void verifyRequiredAttributes(@NonNull TypedArray a) throws XmlPullParserException {
@@ -858,15 +886,6 @@ public class RippleDrawable extends LayerDrawable {
         }
         for (int i = 0; i < mRunningAnimations.size(); i++) {
             RippleAnimationSession s = mRunningAnimations.get(i);
-            if (s.shouldAnimateSparkle()) {
-                final float phase = s.getSparklePhase();
-                if (useCanvasProps) {
-                    s.getCanvasProperties().getShader().setNoisePhase(phase);
-                } else {
-                    s.getProperties().getShader().setNoisePhase(phase);
-                }
-                invalidateSelf();
-            }
             if (useCanvasProps) {
                 RippleAnimationSession.AnimationProperties<CanvasProperty<Float>,
                         CanvasProperty<Paint>>
@@ -883,7 +902,7 @@ public class RippleDrawable extends LayerDrawable {
                     yProp = p.getY();
                 }
                 can.drawRipple(xProp, yProp, p.getMaxRadius(), p.getPaint(),
-                        p.getProgress(), p.getShader());
+                        p.getProgress(), p.getNoisePhase(), p.getShader());
             } else {
                 RippleAnimationSession.AnimationProperties<Float, Paint> p =
                         s.getProperties();
@@ -942,10 +961,13 @@ public class RippleDrawable extends LayerDrawable {
         float radius = getComputedRadius();
         RippleAnimationSession.AnimationProperties<Float, Paint> properties;
         RippleShader shader = new RippleShader();
-        int color = mMaskColorFilter == null
+        // Grab the color for the current state and cut the alpha channel in
+        // half so that the ripple and background together yield full alpha.
+        final int color = clampAlpha(mMaskColorFilter == null
                 ? mState.mColor.getColorForState(getState(), Color.BLACK)
-                : mMaskColorFilter.getColor();
-        shader.setColor(color);
+                : mMaskColorFilter.getColor());
+        final int effectColor = mState.mEffectColor.getColorForState(getState(), Color.MAGENTA);
+        shader.setColor(color, effectColor);
         shader.setOrigin(cx, cy);
         shader.setTouch(x, y);
         shader.setResolution(w, h, mState.mDensity);
@@ -953,7 +975,7 @@ public class RippleDrawable extends LayerDrawable {
         shader.setRadius(radius);
         shader.setProgress(.0f);
         properties = new RippleAnimationSession.AnimationProperties<>(
-                cx, cy, radius, p, 0f, shader);
+                cx, cy, radius, 0f, p, 0f, shader);
         if (mMaskShader == null) {
             shader.setShader(null);
         } else {
@@ -963,6 +985,13 @@ public class RippleDrawable extends LayerDrawable {
         p.setColorFilter(null);
         p.setColor(color);
         return properties;
+    }
+
+    private int clampAlpha(@ColorInt int color) {
+        if (Color.alpha(color) > 128) {
+            return  (color & 0x00FFFFFF) | 0x80000000;
+        }
+        return color;
     }
 
     private boolean shouldUseCanvasProps(Canvas c) {
@@ -1175,10 +1204,7 @@ public class RippleDrawable extends LayerDrawable {
 
         // Grab the color for the current state and cut the alpha channel in
         // half so that the ripple and background together yield full alpha.
-        int color = mState.mColor.getColorForState(getState(), Color.BLACK);
-        if (Color.alpha(color) > 128) {
-            color = (color & 0x00FFFFFF) | 0x80000000;
-        }
+        final int color = clampAlpha(mState.mColor.getColorForState(getState(), Color.BLACK));
         final Paint p = mRipplePaint;
 
         if (mMaskColorFilter != null) {
@@ -1266,33 +1292,6 @@ public class RippleDrawable extends LayerDrawable {
         return this;
     }
 
-    /**
-     * Sets the visual style of the ripple.
-     *
-     * @see #STYLE_SOLID
-     * @see #STYLE_PATTERNED
-     *
-     * @param style The style of the ripple
-     * @hide
-     */
-    public void setRippleStyle(@RippleStyle int style) throws IllegalArgumentException {
-        if (style == STYLE_SOLID || style == STYLE_PATTERNED) {
-            mState.mRippleStyle = style;
-        } else {
-            throw new IllegalArgumentException("Invalid style value " + style);
-        }
-    }
-
-    /**
-     * Get the current ripple style
-     * @return Ripple style
-     * @hide
-     */
-    public @RippleStyle int getRippleStyle() {
-        return mState.mRippleStyle;
-    }
-
-
     @Override
     RippleState createConstantState(LayerState state, Resources res) {
         return new RippleState(state, this, res);
@@ -1302,6 +1301,7 @@ public class RippleDrawable extends LayerDrawable {
         int[] mTouchThemeAttrs;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ColorStateList mColor = ColorStateList.valueOf(Color.MAGENTA);
+        ColorStateList mEffectColor = ColorStateList.valueOf(DEFAULT_EFFECT_COLOR);
         int mMaxRadius = RADIUS_AUTO;
         int mRippleStyle = FORCE_PATTERNED_STYLE ? STYLE_PATTERNED : STYLE_SOLID;
 
@@ -1314,6 +1314,7 @@ public class RippleDrawable extends LayerDrawable {
                 mColor = origs.mColor;
                 mMaxRadius = origs.mMaxRadius;
                 mRippleStyle = origs.mRippleStyle;
+                mEffectColor = origs.mEffectColor;
 
                 if (origs.mDensity != mDensity) {
                     applyDensityScaling(orig.mDensity, mDensity);

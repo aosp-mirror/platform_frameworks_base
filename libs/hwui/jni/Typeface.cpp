@@ -373,6 +373,12 @@ static void Typeface_warmUpCache(JNIEnv* env, jobject, jstring jFilePath) {
     makeSkDataCached(filePath.c_str(), false /* fs verity */);
 }
 
+// Critical Native
+static void Typeface_addFontCollection(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
+    std::shared_ptr<minikin::FontCollection> collection = toTypeface(faceHandle)->fFontCollection;
+    minikin::SystemFonts::addFontMap(std::move(collection));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gTypefaceMethods[] = {
@@ -397,6 +403,7 @@ static const JNINativeMethod gTypefaceMethods[] = {
         {"nativeGetFamilySize", "(J)I", (void*)Typeface_getFamilySize},
         {"nativeGetFamily", "(JI)J", (void*)Typeface_getFamily},
         {"nativeWarmUpCache", "(Ljava/lang/String;)V", (void*)Typeface_warmUpCache},
+        {"nativeAddFontCollections", "(J)V", (void*)Typeface_addFontCollection},
 };
 
 int register_android_graphics_Typeface(JNIEnv* env)

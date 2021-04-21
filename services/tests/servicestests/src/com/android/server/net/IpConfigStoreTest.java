@@ -39,6 +39,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -53,8 +55,8 @@ public class IpConfigStoreTest {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         DataOutputStream outputStream = new DataOutputStream(byteStream);
 
-        IpConfiguration expectedConfig = new IpConfiguration(IpAssignment.DHCP,
-                ProxySettings.NONE, null, null);
+        final IpConfiguration expectedConfig =
+                newIpConfiguration(IpAssignment.DHCP, ProxySettings.NONE, null, null);
 
         // Emulate writing to old format.
         writeDhcpConfigV2(outputStream, KEY_CONFIG, expectedConfig);
@@ -78,18 +80,23 @@ public class IpConfigStoreTest {
         final String DNS_IP_ADDR_1 = "1.2.3.4";
         final String DNS_IP_ADDR_2 = "5.6.7.8";
 
-        StaticIpConfiguration staticIpConfiguration = new StaticIpConfiguration();
-        staticIpConfiguration.ipAddress = new LinkAddress(IP_ADDR_1);
-        staticIpConfiguration.dnsServers.add(InetAddresses.parseNumericAddress(DNS_IP_ADDR_1));
-        staticIpConfiguration.dnsServers.add(InetAddresses.parseNumericAddress(DNS_IP_ADDR_2));
+        final ArrayList<InetAddress> dnsServers = new ArrayList<>();
+        dnsServers.add(InetAddresses.parseNumericAddress(DNS_IP_ADDR_1));
+        dnsServers.add(InetAddresses.parseNumericAddress(DNS_IP_ADDR_2));
+        final StaticIpConfiguration staticIpConfiguration1 = new StaticIpConfiguration.Builder()
+                .setIpAddress(new LinkAddress(IP_ADDR_1))
+                .setDnsServers(dnsServers).build();
+        final StaticIpConfiguration staticIpConfiguration2 = new StaticIpConfiguration.Builder()
+                .setIpAddress(new LinkAddress(IP_ADDR_2))
+                .setDnsServers(dnsServers).build();
 
         ProxyInfo proxyInfo =
                 ProxyInfo.buildDirectProxy("10.10.10.10", 88, Arrays.asList("host1", "host2"));
 
-        IpConfiguration expectedConfig1 = new IpConfiguration(IpAssignment.STATIC,
-                ProxySettings.STATIC, staticIpConfiguration, proxyInfo);
-        IpConfiguration expectedConfig2 = new IpConfiguration(expectedConfig1);
-        expectedConfig2.getStaticIpConfiguration().ipAddress = new LinkAddress(IP_ADDR_2);
+        IpConfiguration expectedConfig1 = newIpConfiguration(IpAssignment.STATIC,
+                ProxySettings.STATIC, staticIpConfiguration1, proxyInfo);
+        IpConfiguration expectedConfig2 = newIpConfiguration(IpAssignment.STATIC,
+                ProxySettings.STATIC, staticIpConfiguration2, proxyInfo);
 
         ArrayMap<String, IpConfiguration> expectedNetworks = new ArrayMap<>();
         expectedNetworks.put(IFACE_1, expectedConfig1);
@@ -107,14 +114,24 @@ public class IpConfigStoreTest {
         assertEquals(expectedNetworks.get(IFACE_2), actualNetworks.get(IFACE_2));
     }
 
+    private IpConfiguration newIpConfiguration(IpAssignment ipAssignment,
+            ProxySettings proxySettings, StaticIpConfiguration staticIpConfig, ProxyInfo info) {
+        final IpConfiguration config = new IpConfiguration();
+        config.setIpAssignment(ipAssignment);
+        config.setProxySettings(proxySettings);
+        config.setStaticIpConfiguration(staticIpConfig);
+        config.setHttpProxy(info);
+        return config;
+    }
+
     // This is simplified snapshot of code that was used to store values in V2 format (key as int).
     private static void writeDhcpConfigV2(DataOutputStream out, int configKey,
             IpConfiguration config) throws IOException {
         out.writeInt(2);  // VERSION 2
-        switch (config.ipAssignment) {
+        switch (config.getIpAssignment()) {
             case DHCP:
                 out.writeUTF("ipAssignment");
-                out.writeUTF(config.ipAssignment.toString());
+                out.writeUTF(config.getIpAssignment().toString());
                 break;
             default:
                 fail("Not supported in test environment");

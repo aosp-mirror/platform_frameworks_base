@@ -60,6 +60,12 @@ class RotateTwoLaunchedAppsInAppPairsMode(
             }
         }
 
+    @FlakyTest
+    @Test
+    override fun statusBarLayerIsAlwaysVisible() {
+        super.statusBarLayerIsAlwaysVisible()
+    }
+
     @Presubmit
     @Test
     fun bothAppWindowsVisible() {

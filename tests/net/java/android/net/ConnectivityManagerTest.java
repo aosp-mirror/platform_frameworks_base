@@ -384,7 +384,7 @@ public class ConnectivityManagerTest {
                 eq(TRACK_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE), anyInt(),
                 eq(testPkgName), eq(testAttributionTag));
 
-        manager.requestBackgroundNetwork(request, handler, callback);
+        manager.requestBackgroundNetwork(request, callback, handler);
         verify(mService).requestNetwork(eq(Process.INVALID_UID), eq(request.networkCapabilities),
                 eq(BACKGROUND_REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE), anyInt(),
                 eq(testPkgName), eq(testAttributionTag));

@@ -41,8 +41,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.media.MediaDevice;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 
 /**
  * Base adapter for media output dialog.

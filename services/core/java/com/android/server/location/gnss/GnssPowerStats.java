@@ -181,7 +181,7 @@ public class GnssPowerStats {
             ipw.println("mJ");
         }
         if (capabilities.hasPowerOtherModes()) {
-            for (int i = 1; i <= mOtherModesEnergyMilliJoule.length; i++) {
+            for (int i = 0; i < mOtherModesEnergyMilliJoule.length; i++) {
                 ipw.print("other mode [" + i + "] power: ");
                 ipw.print(mOtherModesEnergyMilliJoule[i]);
                 ipw.println("mJ");

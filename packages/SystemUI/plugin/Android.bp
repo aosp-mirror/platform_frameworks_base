@@ -32,8 +32,10 @@ java_library {
     ],
 
     static_libs: [
+        "androidx.annotation_annotation",
         "PluginCoreLib",
         "SystemUI-sensors",
+        "SystemUIAnimationLib",
     ],
 
 }

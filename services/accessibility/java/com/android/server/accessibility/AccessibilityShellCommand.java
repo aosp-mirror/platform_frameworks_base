@@ -59,9 +59,8 @@ final class AccessibilityShellCommand extends ShellCommand {
                 return runCallSystemAction();
             }
             case "start-trace":
-                return startTrace();
             case "stop-trace":
-                return stopTrace();
+                return mService.getTraceManager().onShellCommand(cmd);
         }
         return -1;
     }
@@ -107,16 +106,6 @@ final class AccessibilityShellCommand extends ShellCommand {
         return -1;
     }
 
-    private int startTrace() {
-        mService.startTrace();
-        return 0;
-    }
-
-    private int stopTrace() {
-        mService.stopTrace();
-        return 0;
-    }
-
     private Integer parseUserId() {
         final String option = getNextOption();
         if (option != null) {
@@ -142,9 +131,6 @@ final class AccessibilityShellCommand extends ShellCommand {
         pw.println("    Get whether binding to services provided by instant apps is allowed.");
         pw.println("  call-system-action <ACTION_ID>");
         pw.println("    Calls the system action with the given action id.");
-        pw.println("  start-trace");
-        pw.println("    Start the debug tracing.");
-        pw.println("  stop-trace");
-        pw.println("    Stop the debug tracing.");
+        mService.getTraceManager().onHelp(pw);
     }
 }

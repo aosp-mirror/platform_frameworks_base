@@ -70,7 +70,7 @@ public class GeofenceManager extends
     private static final long WAKELOCK_TIMEOUT_MS = 30000;
 
     private static final int MAX_SPEED_M_S = 100;  // 360 km/hr (high speed train)
-    private static final long MAX_LOCATION_AGE_NANOS = 5 * 60 * 1000000000L; // five minutes
+    private static final long MAX_LOCATION_AGE_MS = 5 * 60 * 1000L; // five minutes
     private static final long MAX_LOCATION_INTERVAL_MS = 2 * 60 * 60 * 1000; // two hours
 
     protected final class GeofenceRegistration extends
@@ -472,7 +472,7 @@ public class GeofenceManager extends
         }
 
         if (location != null) {
-            if (location.getElapsedRealtimeAgeNanos() > MAX_LOCATION_AGE_NANOS) {
+            if (location.getElapsedRealtimeAgeMillis() > MAX_LOCATION_AGE_MS) {
                 location = null;
             }
         }
@@ -480,25 +480,25 @@ public class GeofenceManager extends
         return location;
     }
 
-    private void onUserChanged(int userId, int change) {
+    void onUserChanged(int userId, int change) {
         if (change == UserListener.CURRENT_USER_CHANGED) {
             updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
         }
     }
 
-    private void onLocationEnabledChanged(int userId) {
+    void onLocationEnabledChanged(int userId) {
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
-    private void onLocationPackageBlacklistChanged(int userId) {
+    void onLocationPackageBlacklistChanged(int userId) {
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
-    private void onLocationPermissionsChanged(String packageName) {
+    void onLocationPermissionsChanged(String packageName) {
         updateRegistrations(registration -> registration.onLocationPermissionsChanged(packageName));
     }
 
-    private void onLocationPermissionsChanged(int uid) {
+    void onLocationPermissionsChanged(int uid) {
         updateRegistrations(registration -> registration.onLocationPermissionsChanged(uid));
     }
 }

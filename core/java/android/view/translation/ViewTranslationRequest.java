@@ -118,7 +118,8 @@ public final class ViewTranslationRequest implements Parcelable {
          *
          * @param autofillId the {@link AutofillId} of the non-virtual view hosting the virtual view
          * hierarchy associated with this request.
-        * @param virtualChildId the id of the virtual child, relative to the parent.
+        * @param virtualChildId the id of the virtual view in the host view. This id is the same
+         * virtual id provided through content capture.
          */
         public Builder(@NonNull AutofillId autofillId, long virtualChildId) {
             mAutofillId = new AutofillId(autofillId, virtualChildId, AutofillId.NO_SESSION);

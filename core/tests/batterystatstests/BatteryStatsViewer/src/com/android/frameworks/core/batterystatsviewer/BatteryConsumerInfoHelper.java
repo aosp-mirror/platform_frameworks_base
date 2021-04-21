@@ -18,13 +18,13 @@ package com.android.frameworks.core.batterystatsviewer;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.BatteryConsumer;
 import android.os.Process;
+import android.os.SystemBatteryConsumer;
+import android.os.UidBatteryConsumer;
+import android.util.DebugUtils;
 
 import androidx.annotation.NonNull;
-
-import com.android.internal.os.BatterySipper;
-
-import java.util.Locale;
 
 class BatteryConsumerInfoHelper {
 
@@ -37,111 +37,79 @@ class BatteryConsumerInfoHelper {
         public ApplicationInfo iconInfo;
         public CharSequence packages;
         public CharSequence details;
+        public boolean isSystemBatteryConsumer;
     }
 
     @NonNull
     public static BatteryConsumerInfo makeBatteryConsumerInfo(PackageManager packageManager,
-            @NonNull BatterySipper sipper) {
+            @NonNull BatteryConsumer batteryConsumer) {
         BatteryConsumerInfo info = new BatteryConsumerInfo();
-        info.id = BatteryConsumerData.batteryConsumerId(sipper);
-        sipper.sumPower();
-        info.powerMah = sipper.totalSmearedPowerMah;
-        switch (sipper.drainType) {
-            case APP: {
-                int uid = sipper.getUid();
-                info.details = String.format("UID: %d", uid);
-                String packageWithHighestDrain = sipper.packageWithHighestDrain;
-                if (uid == Process.ROOT_UID) {
-                    info.label = "<root>";
-                } else {
-                    String[] packages = packageManager.getPackagesForUid(uid);
-                    String primaryPackageName = null;
-                    if (uid == Process.SYSTEM_UID) {
-                        primaryPackageName = SYSTEM_SERVER_PACKAGE_NAME;
-                    } else if (packages != null) {
-                        for (String name : packages) {
-                            primaryPackageName = name;
-                            if (name.equals(packageWithHighestDrain)) {
-                                break;
-                            }
-                        }
-                    }
+        info.id = BatteryConsumerData.batteryConsumerId(batteryConsumer);
+        info.powerMah = batteryConsumer.getConsumedPower();
 
-                    if (primaryPackageName != null) {
-                        try {
-                            ApplicationInfo applicationInfo =
-                                    packageManager.getApplicationInfo(primaryPackageName, 0);
-                            info.label = applicationInfo.loadLabel(packageManager);
-                            info.iconInfo = applicationInfo;
-                        } catch (PackageManager.NameNotFoundException e) {
-                            info.label = primaryPackageName;
+        if (batteryConsumer instanceof UidBatteryConsumer) {
+            final UidBatteryConsumer uidBatteryConsumer = (UidBatteryConsumer) batteryConsumer;
+            int uid = uidBatteryConsumer.getUid();
+            info.details = String.format("UID: %d", uid);
+            String packageWithHighestDrain = uidBatteryConsumer.getPackageWithHighestDrain();
+            if (uid == Process.ROOT_UID) {
+                info.label = "<root>";
+            } else {
+                String[] packages = packageManager.getPackagesForUid(uid);
+                String primaryPackageName = null;
+                if (uid == Process.SYSTEM_UID) {
+                    primaryPackageName = SYSTEM_SERVER_PACKAGE_NAME;
+                } else if (packages != null) {
+                    for (String name : packages) {
+                        primaryPackageName = name;
+                        if (name.equals(packageWithHighestDrain)) {
+                            break;
                         }
-                    } else if (packageWithHighestDrain != null) {
-                        info.label = packageWithHighestDrain;
-                    }
-
-                    if (packages != null && packages.length > 0) {
-                        StringBuilder sb = new StringBuilder();
-                        if (primaryPackageName != null) {
-                            sb.append(primaryPackageName);
-                        }
-                        for (String packageName : packages) {
-                            if (packageName.equals(primaryPackageName)) {
-                                continue;
-                            }
-
-                            if (sb.length() != 0) {
-                                sb.append(", ");
-                            }
-                            sb.append(packageName);
-                        }
-
-                        info.packages = sb;
                     }
                 }
-                break;
+
+                if (primaryPackageName != null) {
+                    try {
+                        ApplicationInfo applicationInfo =
+                                packageManager.getApplicationInfo(primaryPackageName, 0);
+                        info.label = applicationInfo.loadLabel(packageManager);
+                        info.iconInfo = applicationInfo;
+                    } catch (PackageManager.NameNotFoundException e) {
+                        info.label = primaryPackageName;
+                    }
+                } else if (packageWithHighestDrain != null) {
+                    info.label = packageWithHighestDrain;
+                }
+
+                if (packages != null && packages.length > 0) {
+                    StringBuilder sb = new StringBuilder();
+                    if (primaryPackageName != null) {
+                        sb.append(primaryPackageName);
+                    }
+                    for (String packageName : packages) {
+                        if (packageName.equals(primaryPackageName)) {
+                            continue;
+                        }
+
+                        if (sb.length() != 0) {
+                            sb.append(", ");
+                        }
+                        sb.append(packageName);
+                    }
+
+                    info.packages = sb;
+                }
             }
-            case USER:
-                info.label = "User";
-                info.details = String.format(Locale.getDefault(), "User ID: %d", sipper.userId);
-                break;
-            case AMBIENT_DISPLAY:
-                info.label = "Ambient display";
-                break;
-            case BLUETOOTH:
-                info.label = "Bluetooth";
-                break;
-            case CAMERA:
-                info.label = "Camera";
-                break;
-            case CELL:
-                info.label = "Cell";
-                break;
-            case FLASHLIGHT:
-                info.label = "Flashlight";
-                break;
-            case IDLE:
-                info.label = "Idle";
-                break;
-            case MEMORY:
-                info.label = "Memory";
-                break;
-            case OVERCOUNTED:
-                info.label = "Overcounted";
-                break;
-            case PHONE:
-                info.label = "Phone";
-                break;
-            case SCREEN:
-                info.label = "Screen";
-                break;
-            case UNACCOUNTED:
-                info.label = "Unaccounted";
-                break;
-            case WIFI:
-                info.label = "WiFi";
-                break;
+        } else if (batteryConsumer instanceof SystemBatteryConsumer) {
+            final SystemBatteryConsumer systemBatteryConsumer =
+                    (SystemBatteryConsumer) batteryConsumer;
+            final int drainType = systemBatteryConsumer.getDrainType();
+            String name = DebugUtils.constantToString(SystemBatteryConsumer.class, "DRAIN_TYPE_",
+                    drainType);
+            info.label = name.charAt(0) + name.substring(1).toLowerCase().replace('_', ' ');
+            info.isSystemBatteryConsumer = true;
         }
+
         // Default the app icon to System Server. This includes root, dex2oat and other UIDs.
         if (info.iconInfo == null) {
             try {

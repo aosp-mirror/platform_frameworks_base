@@ -38,8 +38,11 @@ import java.util.Objects;
  *
  * @hide
  */
-public final class VibratorInfo implements Parcelable {
+public class VibratorInfo implements Parcelable {
     private static final String TAG = "VibratorInfo";
+
+    /** @hide */
+    public static final VibratorInfo EMPTY_VIBRATOR_INFO = new VibratorInfo.Builder(-1).build();
 
     private final int mId;
     private final long mCapabilities;
@@ -72,6 +75,23 @@ public final class VibratorInfo implements Parcelable {
         mSupportedPrimitives = toSparseBooleanArray(supportedPrimitives);
         mQFactor = qFactor;
         mFrequencyMapping = frequencyMapping;
+    }
+
+    protected VibratorInfo(int id, int capabilities, VibratorInfo baseVibrator) {
+        mId = id;
+        mCapabilities = capabilities;
+        mSupportedEffects = baseVibrator.mSupportedEffects == null ? null :
+                baseVibrator.mSupportedEffects.clone();
+        mSupportedBraking = baseVibrator.mSupportedBraking == null ? null :
+                baseVibrator.mSupportedBraking.clone();
+        mSupportedPrimitives = baseVibrator.mSupportedPrimitives == null ? null :
+                baseVibrator.mSupportedPrimitives.clone();
+        mQFactor = baseVibrator.mQFactor;
+        mFrequencyMapping = new FrequencyMapping(baseVibrator.mFrequencyMapping.mMinFrequencyHz,
+                baseVibrator.mFrequencyMapping.mResonantFrequencyHz,
+                baseVibrator.mFrequencyMapping.mFrequencyResolutionHz,
+                baseVibrator.mFrequencyMapping.mSuggestedSafeRangeHz,
+                baseVibrator.mFrequencyMapping.mMaxAmplitudes);
     }
 
     @Override
@@ -145,6 +165,7 @@ public final class VibratorInfo implements Parcelable {
      * Returns a default value to be applied to composed PWLE effects for braking.
      *
      * @return a supported braking value, one of android.hardware.vibrator.Braking.*
+     * @hide
      */
     public int getDefaultBraking() {
         if (mSupportedBraking != null) {
@@ -265,6 +286,10 @@ public final class VibratorInfo implements Parcelable {
         return mFrequencyMapping.toHertz(relativeFrequency);
     }
 
+    protected long getCapabilities() {
+        return mCapabilities;
+    }
+
     private String[] getCapabilitiesNames() {
         List<String> names = new ArrayList<>();
         if (hasCapability(IVibrator.CAP_ON_CALLBACK)) {
@@ -370,7 +395,7 @@ public final class VibratorInfo implements Parcelable {
      * <p>The mapping is defined linearly by the following points:
      *
      * <ol>
-     *     <li>{@code toHertz(relativeMinFrequency} = minFrequency
+     *     <li>{@code toHertz(relativeMinFrequency) = minFrequency}
      *     <li>{@code                   toHertz(-1) = resonantFrequency - safeRange / 2}
      *     <li>{@code                    toHertz(0) = resonantFrequency}
      *     <li>{@code                    toHertz(1) = resonantFrequency + safeRange / 2}
@@ -553,6 +578,75 @@ public final class VibratorInfo implements Parcelable {
                         return new FrequencyMapping[size];
                     }
                 };
+    }
+
+    /** @hide */
+    public static final class Builder {
+        private final int mId;
+        private int mCapabilities = 0;
+        private int[] mSupportedEffects = null;
+        private int[] mSupportedBraking = null;
+        private int[] mSupportedPrimitives = null;
+        private float mQFactor = Float.NaN;
+        private FrequencyMapping mFrequencyMapping =
+                new FrequencyMapping(Float.NaN, Float.NaN, Float.NaN, Float.NaN, null);
+
+        /** A builder class for a {@link VibratorInfo}. */
+        public Builder(int id) {
+            mId = id;
+        }
+
+        /** Configure the vibrator capabilities with a combination of IVibrator.CAP_* values. */
+        @NonNull
+        public Builder setCapabilities(int capabilities) {
+            mCapabilities = capabilities;
+            return this;
+        }
+
+        /** Configure the effects supported with {@link android.hardware.vibrator.Effect} values. */
+        @NonNull
+        public Builder setSupportedEffects(int... supportedEffects) {
+            mSupportedEffects = supportedEffects;
+            return this;
+        }
+
+        /** Configure braking supported with {@link android.hardware.vibrator.Braking} values. */
+        @NonNull
+        public Builder setSupportedBraking(int... supportedBraking) {
+            mSupportedBraking = supportedBraking;
+            return this;
+        }
+
+        /**
+         * Configure the primitives supported with
+         * {@link android.hardware.vibrator.CompositePrimitive} values.
+         */
+        @NonNull
+        public Builder setSupportedPrimitives(int... supportedPrimitives) {
+            mSupportedPrimitives = supportedPrimitives;
+            return this;
+        }
+
+        /** Configure the vibrator quality factor. */
+        @NonNull
+        public Builder setQFactor(float qFactor) {
+            mQFactor = qFactor;
+            return this;
+        }
+
+        /** Configure the vibrator frequency information like resonant frequency and bandwidth. */
+        @NonNull
+        public Builder setFrequencyMapping(FrequencyMapping frequencyMapping) {
+            mFrequencyMapping = frequencyMapping;
+            return this;
+        }
+
+        /** Build the configured {@link VibratorInfo}. */
+        @NonNull
+        public VibratorInfo build() {
+            return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
+                    mSupportedPrimitives, mQFactor, mFrequencyMapping);
+        }
     }
 
     @NonNull

@@ -39,6 +39,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.window.IRemoteTransition;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
@@ -50,9 +51,11 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.splitscreen.ISplitScreenListener;
+import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 
@@ -72,19 +75,24 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final ShellExecutor mMainExecutor;
     private final SplitScreenImpl mImpl = new SplitScreenImpl();
     private final DisplayImeController mDisplayImeController;
+    private final Transitions mTransitions;
+    private final TransactionPool mTransactionPool;
 
     private StageCoordinator mStageCoordinator;
 
     public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer,
-            ShellExecutor mainExecutor, DisplayImeController displayImeController) {
+            ShellExecutor mainExecutor, DisplayImeController displayImeController,
+            Transitions transitions, TransactionPool transactionPool) {
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mContext = context;
         mRootTDAOrganizer = rootTDAOrganizer;
         mMainExecutor = mainExecutor;
         mDisplayImeController = displayImeController;
+        mTransitions = transitions;
+        mTransactionPool = transactionPool;
     }
 
     public SplitScreen asSplitScreen() {
@@ -105,7 +113,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         if (mStageCoordinator == null) {
             // TODO: Multi-display
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
-                    mRootTDAOrganizer, mTaskOrganizer, mDisplayImeController);
+                    mRootTDAOrganizer, mTaskOrganizer, mDisplayImeController, mTransitions,
+                    mTransactionPool);
         }
     }
 
@@ -404,6 +413,16 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     (controller) -> {
                         controller.startTask(taskId, stage, position, options);
                     });
+        }
+
+        @Override
+        public void startTasks(int mainTaskId, @Nullable Bundle mainOptions,
+                int sideTaskId, @Nullable Bundle sideOptions,
+                @SplitScreen.StagePosition int sidePosition,
+                @Nullable IRemoteTransition remoteTransition) {
+            executeRemoteCallWithTaskPermission(mController, "startTasks",
+                    (controller) -> controller.mStageCoordinator.startTasks(mainTaskId, mainOptions,
+                            sideTaskId, sideOptions, sidePosition, remoteTransition));
         }
 
         @Override

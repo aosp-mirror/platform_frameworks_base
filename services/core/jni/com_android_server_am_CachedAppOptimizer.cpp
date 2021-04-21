@@ -18,8 +18,11 @@
 //#define LOG_NDEBUG 0
 
 #include <android-base/file.h>
+#include <android-base/logging.h>
 #include <android-base/stringprintf.h>
+#include <android-base/unique_fd.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <binder/IPCThreadState.h>
 #include <cutils/compiler.h>
 #include <dirent.h>
 #include <jni.h>
@@ -27,9 +30,11 @@
 #include <log/log.h>
 #include <meminfo/procmeminfo.h>
 #include <nativehelper/JNIHelp.h>
+#include <processgroup/processgroup.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/mman.h>
+#include <sys/pidfd.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
@@ -37,29 +42,16 @@
 
 #include <algorithm>
 
-#include <nativehelper/JNIHelp.h>
-#include <android_runtime/AndroidRuntime.h>
-#include <binder/IPCThreadState.h>
-#include <jni.h>
-#include <processgroup/processgroup.h>
-
 using android::base::StringPrintf;
 using android::base::WriteStringToFile;
 using android::meminfo::ProcMemInfo;
 using namespace android::meminfo;
 
-// This is temporarily hard-coded and should be removed once
-// bionic/libc/kernel/uapi/asm-generic/unistd.h are updated with process_madvise syscall header
-#ifndef __NR_process_madvise
-#define __NR_process_madvise 440
-#define MADV_COLD 20 /* deactivate these pages */
-#define MADV_PAGEOUT 21
-#endif
-
 #define COMPACT_ACTION_FILE_FLAG 1
 #define COMPACT_ACTION_ANON_FLAG 2
 
 using VmaToAdviseFunc = std::function<int(const Vma&)>;
+using android::base::unique_fd;
 
 #define SYNC_RECEIVED_WHILE_FROZEN (1)
 #define ASYNC_RECEIVED_WHILE_FROZEN (2)
@@ -73,24 +65,25 @@ static inline void compactProcessProcfs(int pid, const std::string& compactionTy
     WriteStringToFile(compactionType, reclaim_path);
 }
 
-static int compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType) {
+// Compacts a set of VMAs for pid using an madviseType accepted by process_madvise syscall
+// On success returns the total bytes that where compacted. On failure it returns
+// a negative error code from the standard linux error codes.
+static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType) {
     // UIO_MAXIOV is currently a small value and we might have more addresses
     // we do multiple syscalls if we exceed its maximum
     static struct iovec vmasToKernel[UIO_MAXIOV];
 
-    int err = 0;
-
     if (vmas.empty()) {
-        return err;
+        return 0;
     }
 
-    int pidfd = syscall(__NR_pidfd_open, pid, 0);
-    err = -errno;
+    unique_fd pidfd(pidfd_open(pid, 0));
     if (pidfd < 0) {
         // Skip compaction if failed to open pidfd with any error
-        return err;
+        return -errno;
     }
 
+    int64_t totalBytesCompacted = 0;
     for (int iBase = 0; iBase < vmas.size(); iBase += UIO_MAXIOV) {
         int totalVmasToKernel = std::min(UIO_MAXIOV, (int)(vmas.size() - iBase));
         for (int iVec = 0, iVma = iBase; iVec < totalVmasToKernel; ++iVec, ++iVma) {
@@ -98,17 +91,16 @@ static int compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType)
             vmasToKernel[iVec].iov_len = vmas[iVma].end - vmas[iVma].start;
         }
 
-        process_madvise(pidfd, vmasToKernel, totalVmasToKernel, madviseType, 0);
-        err = -errno;
-        if (CC_UNLIKELY(err == -ENOSYS)) {
-            // Syscall does not exist, skip trying more calls process_madvise
-            break;
+        auto bytesCompacted =
+                process_madvise(pidfd, vmasToKernel, totalVmasToKernel, madviseType, 0);
+        if (CC_UNLIKELY(bytesCompacted == -1)) {
+            return -errno;
         }
+
+        totalBytesCompacted += bytesCompacted;
     }
 
-    close(pidfd);
-
-    return err;
+    return totalBytesCompacted;
 }
 
 static int getFilePageAdvice(const Vma& vma) {
@@ -132,7 +124,7 @@ static int getAnyPageAdvice(const Vma& vma) {
 
 // Perform a full process compaction using process_madvise syscall
 // reading all filtering VMAs and filtering pages as specified by pageFilter
-static int compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
+static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
     ProcMemInfo meminfo(pid);
     std::vector<Vma> pageoutVmas, coldVmas;
     auto vmaCollectorCb = [&coldVmas,&pageoutVmas,&vmaToAdviseFunc](const Vma& vma) {
@@ -148,11 +140,19 @@ static int compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
     };
     meminfo.ForEachVmaFromMaps(vmaCollectorCb);
 
-    int err = compactMemory(pageoutVmas, pid, MADV_PAGEOUT);
-    if (!err) {
-        err = compactMemory(coldVmas, pid, MADV_COLD);
+    int64_t pageoutBytes = compactMemory(pageoutVmas, pid, MADV_PAGEOUT);
+    if (pageoutBytes < 0) {
+        // Error, just forward it.
+        return pageoutBytes;
     }
-    return err;
+
+    int64_t coldBytes = compactMemory(coldVmas, pid, MADV_COLD);
+    if (coldBytes < 0) {
+        // Error, just forward it.
+        return coldBytes;
+    }
+
+    return pageoutBytes + coldBytes;
 }
 
 // Compact process using process_madvise syscall or fallback to procfs in

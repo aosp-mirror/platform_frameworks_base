@@ -107,7 +107,7 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
         ALOGV("receiver %p ~ Invoking vsync handler.", this);
         env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchVsync,
                             timestamp, displayId.value, count, vsyncEventData.id,
-                            vsyncEventData.deadlineTimestamp);
+                            vsyncEventData.deadlineTimestamp, vsyncEventData.frameInterval);
         ALOGV("receiver %p ~ Returned from vsync handler.", this);
     }
 
@@ -239,7 +239,7 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
 
     gDisplayEventReceiverClassInfo.dispatchVsync =
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchVsync",
-                             "(JJIJJ)V");
+                             "(JJIJJJ)V");
     gDisplayEventReceiverClassInfo.dispatchHotplug = GetMethodIDOrDie(env,
             gDisplayEventReceiverClassInfo.clazz, "dispatchHotplug", "(JJZ)V");
     gDisplayEventReceiverClassInfo.dispatchModeChanged =

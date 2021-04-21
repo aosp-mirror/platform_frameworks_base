@@ -974,6 +974,16 @@ public final class CachedAppOptimizer {
         }
     }
 
+    /**
+     * To be called when the given app is killed.
+     */
+    @GuardedBy({"mAm", "mProcLock"})
+    void unscheduleFreezeAppLSP(ProcessRecord app) {
+        if (mUseFreezer) {
+            mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
+        }
+    }
+
     @VisibleForTesting
     static final class LastCompactionStats {
         private final long[] mRssAfterCompaction;

@@ -22,6 +22,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATI
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -153,29 +154,24 @@ class SurfaceFreezer {
          */
         Snapshot(Supplier<Surface> surfaceFactory, SurfaceControl.Transaction t,
                 SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer, SurfaceControl parent) {
-            Surface drawSurface = surfaceFactory.get();
             // We can't use a delegating constructor since we need to
             // reference this::onAnimationFinished
-            HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
-            final int width = hardwareBuffer.getWidth();
-            final int height = hardwareBuffer.getHeight();
+            GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
+                    screenshotBuffer.getHardwareBuffer());
 
             mSurfaceControl = mAnimatable.makeAnimationLeash()
                     .setName("snapshot anim: " + mAnimatable.toString())
-                    .setBufferSize(width, height)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .setParent(parent)
                     .setSecure(screenshotBuffer.containsSecureLayers())
                     .setCallsite("SurfaceFreezer.Snapshot")
+                    .setBLASTLayer()
                     .build();
 
             ProtoLog.i(WM_SHOW_TRANSACTIONS, "  THUMBNAIL %s: CREATE", mSurfaceControl);
 
-            // Transfer the thumbnail to the surface
-            drawSurface.copyFrom(mSurfaceControl);
-            drawSurface.attachAndQueueBufferWithColorSpace(hardwareBuffer,
-                    screenshotBuffer.getColorSpace());
-            drawSurface.release();
+            t.setBuffer(mSurfaceControl, graphicBuffer);
+            t.setColorSpace(mSurfaceControl, screenshotBuffer.getColorSpace());
             t.show(mSurfaceControl);
 
             // We parent the thumbnail to the container, and just place it on top of anything else

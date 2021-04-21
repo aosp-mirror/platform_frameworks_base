@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager.Authenticators;
@@ -35,7 +36,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.BiometricService.InvalidationTracker;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
@@ -43,29 +47,37 @@ import java.util.ArrayList;
 @SmallTest
 public class InvalidationTrackerTest {
 
+    @Mock
+    private Context mContext;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
     @Test
     public void testCallbackReceived_whenAllStrongSensorsInvalidated() throws Exception {
         final IBiometricAuthenticator authenticator1 = mock(IBiometricAuthenticator.class);
         when(authenticator1.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        final TestSensor sensor1 = new TestSensor(0 /* id */,
+        final TestSensor sensor1 = new TestSensor(mContext, 0 /* id */,
                 BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
                 authenticator1);
 
         final IBiometricAuthenticator authenticator2 = mock(IBiometricAuthenticator.class);
         when(authenticator2.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        final TestSensor sensor2 = new TestSensor(1 /* id */,
+        final TestSensor sensor2 = new TestSensor(mContext, 1 /* id */,
                 BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
                 authenticator2);
 
         final IBiometricAuthenticator authenticator3 = mock(IBiometricAuthenticator.class);
         when(authenticator3.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        final TestSensor sensor3 = new TestSensor(2 /* id */,
+        final TestSensor sensor3 = new TestSensor(mContext, 2 /* id */,
                 BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG,
                 authenticator3);
 
         final IBiometricAuthenticator authenticator4 = mock(IBiometricAuthenticator.class);
         when(authenticator4.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        final TestSensor sensor4 = new TestSensor(3 /* id */,
+        final TestSensor sensor4 = new TestSensor(mContext, 3 /* id */,
                 BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_WEAK,
                 authenticator4);
 
@@ -101,8 +113,9 @@ public class InvalidationTrackerTest {
 
     private static class TestSensor extends BiometricSensor {
 
-        TestSensor(int id, int modality, int strength, IBiometricAuthenticator impl) {
-            super(id, modality, strength, impl);
+        TestSensor(@NonNull Context context, int id, int modality, int strength,
+                @NonNull IBiometricAuthenticator impl) {
+            super(context, id, modality, strength, impl);
         }
 
         @Override

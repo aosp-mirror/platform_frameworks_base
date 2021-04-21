@@ -245,10 +245,14 @@
     <string name="screenshot_dismiss_description">Dismiss screenshot</string>
     <!-- Content description indicating that the view is a preview of the screenshot that was just taken [CHAR LIMIT=NONE] -->
     <string name="screenshot_preview_description">Screenshot preview</string>
-    <!-- Content description for the top boundary of the screenshot being cropped [CHAR LIMIT=NONE] -->
-    <string name="screenshot_top_boundary">Top boundary</string>
-    <!-- Content description for the bottom boundary of the screenshot being cropped [CHAR LIMIT=NONE] -->
-    <string name="screenshot_bottom_boundary">Bottom boundary</string>
+    <!-- Content description for the top boundary of the screenshot being cropped, with the current position as a percentage. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_top_boundary_pct">Top boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
+    <!-- Content description for the bottom boundary of the screenshot being cropped, with the current position as a percentage. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_bottom_boundary_pct">Bottom boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
+    <!-- Content description for the left boundary of the screenshot being cropped, with the current position as a percentage. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_left_boundary_pct">Left boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
+    <!-- Content description for the right boundary of the screenshot being cropped, with the current position as a percentage. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_right_boundary_pct">Right boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_name">Screen Recorder</string>
@@ -1646,10 +1650,10 @@
     <!-- Wallet strings -->
     <!-- Wallet empty state, title [CHAR LIMIT=32] -->
     <string name="wallet_title">Wallet</string>
-    <!-- Label of the button underneath the card carousel when device is unlocked. [CHAR LIMIT=NONE] -->
-    <string name="wallet_button_label_device_unlocked">Show all</string>
-    <!-- Label of the button underneath the card carousel when device is locked. [CHAR LIMIT=NONE] -->
-    <string name="wallet_button_label_device_locked">Unlock to pay</string>
+    <!-- Label of the button at the bottom prompting user enter wallet app. [CHAR LIMIT=NONE] -->
+    <string name="wallet_app_button_label">Show all</string>
+    <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
+    <string name="wallet_action_button_label_unlock">Unlock to pay</string>
     <!-- Secondary label of the quick access wallet tile if active. [CHAR LIMIT=32] -->
     <string name="wallet_secondary_label_active">Ready</string>
     <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->
@@ -2008,7 +2012,7 @@
     <string name="notification_menu_settings_action">Settings</string>
 
     <!-- Notification: Snooze panel: Snooze undo button label. [CHAR LIMIT=50]-->
-    <string name="snooze_undo">UNDO</string>
+    <string name="snooze_undo">Undo</string>
 
     <!-- Notification: Snooze panel: message indicating how long the notification was snoozed for. [CHAR LIMIT=100]-->
     <string name="snoozed_for_time">Snoozed for <xliff:g id="time_amount" example="15 minutes">%1$s</xliff:g></string>
@@ -2092,7 +2096,8 @@
     <string name="keyboard_key_num_lock">Num Lock</string>
     <!-- Name used to refer to keys on the numeric pad of the keyboard, e.g. "Numpad 9". -->
     <string name="keyboard_key_numpad_template">Numpad <xliff:g id="name">%1$s</xliff:g></string>
-
+    <!-- Content description for the delete button on an image attachment when using inline reply via notification [CHAR LIMIT=NONE] -->
+    <string name="notif_inline_reply_remove_attachment_description">Remove attachment</string>
     <!-- User visible title for the system-wide keyboard shortcuts list. -->
     <string name="keyboard_shortcut_group_system">System</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the home screen. -->
@@ -2616,19 +2621,19 @@
     <string name="ongoing_privacy_dialog_last_separator">\u0020and\u0020</string>
 
     <!-- Text for privacy dialog, using sensitive app op (one of camera, location, microphone) right now [CHAR LIMIT=NONE] -->
-    <string name="ongoing_privacy_dialog_using_op"><xliff:g id="application_name" example="Photos">%1$s</xliff:g> is using the <xliff:g id="app_opp_name" example="camera">%2$s</xliff:g></string>
+    <string name="ongoing_privacy_dialog_using_op">Being used by <xliff:g id="application_name" example="Photos">%1$s</xliff:g></string>
 
     <!-- Text for privacy dialog, recently used sensitive app op (one of camera, location, microphone) [CHAR LIMIT=NONE] -->
-    <string name="ongoing_privacy_dialog_recent_op"><xliff:g id="application_name" example="Photos">%1$s</xliff:g> used the <xliff:g id="app_opp_name" example="camera">%2$s</xliff:g> recently</string>
+    <string name="ongoing_privacy_dialog_recent_op">Recently used by <xliff:g id="application_name" example="Photos">%1$s</xliff:g></string>
 
     <!-- Text for privacy dialog, indicating that the application is the enterprise version [CHAR LIMIT=NONE] -->
-    <string name="ongoing_privacy_dialog_enterprise">(enterprise)</string>
+    <string name="ongoing_privacy_dialog_enterprise">(work)</string>
 
     <!-- Text for privacy dialog, identifying the phone call app [CHAR LIMIT=NONE]-->
     <string name="ongoing_privacy_dialog_phonecall">Phone call</string>
 
-    <!-- Text for privacy dialog, indicating that an app is using an op on behalf of another [CHAR LIMIT=NONE] -->
-    <string name="ongoing_privacy_dialog_attribution_text">(through <xliff:g id="attribution" example="Special app">%s</xliff:g>)</string>
+    <!-- Text for privacy dialog, indicating that an app (or multiple) is using an op on behalf of another [CHAR LIMIT=NONE] -->
+    <string name="ongoing_privacy_dialog_attribution_text">(through <xliff:g id="application name(s)" example="Maps, and Assistant">%s</xliff:g>)</string>
 
     <!-- Text for camera app op [CHAR LIMIT=20]-->
     <string name="privacy_type_camera">camera</string>
@@ -2949,10 +2954,7 @@
     [CHAR LIMIT=NONE] -->
     <string name="battery_state_unknown_notification_text">Tap for more information</string>
 
-    <!-- No translation [CHAR LIMIT=0] -->
-    <string name="qs_remove_labels" translatable="false"></string>
-
-    <string name="qs_tile_label_fontFamily" translatable="false">@*android:string/config_headlineFontFamily</string>
+    <string name="qs_tile_label_fontFamily" translatable="false">@*android:string/config_headlineFontFamilyMedium</string>
 
     <!-- Secondary label for alarm tile when there is no next alarm information [CHAR LIMIT=20] -->
     <string name="qs_alarm_tile_no_alarm">No alarm set</string>

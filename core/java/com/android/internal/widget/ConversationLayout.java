@@ -64,6 +64,7 @@ import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -530,13 +531,7 @@ public class ConversationLayout extends FrameLayout
         mConversationText.setText(conversationText);
         // Update if the groups can hide the sender if they are first (applies to 1:1 conversations)
         // This needs to happen after all of the above o update all of the groups
-        for (int i = mGroups.size() - 1; i >= 0; i--) {
-            MessagingGroup messagingGroup = mGroups.get(i);
-            CharSequence messageSender = messagingGroup.getSenderName();
-            boolean canHide = mIsOneToOne
-                    && TextUtils.equals(conversationText, messageSender);
-            messagingGroup.setCanHideSenderIfFirst(canHide);
-        }
+        mPeopleHelper.maybeHideFirstSenderName(mGroups, mIsOneToOne, conversationText);
         updateAppName();
         updateIconPositionAndSize();
         updateImageMessages();
@@ -779,35 +774,7 @@ public class ConversationLayout extends FrameLayout
 
     private void updateTitleAndNamesDisplay() {
         // Map of unique names to their prefix
-        ArrayMap<CharSequence, String> uniqueNames = new ArrayMap<>();
-        // Map of single-character string prefix to the only name which uses it, or null if multiple
-        ArrayMap<String, CharSequence> uniqueCharacters = new ArrayMap<>();
-        for (int i = 0; i < mGroups.size(); i++) {
-            MessagingGroup group = mGroups.get(i);
-            CharSequence senderName = group.getSenderName();
-            if (!group.needsGeneratedAvatar() || TextUtils.isEmpty(senderName)) {
-                continue;
-            }
-            if (!uniqueNames.containsKey(senderName)) {
-                String charPrefix = mPeopleHelper.findNamePrefix(senderName, null);
-                if (charPrefix == null) {
-                    continue;
-                }
-                if (uniqueCharacters.containsKey(charPrefix)) {
-                    // this character was already used, lets make it more unique. We first need to
-                    // resolve the existing character if it exists
-                    CharSequence existingName = uniqueCharacters.get(charPrefix);
-                    if (existingName != null) {
-                        uniqueNames.put(existingName, mPeopleHelper.findNameSplit(existingName));
-                        uniqueCharacters.put(charPrefix, null);
-                    }
-                    uniqueNames.put(senderName, mPeopleHelper.findNameSplit(senderName));
-                } else {
-                    uniqueNames.put(senderName, charPrefix);
-                    uniqueCharacters.put(charPrefix, senderName);
-                }
-            }
-        }
+        Map<CharSequence, String> uniqueNames = mPeopleHelper.mapUniqueNamesToPrefix(mGroups);
 
         // Now that we have the correct symbols, let's look what we have cached
         ArrayMap<CharSequence, Icon> cachedAvatars = new ArrayMap<>();

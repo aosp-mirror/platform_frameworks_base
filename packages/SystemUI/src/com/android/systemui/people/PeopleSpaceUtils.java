@@ -16,11 +16,12 @@
 
 package com.android.systemui.people;
 
-import static android.app.Notification.CATEGORY_MISSED_CALL;
-import static android.app.Notification.EXTRA_MESSAGES;
+import static com.android.systemui.people.NotificationHelper.getContactUri;
+import static com.android.systemui.people.NotificationHelper.getMessagingStyleMessages;
+import static com.android.systemui.people.NotificationHelper.hasReadContactsPermission;
+import static com.android.systemui.people.NotificationHelper.isMissedCall;
+import static com.android.systemui.people.NotificationHelper.shouldMatchNotificationByUri;
 
-import android.annotation.NonNull;
-import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
@@ -29,6 +30,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -36,16 +38,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.icu.text.MeasureFormat;
-import android.icu.util.Measure;
-import android.icu.util.MeasureUnit;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.os.ServiceManager;
-import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.ContactsContract;
-import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
@@ -61,21 +57,16 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.AppWidgetOptionsHelper;
 import com.android.systemui.people.widget.PeopleTileKey;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,9 +76,6 @@ public class PeopleSpaceUtils {
     /** Turns on debugging information about People Space. */
     public static final boolean DEBUG = true;
     private static final String TAG = "PeopleSpaceUtils";
-    private static final int DAYS_IN_A_WEEK = 7;
-    private static final int MIN_HOUR = 1;
-    private static final int ONE_DAY = 1;
     public static final String PACKAGE_NAME = "package_name";
     public static final String USER_ID = "user_id";
     public static final String SHORTCUT_ID = "shortcut_id";
@@ -125,58 +113,6 @@ public class PeopleSpaceUtils {
         public int getId() {
             return mId;
         }
-    }
-
-    /** Returns a list of map entries corresponding to user's priority conversations. */
-    @NonNull
-    public static List<PeopleSpaceTile> getPriorityTiles(
-            Context context, INotificationManager notificationManager, IPeopleManager peopleManager,
-            LauncherApps launcherApps, NotificationEntryManager notificationEntryManager)
-            throws Exception {
-        List<ConversationChannelWrapper> conversations =
-                notificationManager.getConversations(
-                        false).getList();
-        // Add priority conversations to tiles list.
-        Stream<ShortcutInfo> priorityConversations = conversations.stream()
-                .filter(c -> c.getNotificationChannel() != null
-                        && c.getNotificationChannel().isImportantConversation())
-                .map(c -> c.getShortcutInfo());
-        List<PeopleSpaceTile> priorityTiles = getSortedTiles(peopleManager, launcherApps,
-                priorityConversations);
-        priorityTiles = augmentTilesFromVisibleNotifications(
-                context, priorityTiles, notificationEntryManager);
-        return priorityTiles;
-    }
-
-    /** Returns a list of map entries corresponding to user's recent conversations. */
-    @NonNull
-    public static List<PeopleSpaceTile> getRecentTiles(
-            Context context, INotificationManager notificationManager, IPeopleManager peopleManager,
-            LauncherApps launcherApps, NotificationEntryManager notificationEntryManager)
-            throws Exception {
-        if (DEBUG) Log.d(TAG, "Add recent conversations");
-        List<ConversationChannelWrapper> conversations =
-                notificationManager.getConversations(
-                        false).getList();
-        Stream<ShortcutInfo> nonPriorityConversations = conversations.stream()
-                .filter(c -> c.getNotificationChannel() == null
-                        || !c.getNotificationChannel().isImportantConversation())
-                .map(c -> c.getShortcutInfo());
-
-        List<ConversationChannel> recentConversationsList =
-                peopleManager.getRecentConversations().getList();
-        Stream<ShortcutInfo> recentConversations = recentConversationsList
-                .stream()
-                .map(c -> c.getShortcutInfo());
-
-        Stream<ShortcutInfo> mergedStream = Stream.concat(nonPriorityConversations,
-                recentConversations);
-        List<PeopleSpaceTile> recentTiles =
-                getSortedTiles(peopleManager, launcherApps, mergedStream);
-
-        recentTiles = augmentTilesFromVisibleNotifications(
-                context, recentTiles, notificationEntryManager);
-        return recentTiles;
     }
 
     /** Returns stored widgets for the conversation specified. */
@@ -247,72 +183,85 @@ public class PeopleSpaceUtils {
         editor.putStringSet(storageKey, storedWidgetIds);
     }
 
-    /** Augments a single {@link PeopleSpaceTile} with notification content, if one is present. */
-    public static PeopleSpaceTile augmentSingleTileFromVisibleNotifications(Context context,
-            PeopleSpaceTile tile, NotificationEntryManager notificationEntryManager) {
-        List<PeopleSpaceTile> augmentedTile = augmentTilesFromVisibleNotifications(
-                context, Arrays.asList(tile), notificationEntryManager);
-        return augmentedTile.get(0);
-    }
-
-    static List<PeopleSpaceTile> augmentTilesFromVisibleNotifications(Context context,
-            List<PeopleSpaceTile> tiles, NotificationEntryManager notificationEntryManager) {
-        if (notificationEntryManager == null) {
-            Log.w(TAG, "NotificationEntryManager is null");
-            return tiles;
+    /** Returns notifications that match provided {@code contactUri}. */
+    public static List<NotificationEntry> getNotificationsByUri(
+            PackageManager packageManager, String contactUri,
+            Map<PeopleTileKey, Set<NotificationEntry>> notifications) {
+        if (DEBUG) Log.d(TAG, "Getting notifications by contact URI.");
+        if (TextUtils.isEmpty(contactUri)) {
+            return new ArrayList<>();
         }
-        Map<PeopleTileKey, NotificationEntry> visibleNotifications = notificationEntryManager
-                .getVisibleNotifications()
-                .stream()
-                .filter(entry -> entry.getRanking() != null
-                        && entry.getRanking().getConversationShortcutInfo() != null)
-                .collect(Collectors.toMap(PeopleTileKey::new, e -> e,
-                        // Handle duplicate keys to avoid crashes.
-                        (e1, e2) -> e1.getSbn().getNotification().when
-                                > e2.getSbn().getNotification().when ? e1 : e2));
-        if (DEBUG) {
-            Log.d(TAG, "Number of visible notifications:" + visibleNotifications.size());
-        }
-        return tiles
-                .stream()
-                .map(entry -> augmentTileFromVisibleNotifications(
-                        context, entry, visibleNotifications))
+        return notifications.entrySet().stream().flatMap(e -> e.getValue().stream())
+                .filter(e ->
+                        hasReadContactsPermission(packageManager, e.getSbn())
+                                && shouldMatchNotificationByUri(e.getSbn())
+                                && Objects.equals(contactUri, getContactUri(e.getSbn()))
+                )
                 .collect(Collectors.toList());
     }
 
-    static PeopleSpaceTile augmentTileFromVisibleNotifications(Context context,
-            PeopleSpaceTile tile, Map<PeopleTileKey, NotificationEntry> visibleNotifications) {
-        PeopleTileKey key = new PeopleTileKey(
-                tile.getId(), getUserId(tile), tile.getPackageName());
-        // TODO: Match missed calls with matching Uris in addition to keys.
-        if (!visibleNotifications.containsKey(key)) {
-            if (DEBUG) Log.d(TAG, "No existing notifications for key:" + key.toString());
-            return tile;
+    /** Returns the total messages in {@code notificationEntries}.*/
+    public static int getMessagesCount(Set<NotificationEntry> notificationEntries) {
+        if (DEBUG) {
+            Log.d(TAG, "Calculating messages count from " + notificationEntries.size()
+                    + " notifications.");
         }
-        if (DEBUG) Log.d(TAG, "Augmenting tile from visible notifications, key:" + key.toString());
-        return augmentTileFromNotification(context, tile, visibleNotifications.get(key).getSbn());
+        int messagesCount = 0;
+        for (NotificationEntry entry : notificationEntries) {
+            Notification notification = entry.getSbn().getNotification();
+            // Should not count messages from missed call notifications.
+            if (isMissedCall(notification)) {
+                continue;
+            }
+
+            List<Notification.MessagingStyle.Message> messages =
+                    getMessagingStyleMessages(notification);
+            if (messages != null) {
+                messagesCount += messages.size();
+            }
+        }
+        return messagesCount;
     }
 
-    /** Augments {@code tile} with the notification content from {@code sbn}. */
-    public static PeopleSpaceTile augmentTileFromNotification(Context context, PeopleSpaceTile tile,
-            StatusBarNotification sbn) {
-        Notification notification = sbn.getNotification();
-        if (notification == null) {
-            if (DEBUG) Log.d(TAG, "Notification is null");
-            return tile;
+    /** Removes all notification related fields from {@code tile}. */
+    public static PeopleSpaceTile removeNotificationFields(PeopleSpaceTile tile) {
+        if (DEBUG) {
+            Log.i(TAG, "Removing any notification stored for tile Id: " + tile.getId());
         }
-        boolean isMissedCall = Objects.equals(notification.category, CATEGORY_MISSED_CALL);
+        return tile
+                .toBuilder()
+                // Reset notification content.
+                .setNotificationKey(null)
+                .setNotificationContent(null)
+                .setNotificationDataUri(null)
+                .setMessagesCount(0)
+                // Reset missed calls category.
+                .setNotificationCategory(null)
+                .build();
+    }
+
+    /**
+     * Augments {@code tile} with the notification content from {@code notificationEntry} and
+     * {@code messagesCount}.
+     */
+    public static PeopleSpaceTile augmentTileFromNotification(Context context, PeopleSpaceTile tile,
+            NotificationEntry notificationEntry, int messagesCount) {
+        if (notificationEntry == null || notificationEntry.getSbn().getNotification() == null) {
+            if (DEBUG) Log.d(TAG, "Notification is null");
+            return removeNotificationFields(tile);
+        }
+        Notification notification = notificationEntry.getSbn().getNotification();
+        boolean isMissedCall = isMissedCall(notification);
         List<Notification.MessagingStyle.Message> messages =
                 getMessagingStyleMessages(notification);
 
         if (!isMissedCall && ArrayUtils.isEmpty(messages)) {
             if (DEBUG) Log.d(TAG, "Notification has no content");
-            return tile;
+            return removeNotificationFields(tile);
         }
 
         // messages are in chronological order from most recent to least.
         Notification.MessagingStyle.Message message = messages != null ? messages.get(0) : null;
-        int messagesCount = messages != null ? messages.size() : 0;
         // If it's a missed call notification and it doesn't include content, use fallback value,
         // otherwise, use notification content.
         boolean hasMessageText = message != null && !TextUtils.isEmpty(message.getText());
@@ -323,7 +272,7 @@ public class PeopleSpaceUtils {
 
         return tile
                 .toBuilder()
-                .setNotificationKey(sbn.getKey())
+                .setNotificationKey(notificationEntry.getSbn().getKey())
                 .setNotificationCategory(notification.category)
                 .setNotificationContent(content)
                 .setNotificationDataUri(dataUri)
@@ -331,36 +280,13 @@ public class PeopleSpaceUtils {
                 .build();
     }
 
-    /**
-     * Returns {@link Notification.MessagingStyle.Message}s from the Notification in chronological
-     * order from most recent to least.
-     */
-    @VisibleForTesting
-    public static List<Notification.MessagingStyle.Message> getMessagingStyleMessages(
-            Notification notification) {
-        if (notification == null) {
-            return null;
-        }
-        if (Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
-                && notification.extras != null) {
-            final Parcelable[] messages = notification.extras.getParcelableArray(EXTRA_MESSAGES);
-            if (!ArrayUtils.isEmpty(messages)) {
-                List<Notification.MessagingStyle.Message> sortedMessages =
-                        Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
-                sortedMessages.sort(Collections.reverseOrder(
-                        Comparator.comparing(Notification.MessagingStyle.Message::getTimestamp)));
-                return sortedMessages;
-            }
-        }
-        return null;
-    }
-
     /** Returns a list sorted by ascending last interaction time from {@code stream}. */
-    private static List<PeopleSpaceTile> getSortedTiles(IPeopleManager peopleManager,
-            LauncherApps launcherApps,
+    public static List<PeopleSpaceTile> getSortedTiles(IPeopleManager peopleManager,
+            LauncherApps launcherApps, UserManager userManager,
             Stream<ShortcutInfo> stream) {
         return stream
                 .filter(Objects::nonNull)
+                .filter(c -> !userManager.isQuietModeEnabled(c.getUserHandle()))
                 .map(c -> new PeopleSpaceTile.Builder(c, launcherApps).build())
                 .filter(c -> shouldKeepConversation(c))
                 .map(c -> c.toBuilder().setLastInteractionTimestamp(
@@ -424,36 +350,6 @@ public class PeopleSpaceUtils {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
-    }
-
-    /** Returns a readable status describing the {@code lastInteraction}. */
-    public static String getLastInteractionString(Context context, long lastInteraction) {
-        if (lastInteraction == 0L) {
-            Log.e(TAG, "Could not get valid last interaction");
-            return context.getString(R.string.basic_status);
-        }
-        long now = System.currentTimeMillis();
-        Duration durationSinceLastInteraction = Duration.ofMillis(now - lastInteraction);
-        MeasureFormat formatter = MeasureFormat.getInstance(Locale.getDefault(),
-                MeasureFormat.FormatWidth.WIDE);
-        if (durationSinceLastInteraction.toHours() < MIN_HOUR) {
-            return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toMinutes(), MeasureUnit.MINUTE)));
-        } else if (durationSinceLastInteraction.toDays() < ONE_DAY) {
-            return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toHours(),
-                            MeasureUnit.HOUR)));
-        } else if (durationSinceLastInteraction.toDays() < DAYS_IN_A_WEEK) {
-            return context.getString(R.string.timestamp, formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toHours(),
-                            MeasureUnit.DAY)));
-        } else {
-            return context.getString(durationSinceLastInteraction.toDays() == DAYS_IN_A_WEEK
-                            ? R.string.timestamp : R.string.over_timestamp,
-                    formatter.formatMeasures(
-                            new Measure(durationSinceLastInteraction.toDays() / DAYS_IN_A_WEEK,
-                                    MeasureUnit.WEEK)));
-        }
     }
 
     /**
@@ -557,7 +453,14 @@ public class PeopleSpaceUtils {
     /** Updates the current widget view with provided {@link PeopleSpaceTile}. */
     public static void updateAppWidgetViews(AppWidgetManager appWidgetManager,
             Context context, int appWidgetId, PeopleSpaceTile tile, Bundle options) {
-        if (DEBUG) Log.d(TAG, "Widget: " + appWidgetId + ", " + tile.getUserName());
+        if (tile == null) {
+            if (DEBUG) Log.d(TAG, "Widget: " + appWidgetId + ". Tile is null, skipping update");
+            return;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "Widget: " + appWidgetId + ", " + tile.getUserName() + ", "
+                    + tile.getPackageName());
+        }
         RemoteViews views = new PeopleTileViewHelper(context, tile, appWidgetId,
                 options).getViews();
 
@@ -568,8 +471,22 @@ public class PeopleSpaceUtils {
     /** Updates tile in app widget options and the current view. */
     public static void updateAppWidgetOptionsAndView(AppWidgetManager appWidgetManager,
             Context context, int appWidgetId, PeopleSpaceTile tile) {
+        if (tile == null) {
+            Log.d(TAG, "Tile is null, skipping storage and update.");
+            return;
+        }
         Bundle options = AppWidgetOptionsHelper.setPeopleTile(appWidgetManager, appWidgetId, tile);
         updateAppWidgetViews(appWidgetManager, context, appWidgetId, tile, options);
+    }
+
+    /** Wrapper around {@link #updateAppWidgetOptionsAndView} with optional tile as a parameter. */
+    public static void updateAppWidgetOptionsAndView(AppWidgetManager appWidgetManager,
+            Context context, int appWidgetId, Optional<PeopleSpaceTile> optionalTile) {
+        if (!optionalTile.isPresent()) {
+            Log.d(TAG, "Tile is null, skipping storage and update.");
+            return;
+        }
+        updateAppWidgetOptionsAndView(appWidgetManager, context, appWidgetId, optionalTile.get());
     }
 
     /**
@@ -611,43 +528,6 @@ public class PeopleSpaceUtils {
             }
         }
         return lookupKeysWithBirthdaysToday;
-    }
-
-    /**
-     * Returns a {@link RemoteViews} preview of a Conversation's People Tile. Returns null if one
-     * is not available.
-     */
-    public static RemoteViews getPreview(Context context, IPeopleManager peopleManager,
-            LauncherApps launcherApps, NotificationEntryManager notificationEntryManager,
-            String shortcutId, UserHandle userHandle, String packageName) {
-        peopleManager = (peopleManager != null) ? peopleManager : IPeopleManager.Stub.asInterface(
-                ServiceManager.getService(Context.PEOPLE_SERVICE));
-        launcherApps = (launcherApps != null) ? launcherApps
-                : context.getSystemService(LauncherApps.class);
-        if (peopleManager == null || launcherApps == null) {
-            return null;
-        }
-
-        ConversationChannel channel;
-        try {
-            channel = peopleManager.getConversation(
-                    packageName, userHandle.getIdentifier(), shortcutId);
-        } catch (Exception e) {
-            Log.w(TAG, "Exception getting tiles: " + e);
-            return null;
-        }
-        PeopleSpaceTile tile = PeopleSpaceUtils.getTile(channel, launcherApps);
-
-        if (tile == null) {
-            if (DEBUG) Log.i(TAG, "No tile was returned");
-            return null;
-        }
-        PeopleSpaceTile augmentedTile = augmentSingleTileFromVisibleNotifications(
-                context, tile, notificationEntryManager);
-
-        if (DEBUG) Log.i(TAG, "Returning tile preview for shortcutId: " + shortcutId);
-        Bundle bundle = new Bundle();
-        return new PeopleTileViewHelper(context, augmentedTile, 0, bundle).getViews();
     }
 
     /** Returns the userId associated with a {@link PeopleSpaceTile} */

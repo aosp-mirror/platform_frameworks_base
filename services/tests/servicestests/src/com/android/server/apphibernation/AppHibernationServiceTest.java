@@ -123,7 +123,7 @@ public final class AppHibernationServiceTest {
         doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_1);
         mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
 
-        mAppHibernationService.mIsServiceEnabled = true;
+        mAppHibernationService.sIsServiceEnabled = true;
     }
 
     @Test

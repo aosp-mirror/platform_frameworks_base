@@ -31,6 +31,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 
 import java.util.ArrayList;
@@ -118,18 +119,18 @@ public class UnderlyingNetworkTracker {
         if (!mIsQuitting) {
             mRouteSelectionCallback = new RouteSelectionCallback();
             mConnectivityManager.requestBackgroundNetwork(
-                    getRouteSelectionRequest(), mHandler, mRouteSelectionCallback);
+                    getRouteSelectionRequest(), mRouteSelectionCallback, mHandler);
 
             mWifiBringupCallback = new NetworkBringupCallback();
             mConnectivityManager.requestBackgroundNetwork(
-                    getWifiNetworkRequest(), mHandler, mWifiBringupCallback);
+                    getWifiNetworkRequest(), mWifiBringupCallback, mHandler);
 
             for (final int subId : mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup)) {
                 final NetworkBringupCallback cb = new NetworkBringupCallback();
                 mCellBringupCallbacks.add(cb);
 
                 mConnectivityManager.requestBackgroundNetwork(
-                        getCellNetworkRequestForSubId(subId), mHandler, cb);
+                        getCellNetworkRequestForSubId(subId), cb, mHandler);
             }
         } else {
             mRouteSelectionCallback = null;
@@ -153,14 +154,14 @@ public class UnderlyingNetworkTracker {
      * Builds the Route selection request
      *
      * <p>This request is guaranteed to select carrier-owned, non-VCN underlying networks by virtue
-     * of a populated set of subIds as expressed in NetworkCapabilities#getSubIds(). Only carrier
-     * owned networks may be selected, as the request specifies only subIds in the VCN's
+     * of a populated set of subIds as expressed in NetworkCapabilities#getSubscriptionIds(). Only
+     * carrier owned networks may be selected, as the request specifies only subIds in the VCN's
      * subscription group, while the VCN networks are excluded by virtue of not having subIds set on
      * the VCN-exposed networks.
      */
     private NetworkRequest getRouteSelectionRequest() {
         return getBaseNetworkRequestBuilder()
-                .setSubIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
+                .setSubscriptionIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
                 .build();
     }
 
@@ -176,7 +177,7 @@ public class UnderlyingNetworkTracker {
     private NetworkRequest getWifiNetworkRequest() {
         return getBaseNetworkRequestBuilder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                .setSubIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
+                .setSubscriptionIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
                 .build();
     }
 
@@ -394,6 +395,18 @@ public class UnderlyingNetworkTracker {
         @Override
         public int hashCode() {
             return Objects.hash(network, networkCapabilities, linkProperties, isBlocked);
+        }
+
+        /** Dumps the state of this record for logging and debugging purposes. */
+        public void dump(IndentingPrintWriter pw) {
+            pw.println("UnderlyingNetworkRecord:");
+            pw.increaseIndent();
+
+            pw.println("mNetwork: " + network);
+            pw.println("mNetworkCapabilities: " + networkCapabilities);
+            pw.println("mLinkProperties: " + linkProperties);
+
+            pw.decreaseIndent();
         }
 
         /** Builder to incrementally construct an UnderlyingNetworkRecord. */

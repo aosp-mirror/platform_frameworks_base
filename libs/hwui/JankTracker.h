@@ -17,6 +17,7 @@
 #define JANKTRACKER_H_
 
 #include "FrameInfo.h"
+#include "FrameMetricsReporter.h"
 #include "ProfileData.h"
 #include "ProfileDataContainer.h"
 #include "renderthread/TimeLord.h"
@@ -56,9 +57,11 @@ public:
     }
 
     FrameInfo* startFrame() { return &mFrames.next(); }
-    void finishFrame(const FrameInfo& frame);
-    void finishGpuDraw(const FrameInfo& frame);
+    void finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsReporter>& reporter);
 
+    // Calculates the 'legacy' jank information, i.e. with outdated refresh rate information and
+    // without GPU completion or deadlined information.
+    void calculateLegacyJank(FrameInfo& frame);
     void dumpStats(int fd) { dumpData(fd, &mDescription, mData.get()); }
     void dumpFrames(int fd);
     void reset();
@@ -68,14 +71,16 @@ public:
     RingBuffer<FrameInfo, 120>& frames() { return mFrames; }
 
 private:
-    void setFrameInterval(nsecs_t frameIntervalNanos);
-
+    void recomputeThresholds(int64_t frameInterval);
     static void dumpData(int fd, const ProfileDataDescription* description,
                          const ProfileData* data);
 
-    std::array<int64_t, NUM_BUCKETS> mThresholds;
-    int64_t mFrameInterval;
-    nsecs_t mSwapDeadline = -1;
+    // Last frame budget for which mThresholds were computed.
+    int64_t mThresholdsFrameBudget GUARDED_BY(mDataMutex);
+    std::array<int64_t, NUM_BUCKETS> mThresholds GUARDED_BY(mDataMutex);
+
+    int64_t mFrameIntervalLegacy;
+    nsecs_t mSwapDeadlineLegacy = -1;
     // The amount of time we will erase from the total duration to account
     // for SF vsync offsets with HWC2 blocking dequeueBuffers.
     // (Vsync + mDequeueBlockTolerance) is the point at which we expect
@@ -83,7 +88,9 @@ private:
     // point in time by comparing to (IssueDrawCommandsStart + DequeueDuration)
     // This is only used if we are in pipelined mode and are using HWC2,
     // otherwise it's 0.
-    nsecs_t mDequeueTimeForgiveness = 0;
+    nsecs_t mDequeueTimeForgivenessLegacy = 0;
+
+    nsecs_t mNextFrameStartUnstuffed GUARDED_BY(mDataMutex) = -1;
     ProfileDataContainer mData GUARDED_BY(mDataMutex);
     ProfileDataContainer* mGlobalData GUARDED_BY(mDataMutex);
     ProfileDataDescription mDescription;

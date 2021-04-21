@@ -29,6 +29,7 @@ import android.util.Log
 import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
+import com.android.systemui.appops.AppOpsController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -48,7 +49,6 @@ private val defaultDialogProvider = object : PrivacyDialogController.DialogProvi
         return PrivacyDialog(context, list, starter)
     }
 }
-
 /**
  * Controller for [PrivacyDialog].
  *
@@ -66,6 +66,7 @@ class PrivacyDialogController(
     private val uiExecutor: Executor,
     private val privacyLogger: PrivacyLogger,
     private val keyguardStateController: KeyguardStateController,
+    private val appOpsController: AppOpsController,
     @VisibleForTesting private val dialogProvider: DialogProvider
 ) {
 
@@ -79,7 +80,8 @@ class PrivacyDialogController(
         @Background backgroundExecutor: Executor,
         @Main uiExecutor: Executor,
         privacyLogger: PrivacyLogger,
-        keyguardStateController: KeyguardStateController
+        keyguardStateController: KeyguardStateController,
+        appOpsController: AppOpsController
     ) : this(
             permissionManager,
             packageManager,
@@ -90,6 +92,7 @@ class PrivacyDialogController(
             uiExecutor,
             privacyLogger,
             keyguardStateController,
+            appOpsController,
             defaultDialogProvider
     )
 
@@ -127,7 +130,9 @@ class PrivacyDialogController(
     }
 
     @WorkerThread
-    private fun permGroupUsage(): List<PermGroupUsage> = permissionManager.indicatorAppOpUsageData
+    private fun permGroupUsage(): List<PermGroupUsage> {
+        return permissionManager.getIndicatorAppOpUsageData(appOpsController.isMicMuted)
+    }
 
     /**
      * Show the [PrivacyDialog]

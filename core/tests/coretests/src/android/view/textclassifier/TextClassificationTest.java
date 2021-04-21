@@ -244,7 +244,8 @@ public class TextClassificationTest {
                         PendingIntent.getActivity(
                                 context, 0, new Intent("action1"), FLAG_IMMUTABLE)))
                 .addAction(new RemoteAction(icon1, "title2", "desc2",
-                          PendingIntent.getActivity(context, 0, new Intent("action2"), 0)))
+                        PendingIntent.getActivity(context, 0, new Intent("action2"),
+                                FLAG_IMMUTABLE)))
                 .setEntityType(TextClassifier.TYPE_EMAIL, 0.5f)
                 .setEntityType(TextClassifier.TYPE_PHONE, 0.4f)
                 .build();

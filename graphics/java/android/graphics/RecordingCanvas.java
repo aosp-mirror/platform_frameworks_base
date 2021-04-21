@@ -226,10 +226,12 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
      */
     public void drawRipple(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
             CanvasProperty<Float> radius, CanvasProperty<Paint> paint,
-            CanvasProperty<Float> progress, RuntimeShader shader) {
+            CanvasProperty<Float> progress, CanvasProperty<Float> turbulencePhase,
+            RuntimeShader shader) {
         nDrawRipple(mNativeCanvasWrapper, cx.getNativeContainer(), cy.getNativeContainer(),
                 radius.getNativeContainer(), paint.getNativeContainer(),
-                progress.getNativeContainer(), shader.getNativeShaderBuilder());
+                progress.getNativeContainer(), turbulencePhase.getNativeContainer(),
+                shader.getNativeShaderBuilder());
     }
 
     /**
@@ -290,7 +292,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
             long propCy, long propRadius, long propPaint);
     @CriticalNative
     private static native void nDrawRipple(long renderer, long propCx, long propCy, long propRadius,
-            long propPaint, long propProgress, long runtimeEffect);
+            long propPaint, long propProgress, long turbulencePhase, long runtimeEffect);
     @CriticalNative
     private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
             long propRight, long propBottom, long propRx, long propRy, long propPaint);

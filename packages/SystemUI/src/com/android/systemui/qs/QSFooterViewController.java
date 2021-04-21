@@ -32,6 +32,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.globalactions.GlobalActionsDialogLite;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -65,6 +66,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final MetricsLogger mMetricsLogger;
     private final FalsingManager mFalsingManager;
     private final SettingsButton mSettingsButton;
+    private final View mSettingsButtonContainer;
     private final TextView mBuildText;
     private final View mEdit;
     private final MultiUserSwitch mMultiUserSwitch;
@@ -152,6 +154,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         mFalsingManager = falsingManager;
 
         mSettingsButton = mView.findViewById(R.id.settings_button);
+        mSettingsButtonContainer = mView.findViewById(R.id.settings_button_container);
         mBuildText = mView.findViewById(R.id.build);
         mEdit = mView.findViewById(android.R.id.edit);
         mMultiUserSwitch = mView.findViewById(R.id.multi_user_switch);
@@ -258,10 +261,12 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         mView.disable(state2, isTunerEnabled());
     }
 
-
     private void startSettingsActivity() {
+        ActivityLaunchAnimator.Controller animationController =
+                mSettingsButtonContainer != null ? ActivityLaunchAnimator.Controller.fromView(
+                        mSettingsButtonContainer) : null;
         mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS),
-                true /* dismissShade */);
+                true /* dismissShade */, animationController);
     }
 
     private boolean isTunerEnabled() {

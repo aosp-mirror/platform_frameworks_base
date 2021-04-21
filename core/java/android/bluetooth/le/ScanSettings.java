@@ -345,12 +345,14 @@ public final class ScanSettings implements Parcelable {
         }
 
         /**
-         * Set report delay timestamp for Bluetooth LE scan.
+         * Set report delay timestamp for Bluetooth LE scan. If set to 0, you will be notified of
+         * scan results immediately. If &gt; 0, scan results are queued up and delivered after the
+         * requested delay or 5000 milliseconds (whichever is higher). Note scan results may be
+         * delivered sooner if the internal buffers fill up.
          *
-         * @param reportDelayMillis Delay of report in milliseconds. Set to 0 to be notified of
-         * results immediately. Values &gt; 0 causes the scan results to be queued up and delivered
-         * after the requested delay or when the internal buffers fill up.
-         * @throws IllegalArgumentException If {@code reportDelayMillis} &lt; 0.
+         * @param reportDelayMillis         how frequently scan results should be delivered in
+         *                                  milliseconds
+         * @throws IllegalArgumentException if {@code reportDelayMillis} &lt; 0
          */
         public Builder setReportDelay(long reportDelayMillis) {
             if (reportDelayMillis < 0) {

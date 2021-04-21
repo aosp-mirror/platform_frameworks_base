@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.bubbles;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
@@ -47,6 +48,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
@@ -63,6 +65,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseSetArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,6 +81,8 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.TaskStackListenerCallback;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 
 import java.io.FileDescriptor;
@@ -124,6 +129,7 @@ public class BubbleController {
     private final LauncherApps mLauncherApps;
     private final IStatusBarService mBarService;
     private final WindowManager mWindowManager;
+    private final TaskStackListenerImpl mTaskStackListener;
     private final ShellTaskOrganizer mTaskOrganizer;
 
     // Used to post to main UI thread
@@ -140,6 +146,8 @@ public class BubbleController {
 
     // Tracks the id of the current (foreground) user.
     private int mCurrentUserId;
+    // Current profiles of the user (e.g. user with a workprofile)
+    private SparseArray<UserInfo> mCurrentProfiles;
     // Saves notification keys of active bubbles when users are switched.
     private final SparseSetArray<String> mSavedBubbleKeysPerUser;
 
@@ -149,8 +157,8 @@ public class BubbleController {
     // Callback that updates BubbleOverflowActivity on data change.
     @Nullable private BubbleData.Listener mOverflowListener = null;
 
-    // Only load overflow data from disk once
-    private boolean mOverflowDataLoaded = false;
+    // Typically only load once & after user switches
+    private boolean mOverflowDataLoadNeeded = true;
 
     /**
      * When the shade status changes to SHADE (from anything but SHADE, like LOCKED) we'll select
@@ -194,6 +202,7 @@ public class BubbleController {
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps,
+            TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
             ShellExecutor mainExecutor,
@@ -204,7 +213,7 @@ public class BubbleController {
         return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                logger, organizer, positioner, mainExecutor, mainHandler);
+                logger, taskStackListener, organizer, positioner, mainExecutor, mainHandler);
     }
 
     /**
@@ -221,6 +230,7 @@ public class BubbleController {
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps,
             BubbleLogger bubbleLogger,
+            TaskStackListenerImpl taskStackListener,
             ShellTaskOrganizer organizer,
             BubblePositioner positioner,
             ShellExecutor mainExecutor,
@@ -238,6 +248,7 @@ public class BubbleController {
         mLogger = bubbleLogger;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mTaskStackListener = taskStackListener;
         mTaskOrganizer = organizer;
         mSurfaceSynchronizer = synchronizer;
         mCurrentUserId = ActivityManager.getCurrentUser();
@@ -319,6 +330,42 @@ public class BubbleController {
                         packageName, validShortcuts, DISMISS_SHORTCUT_REMOVED);
             }
         }, mMainHandler);
+
+        mTaskStackListener.addListener(new TaskStackListenerCallback() {
+            @Override
+            public void onTaskMovedToFront(int taskId) {
+                if (mSysuiProxy == null) {
+                    return;
+                }
+
+                mSysuiProxy.isNotificationShadeExpand((expand) -> {
+                    mMainExecutor.execute(() -> {
+                        int expandedId = INVALID_TASK_ID;
+                        if (mStackView != null && mStackView.getExpandedBubble() != null
+                                && isStackExpanded() && !mStackView.isExpansionAnimating()
+                                && !expand) {
+                            expandedId = mStackView.getExpandedBubble().getTaskId();
+                        }
+
+                        if (expandedId != INVALID_TASK_ID && expandedId != taskId) {
+                            mBubbleData.setExpanded(false);
+                        }
+                    });
+                });
+            }
+
+            @Override
+            public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                    boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
+                for (Bubble b : mBubbleData.getBubbles()) {
+                    if (task.taskId == b.getTaskId()) {
+                        mBubbleData.setSelectedBubble(b);
+                        mBubbleData.setExpanded(true);
+                        return;
+                    }
+                }
+            }
+        });
     }
 
     @VisibleForTesting
@@ -425,12 +472,29 @@ public class BubbleController {
         updateStack();
     }
 
-    private void onUserChanged(int newUserId) {
+    /** Called when the current user changes. */
+    @VisibleForTesting
+    public void onUserChanged(int newUserId) {
         saveBubbles(mCurrentUserId);
-        mBubbleData.dismissAll(DISMISS_USER_CHANGED);
-        restoreBubbles(newUserId);
         mCurrentUserId = newUserId;
+
+        mBubbleData.dismissAll(DISMISS_USER_CHANGED);
+        mBubbleData.clearOverflow();
+        mOverflowDataLoadNeeded = true;
+
+        restoreBubbles(newUserId);
         mBubbleData.setCurrentUserId(newUserId);
+    }
+
+    /** Called when the profiles for the current user change. **/
+    public void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {
+        mCurrentProfiles = currentProfiles;
+    }
+
+    /** Whether this userId belongs to the current user. */
+    private boolean isCurrentProfile(int userId) {
+        return userId == UserHandle.USER_ALL
+                || (mCurrentProfiles != null && mCurrentProfiles.get(userId) != null);
     }
 
     /**
@@ -513,6 +577,7 @@ public class BubbleController {
         mWmLayoutParams.setTitle("Bubbles!");
         mWmLayoutParams.packageName = mContext.getPackageName();
         mWmLayoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        mWmLayoutParams.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 
         try {
             mAddedToWindowManager = true;
@@ -596,7 +661,7 @@ public class BubbleController {
             });
         });
         // Finally, remove the entries for this user now that bubbles are restored.
-        mSavedBubbleKeysPerUser.remove(mCurrentUserId);
+        mSavedBubbleKeysPerUser.remove(userId);
     }
 
     private void updateForThemeChanges() {
@@ -696,14 +761,11 @@ public class BubbleController {
         return (isSummary && isSuppressedSummary) || isSuppressedBubble;
     }
 
-    private void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback,
-            Executor callbackExecutor) {
+    private void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback) {
         if (mBubbleData.isSummarySuppressed(groupKey)) {
             mBubbleData.removeSuppressedSummary(groupKey);
             if (callback != null) {
-                callbackExecutor.execute(() -> {
-                    callback.accept(mBubbleData.getSummaryKey(groupKey));
-                });
+                callback.accept(mBubbleData.getSummaryKey(groupKey));
             }
         }
     }
@@ -764,12 +826,12 @@ public class BubbleController {
      * Fills the overflow bubbles by loading them from disk.
      */
     void loadOverflowBubblesFromDisk() {
-        if (!mBubbleData.getOverflowBubbles().isEmpty() || mOverflowDataLoaded) {
+        if (!mBubbleData.getOverflowBubbles().isEmpty() && !mOverflowDataLoadNeeded) {
             // we don't need to load overflow bubbles from disk if it is already in memory
             return;
         }
-        mOverflowDataLoaded = true;
-        mDataRepository.loadBubbles((bubbles) -> {
+        mOverflowDataLoadNeeded = false;
+        mDataRepository.loadBubbles(mCurrentUserId, (bubbles) -> {
             bubbles.forEach(bubble -> {
                 if (mBubbleData.hasAnyBubbleWithKey(bubble.getKey())) {
                     // if the bubble is already active, there's no need to push it to overflow
@@ -871,6 +933,12 @@ public class BubbleController {
             Pair<BubbleEntry, Boolean> entryData = entryDataByKey.get(key);
             BubbleEntry entry = entryData.first;
             boolean shouldBubbleUp = entryData.second;
+
+            if (entry != null && !isCurrentProfile(
+                    entry.getStatusBarNotification().getUser().getIdentifier())) {
+                return;
+            }
+
             rankingMap.getRanking(key, mTmpRanking);
             boolean isActiveBubble = mBubbleData.hasAnyBubbleWithKey(key);
             if (isActiveBubble && !mTmpRanking.canBubble()) {
@@ -1255,8 +1323,10 @@ public class BubbleController {
         public void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback,
                 Executor callbackExecutor) {
             mMainExecutor.execute(() -> {
-                BubbleController.this.removeSuppressedSummaryIfNecessary(groupKey, callback,
-                        callbackExecutor);
+                Consumer<String> cb = callback != null
+                        ? (key) -> callbackExecutor.execute(() -> callback.accept(key))
+                        : null;
+                BubbleController.this.removeSuppressedSummaryIfNecessary(groupKey, cb);
             });
         }
 
@@ -1297,10 +1367,13 @@ public class BubbleController {
 
         @Override
         public boolean handleDismissalInterception(BubbleEntry entry,
-                @Nullable List<BubbleEntry> children, IntConsumer removeCallback) {
+                @Nullable List<BubbleEntry> children, IntConsumer removeCallback,
+                Executor callbackExecutor) {
+            IntConsumer cb = removeCallback != null
+                    ? (index) -> callbackExecutor.execute(() -> removeCallback.accept(index))
+                    : null;
             return mMainExecutor.executeBlockingForResult(() -> {
-                return BubbleController.this.handleDismissalInterception(entry, children,
-                        removeCallback);
+                return BubbleController.this.handleDismissalInterception(entry, children, cb);
             }, Boolean.class);
         }
 
@@ -1379,6 +1452,13 @@ public class BubbleController {
         public void onUserChanged(int newUserId) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.onUserChanged(newUserId);
+            });
+        }
+
+        @Override
+        public void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onCurrentProfilesChanged(currentProfiles);
             });
         }
 

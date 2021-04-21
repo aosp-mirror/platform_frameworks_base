@@ -17,18 +17,8 @@
 package com.android.wm.shell.splitscreen;
 
 import android.annotation.IntDef;
-import android.app.ActivityManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Rect;
-import android.os.Bundle;
-import android.os.UserHandle;
-
-import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
-import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 
 /**
  * Interface to engage split-screen feature.
@@ -94,5 +84,15 @@ public interface SplitScreen {
      */
     default ISplitScreen createExternalInterface() {
         return null;
+    }
+
+    /** Get a string representation of a stage type */
+    static String stageTypeToString(@StageType int stage) {
+        switch (stage) {
+            case STAGE_TYPE_UNDEFINED: return "UNDEFINED";
+            case STAGE_TYPE_MAIN: return "MAIN";
+            case STAGE_TYPE_SIDE: return "SIDE";
+            default: return "UNKNOWN(" + stage + ")";
+        }
     }
 }

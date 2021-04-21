@@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -27,6 +28,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 
 /**
  * {@hide}
@@ -58,14 +60,20 @@ public class PasswordPolicy {
         } else if (quality == PASSWORD_QUALITY_BIOMETRIC_WEAK
                 || quality == PASSWORD_QUALITY_SOMETHING) {
             return new PasswordMetrics(CREDENTIAL_TYPE_PATTERN);
-        } // quality is NUMERIC or stronger.
+        } else if (quality == PASSWORD_QUALITY_NUMERIC
+                || quality == PASSWORD_QUALITY_NUMERIC_COMPLEX) {
+            PasswordMetrics result = new PasswordMetrics(CREDENTIAL_TYPE_PIN);
+            result.length = length;
+            if (quality == PASSWORD_QUALITY_NUMERIC_COMPLEX) {
+                result.seqLength = PasswordMetrics.MAX_ALLOWED_SEQUENCE;
+            }
+            return result;
+        } // quality is ALPHABETIC or stronger.
 
         PasswordMetrics result = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
         result.length = length;
 
-        if (quality == PASSWORD_QUALITY_NUMERIC_COMPLEX) {
-            result.seqLength = PasswordMetrics.MAX_ALLOWED_SEQUENCE;
-        } else if (quality == PASSWORD_QUALITY_ALPHABETIC) {
+        if (quality == PASSWORD_QUALITY_ALPHABETIC) {
             result.nonNumeric = 1;
         } else if (quality == PASSWORD_QUALITY_ALPHANUMERIC) {
             result.numeric = 1;

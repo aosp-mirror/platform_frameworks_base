@@ -27,6 +27,7 @@ import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.SystemFonts;
 import android.os.SharedMemory;
 import android.text.FontConfig;
+import android.util.ArrayMap;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
@@ -200,8 +201,9 @@ public class TypefaceTest {
         Map<String, Typeface> systemFontMap = SystemFonts.buildSystemTypefaces(fontConfig,
                 fallbackMap);
         SharedMemory sharedMemory = Typeface.serializeFontMap(systemFontMap);
-        Map<String, Typeface> copiedFontMap =
-                Typeface.deserializeFontMap(sharedMemory.mapReadOnly().order(ByteOrder.BIG_ENDIAN));
+        Map<String, Typeface> copiedFontMap = new ArrayMap<>();
+        Typeface.deserializeFontMap(sharedMemory.mapReadOnly().order(ByteOrder.BIG_ENDIAN),
+                copiedFontMap);
         assertEquals(systemFontMap.size(), copiedFontMap.size());
         for (String key : systemFontMap.keySet()) {
             assertTrue(copiedFontMap.containsKey(key));

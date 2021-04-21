@@ -718,7 +718,7 @@ public class InputMethodService extends AbstractInputMethodService {
         public final void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
                 @NonNull EditorInfo editorInfo, boolean restarting,
                 @NonNull IBinder startInputToken) {
-            mPrivOps.reportStartInput(startInputToken);
+            mPrivOps.reportStartInputAsync(startInputToken);
 
             if (restarting) {
                 restartInput(inputConnection, editorInfo);
@@ -819,10 +819,9 @@ public class InputMethodService extends AbstractInputMethodService {
             if (dispatchOnShowInputRequested(flags, false)) {
                 showWindow(true);
                 applyVisibilityInInsetsConsumerIfNecessary(true /* setVisible */);
-            } else {
-                // If user uses hard keyboard, IME button should always be shown.
-                setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
             }
+            setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
+
             final boolean isVisible = isInputViewShown();
             final boolean visibilityChanged = isVisible != wasVisible;
             if (resultReceiver != null) {
