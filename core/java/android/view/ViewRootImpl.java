@@ -5189,6 +5189,17 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void handleMessage(Message msg) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, getMessageName(msg));
+            }
+            try {
+                handleMessageImpl(msg);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
+        }
+
+        private void handleMessageImpl(Message msg) {
             switch (msg.what) {
                 case MSG_INVALIDATE:
                     ((View) msg.obj).invalidate();
