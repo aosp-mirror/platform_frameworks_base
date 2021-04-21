@@ -19,7 +19,9 @@ package android.bluetooth;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.content.Context;
 import android.os.Binder;
@@ -41,6 +43,9 @@ public final class BluetoothPbapClient implements BluetoothProfile {
     private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.pbapclient.profile.action.CONNECTION_STATE_CHANGED";
 

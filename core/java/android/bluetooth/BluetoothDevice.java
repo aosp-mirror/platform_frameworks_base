@@ -389,6 +389,8 @@ public final class BluetoothDevice implements Parcelable {
 
 
     /** @hide */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String ACTION_SDP_RECORD =
@@ -663,13 +665,15 @@ public final class BluetoothDevice implements Parcelable {
      * <p> Always contains the extra field {@link #EXTRA_UUID}
      */
     @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothScanPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UUID =
             "android.bluetooth.device.action.UUID";
 
     /** @hide */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MAS_INSTANCE =
             "android.bluetooth.device.action.MAS_INSTANCE";
@@ -693,28 +697,36 @@ public final class BluetoothDevice implements Parcelable {
      * Broadcast Action: This intent is used to broadcast PAIRING REQUEST
      */
     @RequiresLegacyBluetoothAdminPermission
-    @RequiresBluetoothScanPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PAIRING_REQUEST =
             "android.bluetooth.device.action.PAIRING_REQUEST";
     /** @hide */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @UnsupportedAppUsage
     public static final String ACTION_PAIRING_CANCEL =
             "android.bluetooth.device.action.PAIRING_CANCEL";
 
     /** @hide */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_ACCESS_REQUEST =
             "android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST";
 
     /** @hide */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_ACCESS_REPLY =
             "android.bluetooth.device.action.CONNECTION_ACCESS_REPLY";
 
     /** @hide */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_ACCESS_CANCEL =
             "android.bluetooth.device.action.CONNECTION_ACCESS_CANCEL";
@@ -725,6 +737,8 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @SystemApi
     public static final String ACTION_SILENCE_MODE_CHANGED =

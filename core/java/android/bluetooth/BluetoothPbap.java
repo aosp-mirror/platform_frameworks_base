@@ -89,7 +89,8 @@ public class BluetoothPbap implements BluetoothProfile {
      */
     @SuppressLint("ActionValue")
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";

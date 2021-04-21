@@ -604,6 +604,7 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @SystemApi public static final String ACTION_BLE_STATE_CHANGED =
             "android.bluetooth.adapter.action.BLE_STATE_CHANGED";
 
@@ -618,6 +619,9 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BLUETOOTH_ADDRESS_CHANGED =
             "android.bluetooth.adapter.action.BLUETOOTH_ADDRESS_CHANGED";
 
@@ -642,6 +646,9 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BLE_ACL_CONNECTED =
             "android.bluetooth.adapter.action.BLE_ACL_CONNECTED";
 
@@ -656,6 +663,9 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BLE_ACL_DISCONNECTED =
             "android.bluetooth.adapter.action.BLE_ACL_DISCONNECTED";
 
