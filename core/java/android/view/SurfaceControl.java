@@ -1085,8 +1085,8 @@ public final class SurfaceControl implements Parcelable {
                 throw new IllegalStateException(
                         "Only buffer layers can set a valid buffer size.");
             }
-            boolean isBqLayer = isBufferQueueLayer();
-            if (isBqLayer) {
+
+            if ((mFlags & FX_SURFACE_MASK) == FX_SURFACE_NORMAL) {
                 setBLASTLayer();
             }
 
@@ -1308,10 +1308,6 @@ public final class SurfaceControl implements Parcelable {
 
         private boolean isEffectLayer() {
             return  (mFlags & FX_SURFACE_EFFECT) == FX_SURFACE_EFFECT;
-        }
-
-        private boolean isBufferQueueLayer() {
-            return (mFlags & FX_SURFACE_NORMAL) == FX_SURFACE_NORMAL;
         }
 
         /**
