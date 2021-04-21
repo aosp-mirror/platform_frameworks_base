@@ -25711,7 +25711,7 @@ package android.net.vcn {
     method @NonNull public int[] getExposedCapabilities();
     method @NonNull public String getGatewayConnectionName();
     method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
-    method @NonNull public long[] getRetryInterval();
+    method @NonNull public long[] getRetryIntervalsMs();
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
@@ -25720,7 +25720,7 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryInterval(@NonNull long[]);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMs(@NonNull long[]);
   }
 
   public class VcnManager {
