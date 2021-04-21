@@ -187,7 +187,8 @@ private:
     void resizeSurface(int newWidth, int newHeight);
     void projectSceneToWindow();
 
-    bool shouldStopPlayingPart(const Animation::Part& part, int fadedFramesCount);
+    bool shouldStopPlayingPart(const Animation::Part& part, int fadedFramesCount,
+                               int lastDisplayedProgress);
     void checkExit();
 
     void handleViewport(nsecs_t timestep);
