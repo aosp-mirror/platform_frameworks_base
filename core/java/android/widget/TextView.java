@@ -13870,7 +13870,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Returns a {@link ViewTranslationRequest} which represents the content to be translated.
+     * Collects a {@link ViewTranslationRequest} which represents the content to be translated in
+     * the view.
      *
      * <p>NOTE: When overriding the method, it should not translate the password. If the subclass
      * uses {@link TransformationMethod} to display the translated result, it's also not recommend
@@ -13880,15 +13881,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *                         android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
      * @return the {@link ViewTranslationRequest} which contains the information to be translated.
      */
-    @Nullable
     @Override
-    public ViewTranslationRequest onCreateTranslationRequest(@NonNull int[] supportedFormats) {
+    public void onCreateViewTranslationRequest(@NonNull int[] supportedFormats,
+            @NonNull Consumer<ViewTranslationRequest> requestsCollector) {
         if (supportedFormats == null || supportedFormats.length == 0) {
             // TODO(b/182433547): remove before S release
             if (UiTranslationController.DEBUG) {
                 Log.w(LOG_TAG, "Do not provide the support translation formats.");
             }
-            return null;
+            return;
         }
         ViewTranslationRequest.Builder requestBuilder =
                 new ViewTranslationRequest.Builder(getAutofillId());
@@ -13899,7 +13900,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (UiTranslationController.DEBUG) {
                     Log.w(LOG_TAG, "Cannot create translation request for the empty text.");
                 }
-                return null;
+                return;
             }
             boolean isPassword = isAnyPasswordInputType() || hasPasswordTransformationMethod();
             // TODO(b/177214256): support selectable text translation.
@@ -13914,14 +13915,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     Log.w(LOG_TAG, "Cannot create translation request. editable = "
                             + isTextEditable() + ", isPassword = " + isPassword + ", selectable = "
                             + isTextSelectable());
+                    return;
                 }
-                return null;
             }
             // TODO(b/176488462): apply the view's important for translation
             requestBuilder.setValue(ViewTranslationRequest.ID_TEXT,
                     TranslationRequestValue.forText(mText));
         }
-        return requestBuilder.build();
+        requestsCollector.accept(requestBuilder.build());
     }
 
     /**
@@ -13932,6 +13933,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @return a {@link ViewTranslationCallback} that is used to control how to display the
      * translated information or {@code null} if this View doesn't support translation.
+     *
+     * @hide
      */
     @Nullable
     @Override
@@ -13948,15 +13951,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      *
-     * Called when the content from {@link #onCreateTranslationRequest} had been translated by the
-     * TranslationService. The default implementation will replace the current
+     * Called when the content from {@link #onCreateViewTranslationRequest} had been translated by
+     * the TranslationService. The default implementation will replace the current
      * {@link TransformationMethod} to transform the original text to the translated text display.
      *
      * @param response a {@link ViewTranslationResponse} that contains the translated information
      * which can be shown in the view.
      */
     @Override
-    public void onTranslationResponse(@NonNull ViewTranslationResponse response) {
+    public void onViewTranslationResponse(@NonNull ViewTranslationResponse response) {
+        // set ViewTranslationResponse
+        super.onViewTranslationResponse(response);
         // TODO(b/183467275): Use the overridden ViewTranslationCallback instead of our default
         //  implementation if the view has overridden getViewTranslationCallback.
         TextViewTranslationCallback callback =
