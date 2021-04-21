@@ -156,7 +156,7 @@ public final class JobServiceContext implements ServiceConnection {
      * {@link JobParameters#STOP_REASON_UNDEFINED}.
      */
     private int mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
-    private int mPendingLegacyStopReason;
+    private int mPendingInternalStopReason;
     private String mPendingDebugStopReason;
 
     // Debugging: reason this job was last stopped.
@@ -366,8 +366,8 @@ public final class JobServiceContext implements ServiceConnection {
     /** Called externally when a job that was scheduled for execution should be cancelled. */
     @GuardedBy("mLock")
     void cancelExecutingJobLocked(@JobParameters.StopReason int reason,
-            int legacyStopReason, @NonNull String debugReason) {
-        doCancelLocked(reason, legacyStopReason, debugReason);
+            int internalStopReason, @NonNull String debugReason) {
+        doCancelLocked(reason, internalStopReason, debugReason);
     }
 
     int getPreferredUid() {
@@ -400,7 +400,7 @@ public final class JobServiceContext implements ServiceConnection {
                 && (!matchJobId || jobId == executing.getJobId())) {
             if (mVerb == VERB_EXECUTING) {
                 mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
-                        JobParameters.REASON_TIMEOUT, reason);
+                        JobParameters.INTERNAL_STOP_REASON_TIMEOUT, reason);
                 sendStopMessageLocked("force timeout from shell");
                 return true;
             }
@@ -627,8 +627,8 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     @GuardedBy("mLock")
-    private void doCancelLocked(@JobParameters.StopReason int stopReasonCode, int legacyStopReason,
-            @Nullable String debugReason) {
+    private void doCancelLocked(@JobParameters.StopReason int stopReasonCode,
+            int internalStopReasonCode, @Nullable String debugReason) {
         if (mVerb == VERB_FINISHED) {
             if (DEBUG) {
                 Slog.d(TAG,
@@ -644,15 +644,14 @@ public final class JobServiceContext implements ServiceConnection {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             if (nowElapsed < earliestStopTimeElapsed) {
                 mPendingStopReason = stopReasonCode;
-                mPendingLegacyStopReason = legacyStopReason;
+                mPendingInternalStopReason = internalStopReasonCode;
                 mPendingDebugStopReason = debugReason;
                 return;
             }
         }
-        mParams.setStopReason(stopReasonCode, legacyStopReason, debugReason);
-        if (legacyStopReason == JobParameters.REASON_PREEMPT) {
-            mPreferredUid = mRunningJob != null ? mRunningJob.getUid() :
-                    NO_PREFERRED_UID;
+        mParams.setStopReason(stopReasonCode, internalStopReasonCode, debugReason);
+        if (internalStopReasonCode == JobParameters.INTERNAL_STOP_REASON_PREEMPT) {
+            mPreferredUid = mRunningJob != null ? mRunningJob.getUid() : NO_PREFERRED_UID;
         }
         handleCancelLocked(debugReason);
     }
@@ -807,12 +806,12 @@ public final class JobServiceContext implements ServiceConnection {
                         // the device was temporarily taken off the charger). Ignore the pending
                         // stop and see what the manager says.
                         mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
-                        mPendingLegacyStopReason = 0;
+                        mPendingInternalStopReason = 0;
                         mPendingDebugStopReason = null;
                     } else {
                         Slog.i(TAG, "JS was waiting to stop this job."
                                 + " Sending onStop: " + getRunningJobNameLocked());
-                        mParams.setStopReason(mPendingStopReason, mPendingLegacyStopReason,
+                        mParams.setStopReason(mPendingStopReason, mPendingInternalStopReason,
                                 mPendingDebugStopReason);
                         sendStopMessageLocked(mPendingDebugStopReason);
                         break;
@@ -826,7 +825,7 @@ public final class JobServiceContext implements ServiceConnection {
                     Slog.i(TAG, "Client timed out while executing (no jobFinished received)."
                             + " Sending onStop: " + getRunningJobNameLocked());
                     mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
-                            JobParameters.REASON_TIMEOUT, "client timed out");
+                            JobParameters.INTERNAL_STOP_REASON_TIMEOUT, "client timed out");
                     sendStopMessageLocked("timeout while executing");
                 } else {
                     // We've given the app the minimum execution time. See if we should stop it or
@@ -839,7 +838,7 @@ public final class JobServiceContext implements ServiceConnection {
                         // of timeout since all of the reasons could equate to "the system needs
                         // the resources the app is currently using."
                         mParams.setStopReason(JobParameters.STOP_REASON_DEVICE_STATE,
-                                JobParameters.REASON_TIMEOUT, reason);
+                                JobParameters.INTERNAL_STOP_REASON_TIMEOUT, reason);
                         sendStopMessageLocked(reason);
                     } else {
                         Slog.i(TAG, "Letting " + getRunningJobNameLocked()
@@ -893,12 +892,12 @@ public final class JobServiceContext implements ServiceConnection {
         }
         applyStoppedReasonLocked(reason);
         completedJob = mRunningJob;
-        final int legacyStopReason = mParams.getLegacyStopReason();
-        mJobPackageTracker.noteInactive(completedJob, legacyStopReason, reason);
+        final int internalStopReason = mParams.getInternalStopReasonCode();
+        mJobPackageTracker.noteInactive(completedJob, internalStopReason, reason);
         FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                 completedJob.getSourceUid(), null, completedJob.getBatteryName(),
                 FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED,
-                legacyStopReason, completedJob.getStandbyBucket(), completedJob.getJobId(),
+                internalStopReason, completedJob.getStandbyBucket(), completedJob.getJobId(),
                 completedJob.hasChargingConstraint(),
                 completedJob.hasBatteryNotLowConstraint(),
                 completedJob.hasStorageNotLowConstraint(),
@@ -911,7 +910,7 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.startedAsExpeditedJob);
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),
-                    legacyStopReason);
+                    internalStopReason);
         } catch (RemoteException e) {
             // Whatever.
         }
@@ -930,10 +929,10 @@ public final class JobServiceContext implements ServiceConnection {
         service = null;
         mAvailable = true;
         mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
-        mPendingLegacyStopReason = 0;
+        mPendingInternalStopReason = 0;
         mPendingDebugStopReason = null;
         removeOpTimeOutLocked();
-        mCompletedListener.onJobCompletedLocked(completedJob, legacyStopReason, reschedule);
+        mCompletedListener.onJobCompletedLocked(completedJob, internalStopReason, reschedule);
         mJobConcurrencyManager.onJobCompletedLocked(this, completedJob, workType);
     }
 
@@ -1023,7 +1022,7 @@ public final class JobServiceContext implements ServiceConnection {
                 pw.print(" Pending stop because ");
                 pw.print(mPendingStopReason);
                 pw.print("/");
-                pw.print(mPendingLegacyStopReason);
+                pw.print(mPendingInternalStopReason);
                 pw.print("/");
                 pw.print(mPendingDebugStopReason);
             }
