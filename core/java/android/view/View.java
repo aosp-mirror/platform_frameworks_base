@@ -26119,7 +26119,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * This is used by the RootView to perform an optimization when
+     * This is used by the ViewRoot to perform an optimization when
      * the view hierarchy contains one or several SurfaceView.
      * SurfaceView is always considered transparent, but its children are not,
      * therefore all View objects remove themselves from the global transparent
@@ -26131,10 +26131,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * point is opaque, regardless of the transparent region; returns false
      * if it is possible for underlying windows to be seen behind the view.
      *
-     * {@hide}
      */
-    @UnsupportedAppUsage
-    public boolean gatherTransparentRegion(Region region) {
+    public boolean gatherTransparentRegion(@Nullable Region region) {
         final AttachInfo attachInfo = mAttachInfo;
         if (region != null && attachInfo != null) {
             final int pflags = mPrivateFlags;
