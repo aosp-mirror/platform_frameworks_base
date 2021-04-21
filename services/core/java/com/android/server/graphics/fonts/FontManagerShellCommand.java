@@ -95,6 +95,15 @@ public class FontManagerShellCommand extends ShellCommand {
         w.println();
         w.println("clear");
         w.println("    Remove all installed font files and reset to the initial state.");
+        w.println();
+        w.println("restart");
+        w.println("    Restart FontManagerService emulating device reboot.");
+        w.println("    WARNING: this is not a safe operation. Other processes may misbehave if");
+        w.println("    they are using fonts updated by FontManagerService.");
+        w.println("    This command exists merely for testing.");
+        w.println();
+        w.println("status");
+        w.println("    Prints status of current system font configuration.");
     }
 
     /* package */ void dumpAll(@NonNull IndentingPrintWriter w) {
@@ -368,7 +377,13 @@ public class FontManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int status(ShellCommand shell) throws SystemFontException {
+    private int restart(ShellCommand shell) {
+        mService.restart();
+        shell.getOutPrintWriter().println("Success");
+        return 0;
+    }
+
+    private int status(ShellCommand shell) {
         final IndentingPrintWriter writer =
                 new IndentingPrintWriter(shell.getOutPrintWriter(), "  ");
         FontConfig config = mService.getSystemFontConfig();
@@ -396,6 +411,8 @@ public class FontManagerShellCommand extends ShellCommand {
                     return update(shell);
                 case "clear":
                     return clear(shell);
+                case "restart":
+                    return restart(shell);
                 case "status":
                     return status(shell);
                 default:
