@@ -6,7 +6,6 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController
 import kotlin.math.ceil
 import kotlin.math.max
@@ -14,7 +13,6 @@ import kotlin.math.max
 /** A provider of [NotificationLaunchAnimatorController]. */
 class NotificationLaunchAnimatorControllerProvider(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
-    private val notificationPanelViewController: NotificationPanelViewController,
     private val notificationListContainer: NotificationListContainer,
     private val depthController: NotificationShadeDepthController
 ) {
@@ -23,7 +21,6 @@ class NotificationLaunchAnimatorControllerProvider(
     ): NotificationLaunchAnimatorController {
         return NotificationLaunchAnimatorController(
             notificationShadeWindowViewController,
-            notificationPanelViewController,
             notificationListContainer,
             depthController,
             notification
@@ -38,7 +35,6 @@ class NotificationLaunchAnimatorControllerProvider(
  */
 class NotificationLaunchAnimatorController(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
-    private val notificationPanelViewController: NotificationPanelViewController,
     private val notificationListContainer: NotificationListContainer,
     private val depthController: NotificationShadeDepthController,
     private val notification: ExpandableNotificationRow
@@ -97,7 +93,6 @@ class NotificationLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-        notificationPanelViewController.setLaunchingNotification(true)
         notification.isExpandAnimationRunning = true
         notificationListContainer.setExpandingNotification(notification)
 
@@ -108,7 +103,6 @@ class NotificationLaunchAnimatorController(
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
         InteractionJankMonitor.getInstance().end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
 
-        notificationPanelViewController.setLaunchingNotification(false)
         notification.isExpandAnimationRunning = false
         notificationShadeWindowViewController.setExpandAnimationRunning(false)
         notificationListContainer.setExpandingNotification(null)
@@ -118,7 +112,6 @@ class NotificationLaunchAnimatorController(
     private fun applyParams(params: ExpandAnimationParameters?) {
         notification.applyExpandAnimationParams(params)
         notificationListContainer.applyExpandAnimationParams(params)
-        notificationPanelViewController.applyExpandAnimationParams(params)
         depthController.notificationLaunchAnimationParams = params
     }
 
