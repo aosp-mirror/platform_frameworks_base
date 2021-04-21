@@ -30,7 +30,11 @@ import android.permission.IOnPermissionsChangeListener;
  * @hide
  */
 interface ILegacyPermissionManager {
-    int checkDeviceIdentifierAccess(String packageName, String callingFeatureId, String message, int pid, int uid);
+    int checkDeviceIdentifierAccess(String packageName, String message, String callingFeatureId,
+            int pid, int uid);
+
+    int checkPhoneNumberAccess(String packageName, String message, String callingFeatureId,
+            int pid, int uid);
 
     void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
 
