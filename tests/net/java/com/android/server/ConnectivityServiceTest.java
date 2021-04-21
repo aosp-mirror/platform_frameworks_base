@@ -10246,12 +10246,15 @@ public class ConnectivityServiceTest {
         return UidRange.createForUser(UserHandle.of(userId));
     }
 
-    private void mockGetApplicationInfo(@NonNull final String packageName, @NonNull final int uid)
-            throws Exception {
+    private void mockGetApplicationInfo(@NonNull final String packageName, @NonNull final int uid) {
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = uid;
-        when(mPackageManager.getApplicationInfo(eq(packageName), anyInt()))
-                .thenReturn(applicationInfo);
+        try {
+            when(mPackageManager.getApplicationInfo(eq(packageName), anyInt()))
+                    .thenReturn(applicationInfo);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
     }
 
     private void mockGetApplicationInfoThrowsNameNotFound(@NonNull final String packageName)
@@ -10272,8 +10275,7 @@ public class ConnectivityServiceTest {
     }
 
     private OemNetworkPreferences createDefaultOemNetworkPreferences(
-            @OemNetworkPreferences.OemNetworkPreference final int preference)
-            throws Exception {
+            @OemNetworkPreferences.OemNetworkPreference final int preference) {
         // Arrange PackageManager mocks
         mockGetApplicationInfo(TEST_PACKAGE_NAME, TEST_PACKAGE_UID);
 
@@ -10750,11 +10752,13 @@ public class ConnectivityServiceTest {
             mDone.complete(new Object());
         }
 
-        void expectOnComplete() throws Exception {
+        void expectOnComplete() {
             try {
                 mDone.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
                 fail("Expected onComplete() not received after " + TIMEOUT_MS + " ms");
+            } catch (Exception e) {
+                fail(e.getMessage());
             }
         }
 
@@ -12368,5 +12372,73 @@ public class ConnectivityServiceTest {
         assertThrows(
                 expected,
                 () -> mCm.registerNetworkCallback(getRequestWithSubIds(), new NetworkCallback()));
+    }
+
+    /**
+     * Validate request counts are counted accurately on setProfileNetworkPreference on set/replace.
+     */
+    @Test
+    public void testProfileNetworkPrefCountsRequestsCorrectlyOnSet() throws Exception {
+        final UserHandle testHandle = setupEnterpriseNetwork();
+        testRequestCountLimits(() -> {
+            // Set initially to test the limit prior to having existing requests.
+            final TestOnCompleteListener listener = new TestOnCompleteListener();
+            mCm.setProfileNetworkPreference(testHandle, PROFILE_NETWORK_PREFERENCE_ENTERPRISE,
+                    Runnable::run, listener);
+            listener.expectOnComplete();
+
+            // re-set so as to test the limit as part of replacing existing requests.
+            mCm.setProfileNetworkPreference(testHandle, PROFILE_NETWORK_PREFERENCE_ENTERPRISE,
+                    Runnable::run, listener);
+            listener.expectOnComplete();
+        });
+    }
+
+    /**
+     * Validate request counts are counted accurately on setOemNetworkPreference on set/replace.
+     */
+    @Test
+    public void testSetOemNetworkPreferenceCountsRequestsCorrectlyOnSet() throws Exception {
+        mockHasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, true);
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
+        testRequestCountLimits(() -> {
+            // Set initially to test the limit prior to having existing requests.
+            final TestOemListenerCallback listener = new TestOemListenerCallback();
+            mService.setOemNetworkPreference(
+                    createDefaultOemNetworkPreferences(networkPref), listener);
+            listener.expectOnComplete();
+
+            // re-set so as to test the limit as part of replacing existing requests.
+            mService.setOemNetworkPreference(
+                    createDefaultOemNetworkPreferences(networkPref), listener);
+            listener.expectOnComplete();
+        });
+    }
+
+    private void testRequestCountLimits(@NonNull final Runnable r) throws Exception {
+        final ArraySet<TestNetworkCallback> callbacks = new ArraySet<>();
+        try {
+            final int requestCount = mService.mSystemNetworkRequestCounter
+                    .mUidToNetworkRequestCount.get(Process.myUid());
+            // The limit is hit when total requests <= limit.
+            final int maxCount =
+                    ConnectivityService.MAX_NETWORK_REQUESTS_PER_SYSTEM_UID - requestCount;
+            // Need permission so registerDefaultNetworkCallback uses mSystemNetworkRequestCounter
+            withPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, () -> {
+                for (int i = 1; i < maxCount - 1; i++) {
+                    final TestNetworkCallback cb = new TestNetworkCallback();
+                    mCm.registerDefaultNetworkCallback(cb);
+                    callbacks.add(cb);
+                }
+
+                // Code to run to check if it triggers a max request count limit error.
+                r.run();
+            });
+        } finally {
+            for (final TestNetworkCallback cb : callbacks) {
+                mCm.unregisterNetworkCallback(cb);
+            }
+        }
     }
 }
