@@ -219,10 +219,12 @@ class ShortcutPackage extends ShortcutPackageItem {
                 getPackageName(), getPackageUserId());
     }
 
+    private boolean isAppSearchEnabled() {
+        return mShortcutUser.mService.isAppSearchEnabled();
+    }
+
     public int getShortcutCount() {
-        final int[] count = new int[1];
-        forEachShortcut(si -> count[0]++);
-        return count[0];
+        return mShortcuts.size();
     }
 
     @Override
@@ -442,15 +444,18 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         forceReplaceShortcutInner(newShortcut);
-        mShortcutUser.mService.injectPostToHandler(() -> awaitInAppSearch("reportUsage",
-                session -> {
-                    final AndroidFuture<Boolean> future = new AndroidFuture<>();
-                    session.reportUsage(
-                            new ReportUsageRequest.Builder(getPackageName())
-                                    .setUri(newShortcut.getId()).build(),
-                            mShortcutUser.mExecutor, result -> future.complete(result.isSuccess()));
-                    return future;
-                }));
+        if (isAppSearchEnabled()) {
+            mShortcutUser.mService.injectPostToHandler(() -> awaitInAppSearch("reportUsage",
+                    session -> {
+                        final AndroidFuture<Boolean> future = new AndroidFuture<>();
+                        session.reportUsage(
+                                new ReportUsageRequest.Builder(getPackageName())
+                                        .setUri(newShortcut.getId()).build(),
+                                mShortcutUser.mExecutor,
+                                result -> future.complete(result.isSuccess()));
+                        return future;
+                    }));
+        }
         return deleted;
     }
 
@@ -960,7 +965,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      * the app's Xml resource.
      */
     int getSharingShortcutCount() {
-        if (getShortcutCount() == 0 || mShareTargets.isEmpty()) {
+        if (mShareTargets.isEmpty()) {
             return 0;
         }
 
@@ -1700,7 +1705,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         final int size = mShortcuts.size();
         final int shareTargetSize = mShareTargets.size();
 
-        if (size == 0 && shareTargetSize == 0 && mApiCallCount == 0 && getShortcutCount() == 0) {
+        if (size == 0 && shareTargetSize == 0 && mApiCallCount == 0) {
             return; // nothing to write.
         }
 
@@ -2254,6 +2259,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     void updateVisibility(String packageName, byte[] certificate, boolean visible) {
+        if (!isAppSearchEnabled()) {
+            return;
+        }
         if (visible) {
             mPackageIdentifiers.put(packageName, new PackageIdentifier(packageName, certificate));
         } else {
@@ -2287,6 +2295,14 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void saveShortcut(@NonNull final Collection<ShortcutInfo> shortcuts) {
         Objects.requireNonNull(shortcuts);
+        if (!isAppSearchEnabled()) {
+            // If AppSearch isn't enabled, save it in memory and we are done.
+            for (ShortcutInfo si : shortcuts) {
+                mShortcuts.put(si.getId(), si);
+            }
+            return;
+        }
+        // Otherwise, save pinned shortcuts in memory.
         shortcuts.forEach(si -> {
             if (si.isPinned()) {
                 mShortcuts.put(si.getId(), si);
@@ -2294,12 +2310,13 @@ class ShortcutPackage extends ShortcutPackageItem {
                 mShortcuts.remove(si.getId());
             }
         });
+        // Then proceed to app search.
         saveToAppSearch(shortcuts);
     }
 
     private void saveToAppSearch(@NonNull final Collection<ShortcutInfo> shortcuts) {
         Objects.requireNonNull(shortcuts);
-        if (shortcuts.isEmpty()) {
+        if (!isAppSearchEnabled() || shortcuts.isEmpty()) {
             // No need to invoke AppSearch when there's nothing to save.
             return;
         }
@@ -2335,6 +2352,9 @@ class ShortcutPackage extends ShortcutPackageItem {
      * Removes shortcuts from AppSearch.
      */
     void removeShortcuts() {
+        if (!isAppSearchEnabled()) {
+            return;
+        }
         awaitInAppSearch("Removing all shortcuts from " + getPackageName(), session -> {
             final AndroidFuture<Boolean> future = new AndroidFuture<>();
             session.remove("", getSearchSpec(), mShortcutUser.mExecutor, result -> {
@@ -2352,6 +2372,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     private void removeShortcut(@NonNull final String id) {
         Objects.requireNonNull(id);
         mShortcuts.remove(id);
+        if (!isAppSearchEnabled()) {
+            return;
+        }
         awaitInAppSearch("Removing shortcut with id=" + id, session -> {
             final AndroidFuture<Boolean> future = new AndroidFuture<>();
             session.remove(new RemoveByUriRequest.Builder(getPackageName()).addUris(id).build(),
@@ -2380,6 +2403,16 @@ class ShortcutPackage extends ShortcutPackageItem {
             if (id != null) {
                 shortcutIds.add(id);
             }
+        }
+        if (!isAppSearchEnabled()) {
+            final List<ShortcutInfo> ret = new ArrayList<>(1);
+            for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+                ShortcutInfo si = mShortcuts.valueAt(i);
+                if (shortcutIds.contains(si.getId())) {
+                    ret.add(si);
+                }
+            }
+            return ret;
         }
         if (ShortcutService.DEBUG_REBOOT) {
             Slog.d(TAG, "Getting shortcuts for user=" + mShortcutUser.getUserId()
@@ -2429,6 +2462,13 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void forEachShortcutMutateIf(@NonNull final String query,
             @NonNull final Function<ShortcutInfo, Boolean> cb) {
+        if (!isAppSearchEnabled()) {
+            for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+                ShortcutInfo si = mShortcuts.valueAt(i);
+                cb.apply(si);
+            }
+            return;
+        }
         if (ShortcutService.DEBUG_REBOOT) {
             Slog.d(TAG, "Changing shortcuts for user=" + mShortcutUser.getUserId()
                     + " pkg=" + getPackageName());
@@ -2454,6 +2494,15 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void forEachShortcutStopWhen(
             @NonNull final String query, @NonNull final Function<ShortcutInfo, Boolean> cb) {
+        if (!isAppSearchEnabled()) {
+            for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+                final ShortcutInfo si = mShortcuts.valueAt(i);
+                if (cb.apply(si)) {
+                    return;
+                }
+            }
+            return;
+        }
         if (ShortcutService.DEBUG_REBOOT) {
             Slog.d(TAG, "Iterating shortcuts for user=" + mShortcutUser.getUserId()
                     + " pkg=" + getPackageName());
@@ -2517,6 +2566,10 @@ class ShortcutPackage extends ShortcutPackageItem {
             final boolean forceReset,
             @NonNull final String description,
             @NonNull final Function<AppSearchSession, CompletableFuture<T>> cb) {
+        if (!isAppSearchEnabled()) {
+            throw new IllegalStateException(
+                    "awaitInAppSearch called when app search integration is disabled");
+        }
         synchronized (mLock) {
             final StrictMode.ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
             final long callingIdentity = Binder.clearCallingIdentity();
