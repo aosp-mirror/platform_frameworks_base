@@ -161,10 +161,6 @@ package android.media.session {
     method public void onVolumeChanged(@NonNull android.media.session.MediaSession.Token, int);
   }
 
-  public final class PlaybackState implements android.os.Parcelable {
-    method public boolean isActiveState();
-  }
-
 }
 
 package android.net {
