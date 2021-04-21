@@ -422,19 +422,24 @@ final class DefaultPermissionGrantPolicy {
             grantRuntimePermissionsForSystemPackage(pm, userId, pkg);
         }
 
-        // Grant READ_PHONE_STATE to all system apps that have READ_PRIVILEGED_PHONE_STATE
+        // Re-grant READ_PHONE_STATE as non-fixed to all system apps that have
+        // READ_PRIVILEGED_PHONE_STATE and READ_PHONE_STATE granted -- this is to undo the fixed
+        // grant from R.
         for (PackageInfo pkg : packages) {
             if (pkg == null
                     || !doesPackageSupportRuntimePermissions(pkg)
                     || ArrayUtils.isEmpty(pkg.requestedPermissions)
                     || !pm.isGranted(Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
-                            pkg, UserHandle.of(userId))) {
+                            pkg, UserHandle.of(userId))
+                    || !pm.isGranted(Manifest.permission.READ_PHONE_STATE, pkg,
+                            UserHandle.of(userId))) {
                 continue;
             }
-            grantRuntimePermissions(pm, pkg,
-                    Collections.singleton(Manifest.permission.READ_PHONE_STATE),
-                    true, // systemFixed
-                    userId);
+
+            pm.updatePermissionFlags(Manifest.permission.READ_PHONE_STATE, pkg,
+                    PackageManager.FLAG_PERMISSION_SYSTEM_FIXED,
+                    0,
+                    UserHandle.of(userId));
         }
 
     }
@@ -1723,7 +1728,7 @@ final class DefaultPermissionGrantPolicy {
                 int flagMask, int flagValues, @NonNull UserHandle user) {
             PermissionState state = getPermissionState(permission, pkg, user);
             state.initFlags();
-            state.newFlags |= flagValues & flagMask;
+            state.newFlags = (state.newFlags & ~flagMask) | (flagValues & flagMask);
         }
 
         @Override
