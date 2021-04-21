@@ -150,6 +150,12 @@ public class QSDetail extends LinearLayout {
 
     public void updateResources() {
         updateDetailText();
+        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        lp.topMargin = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.quick_qs_offset_height);
+        lp.bottomMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.qs_container_bottom_padding);
+        setLayoutParams(lp);
     }
 
     public boolean isClosingDetail() {

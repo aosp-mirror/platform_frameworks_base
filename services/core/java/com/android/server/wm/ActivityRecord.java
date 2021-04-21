@@ -1090,6 +1090,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (info.configChanges != 0) {
                 pw.println(prefix + "configChanges=0x" + Integer.toHexString(info.configChanges));
             }
+            pw.println(prefix + "neverSandboxDisplayApis=" + info.neverSandboxDisplayApis());
+            pw.println(prefix + "alwaysSandboxDisplayApis=" + info.alwaysSandboxDisplayApis());
         }
         if (mLastParentBeforePip != null) {
             pw.println(prefix + "lastParentTaskIdBeforePip=" + mLastParentBeforePip.mTaskId);
@@ -6899,7 +6901,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getResolvedOverrideConfiguration().seq = mConfigurationSeq;
 
         // Sandbox max bounds by setting it to the activity bounds, if activity is letterboxed, or
-        // has or will have mCompatDisplayInsets for size compat.
+        // has or will have mCompatDisplayInsets for size compat. Also forces an activity to be
+        // sandboxed or not depending upon the configuration settings.
         if (providesMaxBounds()) {
             mTmpBounds.set(resolvedConfig.windowConfiguration.getBounds());
             if (mTmpBounds.isEmpty()) {
@@ -6909,11 +6912,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             if (DEBUG_CONFIGURATION) {
                 ProtoLog.d(WM_DEBUG_CONFIGURATION, "Sandbox max bounds for uid %s to bounds %s. "
+                                + "config to never sandbox = %s, "
+                                + "config to always sandbox = %s, "
                                 + "letterboxing from mismatch with parent bounds = %s, "
                                 + "has mCompatDisplayInsets = %s, "
                                 + "should create compatDisplayInsets = %s",
                         getUid(),
                         mTmpBounds,
+                        info.neverSandboxDisplayApis(),
+                        info.alwaysSandboxDisplayApis(),
                         !matchParentBounds(),
                         mCompatDisplayInsets != null,
                         shouldCreateCompatDisplayInsets());
@@ -7311,12 +7318,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mDisplayContent != null && !mDisplayContent.sandboxDisplayApis()) {
             return false;
         }
+        // Never apply sandboxing to an app that should be explicitly excluded from the config.
+        if (info != null && info.neverSandboxDisplayApis()) {
+            return false;
+        }
+        // Always apply sandboxing to an app that should be explicitly included from the config.
+        if (info != null && info.alwaysSandboxDisplayApis()) {
+            return true;
+        }
         // Max bounds should be sandboxed where an activity is letterboxed (activity bounds will be
         // smaller than task bounds).
         if (!matchParentBounds()) {
             return true;
         }
-
         // Max bounds should be sandboxed when an activity should have compatDisplayInsets, and it
         // will keep the same bounds and screen configuration when it was first launched regardless
         // how its parent window changes, so that the sandbox API will provide a consistent result.

@@ -943,6 +943,13 @@ public class RemoteViews implements Parcelable, Filter {
             View target = root.findViewById(viewId);
             if (target == null) return;
 
+            // Ensure that we are applying to an AppWidget root
+            if (!(rootParent instanceof AppWidgetHostView)) {
+                Log.e(LOG_TAG, "setRemoteAdapter can only be used for "
+                        + "AppWidgets (root id: " + viewId + ")");
+                return;
+            }
+
             if (!(target instanceof AdapterView)) {
                 Log.e(LOG_TAG, "Cannot call setRemoteAdapter on a view which is not "
                         + "an AdapterView (id: " + viewId + ")");
@@ -1008,14 +1015,15 @@ public class RemoteViews implements Parcelable, Filter {
 
             // Ensure that we are applying to an AppWidget root
             if (!(rootParent instanceof AppWidgetHostView)) {
-                Log.e(LOG_TAG, "SetRemoteViewsAdapterIntent action can only be used for " +
-                        "AppWidgets (root id: " + viewId + ")");
+                Log.e(LOG_TAG, "setRemoteAdapter can only be used for "
+                        + "AppWidgets (root id: " + viewId + ")");
                 return;
             }
+
             // Ensure that we are calling setRemoteAdapter on an AdapterView that supports it
             if (!(target instanceof AbsListView) && !(target instanceof AdapterViewAnimator)) {
-                Log.e(LOG_TAG, "Cannot setRemoteViewsAdapter on a view which is not " +
-                        "an AbsListView or AdapterViewAnimator (id: " + viewId + ")");
+                Log.e(LOG_TAG, "Cannot setRemoteAdapter on a view which is not "
+                        + "an AbsListView or AdapterViewAnimator (id: " + viewId + ")");
                 return;
             }
 
@@ -1897,31 +1905,49 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        protected @NonNull Object getParameterValue(View view) throws ActionException {
+        protected Object getParameterValue(View view) throws ActionException {
             Resources resources = view.getContext().getResources();
             try {
                 switch (this.mResourceType) {
                     case DIMEN_RESOURCE:
-                        if (this.type == BaseReflectionAction.INT) {
-                            return resources.getDimensionPixelSize(this.mResId);
-                        }
-                        return resources.getDimension(this.mResId);
-                    case COLOR_RESOURCE:
-                        switch(this.type) {
+                        switch (this.type) {
                             case BaseReflectionAction.INT:
-                                return view.getContext().getColor(this.mResId);
-                            case BaseReflectionAction.COLOR_STATE_LIST:
-                                return view.getContext().getColorStateList(this.mResId);
+                                return mResId == 0 ? 0 : resources.getDimensionPixelSize(mResId);
+                            case BaseReflectionAction.FLOAT:
+                                return mResId == 0 ? 0f : resources.getDimension(mResId);
                             default:
                                 throw new ActionException(
-                                        "color resources must be used as int or ColorStateList, "
+                                        "dimen resources must be used as INT or FLOAT, "
                                                 + "not " + this.type);
                         }
+                    case COLOR_RESOURCE:
+                        switch (this.type) {
+                            case BaseReflectionAction.INT:
+                                return mResId == 0 ? 0 : view.getContext().getColor(mResId);
+                            case BaseReflectionAction.COLOR_STATE_LIST:
+                                return mResId == 0
+                                        ? null : view.getContext().getColorStateList(mResId);
+                            default:
+                                throw new ActionException(
+                                        "color resources must be used as INT or COLOR_STATE_LIST,"
+                                                + " not " + this.type);
+                        }
                     case STRING_RESOURCE:
-                        return resources.getText(this.mResId);
+                        switch (this.type) {
+                            case BaseReflectionAction.CHAR_SEQUENCE:
+                                return mResId == 0 ? null : resources.getText(mResId);
+                            case BaseReflectionAction.STRING:
+                                return mResId == 0 ? null : resources.getString(mResId);
+                            default:
+                                throw new ActionException(
+                                        "string resources must be used as STRING or CHAR_SEQUENCE,"
+                                                + " not " + this.type);
+                        }
                     default:
                         throw new ActionException("unknown resource type: " + this.mResourceType);
                 }
+            } catch (ActionException ex) {
+                throw ex;
             } catch (Throwable t) {
                 throw new ActionException(t);
             }
@@ -1963,50 +1989,62 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        protected @NonNull Object getParameterValue(View view) throws ActionException {
+        protected Object getParameterValue(View view) throws ActionException {
+            TypedArray typedArray = view.getContext().obtainStyledAttributes(new int[]{mAttrId});
             try {
-                TypedArray typedArray = view.getContext().obtainStyledAttributes(
-                        new int[]{this.mAttrId});
-                try {
-                    if (typedArray.getType(0) == TypedValue.TYPE_NULL) {
-                        throw new ActionException("Attribute 0x" + Integer.toHexString(this.mAttrId)
-                                + " is not defined");
-                    }
-                    switch (this.mResourceType) {
-                        case DIMEN_RESOURCE:
-                            if (this.type == BaseReflectionAction.INT) {
-                                return typedArray.getDimensionPixelSize(0, 0);
-                            }
-                            return typedArray.getDimension(0, 0);
-                        case COLOR_RESOURCE:
-                            switch (this.type) {
-                                case BaseReflectionAction.INT:
-                                    return typedArray.getColor(0, 0);
-                                case BaseReflectionAction.COLOR_STATE_LIST:
-                                    return typedArray.getColorStateList(0);
-                                default:
-                                    throw new ActionException(
-                                            "Color attribute 0x" + Integer.toHexString(this.mAttrId)
-                                                    + " must be used as int or ColorStateList");
-                            }
-                        case STRING_RESOURCE:
-                            String value = typedArray.getString(0);
-                            if (value == null) {
-                                throw new ActionException("Attribute 0x"
-                                        + Integer.toHexString(this.mAttrId)
-                                        + " is not a defined or is not a string");
-                            }
-                            return value;
-                        default:
-                            // Note: This can only be an implementation error.
-                            throw new ActionException(
-                                    "Unknown resource type: " + this.mResourceType);
-                    }
-                } finally {
-                    typedArray.recycle();
+                // When mAttrId == 0, we will depend on the default values below
+                if (mAttrId != 0 && typedArray.getType(0) == TypedValue.TYPE_NULL) {
+                    throw new ActionException("Attribute 0x" + Integer.toHexString(this.mAttrId)
+                            + " is not defined");
                 }
+                switch (this.mResourceType) {
+                    case DIMEN_RESOURCE:
+                        switch (this.type) {
+                            case BaseReflectionAction.INT:
+                                return typedArray.getDimensionPixelSize(0, 0);
+                            case BaseReflectionAction.FLOAT:
+                                return typedArray.getDimension(0, 0);
+                            default:
+                                throw new ActionException(
+                                        "dimen attribute 0x" + Integer.toHexString(this.mAttrId)
+                                                + " must be used as INT or FLOAT,"
+                                                + " not " + this.type);
+                        }
+                    case COLOR_RESOURCE:
+                        switch (this.type) {
+                            case BaseReflectionAction.INT:
+                                return typedArray.getColor(0, 0);
+                            case BaseReflectionAction.COLOR_STATE_LIST:
+                                return typedArray.getColorStateList(0);
+                            default:
+                                throw new ActionException(
+                                        "color attribute 0x" + Integer.toHexString(this.mAttrId)
+                                                + " must be used as INT or COLOR_STATE_LIST,"
+                                                + " not " + this.type);
+                        }
+                    case STRING_RESOURCE:
+                        switch (this.type) {
+                            case BaseReflectionAction.CHAR_SEQUENCE:
+                                return typedArray.getText(0);
+                            case BaseReflectionAction.STRING:
+                                return typedArray.getString(0);
+                            default:
+                                throw new ActionException(
+                                        "string attribute 0x" + Integer.toHexString(this.mAttrId)
+                                                + " must be used as STRING or CHAR_SEQUENCE,"
+                                                + " not " + this.type);
+                        }
+                    default:
+                        // Note: This can only be an implementation error.
+                        throw new ActionException(
+                                "Unknown resource type: " + this.mResourceType);
+                }
+            } catch (ActionException ex) {
+                throw ex;
             } catch (Throwable t) {
                 throw new ActionException(t);
+            } finally {
+                typedArray.recycle();
             }
         }
 
@@ -4511,7 +4549,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @param viewId The id of the view to change
      * @param type The margin being set e.g. {@link #MARGIN_END}
-     * @param attr a dimension attribute to apply to the margin.
+     * @param attr a dimension attribute to apply to the margin, or 0 to clear the margin.
      */
     public void setViewLayoutMarginAttr(@IdRes int viewId, @MarginType int type,
             @AttrRes int attr) {
@@ -4694,6 +4732,8 @@ public class RemoteViews implements Parcelable, Filter {
      * The dimension will be resolved from the resources at the time the {@link RemoteViews} is
      * (re-)applied.
      *
+     * Undefined resources will result in an exception, except 0 which will resolve to 0.
+     *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param dimenResource The resource to resolve and pass as argument to the method.
@@ -4728,6 +4768,8 @@ public class RemoteViews implements Parcelable, Filter {
      * The dimension will be resolved from the theme attribute at the time the
      * {@link RemoteViews} is (re-)applied.
      *
+     * Unresolvable attributes will result in an exception, except 0 which will resolve to 0.
+     *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param dimenAttr The attribute to resolve and pass as argument to the method.
@@ -4744,6 +4786,8 @@ public class RemoteViews implements Parcelable, Filter {
      * The Color will be resolved from the resources at the time the {@link RemoteViews} is (re-)
      * applied.
      *
+     * Undefined resources will result in an exception, except 0 which will resolve to 0.
+     *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param colorResource The resource to resolve and pass as argument to the method.
@@ -4759,6 +4803,8 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * The Color will be resolved from the theme attribute at the time the {@link RemoteViews} is
      * (re-)applied.
+     *
+     * Unresolvable attributes will result in an exception, except 0 which will resolve to 0.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4838,6 +4884,8 @@ public class RemoteViews implements Parcelable, Filter {
      * The ColorStateList will be resolved from the resources at the time the {@link RemoteViews} is
      * (re-)applied.
      *
+     * Undefined resources will result in an exception, except 0 which will resolve to null.
+     *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param colorResource The resource to resolve and pass as argument to the method.
@@ -4854,6 +4902,8 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * The ColorStateList will be resolved from the theme attribute at the time the
      * {@link RemoteViews} is (re-)applied.
+     *
+     * Unresolvable attributes will result in an exception, except 0 which will resolve to null.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4895,6 +4945,8 @@ public class RemoteViews implements Parcelable, Filter {
      * The dimension will be resolved from the resources at the time the {@link RemoteViews} is
      * (re-)applied.
      *
+     * Undefined resources will result in an exception, except 0 which will resolve to 0f.
+     *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param dimenResource The resource to resolve and pass as argument to the method.
@@ -4930,6 +4982,8 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * The dimension will be resolved from the theme attribute at the time the {@link RemoteViews}
      * is (re-)applied.
+     *
+     * Unresolvable attributes will result in an exception, except 0 which will resolve to 0f.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
@@ -4992,6 +5046,8 @@ public class RemoteViews implements Parcelable, Filter {
      * The CharSequence will be resolved from the resources at the time the {@link RemoteViews} is
      * (re-)applied.
      *
+     * Undefined resources will result in an exception, except 0 which will resolve to null.
+     *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param stringResource The resource to resolve and pass as argument to the method.
@@ -5008,6 +5064,8 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * The CharSequence will be resolved from the theme attribute at the time the
      * {@link RemoteViews} is (re-)applied.
+     *
+     * Unresolvable attributes will result in an exception, except 0 which will resolve to null.
      *
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.

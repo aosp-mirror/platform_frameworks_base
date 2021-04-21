@@ -137,8 +137,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     @GuardedBy("mWorkerLock")
     private PowerStatsInternal mPowerStatsInternal = null;
 
-    // WiFi keeps an accumulated total of stats, unlike Bluetooth.
-    // Keep the last WiFi stats so we can compute a delta.
+    // WiFi keeps an accumulated total of stats. Keep the last WiFi stats so we can compute a delta.
+    // (This is unlike Bluetooth, where BatteryStatsImpl is left responsible for taking the delta.)
     @GuardedBy("mWorkerLock")
     private WifiActivityEnergyInfo mLastWifiInfo =
             new WifiActivityEnergyInfo(0, 0, 0, 0, 0, 0);

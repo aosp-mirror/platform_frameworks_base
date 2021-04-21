@@ -1494,7 +1494,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int SCROLL_CAPTURE_HINT_AUTO = 0;
 
     /**
-     * Explicitly exclcude this view as a potential scroll capture target. The system will not
+     * Explicitly exclude this view as a potential scroll capture target. The system will not
      * consider it. Mutually exclusive with {@link #SCROLL_CAPTURE_HINT_INCLUDE}, which this flag
      * takes precedence over.
      *
@@ -26005,6 +26005,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_minWidth
      */
+    @RemotableViewMethod
     public void setMinimumWidth(int minWidth) {
         mMinWidth = minWidth;
         requestLayout();
@@ -30143,6 +30144,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setScrollCaptureHint(@ScrollCaptureHint int hint) {
         mPrivateFlags4 &= ~PFLAG4_SCROLL_CAPTURE_HINT_MASK;
+        // Since include/exclude are mutually exclusive, exclude takes precedence.
+        if ((hint & SCROLL_CAPTURE_HINT_EXCLUDE) != 0) {
+            hint &= ~SCROLL_CAPTURE_HINT_INCLUDE;
+        }
         mPrivateFlags4 |= ((hint << PFLAG4_SCROLL_CAPTURE_HINT_SHIFT)
                 & PFLAG4_SCROLL_CAPTURE_HINT_MASK);
     }
