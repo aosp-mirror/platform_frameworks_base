@@ -468,28 +468,33 @@ public class VibratorManagerServiceTest {
     @Test
     public void vibrate_withRingtone_usesRingtoneSettings() throws Exception {
         mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
         mVibrator.setDefaultRingVibrationIntensity(Vibrator.VIBRATION_INTENSITY_MEDIUM);
-        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
         setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
         VibratorManagerService service = createSystemReadyService();
-        vibrate(service, VibrationEffect.createOneShot(40, 1), RINGTONE_ATTRS);
+        vibrate(service, VibrationEffect.createOneShot(1, 1), RINGTONE_ATTRS);
+        // Wait before checking it never played.
+        assertFalse(waitUntil(s -> !fakeVibrator.getEffectSegments().isEmpty(),
+                service, /* timeout= */ 50));
 
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
         setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 1);
         service = createSystemReadyService();
-        vibrate(service, VibrationEffect.createOneShot(40, 10), RINGTONE_ATTRS);
-        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+        vibrate(service, VibrationEffect.createOneShot(1, 10), RINGTONE_ATTRS);
+        assertTrue(waitUntil(s -> fakeVibrator.getEffectSegments().size() == 1,
+                service, TEST_TIMEOUT_MILLIS));
 
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
         setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
         service = createSystemReadyService();
-        vibrate(service, VibrationEffect.createOneShot(40, 100), RINGTONE_ATTRS);
-        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+        vibrate(service, VibrationEffect.createOneShot(1, 100), RINGTONE_ATTRS);
+        assertTrue(waitUntil(s -> fakeVibrator.getEffectSegments().size() == 2,
+                service, TEST_TIMEOUT_MILLIS));
 
-        assertEquals(2, mVibratorProviders.get(1).getEffectSegments().size());
         assertEquals(Arrays.asList(10 / 255f, 100 / 255f),
                 mVibratorProviders.get(1).getAmplitudes());
     }
