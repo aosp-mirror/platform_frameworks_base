@@ -309,4 +309,9 @@ public class UwbServiceImpl extends IUwbAdapter.Stub implements IBinder.DeathRec
         enforceUwbPrivilegedPermission();
         getVendorUwbAdapter().closeRanging(sessionHandle);
     }
+
+    @Override
+    public synchronized void setEnabled(boolean enabled) throws RemoteException {
+        getVendorUwbAdapter().setEnabled(enabled);
+    }
 }
