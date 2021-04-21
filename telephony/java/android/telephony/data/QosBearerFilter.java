@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
 /**
  * Class that stores QOS filter parameters as defined in
  * 3gpp 24.008 10.5.6.12 and 3gpp 24.501 9.11.4.13.
