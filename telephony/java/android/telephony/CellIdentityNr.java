@@ -116,7 +116,7 @@ public final class CellIdentityNr extends CellIdentity {
     @Override
     public @NonNull CellIdentityNr sanitizeLocationInfo() {
         return new CellIdentityNr(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, mNrArfcn,
-                mBands, mMccStr, mMncStr, CellInfo.UNAVAILABLE, mAlphaLong, mAlphaShort,
+                mBands, mMccStr, mMncStr, CellInfo.UNAVAILABLE_LONG, mAlphaLong, mAlphaShort,
                 mAdditionalPlmns);
     }
 
