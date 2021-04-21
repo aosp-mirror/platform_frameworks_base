@@ -172,8 +172,8 @@ final class TranslationManagerServiceImpl extends
         res.putInt(EXTRA_STATE, state);
         // TODO(177500482): Store the locale pair so it can be sent for RESUME events.
         if (sourceSpec != null) {
-            res.putString(EXTRA_SOURCE_LOCALE, sourceSpec.getLanguage());
-            res.putString(EXTRA_TARGET_LOCALE, targetSpec.getLanguage());
+            res.putSerializable(EXTRA_SOURCE_LOCALE, sourceSpec.getLocale());
+            res.putSerializable(EXTRA_TARGET_LOCALE, targetSpec.getLocale());
         }
         // TODO(177500482): Only support the *current* Input Method.
         List<InputMethodInfo> enabledInputMethods =
