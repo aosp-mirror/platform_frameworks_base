@@ -90,6 +90,36 @@ public final class LegacyPermissionManager {
     }
 
     /**
+     * Checks whether the package with the given pid/uid can read the device phone number.
+     *
+     * @param packageName      the name of the package to be checked for phone number access
+     * @param message          the message to be used for logging during phone number access
+     *                         verification
+     * @param callingFeatureId the feature in the package
+     * @param pid              the process id of the package to be checked
+     * @param uid              the uid of the package to be checked
+     * @return <ul>
+     *     <li>{@link PackageManager#PERMISSION_GRANTED} if the package is allowed phone number
+     *     access</li>
+     *     <li>{@link android.app.AppOpsManager#MODE_IGNORED} if the package does not have phone
+     *     number access but for appcompat reasons this should be a silent failure (ie return empty
+     *     or null data)</li>
+     *     <li>{@link PackageManager#PERMISSION_DENIED} if the package does not have phone number
+     *     access</li>
+     * </ul>
+     * @hide
+     */
+    public int checkPhoneNumberAccess(@Nullable String packageName, @Nullable String message,
+            @Nullable String callingFeatureId, int pid, int uid) {
+        try {
+            return mLegacyPermissionManager.checkPhoneNumberAccess(packageName, message,
+                    callingFeatureId, pid, uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Grant default permissions to currently active LUI app
      * @param packageName The package name for the LUI app
      * @param user The user handle
