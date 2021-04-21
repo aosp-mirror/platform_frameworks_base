@@ -2333,7 +2333,6 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void setCecSettingStringValue(String name, String value) {
-            Slog.i(TAG, "Setting '" + name + "' to '" + value + "'.");
             initBinderCall();
             long token = Binder.clearCallingIdentity();
             try {
@@ -2356,7 +2355,6 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void setCecSettingIntValue(String name, int value) {
-            Slog.i(TAG, "Setting '" + name + "' to '" + value + "'.");
             initBinderCall();
             long token = Binder.clearCallingIdentity();
             try {
@@ -3521,7 +3519,6 @@ public class HdmiControlService extends SystemService {
             new HdmiCecConfig.SettingChangeListener() {
                 @Override
                 public void onChange(String name) {
-                    Slog.i(TAG, "Change listener fired for '" + name + "' setting.");
                     synchronized (mLock) {
                         if (!mHdmiCecSettingChangeListenerRecords.containsKey(name)) {
                             return;
@@ -3541,7 +3538,6 @@ public class HdmiControlService extends SystemService {
                 mHdmiCecConfig.registerChangeListener(name, mSettingChangeListener);
             }
             mHdmiCecSettingChangeListenerRecords.get(name).register(listener);
-            Slog.i(TAG, "Added change listener for '" + name + "' setting.");
         }
     }
 
@@ -3555,14 +3551,12 @@ public class HdmiControlService extends SystemService {
             if (mHdmiCecSettingChangeListenerRecords.get(name).getRegisteredCallbackCount() == 0) {
                 mHdmiCecSettingChangeListenerRecords.remove(name);
                 mHdmiCecConfig.removeChangeListener(name, mSettingChangeListener);
-                Slog.i(TAG, "Removed change listener for '" + name + "' setting.");
             }
         }
     }
 
     private void invokeCecSettingChangeListenerLocked(String name,
             final IHdmiCecSettingChangeListener listener) {
-        Slog.i(TAG, "Listener.onChange() invoked for '" + name + "' setting.");
         try {
             listener.onChange(name);
         } catch (RemoteException e) {
