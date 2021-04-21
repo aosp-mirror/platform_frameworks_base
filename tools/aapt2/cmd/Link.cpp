@@ -1656,10 +1656,11 @@ class Linker {
                                                      << " with config \"" << config_value->config
                                                      << "\" for round icon compatibility");
 
-      auto value = icon_reference->Clone(&table->string_pool);
+      CloningValueTransformer cloner(&table->string_pool);
+      auto value = icon_reference->Transform(cloner);
       auto round_config_value =
           round_icon_entry->FindOrCreateValue(config_value->config, config_value->product);
-      round_config_value->value.reset(value);
+      round_config_value->value = std::move(value);
     }
   }
 
