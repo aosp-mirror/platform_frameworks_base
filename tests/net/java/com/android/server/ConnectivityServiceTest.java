@@ -10479,7 +10479,7 @@ public class ConnectivityServiceTest {
         assertTrue(mRequests.get(0).hasCapability(NET_CAPABILITY_VALIDATED));
         assertTrue(mRequests.get(1).isRequest());
         assertTrue(mRequests.get(1).hasCapability(NET_CAPABILITY_OEM_PAID));
-        assertTrue(mRequests.get(2).isRequest());
+        assertEquals(NetworkRequest.Type.TRACK_DEFAULT, mRequests.get(2).type);
         assertTrue(mService.getDefaultRequest().networkCapabilities.equalsNetCapabilities(
                 mRequests.get(2).networkCapabilities));
     }
