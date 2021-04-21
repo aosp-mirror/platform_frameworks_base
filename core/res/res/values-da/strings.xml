@@ -309,8 +309,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"få adgang til din fysiske aktivitet"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"tage billeder og optage video"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Opkaldslister"</string>
-    <string name="permgroupdesc_calllog" msgid="2026996642917801803">"læse og redigere opkaldslisten"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Opkaldshistorik"</string>
+    <string name="permgroupdesc_calllog" msgid="2026996642917801803">"læse og redigere opkaldshistorik"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"foretage og administrere telefonopkald"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Kropssensorer"</string>
@@ -403,12 +403,12 @@
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din tablet. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din Android TV-enhed. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din telefon. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
-    <string name="permlab_readCallLog" msgid="1739990210293505948">"læse opkaldsliste"</string>
+    <string name="permlab_readCallLog" msgid="1739990210293505948">"læse opkaldshistorik"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Denne app kan læse din opkaldshistorik."</string>
-    <string name="permlab_writeCallLog" msgid="670292975137658895">"skriv opkaldsliste"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Tillader, at appen ændrer din tablets opkaldsliste, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldsliste."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Tillader, at appen ændrer din Android TV-enheds opkaldsliste, bl.a. data om indgående og udgående opkald. Skadelige apps kan bruge dette til at rydde eller ændre din opkaldsliste."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Tillader, at appen ændrer telefonens opkaldsliste, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldsliste."</string>
+    <string name="permlab_writeCallLog" msgid="670292975137658895">"skriv opkaldshistorik"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Tillader, at appen ændrer din tablets opkaldshistorik, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldshistorik."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Tillader, at appen ændrer din Android TV-enheds opkaldshistorik, bl.a. data om indgående og udgående opkald. Skadelige apps kan bruge dette til at rydde eller ændre din opkaldshistorik."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Tillader, at appen ændrer telefonens opkaldshistorik, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldshistorik."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"få adgang til kropssensorer (f.eks. pulsmålere)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Giver appen adgang til data fra sensorer, der overvåger din fysiske tilstand, f.eks. din puls."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Læs kalenderbegivenheder og -info"</string>
@@ -1636,7 +1636,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Fuld kontrol er velegnet til apps, der hjælper dig med hjælpefunktioner, men ikke de fleste apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Se og styre skærm"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan læse alt indhold på skærmen og vise indhold oven på andre apps."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Se og udfør handlinger"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Se og udføre handlinger"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan spore dine interaktioner med en app eller en hardwaresensor og interagere med apps på dine vegne."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Tillad"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Afvis"</string>

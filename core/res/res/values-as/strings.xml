@@ -1507,7 +1507,7 @@
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"অধিক বিকল্প"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s: %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="8490227947584914460">"শ্বেয়াৰ কৰা আভ্যন্তৰীণ সঞ্চয়াগাৰ"</string>
+    <string name="storage_internal" msgid="8490227947584914460">"শ্বেয়াৰ কৰা আভ্যন্তৰীণ ষ্ট\'ৰেজ"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"এছডি কাৰ্ড"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> এছডি কাৰ্ড"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"ইউএছবি ড্ৰাইভ"</string>

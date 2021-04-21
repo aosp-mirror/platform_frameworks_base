@@ -297,7 +297,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acceder aos teus contactos"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Localización"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"acceder á localización deste dispositivo"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder ao teu calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar e consultar mensaxes de SMS"</string>
@@ -409,7 +409,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permite á aplicación modificar o rexistro de chamadas da tableta, incluídos os datos acerca de chamadas entrantes e saíntes. É posible que aplicacións maliciosas utilicen esta acción para borrar ou modificar o teu rexistro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite que a aplicación modifique o rexistro de chamadas do dispositivo Android TV, incluídos os datos acerca de chamadas entrantes e saíntes. As aplicacións maliciosas poden utilizar este permiso para borrar ou modificar o rexistro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permite á aplicación modificar o rexistro de chamadas do teléfono, incluídos os datos acerca de chamadas entrantes e saíntes. É posible que aplicacións maliciosas utilicen esta acción para borrar ou modificar o teu rexistro de chamadas."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"acceder a sensores do corpo (como monitores de ritmo cardíaco)"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"acceder a sensores corporais (como monitores de ritmo cardíaco)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Permite que a aplicación acceda aos datos dos sensores que controlan o teu estado físico, como o ritmo cardíaco."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler os detalles e os eventos do calendario"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta aplicación pode ler todos os eventos do calendario almacenados na túa tableta e compartir ou gardar os datos do calendario."</string>
@@ -1118,8 +1118,8 @@
     <string name="no" msgid="5122037903299899715">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Atención"</string>
     <string name="loading" msgid="3138021523725055037">"Cargando..."</string>
-    <string name="capital_on" msgid="2770685323900821829">"SI"</string>
-    <string name="capital_off" msgid="7443704171014626777">"NON"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ACTIVADO"</string>
+    <string name="capital_off" msgid="7443704171014626777">"DESACTIVADO"</string>
     <string name="checked" msgid="9179896827054513119">"seleccionado"</string>
     <string name="not_checked" msgid="7972320087569023342">"non seleccionado"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Completar a acción usando"</string>
@@ -1629,8 +1629,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ao manter as dúas teclas de volume premidas durante uns segundos actívase <xliff:g id="SERVICE">%1$s</xliff:g>, unha función de accesibilidade. Esta acción pode cambiar o funcionamento do dispositivo.\n\nPodes cambiar o uso deste atallo para outra función en Configuración &gt; Accesibilidade."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activar"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Non activar"</string>
-    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"SI"</string>
-    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"NON"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVADO"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DESACTIVADO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Queres permitir que <xliff:g id="SERVICE">%1$s</xliff:g> poida controlar totalmente o teu dispositivo?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se activas <xliff:g id="SERVICE">%1$s</xliff:g>, o dispositivo non utilizará o teu bloqueo de pantalla para mellorar a encriptación de datos."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"O control total é adecuado para as aplicacións que che axudan coa accesibilidade, pero non para a maioría das aplicacións."</string>
@@ -1904,7 +1904,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Fixar a <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Deixar de fixar"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Deixar de fixar a <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Info. da aplicación"</string>
+    <string name="app_info" msgid="6113278084877079851">"Información da aplicación"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Iniciando demostración…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Restablecendo dispositivo…"</string>

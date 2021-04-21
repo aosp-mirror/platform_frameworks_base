@@ -297,7 +297,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"আপনার পরিচিতিগুলিতে অ্যাক্সেস"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"লোকেশন"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"এই ডিভাইসের লোকেশন অ্যাক্সেস"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"ক্যালেন্ডার"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"এসএমএসগুলি পাঠাতে এবং দেখতে"</string>
@@ -1563,7 +1563,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"কাস্ট করুন"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ডিভাইসে সংযোগ করুন"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ডিভাইসে স্ক্রিন কাস্ট করুন"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"ডিভাইসগুলি সার্চ করা হচ্ছে…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"ডিভাইস সার্চ করা হচ্ছে…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"সেটিংস"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ডিসকানেক্ট করুন"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"স্ক্যান করা হচ্ছে…"</string>
