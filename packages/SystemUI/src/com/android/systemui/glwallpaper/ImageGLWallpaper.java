@@ -29,7 +29,6 @@ import static android.opengl.GLES20.glDrawArrays;
 import static android.opengl.GLES20.glEnableVertexAttribArray;
 import static android.opengl.GLES20.glGenTextures;
 import static android.opengl.GLES20.glTexParameteri;
-import static android.opengl.GLES20.glUniform1f;
 import static android.opengl.GLES20.glUniform1i;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
@@ -53,7 +52,6 @@ class ImageGLWallpaper {
     private static final String A_POSITION = "aPosition";
     private static final String A_TEXTURE_COORDINATES = "aTextureCoordinates";
     private static final String U_TEXTURE = "uTexture";
-    private static final String U_EXPOSURE = "uExposure";
     private static final int POSITION_COMPONENT_COUNT = 2;
     private static final int TEXTURE_COMPONENT_COUNT = 2;
     private static final int BYTES_PER_FLOAT = 4;
@@ -85,7 +83,6 @@ class ImageGLWallpaper {
     private int mAttrPosition;
     private int mAttrTextureCoordinates;
     private int mUniTexture;
-    private int mUniExposure;
     private int mTextureId;
 
     ImageGLWallpaper(ImageGLProgram program) {
@@ -128,7 +125,6 @@ class ImageGLWallpaper {
 
     private void setupUniforms() {
         mUniTexture = mProgram.getUniformHandle(U_TEXTURE);
-        mUniExposure = mProgram.getUniformHandle(U_EXPOSURE);
     }
 
     void draw() {
@@ -173,10 +169,6 @@ class ImageGLWallpaper {
         glBindTexture(GL_TEXTURE_2D, mTextureId);
         // Let the texture sampler in fragment shader to read form this texture unit.
         glUniform1i(mUniTexture, 0);
-    }
-
-    void setExposureValue(float exposureValue) {
-        glUniform1f(mUniExposure, exposureValue);
     }
 
     /**
