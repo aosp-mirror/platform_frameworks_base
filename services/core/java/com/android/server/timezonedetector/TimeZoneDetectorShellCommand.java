@@ -18,12 +18,19 @@ package com.android.server.timezonedetector;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SERVICE_NAME;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_GEO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE;
+import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
 
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED;
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT;
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE;
+
+import android.app.time.LocationTimeZoneManager;
 import android.app.time.TimeZoneConfiguration;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
@@ -155,20 +162,21 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
-        pw.println("Time Zone Detector (time_zone_detector) commands:");
-        pw.println("  help");
-        pw.println("    Print this help text.");
+        pw.printf("Time Zone Detector (%s) commands:\n", SHELL_COMMAND_SERVICE_NAME);
+        pw.printf("  help\n");
+        pw.printf("    Print this help text.\n");
         pw.printf("  %s\n", SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED);
-        pw.println("    Prints true/false according to the automatic tz detection setting");
+        pw.printf("    Prints true/false according to the automatic time zone detection setting\n");
         pw.printf("  %s true|false\n", SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED);
-        pw.println("    Sets the automatic tz detection setting.");
+        pw.printf("    Sets the automatic time zone detection setting.\n");
         pw.printf("  %s\n", SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED);
-        pw.println("    Prints true/false according to whether geolocation time zone detection is"
-                + " supported on this device");
+        pw.printf("    Prints true/false according to whether geolocation time zone detection is"
+                + " supported on this device.\n");
         pw.printf("  %s\n", SHELL_COMMAND_IS_GEO_DETECTION_ENABLED);
-        pw.println("    Prints true/false according to the geolocation tz detection setting");
+        pw.printf("    Prints true/false according to the geolocation time zone detection setting."
+                + "\n");
         pw.printf("  %s true|false\n", SHELL_COMMAND_SET_GEO_DETECTION_ENABLED);
-        pw.println("    Sets the geolocation tz detection setting.");
+        pw.printf("    Sets the geolocation time zone detection enabled setting.\n");
         pw.printf("  %s <geolocation suggestion opts>\n",
                 SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE);
         pw.printf("  %s <manual suggestion opts>\n",
@@ -181,6 +189,28 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         ManualTimeZoneSuggestion.printCommandLineOpts(pw);
         pw.println();
         TelephonyTimeZoneSuggestion.printCommandLineOpts(pw);
+        pw.println();
+        pw.printf("This service is also affected by the following device_config flags in the"
+                + " %s namespace:\n", NAMESPACE_SYSTEM_TIME);
+        pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED);
+        pw.printf("    Only observed if the geolocation time zone detection feature is enabled in"
+                + " config.\n");
+        pw.printf("    Set this to false to disable the feature.\n");
+        pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT);
+        pw.printf("    Only used if the device does not have an explicit 'geolocation time zone"
+                + " detection enabled' setting stored [*].\n");
+        pw.printf("    The default is when unset is false.\n");
+        pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE);
+        pw.printf("    Used to override the device's 'geolocation time zone detection enabled'"
+                + " setting [*].\n");
+        pw.println();
+        pw.printf("[*] To be enabled, the user must still have location = on / auto time zone"
+                + " detection = on.\n");
+        pw.println();
+        pw.printf("See \"adb shell cmd device_config\" for more information on setting flags.\n");
+        pw.println();
+        pw.printf("Also see \"adb shell cmd %s help\" for lower-level location time zone"
+                        + " commands / settings.\n", LocationTimeZoneManager.SERVICE_NAME);
         pw.println();
     }
 }

@@ -86,9 +86,11 @@ public class StatusBarIconHolder {
             Context context,
             CallIndicatorIconState state) {
         StatusBarIconHolder holder = new StatusBarIconHolder();
+        int resId = state.isNoCalling ? state.noCallingResId : state.callStrengthResId;
+        String contentDescription = state.isNoCalling
+                ? state.noCallingDescription : state.callStrengthDescription;
         holder.mIcon = new StatusBarIcon(UserHandle.SYSTEM, context.getPackageName(),
-                Icon.createWithResource(context, state.noCallingResId),
-                0, 0, state.noCallingDescription);
+                Icon.createWithResource(context, resId), 0, 0, contentDescription);
         holder.mTag = state.subId;
         return holder;
     }

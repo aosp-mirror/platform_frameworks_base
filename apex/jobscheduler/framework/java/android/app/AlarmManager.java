@@ -19,6 +19,7 @@ package android.app;
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
@@ -591,8 +592,8 @@ public class AlarmManager {
      *        in milliseconds.  The alarm will be delivered no later than this many
      *        milliseconds after {@code windowStartMillis}.  Note that this parameter
      *        is a <i>duration,</i> not the timestamp of the end of the window.
-     * @param tag string describing the alarm, used for logging and battery-use
-     *         attribution
+     * @param tag Optional. A string describing the alarm, used for logging and battery-use
+     *         attribution.
      * @param listener {@link OnAlarmListener} instance whose
      *         {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      *         called when the alarm time is reached.  A given OnAlarmListener instance can
@@ -605,9 +606,8 @@ public class AlarmManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.SCHEDULE_PRIORITIZED_ALARM)
     public void setPrioritized(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
-            @NonNull String tag, @NonNull Executor executor, @NonNull OnAlarmListener listener) {
+            @Nullable String tag, @NonNull Executor executor, @NonNull OnAlarmListener listener) {
         Objects.requireNonNull(executor);
-        Objects.requireNonNull(tag);
         Objects.requireNonNull(listener);
         setImpl(type, windowStartMillis, windowLengthMillis, 0, FLAG_PRIORITIZE, null, listener,
                 tag, executor, null, null);
@@ -781,6 +781,50 @@ public class AlarmManager {
         setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener, null,
                 targetHandler, workSource, null);
     }
+
+    /**
+     * Exact version of {@link #set(int, long, long, long, OnAlarmListener, Handler, WorkSource)}.
+     * This equivalent to calling the aforementioned API with {@code windowMillis} and
+     * {@code intervalMillis} set to 0.
+     * One subtle difference is that this API requires {@code workSource} to be non-null. If you
+     * don't want to attribute this alarm to another app for battery consumption, you should use
+     * {@link #setExact(int, long, String, OnAlarmListener, Handler)} instead.
+     *
+     * <p>
+     * Note that using this API requires you to hold
+     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}, unless you are on the system's power
+     * allowlist. This can be set, for example, by marking the app as {@code <allow-in-power-save>}
+     * within the system config.
+     *
+     * @param type            type of alarm
+     * @param triggerAtMillis The exact time in milliseconds, that the alarm should be delivered,
+     *                        expressed in the appropriate clock's units (depending on the alarm
+     *                        type).
+     * @param listener        {@link OnAlarmListener} instance whose
+     *                        {@link OnAlarmListener#onAlarm() onAlarm()} method will be called when
+     *                        the alarm time is reached.
+     * @param executor        The {@link Executor} on which to execute the listener's onAlarm()
+     *                        callback.
+     * @param tag             Optional. A string tag used to identify this alarm in logs and
+     *                        battery-attribution.
+     * @param workSource      A {@link WorkSource} object to attribute this alarm to the app that
+     *                        requested this work.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {
+            Manifest.permission.UPDATE_DEVICE_STATS,
+            Manifest.permission.SCHEDULE_EXACT_ALARM}, conditional = true)
+    public void setExact(@AlarmType int type, long triggerAtMillis, @Nullable String tag,
+            @NonNull Executor executor, @NonNull WorkSource workSource,
+            @NonNull OnAlarmListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(workSource);
+        Objects.requireNonNull(listener);
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, null, listener, tag, executor,
+                workSource, null);
+    }
+
 
     private void setImpl(@AlarmType int type, long triggerAtMillis, long windowMillis,
             long intervalMillis, int flags, PendingIntent operation, final OnAlarmListener listener,

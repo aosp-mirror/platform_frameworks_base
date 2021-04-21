@@ -109,7 +109,7 @@ public final class AppHibernationService extends SystemService {
     private final boolean mOatArtifactDeletionEnabled;
 
     @VisibleForTesting
-    static boolean sIsServiceEnabled;
+    public static boolean sIsServiceEnabled;
 
     /**
      * Initializes the system service.

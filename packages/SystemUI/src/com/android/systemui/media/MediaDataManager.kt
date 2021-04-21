@@ -227,7 +227,7 @@ class MediaDataManager(
         smartspaceSession = smartspaceManager.createSmartspaceSession(
             SmartspaceConfig.Builder(context, SMARTSPACE_UI_SURFACE_LABEL).build())
         smartspaceSession?.let {
-            it.registerSmartspaceUpdates(
+            it.addOnTargetsAvailableListener(
                 // Use a new thread listening to Smartspace updates instead of using the existing
                 // backgroundExecutor. SmartspaceSession has scheduled routine updates which can be
                 // unpredictable on test simulators, using the backgroundExecutor makes it's hard to
@@ -235,7 +235,7 @@ class MediaDataManager(
                 // Switch to use backgroundExecutor when SmartspaceSession has a good way to be
                 // mocked.
                 Executors.newCachedThreadPool(),
-                SmartspaceSession.Callback { targets ->
+                SmartspaceSession.OnTargetsAvailableListener { targets ->
                     smartspaceMediaDataProvider.onTargetsAvailable(targets)
                 })
         }

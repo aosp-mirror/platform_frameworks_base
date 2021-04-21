@@ -171,17 +171,23 @@ static inline int32_t readLEInt32(borrowed_fd fd) {
     return result;
 }
 
-static inline std::vector<char> readBytes(borrowed_fd fd) {
-    int32_t size = readLEInt32(fd);
-    std::vector<char> result(size);
-    android::base::ReadFully(fd, result.data(), size);
-    return result;
+static inline bool skipBytes(borrowed_fd fd, int* max_size) {
+    int32_t size = std::min(readLEInt32(fd), *max_size);
+    if (size <= 0) {
+        return false;
+    }
+    *max_size -= size;
+    return (TEMP_FAILURE_RETRY(lseek64(fd.get(), size, SEEK_CUR)) >= 0);
 }
 
 static inline int32_t skipIdSigHeaders(borrowed_fd fd) {
-    readLEInt32(fd);        // version
-    readBytes(fd);          // hashingInfo
-    readBytes(fd);          // signingInfo
+    // version
+    auto version = readLEInt32(fd);
+    int max_size = INCFS_MAX_SIGNATURE_SIZE - sizeof(version);
+    // hashingInfo and signingInfo
+    if (!skipBytes(fd, &max_size) || !skipBytes(fd, &max_size)) {
+        return -1;
+    }
     return readLEInt32(fd); // size of the verity tree
 }
 
@@ -253,8 +259,12 @@ static inline InputDescs openLocalFile(JNIEnv* env, const JniIds& jni, jobject s
 
     unique_fd idsigFd = openLocalFile(env, jni, shellCommand, idsigPath);
     if (idsigFd.ok()) {
-        auto treeSize = verityTreeSizeForFile(size);
         auto actualTreeSize = skipIdSigHeaders(idsigFd);
+        if (actualTreeSize < 0) {
+            ALOGE("Error reading .idsig file: wrong format.");
+            return {};
+        }
+        auto treeSize = verityTreeSizeForFile(size);
         if (treeSize != actualTreeSize) {
             ALOGE("Verity tree size mismatch: %d vs .idsig: %d.", int(treeSize),
                   int(actualTreeSize));

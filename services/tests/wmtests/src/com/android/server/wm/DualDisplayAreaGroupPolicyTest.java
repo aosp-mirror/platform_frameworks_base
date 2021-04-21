@@ -390,8 +390,8 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     }
 
     private WindowToken tokenOfType(int type) {
-        return new WindowToken(mWm, new Binder(), type, false /* persistOnEmpty */,
-                mDisplay, false /* ownerCanManageAppTokens */);
+        return new WindowToken.Builder(mWm, new Binder(), type)
+                .setDisplayContent(mDisplay).build();
     }
 
     /** Display with two {@link DisplayAreaGroup}. Each of them take half of the screen. */
