@@ -378,6 +378,18 @@ public final class AudioFormat implements Parcelable {
     public static final int CHANNEL_OUT_TOP_BACK_CENTER = 0x40000;
     /** @hide */
     public static final int CHANNEL_OUT_TOP_BACK_RIGHT =  0x80000;
+    /** @hide */
+    public static final int CHANNEL_OUT_TOP_SIDE_LEFT = 0x100000;
+    /** @hide */
+    public static final int CHANNEL_OUT_TOP_SIDE_RIGHT = 0x200000;
+    /** @hide */
+    public static final int CHANNEL_OUT_BOTTOM_FRONT_LEFT = 0x400000;
+    /** @hide */
+    public static final int CHANNEL_OUT_BOTTOM_FRONT_CENTER = 0x800000;
+    /** @hide */
+    public static final int CHANNEL_OUT_BOTTOM_FRONT_RIGHT = 0x1000000;
+    /** @hide */
+    public static final int CHANNEL_OUT_LOW_FREQUENCY_2 = 0x2000000;
 
     public static final int CHANNEL_OUT_MONO = CHANNEL_OUT_FRONT_LEFT;
     public static final int CHANNEL_OUT_STEREO = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT);
@@ -407,6 +419,38 @@ public final class AudioFormat implements Parcelable {
             CHANNEL_OUT_SIDE_LEFT | CHANNEL_OUT_SIDE_RIGHT |
             CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
             CHANNEL_OUT_LOW_FREQUENCY);
+    /** @hide */
+    public static final int CHANNEL_OUT_5POINT1POINT2 = (CHANNEL_OUT_5POINT1 |
+            CHANNEL_OUT_TOP_SIDE_LEFT | CHANNEL_OUT_TOP_SIDE_RIGHT);
+    /** @hide */
+    public static final int CHANNEL_OUT_5POINT1POINT4 = (CHANNEL_OUT_5POINT1 |
+            CHANNEL_OUT_TOP_FRONT_LEFT | CHANNEL_OUT_TOP_FRONT_RIGHT |
+            CHANNEL_OUT_TOP_BACK_LEFT | CHANNEL_OUT_TOP_BACK_RIGHT);
+    /** @hide */
+    public static final int CHANNEL_OUT_7POINT1POINT2 = (CHANNEL_OUT_7POINT1_SURROUND |
+            CHANNEL_OUT_TOP_SIDE_LEFT | CHANNEL_OUT_TOP_SIDE_RIGHT);
+    /** @hide */
+    public static final int CHANNEL_OUT_7POINT1POINT4 = (CHANNEL_OUT_7POINT1_SURROUND |
+            CHANNEL_OUT_TOP_FRONT_LEFT | CHANNEL_OUT_TOP_FRONT_RIGHT |
+            CHANNEL_OUT_TOP_BACK_LEFT | CHANNEL_OUT_TOP_BACK_RIGHT);
+    /** @hide */
+    public static final int CHANNEL_OUT_13POINT_360RA = (
+            CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_FRONT_RIGHT |
+            CHANNEL_OUT_SIDE_LEFT | CHANNEL_OUT_SIDE_RIGHT |
+            CHANNEL_OUT_TOP_FRONT_LEFT | CHANNEL_OUT_TOP_FRONT_CENTER |
+            CHANNEL_OUT_TOP_FRONT_RIGHT |
+            CHANNEL_OUT_TOP_BACK_LEFT | CHANNEL_OUT_TOP_BACK_RIGHT |
+            CHANNEL_OUT_BOTTOM_FRONT_LEFT | CHANNEL_OUT_BOTTOM_FRONT_CENTER |
+            CHANNEL_OUT_BOTTOM_FRONT_RIGHT);
+    /** @hide */
+    public static final int CHANNEL_OUT_22POINT2 = (CHANNEL_OUT_7POINT1POINT4 |
+            CHANNEL_OUT_FRONT_LEFT_OF_CENTER | CHANNEL_OUT_FRONT_RIGHT_OF_CENTER |
+            CHANNEL_OUT_BACK_CENTER | CHANNEL_OUT_TOP_CENTER |
+            CHANNEL_OUT_TOP_FRONT_CENTER | CHANNEL_OUT_TOP_BACK_CENTER |
+            CHANNEL_OUT_TOP_SIDE_LEFT | CHANNEL_OUT_TOP_SIDE_RIGHT |
+            CHANNEL_OUT_BOTTOM_FRONT_LEFT | CHANNEL_OUT_BOTTOM_FRONT_RIGHT |
+            CHANNEL_OUT_BOTTOM_FRONT_CENTER |
+            CHANNEL_OUT_LOW_FREQUENCY_2);
     // CHANNEL_OUT_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_OUT_ALL
 
     /** Minimum value for sample rate,
