@@ -121,7 +121,7 @@
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Se zařízením <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nelze navázat komunikaci."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Párování odmítnuto zařízením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Počítač"</string>
-    <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"Náhlavní souprava"</string>
+    <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"Sluchátka"</string>
     <string name="bluetooth_talkback_phone" msgid="868393783858123880">"Telefon"</string>
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Zobrazovací zařízení"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Sluchátka"</string>

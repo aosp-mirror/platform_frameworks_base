@@ -468,7 +468,7 @@
     <string name="charge_length_format" msgid="6941645744588690932">"Acum <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Timp rămas: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Mică"</string>
-    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Prestabilit"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Prestabilită"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Mare"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Mai mare"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Cel mai mare"</string>

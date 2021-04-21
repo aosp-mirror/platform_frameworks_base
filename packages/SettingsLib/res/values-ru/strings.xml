@@ -276,9 +276,9 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Потоковая передача: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Частный DNS-сервер"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Выберите режим частного DNS-сервера"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"Отключено"</string>
-    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Автоматический режим"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Имя хоста поставщика частного DNS-сервера"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"Отключен"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Автоматически"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Вручную"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Введите имя хоста поставщика DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Ошибка подключения"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показывать параметры сертификации беспроводных мониторов"</string>
