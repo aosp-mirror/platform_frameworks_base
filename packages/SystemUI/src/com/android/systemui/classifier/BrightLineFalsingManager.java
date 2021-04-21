@@ -147,10 +147,16 @@ public class BrightLineFalsingManager implements FalsingManager {
                         mPriorInteractionType = Classifier.GENERIC;
                     } else {
                         // Gestures that were not classified get treated as a false.
+                        // Gestures that look like simple taps are less likely to be false
+                        // than swipes. They may simply be mis-clicks.
+                        double penalty = mSingleTapClassifier.isTap(
+                                mDataProvider.getRecentMotionEvents(), 0).isFalse()
+                                ? 0.7 : 0.8;
                         mHistoryTracker.addResults(
                                 Collections.singleton(
                                         FalsingClassifier.Result.falsed(
-                                                .8, getClass().getSimpleName(), "unclassified")),
+                                                penalty, getClass().getSimpleName(),
+                                                "unclassified")),
                                 completionTimeMs);
                     }
                 }
