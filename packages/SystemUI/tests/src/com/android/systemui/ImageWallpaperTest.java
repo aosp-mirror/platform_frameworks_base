@@ -41,7 +41,6 @@ import android.view.DisplayInfo;
 import android.view.SurfaceHolder;
 
 import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -100,7 +99,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
     }
 
     private ImageWallpaper createImageWallpaper() {
-        return new ImageWallpaper(mock(StatusBarStateController.class)) {
+        return new ImageWallpaper() {
             @Override
             public Engine onCreateEngine() {
                 return new GLEngine(mHandler) {
