@@ -10497,6 +10497,7 @@ package android.service.voice {
     ctor public AlwaysOnHotwordDetector.Callback();
     method public abstract void onAvailabilityChanged(int);
     method public void onHotwordDetectionServiceInitialized(int);
+    method public void onHotwordDetectionServiceRestarted();
     method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
   }
 
@@ -10573,6 +10574,7 @@ package android.service.voice {
     method public void onDetected(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload);
     method public void onError();
     method public void onHotwordDetectionServiceInitialized(int);
+    method public void onHotwordDetectionServiceRestarted();
     method public void onRecognitionPaused();
     method public void onRecognitionResumed();
     method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
