@@ -104,13 +104,6 @@ class ResizeLegacySplitScreen(
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertWm {
-            this.visibleWindowsShownMoreThanOneConsecutiveEntry()
-        }
-    }
-
     @FlakyTest(bugId = 156223549)
     @Test
     fun topAppWindowIsAlwaysVisible() {
@@ -143,10 +136,6 @@ class ResizeLegacySplitScreen(
     @Test
     fun statusBarLayerRotatesScales() =
         testSpec.statusBarLayerRotatesScales(testSpec.config.endRotation)
-
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     @Test
     fun topAppLayerIsAlwaysVisible() {
