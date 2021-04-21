@@ -869,21 +869,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testStartUdfpsServiceOnBouncerNotVisible() {
-        // GIVEN
-        // - status bar state is on the keyguard
-        // - user has authenticated since boot
-        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
-        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
-
-        // WHEN the bouncer is showing
-        setKeyguardBouncerVisibility(true /* isVisible */);
-
-        // THEN we shouldn't listen for udfps
-        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
-    }
-
-    @Test
     public void testShouldNotListenForUdfps_whenTrustEnabled() {
         // GIVEN a "we should listen for udfps" state
         setKeyguardBouncerVisibility(false /* isVisible */);
