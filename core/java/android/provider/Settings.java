@@ -6317,6 +6317,27 @@ public final class Settings {
         public static final String ALLOW_MOCK_LOCATION = "mock_location";
 
         /**
+         * This is used by Bluetooth Manager to store adapter name
+         * @hide
+         */
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        public static final String BLUETOOTH_NAME = "bluetooth_name";
+
+        /**
+         * This is used by Bluetooth Manager to store adapter address
+         * @hide
+         */
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
+
+        /**
+         * This is used by Bluetooth Manager to store whether adapter address is valid
+         * @hide
+         */
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
+
+        /**
          * Setting to indicate that on device captions are enabled.
          *
          * @hide
