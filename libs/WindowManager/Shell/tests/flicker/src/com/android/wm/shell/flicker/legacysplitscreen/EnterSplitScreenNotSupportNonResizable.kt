@@ -19,7 +19,6 @@ package com.android.wm.shell.flicker.legacysplitscreen
 import android.platform.test.annotations.Postsubmit
 import android.provider.Settings
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -97,24 +96,8 @@ class EnterSplitScreenNotSupportNonResizable(
                 prevSupportNonResizableInMultiWindow)
     }
 
-    @FlakyTest(bugId = 178447631)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
     @Test
     fun dockedStackDividerIsInvisible() = testSpec.dockedStackDividerIsInvisible()
-
-    @Test
-    fun appWindowIsVisible() {
-        testSpec.assertWmEnd {
-            isInvisible(nonResizeableApp.defaultWindowName)
-        }
-    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
