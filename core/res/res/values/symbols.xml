@@ -1150,6 +1150,17 @@
   <java-symbol type="string" name="mediasize_na_monarch" />
   <java-symbol type="string" name="mediasize_na_quarto" />
   <java-symbol type="string" name="mediasize_na_foolscap" />
+  <java-symbol type="string" name="mediasize_na_ansi_c" />
+  <java-symbol type="string" name="mediasize_na_ansi_d" />
+  <java-symbol type="string" name="mediasize_na_ansi_e" />
+  <java-symbol type="string" name="mediasize_na_ansi_f" />
+  <java-symbol type="string" name="mediasize_na_arch_a" />
+  <java-symbol type="string" name="mediasize_na_arch_b" />
+  <java-symbol type="string" name="mediasize_na_arch_c" />
+  <java-symbol type="string" name="mediasize_na_arch_d" />
+  <java-symbol type="string" name="mediasize_na_arch_e" />
+  <java-symbol type="string" name="mediasize_na_arch_e1" />
+  <java-symbol type="string" name="mediasize_na_super_b" />
   <java-symbol type="string" name="mediasize_chinese_roc_8k" />
   <java-symbol type="string" name="mediasize_chinese_roc_16k" />
   <java-symbol type="string" name="mediasize_chinese_prc_1" />
