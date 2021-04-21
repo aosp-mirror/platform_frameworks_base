@@ -82,6 +82,15 @@ public class JobParameters implements Parcelable {
      * @hide
      */
     public static final int INTERNAL_STOP_REASON_DATA_CLEARED = 8;
+    /**
+     * @hide
+     */
+    public static final int INTERNAL_STOP_REASON_RTC_UPDATED = 9;
+    /**
+     * The app called jobFinished() on its own.
+     * @hide
+     */
+    public static final int INTERNAL_STOP_REASON_SUCCESSFUL_FINISH = 10;
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
@@ -116,6 +125,10 @@ public class JobParameters implements Parcelable {
             case INTERNAL_STOP_REASON_DEVICE_IDLE: return "device_idle";
             case INTERNAL_STOP_REASON_DEVICE_THERMAL: return "thermal";
             case INTERNAL_STOP_REASON_RESTRICTED_BUCKET: return "restricted_bucket";
+            case INTERNAL_STOP_REASON_UNINSTALL: return "uninstall";
+            case INTERNAL_STOP_REASON_DATA_CLEARED: return "data_cleared";
+            case INTERNAL_STOP_REASON_RTC_UPDATED: return "rtc_updated";
+            case INTERNAL_STOP_REASON_SUCCESSFUL_FINISH: return "successful_finish";
             default: return "unknown:" + reasonCode;
         }
     }

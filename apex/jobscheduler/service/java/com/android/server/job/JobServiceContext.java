@@ -409,7 +409,20 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     void doJobFinished(JobCallback cb, int jobId, boolean reschedule) {
-        doCallback(cb, reschedule, "app called jobFinished");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                if (!verifyCallerLocked(cb)) {
+                    return;
+                }
+                mParams.setStopReason(JobParameters.STOP_REASON_UNDEFINED,
+                        JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
+                        "app called jobFinished");
+                doCallbackLocked(reschedule, "app called jobFinished");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     void doAcknowledgeStopMessage(JobCallback cb, int jobId, boolean reschedule) {
@@ -433,6 +446,9 @@ public final class JobServiceContext implements ServiceConnection {
                 }
                 final JobWorkItem work = mRunningJob.dequeueWorkLocked();
                 if (work == null && !mRunningJob.hasExecutingWorkLocked()) {
+                    mParams.setStopReason(JobParameters.STOP_REASON_UNDEFINED,
+                            JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
+                            "last work dequeued");
                     // This will finish the job.
                     doCallbackLocked(false, "last work dequeued");
                 }

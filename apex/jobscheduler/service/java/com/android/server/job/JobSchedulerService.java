@@ -1497,7 +1497,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.v(TAG, "  replacing " + oldJob + " with " + newJob);
                 }
                 cancelJobImplLocked(oldJob, newJob, JobParameters.STOP_REASON_SYSTEM_PROCESSING,
-                        JobParameters.INTERNAL_STOP_REASON_CANCELED, "deferred rtc calculation");
+                        JobParameters.INTERNAL_STOP_REASON_RTC_UPDATED, "deferred rtc calculation");
             }
         }
     };
