@@ -23351,7 +23351,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // writer
         synchronized (mLock) {
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps.getStopped(userId) && !stopped) {
+            if (ps != null && ps.getStopped(userId) && !stopped) {
                 shouldUnhibernate = true;
             }
             if (!shouldFilterApplicationLocked(ps, callingUid, userId)
