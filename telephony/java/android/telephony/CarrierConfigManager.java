@@ -5069,6 +5069,7 @@ public class CarrierConfigManager {
                         + "320000:5000,640000:5000,1280000:5000,1800000:5000",
                 "mms:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
                         + "320000:5000,640000:5000,1280000:5000,1800000:5000",
+                "ims:max_retries=10, 5000, 5000, 5000",
                 "others:max_retries=3, 5000, 5000, 5000"});
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
