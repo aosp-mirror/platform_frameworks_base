@@ -20,7 +20,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -120,7 +123,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (getState().state == Tile.STATE_UNAVAILABLE) {
             return;
         }
