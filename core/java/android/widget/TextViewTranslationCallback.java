@@ -79,6 +79,11 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
     @Override
     public boolean onShowTranslation(@NonNull View view) {
         mIsShowingTranslation = true;
+        if (view.getViewTranslationResponse() == null) {
+            Log.wtf(TAG, "onShowTranslation() shouldn't be called before "
+                    + "onViewTranslationResponse().");
+            return false;
+        }
         if (mTranslationTransformation != null) {
             ((TextView) view).setTransformationMethod(mTranslationTransformation);
         } else {
@@ -86,6 +91,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
                 // TODO(b/182433547): remove before S release
                 Log.w(TAG, "onShowTranslation(): no translated text.");
             }
+            return false;
         }
         return true;
     }
@@ -96,6 +102,11 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
     @Override
     public boolean onHideTranslation(@NonNull View view) {
         mIsShowingTranslation = false;
+        if (view.getViewTranslationResponse() == null) {
+            Log.wtf(TAG, "onHideTranslation() shouldn't be called before "
+                    + "onViewTranslationResponse().");
+            return false;
+        }
         // Restore to original text content.
         if (mTranslationTransformation != null) {
             ((TextView) view).setTransformationMethod(
@@ -105,6 +116,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
                 // TODO(b/182433547): remove before S release
                 Log.w(TAG, "onHideTranslation(): no translated text.");
             }
+            return false;
         }
         return true;
     }
@@ -124,6 +136,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
                 // TODO(b/182433547): remove before S release
                 Log.w(TAG, "onClearTranslation(): no translated text.");
             }
+            return false;
         }
         return true;
     }
