@@ -32066,6 +32066,8 @@ package android.os {
     field public static final int PRIMITIVE_QUICK_FALL = 6; // 0x6
     field public static final int PRIMITIVE_QUICK_RISE = 4; // 0x4
     field public static final int PRIMITIVE_SLOW_RISE = 5; // 0x5
+    field public static final int PRIMITIVE_SPIN = 3; // 0x3
+    field public static final int PRIMITIVE_THUD = 2; // 0x2
     field public static final int PRIMITIVE_TICK = 7; // 0x7
   }
 
