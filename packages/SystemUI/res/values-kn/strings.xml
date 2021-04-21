@@ -389,7 +389,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ವೈ-ಫೈ ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ಪ್ರಕಾಶಮಾನ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"ಸ್ವಯಂ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ಬಣ್ಣಗಳನ್ನು ಇನ್ವರ್ಟ್ ಮಾಡಿ"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ಬಣ್ಣ ಇನ್ವರ್ಟ್ ಮಾಡಿ"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"ಬಣ್ಣ ತಿದ್ದುಪಡಿ ಮೋಡ್"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ಮುಗಿದಿದೆ"</string>
@@ -1026,7 +1026,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"ವರ್ಧನೆಯ ವಿಂಡೋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ವರ್ಧನೆಯ ವಿಂಡೋ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳು"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"ನಿಮ್ಮ ಸಂಪರ್ಕಿತ ಸಾಧನಗಳಿಗೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"ನಿಮ್ಮ ಕನೆಕ್ಟ್ ಆಗಿರುವ ಸಾಧನಗಳಿಗೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಿ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ನಿಮ್ಮ ನಿಯಂತ್ರಣಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಪವರ್ ಬಟನ್ ಅನ್ನು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>

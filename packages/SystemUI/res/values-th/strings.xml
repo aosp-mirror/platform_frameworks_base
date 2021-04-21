@@ -339,7 +339,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"ขณะนี้หน้าจอล็อกอยู่ในแนวนอน"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"ขณะนี้หน้าจอล็อกอยู่ในแนวตั้ง"</string>
     <string name="dessert_case" msgid="9104973640704357717">"ชั้นแสดงของหวาน"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาจอภาพ"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาหน้าจอ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"อีเทอร์เน็ต"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"แตะไอคอนค้างไว้เพื่อดูตัวเลือกอื่นๆ"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ห้ามรบกวน"</string>
@@ -595,11 +595,11 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"ปักหมุดแอปอยู่"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"วิธีนี้ช่วยให้เห็นแอปบนหน้าจอตลอดจนกว่าจะเลิกตรึง เลื่อนขึ้นค้างไว้เพื่อเลิกตรึง"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"วิธีนี้ช่วยให้เห็นแอปบนหน้าจอตลอดจนกว่าจะเลิกปักหมุด เลื่อนขึ้นค้างไว้เพื่อเลิกปักหมุด"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"อาจมีการเข้าถึงข้อมูลส่วนตัว (เช่น รายชื่อติดต่อและเนื้อหาในอีเมล)"</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"แอปที่ตรึงไว้อาจเปิดแอปอื่นๆ"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"แอปที่ปักหมุดไว้อาจเปิดแอปอื่นๆ"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"หากต้องการเลิกปักหมุดแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"ภาพรวม\" ค้างไว้"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"หากต้องการเลิกปักหมุดแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"หน้าแรก\" ค้างไว้"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"หากต้องการเลิกปักหมุดแอปนี้ ให้เลื่อนขึ้นค้างไว้"</string>

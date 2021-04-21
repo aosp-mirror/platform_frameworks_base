@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Ota virransäästö käyttöön"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Asetukset"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Näytön automaattinen kierto"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Näytön automaattinen kääntö"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"ÄÄNET."</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"Ilmoitukset"</string>
