@@ -27,6 +27,7 @@ import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
@@ -108,9 +109,16 @@ public final class NetworkStatsAccess {
                 DevicePolicyManagerInternal.class);
         final TelephonyManager tm = (TelephonyManager)
                 context.getSystemService(Context.TELEPHONY_SERVICE);
-        boolean hasCarrierPrivileges = tm != null &&
-                tm.checkCarrierPrivilegesForPackageAnyPhone(callingPackage) ==
-                        TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+        boolean hasCarrierPrivileges;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            hasCarrierPrivileges = tm != null
+                    && tm.checkCarrierPrivilegesForPackageAnyPhone(callingPackage)
+                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
         final boolean isDeviceOwner = dpmi != null && dpmi.isActiveDeviceOwner(callingUid);
         final int appId = UserHandle.getAppId(callingUid);
         if (hasCarrierPrivileges || isDeviceOwner
