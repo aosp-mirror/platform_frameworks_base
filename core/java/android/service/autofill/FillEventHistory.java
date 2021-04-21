@@ -245,35 +245,35 @@ public final class FillEventHistory implements Parcelable {
         @interface EventIds{}
 
         /** No reason for save dialog. */
-        public static final int NO_SAVE_REASON_NONE = 0;
+        public static final int NO_SAVE_UI_REASON_NONE = 0;
 
         /** The SaveInfo associated with the FillResponse is null. */
-        public static final int NO_SAVE_REASON_NO_SAVE_INFO = 1;
+        public static final int NO_SAVE_UI_REASON_NO_SAVE_INFO = 1;
 
         /** The service asked to delay save. */
-        public static final int NO_SAVE_REASON_WITH_DELAY_SAVE_FLAG = 2;
+        public static final int NO_SAVE_UI_REASON_WITH_DELAY_SAVE_FLAG = 2;
 
         /** There was empty value for required ids. */
-        public static final int NO_SAVE_REASON_HAS_EMPTY_REQUIRED = 3;
+        public static final int NO_SAVE_UI_REASON_HAS_EMPTY_REQUIRED = 3;
 
         /** No value has been changed. */
-        public static final int NO_SAVE_REASON_NO_VALUE_CHANGED = 4;
+        public static final int NO_SAVE_UI_REASON_NO_VALUE_CHANGED = 4;
 
         /** Fields failed validation. */
-        public static final int NO_SAVE_REASON_FIELD_VALIDATION_FAILED = 5;
+        public static final int NO_SAVE_UI_REASON_FIELD_VALIDATION_FAILED = 5;
 
         /** All fields matched contents of datasets. */
-        public static final int NO_SAVE_REASON_DATASET_MATCH = 6;
+        public static final int NO_SAVE_UI_REASON_DATASET_MATCH = 6;
 
         /** @hide */
-        @IntDef(prefix = { "NO_SAVE_REASON_" }, value = {
-                NO_SAVE_REASON_NONE,
-                NO_SAVE_REASON_NO_SAVE_INFO,
-                NO_SAVE_REASON_WITH_DELAY_SAVE_FLAG,
-                NO_SAVE_REASON_HAS_EMPTY_REQUIRED,
-                NO_SAVE_REASON_NO_VALUE_CHANGED,
-                NO_SAVE_REASON_FIELD_VALIDATION_FAILED,
-                NO_SAVE_REASON_DATASET_MATCH
+        @IntDef(prefix = { "NO_SAVE_UI_REASON_" }, value = {
+                NO_SAVE_UI_REASON_NONE,
+                NO_SAVE_UI_REASON_NO_SAVE_INFO,
+                NO_SAVE_UI_REASON_WITH_DELAY_SAVE_FLAG,
+                NO_SAVE_UI_REASON_HAS_EMPTY_REQUIRED,
+                NO_SAVE_UI_REASON_NO_VALUE_CHANGED,
+                NO_SAVE_UI_REASON_FIELD_VALIDATION_FAILED,
+                NO_SAVE_UI_REASON_DATASET_MATCH
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface NoSaveReason{}
@@ -488,11 +488,12 @@ public final class FillEventHistory implements Parcelable {
          * Returns the reason why a save dialog was not shown.
          *
          * <p><b>Note: </b>Only set on events of type {@link #TYPE_CONTEXT_COMMITTED}. For the other
-         * event types, the reason is set to NO_SAVE_REASON_NONE.
+         * event types, the reason is set to NO_SAVE_UI_REASON_NONE.
          *
          * @return The reason why a save dialog was not shown.
          */
-        public int getNoSaveReason() {
+        @NoSaveReason
+        public int getNoSaveUiReason() {
             return mSaveDialogNotShowReason;
         }
 
@@ -533,7 +534,7 @@ public final class FillEventHistory implements Parcelable {
             this(eventType, datasetId, clientState, selectedDatasetIds, ignoredDatasetIds,
                     changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
                     manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
-                    NO_SAVE_REASON_NONE);
+                    NO_SAVE_UI_REASON_NONE);
         }
 
         /**
@@ -599,7 +600,7 @@ public final class FillEventHistory implements Parcelable {
             mDetectedFieldClassifications = detectedFieldClassifications;
 
             mSaveDialogNotShowReason = Preconditions.checkArgumentInRange(saveDialogNotShowReason,
-                    NO_SAVE_REASON_NONE, NO_SAVE_REASON_DATASET_MATCH,
+                    NO_SAVE_UI_REASON_NONE, NO_SAVE_UI_REASON_DATASET_MATCH,
                     "saveDialogNotShowReason");
         }
 
