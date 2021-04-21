@@ -23307,6 +23307,7 @@ package android.media {
   }
 
   public final class MediaRouter2 {
+    method @Nullable public android.media.MediaRouter2.RoutingController getController(@NonNull String);
     method @NonNull public java.util.List<android.media.MediaRouter2.RoutingController> getControllers();
     method @NonNull public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context);
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getRoutes();
