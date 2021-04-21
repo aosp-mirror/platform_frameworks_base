@@ -61,6 +61,7 @@ import android.hardware.ISensorPrivacyManager;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -72,6 +73,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
 import android.service.SensorPrivacyServiceDumpProto;
@@ -193,7 +195,7 @@ public final class SensorPrivacyService extends SystemService {
 
     class SensorPrivacyServiceImpl extends ISensorPrivacyManager.Stub implements
             AppOpsManager.OnOpNotedListener, AppOpsManager.OnOpStartedListener,
-            IBinder.DeathRecipient {
+            IBinder.DeathRecipient, UserManagerInternal.UserRestrictionsListener {
 
         private final SensorPrivacyHandler mHandler;
         private final Object mLock = new Object();
@@ -280,6 +282,21 @@ public final class SensorPrivacyService extends SystemService {
                 }
             }, new IntentFilter(ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY),
                     MANAGE_SENSOR_PRIVACY, null);
+            mUserManagerInternal.addUserRestrictionsListener(this);
+        }
+
+        @Override
+        public void onUserRestrictionsChanged(int userId, Bundle newRestrictions,
+                Bundle prevRestrictions) {
+            // Reset sensor privacy when restriction is added
+            if (!prevRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)
+                    && newRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)) {
+                setIndividualSensorPrivacyUnchecked(userId, CAMERA, false);
+            }
+            if (!prevRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)
+                    && newRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)) {
+                setIndividualSensorPrivacyUnchecked(userId, MICROPHONE, false);
+            }
         }
 
         @Override
@@ -608,6 +625,17 @@ public final class SensorPrivacyService extends SystemService {
                 return false;
             }
 
+            if (sensor == MICROPHONE && mUserManagerInternal.getUserRestriction(userId,
+                    UserManager.DISALLOW_MICROPHONE_TOGGLE)) {
+                Log.i(TAG, "Can't change mic toggle due to admin restriction");
+                return false;
+            }
+
+            if (sensor == CAMERA && mUserManagerInternal.getUserRestriction(userId,
+                    UserManager.DISALLOW_CAMERA_TOGGLE)) {
+                Log.i(TAG, "Can't change camera toggle due to admin restriction");
+                return false;
+            }
             return true;
         }
 
