@@ -66,7 +66,9 @@ public final class BluetoothCallQualityReport implements Parcelable {
     }
 
     /**
-     * @return {@code true} if bluetooth hardware detects voice is choppy
+     * When the bluetooth controller detects factors that cause choppy voice,
+     * the controller reports an (e)SCO Voice Choppy event to the host
+     * @return {@code true} when we receive (e)SCO Voice Choppy event from the controller
      */
     public boolean isChoppyVoice() {
         return mChoppyVoice;
