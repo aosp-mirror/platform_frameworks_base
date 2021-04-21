@@ -346,6 +346,7 @@ import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
@@ -16734,6 +16735,29 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return superImpl.apply(code, attributionSource, shouldCollectAsyncNotedOp,
                     message, shouldCollectMessage, skiProxyOperation);
+        }
+
+        @Override
+        public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+                @Nullable String packageName, @Nullable String attributionTag,
+                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message, boolean shouldCollectMessage,
+                @NonNull NonaFunction<IBinder, Integer, Integer, String, String, Boolean,
+                        Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
+            if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(token, code, shellUid, "com.android.shell",
+                            attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(token, code, uid, packageName, attributionTag,
+                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
         }
 
         @Override
