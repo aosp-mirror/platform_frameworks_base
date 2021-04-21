@@ -275,7 +275,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"တိုက်ရိုက်လွှင့်နေသည်− <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"သီးသန့် DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"သီးသန့် DNS မုဒ်ကို ရွေးပါ"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"ပိတ်ရန်"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"ပိတ်"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"အလိုအလျောက်"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"သီးသန့် DNS ဝန်ဆောင်မှုပေးသူအမည်"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ဝန်ဆောင်ပေးသူအမည်ကို ထည့်ပါ"</string>

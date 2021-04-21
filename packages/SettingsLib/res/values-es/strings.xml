@@ -227,7 +227,7 @@
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"No se ha podido emparejar"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Asegúrate de que el dispositivo esté conectado a la misma red."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Empareja un dispositivo mediante Wi‑Fi con un código QR"</string>
-    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Vinculando dispositivo…"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Emparejando dispositivo…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"No se ha podido emparejar el dispositivo. El código QR no era correcto o el dispositivo no estaba conectado a la misma red."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Dirección IP y puerto"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escanea el código QR"</string>
