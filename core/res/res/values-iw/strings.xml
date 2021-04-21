@@ -1840,7 +1840,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"אישור"</string>
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"‏כדי להאריך את חיי הסוללה, התכונה \'חיסכון בסוללה\':\n\n• מפעילה עיצוב כהה\n• מכבה או מגבילה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות כמו Hey Google\n\n"<annotation id="url">"למידע נוסף"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"‏כדי להאריך את חיי הסוללה, התכונה \'חיסכון בסוללה\':\n\n• מפעילה עיצוב כהה\n• משביתה או מגבילה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות כמו Hey Google"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה נעשה שימוש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות לשלוח או לקבל נתונים ברקע. אפליקציות שבהן נעשה שימוש כרגע יכולות לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"להפעיל את חוסך הנתונים?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"הפעלה"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

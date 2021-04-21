@@ -1795,7 +1795,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батарея жұмысының ұзақтығын арттыру үшін Батареяны үнемдеу режимі:\n\n•қараңғы тақырыпты іске қосады;\n•фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді не шектейді.\n\n"<annotation id="url">"Толығырақ"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Батарея ұзағырақ жұмыс істеуі үшін, Батареяны үнемдеу режимі:\n\n• қараңғы тақырыпты қосады;\n•фондық жұмысты, кейбір визуалды әсерлерді және \"Ok Google\" сияқты басқа функцияларды өшіреді не шектейді."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу функциясын қосу керек пе?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу режимі қосылсын ба?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d минут бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
@@ -2029,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> файл</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Бөлісу үшін ұсынылатын адамдар жоқ"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Бөлісу үшін ұсынылатын адамдар жоқ."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Қолданбалар тізімі"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Қолданбаға жазу рұқсаты берілмеді, бірақ ол осы USB құрылғысы арқылы дыбыс жаза алады."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Негізгі экран"</string>
