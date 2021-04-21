@@ -105,10 +105,9 @@
         }
       ]
     },
-    // TODO(b/157425108): Re-enable the test after the bug is fixed.
-    // {
-    //   "name": "CtsAppSecurityHostTestCases"
-    // },
+    {
+      "name": "CtsAppSecurityHostTestCases"
+    },
     {
       "name": "PackageManagerServiceHostTests"
     },
