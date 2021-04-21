@@ -29,7 +29,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Size;
-import android.view.Choreographer;
 import android.view.DisplayInfo;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
@@ -39,7 +38,6 @@ import androidx.annotation.NonNull;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.glwallpaper.EglHelper;
 import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -60,7 +58,6 @@ public class ImageWallpaper extends WallpaperService {
     private static final @android.annotation.NonNull RectF LOCAL_COLOR_BOUNDS =
             new RectF(0, 0, 1, 1);
     private static final boolean DEBUG = false;
-    private final StatusBarStateController mStatusBarStateController;
     private final ArrayList<RectF> mLocalColorsToAdd = new ArrayList<>();
     private final ArraySet<RectF> mColorAreas = new ArraySet<>();
     private volatile int mPages = 1;
@@ -69,9 +66,8 @@ public class ImageWallpaper extends WallpaperService {
     private Bitmap mMiniBitmap;
 
     @Inject
-    public ImageWallpaper(StatusBarStateController statusBarStateController) {
+    public ImageWallpaper() {
         super();
-        mStatusBarStateController = statusBarStateController;
     }
 
     @Override
@@ -94,9 +90,7 @@ public class ImageWallpaper extends WallpaperService {
         mMiniBitmap = null;
     }
 
-
-    class GLEngine extends Engine implements StatusBarStateController.StateListener,
-            Choreographer.FrameCallback {
+    class GLEngine extends Engine {
         // Surface is rejected if size below a threshold on some devices (ie. 8px on elfin)
         // set min to 64 px (CTS covers this), please refer to ag/4867989 for detail.
         @VisibleForTesting
@@ -107,16 +101,13 @@ public class ImageWallpaper extends WallpaperService {
         private ImageWallpaperRenderer mRenderer;
         private EglHelper mEglHelper;
         private final Runnable mFinishRenderingTask = this::finishRendering;
-        private final Runnable mInitChoreographerTask = this::initChoreographerInternal;
+        private boolean mNeedRedraw;
         private int mWidth = 1;
         private int mHeight = 1;
         private int mImgWidth = 1;
         private int mImgHeight = 1;
         private float mPageWidth = 1.f;
         private float mPageOffset = 1.f;
-        private volatile float mDozeAmount;
-        private volatile boolean mNewDozeValue = false;
-        private volatile boolean mShouldScheduleFrame = false;
 
         GLEngine() {
         }
@@ -143,9 +134,6 @@ public class ImageWallpaper extends WallpaperService {
             if (mWorker != null && mWorker.getThreadHandler() != null) {
                 mWorker.getThreadHandler().post(this::updateMiniBitmap);
             }
-
-            mDozeAmount = mStatusBarStateController.getDozeAmount();
-            mStatusBarStateController.addCallback(this);
         }
 
         EglHelper getEglHelperInstance() {
@@ -221,11 +209,7 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onDestroy() {
             mMiniBitmap = null;
-
-            mStatusBarStateController.removeCallback(this);
-
             mWorker.getThreadHandler().post(() -> {
-                finishChoreographerInternal();
                 mRenderer.finish();
                 mRenderer = null;
                 mEglHelper.finish();
@@ -351,16 +335,7 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             if (mWorker == null) return;
-            mDozeAmount = mStatusBarStateController.getDozeAmount();
             mWorker.getThreadHandler().post(this::drawFrame);
-        }
-
-        @Override
-        public void onDozeAmountChanged(float linear, float eased) {
-            initChoreographer();
-
-            mDozeAmount = linear;
-            mNewDozeValue = true;
         }
 
         private void drawFrame() {
@@ -369,10 +344,8 @@ public class ImageWallpaper extends WallpaperService {
             postRender();
         }
 
-        /**
-         * Important: this method should only be invoked from the ImageWallpaper (worker) Thread.
-         */
         public void preRender() {
+            // This method should only be invoked from worker thread.
             Trace.beginSection("ImageWallpaper#preRender");
             preRenderInternal();
             Trace.endSection();
@@ -407,10 +380,8 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
-        /**
-         * Important: this method should only be invoked from the ImageWallpaper (worker) Thread.
-         */
         public void requestRender() {
+            // This method should only be invoked from worker thread.
             Trace.beginSection("ImageWallpaper#requestRender");
             requestRenderInternal();
             Trace.endSection();
@@ -422,7 +393,6 @@ public class ImageWallpaper extends WallpaperService {
                     && frame.width() > 0 && frame.height() > 0;
 
             if (readyToRender) {
-                mRenderer.setExposureValue(1 - mDozeAmount);
                 mRenderer.onDrawFrame();
                 if (!mEglHelper.swapBuffer()) {
                     Log.e(TAG, "drawFrame failed!");
@@ -434,10 +404,8 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
-        /**
-         * Important: this method should only be invoked from the ImageWallpaper (worker) Thread.
-         */
         public void postRender() {
+            // This method should only be invoked from worker thread.
             Trace.beginSection("ImageWallpaper#postRender");
             scheduleFinishRendering();
             Trace.endSection();
@@ -456,41 +424,11 @@ public class ImageWallpaper extends WallpaperService {
 
         private void finishRendering() {
             Trace.beginSection("ImageWallpaper#finishRendering");
-            finishChoreographerInternal();
             if (mEglHelper != null) {
                 mEglHelper.destroyEglSurface();
                 mEglHelper.destroyEglContext();
             }
             Trace.endSection();
-        }
-
-        private void initChoreographer() {
-            if (!mWorker.getThreadHandler().hasCallbacks(mInitChoreographerTask)
-                    && !mShouldScheduleFrame) {
-                mWorker.getThreadHandler().post(mInitChoreographerTask);
-            }
-        }
-
-        /**
-         * Subscribes the engine to listen to Choreographer frame events.
-         * Important: this method should only be invoked from the ImageWallpaper (worker) Thread.
-         */
-        private void initChoreographerInternal() {
-            if (!mShouldScheduleFrame) {
-                // Prepare EGL Context and Surface
-                preRender();
-                mShouldScheduleFrame = true;
-                Choreographer.getInstance().postFrameCallback(GLEngine.this);
-            }
-        }
-
-        /**
-         * Unsubscribe the engine from listening to Choreographer frame events.
-         * Important: this method should only be invoked from the ImageWallpaper (worker) Thread.
-         */
-        private void finishChoreographerInternal() {
-            mShouldScheduleFrame = false;
-            Choreographer.getInstance().removeFrameCallback(GLEngine.this);
         }
 
         private boolean needSupportWideColorGamut() {
@@ -511,18 +449,6 @@ public class ImageWallpaper extends WallpaperService {
 
             mEglHelper.dump(prefix, fd, out, args);
             mRenderer.dump(prefix, fd, out, args);
-        }
-
-        @Override
-        public void doFrame(long frameTimeNanos) {
-            if (mNewDozeValue) {
-                drawFrame();
-                mNewDozeValue = false;
-            }
-
-            if (mShouldScheduleFrame) {
-                Choreographer.getInstance().postFrameCallback(this);
-            }
         }
     }
 }
