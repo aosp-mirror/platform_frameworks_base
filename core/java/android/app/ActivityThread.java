@@ -39,7 +39,6 @@ import android.annotation.Nullable;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
-import android.app.backup.BackupManager;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -4391,11 +4390,20 @@ public final class ActivityThread extends ClientTransactionHandler
             if (localLOGV) Slog.v(TAG, "Creating service " + data.info.name);
 
             Application app = packageInfo.makeApplication(false, mInstrumentation);
-            java.lang.ClassLoader cl = packageInfo.getClassLoader();
+
+            final java.lang.ClassLoader cl;
+            if (data.info.splitName != null) {
+                cl = packageInfo.getSplitClassLoader(data.info.splitName);
+            } else {
+                cl = packageInfo.getClassLoader();
+            }
             service = packageInfo.getAppFactory()
                     .instantiateService(cl, data.info.name, data.intent);
-            final ContextImpl context = ContextImpl.getImpl(service
+            ContextImpl context = ContextImpl.getImpl(service
                     .createServiceBaseContext(this, packageInfo));
+            if (data.info.splitName != null) {
+                context = (ContextImpl) context.createContextForSplit(data.info.splitName);
+            }
             // Service resources must be initialized with the same loaders as the application
             // context.
             context.getResources().addLoaders(
