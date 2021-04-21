@@ -850,7 +850,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
 
         // THEN we should listen for udfps
-        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(true);
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(true);
     }
 
     @Test
@@ -865,7 +865,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(false);
 
         // THEN we shouldn't listen for udfps
-        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
     }
 
     @Test
@@ -880,7 +880,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         setKeyguardBouncerVisibility(true /* isVisible */);
 
         // THEN we shouldn't listen for udfps
-        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
     }
 
     @Test
@@ -895,7 +895,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
 
         // THEN we shouldn't listen for udfps
-        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
     }
 
     @Test
@@ -910,7 +910,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 KeyguardUpdateMonitor.getCurrentUser(), false);
 
         // THEN we shouldn't listen for udfps
-        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
     }
 
     @Test
@@ -925,7 +925,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
 
         // THEN we shouldn't listen for udfps
-        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
     }
 
     @Test

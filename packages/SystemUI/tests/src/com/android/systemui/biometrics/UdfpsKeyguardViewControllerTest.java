@@ -28,6 +28,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -81,10 +82,14 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
             mAltAuthInterceptorCaptor;
     private StatusBarKeyguardViewManager.AlternateAuthInterceptor mAltAuthInterceptor;
 
+    @Captor private ArgumentCaptor<KeyguardUpdateMonitorCallback> mUpdateMonitorCallbackCaptor;
+    private KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isKeyguardVisible()).thenReturn(true);
         mController = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
@@ -156,6 +161,17 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         sendStatusBarStateChanged(StatusBarState.KEYGUARD);
 
         assertFalse(mController.shouldPauseAuth());
+    }
+
+    @Test
+    public void testShouldPauseAuthKeyguardNotVisible() {
+        mController.onViewAttached();
+        captureKeyguardUpdateMonitorCallback();
+
+        // WHEN keyguard isn't visible
+        mKeyguardUpdateMonitorCallback.onKeyguardVisibilityChangedRaw(false);
+
+        assertTrue(mController.shouldPauseAuth());
     }
 
     @Test
@@ -233,15 +249,12 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         // GIVEN view is attached, alt auth is force being shown
         mController.onViewAttached();
         captureStatusBarStateListeners();
-        captureAltAuthInterceptor();
-
-        mAltAuthInterceptor.showAlternateAuthBouncer(); // alt auth force show
 
         // WHEN view is detached
         mController.onViewDetached();
 
-        // THEN alt auth state reports not showing
-        assertFalse(mAltAuthInterceptor.isShowingAlternateAuthBouncer());
+        // THEN set alternate auth interceptor to null
+        verify(mStatusBarKeyguardViewManager).setAlternateAuthInterceptor(null);
     }
 
     private void sendStatusBarStateChanged(int statusBarState) {
@@ -262,5 +275,10 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         verify(mStatusBarKeyguardViewManager).setAlternateAuthInterceptor(
                 mAltAuthInterceptorCaptor.capture());
         mAltAuthInterceptor = mAltAuthInterceptorCaptor.getValue();
+    }
+
+    private void captureKeyguardUpdateMonitorCallback() {
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateMonitorCallbackCaptor.capture());
+        mKeyguardUpdateMonitorCallback = mUpdateMonitorCallbackCaptor.getValue();
     }
 }
