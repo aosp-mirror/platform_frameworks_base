@@ -40,7 +40,7 @@ import java.util.Objects;
  * both successes and failures.
  *
  * @see AppSearchSession#put
- * @see AppSearchSession#getByUri
+ * @see AppSearchSession#getByDocumentId
  * @see AppSearchSession#remove
  */
 public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
@@ -87,8 +87,9 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
      * Returns a {@link Map} of keys mapped to instances of the value type for all successful
      * individual results.
      *
-     * <p>Example: {@link AppSearchSession#getByUri} returns an {@link AppSearchBatchResult}. Each
-     * key (a URI of {@code String} type) will map to a {@link GenericDocument} object.
+     * <p>Example: {@link AppSearchSession#getByDocumentId} returns an {@link AppSearchBatchResult}.
+     * Each key (the document ID, of {@code String} type) will map to a {@link GenericDocument}
+     * object.
      *
      * <p>The values of the {@link Map} will not be {@code null}.
      */

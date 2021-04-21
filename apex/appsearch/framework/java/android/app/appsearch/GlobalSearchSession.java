@@ -31,9 +31,12 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * This class provides global access to the centralized AppSearch index maintained by the system.
+ * Provides a connection to all AppSearch databases the querying application has been granted access
+ * to.
  *
- * <p>Apps can retrieve indexed documents through the {@link #search} API.
+ * <p>This class is thread safe.
+ *
+ * @see AppSearchSession
  */
 public class GlobalSearchSession implements Closeable {
     private static final String TAG = "AppSearchGlobalSearchSe";
@@ -151,8 +154,8 @@ public class GlobalSearchSession implements Closeable {
                     request.getPackageName(),
                     request.getDatabaseName(),
                     request.getNamespace(),
-                    request.getUri(),
-                    request.getUsageTimeMillis(),
+                    request.getDocumentId(),
+                    request.getUsageTimestampMillis(),
                     /*systemUsage=*/ true,
                     mUserId,
                     new IAppSearchResultCallback.Stub() {
