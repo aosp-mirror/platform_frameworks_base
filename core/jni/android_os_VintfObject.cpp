@@ -40,12 +40,10 @@ namespace android {
 using vintf::HalManifest;
 using vintf::Level;
 using vintf::SchemaType;
-using vintf::VintfObject;
-using vintf::XmlConverter;
-using vintf::Vndk;
-using vintf::gHalManifestConverter;
-using vintf::gCompatibilityMatrixConverter;
 using vintf::to_string;
+using vintf::toXml;
+using vintf::VintfObject;
+using vintf::Vndk;
 
 template<typename V>
 static inline jobjectArray toJavaStringArray(JNIEnv* env, const V& v) {
@@ -58,14 +56,13 @@ static inline jobjectArray toJavaStringArray(JNIEnv* env, const V& v) {
     return ret;
 }
 
-template<typename T>
-static void tryAddSchema(const std::shared_ptr<const T>& object, const XmlConverter<T>& converter,
-        const std::string& description,
-        std::vector<std::string>* cStrings) {
+template <typename T>
+static void tryAddSchema(const std::shared_ptr<const T>& object, const std::string& description,
+                         std::vector<std::string>* cStrings) {
     if (object == nullptr) {
         LOG(WARNING) << __FUNCTION__ << "Cannot get " << description;
     } else {
-        cStrings->push_back(converter(*object));
+        cStrings->push_back(toXml(*object));
     }
 }
 
@@ -84,14 +81,12 @@ static jobjectArray android_os_VintfObject_report(JNIEnv* env, jclass)
 {
     std::vector<std::string> cStrings;
 
-    tryAddSchema(VintfObject::GetDeviceHalManifest(), gHalManifestConverter,
-            "device manifest", &cStrings);
-    tryAddSchema(VintfObject::GetFrameworkHalManifest(), gHalManifestConverter,
-            "framework manifest", &cStrings);
-    tryAddSchema(VintfObject::GetDeviceCompatibilityMatrix(), gCompatibilityMatrixConverter,
-            "device compatibility matrix", &cStrings);
-    tryAddSchema(VintfObject::GetFrameworkCompatibilityMatrix(), gCompatibilityMatrixConverter,
-            "framework compatibility matrix", &cStrings);
+    tryAddSchema(VintfObject::GetDeviceHalManifest(), "device manifest", &cStrings);
+    tryAddSchema(VintfObject::GetFrameworkHalManifest(), "framework manifest", &cStrings);
+    tryAddSchema(VintfObject::GetDeviceCompatibilityMatrix(), "device compatibility matrix",
+                 &cStrings);
+    tryAddSchema(VintfObject::GetFrameworkCompatibilityMatrix(), "framework compatibility matrix",
+                 &cStrings);
 
     return toJavaStringArray(env, cStrings);
 }
