@@ -12415,9 +12415,6 @@ package android.content.pm {
     field public static final int STAGED_SESSION_NO_ERROR = 0; // 0x0
     field public static final int STAGED_SESSION_UNKNOWN = 3; // 0x3
     field public static final int STAGED_SESSION_VERIFICATION_FAILED = 1; // 0x1
-    field public static final int USER_ACTION_NOT_REQUIRED = 2; // 0x2
-    field public static final int USER_ACTION_REQUIRED = 1; // 0x1
-    field public static final int USER_ACTION_UNSPECIFIED = 0; // 0x0
   }
 
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
@@ -12434,7 +12431,7 @@ package android.content.pm {
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(@Nullable android.net.Uri);
     method public void setReferrerUri(@Nullable android.net.Uri);
-    method public void setRequireUserAction(boolean);
+    method public void setRequireUserAction(int);
     method public void setSize(long);
     method public void setWhitelistedRestrictedPermissions(@Nullable java.util.Set<java.lang.String>);
     method public void writeToParcel(android.os.Parcel, int);
@@ -12442,6 +12439,9 @@ package android.content.pm {
     field public static final int MODE_FULL_INSTALL = 1; // 0x1
     field public static final int MODE_INHERIT_EXISTING = 2; // 0x2
     field @NonNull public static final java.util.Set<java.lang.String> RESTRICTED_PERMISSIONS_ALL;
+    field public static final int USER_ACTION_NOT_REQUIRED = 2; // 0x2
+    field public static final int USER_ACTION_REQUIRED = 1; // 0x1
+    field public static final int USER_ACTION_UNSPECIFIED = 0; // 0x0
   }
 
   public class PackageItemInfo {
