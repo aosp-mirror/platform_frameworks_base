@@ -74,6 +74,7 @@ import java.lang.annotation.Target;
  *   public static final String ACTION_CALL = "android.intent.action.CALL";
  * }</pre>
  *
+ * @see RequiresNoPermission
  * @hide
  */
 @Retention(CLASS)

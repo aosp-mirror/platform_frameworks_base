@@ -17,4 +17,11 @@
 package android.content;
 
 public class Intent {
+    public Intent(String action) {
+        throw new UnsupportedOperationException();
+    }
+
+    public Intent setAction(String action) {
+        throw new UnsupportedOperationException();
+    }
 }
