@@ -19,6 +19,7 @@ package com.android.server.apphibernation;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsArgAt;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +36,7 @@ import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
@@ -89,7 +91,7 @@ public final class AppHibernationServiceTest {
     @Mock
     private UserManager mUserManager;
     @Mock
-    private HibernationStateDiskStore<UserLevelState> mHibernationStateDiskStore;
+    private HibernationStateDiskStore<UserLevelState> mUserLevelDiskStore;
     @Captor
     private ArgumentCaptor<BroadcastReceiver> mReceiverCaptor;
 
@@ -207,6 +209,61 @@ public final class AppHibernationServiceTest {
         assertTrue(hibernatingPackages.contains(PACKAGE_NAME_2));
     }
 
+    @Test
+    public void testUserLevelStatesInitializedFromDisk() throws RemoteException {
+        // GIVEN states stored on disk that match with package manager's force-stop states
+        List<UserLevelState> diskStates = new ArrayList<>();
+        diskStates.add(makeUserLevelState(PACKAGE_NAME_1, false /* hibernated */));
+        diskStates.add(makeUserLevelState(PACKAGE_NAME_2, true /* hibernated */));
+        doReturn(diskStates).when(mUserLevelDiskStore).readHibernationStates();
+
+        List<PackageInfo> packageInfos = new ArrayList<>();
+        packageInfos.add(makePackageInfo(PACKAGE_NAME_1));
+        PackageInfo stoppedPkg = makePackageInfo(PACKAGE_NAME_2);
+        stoppedPkg.applicationInfo.flags |= ApplicationInfo.FLAG_STOPPED;
+        packageInfos.add(stoppedPkg);
+
+        // WHEN a user is unlocked and the states are initialized
+        UserInfo user2 = addUser(USER_ID_2, packageInfos);
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(user2));
+
+        // THEN the hibernation states are initialized to the disk states
+        assertFalse(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_2));
+        assertTrue(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_2, USER_ID_2));
+    }
+
+    @Test
+    public void testNonForceStoppedAppsNotHibernatedOnUnlock() throws RemoteException {
+        // GIVEN a package that is hibernated on disk but not force-stopped
+        List<UserLevelState> diskStates = new ArrayList<>();
+        diskStates.add(makeUserLevelState(PACKAGE_NAME_1, true /* hibernated */));
+        doReturn(diskStates).when(mUserLevelDiskStore).readHibernationStates();
+
+        // WHEN a user is unlocked and the states are initialized
+        UserInfo user2 = addUser(USER_ID_2, new String[]{PACKAGE_NAME_1});
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(user2));
+
+        // THEN the app is not hibernating for the user
+        assertFalse(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_2));
+    }
+
+    @Test
+    public void testUnhibernatedPackageForUserUnhibernatesPackageGloballyOnUnlock()
+            throws RemoteException {
+        // GIVEN a package that is globally hibernating
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
+
+        // WHEN a user is unlocked and the package is not hibernating for the user
+        UserInfo user2 = addUser(USER_ID_2);
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(user2));
+
+        // THEN the package is no longer globally hibernating
+        assertFalse(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
+    }
+
     /**
      * Add a mock user with one package.
      */
@@ -218,12 +275,19 @@ public final class AppHibernationServiceTest {
      * Add a mock user with the packages specified.
      */
     private UserInfo addUser(int userId, String[] packageNames) throws RemoteException {
-        UserInfo userInfo = new UserInfo(userId, "user_" + userId, 0 /* flags */);
-        mUserInfos.add(userInfo);
         List<PackageInfo> userPackages = new ArrayList<>();
         for (String pkgName : packageNames) {
             userPackages.add(makePackageInfo(pkgName));
         }
+        return addUser(userId, userPackages);
+    }
+
+    /**
+     * Add a mock user with the package infos specified.
+     */
+    private UserInfo addUser(int userId, List<PackageInfo> userPackages) throws RemoteException {
+        UserInfo userInfo = new UserInfo(userId, "user_" + userId, 0 /* flags */);
+        mUserInfos.add(userInfo);
         doReturn(new ParceledListSlice<>(userPackages)).when(mIPackageManager)
                 .getInstalledPackages(intThat(arg -> (arg & MATCH_ANY_USER) == 0), eq(userId));
         return userInfo;
@@ -232,7 +296,15 @@ public final class AppHibernationServiceTest {
     private static PackageInfo makePackageInfo(String packageName) {
         PackageInfo pkg = new PackageInfo();
         pkg.packageName = packageName;
+        pkg.applicationInfo = new ApplicationInfo();
         return pkg;
+    }
+
+    private static UserLevelState makeUserLevelState(String packageName, boolean hibernated) {
+        UserLevelState state = new UserLevelState();
+        state.packageName = packageName;
+        state.hibernated = hibernated;
+        return state;
     }
 
     private class MockInjector implements AppHibernationService.Injector {
@@ -280,7 +352,7 @@ public final class AppHibernationServiceTest {
 
         @Override
         public HibernationStateDiskStore<UserLevelState> getUserLevelDiskStore(int userId) {
-            return mock(HibernationStateDiskStore.class);
+            return mUserLevelDiskStore;
         }
 
         @Override
