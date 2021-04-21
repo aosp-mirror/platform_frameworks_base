@@ -41,10 +41,14 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * Represents a connection to an AppSearch storage system where {@link GenericDocument}s can be
- * placed and queried.
+ * Provides a connection to a single AppSearch database.
+ *
+ * <p>An {@link AppSearchSession} instance provides access to database operations such as
+ * setting a schema, adding documents, and searching.
  *
  * <p>This class is thread safe.
+ *
+ * @see GlobalSearchSession
  */
 public final class AppSearchSession implements Closeable {
     private static final String TAG = "AppSearchSession";
@@ -250,12 +254,12 @@ public final class AppSearchSession implements Closeable {
      * @param request containing documents to be indexed.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive pending result of performing this operation. The keys
-     *                 of the returned {@link AppSearchBatchResult} are the URIs of the input
+     *                 of the returned {@link AppSearchBatchResult} are the IDs of the input
      *                 documents. The values are {@code null} if they were successfully indexed,
-     *                 or a failed {@link AppSearchResult} otherwise.
-     *                 Or {@link BatchResultCallback#onSystemError} will be invoked with a
-     *                 {@link Throwable} if an unexpected internal error occurred in AppSearch
-     *                 service.
+     *                 or a failed {@link AppSearchResult} otherwise. If an unexpected internal
+     *                 error occurs in the AppSearch service,
+     *                 {@link BatchResultCallback#onSystemError} will be invoked with a
+     *                 {@link Throwable}.
      */
     public void put(
             @NonNull PutDocumentsRequest request,
@@ -291,23 +295,22 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * Gets {@link GenericDocument} objects by URIs and namespace from the {@link AppSearchSession}
-     * database.
+     * Gets {@link GenericDocument} objects by document IDs in a namespace from the {@link
+     * AppSearchSession} database.
      *
-     * @param request a request containing URIs and namespace to get documents for.
+     * @param request a request containing a namespace and IDs to get documents for.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive the pending result of performing this operation. The keys
-     *                 of the returned {@link AppSearchBatchResult} are the input URIs. The values
+     *                 of the returned {@link AppSearchBatchResult} are the input IDs. The values
      *                 are the returned {@link GenericDocument}s on success, or a failed
-     *                 {@link AppSearchResult} otherwise. URIs that are not found will return a
+     *                 {@link AppSearchResult} otherwise. IDs that are not found will return a
      *                 failed {@link AppSearchResult} with a result code of
-     *                 {@link AppSearchResult#RESULT_NOT_FOUND}.
-     *                 Or {@link BatchResultCallback#onSystemError} will be invoked with a
-     *                 {@link Throwable} if an unexpected internal error occurred in AppSearch
-     *                 service.
+     *                 {@link AppSearchResult#RESULT_NOT_FOUND}. If an unexpected internal error
+     *                 occurs in the AppSearch service, {@link BatchResultCallback#onSystemError}
+     *                 will be invoked with a {@link Throwable}.
      */
-    public void getByUri(
-            @NonNull GetByUriRequest request,
+    public void getByDocumentId(
+            @NonNull GetByDocumentIdRequest request,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BatchResultCallback<String, GenericDocument> callback) {
         Objects.requireNonNull(request);
@@ -319,7 +322,7 @@ public final class AppSearchSession implements Closeable {
                     mPackageName,
                     mDatabaseName,
                     request.getNamespace(),
-                    new ArrayList<>(request.getUris()),
+                    new ArrayList<>(request.getIds()),
                     request.getProjectionsInternal(),
                     mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
@@ -373,8 +376,8 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * Retrieves documents from the open {@link AppSearchSession} that match a given query string
-     * and type of search provided.
+     * Retrieves documents from the open {@link AppSearchSession} that match a given query
+     * string and type of search provided.
      *
      * <p>Query strings can be empty, contain one term with no operators, or contain multiple terms
      * and operators.
@@ -441,7 +444,7 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * Reports usage of a particular document by URI and namespace.
+     * Reports usage of a particular document by namespace and ID.
      *
      * <p>A usage report represents an event in which a user interacted with or viewed a document.
      *
@@ -470,8 +473,8 @@ public final class AppSearchSession implements Closeable {
                     mPackageName,
                     mDatabaseName,
                     request.getNamespace(),
-                    request.getUri(),
-                    request.getUsageTimeMillis(),
+                    request.getDocumentId(),
+                    request.getUsageTimestampMillis(),
                     /*systemUsage=*/ false,
                     mUserId,
                     new IAppSearchResultCallback.Stub() {
@@ -486,29 +489,29 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * Removes {@link GenericDocument} objects by URIs and namespace from the {@link
+     * Removes {@link GenericDocument} objects by document IDs in a namespace from the {@link
      * AppSearchSession} database.
      *
-     * <p>Removed documents will no longer be surfaced by {@link #search} or {@link #getByUri}
-     * calls.
+     * <p>Removed documents will no longer be surfaced by {@link #search} or {@link
+     * #getByDocumentId} calls.
      *
-     * <p><b>NOTE:</b>By default, documents are removed via a soft delete operation. Once the
-     * document crosses the count threshold or byte usage threshold, the documents will be removed
-     * from disk.
+     * <p>Once the database crosses the document count or byte usage threshold, removed documents
+     * will be deleted from disk.
      *
-     * @param request {@link RemoveByUriRequest} with URIs and namespace to remove from the index.
+     * @param request {@link RemoveByDocumentIdRequest} with IDs in a namespace to remove from the
+     *     index.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive the pending result of performing this operation. The keys
-     *                 of the returned {@link AppSearchBatchResult} are the input URIs. The values
-     *                 are {@code null} on success, or a failed {@link AppSearchResult} otherwise.
-     *                 URIs that are not found will return a failed {@link AppSearchResult} with a
-     *                 result code of {@link AppSearchResult#RESULT_NOT_FOUND}.
-     *                 Or {@link BatchResultCallback#onSystemError} will be invoked with a
-     *                 {@link Throwable} if an unexpected internal error occurred in AppSearch
-     *                 service.
+     *                 of the returned {@link AppSearchBatchResult} are the input document IDs. The
+     *                 values are {@code null} on success, or a failed {@link AppSearchResult}
+     *                 otherwise. IDs that are not found will return a failed
+     *                 {@link AppSearchResult} with a result code of
+     *                 {@link AppSearchResult#RESULT_NOT_FOUND}. If an unexpected internal error
+     *                 occurs in the AppSearch service, {@link BatchResultCallback#onSystemError}
+     *                 will be invoked with a {@link Throwable}.
      */
     public void remove(
-            @NonNull RemoveByUriRequest request,
+            @NonNull RemoveByDocumentIdRequest request,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BatchResultCallback<String, Void> callback) {
         Objects.requireNonNull(request);
@@ -516,8 +519,8 @@ public final class AppSearchSession implements Closeable {
         Objects.requireNonNull(callback);
         Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         try {
-            mService.removeByUri(mPackageName, mDatabaseName, request.getNamespace(),
-                    new ArrayList<>(request.getUris()), mUserId,
+            mService.removeByDocumentId(mPackageName, mDatabaseName, request.getNamespace(),
+                    new ArrayList<>(request.getIds()), mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
                         @Override
                         public void onResult(AppSearchBatchResult result) {
@@ -581,8 +584,8 @@ public final class AppSearchSession implements Closeable {
     /**
      * Gets the storage info for this {@link AppSearchSession} database.
      *
-     * <p>This may take time proportional to the number of documents and may be inefficient to
-     * call repeatedly.
+     * <p>This may take time proportional to the number of documents and may be inefficient to call
+     * repeatedly.
      *
      * @param executor        Executor on which to invoke the callback.
      * @param callback        Callback to receive the storage info.
@@ -618,8 +621,8 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * Closes the {@link AppSearchSession} to persist all schema and document updates, additions,
-     * and deletes to disk.
+     * Closes the {@link AppSearchSession} to persist all schema and document updates,
+     * additions, and deletes to disk.
      */
     @Override
     public void close() {

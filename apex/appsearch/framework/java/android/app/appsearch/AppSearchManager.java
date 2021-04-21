@@ -78,10 +78,10 @@ import java.util.function.Consumer;
  * });</pre>
  *
  * <p>The basic unit of data in AppSearch is represented as a {@link GenericDocument} object,
- * containing a URI, namespace, time-to-live, score, and properties. A namespace organizes a logical
+ * containing an ID, namespace, time-to-live, score, and properties. A namespace organizes a logical
  * group of documents. For example, a namespace can be created to group documents on a per-account
- * basis. A URI identifies a single document within a namespace. The combination of URI and
- * namespace uniquely identifies a {@link GenericDocument} in the database.
+ * basis. An ID identifies a single document within a namespace. The combination of namespace and ID
+ * uniquely identifies a {@link GenericDocument} in the database.
  *
  * <p>Once the schema has been set, {@link GenericDocument} objects can be put into the database and
  * indexed by calling {@link AppSearchSession#put}.
@@ -91,8 +91,7 @@ import java.util.function.Consumer;
  * <pre>
  * // Although for this example we use GenericDocument directly, we recommend extending
  * // GenericDocument to create specific types (i.e. Email) with specific setters/getters.
- * GenericDocument email = new GenericDocument.Builder<>(URI, EMAIL_SCHEMA_TYPE)
- *     .setNamespace(NAMESPACE)
+ * GenericDocument email = new GenericDocument.Builder<>(NAMESPACE, ID, EMAIL_SCHEMA_TYPE)
  *     .setPropertyString(“subject”, EMAIL_SUBJECT)
  *     .setScore(EMAIL_SCORE)
  *     .build();
@@ -108,13 +107,13 @@ import java.util.function.Consumer;
  * <p>Searching within the database is done by calling {@link AppSearchSession#search} and providing
  * the query string to search for, as well as a {@link SearchSpec}.
  *
- * <p>Alternatively, {@link AppSearchSession#getByUri} can be called to retrieve documents by URI
- * and namespace.
+ * <p>Alternatively, {@link AppSearchSession#getByDocumentId} can be called to retrieve documents by
+ * namespace and ID.
  *
  * <p>Document removal is done either by time-to-live expiration, or explicitly calling a remove
- * operation. Remove operations can be done by URI and namespace via {@link
- * AppSearchSession#remove(RemoveByUriRequest, Executor, BatchResultCallback)}, or by query via
- * {@link AppSearchSession#remove(String, SearchSpec, Executor, Consumer)}.
+ * operation. Remove operations can be done by namespace and ID via {@link
+ * AppSearchSession#remove(RemoveByDocumentIdRequest, Executor, BatchResultCallback)}, or by query
+ * via {@link AppSearchSession#remove(String, SearchSpec, Executor, Consumer)}.
  */
 @SystemService(Context.APP_SEARCH_SERVICE)
 public class AppSearchManager {

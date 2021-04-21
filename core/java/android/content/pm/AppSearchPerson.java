@@ -91,7 +91,7 @@ public class AppSearchPerson extends GenericDocument {
         String uri;
         try {
             uri = UriCodec.decode(
-                    getUri(), false /* convertPlus */, StandardCharsets.UTF_8,
+                    getId(), false /* convertPlus */, StandardCharsets.UTF_8,
                     true /* throwOnFailure */);
         } catch (IllegalArgumentException e) {
             uri = null;

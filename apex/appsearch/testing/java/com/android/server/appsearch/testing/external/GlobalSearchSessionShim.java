@@ -23,9 +23,12 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.io.Closeable;
 
 /**
- * This class provides global access to the centralized AppSearch index maintained by the system.
+ * Provides a connection to all AppSearch databases the querying application has been granted access
+ * to.
  *
- * <p>Apps can retrieve indexed documents through the {@link #search} API.
+ * <p>All implementations of this interface must be thread safe.
+ *
+ * @see AppSearchSessionShim
  */
 public interface GlobalSearchSessionShim extends Closeable {
     /**
