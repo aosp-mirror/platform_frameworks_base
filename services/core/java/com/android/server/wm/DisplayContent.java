@@ -200,6 +200,7 @@ import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.MagnificationSpec;
+import android.view.PrivacyIndicatorBounds;
 import android.view.RemoteAnimationDefinition;
 import android.view.RoundedCorners;
 import android.view.Surface;
@@ -341,6 +342,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     RoundedCorners mInitialRoundedCorners;
     private final RotationCache<RoundedCorners, RoundedCorners> mRoundedCornerCache =
             new RotationCache<>(this::calculateRoundedCornersForRotationUncached);
+
+    PrivacyIndicatorBounds mCurrentPrivacyIndicatorBounds = new PrivacyIndicatorBounds();
+    private final RotationCache<PrivacyIndicatorBounds, PrivacyIndicatorBounds>
+            mPrivacyIndicatorBoundsCache = new
+            RotationCache<>(this::calculatePrivacyIndicatorBoundsForRotationUncached);
 
     /**
      * Overridden display size. Initialized with {@link #mInitialDisplayWidth}
@@ -986,7 +992,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInsetsStateController = new InsetsStateController(this);
         mDisplayFrames = new DisplayFrames(mDisplayId, mInsetsStateController.getRawInsetsState(),
                 mDisplayInfo, calculateDisplayCutoutForRotation(mDisplayInfo.rotation),
-                calculateRoundedCornersForRotation(mDisplayInfo.rotation));
+                calculateRoundedCornersForRotation(mDisplayInfo.rotation),
+                calculatePrivacyIndicatorBoundsForRotation(mDisplayInfo.rotation));
         initializeDisplayBaseInfo();
 
         mAppTransition = new AppTransition(mWmService.mContext, mWmService, this);
@@ -1713,8 +1720,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final DisplayInfo info = computeScreenConfiguration(mTmpConfiguration, rotation);
         final WmDisplayCutout cutout = calculateDisplayCutoutForRotation(rotation);
         final RoundedCorners roundedCorners = calculateRoundedCornersForRotation(rotation);
+        final PrivacyIndicatorBounds indicatorBounds =
+                calculatePrivacyIndicatorBoundsForRotation(rotation);
         final DisplayFrames displayFrames = new DisplayFrames(mDisplayId, new InsetsState(), info,
-                cutout, roundedCorners);
+                cutout, roundedCorners, indicatorBounds);
         token.applyFixedRotationTransform(info, displayFrames, mTmpConfiguration);
     }
 
@@ -2010,6 +2019,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         return roundedCorners.rotate(rotation, mInitialDisplayWidth, mInitialDisplayHeight);
+    }
+
+    PrivacyIndicatorBounds calculatePrivacyIndicatorBoundsForRotation(int rotation) {
+        return mPrivacyIndicatorBoundsCache.getOrCompute(mCurrentPrivacyIndicatorBounds, rotation);
+    }
+
+    private PrivacyIndicatorBounds calculatePrivacyIndicatorBoundsForRotationUncached(
+            PrivacyIndicatorBounds bounds, int rotation) {
+        if (bounds == null) {
+            return new PrivacyIndicatorBounds(new Rect[4], rotation);
+        }
+
+        return bounds.rotate(rotation);
     }
 
     /**
@@ -2527,14 +2549,30 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         onDisplayChanged(this);
     }
 
+    void updatePrivacyIndicatorBounds(Rect[] staticBounds) {
+        PrivacyIndicatorBounds oldBounds = mCurrentPrivacyIndicatorBounds;
+        mCurrentPrivacyIndicatorBounds =
+                mCurrentPrivacyIndicatorBounds.updateStaticBounds(staticBounds);
+        if (!Objects.equals(oldBounds, mCurrentPrivacyIndicatorBounds)) {
+            final DisplayInfo info = mDisplayInfo;
+            if (mDisplayFrames.onDisplayInfoUpdated(info,
+                    calculateDisplayCutoutForRotation(info.rotation),
+                    calculateRoundedCornersForRotation(info.rotation),
+                    calculatePrivacyIndicatorBoundsForRotation(info.rotation))) {
+                mInsetsStateController.onDisplayInfoUpdated(true);
+            }
+        }
+    }
+
     void onDisplayInfoChanged() {
         final DisplayInfo info = mDisplayInfo;
         if (mDisplayFrames.onDisplayInfoUpdated(info,
                 calculateDisplayCutoutForRotation(info.rotation),
-                calculateRoundedCornersForRotation(info.rotation))) {
+                calculateRoundedCornersForRotation(info.rotation),
+                calculatePrivacyIndicatorBoundsForRotation(info.rotation))) {
             // TODO(b/161810301): Set notifyInsetsChange to true while the server no longer performs
             //                    layout.
-            mInsetsStateController.onDisplayInfoUpdated(false /* notifyInsetsChange */);
+            mInsetsStateController.onDisplayInfoUpdated(false /* notifyInsetsChanged */);
         }
         mInputMonitor.layoutInputConsumers(info.logicalWidth, info.logicalHeight);
         mDisplayPolicy.onDisplayInfoChanged(info);
@@ -2569,6 +2607,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
         mInitialDisplayCutout = mDisplayInfo.displayCutout;
         mInitialRoundedCorners = mDisplayInfo.roundedCorners;
+        mCurrentPrivacyIndicatorBounds = new PrivacyIndicatorBounds(new Rect[4],
+                mDisplayInfo.rotation);
     }
 
     /**
