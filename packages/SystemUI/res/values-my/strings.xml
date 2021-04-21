@@ -101,7 +101,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"စတင်ရန်"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"ဖန်သားပြင်ကို ရိုက်ကူးနေသည်"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"အသံနှင့် ဖန်သားပြင်ကို ရိုက်ကူးနေသည်"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"မျက်နှာပြင်ပေါ်တွင် ထိချက်များ ပြရန်"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"ဖန်သားပြင်ပေါ်တွင် ထိချက်များ ပြရန်"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"ရပ်ရန် တို့ပါ"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ရပ်ရန်"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"ခဏရပ်ရန်"</string>
@@ -209,7 +209,7 @@
     <string name="accessibility_two_bars" msgid="1335676987274417121">"၂ ဘား"</string>
     <string name="accessibility_three_bars" msgid="819417766606501295">"၃ ဘား"</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"ဒေတာထုတ်လွှင့်မှုအပြည့်ဖမ်းမိခြင်း"</string>
-    <string name="accessibility_desc_on" msgid="2899626845061427845">"ဖွင့်ထားသည်"</string>
+    <string name="accessibility_desc_on" msgid="2899626845061427845">"ဖွင့်"</string>
     <string name="accessibility_desc_off" msgid="8055389500285421408">"ပိတ်ထားသည်"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"ချိတ်ဆက်ထားသည်"</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"ချိတ်ဆက်နေ။"</string>
@@ -231,7 +231,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"မိုဘိုင်းဒေတာကို ဖွင့်ထားပါသည်"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"မိုဘိုင်းဒေတာ ပိတ်ထားသည်"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"ဒေတာအသုံးပြုရန် သတ်မှတ်မထားပါ"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"ပိတ်ရန်"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"ပိတ်"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"ဘလူးတုသ်သုံး၍ ချိတ်ဆက်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"လေယာဉ်ပျံမုဒ်"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ကို ဖွင့်ထားသည်။"</string>
@@ -599,9 +599,9 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"သင်က ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'ပင်မ\' ခလုတ်ကို တို့၍ဖိထားပါ။"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ကိုယ်ရေးကိုယ်တာ ဒေတာများ (အဆက်အသွယ်နှင့် အီးမေးလ် အကြောင်းအရာများကဲ့သို့) ကို အသုံးပြုနိုင်ပါသည်။"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ပင်ထိုးထားသည့်အက်ပ်က အခြားအက်ပ်များကို ဖွင့်နိုင်သည်။"</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"ဤအက်ပ်ကိုပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'အနှစ်ချုပ်\' ခလုတ်များကို ထိ၍နှိပ်ထားပါ"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ဤအက်ပ်ကိုပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို ထိ၍နှိပ်ထားပါ"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ဤအက်ပ်ကိုပင်ဖြုတ်ရန် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"ဤအက်ပ်ကို ပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'အနှစ်ချုပ်\' ခလုတ်များကို ထိ၍နှိပ်ထားပါ"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ဤအက်ပ်ကို ပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို ထိ၍နှိပ်ထားပါ"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ဤအက်ပ်ကို ပင်ဖြုတ်ရန် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ရပါပြီ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"မလိုပါ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"အက်ပ်ကို ပင်ထိုးလိုက်သည်"</string>
@@ -684,8 +684,8 @@
     <string name="do_not_silence" msgid="4982217934250511227">"အသံ မတိတ်ပါနှင့်"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"အသံ မတိတ်ပါနှင့် သို့မဟုတ် မပိတ်ဆို့ပါနှင့်"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများ"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ဖွင့်ပါ"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ပိတ်ထားသည်"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ဖွင့်"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ပိတ်"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများကိုအသုံးပြုပြီး အက်ပ်တစ်ခု၏ အကြောင်းကြားချက် အရေးပါမှု ၀ မှ ၅ အထိသတ်မှတ်ပေးနိုင်သည်။ \n\n"<b>"အဆင့် ၅"</b>" \n- အကြောင်းကြားချက်စာရင်း၏ ထိပ်ဆုံးတွင် ပြသည် \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်းကို ခွင့်ပြုသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၄"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၃"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n\n"<b>"အဆင့် ၂"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n\n"<b>"အဆင့် ၁"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n- လော့ခ်ချထားသည့် မျက်နှာပြင်နှင့် အခြေအနေဘားတန်းတို့တွင် မပြပါ \n- အကြောင်းကြားချက်စာရင်း အောက်ဆုံးတွင်ပြသည် \n\n"<b>"အဆင့် ၀"</b>" \n- အက်ပ်မှ အကြောင်းကြားချက်များ အားလုံးကို ပိတ်ဆို့သည်"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"အကြောင်းကြားချက်များ"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ဤအကြောင်းကြားချက်များကို မြင်ရတော့မည် မဟုတ်ပါ"</string>
@@ -824,8 +824,8 @@
     <string name="data_saver" msgid="3484013368530820763">"ဒေတာချွေတာမှု"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"ဒေတာချွေတာမှု ဖွင့်ထားသည်"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"ဒေတာချွေတာမှု ပိတ်ထားသည်"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"ဖွင့်ပါ"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"ပိတ်ထားသည်"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"ဖွင့်"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"ပိတ်"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"မရနိုင်ပါ"</string>
     <string name="nav_bar" msgid="4642708685386136807">"ရွှေ့လျားရန်ဘားတန်း"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"အပြင်အဆင်"</string>

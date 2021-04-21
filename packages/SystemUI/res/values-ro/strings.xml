@@ -101,7 +101,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"Începeți"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Se înregistrează ecranul"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Se înregistrează ecranul și conținutul audio"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afișează atingerile de pe ecran"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afișați atingerile de pe ecran"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Atingeți pentru a opri"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Opriți"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Întrerupeți"</string>
