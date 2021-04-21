@@ -1252,9 +1252,11 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Task and display bounds should be equal while activity should be letterboxed and
         // has 700x1400 bounds with the ratio as the display.
-        assertTrue(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertTrue(newActivity.isLetterboxedForFixedOrientationAndAspectRatio());
         assertFalse(newActivity.inSizeCompatMode());
-        assertActivityMaxBoundsSandboxed();
+        // Activity max bounds are sandboxed due to size compat mode.
+        assertThat(newActivity.getConfiguration().windowConfiguration.getMaxBounds())
+                .isEqualTo(newActivity.getWindowConfiguration().getBounds());
         assertEquals(taskBounds, displayBounds);
         assertEquals(displayBounds.height(), newActivityBounds.height());
         assertEquals(displayBounds.height() * displayBounds.height() / displayBounds.width(),
@@ -1412,7 +1414,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSandboxDisplayApis_letterboxAppNotSandboxed() {
+    public void testSandboxDisplayApis_unresizableAppNotSandboxed() {
         // Set up a display in landscape with an unresizable app.
         setUpDisplaySizeWithApp(2500, 1000);
         mActivity.mDisplayContent.setSandboxDisplayApis(false /* sandboxDisplayApis */);
@@ -1420,11 +1422,11 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFitted();
 
         // Activity max bounds not be sandboxed since sandboxing is disabled.
-        assertThat(mActivity.getMaxBounds()).isEqualTo(mActivity.mDisplayContent.getBounds());
+        assertMaxBoundsInheritDisplayAreaBounds();
     }
 
     @Test
-    public void testSandboxDisplayApis_letterboxAppSandboxed() {
+    public void testSandboxDisplayApis_unresizableAppSandboxed() {
         // Set up a display in landscape with an unresizable app.
         setUpDisplaySizeWithApp(2500, 1000);
         mActivity.mDisplayContent.setSandboxDisplayApis(true /* sandboxDisplayApis */);
@@ -1435,6 +1437,89 @@ public class SizeCompatTests extends WindowTestsBase {
         assertActivityMaxBoundsSandboxed();
     }
 
+    @Test
+    public void testResizableApp_notSandboxed() {
+        // Set up a display in landscape with a fully resizable app.
+        setUpDisplaySizeWithApp(2500, 1000);
+        prepareLimitedBounds(mActivity, /* maxAspect= */ -1,
+                SCREEN_ORIENTATION_UNSPECIFIED, /* isUnresizable= */ false);
+        assertFitted();
+
+        // Activity max bounds not be sandboxed since app is fully resizable.
+        assertMaxBoundsInheritDisplayAreaBounds();
+    }
+
+    @Test
+    public void testResizableMaxAspectApp_notSandboxed() {
+        // Set up a display in landscape with a fully resizable app.
+        setUpDisplaySizeWithApp(2500, 1000);
+        prepareLimitedBounds(mActivity, /* maxAspect= */ 1,
+                SCREEN_ORIENTATION_UNSPECIFIED, /* isUnresizable= */ false);
+        assertFitted();
+
+        // Activity max bounds not be sandboxed since app is fully resizable.
+        assertMaxBoundsInheritDisplayAreaBounds();
+    }
+
+    @Test
+    public void testResizableOrientationRequestApp_notSandboxed() {
+        // Set up a display in landscape with a fully resizable app.
+        setUpDisplaySizeWithApp(2500, 1000);
+        prepareLimitedBounds(mActivity, /* maxAspect= */ -1,
+                SCREEN_ORIENTATION_PORTRAIT, /* isUnresizable= */ false);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        assertFitted();
+
+        // Activity max bounds not be sandboxed since app is fully resizable.
+        assertMaxBoundsInheritDisplayAreaBounds();
+    }
+
+    @Test
+    public void testResizableMaxAspectOrientationRequestApp_notSandboxed() {
+        // Set up a display in landscape with a fully resizable app.
+        setUpDisplaySizeWithApp(2500, 1000);
+        prepareLimitedBounds(mActivity, /* maxAspect= */ 1,
+                SCREEN_ORIENTATION_PORTRAIT, /* isUnresizable= */ false);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        assertFitted();
+
+        // Activity max bounds not be sandboxed since app is fully resizable.
+        assertMaxBoundsInheritDisplayAreaBounds();
+    }
+
+    @Test
+    public void testUnresizableApp_isSandboxed() {
+        // Set up a display in landscape with a fully resizable app.
+        setUpDisplaySizeWithApp(2500, 1000);
+        prepareLimitedBounds(mActivity, /* maxAspect= */ -1,
+                SCREEN_ORIENTATION_UNSPECIFIED, /* isUnresizable= */ true);
+        assertFitted();
+
+        // Activity max bounds are sandboxed since app may enter size compat mode.
+        assertActivityMaxBoundsSandboxed();
+        assertFalse(mActivity.inSizeCompatMode());
+    }
+
+    @Test
+    public void testUnresizableMaxAspectApp_isSandboxed() {
+        // Set up a display in landscape with a fully resizable app.
+        setUpDisplaySizeWithApp(2500, 1000);
+        prepareLimitedBounds(mActivity, /* maxAspect= */ 1,
+                SCREEN_ORIENTATION_UNSPECIFIED, /* isUnresizable= */ true);
+        assertFitted();
+
+        // Activity max bounds are sandboxed since app may enter size compat mode.
+        assertActivityMaxBoundsSandboxed();
+        assertFalse(mActivity.inSizeCompatMode());
+        assertTrue(mActivity.shouldCreateCompatDisplayInsets());
+
+        // Resize display to half the width.
+        resizeDisplay(mActivity.getDisplayContent(), 500, 1000);
+
+        // Activity now in size compat mode.
+        assertActivityMaxBoundsSandboxed();
+        assertTrue(mActivity.inSizeCompatMode());
+    }
 
     @Test
     public void testTaskDisplayAreaNotFillDisplay() {
