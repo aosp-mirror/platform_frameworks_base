@@ -31,12 +31,12 @@ import android.app.ActivityThread;
 import android.app.PropertyInvalidatedCache;
 import android.bluetooth.BluetoothDevice.Transport;
 import android.bluetooth.BluetoothProfile.ConnectionPolicy;
-import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.bluetooth.annotations.RequiresBluetoothAdvertisePermission;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresBluetoothLocationPermission;
-import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.bluetooth.annotations.RequiresBluetoothScanPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.PeriodicAdvertisingManager;
@@ -807,7 +807,7 @@ public final class BluetoothAdapter {
      */
     @RequiresNoPermission
     public BluetoothDevice getRemoteDevice(String address) {
-        return new BluetoothDevice(address);
+        return new BluetoothDevice(address, getAttributionSource());
     }
 
     /**
@@ -828,7 +828,7 @@ public final class BluetoothAdapter {
         }
         return new BluetoothDevice(
                 String.format(Locale.US, "%02X:%02X:%02X:%02X:%02X:%02X", address[0], address[1],
-                        address[2], address[3], address[4], address[5]));
+                        address[2], address[3], address[4], address[5]), getAttributionSource());
     }
 
     /**
@@ -1330,7 +1330,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.getUuids();
+                return mService.getUuids(getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1364,7 +1364,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.setName(name);
+                return mService.setName(name, getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1392,7 +1392,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.getBluetoothClass();
+                return mService.getBluetoothClass(getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1448,7 +1448,7 @@ public final class BluetoothAdapter {
         if (getState() != STATE_ON) return BluetoothAdapter.IO_CAPABILITY_UNKNOWN;
         try {
             mServiceLock.readLock().lock();
-            if (mService != null) return mService.getIoCapability();
+            if (mService != null) return mService.getIoCapability(getAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, e.getMessage(), e);
         } finally {
@@ -1501,7 +1501,7 @@ public final class BluetoothAdapter {
         if (getState() != STATE_ON) return BluetoothAdapter.IO_CAPABILITY_UNKNOWN;
         try {
             mServiceLock.readLock().lock();
-            if (mService != null) return mService.getLeIoCapability();
+            if (mService != null) return mService.getLeIoCapability(getAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, e.getMessage(), e);
         } finally {
@@ -1563,7 +1563,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.getScanMode();
+                return mService.getScanMode(getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1612,7 +1612,7 @@ public final class BluetoothAdapter {
             mServiceLock.readLock().lock();
             if (mService != null) {
                 int durationSeconds = Math.toIntExact(durationMillis / 1000);
-                return mService.setScanMode(mode, durationSeconds);
+                return mService.setScanMode(mode, durationSeconds, getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1662,7 +1662,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.setScanMode(mode, getDiscoverableTimeout());
+                return mService.setScanMode(mode, getDiscoverableTimeout(), getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1683,7 +1683,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.getDiscoverableTimeout();
+                return mService.getDiscoverableTimeout(getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1704,7 +1704,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                mService.setDiscoverableTimeout(timeout);
+                mService.setDiscoverableTimeout(timeout, getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1755,7 +1755,7 @@ public final class BluetoothAdapter {
         return ActivityThread.currentOpPackageName();
     }
 
-    private AttributionSource getAttributionSource() {
+    AttributionSource getAttributionSource() {
         if (mContext != null) {
             return mContext.getAttributionSource();
         }
@@ -1838,7 +1838,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.cancelDiscovery();
+                return mService.cancelDiscovery(getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1876,7 +1876,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.isDiscovering();
+                return mService.isDiscovering(getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -2313,7 +2313,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.getMaxConnectedAudioDevices();
+                return mService.getMaxConnectedAudioDevices(getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "failed to get getMaxConnectedAudioDevices, error: ", e);
@@ -2425,7 +2425,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.getMostRecentlyConnectedDevices();
+                return mService.getMostRecentlyConnectedDevices(getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -2455,7 +2455,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return toDeviceSet(mService.getBondedDevices());
+                return toDeviceSet(mService.getBondedDevices(getAttributionSource()));
             }
             return toDeviceSet(new BluetoothDevice[0]);
         } catch (RemoteException e) {
