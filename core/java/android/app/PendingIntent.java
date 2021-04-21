@@ -358,12 +358,6 @@ public final class PendingIntent implements Parcelable {
     private static void checkFlags(int flags, String packageName) {
         final boolean flagImmutableSet = (flags & PendingIntent.FLAG_IMMUTABLE) != 0;
         final boolean flagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
-        String msg = packageName + ": Targeting S+ (version " + Build.VERSION_CODES.S
-                    + " and above) requires that one of FLAG_IMMUTABLE or FLAG_MUTABLE"
-                    + " be specified when creating a PendingIntent.\nStrongly consider"
-                    + " using FLAG_IMMUTABLE, only use FLAG_MUTABLE if some functionality"
-                    + " depends on the PendingIntent being mutable, e.g. if it needs to"
-                    + " be used with inline replies or bubbles.";
 
         if (flagImmutableSet && flagMutableSet) {
             throw new IllegalArgumentException(
@@ -372,6 +366,12 @@ public final class PendingIntent implements Parcelable {
 
         if (Compatibility.isChangeEnabled(PENDING_INTENT_EXPLICIT_MUTABILITY_REQUIRED)
                 && !flagImmutableSet && !flagMutableSet) {
+            String msg = packageName + ": Targeting S+ (version " + Build.VERSION_CODES.S
+                    + " and above) requires that one of FLAG_IMMUTABLE or FLAG_MUTABLE"
+                    + " be specified when creating a PendingIntent.\nStrongly consider"
+                    + " using FLAG_IMMUTABLE, only use FLAG_MUTABLE if some functionality"
+                    + " depends on the PendingIntent being mutable, e.g. if it needs to"
+                    + " be used with inline replies or bubbles.";
                 throw new IllegalArgumentException(msg);
         }
     }
