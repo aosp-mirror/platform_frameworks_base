@@ -81,6 +81,7 @@ public class RequiresPermissionCheckerTest {
         compilationHelper
                 .addSourceFile("/android/annotation/RequiresPermission.java")
                 .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/content/Intent.java")
                 .addSourceLines("ColorManager.java",
                         "import android.annotation.RequiresPermission;",
                         "import android.content.Context;",
@@ -139,6 +140,7 @@ public class RequiresPermissionCheckerTest {
         compilationHelper
                 .addSourceFile("/android/annotation/RequiresPermission.java")
                 .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/content/Intent.java")
                 .addSourceFile("/android/foo/IColorService.java")
                 .addSourceFile("/android/os/IInterface.java")
                 .addSourceLines("ColorService.java",
@@ -319,6 +321,97 @@ public class RequiresPermissionCheckerTest {
                         "  @RequiresPermission(BLUE) abstract int blue();",
                         "  public void toParent() { red(); }",
                         "  public void toSibling() { blue(); }",
+                        "}")
+                .doTest();
+    }
+
+    @Test
+    public void testSendBroadcast() {
+        compilationHelper
+                .addSourceFile("/android/annotation/RequiresPermission.java")
+                .addSourceFile("/android/annotation/SdkConstant.java")
+                .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/content/Intent.java")
+                .addSourceLines("FooManager.java",
+                        "import android.annotation.RequiresPermission;",
+                        "import android.annotation.SdkConstant;",
+                        "import android.content.Context;",
+                        "import android.content.Intent;",
+                        "public class FooManager {",
+                        "  private static final String PERMISSION_RED = \"red\";",
+                        "  private static final String PERMISSION_BLUE = \"blue\";",
+                        "  @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)",
+                        "  private static final String ACTION_NONE = \"none\";",
+                        "  @RequiresPermission(PERMISSION_RED)",
+                        "  @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)",
+                        "  private static final String ACTION_RED = \"red\";",
+                        "  @RequiresPermission(allOf={PERMISSION_RED,PERMISSION_BLUE})",
+                        "  @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)",
+                        "  private static final String ACTION_RED_BLUE = \"red_blue\";",
+                        "  public void exampleNone(Context context) {",
+                        "    Intent intent = new Intent(ACTION_NONE);",
+                        "    context.sendBroadcast(intent);",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcast(intent, PERMISSION_RED);",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcastWithMultiplePermissions(intent,",
+                        "        new String[] { PERMISSION_RED });",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcastWithMultiplePermissions(intent,",
+                        "        new String[] { PERMISSION_RED, PERMISSION_BLUE });",
+                        "  }",
+                        "  public void exampleRed(Context context) {",
+                        "    Intent intent = new Intent(FooManager.ACTION_RED);",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcast(intent);",
+                        "    context.sendBroadcast(intent, FooManager.PERMISSION_RED);",
+                        "    context.sendBroadcastWithMultiplePermissions(intent,",
+                        "        new String[] { FooManager.PERMISSION_RED });",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcastWithMultiplePermissions(intent,",
+                        "        new String[] { FooManager.PERMISSION_RED, PERMISSION_BLUE });",
+                        "  }",
+                        "  public void exampleRedBlue(Context context) {",
+                        "    Intent intent = new Intent(ACTION_RED_BLUE);",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcast(intent);",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcast(intent, PERMISSION_RED);",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcastWithMultiplePermissions(intent,",
+                        "        new String[] { PERMISSION_RED });",
+                        "    context.sendBroadcastWithMultiplePermissions(intent,",
+                        "        new String[] { PERMISSION_RED, PERMISSION_BLUE });",
+                        "  }",
+                        "  public void exampleUnknown(Context context, Intent intent) {",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcast(intent);",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcast(intent, PERMISSION_RED);",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcastWithMultiplePermissions(intent,",
+                        "        new String[] { PERMISSION_RED });",
+                        "    // BUG: Diagnostic contains:",
+                        "    context.sendBroadcastWithMultiplePermissions(intent,",
+                        "        new String[] { PERMISSION_RED, PERMISSION_BLUE });",
+                        "  }",
+                        "  public void exampleReuse(Context context) {",
+                        "    Intent intent = new Intent(ACTION_RED);",
+                        "    context.sendBroadcast(intent, PERMISSION_RED);",
+                        "    intent = new Intent(ACTION_NONE);",
+                        "    context.sendBroadcast(intent);",
+                        "    intent.setAction(ACTION_RED);",
+                        "    context.sendBroadcast(intent, PERMISSION_RED);",
+                        "  }",
+                        "  public void exampleScoped(Context context) {",
+                        "    if (true) {",
+                        "      Intent intent = new Intent(ACTION_RED);",
+                        "      context.sendBroadcast(intent, PERMISSION_RED);",
+                        "    } else {",
+                        "      Intent intent = new Intent(ACTION_NONE);",
+                        "      context.sendBroadcast(intent);",
+                        "    }",
+                        "  }",
                         "}")
                 .doTest();
     }

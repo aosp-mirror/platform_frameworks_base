@@ -80,6 +80,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     /**
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PROTOCOL_MODE_CHANGED =
             "android.bluetooth.input.profile.action.PROTOCOL_MODE_CHANGED";
@@ -87,6 +89,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     /**
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_HANDSHAKE =
             "android.bluetooth.input.profile.action.HANDSHAKE";
@@ -94,6 +98,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     /**
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_REPORT =
             "android.bluetooth.input.profile.action.REPORT";
@@ -101,6 +107,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     /**
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_VIRTUAL_UNPLUG_STATUS =
             "android.bluetooth.input.profile.action.VIRTUAL_UNPLUG_STATUS";
@@ -108,6 +116,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     /**
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_IDLE_TIME_CHANGED =
             "android.bluetooth.input.profile.action.IDLE_TIME_CHANGED";
