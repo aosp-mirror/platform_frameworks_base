@@ -1295,7 +1295,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"कुनै अनुमति आवश्यक छैन"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"सायद तपाईँलाई पैसा पर्न सक्छ।"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ठिक छ"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"यो यन्त्रलाई USB मार्फत चार्ज गर्दै"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"यो डिभाइस USB बाट चार्ज गरिँदै छ"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"जडान गरिएको यन्त्रलाई USB मार्फत चार्ज गर्दै"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB फाइल स्थानान्तरण सेवा सक्रिय गरियो"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB मार्फत PTP सेवा सक्रिय गरियो"</string>
@@ -1306,8 +1306,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"कनेक्ट गरिएको डिभाइस चार्ज गर्दै। थप विकल्पहरूका लागि ट्याप गर्नुहोस्।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"एनालग अडियोको सहायक उपकरण पत्ता लाग्यो"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"संलग्न गरिएको यन्त्र यो फोनसँग कम्प्याटिबल छैन। थप जान्न ट्याप गर्नुहोस्।"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB डिबगिङ सक्रिय गरिएको छ"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB डिबगिङ निष्क्रिय पार्न ट्याप गर्नुहोस्‌"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB डिबग गर्न ADB कनेक्ट गरिएको छ"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB डिबगिङ अफ गर्न ट्याप गर्नुहोस्‌"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB डिबगिङलाई असक्षम पार्न ट्याप गर्नुहोस्।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"वायरलेस डिबगिङ जोडियो"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"वायरलेस डिबगिङ निष्क्रिय पार्न ट्याप गर्नुहोस्"</string>
@@ -1507,7 +1507,7 @@
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"थप विकल्पहरू"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="8490227947584914460">"साझेदारी गरिएको आन्तरिक भण्डारण"</string>
+    <string name="storage_internal" msgid="8490227947584914460">"प्रयोग भएको आन्तरिक भण्डारण"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD कार्ड"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD कार्ड"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB ड्राइभ"</string>
@@ -1562,7 +1562,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ताररहित प्रदर्शन"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"कास्ट"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"उपकरणमा जडान गर्नुहोस्"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"स्क्रिन उपकरणमा कास्ट गर्नुहोस्"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"स्क्रिन डिभाइसमा कास्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"उपकरणको खोजी गरिँदै..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"सेटिंङहरू"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"डिस्कनेक्ट गर्नुहोस्"</string>
@@ -1795,7 +1795,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"ब्याट्री सेभरले डिभाइसको ब्याट्री बढी समय टिकाउन:\n\n•अँध्यारो थिम सक्रिय गर्छ\n•पृष्ठभूमिका गतिविधि, केही दृश्यात्मक प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ\n\n"<annotation id="url">"थप जान्नुहोस्"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"ब्याट्री सेभरले डिभाइसको ब्याट्री बढी समय टिकाउन:\n\n• अँध्यारो थिम अन गर्छ\n• पृष्ठभूमिका क्रियाकलाप, केही दृश्यात्मक प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू अफ गर्छ वा सीमित पार्छ"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"डेटा सेभरले डेटा खपत कम गर्न केही एपहरूलाई ब्याकग्राउन्डमा डेटा पठाउन वा प्राप्त गर्न दिँदैन। तपाईंले अहिले प्रयोग गरिरहनुभएको एपले सीमित रूपमा मात्र डेटा चलाउन पाउँछ। उदाहरणका लागि, तपाईंले फोटोमा ट्याप गर्नुभयो भने मात्र फोटो देखिन्छ नत्र देखिँदैन।"</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेभर सक्रिय गर्ने हो?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेभर अन गर्ने हो?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"सक्रिय गर्नुहोस्"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other"> %1$d मिनेटको लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>
