@@ -22,6 +22,7 @@ import android.os.ResultReceiver;
 import android.view.autofill.AutofillId;
 import android.view.translation.TranslationContext;
 import android.view.translation.TranslationSpec;
+import android.view.translation.UiTranslationSpec;
 import com.android.internal.os.IResultReceiver;
 
 import java.util.List;
@@ -39,7 +40,7 @@ oneway interface ITranslationManager {
 
     void updateUiTranslationState(int state, in TranslationSpec sourceSpec,
          in TranslationSpec targetSpec, in List<AutofillId> viewIds, IBinder token, int taskId,
-         int userId);
+         in UiTranslationSpec uiTranslationSpec, int userId);
 
     void registerUiTranslationStateCallback(in IRemoteCallback callback, int userId);
     void unregisterUiTranslationStateCallback(in IRemoteCallback callback, int userId);

@@ -38,6 +38,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.translation.TranslationContext;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationManager.UiTranslationState;
+import android.view.translation.UiTranslationSpec;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -146,7 +147,7 @@ final class TranslationManagerServiceImpl extends
     @GuardedBy("mLock")
     public void updateUiTranslationStateLocked(@UiTranslationState int state,
             TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
-            IBinder token, int taskId) {
+            IBinder token, int taskId, UiTranslationSpec uiTranslationSpec) {
         // Get top activity for a given task id
         final ActivityTokens taskTopActivityTokens =
                 mActivityTaskManagerInternal.getTopActivityForTask(taskId);
@@ -157,6 +158,7 @@ final class TranslationManagerServiceImpl extends
             return;
         }
         try {
+            // TODO: Pipe uiTranslationSpec through to the UiTranslationController.
             taskTopActivityTokens.getApplicationThread().updateUiTranslationState(
                     taskTopActivityTokens.getActivityToken(), state, sourceSpec, targetSpec,
                     viewIds);
