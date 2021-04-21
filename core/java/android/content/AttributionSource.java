@@ -550,8 +550,27 @@ public final class AttributionSource implements Parcelable {
         }
 
         /**
-         * Permissions that should be considered revoked regardless if granted.
+         * Sets permissions which have been voluntarily "renounced" by the
+         * calling app.
+         * <p>
+         * Interactions performed through services obtained from the created
+         * Context will ideally be treated as if these "renounced" permissions
+         * have not actually been granted to the app, regardless of their actual
+         * grant status.
+         * <p>
+         * This is designed for use by separate logical components within an app
+         * which have no intention of interacting with data or services that are
+         * protected by the renounced permissions.
+         * <p>
+         * Note that only {@link PermissionInfo#PROTECTION_DANGEROUS}
+         * permissions are supported by this mechanism. Additionally, this
+         * mechanism only applies to calls made through services obtained via
+         * {@link Context#getSystemService}; it has no effect on static or raw
+         * Binder calls.
          *
+         * @param renouncedPermissions The set of permissions to treat as
+         *            renounced, which is as if not granted.
+         * @return This builder.
          * @hide
          */
         @SystemApi
