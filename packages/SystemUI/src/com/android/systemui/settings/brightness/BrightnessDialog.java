@@ -16,12 +16,17 @@
 
 package com.android.systemui.settings.brightness;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -62,10 +67,15 @@ public class BrightnessDialog extends Activity {
         window.setLayout(
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
 
-        BrightnessSlider controller = mToggleSliderFactory.create(this, null);
+        setContentView(R.layout.brightness_mirror_container);
+        FrameLayout frame = findViewById(R.id.brightness_mirror_container);
+        // The brightness mirror container is INVISIBLE by default.
+        frame.setVisibility(View.VISIBLE);
+
+        BrightnessSlider controller = mToggleSliderFactory.create(this, frame);
         controller.init();
-        setContentView(controller.getRootView());
-        controller.getRootView().setBackgroundResource(R.drawable.brightness_mirror_background);
+        frame.addView(controller.getRootView(), MATCH_PARENT, WRAP_CONTENT);
+
         mBrightnessController = new BrightnessController(this, controller, mBroadcastDispatcher);
     }
 

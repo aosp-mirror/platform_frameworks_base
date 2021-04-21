@@ -17,7 +17,10 @@
 package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -160,6 +163,26 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
 
         mController.assertCallerCanModifyListener(mClientToken,
                 false /* callerCanManagerAppTokens */, ANOTHER_UID);
+    }
+
+    @Test
+    public void testWindowContextCreatedWindowTokenRemoved_SwitchToListenToDA() {
+        WindowToken windowContextCreatedToken = new WindowToken.Builder(mWm, mClientToken,
+                TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                .setDisplayContent(mDefaultDisplay)
+                .setFromClientToken(true)
+                .build();
+        final DisplayArea da = windowContextCreatedToken.getDisplayArea();
+
+        mController.registerWindowContainerListener(mClientToken, windowContextCreatedToken,
+                TEST_UID, TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, null /* options */);
+
+        assertThat(mController.getContainer(mClientToken)).isEqualTo(windowContextCreatedToken);
+
+        // Remove WindowToken
+        windowContextCreatedToken.removeImmediately();
+
+        assertThat(mController.getContainer(mClientToken)).isEqualTo(da);
     }
 
     private class TestWindowTokenClient extends IWindowToken.Stub {

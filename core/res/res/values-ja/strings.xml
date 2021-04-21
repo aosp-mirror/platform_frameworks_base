@@ -1692,7 +1692,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能を必要とするユーザーをサポートするアプリには適していますが、ほとんどのアプリには適していません。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能が必要な場合には適していますが、その他の多くのアプリには不要です。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"画面の表示と操作"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリでコンテンツを表示することができます。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"操作の表示と実行"</string>

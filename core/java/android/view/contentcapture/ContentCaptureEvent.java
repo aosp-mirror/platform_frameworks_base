@@ -428,10 +428,11 @@ public final class ContentCaptureEvent implements Parcelable {
         }
         if (mNode != null) {
             final String className = mNode.getClassName();
-            if (mNode != null) {
-                string.append(", class=").append(className);
-            }
+            string.append(", class=").append(className);
             string.append(", id=").append(mNode.getAutofillId());
+            if (mNode.getText() != null) {
+                string.append(", text=").append(getSanitizedString(mNode.getText()));
+            }
         }
         if (mText != null) {
             string.append(", text=").append(getSanitizedString(mText));

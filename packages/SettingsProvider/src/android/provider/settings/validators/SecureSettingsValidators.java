@@ -284,5 +284,6 @@ public class SecureSettingsValidators {
                 new InclusiveFloatRangeValidator(0.0f, 1.0f));
         VALIDATORS.put(Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.NOTIFICATION_BUBBLES, BOOLEAN_VALIDATOR);
     }
 }

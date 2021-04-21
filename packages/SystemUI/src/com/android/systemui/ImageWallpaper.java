@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.Size;
 import android.view.Choreographer;
+import android.view.DisplayInfo;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
@@ -62,8 +63,7 @@ public class ImageWallpaper extends WallpaperService {
     private final StatusBarStateController mStatusBarStateController;
     private final ArrayList<RectF> mLocalColorsToAdd = new ArrayList<>();
     private final ArraySet<RectF> mColorAreas = new ArraySet<>();
-    private float mShift;
-    private volatile int mPages;
+    private volatile int mPages = 1;
     private HandlerThread mWorker;
     // scaled down version
     private Bitmap mMiniBitmap;
@@ -100,9 +100,9 @@ public class ImageWallpaper extends WallpaperService {
         // Surface is rejected if size below a threshold on some devices (ie. 8px on elfin)
         // set min to 64 px (CTS covers this), please refer to ag/4867989 for detail.
         @VisibleForTesting
-        static final int MIN_SURFACE_WIDTH = 64;
+        static final int MIN_SURFACE_WIDTH = 128;
         @VisibleForTesting
-        static final int MIN_SURFACE_HEIGHT = 64;
+        static final int MIN_SURFACE_HEIGHT = 128;
 
         private ImageWallpaperRenderer mRenderer;
         private EglHelper mEglHelper;
@@ -112,6 +112,8 @@ public class ImageWallpaper extends WallpaperService {
         private int mHeight = 1;
         private int mImgWidth = 1;
         private int mImgHeight = 1;
+        private float mPageWidth = 1.f;
+        private float mPageOffset = 1.f;
         private volatile float mDozeAmount;
         private volatile boolean mNewDozeValue = false;
         private volatile boolean mShouldScheduleFrame = false;
@@ -158,15 +160,15 @@ public class ImageWallpaper extends WallpaperService {
         public void onOffsetsChanged(float xOffset, float yOffset,
                 float xOffsetStep, float yOffsetStep,
                 int xPixelOffset, int yPixelOffset) {
-            if (mMiniBitmap == null || mMiniBitmap.isRecycled()) return;
             final int pages;
             if (xOffsetStep > 0 && xOffsetStep <= 1) {
-                pages = (int) (1 / xOffsetStep + 1);
+                pages = (int) Math.round(1 / xOffsetStep) + 1;
             } else {
                 pages = 1;
             }
             if (pages == mPages) return;
             mPages = pages;
+            if (mMiniBitmap == null || mMiniBitmap.isRecycled()) return;
             updateShift();
             mWorker.getThreadHandler().post(() ->
                     computeAndNotifyLocalColors(new ArrayList<>(mColorAreas), mMiniBitmap));
@@ -174,19 +176,17 @@ public class ImageWallpaper extends WallpaperService {
 
         private void updateShift() {
             if (mImgHeight == 0) {
-                mShift = 0;
+                mPageOffset = 0;
+                mPageWidth = 1;
                 return;
             }
             // calculate shift
-            float imgWidth = (float) mImgWidth / (float) mImgHeight;
-            float displayWidth =
-                    (float) mWidth / (float) mHeight;
-            // if need to shift
-            if (imgWidth > displayWidth) {
-                mShift = imgWidth / imgWidth - displayWidth / imgWidth;
-            } else {
-                mShift = 0;
-            }
+            DisplayInfo displayInfo = new DisplayInfo();
+            getDisplayContext().getDisplay().getDisplayInfo(displayInfo);
+            int screenWidth = displayInfo.getNaturalWidth();
+            float imgWidth = Math.min(mImgWidth > 0 ? screenWidth / (float) mImgWidth : 1.f, 1.f);
+            mPageWidth = imgWidth;
+            mPageOffset = (1 - imgWidth) / (float) (mPages - 1);
         }
 
         private void updateMiniBitmap() {
@@ -198,8 +198,8 @@ public class ImageWallpaper extends WallpaperService {
                 }
                 mImgHeight = b.getHeight();
                 mImgWidth = b.getWidth();
-                mMiniBitmap = Bitmap.createScaledBitmap(b, (int) Math.ceil(scale * b.getWidth()),
-                        (int) Math.ceil(scale * b.getHeight()), false);
+                mMiniBitmap = Bitmap.createScaledBitmap(b,  (int) Math.max(scale * b.getWidth(), 1),
+                        (int) Math.max(scale * b.getHeight(), 1), false);
                 computeAndNotifyLocalColors(mLocalColorsToAdd, mMiniBitmap);
                 mLocalColorsToAdd.clear();
             });
@@ -274,27 +274,39 @@ public class ImageWallpaper extends WallpaperService {
             });
         }
 
+        /**
+         * Transform the logical coordinates into wallpaper coordinates.
+         *
+         * Logical coordinates are organised such that the various pages are non-overlapping. So,
+         * if there are n pages, the first page will have its X coordinate on the range [0-1/n].
+         *
+         * The real pages are overlapping. If the Wallpaper are a width Ww and the screen a width
+         * Ws, the relative width of a page Wr is Ws/Ww. This does not change if the number of
+         * pages increase.
+         * If there are n pages, the page k starts at the offset k * (1 - Wr) / (n - 1), as the
+         * last page is at position (1-Wr) and the others are regularly spread on the range [0-
+         * (1-Wr)].
+         */
         private RectF pageToImgRect(RectF area) {
-            float pageWidth = 1f / (float) mPages;
-            if (pageWidth < 1 && pageWidth >= 0) pageWidth = 1;
-            float imgWidth = (float) mImgWidth / (float) mImgHeight;
-            float displayWidth =
-                    (float) mWidth / (float) mHeight;
-            float expansion = imgWidth > displayWidth ? displayWidth / imgWidth : 1;
-            int page = (int) Math.floor(area.centerX() / pageWidth);
-            float shiftWidth = mShift * page * pageWidth;
+            // Width of a page for the caller of this API.
+            float virtualPageWidth = 1f / (float) mPages;
+            float leftPosOnPage = (area.left % virtualPageWidth) / virtualPageWidth;
+            float rightPosOnPage = (area.right % virtualPageWidth) / virtualPageWidth;
+            int currentPage = (int) Math.floor(area.centerX() / virtualPageWidth);
+
             RectF imgArea = new RectF();
             imgArea.bottom = area.bottom;
             imgArea.top = area.top;
-            imgArea.left = MathUtils.constrain(area.left % pageWidth, 0, 1)
-                    * expansion + shiftWidth;
-            imgArea.right = MathUtils.constrain(area.right % pageWidth, 0, 1)
-                    * expansion + shiftWidth;
+            imgArea.left = MathUtils.constrain(
+                    leftPosOnPage * mPageWidth + currentPage * mPageOffset, 0, 1);
+            imgArea.right = MathUtils.constrain(
+                    rightPosOnPage * mPageWidth + currentPage * mPageOffset, 0, 1);
             if (imgArea.left > imgArea.right) {
                 // take full page
-                imgArea.left = shiftWidth;
-                imgArea.right = 1 - (mShift - shiftWidth);
+                imgArea.left = 0;
+                imgArea.right = 1;
             }
+
             return imgArea;
         }
 

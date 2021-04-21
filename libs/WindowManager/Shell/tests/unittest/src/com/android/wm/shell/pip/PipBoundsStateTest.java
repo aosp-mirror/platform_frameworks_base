@@ -38,6 +38,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.function.Consumer;
+
 /**
  * Tests for {@link PipBoundsState}.
  */
@@ -177,5 +179,21 @@ public class PipBoundsStateTest extends ShellTestCase {
 
         mPipBoundsState.setOverrideMinSize(new Size(15, 10));
         assertEquals(10, mPipBoundsState.getOverrideMinEdgeSize());
+    }
+
+    @Test
+    public void testSetBounds_updatesPipExclusionBounds() {
+        final Consumer<Rect> callback = mock(Consumer.class);
+        final Rect currentBounds = new Rect(10, 10, 20, 15);
+        final Rect newBounds = new Rect(50, 50, 100, 75);
+        mPipBoundsState.setBounds(currentBounds);
+
+        mPipBoundsState.setPipExclusionBoundsChangeCallback(callback);
+        // Setting the listener immediately calls back with the current bounds.
+        verify(callback).accept(currentBounds);
+
+        mPipBoundsState.setBounds(newBounds);
+        // Updating the bounds makes the listener call back back with the new rect.
+        verify(callback).accept(newBounds);
     }
 }

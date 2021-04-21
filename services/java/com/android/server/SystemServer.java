@@ -2751,13 +2751,6 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            t.traceBegin("StartSystemUI");
-            try {
-                startSystemUi(context, windowManagerF);
-            } catch (Throwable e) {
-                reportWtf("starting System UI", e);
-            }
-            t.traceEnd();
             // Enable airplane mode in safe mode. setAirplaneMode() cannot be called
             // earlier as it sends broadcasts to other services.
             // TODO: This may actually be too late if radio firmware already started leaking
@@ -2958,6 +2951,14 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
         }, t);
+
+        t.traceBegin("StartSystemUI");
+        try {
+            startSystemUi(context, windowManagerF);
+        } catch (Throwable e) {
+            reportWtf("starting System UI", e);
+        }
+        t.traceEnd();
 
         t.traceEnd(); // startOtherServices
     }

@@ -59,8 +59,8 @@ droiddoc {
         "android.test.runner",
         "junit",
         "android.test.base",
-        "unsupportedappusage",
     ],
+    sdk_version: "current",
     installable: false,
     custom_template: "droiddoc-templates-sdk",
 }

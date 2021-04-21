@@ -161,7 +161,7 @@ public class NotificationShadeWindowViewController {
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
 
         // This view is not part of the newly inflated expanded status bar.
-        mBrightnessMirror = mView.findViewById(R.id.brightness_mirror);
+        mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
     }
 
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
@@ -392,7 +392,7 @@ public class NotificationShadeWindowViewController {
         mView.setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
             @Override
             public void onChildViewAdded(View parent, View child) {
-                if (child.getId() == R.id.brightness_mirror) {
+                if (child.getId() == R.id.brightness_mirror_container) {
                     mBrightnessMirror = child;
                 }
             }

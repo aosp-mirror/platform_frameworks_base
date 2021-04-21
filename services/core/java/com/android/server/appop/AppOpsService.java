@@ -565,6 +565,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 } else if (mActivityManagerInternal != null
                         && mActivityManagerInternal.isPendingTopUid(uid)) {
                     return MODE_ALLOWED;
+                } else if (mActivityManagerInternal != null
+                        && mActivityManagerInternal.isTempAllowlistedForFgsWhileInUse(uid)) {
+                    return MODE_ALLOWED;
                 } else if (state <= UID_STATE_TOP) {
                     // process is in TOP.
                     return MODE_ALLOWED;

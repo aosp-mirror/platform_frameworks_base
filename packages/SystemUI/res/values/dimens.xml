@@ -528,7 +528,7 @@
     <!-- The size of the gesture span needed to activate the "pull" notification expansion -->
     <dimen name="pull_span_min">25dp</dimen>
 
-    <dimen name="qs_corner_radius">14dp</dimen>
+    <dimen name="qs_corner_radius">28dp</dimen>
     <dimen name="qs_tile_height">88dp</dimen>
     <!--notification_side_paddings + notification_content_margin_start - (qs_quick_tile_size - qs_tile_background_size) / 2 -->
     <dimen name="qs_tile_layout_margin_side">18dp</dimen>
@@ -609,6 +609,8 @@
     <dimen name="qs_header_bottom_padding">14dp</dimen>
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
+
+    <dimen name="qs_container_bottom_padding">24dp</dimen>
 
     <!-- Desired qs icon overlay size. -->
     <dimen name="qs_detail_icon_overlay_size">24dp</dimen>
@@ -1428,6 +1430,9 @@
     <dimen name="rounded_slider_track_width">4dp</dimen>
     <!-- rounded_slider_track_width / 2 -->
     <dimen name="rounded_slider_track_corner_radius">2dp</dimen>
+    <dimen name="rounded_slider_background_padding">8dp</dimen>
+    <!-- rounded_slider_corner_radius + rounded_slider_background_padding -->
+    <dimen name="rounded_slider_background_rounded_corner">32dp</dimen>
 
     <!-- inset for ic_lock_open within a DisabledUdfpsView -->
     <dimen name="udfps_unlock_icon_inset">16dp</dimen>

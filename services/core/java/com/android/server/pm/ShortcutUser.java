@@ -328,6 +328,10 @@ class ShortcutUser {
 
     public void rescanPackageIfNeeded(@NonNull String packageName, boolean forceRescan) {
         final boolean isNewApp = !mPackages.containsKey(packageName);
+        if (ShortcutService.DEBUG_REBOOT) {
+            Slog.d(TAG, "rescanPackageIfNeeded " + getUserId() + "@" + packageName
+                    + ", forceRescan=" + forceRescan + " , isNewApp=" + isNewApp);
+        }
 
         final ShortcutPackage shortcutPackage = getPackageShortcuts(packageName);
 
@@ -397,7 +401,7 @@ class ShortcutUser {
         } else {
             // Save each ShortcutPackageItem in a separate Xml file.
             final File path = getShortcutPackageItemFile(spi);
-            if (ShortcutService.DEBUG) {
+            if (ShortcutService.DEBUG || ShortcutService.DEBUG_REBOOT) {
                 Slog.d(TAG, "Saving package item " + spi.getPackageName() + " to " + path);
             }
 

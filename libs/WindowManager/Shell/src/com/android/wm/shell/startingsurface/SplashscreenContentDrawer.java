@@ -109,11 +109,12 @@ public class SplashscreenContentDrawer {
      * view on background thread so the view and the drawable can be create and pre-draw in
      * parallel.
      *
+     * @param emptyView Create a splash screen view without icon on it.
      * @param consumer Receiving the SplashScreenView object, which will also be executed
      *                 on splash screen thread. Note that the view can be null if failed.
      */
-    void createContentView(Context context, int splashScreenResId, ActivityInfo info,
-            int taskId, Consumer<SplashScreenView> consumer) {
+    void createContentView(Context context, boolean emptyView, int splashScreenResId,
+            ActivityInfo info, int taskId, Consumer<SplashScreenView> consumer) {
         mSplashscreenWorkerHandler.post(() -> {
             SplashScreenView contentView;
             try {
@@ -121,7 +122,11 @@ public class SplashscreenContentDrawer {
                         context, splashScreenResId);
                 if (contentView == null) {
                     Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "makeSplashScreenContentView");
-                    contentView = makeSplashScreenContentView(context, info);
+                    if (emptyView) {
+                        contentView = makeEmptySplashScreenContentView(context);
+                    } else {
+                        contentView = makeSplashScreenContentView(context, info);
+                    }
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 }
             } catch (RuntimeException e) {
@@ -188,6 +193,18 @@ public class SplashscreenContentDrawer {
         } else {
             return themeBGTester.getDominateColor();
         }
+    }
+
+    private SplashScreenView makeEmptySplashScreenContentView(Context context) {
+        getWindowAttrs(context, mTmpAttrs);
+        final StartingWindowViewBuilder builder = new StartingWindowViewBuilder();
+        final int themeBGColor = peekWindowBGColor(context);
+        final SplashScreenView view =  builder
+                .setContext(context)
+                .setWindowBGColor(themeBGColor)
+                .build();
+        view.setNotCopyable();
+        return view;
     }
 
     private SplashScreenView makeSplashScreenContentView(Context context, ActivityInfo ai) {

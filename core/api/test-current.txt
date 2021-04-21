@@ -347,6 +347,10 @@ package android.app {
     method public boolean isSeamlessResizeEnabled();
   }
 
+  public final class PictureInPictureUiState implements android.os.Parcelable {
+    ctor public PictureInPictureUiState(boolean);
+  }
+
   public class StatusBarManager {
     method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
@@ -783,8 +787,10 @@ package android.content.pm {
 
   public class ActivityInfo extends android.content.pm.ComponentInfo implements android.os.Parcelable {
     method public static boolean isTranslucentOrFloating(android.content.res.TypedArray);
+    field public static final long ALWAYS_SANDBOX_DISPLAY_APIS = 185004937L; // 0xb06f389L
     field public static final long FORCE_NON_RESIZE_APP = 181136395L; // 0xacbec0bL
     field public static final long FORCE_RESIZE_APP = 174042936L; // 0xa5faf38L
+    field public static final long NEVER_SANDBOX_DISPLAY_APIS = 184838306L; // 0xb0468a2L
     field public static final long OVERRIDE_MIN_ASPECT_RATIO = 174042980L; // 0xa5faf64L
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_LARGE = 180326787L; // 0xabf9183L
     field public static final float OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE = 1.7777778f;
@@ -2114,7 +2120,7 @@ package android.provider {
     field public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST = "location_ignore_settings_package_whitelist";
     field public static final String LOW_POWER_MODE = "low_power";
     field public static final String LOW_POWER_MODE_STICKY = "low_power_sticky";
-    field public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
+    field @Deprecated public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
     field public static final String SHOW_FIRST_CRASH_DIALOG = "show_first_crash_dialog";
     field public static final String USER_DISABLED_HDR_FORMATS = "user_disabled_hdr_formats";
@@ -2138,6 +2144,7 @@ package android.provider {
     field public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
     field public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
     field public static final String NOTIFICATION_BADGING = "notification_badging";
+    field public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field public static final String POWER_MENU_LOCKED_SHOW_CONTENT = "power_menu_locked_show_content";
     field public static final String SELECTED_SPELL_CHECKER = "selected_spell_checker";
     field public static final String SELECTED_SPELL_CHECKER_SUBTYPE = "selected_spell_checker_subtype";
@@ -2342,6 +2349,14 @@ package android.service.quicksettings {
 
   public class TileService extends android.app.Service {
     method public static boolean isQuickSettingsSupported();
+  }
+
+}
+
+package android.service.voice {
+
+  public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
   }
 
 }

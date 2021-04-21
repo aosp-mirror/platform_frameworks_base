@@ -626,6 +626,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     private static final long PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT = 165573442L;
 
+    private static final String CREDENTIAL_MANAGEMENT_APP_INVALID_ALIAS_MSG =
+            "The alias provided must be contained in the aliases specified in the credential "
+                    + "management app's authentication policy";
+
     final Context mContext;
     final Injector mInjector;
     final IPackageManager mIPackageManager;
@@ -5450,11 +5454,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             boolean isUserSelectable) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
-        final boolean isCredentialManagementApp =
-                isCredentialManagementApp(caller, alias, isUserSelectable);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
                 || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+        if (isCredentialManagementApp) {
+            Preconditions.checkCallAuthorization(isUserSelectable, "The credential "
+                    + "management app is not allowed to install a user selectable key pair");
+            Preconditions.checkCallAuthorization(
+                    isAliasInCredentialManagementAppPolicy(caller, alias),
+                    CREDENTIAL_MANAGEMENT_APP_INVALID_ALIAS_MSG);
+        }
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_INSTALL_KEY_PAIR);
 
         final long id = mInjector.binderClearCallingIdentity();
@@ -5509,10 +5519,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean removeKeyPair(ComponentName who, String callerPackage, String alias) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
-        final boolean isCredentialManagementApp = isCredentialManagementApp(caller, alias);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
                 || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+        if (isCredentialManagementApp) {
+            Preconditions.checkCallAuthorization(
+                    isAliasInCredentialManagementAppPolicy(caller, alias),
+                    CREDENTIAL_MANAGEMENT_APP_INVALID_ALIAS_MSG);
+        }
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_REMOVE_KEY_PAIR);
 
         final long id = Binder.clearCallingIdentity();
@@ -5546,8 +5561,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean hasKeyPair(String callerPackage, String alias) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller);
         Preconditions.checkCallAuthorization(canManageCertificates(caller)
-                || isCredentialManagementApp(caller, alias));
+                || isCredentialManagementApp);
+        if (isCredentialManagementApp) {
+            Preconditions.checkCallAuthorization(
+                    isAliasInCredentialManagementAppPolicy(caller, alias),
+                    CREDENTIAL_MANAGEMENT_APP_INVALID_ALIAS_MSG);
+        }
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
             try (KeyChainConnection keyChainConnection =
@@ -5782,7 +5803,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
-        final boolean isCredentialManagementApp = isCredentialManagementApp(caller, alias);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller);
         if (deviceIdAttestationRequired && attestationUtilsFlags.length > 0) {
             // TODO: replace enforce methods
             enforceCallerCanRequestDeviceIdAttestation(caller);
@@ -5791,6 +5812,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                     && (isProfileOwner(caller) || isDeviceOwner(caller)))
                     || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+            if (isCredentialManagementApp) {
+                Preconditions.checkCallAuthorization(
+                        isAliasInCredentialManagementAppPolicy(caller, alias),
+                        CREDENTIAL_MANAGEMENT_APP_INVALID_ALIAS_MSG);
+            }
         }
 
         if (TextUtils.isEmpty(alias)) {
@@ -5918,10 +5944,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             byte[] cert, byte[] chain, boolean isUserSelectable) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
-        final boolean isCredentialManagementApp = isCredentialManagementApp(caller, alias);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
                 || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+        if (isCredentialManagementApp) {
+            Preconditions.checkCallAuthorization(
+                    isAliasInCredentialManagementAppPolicy(caller, alias),
+                    CREDENTIAL_MANAGEMENT_APP_INVALID_ALIAS_MSG);
+        }
 
         final long id = mInjector.binderClearCallingIdentity();
         try (final KeyChainConnection keyChainConnection =
@@ -6367,55 +6398,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * privileged APIs.
      * <p>
      * This is done by checking that the calling package is authorized to perform the app operation
-     * {@link android.app.AppOpsManager#OP_MANAGE_CREDENTIALS}. The alias provided must be contained
-     * in the aliases specified in the credential management app's authentication policy. The
-     * key pair to install must not be user selectable.
+     * {@link android.app.AppOpsManager#OP_MANAGE_CREDENTIALS}.
      *
      * @param caller the calling identity
      * @return {@code true} if the calling process is the credential management app.
      */
-    private boolean isCredentialManagementApp(CallerIdentity caller, String alias,
-            boolean isUserSelectable) {
-        // Should not be user selectable
-        if (isUserSelectable) {
-            Slogf.e(LOG_TAG, "The credential management app is not allowed to install a "
-                    + "user selectable key pair");
-            return false;
-        }
-        return isCredentialManagementApp(caller, alias);
+    private boolean isCredentialManagementApp(CallerIdentity caller) {
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            AppOpsManager appOpsManager = mInjector.getAppOpsManager();
+            if (appOpsManager == null) return false;
+            return appOpsManager.noteOpNoThrow(AppOpsManager.OP_MANAGE_CREDENTIALS, caller.getUid(),
+                    caller.getPackageName(), null, null) == AppOpsManager.MODE_ALLOWED;
+        });
     }
 
     /**
-     * Check whether a caller application is the credential mangement app, which can access
-     * privileged APIs.
-     * <p>
-     * This is done by checking that the calling package is authorized to perform the app operation
-     * {@link android.app.AppOpsManager#OP_MANAGE_CREDENTIALS}. The alias provided must be contained
+     * If the caller is the credential management app, the alias provided must be contained
      * in the aliases specified in the credential management app's authentication policy.
-     *
-     * @param caller the calling identity
-     * @return {@code true} if the calling process is the credential management app.
      */
-    private boolean isCredentialManagementApp(CallerIdentity caller, String alias) {
+    private boolean isAliasInCredentialManagementAppPolicy(CallerIdentity caller, String alias) {
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            // Should include alias in authentication policy
             try (KeyChainConnection connection = KeyChain.bindAsUser(mContext,
                     caller.getUserHandle())) {
                 // The policy will be null if there is no credential management app
                 AppUriAuthenticationPolicy policy =
                         connection.getService().getCredentialManagementAppPolicy();
-                if (policy == null || policy.getAppAndUriMappings().isEmpty()
-                        || !containsAlias(policy, alias)) {
-                    return false;
-                }
+                return policy != null && !policy.getAppAndUriMappings().isEmpty()
+                        && containsAlias(policy, alias);
             } catch (RemoteException | InterruptedException e) {
                 return false;
             }
-
-            AppOpsManager appOpsManager = mInjector.getAppOpsManager();
-            if (appOpsManager == null) return false;
-            return appOpsManager.noteOpNoThrow(AppOpsManager.OP_MANAGE_CREDENTIALS, caller.getUid(),
-                    caller.getPackageName(), null, null) == AppOpsManager.MODE_ALLOWED;
         });
     }
 

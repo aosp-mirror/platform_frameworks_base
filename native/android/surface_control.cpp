@@ -459,34 +459,31 @@ void ASurfaceTransaction_setGeometry(ASurfaceTransaction* aSurfaceTransaction,
     transaction->setTransformToDisplayInverse(surfaceControl, transformToInverseDisplay);
 }
 
-void ASurfaceTransaction_setSourceRect(ASurfaceTransaction* aSurfaceTransaction,
-                                       ASurfaceControl* aSurfaceControl, const ARect& source) {
+void ASurfaceTransaction_setCrop(ASurfaceTransaction* aSurfaceTransaction,
+                                 ASurfaceControl* aSurfaceControl, const ARect& crop) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
-    CHECK_VALID_RECT(source);
+    CHECK_VALID_RECT(crop);
 
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
-    transaction->setCrop(surfaceControl, static_cast<const Rect&>(source));
+    transaction->setCrop(surfaceControl, static_cast<const Rect&>(crop));
 }
 
-void ASurfaceTransaction_setPosition(ASurfaceTransaction* /* aSurfaceTransaction */,
-                                     ASurfaceControl* /* aSurfaceControl */,
-                                     const ARect& /* destination */) {
-    // TODO: Fix this function
-    /* CHECK_NOT_NULL(aSurfaceTransaction);
+void ASurfaceTransaction_setPosition(ASurfaceTransaction* aSurfaceTransaction,
+                                     ASurfaceControl* aSurfaceControl, int32_t x, int32_t y) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
-    CHECK_VALID_RECT(destination);
 
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
-    transaction->setFrame(surfaceControl, static_cast<const Rect&>(destination));*/
+    transaction->setPosition(surfaceControl, x, y);
 }
 
-void ASurfaceTransaction_setTransform(ASurfaceTransaction* aSurfaceTransaction,
-                                      ASurfaceControl* aSurfaceControl, int32_t transform) {
+void ASurfaceTransaction_setBufferTransform(ASurfaceTransaction* aSurfaceTransaction,
+                                            ASurfaceControl* aSurfaceControl, int32_t transform) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
 
@@ -497,6 +494,19 @@ void ASurfaceTransaction_setTransform(ASurfaceTransaction* aSurfaceTransaction,
     bool transformToInverseDisplay = (NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY & transform) ==
             NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY;
     transaction->setTransformToDisplayInverse(surfaceControl, transformToInverseDisplay);
+}
+
+void ASurfaceTransaction_setScale(ASurfaceTransaction* aSurfaceTransaction,
+                                  ASurfaceControl* aSurfaceControl, float xScale, float yScale) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+    LOG_ALWAYS_FATAL_IF(xScale < 0, "negative value passed in for xScale");
+    LOG_ALWAYS_FATAL_IF(yScale < 0, "negative value passed in for yScale");
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->setMatrix(surfaceControl, xScale, 0, 0, yScale);
 }
 
 void ASurfaceTransaction_setBufferTransparency(ASurfaceTransaction* aSurfaceTransaction,

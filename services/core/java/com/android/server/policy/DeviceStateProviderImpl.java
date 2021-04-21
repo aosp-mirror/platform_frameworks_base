@@ -394,13 +394,13 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                     throw new IllegalStateException("Have not received sensor event.");
                 }
 
-                if (latestEvent.values.length != mExpectedValues.size()) {
+                if (latestEvent.values.length < mExpectedValues.size()) {
                     throw new RuntimeException("Number of supplied numeric range(s) does not "
                             + "match the number of values in the latest sensor event for sensor: "
                             + mSensor);
                 }
 
-                for (int i = 0; i < latestEvent.values.length; i++) {
+                for (int i = 0; i < mExpectedValues.size(); i++) {
                     if (!adheresToRange(latestEvent.values[i], mExpectedValues.get(i))) {
                         return false;
                     }
