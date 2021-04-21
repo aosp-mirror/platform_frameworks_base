@@ -36,8 +36,7 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
     private final IFingerprintService mFingerprintService;
     private final int mSensorId;
 
-    public FingerprintAuthenticator(IFingerprintService fingerprintService, int sensorId)
-            throws RemoteException {
+    public FingerprintAuthenticator(IFingerprintService fingerprintService, int sensorId) {
         mFingerprintService = fingerprintService;
         mSensorId = sensorId;
     }

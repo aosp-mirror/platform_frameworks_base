@@ -144,8 +144,10 @@ interface IFingerprintService {
     // Removes a callback set by addClientActiveCallback
     void removeClientActiveCallback(IFingerprintClientActiveCallback callback);
 
-    // Give FingerprintService its ID. See AuthService.java
-    void initializeConfiguration(int sensorId, int strength);
+    // Registers all HIDL and AIDL sensors. Only HIDL sensor properties need to be provided, because
+    // AIDL sensor properties are retrieved directly from the available HALs. If no HIDL HALs exist,
+    // hidlSensors must be non-null and empty. See AuthService.java
+    void registerAuthenticators(in List<FingerprintSensorPropertiesInternal> hidlSensors);
 
     // Notifies about a finger touching the sensor area.
     void onPointerDown(int sensorId, int x, int y, float minor, float major);
