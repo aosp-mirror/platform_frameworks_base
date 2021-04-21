@@ -18,9 +18,9 @@ package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.app.Instrumentation
 import android.content.Context
-import android.platform.test.annotations.Presubmit
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -102,7 +102,7 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
             }
         }
 
-    @Presubmit
+    @FlakyTest(bugId = 178447631)
     @Test
     open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
@@ -110,7 +110,7 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 178447631)
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {

@@ -65,11 +65,6 @@ class OpenAppToLegacySplitScreen(
             WindowManagerStateHelper.SPLASH_SCREEN_NAME,
             WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
 
-    @FlakyTest(bugId = 178447631)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
     @FlakyTest
     @Test
     fun appWindowBecomesVisible() = testSpec.appWindowBecomesVisible(splitScreenApp.getPackage())
@@ -89,11 +84,6 @@ class OpenAppToLegacySplitScreen(
     @FlakyTest
     @Test
     fun layerBecomesVisible() = testSpec.layerBecomesVisible(splitScreenApp.getPackage())
-
-    @FlakyTest(bugId = 178447631)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     @FlakyTest(bugId = 151179149)
     @Test
