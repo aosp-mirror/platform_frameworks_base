@@ -424,6 +424,9 @@ public class ConnectivityManager {
      * Action used to display a dialog that asks the user whether to connect to a network that is
      * not validated. This intent is used to start the dialog in settings via startActivity.
      *
+     * This action includes a {@link Network} typed extra which is called
+     * {@link ConnectivityManager#EXTRA_NETWORK} that represents the network which is unvalidated.
+     *
      * @hide
      */
     @SystemApi(client = MODULE_LIBRARIES)
@@ -432,6 +435,10 @@ public class ConnectivityManager {
     /**
      * Action used to display a dialog that asks the user whether to avoid a network that is no
      * longer validated. This intent is used to start the dialog in settings via startActivity.
+     *
+     * This action includes a {@link Network} typed extra which is called
+     * {@link ConnectivityManager#EXTRA_NETWORK} that represents the network which is no longer
+     * validated.
      *
      * @hide
      */
@@ -443,6 +450,10 @@ public class ConnectivityManager {
      * Action used to display a dialog that asks the user whether to stay connected to a network
      * that has not validated. This intent is used to start the dialog in settings via
      * startActivity.
+     *
+     * This action includes a {@link Network} typed extra which is called
+     * {@link ConnectivityManager#EXTRA_NETWORK} that represents the network which has partial
+     * connectivity.
      *
      * @hide
      */
