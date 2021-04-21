@@ -33,6 +33,8 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
+import android.app.StatsManager;
+import android.app.StatsManager.StatsPullAtomCallback;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
@@ -46,6 +48,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -62,10 +65,12 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -177,6 +182,12 @@ public final class AppHibernationService extends SystemService {
                     NAMESPACE_APP_HIBERNATION,
                     ActivityThread.currentApplication().getMainExecutor(),
                     this::onDeviceConfigChanged);
+            getContext().getSystemService(StatsManager.class)
+                    .setPullAtomCallback(
+                            FrameworkStatsLog.USER_LEVEL_HIBERNATED_APPS,
+                            /* metadata */ null, // use default PullAtomMetadata values
+                            mBackgroundExecutor,
+                            new StatsPullAtomCallbackImpl());
         }
     }
 
@@ -272,6 +283,16 @@ public final class AppHibernationService extends SystemService {
             } else {
                 unhibernatePackageForUser(packageName, userId, pkgState);
             }
+            final UserLevelState stateSnapshot = new UserLevelState(pkgState);
+            final int userIdSnapshot = userId;
+            mBackgroundExecutor.execute(() -> {
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.USER_LEVEL_HIBERNATION_STATE_CHANGED,
+                        stateSnapshot.packageName,
+                        userIdSnapshot,
+                        stateSnapshot.hibernated,
+                        stateSnapshot.lastUnhibernatedMs);
+            });
             List<UserLevelState> states = new ArrayList<>(mUserStates.get(userId).values());
             mUserDiskStores.get(userId).scheduleWriteHibernationStates(states);
         }
@@ -908,6 +929,31 @@ public final class AppHibernationService extends SystemService {
         public boolean isOatArtifactDeletionEnabled() {
             return mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_hibernationDeletesOatArtifactsEnabled);
+        }
+    }
+
+    private final class StatsPullAtomCallbackImpl implements StatsPullAtomCallback {
+        @Override
+        public int onPullAtom(int atomTag, @NonNull List<StatsEvent> data) {
+            if (atomTag != FrameworkStatsLog.USER_LEVEL_HIBERNATED_APPS) {
+                return StatsManager.PULL_SKIP;
+            }
+            if (isAppHibernationEnabled()) {
+                List<UserInfo> userInfos = mUserManager.getAliveUsers();
+                final int numUsers = userInfos.size();
+                for (int i = 0; i < numUsers; ++i) {
+                    final int userId = userInfos.get(i).id;
+                    if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
+                        data.add(
+                                FrameworkStatsLog.buildStatsEvent(
+                                        atomTag,
+                                        getHibernatingPackagesForUser(userId).size(),
+                                        userId)
+                        );
+                    }
+                }
+            }
+            return StatsManager.PULL_SUCCESS;
         }
     }
 }
