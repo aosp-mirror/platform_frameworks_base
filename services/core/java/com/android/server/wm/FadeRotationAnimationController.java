@@ -66,9 +66,14 @@ public class FadeRotationAnimationController extends FadeAnimationController {
         } else {
             mNavBarToken = null;
         }
+        // Do not fade notification shade when running fixed rotation (not frozen) because it may
+        // need to animate with the launching app.
+        final WindowState notificationShade = mFrozenTimeoutRunnable == null
+                ? displayPolicy.getNotificationShade() : null;
         displayContent.forAllWindows(w -> {
             if (w.mActivityRecord == null && w.mHasSurface && !w.mForceSeamlesslyRotate
-                    && !w.mIsWallpaper && !w.mIsImWindow && w != navigationBar) {
+                    && !w.mIsWallpaper && !w.mIsImWindow && w != navigationBar
+                    && w != notificationShade) {
                 mTargetWindowTokens.add(w.mToken);
             }
         }, true /* traverseTopToBottom */);
