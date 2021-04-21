@@ -15,6 +15,7 @@
  */
 package android.app.smartspace;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,7 +40,7 @@ import java.util.Objects;
  * {@link SmartspaceAction} as their type because they can have associated actions.
  *
  * <p><b>NOTE: </b>
- * If {@link mWidgetId} is set, it should be preferred over all other properties.
+ * If {@link mWidget} is set, it should be preferred over all other properties.
  * Else, if {@link mSliceUri} is set, it should be preferred over all other data properties.
  * Otherwise, the instance should be treated as a data object.
  *
@@ -61,18 +62,17 @@ public final class SmartspaceTarget implements Parcelable {
     private final SmartspaceAction mBaseAction;
 
     /** A timestamp indicating when the card was created. */
-    @NonNull
+    @CurrentTimeMillisLong
     private final long mCreationTimeMillis;
 
     /**
      * A timestamp indicating when the card should be removed from view, in case the service
      * disconnects or restarts.
      */
-    @NonNull
+    @CurrentTimeMillisLong
     private final long mExpiryTimeMillis;
 
     /** A score assigned to a target. */
-    @NonNull
     private final float mScore;
 
     /** A {@link List<SmartspaceAction>} containing all action chips. */
@@ -89,18 +89,15 @@ public final class SmartspaceTarget implements Parcelable {
      * @see FeatureType
      */
     @FeatureType
-    @NonNull
     private final int mFeatureType;
 
     /**
      * Indicates whether the content is sensitive. Certain UI surfaces may choose to skip rendering
      * real content until the device is unlocked.
      */
-    @NonNull
     private final boolean mSensitive;
 
     /** Indicating if the UI should show this target in its expanded state. */
-    @NonNull
     private final boolean mShouldShowExpanded;
 
     /** A Notification key if the target was generated using a notification. */
@@ -115,7 +112,14 @@ public final class SmartspaceTarget implements Parcelable {
     @NonNull
     private final UserHandle mUserHandle;
 
-    /** Target Ids of other {@link SmartspaceTarget}s if they are associated with this target. */
+    /**
+     * Target Id of other {@link SmartspaceTarget}s if it is associated with this target. This
+     * association is added to tell the UI that a card would be more useful if displayed with the
+     * associated smartspace target. This field is supposed to be taken as a suggestion and the
+     * association can be ignored based on the situation in the UI. It is possible to have a one way
+     * card association. In other words, Card B can be associated with Card A but not the other way
+     * around.
+     */
     @Nullable
     private final String mAssociatedSmartspaceTargetId;
 
@@ -125,7 +129,7 @@ public final class SmartspaceTarget implements Parcelable {
 
     /** {@link AppWidgetProviderInfo} if this target is a widget. */
     @Nullable
-    private final AppWidgetProviderInfo mWidgetId;
+    private final AppWidgetProviderInfo mWidget;
 
     public static final int FEATURE_UNDEFINED = 0;
     public static final int FEATURE_WEATHER = 1;
@@ -202,7 +206,7 @@ public final class SmartspaceTarget implements Parcelable {
         this.mUserHandle = in.readTypedObject(UserHandle.CREATOR);
         this.mAssociatedSmartspaceTargetId = in.readString();
         this.mSliceUri = in.readTypedObject(Uri.CREATOR);
-        this.mWidgetId = in.readTypedObject(AppWidgetProviderInfo.CREATOR);
+        this.mWidget = in.readTypedObject(AppWidgetProviderInfo.CREATOR);
     }
 
     private SmartspaceTarget(String smartspaceTargetId,
@@ -213,7 +217,7 @@ public final class SmartspaceTarget implements Parcelable {
             boolean shouldShowExpanded, String sourceNotificationKey,
             ComponentName componentName, UserHandle userHandle,
             String associatedSmartspaceTargetId, Uri sliceUri,
-            AppWidgetProviderInfo widgetId) {
+            AppWidgetProviderInfo widget) {
         mSmartspaceTargetId = smartspaceTargetId;
         mHeaderAction = headerAction;
         mBaseAction = baseAction;
@@ -230,7 +234,7 @@ public final class SmartspaceTarget implements Parcelable {
         mUserHandle = userHandle;
         mAssociatedSmartspaceTargetId = associatedSmartspaceTargetId;
         mSliceUri = sliceUri;
-        mWidgetId = widgetId;
+        mWidget = widget;
     }
 
     /**
@@ -260,7 +264,7 @@ public final class SmartspaceTarget implements Parcelable {
     /**
      * Returns the creation time of the target.
      */
-    @NonNull
+    @CurrentTimeMillisLong
     public long getCreationTimeMillis() {
         return mCreationTimeMillis;
     }
@@ -268,7 +272,7 @@ public final class SmartspaceTarget implements Parcelable {
     /**
      * Returns the expiry time of the target.
      */
-    @NonNull
+    @CurrentTimeMillisLong
     public long getExpiryTimeMillis() {
         return mExpiryTimeMillis;
     }
@@ -276,7 +280,6 @@ public final class SmartspaceTarget implements Parcelable {
     /**
      * Returns the score of the target.
      */
-    @NonNull
     public float getScore() {
         return mScore;
     }
@@ -300,7 +303,7 @@ public final class SmartspaceTarget implements Parcelable {
     /**
      * Returns the feature type of the target.
      */
-    @NonNull
+    @FeatureType
     public int getFeatureType() {
         return mFeatureType;
     }
@@ -308,7 +311,6 @@ public final class SmartspaceTarget implements Parcelable {
     /**
      * Returns whether the target is sensitive or not.
      */
-    @NonNull
     public boolean isSensitive() {
         return mSensitive;
     }
@@ -316,7 +318,6 @@ public final class SmartspaceTarget implements Parcelable {
     /**
      * Returns whether the target should be shown in expanded state.
      */
-    @NonNull
     public boolean shouldShowExpanded() {
         return mShouldShowExpanded;
     }
@@ -365,8 +366,8 @@ public final class SmartspaceTarget implements Parcelable {
      * Returns the AppWidgetProviderInfo, if the target is a widget.
      */
     @Nullable
-    public AppWidgetProviderInfo getWidgetId() {
-        return mWidgetId;
+    public AppWidgetProviderInfo getWidget() {
+        return mWidget;
     }
 
     /**
@@ -403,7 +404,7 @@ public final class SmartspaceTarget implements Parcelable {
         dest.writeTypedObject(this.mUserHandle, flags);
         dest.writeString(this.mAssociatedSmartspaceTargetId);
         dest.writeTypedObject(this.mSliceUri, flags);
-        dest.writeTypedObject(this.mWidgetId, flags);
+        dest.writeTypedObject(this.mWidget, flags);
     }
 
     @Override
@@ -430,7 +431,7 @@ public final class SmartspaceTarget implements Parcelable {
                 + ", mUserHandle=" + mUserHandle
                 + ", mAssociatedSmartspaceTargetId='" + mAssociatedSmartspaceTargetId + '\''
                 + ", mSliceUri=" + mSliceUri
-                + ", mWidgetId=" + mWidgetId
+                + ", mWidget=" + mWidget
                 + '}';
     }
 
@@ -456,7 +457,7 @@ public final class SmartspaceTarget implements Parcelable {
                 && Objects.equals(mAssociatedSmartspaceTargetId,
                 that.mAssociatedSmartspaceTargetId)
                 && Objects.equals(mSliceUri, that.mSliceUri)
-                && Objects.equals(mWidgetId, that.mWidgetId);
+                && Objects.equals(mWidget, that.mWidget);
     }
 
     @Override
@@ -464,7 +465,7 @@ public final class SmartspaceTarget implements Parcelable {
         return Objects.hash(mSmartspaceTargetId, mHeaderAction, mBaseAction, mCreationTimeMillis,
                 mExpiryTimeMillis, mScore, mActionChips, mIconGrid, mFeatureType, mSensitive,
                 mShouldShowExpanded, mSourceNotificationKey, mComponentName, mUserHandle,
-                mAssociatedSmartspaceTargetId, mSliceUri, mWidgetId);
+                mAssociatedSmartspaceTargetId, mSliceUri, mWidget);
     }
 
     /**
@@ -490,7 +491,7 @@ public final class SmartspaceTarget implements Parcelable {
         private final UserHandle mUserHandle;
         private String mAssociatedSmartspaceTargetId;
         private Uri mSliceUri;
-        private AppWidgetProviderInfo mWidgetId;
+        private AppWidgetProviderInfo mWidget;
 
         /**
          * A builder for {@link SmartspaceTarget}.
@@ -528,7 +529,7 @@ public final class SmartspaceTarget implements Parcelable {
          * Sets the creation time.
          */
         @NonNull
-        public Builder setCreationTimeMillis(@NonNull long creationTimeMillis) {
+        public Builder setCreationTimeMillis(@CurrentTimeMillisLong long creationTimeMillis) {
             this.mCreationTimeMillis = creationTimeMillis;
             return this;
         }
@@ -537,7 +538,7 @@ public final class SmartspaceTarget implements Parcelable {
          * Sets the expiration time.
          */
         @NonNull
-        public Builder setExpiryTimeMillis(@NonNull long expiryTimeMillis) {
+        public Builder setExpiryTimeMillis(@CurrentTimeMillisLong long expiryTimeMillis) {
             this.mExpiryTimeMillis = expiryTimeMillis;
             return this;
         }
@@ -546,7 +547,7 @@ public final class SmartspaceTarget implements Parcelable {
          * Sets the score.
          */
         @NonNull
-        public Builder setScore(@NonNull float score) {
+        public Builder setScore(float score) {
             this.mScore = score;
             return this;
         }
@@ -573,7 +574,7 @@ public final class SmartspaceTarget implements Parcelable {
          * Sets the feature type.
          */
         @NonNull
-        public Builder setFeatureType(@NonNull int featureType) {
+        public Builder setFeatureType(int featureType) {
             this.mFeatureType = featureType;
             return this;
         }
@@ -582,7 +583,7 @@ public final class SmartspaceTarget implements Parcelable {
          * Sets whether the contents are sensitive.
          */
         @NonNull
-        public Builder setSensitive(@NonNull boolean sensitive) {
+        public Builder setSensitive(boolean sensitive) {
             this.mSensitive = sensitive;
             return this;
         }
@@ -591,7 +592,7 @@ public final class SmartspaceTarget implements Parcelable {
          * Sets whether to show the card as expanded.
          */
         @NonNull
-        public Builder setShouldShowExpanded(@NonNull boolean shouldShowExpanded) {
+        public Builder setShouldShowExpanded(boolean shouldShowExpanded) {
             this.mShouldShowExpanded = shouldShowExpanded;
             return this;
         }
@@ -618,7 +619,7 @@ public final class SmartspaceTarget implements Parcelable {
         /**
          * Sets the slice uri.
          *
-         * <p><b>NOTE: </b> If {@link mWidgetId} is also set, {@link mSliceUri} should be ignored.
+         * <p><b>NOTE: </b> If {@link mWidget} is also set, {@link mSliceUri} should be ignored.
          */
         @NonNull
         public Builder setSliceUri(@NonNull Uri sliceUri) {
@@ -629,12 +630,12 @@ public final class SmartspaceTarget implements Parcelable {
         /**
          * Sets the widget id.
          *
-         * <p><b>NOTE: </b> If {@link mWidgetId} is set, all other @Nullable params should be
+         * <p><b>NOTE: </b> If {@link mWidget} is set, all other @Nullable params should be
          * ignored.
          */
         @NonNull
-        public Builder setWidgetId(@NonNull AppWidgetProviderInfo widgetId) {
-            this.mWidgetId = widgetId;
+        public Builder setWidget(@NonNull AppWidgetProviderInfo widget) {
+            this.mWidget = widget;
             return this;
         }
 
@@ -654,7 +655,7 @@ public final class SmartspaceTarget implements Parcelable {
                     mHeaderAction, mBaseAction, mCreationTimeMillis, mExpiryTimeMillis, mScore,
                     mActionChips, mIconGrid, mFeatureType, mSensitive, mShouldShowExpanded,
                     mSourceNotificationKey, mComponentName, mUserHandle,
-                    mAssociatedSmartspaceTargetId, mSliceUri, mWidgetId);
+                    mAssociatedSmartspaceTargetId, mSliceUri, mWidget);
         }
     }
 }

@@ -501,6 +501,10 @@ public final class SipDelegateImsConfiguration implements Parcelable {
      * {@link SipMessage} was using the latest configuration during creation and not a stale
      * configuration due to race conditions between the configuration being updated and the RCS
      * application not receiving the updated configuration before generating a new message.
+     * <p>
+     * The version number should be a positive number that starts at 0 and increments sequentially
+     * as new {@link SipDelegateImsConfiguration} instances are created to update the IMS
+     * configuration state.
      *
      * @return the version number associated with this {@link SipDelegateImsConfiguration}.
      */

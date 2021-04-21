@@ -200,6 +200,7 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         Resources r = getResources();
         mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_volume));
         mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_alarm_clock));
+        mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_call_strength));
     }
 
     private void updateVisibilities() {

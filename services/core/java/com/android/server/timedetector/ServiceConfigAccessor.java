@@ -64,6 +64,7 @@ final class ServiceConfigAccessor {
     private static final Instant TIME_LOWER_BOUND_DEFAULT = Instant.ofEpochMilli(
             Long.max(android.os.Environment.getRootDirectory().lastModified(), Build.TIME));
 
+    /** Device config keys that affect the {@link TimeDetectorService}. */
     private static final Set<String> SERVER_FLAGS_KEYS_TO_WATCH = Collections.unmodifiableSet(
             new ArraySet<>(new String[] {
                     KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE,
