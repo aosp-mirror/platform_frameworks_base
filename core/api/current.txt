@@ -32871,6 +32871,10 @@ package android.print {
     method @NonNull public String getLabel(@NonNull android.content.pm.PackageManager);
     method @IntRange(from=1) public int getWidthMils();
     method public boolean isPortrait();
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_C;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_D;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_E;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_F;
     field public static final android.print.PrintAttributes.MediaSize ISO_A0;
     field public static final android.print.PrintAttributes.MediaSize ISO_A1;
     field public static final android.print.PrintAttributes.MediaSize ISO_A10;
@@ -32924,6 +32928,12 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize JPN_KAKU2;
     field public static final android.print.PrintAttributes.MediaSize JPN_OUFUKU;
     field public static final android.print.PrintAttributes.MediaSize JPN_YOU4;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_A;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_B;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_C;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_D;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_E;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_E1;
     field public static final android.print.PrintAttributes.MediaSize NA_FOOLSCAP;
     field public static final android.print.PrintAttributes.MediaSize NA_GOVT_LETTER;
     field public static final android.print.PrintAttributes.MediaSize NA_INDEX_3X5;
@@ -32935,6 +32945,7 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize NA_LETTER;
     field public static final android.print.PrintAttributes.MediaSize NA_MONARCH;
     field public static final android.print.PrintAttributes.MediaSize NA_QUARTO;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_SUPER_B;
     field public static final android.print.PrintAttributes.MediaSize NA_TABLOID;
     field public static final android.print.PrintAttributes.MediaSize OM_DAI_PA_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_JUURO_KU_KAI;
