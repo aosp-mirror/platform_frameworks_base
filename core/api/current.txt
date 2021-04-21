@@ -17723,9 +17723,7 @@ package android.hardware.biometrics {
   public class BiometricManager {
     method @Deprecated @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public int canAuthenticate();
     method @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public int canAuthenticate(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getButtonLabel(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getPromptMessage(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getSettingName(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public android.hardware.biometrics.BiometricManager.Strings getStrings(int);
     field public static final int BIOMETRIC_ERROR_HW_UNAVAILABLE = 1; // 0x1
     field public static final int BIOMETRIC_ERROR_NONE_ENROLLED = 11; // 0xb
     field public static final int BIOMETRIC_ERROR_NO_HARDWARE = 12; // 0xc
@@ -17737,6 +17735,12 @@ package android.hardware.biometrics {
     field public static final int BIOMETRIC_STRONG = 15; // 0xf
     field public static final int BIOMETRIC_WEAK = 255; // 0xff
     field public static final int DEVICE_CREDENTIAL = 32768; // 0x8000
+  }
+
+  public static class BiometricManager.Strings {
+    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getButtonLabel();
+    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getPromptMessage();
+    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getSettingName();
   }
 
   public class BiometricPrompt {
