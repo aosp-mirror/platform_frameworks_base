@@ -1769,17 +1769,10 @@ abstract public class ManagedServices {
             UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
             if (userManager != null) {
                 int currentUserId = ActivityManager.getCurrentUser();
-                List<UserInfo> unlockedProfiles = new ArrayList<>();
-                for (UserInfo user : userManager.getProfiles(currentUserId)) {
-                    // Dependencies throw if we call APIs on a locked user. Only include
-                    // unlocked users.
-                    if (userManager.isUserUnlocked(user.id)) {
-                        unlockedProfiles.add(user);
-                    }
-                }
+                List<UserInfo> profiles = userManager.getProfiles(currentUserId);
                 synchronized (mCurrentProfiles) {
                     mCurrentProfiles.clear();
-                    for (UserInfo user : unlockedProfiles) {
+                    for (UserInfo user : profiles) {
                         mCurrentProfiles.put(user.id, user);
                     }
                 }
