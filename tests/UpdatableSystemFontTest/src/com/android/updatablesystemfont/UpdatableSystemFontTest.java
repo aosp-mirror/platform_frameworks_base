@@ -19,6 +19,8 @@ package com.android.updatablesystemfont;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import android.platform.test.annotations.RootPermissionTest;
 
 import com.android.fsverity.AddFsVerityCertRule;
@@ -35,7 +37,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,6 +78,7 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
     private static final String EMOJI_RENDERING_TEST_APP_ID = "com.android.emojirenderingtestapp";
     private static final String EMOJI_RENDERING_TEST_ACTIVITY =
             EMOJI_RENDERING_TEST_APP_ID + "/.EmojiRenderingTestActivity";
+    private static final long ACTIVITY_TIMEOUT_MILLIS = SECONDS.toMillis(10);
 
     private interface ThrowingSupplier<T> {
         T get() throws Exception;
@@ -167,9 +169,8 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
     public void launchApp() throws Exception {
         String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
         assertThat(fontPath).startsWith(SYSTEM_FONTS_DIR);
-        expectRemoteCommandToSucceed("am force-stop " + EMOJI_RENDERING_TEST_APP_ID);
-        expectRemoteCommandToSucceed("am start-activity -n " + EMOJI_RENDERING_TEST_ACTIVITY);
-        waitUntil(TimeUnit.SECONDS.toMillis(5), () ->
+        startActivity(EMOJI_RENDERING_TEST_APP_ID, EMOJI_RENDERING_TEST_ACTIVITY);
+        waitUntil(ACTIVITY_TIMEOUT_MILLIS, () ->
                 isFileOpenedBy(fontPath, EMOJI_RENDERING_TEST_APP_ID));
     }
 
@@ -181,10 +182,9 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
                 TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
         String updatedFontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
         assertThat(updatedFontPath).startsWith(DATA_FONTS_DIR);
-        expectRemoteCommandToSucceed("am force-stop " + EMOJI_RENDERING_TEST_APP_ID);
-        expectRemoteCommandToSucceed("am start-activity -n " + EMOJI_RENDERING_TEST_ACTIVITY);
+        startActivity(EMOJI_RENDERING_TEST_APP_ID, EMOJI_RENDERING_TEST_ACTIVITY);
         // The original font should NOT be opened by the app.
-        waitUntil(TimeUnit.SECONDS.toMillis(5), () ->
+        waitUntil(ACTIVITY_TIMEOUT_MILLIS, () ->
                 isFileOpenedBy(updatedFontPath, EMOJI_RENDERING_TEST_APP_ID)
                         && !isFileOpenedBy(originalFontPath, EMOJI_RENDERING_TEST_APP_ID));
     }
@@ -216,6 +216,17 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
         return null;
     }
 
+    private void startActivity(String appId, String activityId) throws Exception {
+        // Make sure that the app is installed and enabled.
+        waitUntil(ACTIVITY_TIMEOUT_MILLIS, () -> {
+            String packageInfo = expectRemoteCommandToSucceed(
+                    "pm list packages -e " + EMOJI_RENDERING_TEST_APP_ID);
+            return !packageInfo.isEmpty();
+        });
+        expectRemoteCommandToSucceed("am force-stop " + EMOJI_RENDERING_TEST_APP_ID);
+        expectRemoteCommandToSucceed("am start-activity -n " + EMOJI_RENDERING_TEST_ACTIVITY);
+    }
+
     private String expectRemoteCommandToSucceed(String cmd) throws Exception {
         CommandResult result = getDevice().executeShellV2Command(cmd);
         assertWithMessage("`" + cmd + "` failed: " + result.getStderr())
@@ -232,7 +243,7 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
     }
 
     private void waitUntilFontCommandIsReady() {
-        waitUntil(TimeUnit.SECONDS.toMillis(30), () -> {
+        waitUntil(SECONDS.toMillis(30), () -> {
             try {
                 return getDevice().executeShellV2Command("cmd font status").getStatus()
                         == CommandStatus.SUCCESS;
