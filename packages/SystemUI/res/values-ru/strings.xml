@@ -1044,7 +1044,7 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Наложение окна увеличения"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Окно увеличения"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Настройки окна увеличения"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Управление устройствами"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Управление устройством"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Добавьте виджеты для управления устройствами."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Настройте виджеты управления устройствами"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Чтобы перейти к элементам управления, удерживайте кнопку питания."</string>

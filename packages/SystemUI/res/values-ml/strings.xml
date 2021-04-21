@@ -718,7 +718,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"സംഭാഷണ വിഭാഗത്തിന് മുകളിലായി കാണിക്കുന്നു, ഫ്ലോട്ടിംഗ് ബബിളായി ദൃശ്യമാകുന്നു, ലോക്ക് സ്ക്രീനിൽ പ്രൊഫൈൽ ചിത്രം പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ക്രമീകരണം"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"മുൻഗണന"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> സംഭാഷണ സവിശേഷതകളെ പിന്തുണയ്‌ക്കുന്നില്ല"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> സംഭാഷണ ഫീച്ചറുകളെ പിന്തുണയ്‌ക്കുന്നില്ല"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"അടുത്തിടെയുള്ള ബബിളുകൾ ഒന്നുമില്ല"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"അടുത്തിടെയുള്ള ബബിളുകൾ, ഡിസ്മിസ് ചെയ്ത ബബിളുകൾ എന്നിവ ഇവിടെ ദൃശ്യമാവും"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ഈ അറിയിപ്പുകൾ പരിഷ്ക്കരിക്കാനാവില്ല."</string>
@@ -858,7 +858,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ടൈലുകൾ പുനഃക്രമീകരിക്കാൻ അമർത്തിപ്പിടിച്ച് വലിച്ചിടുക"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"നീക്കംചെയ്യുന്നതിന് ഇവിടെ വലിച്ചിടുക"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"നിങ്ങൾക്ക് ചുരുങ്ങിയത് <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> ടൈലുകളെങ്കിലും വേണം"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"എഡിറ്റുചെയ്യുക"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="tuner_time" msgid="2450785840990529997">"സമയം"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"മണിക്കൂറും മിനിറ്റും സെക്കൻഡും കാണിക്കുക"</item>
@@ -1035,7 +1035,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ നിയന്ത്രണങ്ങൾ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ഉപകരണ നിയന്ത്രണങ്ങൾ"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"കണക്റ്റ് ചെയ്ത ഉപകരണങ്ങൾക്ക് നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"കണക്റ്റ് ചെയ്തവയ്ക്ക് നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ഉപകരണ നിയന്ത്രണങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"നിങ്ങളുടെ നിയന്ത്രണങ്ങൾ ആക്‌സസ് ചെയ്യാൻ പവർ ബട്ടണിൽ പിടിക്കുക"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"നിയന്ത്രണങ്ങൾ ചേർക്കാൻ ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
