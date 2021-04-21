@@ -162,6 +162,7 @@ cc_library_host_static {
         "Configuration.proto",
         "Resources.proto",
         "ResourcesInternal.proto",
+        "ValueTransformer.cpp",
     ],
     proto: {
         export_proto_headers: true,
