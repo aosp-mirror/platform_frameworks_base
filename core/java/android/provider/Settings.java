@@ -9428,9 +9428,12 @@ public final class Settings {
          * 0 indicates disabled and 1 indicates enabled. A non existent value should be treated as
          * enabled.
          *
+         * @deprecated Controls are migrated to Quick Settings, rendering this unnecessary and will
+         *             be removed in a future release.
          * @hide
          */
         @Readable
+        @Deprecated
         public static final String CONTROLS_ENABLED = "controls_enabled";
 
         /**
