@@ -146,21 +146,6 @@ final class TranslationManagerServiceImpl extends
     @GuardedBy("mLock")
     public void updateUiTranslationStateLocked(@UiTranslationState int state,
             TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
-            int taskId) {
-        // deprecated
-        final ActivityTokens taskTopActivityTokens =
-                mActivityTaskManagerInternal.getTopActivityForTask(taskId);
-        if (taskTopActivityTokens == null) {
-            Slog.w(TAG, "Unknown activity to query for update translation state.");
-            return;
-        }
-        updateUiTranslationStateByActivityTokens(taskTopActivityTokens, state, sourceSpec,
-                targetSpec, viewIds);
-    }
-
-    @GuardedBy("mLock")
-    public void updateUiTranslationStateLocked(@UiTranslationState int state,
-            TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
             IBinder token, int taskId) {
         // Get top activity for a given task id
         final ActivityTokens taskTopActivityTokens =
@@ -171,16 +156,10 @@ final class TranslationManagerServiceImpl extends
                     + "translation state for token=" + token + " taskId=" + taskId);
             return;
         }
-        updateUiTranslationStateByActivityTokens(taskTopActivityTokens, state, sourceSpec,
-                targetSpec, viewIds);
-    }
-
-    private void updateUiTranslationStateByActivityTokens(ActivityTokens tokens,
-            @UiTranslationState int state, TranslationSpec sourceSpec, TranslationSpec targetSpec,
-            List<AutofillId> viewIds) {
         try {
-            tokens.getApplicationThread().updateUiTranslationState(tokens.getActivityToken(), state,
-                    sourceSpec, targetSpec, viewIds);
+            taskTopActivityTokens.getApplicationThread().updateUiTranslationState(
+                    taskTopActivityTokens.getActivityToken(), state, sourceSpec, targetSpec,
+                    viewIds);
         } catch (RemoteException e) {
             Slog.w(TAG, "Update UiTranslationState fail: " + e);
         }

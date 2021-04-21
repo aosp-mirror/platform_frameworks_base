@@ -120,42 +120,6 @@ public final class UiTranslationManager {
     /**
      * Request ui translation for a given Views.
      *
-     * NOTE: Please use {@code startTranslation(TranslationSpec, TranslationSpec, List<AutofillId>,
-     * ActivityId)} instead.
-     *
-     * @param sourceSpec {@link TranslationSpec} for the data to be translated.
-     * @param targetSpec {@link TranslationSpec} for the translated data.
-     * @param viewIds A list of the {@link View}'s {@link AutofillId} which needs to be translated
-     * @param taskId the Activity Task id which needs ui translation
-     * @deprecated Use {@code startTranslation(TranslationSpec, TranslationSpec, List<AutofillId>,
-     * ActivityId)} instead.
-     *
-     * @hide
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
-    public void startTranslation(@NonNull TranslationSpec sourceSpec,
-            @NonNull TranslationSpec targetSpec, @NonNull List<AutofillId> viewIds,
-            int taskId) {
-        Objects.requireNonNull(sourceSpec);
-        Objects.requireNonNull(targetSpec);
-        Objects.requireNonNull(viewIds);
-        if (viewIds.size() == 0) {
-            throw new IllegalArgumentException("Invalid empty views: " + viewIds);
-        }
-        try {
-            mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_STARTED, sourceSpec,
-                    targetSpec, viewIds, taskId, mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Request ui translation for a given Views.
-     *
      * @param sourceSpec {@link TranslationSpec} for the data to be translated.
      * @param targetSpec {@link TranslationSpec} for the translated data.
      * @param viewIds A list of the {@link View}'s {@link AutofillId} which needs to be translated
@@ -193,32 +157,6 @@ public final class UiTranslationManager {
      * Request to disable the ui translation. It will destroy all the {@link Translator}s and no
      * longer to show to show the translated text.
      *
-     * NOTE: Please use {@code finishTranslation(ActivityId)} instead.
-     *
-     * @param taskId the Activity Task id which needs ui translation
-     * @deprecated Use {@code finishTranslation(ActivityId)} instead.
-     *
-     * @hide
-     * @removed
-     *
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
-    public void finishTranslation(int taskId) {
-        try {
-            mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_FINISHED,
-                    null /* sourceSpec */, null /* targetSpec */, null /* viewIds */, taskId,
-                    mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Request to disable the ui translation. It will destroy all the {@link Translator}s and no
-     * longer to show to show the translated text.
-     *
      * @param activityId the identifier for the Activity which needs ui translation
      * @throws NullPointerException the activityId or
      *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
@@ -243,31 +181,6 @@ public final class UiTranslationManager {
      * Request to pause the current ui translation's {@link Translator} which will switch back to
      * the original language.
      *
-     * NOTE: Please use {@code pauseTranslation(ActivityId)} instead.
-     *
-     * @param taskId the Activity Task id which needs ui translation
-     * @deprecated Use {@code pauseTranslation(ActivityId)} instead.
-     *
-     * @hide
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
-    public void pauseTranslation(int taskId) {
-        try {
-            mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_PAUSED,
-                    null /* sourceSpec */, null /* targetSpec */, null /* viewIds */, taskId,
-                    mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Request to pause the current ui translation's {@link Translator} which will switch back to
-     * the original language.
-     *
      * @param activityId the identifier for the Activity which needs ui translation
      * @throws NullPointerException the activityId or
      *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
@@ -283,31 +196,6 @@ public final class UiTranslationManager {
             mService.updateUiTranslationState(STATE_UI_TRANSLATION_PAUSED,
                     null /* sourceSpec */, null /* targetSpec */, null /* viewIds */,
                     activityId.getToken(), activityId.getTaskId(), mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Request to resume the paused ui translation's {@link Translator} which will switch to the
-     * translated language if the text had been translated.
-     *
-     * NOTE: Please use {@code resumeTranslation(ActivityId)} instead.
-     *
-     * @param taskId the Activity Task id which needs ui translation
-     * @deprecated Use {@code resumeTranslation(ActivityId)} instead.
-     *
-     * @hide
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
-    @SystemApi
-    public void resumeTranslation(int taskId) {
-        try {
-            mService.updateUiTranslationStateByTaskId(STATE_UI_TRANSLATION_RESUMED,
-                    null /* sourceSpec */, null /* targetSpec */, null /* viewIds */,
-                    taskId, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
