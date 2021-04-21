@@ -43,6 +43,7 @@ import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.LongSparseArray;
+import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dumpable;
@@ -432,7 +433,7 @@ public class GarbageMonitor implements Dumpable {
         }
 
         @Override
-        protected void handleClick() {
+        protected void handleClick(@Nullable View view) {
             if (dumpInProgress) return;
 
             dumpInProgress = true;

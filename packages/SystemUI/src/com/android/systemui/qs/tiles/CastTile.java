@@ -33,6 +33,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -137,17 +139,12 @@ public class CastTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleSecondaryClick() {
-        handleClick();
+    protected void handleLongClick(@Nullable View view) {
+        handleClick(view);
     }
 
     @Override
-    protected void handleLongClick(View view) {
-        handleClick();
-    }
-
-    @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (getState().state == Tile.STATE_UNAVAILABLE) {
             return;
         }
