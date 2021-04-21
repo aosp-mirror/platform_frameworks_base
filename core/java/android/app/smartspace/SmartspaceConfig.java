@@ -15,6 +15,7 @@
  */
 package android.app.smartspace;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -41,6 +42,7 @@ public final class SmartspaceConfig implements Parcelable {
      * The least number of smartspace targets expected to be predicted by the backend. The backend
      * will always try to satisfy this threshold but it is not guaranteed to always meet it.
      */
+    @IntRange(from = 0, to = 50)
     private final int mSmartspaceTargetCount;
 
     /**
@@ -54,13 +56,15 @@ public final class SmartspaceConfig implements Parcelable {
     @NonNull
     private String mPackageName;
 
-    /** Send other client UI configurations in extras.
+    /**
+     * Send other client UI configurations in extras.
      *
      * This can include:
      *
-     *  - Desired maximum update frequency
-     *  - Request to get periodic updates
-     *  - Request to support multiple clients for the same UISurface.
+     * - Desired maximum update frequency (For example 1 minute update frequency for AoD, 1 second
+     * update frequency for home screen etc).
+     * - Request to get periodic updates
+     * - Request to support multiple clients for the same UISurface.
      */
     @Nullable
     private final Bundle mExtras;
@@ -165,7 +169,7 @@ public final class SmartspaceConfig implements Parcelable {
         private Bundle mExtras = Bundle.EMPTY;
 
         /**
-         * @param context The {@link Context} which is used to fetch the package name.
+         * @param context   The {@link Context} which is used to fetch the package name.
          * @param uiSurface the UI Surface name associated with this context.
          * @hide
          */
@@ -179,7 +183,8 @@ public final class SmartspaceConfig implements Parcelable {
          * Used to set the expected number of cards for this context.
          */
         @NonNull
-        public Builder setSmartspaceTargetCount(int smartspaceTargetCount) {
+        public Builder setSmartspaceTargetCount(
+                @IntRange(from = 0, to = 50) int smartspaceTargetCount) {
             this.mSmartspaceTargetCount = smartspaceTargetCount;
             return this;
         }

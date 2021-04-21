@@ -156,7 +156,7 @@ public class SmartspaceManagerService extends
                 @NonNull final Consumer<SmartspacePerUserService> c) {
             ActivityManagerInternal am = LocalServices.getService(ActivityManagerInternal.class);
             final int userId = am.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                    sessionId.getUserId(), false, ALLOW_NON_FULL, null, null);
+                    sessionId.getUserHandle().getIdentifier(), false, ALLOW_NON_FULL, null, null);
 
             if (DEBUG) {
                 Slog.d(TAG, "runForUserLocked:" + func + " from pid=" + Binder.getCallingPid()

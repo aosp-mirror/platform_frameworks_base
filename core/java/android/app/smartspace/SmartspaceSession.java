@@ -63,7 +63,7 @@ import java.util.function.Consumer;
  *
  *    void onDestroy() {
  *        mSmartspaceSession.unregisterPredictionUpdates()
- *        mSmartspaceSession.destroy();
+ *        mSmartspaceSession.close();
  *    }
  *
  * }</pre>
@@ -81,7 +81,8 @@ public final class SmartspaceSession implements AutoCloseable {
     private final AtomicBoolean mIsClosed = new AtomicBoolean(false);
 
     private final SmartspaceSessionId mSessionId;
-    private final ArrayMap<Callback, CallbackWrapper> mRegisteredCallbacks = new ArrayMap<>();
+    private final ArrayMap<OnTargetsAvailableListener, CallbackWrapper> mRegisteredCallbacks =
+            new ArrayMap<>();
     private final IBinder mToken = new Binder();
 
     /**
@@ -98,11 +99,11 @@ public final class SmartspaceSession implements AutoCloseable {
         IBinder b = ServiceManager.getService(Context.SMARTSPACE_SERVICE);
         mInterface = android.app.smartspace.ISmartspaceManager.Stub.asInterface(b);
         mSessionId = new SmartspaceSessionId(
-                context.getPackageName() + ":" + UUID.randomUUID().toString(), context.getUserId());
+                context.getPackageName() + ":" + UUID.randomUUID().toString(), context.getUser());
         try {
             mInterface.createSmartspaceSession(smartspaceConfig, mSessionId, mToken);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to cerate Smartspace session", e);
+            Log.e(TAG, "Failed to create Smartspace session", e);
             e.rethrowFromSystemServer();
         }
 
@@ -145,24 +146,24 @@ public final class SmartspaceSession implements AutoCloseable {
      * Requests the smartspace service provide continuous updates of smartspace cards via the
      * provided callback, until the given callback is unregistered.
      *
-     * @param callbackExecutor The callback executor to use when calling the callback.
-     * @param callback         The Callback to be called when updates of Smartspace targets are
+     * @param listenerExecutor The listener executor to use when firing the listener.
+     * @param listener         The listener to be called when updates of Smartspace targets are
      *                         available.
      */
-    public void registerSmartspaceUpdates(@NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull Callback callback) {
+    public void addOnTargetsAvailableListener(@NonNull @CallbackExecutor Executor listenerExecutor,
+            @NonNull OnTargetsAvailableListener listener) {
         if (mIsClosed.get()) {
             throw new IllegalStateException("This client has already been destroyed.");
         }
 
-        if (mRegisteredCallbacks.containsKey(callback)) {
+        if (mRegisteredCallbacks.containsKey(listener)) {
             // Skip if this callback is already registered
             return;
         }
         try {
-            final CallbackWrapper callbackWrapper = new CallbackWrapper(callbackExecutor,
-                    callback::onTargetsAvailable);
-            mRegisteredCallbacks.put(callback, callbackWrapper);
+            final CallbackWrapper callbackWrapper = new CallbackWrapper(listenerExecutor,
+                    listener::onTargetsAvailable);
+            mRegisteredCallbacks.put(listener, callbackWrapper);
             mInterface.registerSmartspaceUpdates(mSessionId, callbackWrapper);
             mInterface.requestSmartspaceUpdate(mSessionId);
         } catch (RemoteException e) {
@@ -175,21 +176,21 @@ public final class SmartspaceSession implements AutoCloseable {
      * Requests the smartspace service to stop providing continuous updates to the provided
      * callback until the callback is re-registered.
      *
-     * @see {@link SmartspaceSession#registerSmartspaceUpdates(Executor, Callback)}.
-     *
-     * @param callback The callback to be unregistered.
+     * @param listener The callback to be unregistered.
+     * @see {@link SmartspaceSession#addOnTargetsAvailableListener(Executor,
+     * OnTargetsAvailableListener)}.
      */
-    public void unregisterSmartspaceUpdates(@NonNull Callback callback) {
+    public void removeOnTargetsAvailableListener(@NonNull OnTargetsAvailableListener listener) {
         if (mIsClosed.get()) {
             throw new IllegalStateException("This client has already been destroyed.");
         }
 
-        if (!mRegisteredCallbacks.containsKey(callback)) {
+        if (!mRegisteredCallbacks.containsKey(listener)) {
             // Skip if this callback was never registered
             return;
         }
         try {
-            final CallbackWrapper callbackWrapper = mRegisteredCallbacks.remove(callback);
+            final CallbackWrapper callbackWrapper = mRegisteredCallbacks.remove(listener);
             mInterface.unregisterSmartspaceUpdates(mSessionId, callbackWrapper);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to unregister for smartspace updates", e);
@@ -201,7 +202,7 @@ public final class SmartspaceSession implements AutoCloseable {
      * Destroys the client and unregisters the callback. Any method on this class after this call
      * will throw {@link IllegalStateException}.
      */
-    public void destroy() {
+    private void destroy() {
         if (!mIsClosed.getAndSet(true)) {
             mCloseGuard.close();
 
@@ -238,6 +239,7 @@ public final class SmartspaceSession implements AutoCloseable {
     @Override
     public void close() {
         try {
+            destroy();
             finalize();
         } catch (Throwable throwable) {
             throwable.printStackTrace();
@@ -245,14 +247,14 @@ public final class SmartspaceSession implements AutoCloseable {
     }
 
     /**
-     * Callback for receiving smartspace updates.
+     * Listener to receive smartspace targets from the service.
      */
-    public interface Callback {
+    public interface OnTargetsAvailableListener {
 
         /**
          * Called when a new set of smartspace targets are available.
          *
-         * @param targets Sorted list of smartspace targets.
+         * @param targets Ranked list of smartspace targets.
          */
         void onTargetsAvailable(@NonNull List<SmartspaceTarget> targets);
     }

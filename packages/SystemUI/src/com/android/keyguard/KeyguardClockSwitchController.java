@@ -86,7 +86,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private FrameLayout mLargeClockFrame;
 
     private SmartspaceSession mSmartspaceSession;
-    private SmartspaceSession.Callback mSmartspaceCallback;
+    private SmartspaceSession.OnTargetsAvailableListener mSmartspaceCallback;
     private float mDozeAmount;
     private int mWallpaperTextColor;
     private int mDozeColor = Color.WHITE;
@@ -234,7 +234,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     .createSmartspaceSession(
                             new SmartspaceConfig.Builder(getContext(), "lockscreen").build());
             mSmartspaceCallback = targets -> smartspaceDataPlugin.onTargetsAvailable(targets);
-            mSmartspaceSession.registerSmartspaceUpdates(mUiExecutor, mSmartspaceCallback);
+            mSmartspaceSession.addOnTargetsAvailableListener(mUiExecutor, mSmartspaceCallback);
             mSmartspaceSession.requestSmartspaceUpdate();
         }
     }
@@ -261,8 +261,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.setClockPlugin(null, mStatusBarStateController.getState());
 
         if (mSmartspaceSession != null) {
-            mSmartspaceSession.unregisterSmartspaceUpdates(mSmartspaceCallback);
-            mSmartspaceSession.destroy();
+            mSmartspaceSession.removeOnTargetsAvailableListener(mSmartspaceCallback);
+            mSmartspaceSession.close();
             mSmartspaceSession = null;
         }
         mStatusBarStateController.removeCallback(mStatusBarStateListener);

@@ -92,6 +92,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Package information used by {@link ShortcutService}.
@@ -721,7 +722,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // If not reset yet, then reset.
         if (mLastResetTime < last) {
-            if (ShortcutService.DEBUG) {
+            if (ShortcutService.DEBUG || ShortcutService.DEBUG_REBOOT) {
                 Slog.d(TAG, String.format("%s: last reset=%d, now=%d, last=%d: resetting",
                         getPackageName(), mLastResetTime, now, last));
             }
@@ -1101,7 +1102,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         final int manifestShortcutSize = newManifestShortcutList == null ? 0
                 : newManifestShortcutList.size();
-        if (ShortcutService.DEBUG) {
+        if (ShortcutService.DEBUG || ShortcutService.DEBUG_REBOOT) {
             Slog.d(TAG,
                     String.format("Package %s has %d manifest shortcut(s), and %d share target(s)",
                             getPackageName(), manifestShortcutSize, mShareTargets.size()));
@@ -1113,7 +1114,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             // disabled.
             return false;
         }
-        if (ShortcutService.DEBUG) {
+        if (ShortcutService.DEBUG || ShortcutService.DEBUG_REBOOT) {
             Slog.d(TAG, String.format("Package %s %s, version %d -> %d", getPackageName(),
                     (isNewApp ? "added" : "updated"),
                     getPackageInfo().getVersionCode(), pi.getLongVersionCode()));
@@ -1202,7 +1203,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     private boolean publishManifestShortcuts(List<ShortcutInfo> newManifestShortcutList) {
-        if (ShortcutService.DEBUG) {
+        if (ShortcutService.DEBUG || ShortcutService.DEBUG_REBOOT) {
             Slog.d(TAG, String.format(
                     "Package %s: publishing manifest shortcuts", getPackageName()));
         }
@@ -1879,7 +1880,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 final int depth = parser.getDepth();
 
                 final String tag = parser.getName();
-                if (ShortcutService.DEBUG_LOAD) {
+                if (ShortcutService.DEBUG_LOAD || ShortcutService.DEBUG_REBOOT) {
                     Slog.d(TAG, String.format("depth=%d type=%d name=%s", depth, type, tag));
                 }
                 if ((depth == 1) && TAG_ROOT.equals(tag)) {
@@ -2015,7 +2016,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             final int depth = parser.getDepth();
             final String tag = parser.getName();
-            if (ShortcutService.DEBUG_LOAD) {
+            if (ShortcutService.DEBUG_LOAD || ShortcutService.DEBUG_REBOOT) {
                 Slog.d(TAG, String.format("  depth=%d type=%d name=%s",
                         depth, type, tag));
             }
@@ -2099,7 +2100,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             final int depth = parser.getDepth();
             final String tag = parser.getName();
-            if (ShortcutService.DEBUG_LOAD) {
+            if (ShortcutService.DEBUG_LOAD || ShortcutService.DEBUG_REBOOT) {
                 Slog.d(TAG, String.format("  depth=%d type=%d name=%s",
                         depth, type, tag));
             }
@@ -2302,6 +2303,12 @@ class ShortcutPackage extends ShortcutPackageItem {
             // No need to invoke AppSearch when there's nothing to save.
             return;
         }
+        if (ShortcutService.DEBUG_REBOOT) {
+            Slog.d(TAG, "Saving shortcuts for user=" + mShortcutUser.getUserId()
+                    + " pkg=" + getPackageName() + " ids=["
+                    + shortcuts.stream().map(ShortcutInfo::getId)
+                    .collect(Collectors.joining(",")) + "]");
+        }
         awaitInAppSearch("Saving shortcuts", session -> {
             final AndroidFuture<Boolean> future = new AndroidFuture<>();
             session.put(new PutDocumentsRequest.Builder()
@@ -2374,6 +2381,10 @@ class ShortcutPackage extends ShortcutPackageItem {
                 shortcutIds.add(id);
             }
         }
+        if (ShortcutService.DEBUG_REBOOT) {
+            Slog.d(TAG, "Getting shortcuts for user=" + mShortcutUser.getUserId()
+                    + " pkg=" + getPackageName() + " ids: [" + String.join(",", ids) + "]");
+        }
         return awaitInAppSearch("Getting shortcut by id", session -> {
             final AndroidFuture<List<ShortcutInfo>> future = new AndroidFuture<>();
             session.getByUri(
@@ -2418,6 +2429,10 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void forEachShortcutMutateIf(@NonNull final String query,
             @NonNull final Function<ShortcutInfo, Boolean> cb) {
+        if (ShortcutService.DEBUG_REBOOT) {
+            Slog.d(TAG, "Changing shortcuts for user=" + mShortcutUser.getUserId()
+                    + " pkg=" + getPackageName());
+        }
         final SearchResults res = awaitInAppSearch("Mutating shortcuts", session ->
                 AndroidFuture.completedFuture(session.search(query, getSearchSpec())));
         if (res == null) return;
@@ -2439,6 +2454,10 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void forEachShortcutStopWhen(
             @NonNull final String query, @NonNull final Function<ShortcutInfo, Boolean> cb) {
+        if (ShortcutService.DEBUG_REBOOT) {
+            Slog.d(TAG, "Iterating shortcuts for user=" + mShortcutUser.getUserId()
+                    + " pkg=" + getPackageName());
+        }
         final SearchResults res = awaitInAppSearch("Iterating shortcuts", session ->
                 AndroidFuture.completedFuture(session.search(query, getSearchSpec())));
         if (res == null) return;
@@ -2452,6 +2471,10 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     private List<ShortcutInfo> getNextPage(@NonNull final SearchResults res) {
+        if (ShortcutService.DEBUG_REBOOT) {
+            Slog.d(TAG, "Get next page for search result for user=" + mShortcutUser.getUserId()
+                    + " pkg=" + getPackageName());
+        }
         final AndroidFuture<List<ShortcutInfo>> future = new AndroidFuture<>();
         final List<ShortcutInfo> ret = new ArrayList<>();
         final long callingIdentity = Binder.clearCallingIdentity();
@@ -2529,6 +2552,10 @@ class ShortcutPackage extends ShortcutPackageItem {
     @NonNull
     private AndroidFuture<AppSearchSession> setupSchema(
             @NonNull final AppSearchSession session) {
+        if (ShortcutService.DEBUG_REBOOT) {
+            Slog.d(TAG, "Setup Schema for user=" + mShortcutUser.getUserId()
+                    + " pkg=" + getPackageName());
+        }
         SetSchemaRequest.Builder schemaBuilder = new SetSchemaRequest.Builder()
                 .addSchemas(AppSearchPerson.SCHEMA, AppSearchShortcutInfo.SCHEMA)
                 .setForceOverride(true);
@@ -2569,6 +2596,15 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     private void restoreParsedShortcuts(final boolean replace) {
+        if (ShortcutService.DEBUG_REBOOT) {
+            if (replace) {
+                Slog.d(TAG, "Replacing all shortcuts with the ones parsed from xml for user="
+                        + mShortcutUser.getUserId() + " pkg=" + getPackageName());
+            } else {
+                Slog.d(TAG, "Restoring pinned shortcuts from xml for user="
+                        + mShortcutUser.getUserId() + " pkg=" + getPackageName());
+            }
+        }
         if (replace) {
             removeShortcuts();
         }

@@ -105,10 +105,8 @@ public final class NetworkEvent extends Event implements Parcelable {
 
     /**
      * Creates a new NetworkEvent.
-     *
-     * @hide
      */
-    public NetworkEvent(@NetworkType int type, long timeSinceCreatedMillis,
+    private NetworkEvent(@NetworkType int type, long timeSinceCreatedMillis,
             @NonNull Bundle extras) {
         this.mNetworkType = type;
         this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
@@ -124,8 +122,11 @@ public final class NetworkEvent extends Event implements Parcelable {
     }
 
     /**
-     * Gets timestamp since the creation in milliseconds.
+     * Gets timestamp since the creation of the log session in milliseconds.
      * @return the timestamp since the creation in milliseconds, or -1 if unknown.
+     * @see LogSessionId
+     * @see PlaybackSession
+     * @see RecordingSession
      */
     @Override
     @IntRange(from = -1)
@@ -177,8 +178,7 @@ public final class NetworkEvent extends Event implements Parcelable {
         return 0;
     }
 
-    /** @hide */
-    /* package-private */ NetworkEvent(@NonNull android.os.Parcel in) {
+    private NetworkEvent(@NonNull android.os.Parcel in) {
         int type = in.readInt();
         long timeSinceCreatedMillis = in.readLong();
         Bundle extras = in.readBundle();
@@ -230,6 +230,7 @@ public final class NetworkEvent extends Event implements Parcelable {
          * Sets timestamp since the creation in milliseconds.
          * @param value the timestamp since the creation in milliseconds.
          *              -1 indicates the value is unknown.
+         * @see #getTimeSinceCreatedMillis()
          */
         public @NonNull Builder setTimeSinceCreatedMillis(@IntRange(from = -1) long value) {
             mTimeSinceCreatedMillis = value;

@@ -37,7 +37,11 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 interface IActivityClientController {
     oneway void activityIdle(in IBinder token, in Configuration config, in boolean stopProfiling);
     oneway void activityResumed(in IBinder token, in boolean handleSplashScreenExit);
-    oneway void activityTopResumedStateLost();
+    /**
+     * This call is not one-way because {@link #activityPaused()) is not one-way, or
+     * the top-resumed-lost could be reported after activity paused.
+     */
+    void activityTopResumedStateLost();
     /**
      * Notifies that the activity has completed paused. This call is not one-way because it can make
      * consecutive launch in the same process more coherent. About the order of binder call, it

@@ -586,10 +586,13 @@ public class DisplayAreaPolicyBuilderTest {
                         .setTaskDisplayAreas(Lists.newArrayList(mTda2)))
                 .build(mWms);
 
-        final WindowToken token = new WindowToken(mWms, mock(IBinder.class),
-                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
-                false /* fromClientToken */, null /* options */);
+        final WindowToken token = new WindowToken.Builder(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR)
+                .setDisplayContent(mDisplayContent)
+                .setPersistOnEmpty(true)
+                .setOwnerCanManageAppTokens(true)
+                .build();
+
         policy.addWindow(token);
 
         // By default, window are always added to the root.
@@ -600,10 +603,13 @@ public class DisplayAreaPolicyBuilderTest {
         // When the window has options for target root id, attach it to the target root.
         final Bundle options = new Bundle();
         options.putInt(KEY_ROOT_DISPLAY_AREA_ID, mGroupRoot2.mFeatureId);
-        final WindowToken token2 = new WindowToken(mWms, mock(IBinder.class),
-                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
-                false /* fromClientToken */, options);
+        final WindowToken token2 = new WindowToken.Builder(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR)
+                .setDisplayContent(mDisplayContent)
+                .setPersistOnEmpty(true)
+                .setOwnerCanManageAppTokens(true)
+                .setOptions(options)
+                .build();
         policy.addWindow(token2);
 
         assertThat(token2.isDescendantOf(mGroupRoot2)).isTrue();
@@ -631,14 +637,18 @@ public class DisplayAreaPolicyBuilderTest {
                 })
                 .build(mWms);
 
-        final WindowToken token1 = new WindowToken(mWms, mock(IBinder.class),
-                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
-                false /* fromClientToken */, null /* options */);
-        final WindowToken token2 = new WindowToken(mWms, mock(IBinder.class),
-                TYPE_WALLPAPER, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
-                false /* fromClientToken */, null /* options */);
+        final WindowToken token1 = new WindowToken.Builder(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR)
+                .setDisplayContent(mDisplayContent)
+                .setPersistOnEmpty(true)
+                .setOwnerCanManageAppTokens(true)
+                .build();
+        final WindowToken token2 = new WindowToken.Builder(mWms, mock(IBinder.class),
+                TYPE_WALLPAPER)
+                .setDisplayContent(mDisplayContent)
+                .setPersistOnEmpty(true)
+                .setOwnerCanManageAppTokens(true)
+                .build();
         policy.addWindow(token1);
         policy.addWindow(token2);
 
@@ -682,18 +692,26 @@ public class DisplayAreaPolicyBuilderTest {
         options1.putInt("HIERARCHY_ROOT_ID", mGroupRoot1.mFeatureId);
         final Bundle options2 = new Bundle();
         options2.putInt("HIERARCHY_ROOT_ID", mGroupRoot2.mFeatureId);
-        final WindowToken token0 = new WindowToken(mWms, mock(IBinder.class),
-                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
-                false /* fromClientToken */, null /* options */);
-        final WindowToken token1 = new WindowToken(mWms, mock(IBinder.class),
-                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
-                false /* fromClientToken */, options1);
-        final WindowToken token2 = new WindowToken(mWms, mock(IBinder.class),
-                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
-                false /* fromClientToken */, options2);
+        final WindowToken token0 = new WindowToken.Builder(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR)
+                .setDisplayContent(mDisplayContent)
+                .setPersistOnEmpty(true)
+                .setOwnerCanManageAppTokens(true)
+                .build();
+        final WindowToken token1 = new WindowToken.Builder(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR)
+                .setDisplayContent(mDisplayContent)
+                .setPersistOnEmpty(true)
+                .setOwnerCanManageAppTokens(true)
+                .setOptions(options1)
+                .build();
+        final WindowToken token2 = new WindowToken.Builder(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR)
+                .setDisplayContent(mDisplayContent)
+                .setPersistOnEmpty(true)
+                .setOwnerCanManageAppTokens(true)
+                .setOptions(options2)
+                .build();
 
         policy.addWindow(token0);
         policy.addWindow(token1);
@@ -787,9 +805,8 @@ public class DisplayAreaPolicyBuilderTest {
     }
 
     private WindowToken tokenOfType(int type) {
-        WindowToken token = new WindowToken(mWms, new Binder(), type, false /* persistOnEmpty */,
-                mDisplayContent, false /* ownerCanManageAppTokens */);
-        return token;
+        return new WindowToken.Builder(mWms, new Binder(), type)
+                .setDisplayContent(mDisplayContent).build();
     }
 
     private static void assertMatchLayerOrder(List<DisplayArea<?>> actualOrder,

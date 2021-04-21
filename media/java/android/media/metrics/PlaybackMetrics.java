@@ -213,6 +213,7 @@ public final class PlaybackMetrics implements Parcelable {
 
     /**
      * Gets the media duration in milliseconds.
+     * <p>Media duration is the length of the media.
      * @return the media duration in milliseconds, or -1 if unknown.
      */
     @IntRange(from = -1)
@@ -328,6 +329,8 @@ public final class PlaybackMetrics implements Parcelable {
 
     /**
      * Gets network transfer duration in milliseconds.
+     * <p>Total transfer time spent reading from the network in ms. For parallel requests, the
+     * overlapping time intervals are counted only once.
      */
     @IntRange(from = -1)
     public long getNetworkTransferDurationMillis() {
@@ -523,6 +526,7 @@ public final class PlaybackMetrics implements Parcelable {
         /**
          * Sets the media duration in milliseconds.
          * @param value the media duration in milliseconds. -1 indicates the value is unknown.
+         * @see #getMediaDurationMillis()
          */
         public @NonNull Builder setMediaDurationMillis(@IntRange(from = -1) long value) {
             mMediaDurationMillis = value;
@@ -645,6 +649,7 @@ public final class PlaybackMetrics implements Parcelable {
          * Sets the network transfer duration in milliseconds.
          * @param value the network transfer duration in milliseconds.
          *              -1 indicates the value is unknown.
+         * @see #getNetworkTransferDurationMillis()
          */
         public @NonNull Builder setNetworkTransferDurationMillis(@IntRange(from = -1) long value) {
             mNetworkTransferDurationMillis = value;

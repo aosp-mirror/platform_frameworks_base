@@ -119,7 +119,7 @@ class PrivacyDialog(
         } else {
             app
         }
-        val firstLine = context.getString(stringId, appName, element.type.getName(context))
+        val firstLine = context.getString(stringId, appName)
         val finalText = element.attribution?.let {
             TextUtils.concat(
                     firstLine,

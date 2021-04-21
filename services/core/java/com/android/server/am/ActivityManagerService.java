@@ -6487,7 +6487,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long identity = Binder.clearCallingIdentity();
         try {
             // Send broadcast to shell to trigger bugreport using Bugreport API
-            mContext.sendBroadcast(triggerShellBugreport);
+            mContext.sendBroadcastAsUser(triggerShellBugreport, UserHandle.SYSTEM);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
