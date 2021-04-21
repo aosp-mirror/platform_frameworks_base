@@ -158,6 +158,8 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String KEY_BITMAPS = "bitmaps";
     private static final String KEY_BITMAP_BYTES = "bitmapBytes";
 
+    private final Object mLock = new Object();
+
     /**
      * An temp in-memory copy of shortcuts for this package that was loaded from xml, keyed on IDs.
      */
@@ -167,6 +169,11 @@ class ShortcutPackage extends ShortcutPackageItem {
      * All the share targets from the package
      */
     private final ArrayList<ShareTargetInfo> mShareTargets = new ArrayList<>(0);
+
+    /**
+     * All external packages that have gained access to the shortcuts from this package
+     */
+    private final Map<String, PackageIdentifier> mPackageIdentifiers = new ArrayMap<>(0);
 
     /**
      * # of times the package has called rate-limited APIs.
@@ -181,13 +188,6 @@ class ShortcutPackage extends ShortcutPackageItem {
     private final int mPackageUid;
 
     private long mLastKnownForegroundElapsedTime;
-
-    private final Object mLock = new Object();
-
-    /**
-     * All external packages that have gained access to the shortcuts from this package
-     */
-    private final Map<String, PackageIdentifier> mPackageIdentifiers = new ArrayMap<>(0);
 
     private boolean mIsInitilized;
 
