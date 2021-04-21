@@ -23413,11 +23413,14 @@ package android.media {
     method public void onError(@NonNull android.media.MediaSync, int, int);
   }
 
-  public class MediaSyncEvent {
+  public class MediaSyncEvent implements android.os.Parcelable {
     method public static android.media.MediaSyncEvent createEvent(int) throws java.lang.IllegalArgumentException;
+    method public int describeContents();
     method public int getAudioSessionId();
     method public int getType();
     method public android.media.MediaSyncEvent setAudioSessionId(int) throws java.lang.IllegalArgumentException;
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.MediaSyncEvent> CREATOR;
     field public static final int SYNC_EVENT_NONE = 0; // 0x0
     field public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1; // 0x1
   }

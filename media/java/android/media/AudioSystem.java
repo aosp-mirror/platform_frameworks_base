@@ -1464,6 +1464,10 @@ public class AudioSystem
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
     /** @hide */ public static final int SYNC_EVENT_NONE = 0;
     /** @hide */ public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1;
+    /** @hide
+     *  Not used by native implementation.
+     *  See {@link AudioRecord.Builder#setSharedAudioEvent(MediaSyncEvent) */
+    public static final int SYNC_EVENT_SHARE_AUDIO_HISTORY = 100;
 
     /**
      * @hide
