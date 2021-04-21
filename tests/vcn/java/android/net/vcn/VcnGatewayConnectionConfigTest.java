@@ -81,7 +81,7 @@ public class VcnGatewayConnectionConfigTest {
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfigWithExposedCaps(int... exposedCaps) {
         final VcnGatewayConnectionConfig.Builder builder =
-                newBuilder().setRetryInterval(RETRY_INTERVALS_MS).setMaxMtu(MAX_MTU);
+                newBuilder().setRetryIntervalsMs(RETRY_INTERVALS_MS).setMaxMtu(MAX_MTU);
 
         for (int caps : exposedCaps) {
             builder.addExposedCapability(caps);
@@ -133,7 +133,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresNonNullRetryInterval() {
         try {
-            newBuilder().setRetryInterval(null);
+            newBuilder().setRetryIntervalsMs(null);
             fail("Expected exception due to invalid retryIntervalMs");
         } catch (IllegalArgumentException e) {
         }
@@ -142,7 +142,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresNonEmptyRetryInterval() {
         try {
-            newBuilder().setRetryInterval(new long[0]);
+            newBuilder().setRetryIntervalsMs(new long[0]);
             fail("Expected exception due to invalid retryIntervalMs");
         } catch (IllegalArgumentException e) {
         }
