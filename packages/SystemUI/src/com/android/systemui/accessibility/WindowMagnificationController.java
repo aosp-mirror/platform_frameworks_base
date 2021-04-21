@@ -30,7 +30,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -80,7 +79,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final Context mContext;
     private final Resources mResources;
     private final Handler mHandler;
-    private final Point mDisplaySize = new Point();
+    private Rect mWindowBounds;
     private final int mDisplayId;
     @Surface.Rotation
     @VisibleForTesting
@@ -143,12 +142,13 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mHandler = handler;
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mWindowMagnifierCallback = callback;
-        Display display = mContext.getDisplay();
-        display.getRealSize(mDisplaySize);
+
+        final Display display = mContext.getDisplay();
         mDisplayId = mContext.getDisplayId();
         mRotation = display.getRotation();
 
         mWm = context.getSystemService(WindowManager.class);
+        mWindowBounds = mWm.getCurrentWindowMetrics().getBounds();
 
         mResources = mContext.getResources();
         mScale = mResources.getInteger(R.integer.magnification_default_scale);
@@ -225,7 +225,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mNavGestureHeight = 0;
             return;
         }
-        mNavGestureHeight = (mDisplaySize.x > mDisplaySize.y)
+        mNavGestureHeight = (mWindowBounds.width() > mWindowBounds.height())
                 ? mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.navigation_bar_height_landscape)
                 : mResources.getDimensionPixelSize(
@@ -295,7 +295,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private void onRotate() {
         final Display display = mContext.getDisplay();
         final int oldRotation = mRotation;
-        display.getRealSize(mDisplaySize);
+        mWindowBounds = mWm.getCurrentWindowMetrics().getBounds();
+
         setMagnificationFrameBoundary();
         mRotation = display.getRotation();
         updateNavigationBarDimensions();
@@ -309,9 +310,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         final Matrix matrix = new Matrix();
         matrix.setRotate(rotationDegree);
         if (rotationDegree == 90) {
-            matrix.postTranslate(mDisplaySize.x, 0);
+            matrix.postTranslate(mWindowBounds.width(), 0);
         } else if (rotationDegree == 270) {
-            matrix.postTranslate(0, mDisplaySize.y);
+            matrix.postTranslate(0, mWindowBounds.height());
         } else {
             Log.w(TAG, "Invalid rotation change. " + rotationDegree);
             return;
@@ -409,10 +410,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
     private void setInitialStartBounds() {
         // Sets the initial frame area for the mirror and places it in the center of the display.
-        final int initSize = Math.min(mDisplaySize.x, mDisplaySize.y) / 2
+        final int initSize = Math.min(mWindowBounds.width(), mWindowBounds.height()) / 2
                 + 2 * mMirrorSurfaceMargin;
-        final int initX = mDisplaySize.x / 2 - initSize / 2;
-        final int initY = mDisplaySize.y / 2 - initSize / 2;
+        final int initX = mWindowBounds.width() / 2 - initSize / 2;
+        final int initY = mWindowBounds.height() / 2 - initSize / 2;
         mMagnificationFrame.set(initX, initY, initX + initSize, initY + initSize);
     }
 
@@ -462,8 +463,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (!isWindowVisible()) {
             return;
         }
-        final int maxMirrorViewX = mDisplaySize.x - mMirrorView.getWidth();
-        final int maxMirrorViewY = mDisplaySize.y - mMirrorView.getHeight() - mNavGestureHeight;
+        final int maxMirrorViewX = mWindowBounds.width() - mMirrorView.getWidth();
+        final int maxMirrorViewY =
+                mWindowBounds.height() - mMirrorView.getHeight() - mNavGestureHeight;
         LayoutParams params =
                 (LayoutParams) mMirrorView.getLayoutParams();
         params.x = mMagnificationFrame.left - mMirrorSurfaceMargin;
@@ -535,7 +537,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         final int exceededHeight = halfHeight - scaledHeight;
 
         mMagnificationFrameBoundary.set(-exceededWidth, -exceededHeight,
-                mDisplaySize.x + exceededWidth, mDisplaySize.y + exceededHeight);
+                mWindowBounds.width() + exceededWidth, mWindowBounds.height() + exceededHeight);
     }
 
     /**
