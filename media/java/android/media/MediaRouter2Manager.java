@@ -49,6 +49,8 @@ import java.util.stream.Collectors;
 
 /**
  * A class that monitors and controls media routing of other apps.
+ * {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} is required to use this class,
+ * or {@link SecurityException} will be thrown.
  * @hide
  */
 public final class MediaRouter2Manager {
