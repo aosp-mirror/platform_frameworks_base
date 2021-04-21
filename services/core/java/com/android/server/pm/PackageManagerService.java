@@ -4619,7 +4619,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     Integer filteringAppId = setting == null ? null : setting.appId;
                     mAppsFilter.dumpQueries(
                             pw, filteringAppId, dumpState, mUserManager.getUserIds(),
-                            this::getPackagesForUid);
+                            this::getPackagesForUidInternalBody);
                     break;
                 }
 
