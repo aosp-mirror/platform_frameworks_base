@@ -1663,7 +1663,7 @@
     <string name="user_switched" msgid="7249833311585228097">"Erabiltzailea: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"\"<xliff:g id="NAME">%1$s</xliff:g>\" erabiltzailera aldatzen…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailearen saioa amaitzen…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"Jabea"</string>
+    <string name="owner_name" msgid="8713560351570795743">"Jabe"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Errorea"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Administratzaileak ez du eman aldaketa egiteko baimena"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Ez da ekintza gauza dezakeen aplikaziorik aurkitu"</string>
