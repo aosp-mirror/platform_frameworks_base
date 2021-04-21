@@ -18,6 +18,8 @@ package android.bluetooth;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -72,6 +74,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * booleans with value <code>true</code>,
      * and not supported ones are <strong>not</strong> being sent at all.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.headsetclient.profile.action.CONNECTION_STATE_CHANGED";
 
@@ -90,6 +95,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * it also includes {@link #EXTRA_AUDIO_WBS}
      * indicating wide band speech support.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_AUDIO_STATE_CHANGED =
             "android.bluetooth.headsetclient.profile.action.AUDIO_STATE_CHANGED";
 
@@ -106,6 +114,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * {@link #EXTRA_VOICE_RECOGNITION},
      * {@link #EXTRA_IN_BAND_RING}</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_AG_EVENT =
             "android.bluetooth.headsetclient.profile.action.AG_EVENT";
 
@@ -117,6 +128,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * with value of {@link BluetoothHeadsetClientCall} instance,
      * representing actual call state.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CALL_CHANGED =
             "android.bluetooth.headsetclient.profile.action.AG_CALL_CHANGED";
 
@@ -127,6 +141,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * like <code>ACTION_AG_EVENT</code> with <code>EXTRA_VOICE_RECOGNITION</code> value
      * when for example user started voice recognition from HF unit.
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_RESULT =
             "android.bluetooth.headsetclient.profile.action.RESULT";
 
@@ -138,6 +155,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * Vendor event can be a response to an vendor specific command or unsolicited.
      *
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_VENDOR_SPECIFIC_HEADSETCLIENT_EVENT =
             "android.bluetooth.headsetclient.profile.action.VENDOR_SPECIFIC_EVENT";
 
@@ -149,6 +169,9 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * {@link #EXTRA_NUMBER},
      * with a <code>String</code> value representing phone number.</p>
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LAST_VTAG =
             "android.bluetooth.headsetclient.profile.action.LAST_VTAG";
 

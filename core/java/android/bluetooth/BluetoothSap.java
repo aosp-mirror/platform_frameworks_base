@@ -19,7 +19,9 @@ package android.bluetooth;
 import android.Manifest;
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -70,6 +72,7 @@ public final class BluetoothSap implements BluetoothProfile {
     @RequiresLegacyBluetoothPermission
     @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.sap.profile.action.CONNECTION_STATE_CHANGED";
 

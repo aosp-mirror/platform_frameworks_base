@@ -18,9 +18,22 @@ package android.content;
 
 public class Context {
     public int getUserId() {
-        return 0;
+        throw new UnsupportedOperationException();
     }
 
     public void enforceCallingOrSelfPermission(String permission, String message) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void sendBroadcast(Intent intent) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void sendBroadcast(Intent intent, String receiverPermission) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void sendBroadcastWithMultiplePermissions(Intent intent, String[] receiverPermissions) {
+        throw new UnsupportedOperationException();
     }
 }
