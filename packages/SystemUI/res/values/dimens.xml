@@ -461,29 +461,33 @@
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
-    <dimen name="volume_dialog_panel_transparent_padding_right">4dp</dimen>
+    <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
 
     <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
     <dimen name="volume_dialog_stream_padding">12dp</dimen>
 
-    <dimen name="volume_dialog_panel_width">64dp</dimen>
+    <dimen name="volume_dialog_panel_width">56dp</dimen>
 
-    <dimen name="volume_dialog_panel_width_half">32dp</dimen>
+    <dimen name="volume_dialog_panel_width_half">28dp</dimen>
+
+    <dimen name="volume_dialog_slider_width">42dp</dimen>
+
+    <dimen name="volume_dialog_slider_corner_radius">21dp</dimen>
 
     <dimen name="volume_dialog_slider_height">116dp</dimen>
 
-    <dimen name="volume_dialog_slider_width">@dimen/volume_dialog_panel_width</dimen>
+    <dimen name="volume_dialog_track_width">4dp</dimen>
 
-    <dimen name="volume_dialog_slider_corner_radius">@dimen/volume_dialog_panel_width_half</dimen>
+    <dimen name="volume_dialog_track_corner_radius">2dp</dimen>
 
-    <dimen name="volume_dialog_ringer_size">64dp</dimen>
+    <dimen name="volume_dialog_ringer_size">42dp</dimen>
 
     <dimen name="volume_dialog_ringer_icon_padding">20dp</dimen>
 
-    <dimen name="volume_dialog_caption_size">64dp</dimen>
+    <dimen name="volume_dialog_caption_size">56dp</dimen>
 
-    <dimen name="volume_dialog_tap_target_size">48dp</dimen>
+    <dimen name="volume_dialog_tap_target_size">42dp</dimen>
 
     <dimen name="volume_dialog_spacer">4dp</dimen>
 
@@ -504,8 +508,8 @@
     <dimen name="volume_tool_tip_arrow_corner_radius">2dp</dimen>
 
     <!-- Size of each item in the ringer selector drawer. -->
-    <dimen name="volume_ringer_drawer_item_size">64dp</dimen>
-    <dimen name="volume_ringer_drawer_item_size_half">32dp</dimen>
+    <dimen name="volume_ringer_drawer_item_size">42dp</dimen>
+    <dimen name="volume_ringer_drawer_item_size_half">21dp</dimen>
 
     <!-- Size of the icon inside each item in the ringer selector drawer. -->
     <dimen name="volume_ringer_drawer_icon_size">24dp</dimen>
