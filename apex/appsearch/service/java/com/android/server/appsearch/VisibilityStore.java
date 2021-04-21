@@ -103,14 +103,13 @@ public class VisibilityStore {
             new AppSearchSchema.Builder(VISIBILITY_TYPE)
                     .addProperty(
                             new AppSearchSchema.StringPropertyConfig.Builder(
-                                            NOT_PLATFORM_SURFACEABLE_PROPERTY)
+                                    NOT_PLATFORM_SURFACEABLE_PROPERTY)
                                     .setCardinality(
                                             AppSearchSchema.PropertyConfig.CARDINALITY_REPEATED)
                                     .build())
                     .addProperty(
                             new AppSearchSchema.DocumentPropertyConfig.Builder(
-                                            PACKAGE_ACCESSIBLE_PROPERTY)
-                                    .setSchemaType(PACKAGE_ACCESSIBLE_TYPE)
+                                    PACKAGE_ACCESSIBLE_PROPERTY, PACKAGE_ACCESSIBLE_TYPE)
                                     .setCardinality(
                                             AppSearchSchema.PropertyConfig.CARDINALITY_REPEATED)
                                     .build())
@@ -160,9 +159,9 @@ public class VisibilityStore {
     private static final String NAMESPACE = "";
 
     /**
-     * Prefix to add to all visibility document uri's. IcingSearchEngine doesn't allow empty uri's.
+     * Prefix to add to all visibility document ids. IcingSearchEngine doesn't allow empty ids.
      */
-    private static final String URI_PREFIX = "uri:";
+    private static final String ID_PREFIX = "uri:";
 
     private final AppSearchImpl mAppSearchImpl;
 
@@ -259,13 +258,13 @@ public class VisibilityStore {
             }
 
             try {
-                // Note: We use the other clients' prefixed names as uris
+                // Note: We use the other clients' prefixed names as ids
                 GenericDocument document =
                         mAppSearchImpl.getDocument(
                                 PACKAGE_NAME,
                                 DATABASE_NAME,
                                 NAMESPACE,
-                                /*uri=*/ addUriPrefix(prefix),
+                                /*id=*/ addIdPrefix(prefix),
                                 /*typePropertyPaths=*/ Collections.emptyMap());
 
                 // Update platform visibility settings
@@ -340,7 +339,7 @@ public class VisibilityStore {
         // Persist the document
         GenericDocument.Builder<?> visibilityDocument =
                 new GenericDocument.Builder<>(
-                        NAMESPACE, /*uri=*/ addUriPrefix(prefix), VISIBILITY_TYPE);
+                        NAMESPACE, /*id=*/ addIdPrefix(prefix), VISIBILITY_TYPE);
         if (!schemasNotPlatformSurfaceable.isEmpty()) {
             visibilityDocument.setPropertyString(
                     NOT_PLATFORM_SURFACEABLE_PROPERTY,
@@ -353,7 +352,7 @@ public class VisibilityStore {
                 schemasPackageAccessible.entrySet()) {
             for (int i = 0; i < entry.getValue().size(); i++) {
                 GenericDocument packageAccessibleDocument = new GenericDocument.Builder<>(
-                        NAMESPACE, /*uri=*/ "", PACKAGE_ACCESSIBLE_TYPE)
+                        NAMESPACE, /*id=*/ "", PACKAGE_ACCESSIBLE_TYPE)
                         .setPropertyString(
                                 PACKAGE_NAME_PROPERTY,
                                 entry.getValue().get(i).getPackageName())
@@ -480,13 +479,13 @@ public class VisibilityStore {
     }
 
     /**
-     * Adds a uri prefix to create a visibility store document's uri.
+     * Adds a prefix to create a visibility store document's id.
      *
-     * @param uri Non-prefixed uri
-     * @return Prefixed uri
+     * @param id Non-prefixed id
+     * @return Prefixed id
      */
-    private static String addUriPrefix(String uri) {
-        return URI_PREFIX + uri;
+    private static String addIdPrefix(String id) {
+        return ID_PREFIX + id;
     }
 
     /**

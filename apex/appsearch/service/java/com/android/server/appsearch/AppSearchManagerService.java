@@ -308,13 +308,13 @@ public class AppSearchManagerService extends SystemService {
                         GenericDocument document = new GenericDocument(documentBundles.get(i));
                         try {
                             impl.putDocument(packageName, databaseName, document, logger);
-                            resultBuilder.setSuccess(document.getUri(), /*result=*/ null);
+                            resultBuilder.setSuccess(document.getId(), /*result=*/ null);
                             ++operationSuccessCount;
                         } catch (Throwable t) {
-                            resultBuilder.setResult(document.getUri(),
+                            resultBuilder.setResult(document.getId(),
                                     throwableToFailedResult(t));
                             AppSearchResult<Void> result = throwableToFailedResult(t);
-                            resultBuilder.setResult(document.getUri(), result);
+                            resultBuilder.setResult(document.getId(), result);
                             // for failures, we would just log the one for last failure
                             statusCode = result.getResultCode();
                             ++operationFailureCount;
@@ -354,14 +354,14 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String packageName,
                 @NonNull String databaseName,
                 @NonNull String namespace,
-                @NonNull List<String> uris,
+                @NonNull List<String> ids,
                 @NonNull Map<String, List<String>> typePropertyPaths,
                 @UserIdInt int userId,
                 @NonNull IAppSearchBatchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
             Objects.requireNonNull(namespace);
-            Objects.requireNonNull(uris);
+            Objects.requireNonNull(ids);
             Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
@@ -373,19 +373,19 @@ public class AppSearchManagerService extends SystemService {
                             new AppSearchBatchResult.Builder<>();
                     AppSearchImpl impl =
                             mImplInstanceManager.getAppSearchImpl(callingUserId);
-                    for (int i = 0; i < uris.size(); i++) {
-                        String uri = uris.get(i);
+                    for (int i = 0; i < ids.size(); i++) {
+                        String id = ids.get(i);
                         try {
                             GenericDocument document =
                                     impl.getDocument(
                                             packageName,
                                             databaseName,
                                             namespace,
-                                            uri,
+                                            id,
                                             typePropertyPaths);
-                            resultBuilder.setSuccess(uri, document.getBundle());
+                            resultBuilder.setSuccess(id, document.getBundle());
                         } catch (Throwable t) {
-                            resultBuilder.setResult(uri, throwableToFailedResult(t));
+                            resultBuilder.setResult(id, throwableToFailedResult(t));
                         }
                     }
                     invokeCallbackOnResult(callback, resultBuilder.build());
@@ -578,14 +578,12 @@ public class AppSearchManagerService extends SystemService {
                                 impl.putDocument(packageName, databaseName, document,
                                         /*logger=*/ null);
                             } catch (Throwable t) {
-                                migrationFailureBundles.add(
-                                        new SetSchemaResponse.MigrationFailure.Builder()
-                                                .setNamespace(document.getNamespace())
-                                                .setSchemaType(document.getSchemaType())
-                                                .setUri(document.getUri())
-                                                .setAppSearchResult(AppSearchResult
-                                                        .throwableToFailedResult(t))
-                                                .build().getBundle());
+                                migrationFailureBundles.add(new SetSchemaResponse.MigrationFailure(
+                                        document.getNamespace(),
+                                        document.getId(),
+                                        document.getSchemaType(),
+                                        AppSearchResult.throwableToFailedResult(t))
+                                        .getBundle());
                             }
                         }
                     }
@@ -603,14 +601,14 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String packageName,
                 @NonNull String databaseName,
                 @NonNull String namespace,
-                @NonNull String uri,
+                @NonNull String documentId,
                 long usageTimeMillis,
                 boolean systemUsage,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(databaseName);
             Objects.requireNonNull(namespace);
-            Objects.requireNonNull(uri);
+            Objects.requireNonNull(documentId);
             Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
@@ -625,7 +623,7 @@ public class AppSearchManagerService extends SystemService {
                     AppSearchImpl impl =
                             mImplInstanceManager.getAppSearchImpl(callingUserId);
                     impl.reportUsage(
-                            packageName, databaseName, namespace, uri,
+                            packageName, databaseName, namespace, documentId,
                             usageTimeMillis, systemUsage);
                     invokeCallbackOnResult(
                             callback, AppSearchResult.newSuccessfulResult(/*result=*/ null));
@@ -636,16 +634,16 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void removeByUri(
+        public void removeByDocumentId(
                 @NonNull String packageName,
                 @NonNull String databaseName,
                 @NonNull String namespace,
-                @NonNull List<String> uris,
+                @NonNull List<String> ids,
                 @UserIdInt int userId,
                 @NonNull IAppSearchBatchResultCallback callback) {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(databaseName);
-            Objects.requireNonNull(uris);
+            Objects.requireNonNull(ids);
             Objects.requireNonNull(callback);
             int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
@@ -657,13 +655,13 @@ public class AppSearchManagerService extends SystemService {
                             new AppSearchBatchResult.Builder<>();
                     AppSearchImpl impl =
                             mImplInstanceManager.getAppSearchImpl(callingUserId);
-                    for (int i = 0; i < uris.size(); i++) {
-                        String uri = uris.get(i);
+                    for (int i = 0; i < ids.size(); i++) {
+                        String id = ids.get(i);
                         try {
-                            impl.remove(packageName, databaseName, namespace, uri);
-                            resultBuilder.setSuccess(uri, /*result= */ null);
+                            impl.remove(packageName, databaseName, namespace, id);
+                            resultBuilder.setSuccess(id, /*result= */ null);
                         } catch (Throwable t) {
-                            resultBuilder.setResult(uri, throwableToFailedResult(t));
+                            resultBuilder.setResult(id, throwableToFailedResult(t));
                         }
                     }
                     // Now that the batch has been written. Persist the newly written data.

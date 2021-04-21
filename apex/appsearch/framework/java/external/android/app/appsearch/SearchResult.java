@@ -415,16 +415,13 @@ public final class SearchResult {
         private static String getPropertyValues(GenericDocument document, String propertyName) {
             // In IcingLib snippeting is available for only 3 data types i.e String, double and
             // long, so we need to check which of these three are requested.
-            // TODO (tytytyww): getPropertyStringArray takes property name, handle for property
-            //  path.
             // TODO (tytytyww): support double[] and long[].
-            String[] values = document.getPropertyStringArray(propertyName);
-            if (values == null) {
-                throw new IllegalStateException("No content found for requested property path!");
+            String result = document.getPropertyString(propertyName);
+            if (result == null) {
+                throw new IllegalStateException(
+                        "No content found for requested property path: " + propertyName);
             }
-
-            // TODO(b/175146044): Return the proper match based on the index in the propertyName.
-            return values[0];
+            return result;
         }
 
         /** Builder for {@link MatchInfo} objects. */
@@ -433,23 +430,22 @@ public final class SearchResult {
             private boolean mBuilt = false;
 
             /**
-             * Sets the property path corresponding to the given entry.
+             * Creates a new {@link MatchInfo.Builder} reporting a match with the given property
+             * path.
              *
-             * <p>A property path is a '.' - delimited sequence of property names indicating which
+             * <p>A property path is a dot-delimited sequence of property names indicating which
              * property in the document these snippets correspond to.
              *
-             * <p>Example properties: 'body', 'sender.name', 'sender.emailaddress', etc. For class
-             * example 1 this returns "subject"
+             * <p>Example properties: 'body', 'sender.name', 'sender.emailaddress', etc.
+             * For class example 1 this returns "subject".
              *
-             * @throws IllegalStateException if the builder has already been used
+             * @param propertyPath A {@code dot-delimited sequence of property names indicating
+             *                     which property in the document these snippets correspond to.
              */
-            @NonNull
-            public Builder setPropertyPath(@NonNull String propertyPath) {
-                Preconditions.checkState(!mBuilt, "Builder has already been used");
+            public Builder(@NonNull String propertyPath) {
                 mBundle.putString(
                         SearchResult.MatchInfo.PROPERTY_PATH_FIELD,
                         Objects.requireNonNull(propertyPath));
-                return this;
             }
 
             /**
