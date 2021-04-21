@@ -535,6 +535,15 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
          */
         public void onHotwordDetectionServiceInitialized(@InitializationStatus int status) {
         }
+
+        /**
+         * Called with the {@link HotwordDetectionService} is restarted.
+         *
+         * Clients are expected to call {@link HotwordDetector#updateState} to share the state with
+         * the newly created service.
+         */
+        public void onHotwordDetectionServiceRestarted() {
+        }
     }
 
     /**
