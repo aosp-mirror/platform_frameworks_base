@@ -417,6 +417,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     mPendingShowBouncer = true;
                 } else {
                     showBouncer();
+                    mKeyguardViewController.notifyKeyguardAuthenticated(false /* strongAuth */);
                 }
                 Trace.endSection();
                 break;

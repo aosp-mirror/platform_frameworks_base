@@ -251,7 +251,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public void setAlternateAuthInterceptor(@Nullable AlternateAuthInterceptor authInterceptor) {
+        final boolean newlyNull = authInterceptor == null && mAlternateAuthInterceptor != null;
         mAlternateAuthInterceptor = authInterceptor;
+        resetAlternateAuth(newlyNull);
     }
 
     private void registerListeners() {
@@ -432,7 +434,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } else {
                 showBouncerOrKeyguard(hideBouncerWhenShowing);
             }
-            resetAlternateAuth();
+            resetAlternateAuth(false);
             mKeyguardUpdateManager.sendKeyguardReset();
             updateStates();
         }
@@ -441,9 +443,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     /**
      * Stop showing any alternate auth methods
      */
-    public void resetAlternateAuth() {
-        if (mAlternateAuthInterceptor != null
-                && mAlternateAuthInterceptor.hideAlternateAuthBouncer()) {
+    public void resetAlternateAuth(boolean forceUpdateScrim) {
+        if ((mAlternateAuthInterceptor != null
+                && mAlternateAuthInterceptor.hideAlternateAuthBouncer())
+                || forceUpdateScrim) {
             mStatusBar.updateScrimController();
         }
     }
@@ -957,6 +960,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public void notifyKeyguardAuthenticated(boolean strongAuth) {
         mBouncer.notifyKeyguardAuthenticated(strongAuth);
+
+        if (mAlternateAuthInterceptor != null && isShowingAlternateAuthOrAnimating()) {
+            resetAlternateAuth(false);
+            executeAfterKeyguardGoneAction();
+        }
+
     }
 
     public void showBouncerMessage(String message, ColorStateList colorState) {
