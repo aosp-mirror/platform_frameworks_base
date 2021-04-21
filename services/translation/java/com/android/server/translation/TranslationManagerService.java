@@ -185,23 +185,6 @@ public final class TranslationManagerService
         }
 
         @Override
-        public void updateUiTranslationStateByTaskId(@UiTranslationState int state,
-                TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
-                int taskId, int userId) {
-            // deprecated
-            enforceCallerHasPermission(MANAGE_UI_TRANSLATION);
-            synchronized (mLock) {
-                final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
-                if (service != null && (isDefaultServiceLocked(userId)
-                        || isCalledByServiceAppLocked(userId,
-                        "updateUiTranslationStateByTaskId"))) {
-                    service.updateUiTranslationStateLocked(state, sourceSpec, targetSpec, viewIds,
-                            taskId);
-                }
-            }
-        }
-
-        @Override
         public void updateUiTranslationState(@UiTranslationState int state,
                 TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
                 IBinder token, int taskId, int userId) {
