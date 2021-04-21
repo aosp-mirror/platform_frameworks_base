@@ -715,7 +715,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ nhắn tin của nhà cung cấp dịch vụ. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"liên kết với dịch vụ của nhà cung cấp"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Cho phép chủ sở hữu liên kết với các dịch vụ của nhà cung cấp. Không bao giờ cần cho các ứng dụng thông thường."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"truy cập Không làm phiền"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"quyền truy cập chế độ Không làm phiền"</string>
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Cho phép ứng dụng đọc và ghi cấu hình Không làm phiền."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"cấp quyền xem"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Cho phép chủ sở hữu cấp quyền cho một ứng dụng. Các ứng dụng thông thường sẽ không bao giờ cần quyền này."</string>
@@ -1156,7 +1156,7 @@
     <string name="delete" msgid="1514113991712129054">"Xóa"</string>
     <string name="copyUrl" msgid="6229645005987260230">"Sao chép URL"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"Chọn văn bản"</string>
-    <string name="undo" msgid="3175318090002654673">"Hoàn tác"</string>
+    <string name="undo" msgid="3175318090002654673">"Hủy"</string>
     <string name="redo" msgid="7231448494008532233">"Làm lại"</string>
     <string name="autofill" msgid="511224882647795296">"Tự động điền"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Lựa chọn văn bản"</string>
@@ -1709,7 +1709,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sử dụng phím tắt"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Đảo màu"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Chỉnh màu"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Giảm độ sáng hơn nữa"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Siêu tối"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã bật."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã tắt."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Nhấn và giữ đồng thời cả hai phím âm lượng trong 3 giây để sử dụng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
