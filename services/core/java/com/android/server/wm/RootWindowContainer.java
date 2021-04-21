@@ -2132,9 +2132,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 rootTask.setLastNonFullscreenBounds(task.mLastNonFullscreenBounds);
                 rootTask.setBounds(task.getBounds());
 
-                // Move reparent bounds from original task to the new one.
-                rootTask.mLastRecentsAnimationBounds.set(task.mLastRecentsAnimationBounds);
-                task.mLastRecentsAnimationBounds.setEmpty();
+                // Move the last recents animation transaction from original task to the new one.
+                if (task.mLastRecentsAnimationTransaction != null) {
+                    rootTask.setLastRecentsAnimationTransaction(
+                            task.mLastRecentsAnimationTransaction);
+                    task.clearLastRecentsAnimationTransaction();
+                }
 
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
@@ -2143,7 +2146,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 r.reparent(rootTask, MAX_VALUE, reason);
 
                 // Ensure the leash of new task is in sync with its current bounds after reparent.
-                rootTask.maybeApplyLastRecentsAnimationBounds();
+                rootTask.maybeApplyLastRecentsAnimationTransaction();
 
                 // In the case of this activity entering PIP due to it being moved to the back,
                 // the old activity would have a TRANSIT_TASK_TO_BACK transition that needs to be
