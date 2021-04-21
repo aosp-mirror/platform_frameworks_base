@@ -38,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -321,9 +322,10 @@ public class SipDelegateManager {
     public void createSipDelegate(@NonNull DelegateRequest request, @NonNull Executor executor,
             @NonNull DelegateConnectionStateCallback dc,
             @NonNull DelegateConnectionMessageCallback mc) throws ImsException {
-        if (request == null || executor == null || dc == null || mc == null) {
-            throw new IllegalArgumentException("Invalid arguments passed into createSipDelegate");
-        }
+        Objects.requireNonNull(request, "The DelegateRequest must not be null.");
+        Objects.requireNonNull(executor, "The Executor must not be null.");
+        Objects.requireNonNull(dc, "The DelegateConnectionStateCallback must not be null.");
+        Objects.requireNonNull(mc, "The DelegateConnectionMessageCallback must not be null.");
         try {
             SipDelegateConnectionAidlWrapper wrapper =
                     new SipDelegateConnectionAidlWrapper(executor, dc, mc);
@@ -354,10 +356,7 @@ public class SipDelegateManager {
     @RequiresPermission(Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION)
     public void destroySipDelegate(@NonNull SipDelegateConnection delegateConnection,
             @SipDelegateDestroyReason int reason) {
-
-        if (delegateConnection == null) {
-            throw new IllegalArgumentException("invalid argument passed into destroySipDelegate");
-        }
+        Objects.requireNonNull(delegateConnection, "SipDelegateConnection can not be null.");
         if (delegateConnection instanceof SipDelegateConnectionAidlWrapper) {
             SipDelegateConnectionAidlWrapper w =
                     (SipDelegateConnectionAidlWrapper) delegateConnection;
@@ -395,9 +394,7 @@ public class SipDelegateManager {
     @RequiresPermission(Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION)
     public void triggerFullNetworkRegistration(@NonNull SipDelegateConnection connection,
             @IntRange(from = 100, to = 699) int sipCode, @Nullable String sipReason) {
-        if (connection == null) {
-            throw new IllegalArgumentException("invalid connection.");
-        }
+        Objects.requireNonNull(connection, "SipDelegateConnection can not be null.");
         if (connection instanceof SipDelegateConnectionAidlWrapper) {
             SipDelegateConnectionAidlWrapper w = (SipDelegateConnectionAidlWrapper) connection;
             try {
