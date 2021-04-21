@@ -1268,8 +1268,8 @@
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> es tancarà sense desar els canvis"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de memòria"</string>
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"L\'abocament de memòria en monticle del procés <xliff:g id="PROC">%1$s</xliff:g> ja està a punt"</string>
-    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"S\'ha recopilat un procés \"heap dump\". Toca per compartir-lo."</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"Vols compartir el \"heap dump\"?"</string>
+    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"S\'ha recopilat un abocament de memòria en monticle. Toca per compartir-lo."</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"Vols compartir l\'abocament de memòria en monticle?"</string>
     <string name="dump_heap_text" msgid="1692649033835719336">"El procés <xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de memòria (<xliff:g id="SIZE">%2$s</xliff:g>). Hi ha un abocament de memòria en monticle disponible perquè el comparteixis amb el desenvolupador. Ves amb compte, ja que pot contenir informació personal a la qual el procés pot accedir."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"El procés <xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de memòria (<xliff:g id="SIZE">%2$s</xliff:g>). Hi ha un abocament de memòria en monticle disponible que pots compartir. Ves amb compte, ja que pot contenir informació personal sensible a la qual el procés pot accedir, com ara text que hagis introduït."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Hi ha un abocament de memòria en monticle del procés de <xliff:g id="PROC">%1$s</xliff:g> disponible que pots compartir. Ves amb compte, ja que pot contenir informació personal sensible a la qual el procés pot accedir, com ara text que hagis introduït."</string>
@@ -1621,7 +1621,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Pantalla sense fil"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Emet"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Connexió al dispositiu"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Emet pantalla al dispositiu"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Emet la pantalla al dispositiu"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"S\'estan cercant dispositius…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Configuració"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Desconnecta"</string>
