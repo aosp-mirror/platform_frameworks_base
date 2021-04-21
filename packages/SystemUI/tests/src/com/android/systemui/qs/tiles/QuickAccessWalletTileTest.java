@@ -62,6 +62,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -186,11 +187,12 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         when(mQuickAccessWalletClient.createWalletIntent()).thenReturn(intent);
         setUpWalletCard(/* hasCard= */ false);
 
-        mTile.handleClick();
+        mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
         verify(mActivityStarter, times(1))
-                .postStartActivityDismissingKeyguard(eq(intent), anyInt());
+                .postStartActivityDismissingKeyguard(eq(intent), anyInt(),
+                        eq(null) /* animationController */);
     }
 
     @Test
@@ -198,7 +200,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         when(mQuickAccessWalletClient.createWalletIntent()).thenReturn(null);
         setUpWalletCard(/* hasCard= */ false);
 
-        mTile.handleClick();
+        mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
         verifyZeroInteractions(mActivityStarter);
@@ -208,10 +210,11 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     public void testHandleClick_hasCards_startWalletActivity() {
         setUpWalletCard(/* hasCard= */ true);
 
-        mTile.handleClick();
+        mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
-        verify(mSpiedContext).startActivity(mIntentCaptor.capture());
+        verify(mActivityStarter).startActivity(mIntentCaptor.capture(), eq(true) /* dismissShade */,
+                (ActivityLaunchAnimator.Controller) eq(null));
 
         Intent nextStartedIntent = mIntentCaptor.getValue();
         String walletClassName = "com.android.systemui.wallet.ui.WalletActivity";

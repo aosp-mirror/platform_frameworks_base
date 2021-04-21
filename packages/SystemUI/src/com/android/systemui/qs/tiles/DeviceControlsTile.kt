@@ -22,8 +22,10 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.service.quicksettings.Tile
+import android.view.View
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.R
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE
@@ -96,16 +98,19 @@ class DeviceControlsTile @Inject constructor(
         super.handleDestroy()
     }
 
-    override fun handleClick() {
+    override fun handleClick(view: View?) {
         if (state.state == Tile.STATE_ACTIVE) {
             mUiHandler.post {
-                mHost.collapsePanels()
                 val i = Intent().apply {
                     component = ComponentName(mContext, ControlsActivity::class.java)
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
                     putExtra(ControlsUiController.EXTRA_ANIMATE, true)
                 }
-                mContext.startActivity(i)
+
+                val animationController = view?.let {
+                    ActivityLaunchAnimator.Controller.fromView(it)
+                }
+                mActivityStarter.startActivity(i, true /* dismissShade */, animationController)
             }
         }
     }

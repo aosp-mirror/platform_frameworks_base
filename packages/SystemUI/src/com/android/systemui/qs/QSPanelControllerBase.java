@@ -210,7 +210,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         final String spec = CustomTile.toSpec(tile);
         for (TileRecord record : mRecords) {
             if (record.tile.getTileSpec().equals(spec)) {
-                record.tile.click();
+                record.tile.click(null /* view */);
                 break;
             }
         }
