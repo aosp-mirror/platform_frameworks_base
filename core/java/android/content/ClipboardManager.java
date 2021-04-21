@@ -100,6 +100,10 @@ public class ClipboardManager extends android.text.ClipboardManager {
         /**
          * Callback that is invoked by {@link android.content.ClipboardManager} when the primary
          * clip changes.
+         *
+         * <p>This is called when the result of {@link ClipDescription#getClassificationStatus()}
+         * changes, as well as when new clip data is set. So in cases where text classification is
+         * performed, this callback may be invoked multiple times for the same clip.
          */
         void onPrimaryClipChanged();
     }
