@@ -78,6 +78,7 @@ public final class IkeSessionParamsUtils {
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_ACCEPT_ANY_REMOTE_ID);
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_EAP_ONLY_AUTH);
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_MOBIKE);
+        IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_FORCE_PORT_4500);
     }
 
     /** Serializes an IkeSessionParams to a PersistableBundle. */
@@ -124,6 +125,8 @@ public final class IkeSessionParamsUtils {
         result.putInt(DPD_DELAY_SEC_KEY, params.getDpdDelaySeconds());
         result.putInt(NATT_KEEPALIVE_DELAY_SEC_KEY, params.getNattKeepAliveDelaySeconds());
 
+        // TODO: b/185941731 Make sure IkeSessionParamsUtils is automatically updated when a new
+        // IKE_OPTION is defined in IKE module and added in the IkeSessionParams
         final List<Integer> enabledIkeOptions = new ArrayList<>();
         for (int option : IKE_OPTIONS) {
             if (params.hasIkeOption(option)) {
