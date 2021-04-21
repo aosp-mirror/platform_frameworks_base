@@ -334,11 +334,12 @@ TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent)
   styleable.entries.push_back(Reference(test::ParseNameOrDie("android:attr/one")));
   styleable.SetComment(StringPiece("This is a styleable"));
 
+  CloningValueTransformer cloner(nullptr);
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .AddValue("android:attr/one", util::make_unique<Attribute>(attr))
           .AddValue("android:styleable/Container",
-                    std::unique_ptr<Styleable>(styleable.Clone(nullptr)))
+                    std::unique_ptr<Styleable>(styleable.Transform(cloner)))
           .Build();
 
   std::unique_ptr<IAaptContext> context =
@@ -371,11 +372,12 @@ TEST(JavaClassGeneratorTest, CommentsForStyleableHiddenAttributesAreNotPresent) 
   styleable.entries.push_back(Reference(test::ParseNameOrDie("android:attr/one")));
   styleable.SetComment(StringPiece("This is a styleable"));
 
+  CloningValueTransformer cloner(nullptr);
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .AddValue("android:attr/one", util::make_unique<Attribute>(attr))
           .AddValue("android:styleable/Container",
-                    std::unique_ptr<Styleable>(styleable.Clone(nullptr)))
+                    std::unique_ptr<Styleable>(styleable.Transform(cloner)))
           .Build();
 
   std::unique_ptr<IAaptContext> context =

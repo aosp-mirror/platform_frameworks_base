@@ -280,13 +280,13 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
         }
 
         // Continue if we're taking the new resource.
-
+        CloningValueTransformer cloner(&main_table_->string_pool);
         if (FileReference* f = ValueCast<FileReference>(src_config_value->value.get())) {
           std::unique_ptr<FileReference> new_file_ref;
           if (mangle_package) {
             new_file_ref = CloneAndMangleFile(src_package->name, *f);
           } else {
-            new_file_ref = std::unique_ptr<FileReference>(f->Clone(&main_table_->string_pool));
+            new_file_ref = std::unique_ptr<FileReference>(f->Transform(cloner));
           }
           dst_config_value->value = std::move(new_file_ref);
 
@@ -294,8 +294,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
           Maybe<std::string> original_comment = (dst_config_value->value)
               ? dst_config_value->value->GetComment() : Maybe<std::string>();
 
-          dst_config_value->value = std::unique_ptr<Value>(
-              src_config_value->value->Clone(&main_table_->string_pool));
+          dst_config_value->value = src_config_value->value->Transform(cloner);
 
           // Keep the comment from the original resource and ignore all comments from overlaying
           // resources
@@ -323,7 +322,9 @@ std::unique_ptr<FileReference> TableMerger::CloneAndMangleFile(
     new_file_ref->file = file_ref.file;
     return new_file_ref;
   }
-  return std::unique_ptr<FileReference>(file_ref.Clone(&main_table_->string_pool));
+
+  CloningValueTransformer cloner(&main_table_->string_pool);
+  return std::unique_ptr<FileReference>(file_ref.Transform(cloner));
 }
 
 bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFile* file) {
