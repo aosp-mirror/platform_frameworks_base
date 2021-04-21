@@ -143,7 +143,9 @@ public abstract class TranslationService extends Service {
 
         /**
          * TODO: implement javadoc
+         * @deprecated use {@link #onTranslationSuccess} with an error response instead.
          */
+        @Deprecated
         void onError();
     }
 
