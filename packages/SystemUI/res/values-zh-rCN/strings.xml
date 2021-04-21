@@ -595,7 +595,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"应用已固定"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”和“概览”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”和“主屏幕”即可取消固定屏幕。"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"这会使此屏幕固定显示，直到您取消固定为止。向上滑动并按住即可取消固定。"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"此屏幕会固定显示，直到您取消固定为止。向上滑动并按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“概览”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“主屏幕”即可取消固定屏幕。"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"可访问个人数据（例如通讯录和电子邮件内容）。"</string>
@@ -1026,7 +1026,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"放大窗口"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大窗口控件"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"设备控制器"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"为您所连接的设备添加控件"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"为您所连接的设备添加控制器"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"设置设备控件"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"按住电源按钮即可访问您的控件"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"选择要添加控制器的应用"</string>
@@ -1042,15 +1042,15 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"取消收藏"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移至位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控件"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"选择要从电源菜单访问的控件"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控件"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控件"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"选择要从电源菜单访问的控制器"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控制器"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控制器"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"未保存更改"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"查看其他应用"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"无法加载控件。请查看<xliff:g id="APP">%s</xliff:g>应用，确保应用设置没有更改。"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"找不到兼容的控件"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"添加到设备控件"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"添加到设备控制器"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"添加"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"来自<xliff:g id="APP">%s</xliff:g>的建议"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"控件已更新"</string>
@@ -1079,6 +1079,6 @@
     <string name="controls_error_failed" msgid="960228639198558525">"出现错误，请重试"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"正在进行"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"按住电源按钮即可查看新控件"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"添加控件"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"修改控件"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"添加控制器"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"修改控制器"</string>
 </resources>

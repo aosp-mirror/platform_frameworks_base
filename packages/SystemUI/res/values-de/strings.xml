@@ -94,10 +94,10 @@
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Aufzeichnung starten?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Beim Aufnehmen kann das Android-System vertrauliche Informationen erfassen, die auf deinem Bildschirm angezeigt oder von deinem Gerät wiedergegeben werden. Das können Passwörter, Zahlungsinformationen, Fotos, Nachrichten und Audioinhalte sein."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio aufnehmen"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio über das Gerät"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio des Geräts"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Audioinhalte auf deinem Gerät, wie Musik, Anrufe und Klingeltöne"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio über Gerät und externes Mikrofon aufnehmen"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio des Geräts und über externes Mikrofon aufnehmen"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Start"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Bildschirm wird aufgezeichnet"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Bildschirm und Ton werden aufgezeichnet"</string>
@@ -595,18 +595,18 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"App ist auf dem Bildschirm fixiert"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Startbildschirm\"."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Wische dazu nach oben und halte den Bildschirm gedrückt."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Die App bleibt so lange auf dem Bildschirm angepinnt, bis du die Fixierung aufhebst. Wische dazu nach oben und halte den Bildschirm gedrückt."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Startbildschirm\"."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Möglicherweise kann auf personenbezogene Daten (Kontakte, E-Mails usw.) zugegriffen werden."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Die fixierte App kann ggf. andere Apps öffnen."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Zum Aufheben der Fixierung dieser App \"Zurück\" und \"Übersicht\" halten"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Zum Aufheben der Fixierung dieser App \"Zurück\" und \"Startbildschirm\" halten"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Zum Aufheben der Fixierung nach oben wischen und halten"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Zum Loslösen der App nach oben wischen und halten"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ok"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nein danke"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"Bildschirm wurde fixiert"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Bildschirmfixierung aufgehoben"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"App angepinnt"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"App vom Bildschirm losgelöst"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ausblenden?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Sie wird wieder eingeblendet, wenn du sie in den Einstellungen erneut aktivierst."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Ausblenden"</string>

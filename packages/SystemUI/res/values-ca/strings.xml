@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Activa la funció Estalvi de bateria"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Configuració"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Gira pantalla automàticament"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Gira la pantalla automàticament"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"Silen."</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO."</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"Notificacions"</string>
@@ -987,7 +987,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"L\'estalvi de bateria s\'activarà automàticament quan el nivell de bateria sigui inferior al <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Configuració"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Entesos"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Aboca espai de SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Aboca el monticle de SysUI"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensors desactivats"</string>
     <string name="device_services" msgid="1549944177856658705">"Serveis per a dispositius"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sense títol"</string>
