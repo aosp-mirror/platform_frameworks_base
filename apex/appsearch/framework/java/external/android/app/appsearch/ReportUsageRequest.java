@@ -16,6 +16,7 @@
 
 package android.app.appsearch;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
@@ -31,13 +32,14 @@ import java.util.Objects;
  */
 public final class ReportUsageRequest {
     private final String mNamespace;
-    private final String mUri;
-    private final long mUsageTimeMillis;
+    private final String mDocumentId;
+    private final long mUsageTimestampMillis;
 
-    ReportUsageRequest(@NonNull String namespace, @NonNull String uri, long usageTimeMillis) {
+    ReportUsageRequest(
+            @NonNull String namespace, @NonNull String documentId, long usageTimestampMillis) {
         mNamespace = Objects.requireNonNull(namespace);
-        mUri = Objects.requireNonNull(uri);
-        mUsageTimeMillis = usageTimeMillis;
+        mDocumentId = Objects.requireNonNull(documentId);
+        mUsageTimestampMillis = usageTimestampMillis;
     }
 
     /** Returns the namespace of the document that was used. */
@@ -46,10 +48,10 @@ public final class ReportUsageRequest {
         return mNamespace;
     }
 
-    /** Returns the URI of document that was used. */
+    /** Returns the ID of document that was used. */
     @NonNull
-    public String getUri() {
-        return mUri;
+    public String getDocumentId() {
+        return mDocumentId;
     }
 
     /**
@@ -58,35 +60,22 @@ public final class ReportUsageRequest {
      *
      * <p>The value is in the {@link System#currentTimeMillis} time base.
      */
-    public long getUsageTimeMillis() {
-        return mUsageTimeMillis;
+    @CurrentTimeMillisLong
+    public long getUsageTimestampMillis() {
+        return mUsageTimestampMillis;
     }
 
     /** Builder for {@link ReportUsageRequest} objects. */
     public static final class Builder {
         private final String mNamespace;
-        private String mUri;
-        private Long mUsageTimeMillis;
+        private final String mDocumentId;
+        private Long mUsageTimestampMillis;
         private boolean mBuilt = false;
 
         /** Creates a {@link ReportUsageRequest.Builder} instance. */
-        public Builder(@NonNull String namespace) {
+        public Builder(@NonNull String namespace, @NonNull String documentId) {
             mNamespace = Objects.requireNonNull(namespace);
-        }
-
-        /**
-         * Sets the URI of the document being used.
-         *
-         * <p>This field is required.
-         *
-         * @throws IllegalStateException if the builder has already been used
-         */
-        @NonNull
-        public ReportUsageRequest.Builder setUri(@NonNull String uri) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Objects.requireNonNull(uri);
-            mUri = uri;
-            return this;
+            mDocumentId = Objects.requireNonNull(documentId);
         }
 
         /**
@@ -101,27 +90,26 @@ public final class ReportUsageRequest {
          * @throws IllegalStateException if the builder has already been used
          */
         @NonNull
-        public ReportUsageRequest.Builder setUsageTimeMillis(long usageTimeMillis) {
+        public ReportUsageRequest.Builder setUsageTimestampMillis(
+                @CurrentTimeMillisLong long usageTimestampMillis) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            mUsageTimeMillis = usageTimeMillis;
+            mUsageTimestampMillis = usageTimestampMillis;
             return this;
         }
 
         /**
          * Builds a new {@link ReportUsageRequest}.
          *
-         * @throws NullPointerException if {@link #setUri} has never been called
          * @throws IllegalStateException if the builder has already been used
          */
         @NonNull
         public ReportUsageRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Objects.requireNonNull(mUri, "ReportUsageRequest is missing a URI");
-            if (mUsageTimeMillis == null) {
-                mUsageTimeMillis = System.currentTimeMillis();
+            if (mUsageTimestampMillis == null) {
+                mUsageTimestampMillis = System.currentTimeMillis();
             }
             mBuilt = true;
-            return new ReportUsageRequest(mNamespace, mUri, mUsageTimeMillis);
+            return new ReportUsageRequest(mNamespace, mDocumentId, mUsageTimestampMillis);
         }
     }
 }

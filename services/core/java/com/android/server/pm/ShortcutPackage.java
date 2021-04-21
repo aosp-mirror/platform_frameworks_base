@@ -23,10 +23,10 @@ import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
 import android.app.appsearch.GenericDocument;
-import android.app.appsearch.GetByUriRequest;
+import android.app.appsearch.GetByDocumentIdRequest;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.PutDocumentsRequest;
-import android.app.appsearch.RemoveByUriRequest;
+import android.app.appsearch.RemoveByDocumentIdRequest;
 import android.app.appsearch.ReportUsageRequest;
 import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResults;
@@ -449,8 +449,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                     session -> {
                         final AndroidFuture<Boolean> future = new AndroidFuture<>();
                         session.reportUsage(
-                                new ReportUsageRequest.Builder(getPackageName())
-                                        .setUri(newShortcut.getId()).build(),
+                                new ReportUsageRequest.Builder(
+                                        getPackageName(), newShortcut.getId()).build(),
                                 mShortcutUser.mExecutor,
                                 result -> future.complete(result.isSuccess()));
                         return future;
@@ -2377,7 +2377,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         awaitInAppSearch("Removing shortcut with id=" + id, session -> {
             final AndroidFuture<Boolean> future = new AndroidFuture<>();
-            session.remove(new RemoveByUriRequest.Builder(getPackageName()).addUris(id).build(),
+            session.remove(
+                    new RemoveByDocumentIdRequest.Builder(getPackageName()).addIds(id).build(),
                     mShortcutUser.mExecutor, result -> {
                         if (!result.isSuccess()) {
                             final Map<String, AppSearchResult<Void>> failures =
@@ -2420,8 +2421,9 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         return awaitInAppSearch("Getting shortcut by id", session -> {
             final AndroidFuture<List<ShortcutInfo>> future = new AndroidFuture<>();
-            session.getByUri(
-                    new GetByUriRequest.Builder(getPackageName()).addUris(shortcutIds).build(),
+            session.getByDocumentId(
+                    new GetByDocumentIdRequest.Builder(getPackageName())
+                            .addIds(shortcutIds).build(),
                     mShortcutUser.mExecutor,
                     results -> {
                         final List<ShortcutInfo> ret = new ArrayList<>(1);

@@ -16,6 +16,7 @@
 
 package android.app.appsearch;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
@@ -35,20 +36,20 @@ public final class ReportSystemUsageRequest {
     private final String mPackageName;
     private final String mDatabase;
     private final String mNamespace;
-    private final String mUri;
-    private final long mUsageTimeMillis;
+    private final String mDocumentId;
+    private final long mUsageTimestampMillis;
 
     ReportSystemUsageRequest(
             @NonNull String packageName,
             @NonNull String database,
             @NonNull String namespace,
-            @NonNull String uri,
-            long usageTimeMillis) {
+            @NonNull String documentId,
+            long usageTimestampMillis) {
         mPackageName = Objects.requireNonNull(packageName);
         mDatabase = Objects.requireNonNull(database);
         mNamespace = Objects.requireNonNull(namespace);
-        mUri = Objects.requireNonNull(uri);
-        mUsageTimeMillis = usageTimeMillis;
+        mDocumentId = Objects.requireNonNull(documentId);
+        mUsageTimestampMillis = usageTimestampMillis;
     }
 
     /** Returns the package name of the app which owns the document that was used. */
@@ -69,10 +70,10 @@ public final class ReportSystemUsageRequest {
         return mNamespace;
     }
 
-    /** Returns the URI of document that was used. */
+    /** Returns the ID of document that was used. */
     @NonNull
-    public String getUri() {
-        return mUri;
+    public String getDocumentId() {
+        return mDocumentId;
     }
 
     /**
@@ -81,8 +82,9 @@ public final class ReportSystemUsageRequest {
      *
      * <p>The value is in the {@link System#currentTimeMillis} time base.
      */
-    public long getUsageTimeMillis() {
-        return mUsageTimeMillis;
+    @CurrentTimeMillisLong
+    public long getUsageTimestampMillis() {
+        return mUsageTimestampMillis;
     }
 
     /** Builder for {@link ReportSystemUsageRequest} objects. */
@@ -90,31 +92,20 @@ public final class ReportSystemUsageRequest {
         private final String mPackageName;
         private final String mDatabase;
         private final String mNamespace;
-        private String mUri;
-        private Long mUsageTimeMillis;
+        private final String mDocumentId;
+        private Long mUsageTimestampMillis;
         private boolean mBuilt = false;
 
         /** Creates a {@link ReportSystemUsageRequest.Builder} instance. */
         public Builder(
-                @NonNull String packageName, @NonNull String database, @NonNull String namespace) {
+                @NonNull String packageName,
+                @NonNull String database,
+                @NonNull String namespace,
+                @NonNull String documentId) {
             mPackageName = Objects.requireNonNull(packageName);
             mDatabase = Objects.requireNonNull(database);
             mNamespace = Objects.requireNonNull(namespace);
-        }
-
-        /**
-         * Sets the URI of the document being used.
-         *
-         * <p>This field is required.
-         *
-         * @throws IllegalStateException if the builder has already been used
-         */
-        @NonNull
-        public ReportSystemUsageRequest.Builder setUri(@NonNull String uri) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Objects.requireNonNull(uri);
-            mUri = uri;
-            return this;
+            mDocumentId = Objects.requireNonNull(documentId);
         }
 
         /**
@@ -129,28 +120,27 @@ public final class ReportSystemUsageRequest {
          * @throws IllegalStateException if the builder has already been used
          */
         @NonNull
-        public ReportSystemUsageRequest.Builder setUsageTimeMillis(long usageTimeMillis) {
+        public ReportSystemUsageRequest.Builder setUsageTimestampMillis(
+                @CurrentTimeMillisLong long usageTimestampMillis) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            mUsageTimeMillis = usageTimeMillis;
+            mUsageTimestampMillis = usageTimestampMillis;
             return this;
         }
 
         /**
          * Builds a new {@link ReportSystemUsageRequest}.
          *
-         * @throws NullPointerException if {@link #setUri} has never been called
          * @throws IllegalStateException if the builder has already been used
          */
         @NonNull
         public ReportSystemUsageRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Objects.requireNonNull(mUri, "ReportUsageRequest is missing a URI");
-            if (mUsageTimeMillis == null) {
-                mUsageTimeMillis = System.currentTimeMillis();
+            if (mUsageTimestampMillis == null) {
+                mUsageTimestampMillis = System.currentTimeMillis();
             }
             mBuilt = true;
             return new ReportSystemUsageRequest(
-                    mPackageName, mDatabase, mNamespace, mUri, mUsageTimeMillis);
+                    mPackageName, mDatabase, mNamespace, mDocumentId, mUsageTimestampMillis);
         }
     }
 }
