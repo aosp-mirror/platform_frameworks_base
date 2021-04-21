@@ -28,18 +28,18 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Encapsulates a request to remove documents by namespace and URIs from the {@link
- * AppSearchSession} database.
+ * Encapsulates a request to remove documents by namespace and IDs from the {@link AppSearchSession}
+ * database.
  *
  * @see AppSearchSession#remove
  */
-public final class RemoveByUriRequest {
+public final class RemoveByDocumentIdRequest {
     private final String mNamespace;
-    private final Set<String> mUris;
+    private final Set<String> mIds;
 
-    RemoveByUriRequest(String namespace, Set<String> uris) {
+    RemoveByDocumentIdRequest(String namespace, Set<String> ids) {
         mNamespace = namespace;
-        mUris = uris;
+        mIds = ids;
     }
 
     /** Returns the namespace to remove documents from. */
@@ -48,61 +48,61 @@ public final class RemoveByUriRequest {
         return mNamespace;
     }
 
-    /** Returns the set of URIs attached to the request. */
+    /** Returns the set of document IDs attached to the request. */
     @NonNull
-    public Set<String> getUris() {
-        return Collections.unmodifiableSet(mUris);
+    public Set<String> getIds() {
+        return Collections.unmodifiableSet(mIds);
     }
 
     /**
-     * Builder for {@link RemoveByUriRequest} objects.
+     * Builder for {@link RemoveByDocumentIdRequest} objects.
      *
      * <p>Once {@link #build} is called, the instance can no longer be used.
      */
     public static final class Builder {
         private final String mNamespace;
-        private final Set<String> mUris = new ArraySet<>();
+        private final Set<String> mIds = new ArraySet<>();
         private boolean mBuilt = false;
 
-        /** Creates a {@link RemoveByUriRequest.Builder} instance. */
+        /** Creates a {@link RemoveByDocumentIdRequest.Builder} instance. */
         public Builder(@NonNull String namespace) {
             mNamespace = Objects.requireNonNull(namespace);
         }
 
         /**
-         * Adds one or more URIs to the request.
+         * Adds one or more document IDs to the request.
          *
          * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
-        public Builder addUris(@NonNull String... uris) {
-            Objects.requireNonNull(uris);
-            return addUris(Arrays.asList(uris));
+        public Builder addIds(@NonNull String... ids) {
+            Objects.requireNonNull(ids);
+            return addIds(Arrays.asList(ids));
         }
 
         /**
-         * Adds a collection of URIs to the request.
+         * Adds a collection of IDs to the request.
          *
          * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
-        public Builder addUris(@NonNull Collection<String> uris) {
+        public Builder addIds(@NonNull Collection<String> ids) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Objects.requireNonNull(uris);
-            mUris.addAll(uris);
+            Objects.requireNonNull(ids);
+            mIds.addAll(ids);
             return this;
         }
 
         /**
-         * Builds a new {@link RemoveByUriRequest}.
+         * Builds a new {@link RemoveByDocumentIdRequest}.
          *
          * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
-        public RemoveByUriRequest build() {
+        public RemoveByDocumentIdRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             mBuilt = true;
-            return new RemoveByUriRequest(mNamespace, mUris);
+            return new RemoveByDocumentIdRequest(mNamespace, mIds);
         }
     }
 }

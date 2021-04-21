@@ -25,10 +25,14 @@ import java.io.Closeable;
 import java.util.Set;
 
 /**
- * Represents a connection to an AppSearch storage system where {@link GenericDocument}s can be
- * placed and queried.
+ * Provides a connection to a single AppSearch database.
+ *
+ * <p>An {@link AppSearchSessionShim} instance provides access to database operations such as
+ * setting a schema, adding documents, and searching.
  *
  * <p>All implementations of this interface must be thread safe.
+ *
+ * @see GlobalSearchSessionShim
  */
 public interface AppSearchSessionShim extends Closeable {
 
@@ -76,28 +80,29 @@ public interface AppSearchSessionShim extends Closeable {
      *
      * @param request containing documents to be indexed.
      * @return a {@link ListenableFuture} which resolves to an {@link AppSearchBatchResult}. The
-     *     keys of the returned {@link AppSearchBatchResult} are the URIs of the input documents.
-     *     The values are either {@code null} if the corresponding document was successfully
-     *     indexed, or a failed {@link AppSearchResult} otherwise.
+     *     keys of the returned {@link AppSearchBatchResult} are the IDs of the input documents. The
+     *     values are either {@code null} if the corresponding document was successfully indexed, or
+     *     a failed {@link AppSearchResult} otherwise.
      */
     @NonNull
     ListenableFuture<AppSearchBatchResult<String, Void>> put(@NonNull PutDocumentsRequest request);
 
     /**
-     * Gets {@link GenericDocument} objects by URIs and namespace from the {@link
+     * Gets {@link GenericDocument} objects by document IDs in a namespace from the {@link
      * AppSearchSessionShim} database.
      *
-     * @param request a request containing URIs and namespace to get documents for.
+     * @param request a request containing a namespace and IDs to get documents for.
      * @return A {@link ListenableFuture} which resolves to an {@link AppSearchBatchResult}. The
-     *     keys of the {@link AppSearchBatchResult} represent the input URIs from the {@link
-     *     GetByUriRequest} object. The values are either the corresponding {@link GenericDocument}
-     *     object for the URI on success, or an {@link AppSearchResult} object on failure. For
-     *     example, if a URI is not found, the value for that URI will be set to an {@link
-     *     AppSearchResult} object with result code: {@link AppSearchResult#RESULT_NOT_FOUND}.
+     *     keys of the {@link AppSearchBatchResult} represent the input document IDs from the {@link
+     *     GetByDocumentIdRequest} object. The values are either the corresponding {@link
+     *     GenericDocument} object for the ID on success, or an {@link AppSearchResult} object on
+     *     failure. For example, if an ID is not found, the value for that ID will be set to an
+     *     {@link AppSearchResult} object with result code: {@link
+     *     AppSearchResult#RESULT_NOT_FOUND}.
      */
     @NonNull
-    ListenableFuture<AppSearchBatchResult<String, GenericDocument>> getByUri(
-            @NonNull GetByUriRequest request);
+    ListenableFuture<AppSearchBatchResult<String, GenericDocument>> getByDocumentId(
+            @NonNull GetByDocumentIdRequest request);
 
     /**
      * Retrieves documents from the open {@link AppSearchSessionShim} that match a given query
@@ -162,7 +167,7 @@ public interface AppSearchSessionShim extends Closeable {
     SearchResultsShim search(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
 
     /**
-     * Reports usage of a particular document by URI and namespace.
+     * Reports usage of a particular document by namespace and ID.
      *
      * <p>A usage report represents an event in which a user interacted with or viewed a document.
      *
@@ -181,25 +186,26 @@ public interface AppSearchSessionShim extends Closeable {
     ListenableFuture<Void> reportUsage(@NonNull ReportUsageRequest request);
 
     /**
-     * Removes {@link GenericDocument} objects by URIs and namespace from the {@link
+     * Removes {@link GenericDocument} objects by document IDs in a namespace from the {@link
      * AppSearchSessionShim} database.
      *
-     * <p>Removed documents will no longer be surfaced by {@link #search} or {@link #getByUri}
-     * calls.
+     * <p>Removed documents will no longer be surfaced by {@link #search} or {@link
+     * #getByDocumentId} calls.
      *
      * <p>Once the database crosses the document count or byte usage threshold, removed documents
      * will be deleted from disk.
      *
-     * @param request {@link RemoveByUriRequest} with URIs and namespace to remove from the index.
+     * @param request {@link RemoveByDocumentIdRequest} with IDs in a namespace to remove from the
+     *     index.
      * @return a {@link ListenableFuture} which resolves to an {@link AppSearchBatchResult}. The
-     *     keys of the {@link AppSearchBatchResult} represent the input URIs from the {@link
-     *     RemoveByUriRequest} object. The values are either {@code null} on success, or a failed
-     *     {@link AppSearchResult} otherwise. URIs that are not found will return a failed {@link
-     *     AppSearchResult} with a result code of {@link AppSearchResult#RESULT_NOT_FOUND}.
+     *     keys of the {@link AppSearchBatchResult} represent the input IDs from the {@link
+     *     RemoveByDocumentIdRequest} object. The values are either {@code null} on success, or a
+     *     failed {@link AppSearchResult} otherwise. IDs that are not found will return a failed
+     *     {@link AppSearchResult} with a result code of {@link AppSearchResult#RESULT_NOT_FOUND}.
      */
     @NonNull
     ListenableFuture<AppSearchBatchResult<String, Void>> remove(
-            @NonNull RemoveByUriRequest request);
+            @NonNull RemoveByDocumentIdRequest request);
 
     /**
      * Removes {@link GenericDocument}s from the index by Query. Documents will be removed if they

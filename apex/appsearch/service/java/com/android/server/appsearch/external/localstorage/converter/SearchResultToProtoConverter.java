@@ -125,8 +125,7 @@ public class SearchResultToProtoConverter {
 
     private static SearchResult.MatchInfo toMatchInfo(
             @NonNull SnippetMatchProto snippetMatchProto, @NonNull String propertyPath) {
-        return new SearchResult.MatchInfo.Builder()
-                .setPropertyPath(propertyPath)
+        return new SearchResult.MatchInfo.Builder(propertyPath)
                 .setExactMatchRange(
                         new SearchResult.MatchRange(
                                 snippetMatchProto.getExactMatchPosition(),

@@ -64,7 +64,7 @@ public class GenericDocumentToProtoConverterTest {
     public void testDocumentProtoConvert() {
         GenericDocument document =
                 new GenericDocument.Builder<GenericDocument.Builder<?>>(
-                                "namespace", "uri1", SCHEMA_TYPE_1)
+                                "namespace", "id1", SCHEMA_TYPE_1)
                         .setCreationTimestampMillis(5L)
                         .setScore(1)
                         .setTtlMillis(1L)
@@ -80,7 +80,7 @@ public class GenericDocumentToProtoConverterTest {
         // Create the Document proto. Need to sort the property order by key.
         DocumentProto.Builder documentProtoBuilder =
                 DocumentProto.newBuilder()
-                        .setUri("uri1")
+                        .setUri("id1")
                         .setSchema(SCHEMA_TYPE_1)
                         .setCreationTimestampMs(5L)
                         .setScore(1)
@@ -140,7 +140,7 @@ public class GenericDocumentToProtoConverterTest {
         String emptyStringPropertyName = "emptyStringProperty";
         DocumentProto documentProto =
                 DocumentProto.newBuilder()
-                        .setUri("uri1")
+                        .setUri("id1")
                         .setSchema(SCHEMA_TYPE_1)
                         .setCreationTimestampMs(5L)
                         .setNamespace("namespace")
@@ -167,7 +167,7 @@ public class GenericDocumentToProtoConverterTest {
 
         GenericDocument expectedDocument =
                 new GenericDocument.Builder<GenericDocument.Builder<?>>(
-                                "namespace", "uri1", SCHEMA_TYPE_1)
+                                "namespace", "id1", SCHEMA_TYPE_1)
                         .setCreationTimestampMillis(5L)
                         .setPropertyString(emptyStringPropertyName)
                         .build();
@@ -181,7 +181,7 @@ public class GenericDocumentToProtoConverterTest {
         String documentPropertyName = "documentProperty";
         DocumentProto nestedDocumentProto =
                 DocumentProto.newBuilder()
-                        .setUri("uri2")
+                        .setUri("id2")
                         .setSchema(SCHEMA_TYPE_2)
                         .setCreationTimestampMs(5L)
                         .setNamespace("namespace")
@@ -190,7 +190,7 @@ public class GenericDocumentToProtoConverterTest {
                         .build();
         DocumentProto documentProto =
                 DocumentProto.newBuilder()
-                        .setUri("uri1")
+                        .setUri("id1")
                         .setSchema(SCHEMA_TYPE_1)
                         .setCreationTimestampMs(5L)
                         .setNamespace("namespace")
@@ -236,12 +236,12 @@ public class GenericDocumentToProtoConverterTest {
 
         GenericDocument expectedDocument =
                 new GenericDocument.Builder<GenericDocument.Builder<?>>(
-                                "namespace", "uri1", SCHEMA_TYPE_1)
+                                "namespace", "id1", SCHEMA_TYPE_1)
                         .setCreationTimestampMillis(5L)
                         .setPropertyDocument(
                                 documentPropertyName,
                                 new GenericDocument.Builder<GenericDocument.Builder<?>>(
-                                                "namespace", "uri2", SCHEMA_TYPE_2)
+                                                "namespace", "id2", SCHEMA_TYPE_2)
                                         .setCreationTimestampMillis(5L)
                                         .setPropertyString(emptyStringPropertyName)
                                         .build())

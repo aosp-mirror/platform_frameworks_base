@@ -52,7 +52,7 @@ public abstract class Migrator {
      *
      * <p>If this {@link Migrator} is provided to cover a compatible schema change via {@link
      * AppSearchSession#setSchema}, documents under the old version won't be removed unless you use
-     * the same URI.
+     * the same document ID.
      *
      * <p>This method will be invoked on the background worker thread provided via {@link
      * AppSearchSession#setSchema}.
@@ -75,7 +75,7 @@ public abstract class Migrator {
      *
      * <p>If this {@link Migrator} is provided to cover a compatible schema change via {@link
      * AppSearchSession#setSchema}, documents under the old version won't be removed unless you use
-     * the same URI.
+     * the same document ID.
      *
      * <p>This method will be invoked on the background worker thread.
      *
