@@ -550,6 +550,7 @@
 
     <!-- Permission required for CTS test - CtsUwbTestCases -->
     <uses-permission android:name="android.permission.UWB_PRIVILEGED" />
+    <uses-permission android:name="android.permission.UWB_RANGING" />
 
     <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
