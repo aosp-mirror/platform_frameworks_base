@@ -115,11 +115,11 @@ import java.util.Arrays;
  * </pre>
  * <p>
  * Starting with API 31, items may optionally define an {@link android.R.attr#lStar android:lStar}
- * attribute to modify the base color's perceptual luminance. This attribute takes a either
+ * attribute to modify the base color's perceptual luminance. This attribute takes either a
  * floating-point value between 0 and 100 or a theme attribute that resolves as such. The item's
  * overall color is calculated by converting the base color to an accessibility friendly color space
  * and setting its L* to the value specified on the {@code lStar} attribute. For
- * example, the following item represents the theme's accent color at 50% perpectual luminosity:
+ * example, the following item represents the theme's accent color at 50% perceptual luminance:
  * <pre>
  * &lt;item android:state_enabled="false"
  *         android:color="?android:attr/colorAccent"
