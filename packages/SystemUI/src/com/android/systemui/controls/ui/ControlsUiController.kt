@@ -23,8 +23,6 @@ import android.service.controls.actions.ControlAction
 import android.view.ViewGroup
 
 interface ControlsUiController {
-    val available: Boolean
-
     companion object {
         public const val TAG = "ControlsUiController"
         public const val EXTRA_ANIMATE = "extra_animate"
