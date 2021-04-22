@@ -1240,6 +1240,14 @@ package android.hardware.input {
 
 }
 
+package android.hardware.lights {
+
+  public abstract class LightsManager {
+    method @NonNull public abstract android.hardware.lights.LightsManager.LightsSession openSession(int);
+  }
+
+}
+
 package android.hardware.soundtrigger {
 
   public class KeyphraseEnrollmentInfo {

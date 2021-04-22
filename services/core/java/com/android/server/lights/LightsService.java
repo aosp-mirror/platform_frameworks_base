@@ -46,6 +46,7 @@ import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,12 +69,14 @@ public class LightsService extends SystemService {
 
     private final class LightsManagerBinderService extends ILightsManager.Stub {
 
-        private final class Session {
+        private final class Session implements Comparable<Session> {
             final IBinder mToken;
             final SparseArray<LightState> mRequests = new SparseArray<>();
+            final int mPriority;
 
-            Session(IBinder token) {
+            Session(IBinder token, int priority) {
                 mToken = token;
+                mPriority = priority;
             }
 
             void setRequest(int lightId, LightState state) {
@@ -82,6 +85,12 @@ public class LightsService extends SystemService {
                 } else {
                     mRequests.remove(lightId);
                 }
+            }
+
+            @Override
+            public int compareTo(Session otherSession) {
+                // Sort descending by priority
+                return Integer.compare(otherSession.mPriority, mPriority);
             }
         }
 
@@ -150,7 +159,7 @@ public class LightsService extends SystemService {
         }
 
         @Override
-        public void openSession(IBinder token) {
+        public void openSession(IBinder token, int priority) {
             getContext().enforceCallingOrSelfPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS,
                     "openSession requires CONTROL_DEVICE_LIGHTS permission");
             Preconditions.checkNotNull(token);
@@ -159,7 +168,8 @@ public class LightsService extends SystemService {
                 Preconditions.checkState(getSessionLocked(token) == null, "already registered");
                 try {
                     token.linkToDeath(() -> closeSessionInternal(token), 0);
-                    mSessions.add(new Session(token));
+                    mSessions.add(new Session(token, priority));
+                    Collections.sort(mSessions);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Couldn't open session, client already died" , e);
                     throw new IllegalArgumentException("Client is already dead.");
@@ -216,10 +226,10 @@ public class LightsService extends SystemService {
         }
 
         private void checkRequestIsValid(int[] lightIds) {
-            for (int i = 0; i < lightIds.length; i++) {
-                final LightImpl light = mLightsById.get(lightIds[i]);
+            for (int lightId : lightIds) {
+                final LightImpl light = mLightsById.get(lightId);
                 Preconditions.checkState(light != null && !light.isSystemLight(),
-                        "Invalid lightId " + lightIds[i]);
+                        "Invalid lightId " + lightId);
             }
         }
 
