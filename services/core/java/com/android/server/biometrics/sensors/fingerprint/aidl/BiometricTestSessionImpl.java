@@ -32,6 +32,7 @@ import android.util.Slog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.HashSet;
@@ -50,6 +51,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     @NonNull private final Context mContext;
     private final int mSensorId;
     @NonNull private final ITestSessionCallback mCallback;
+    @NonNull private final FingerprintService.FingerprintStateCallback mFingerprintStateCallback;
     @NonNull private final FingerprintProvider mProvider;
     @NonNull private final Sensor mSensor;
     @NonNull private final Set<Integer> mEnrollmentIds;
@@ -114,11 +116,14 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     };
 
     BiometricTestSessionImpl(@NonNull Context context, int sensorId,
-            @NonNull ITestSessionCallback callback, @NonNull FingerprintProvider provider,
+            @NonNull ITestSessionCallback callback,
+            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback,
+            @NonNull FingerprintProvider provider,
             @NonNull Sensor sensor) {
         mContext = context;
         mSensorId = sensorId;
         mCallback = callback;
+        mFingerprintStateCallback = fingerprintStateCallback;
         mProvider = provider;
         mSensor = sensor;
         mEnrollmentIds = new HashSet<>();
@@ -138,7 +143,8 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         mProvider.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
-                mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL);
+                mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL,
+                mFingerprintStateCallback);
     }
 
     @Override
