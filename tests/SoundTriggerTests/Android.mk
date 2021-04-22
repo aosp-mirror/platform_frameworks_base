@@ -31,6 +31,9 @@ LOCAL_STATIC_JAVA_LIBRARIES := mockito-target
 LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
 
 LOCAL_PACKAGE_NAME := SoundTriggerTests
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../NOTICE
 LOCAL_PRIVATE_PLATFORM_APIS := true
 
 include $(BUILD_PACKAGE)
