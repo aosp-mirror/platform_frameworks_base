@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.QueuedWork;
@@ -48,6 +49,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -187,6 +190,15 @@ public abstract class BackupAgent extends ContextWrapper {
      * @hide
      */
     public static final int FLAG_FAKE_CLIENT_SIDE_ENCRYPTION_ENABLED = 1 << 31;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
+            FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED,
+            FLAG_DEVICE_TO_DEVICE_TRANSFER,
+            FLAG_FAKE_CLIENT_SIDE_ENCRYPTION_ENABLED
+    })
+    public @interface BackupTransportFlags {}
 
     Handler mHandler = null;
 
