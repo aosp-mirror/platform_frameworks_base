@@ -52,7 +52,6 @@ import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
-import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.RemovalConsumer;
@@ -179,7 +178,8 @@ class Sensor {
                 }
 
                 final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
-                acquisitionClient.onAcquired(info, vendorCode);
+                acquisitionClient.onAcquired(AidlConversionUtils.toFrameworkAcquiredInfo(info),
+                        vendorCode);
             });
         }
 
@@ -198,7 +198,7 @@ class Sensor {
                 }
 
                 final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-                errorConsumer.onError(error, vendorCode);
+                errorConsumer.onError(AidlConversionUtils.toFrameworkError(error), vendorCode);
 
                 if (error == Error.HW_UNAVAILABLE) {
                     mCallback.onHardwareUnavailable();
