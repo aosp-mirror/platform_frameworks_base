@@ -26011,7 +26011,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public String[] getNamesForUids(int[] uids) throws RemoteException {
-            final String[] results = PackageManagerService.this.getNamesForUids(uids);
+            if (uids == null || uids.length == 0) {
+                return null;
+            }
+            final String[] names = PackageManagerService.this.getNamesForUids(uids);
+            final String[] results = (names != null) ? names : new String[uids.length];
             // massage results so they can be parsed by the native binder
             for (int i = results.length - 1; i >= 0; --i) {
                 if (results[i] == null) {
