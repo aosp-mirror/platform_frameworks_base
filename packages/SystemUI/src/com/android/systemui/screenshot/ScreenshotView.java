@@ -137,6 +137,7 @@ public class ScreenshotView extends FrameLayout implements
     private ScreenshotActionChip mShareChip;
     private ScreenshotActionChip mEditChip;
     private ScreenshotActionChip mScrollChip;
+    private ScreenshotActionChip mQuickShareChip;
 
     private UiEventLogger mUiEventLogger;
     private ScreenshotViewCallback mCallbacks;
@@ -149,7 +150,8 @@ public class ScreenshotView extends FrameLayout implements
     private enum PendingInteraction {
         PREVIEW,
         EDIT,
-        SHARE
+        SHARE,
+        QUICK_SHARE
     }
 
     public ScreenshotView(Context context) {
@@ -481,6 +483,9 @@ public class ScreenshotView extends FrameLayout implements
         mShareChip.setOnClickListener(v -> {
             mShareChip.setIsPending(true);
             mEditChip.setIsPending(false);
+            if (mQuickShareChip != null) {
+                mQuickShareChip.setIsPending(false);
+            }
             mPendingInteraction = PendingInteraction.SHARE;
         });
         chips.add(mShareChip);
@@ -490,6 +495,9 @@ public class ScreenshotView extends FrameLayout implements
         mEditChip.setOnClickListener(v -> {
             mEditChip.setIsPending(true);
             mShareChip.setIsPending(false);
+            if (mQuickShareChip != null) {
+                mQuickShareChip.setIsPending(false);
+            }
             mPendingInteraction = PendingInteraction.EDIT;
         });
         chips.add(mEditChip);
@@ -497,6 +505,9 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreview.setOnClickListener(v -> {
             mShareChip.setIsPending(false);
             mEditChip.setIsPending(false);
+            if (mQuickShareChip != null) {
+                mQuickShareChip.setIsPending(false);
+            }
             mPendingInteraction = PendingInteraction.PREVIEW;
         });
 
@@ -558,6 +569,13 @@ public class ScreenshotView extends FrameLayout implements
             startSharedTransition(
                     imageData.editTransition.get());
         });
+        if (mQuickShareChip != null) {
+            mQuickShareChip.setPendingIntent(imageData.quickShareAction.actionIntent,
+                    () -> {
+                        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED);
+                        animateDismissal();
+                    });
+        }
 
         if (mPendingInteraction != null) {
             switch (mPendingInteraction) {
@@ -569,6 +587,9 @@ public class ScreenshotView extends FrameLayout implements
                     break;
                 case EDIT:
                     mEditChip.callOnClick();
+                    break;
+                case QUICK_SHARE:
+                    mQuickShareChip.callOnClick();
                     break;
             }
         } else {
@@ -588,6 +609,25 @@ public class ScreenshotView extends FrameLayout implements
                 mActionsView.addView(actionChip);
                 mSmartChips.add(actionChip);
             }
+        }
+    }
+
+    void addQuickShareChip(Notification.Action quickShareAction) {
+        if (mPendingInteraction == null) {
+            LayoutInflater inflater = LayoutInflater.from(mContext);
+            mQuickShareChip = (ScreenshotActionChip) inflater.inflate(
+                    R.layout.global_screenshot_action_chip, mActionsView, false);
+            mQuickShareChip.setText(quickShareAction.title);
+            mQuickShareChip.setIcon(quickShareAction.getIcon(), false);
+            mQuickShareChip.setOnClickListener(v -> {
+                mShareChip.setIsPending(false);
+                mEditChip.setIsPending(false);
+                mQuickShareChip.setIsPending(true);
+                mPendingInteraction = PendingInteraction.QUICK_SHARE;
+            });
+            mQuickShareChip.setAlpha(1);
+            mActionsView.addView(mQuickShareChip);
+            mSmartChips.add(mQuickShareChip);
         }
     }
 
@@ -676,6 +716,7 @@ public class ScreenshotView extends FrameLayout implements
             mActionsView.removeView(chip);
         }
         mSmartChips.clear();
+        mQuickShareChip = null;
         setAlpha(1);
         mDismissButton.setTranslationY(0);
         mActionsContainer.setTranslationY(0);
