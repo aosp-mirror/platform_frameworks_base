@@ -370,6 +370,7 @@ static jobject vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
     jintArray supportedEffects = nullptr;
     jintArray supportedBraking = nullptr;
     jintArray supportedPrimitives = nullptr;
+    jintArray primitiveDurations = nullptr;
     jfloatArray maxAmplitudes = nullptr;
 
     if (info.supportedEffects.isOk()) {
@@ -390,6 +391,15 @@ static jobject vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
         env->SetIntArrayRegion(supportedPrimitives, 0, primitives.size(),
                                reinterpret_cast<jint*>(primitives.data()));
     }
+    if (info.primitiveDurations.isOk()) {
+        std::vector<int32_t> durations;
+        for (auto duration : info.primitiveDurations.value()) {
+            durations.push_back(duration.count());
+        }
+        primitiveDurations = env->NewIntArray(durations.size());
+        env->SetIntArrayRegion(primitiveDurations, 0, durations.size(),
+                               reinterpret_cast<jint*>(durations.data()));
+    }
     if (info.maxAmplitudes.isOk()) {
         std::vector<float> amplitudes = info.maxAmplitudes.value();
         maxAmplitudes = env->NewFloatArray(amplitudes.size());
@@ -403,7 +413,7 @@ static jobject vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
 
     return env->NewObject(sVibratorInfoClass, sVibratorInfoCtor, wrapper->getVibratorId(),
                           capabilities, supportedEffects, supportedBraking, supportedPrimitives,
-                          qFactor, frequencyMapping);
+                          primitiveDurations, qFactor, frequencyMapping);
 }
 
 static const JNINativeMethod method_table[] = {
@@ -450,9 +460,10 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sFrequencyMappingCtor = GetMethodIDOrDie(env, sFrequencyMappingClass, "<init>", "(FFFF[F)V");
 
     jclass vibratorInfoClass = FindClassOrDie(env, "android/os/VibratorInfo");
-    sVibratorInfoClass = static_cast<jclass>(env->NewGlobalRef(vibratorInfoClass));
-    sVibratorInfoCtor = GetMethodIDOrDie(env, sVibratorInfoClass, "<init>",
-                                         "(IJ[I[I[IFLandroid/os/VibratorInfo$FrequencyMapping;)V");
+    sVibratorInfoClass = (jclass)env->NewGlobalRef(vibratorInfoClass);
+    sVibratorInfoCtor =
+            GetMethodIDOrDie(env, sVibratorInfoClass, "<init>",
+                             "(IJ[I[I[I[IFLandroid/os/VibratorInfo$FrequencyMapping;)V");
 
     return jniRegisterNativeMethods(env,
                                     "com/android/server/vibrator/VibratorController$NativeWrapper",
