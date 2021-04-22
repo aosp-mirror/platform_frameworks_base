@@ -125,7 +125,7 @@ final class UpdatableFontDir {
     private final Supplier<Long> mCurrentTimeSupplier;
 
     private long mLastModifiedMillis;
-    private int mConfigVersion = 1;
+    private int mConfigVersion;
 
     /**
      * A mutable map containing mapping from font file name (e.g. "NotoColorEmoji.ttf") to {@link
@@ -152,9 +152,15 @@ final class UpdatableFontDir {
         mCurrentTimeSupplier = currentTimeSupplier;
     }
 
+    /**
+     * Loads fonts from file system, validate them, and delete obsolete font files.
+     * Note that this method may be called by multiple times in integration tests via {@link
+     * FontManagerService#restart()}.
+     */
     /* package */ void loadFontFileMap() {
         mFontFileInfoMap.clear();
         mLastModifiedMillis = 0;
+        mConfigVersion = 1;
         boolean success = false;
         try {
             PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
