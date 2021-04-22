@@ -5662,8 +5662,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             try (KeyChainConnection keyChainConnection =
                          KeyChain.bindAsUser(mContext, userHandle)) {
                 IKeyChainService keyChain = keyChainConnection.getService();
-                keyChain.setGrant(granteeUid, alias, hasGrant);
-                return true;
+                return keyChain.setGrant(granteeUid, alias, hasGrant);
             } catch (RemoteException e) {
                 Slogf.e(LOG_TAG, "Setting grant for package.", e);
                 return false;
