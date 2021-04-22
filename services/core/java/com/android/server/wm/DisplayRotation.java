@@ -254,7 +254,7 @@ public class DisplayRotation {
 
         if (isDefaultDisplay) {
             final Handler uiHandler = UiThread.getHandler();
-            mOrientationListener = new OrientationListener(mContext, uiHandler, mService);
+            mOrientationListener = new OrientationListener(mContext, uiHandler);
             mOrientationListener.setCurrentRotation(mRotation);
             mSettingsObserver = new SettingsObserver(uiHandler);
             mSettingsObserver.observe();
@@ -1514,8 +1514,8 @@ public class DisplayRotation {
         final SparseArray<Runnable> mRunnableCache = new SparseArray<>(5);
         boolean mEnabled;
 
-        OrientationListener(Context context, Handler handler, WindowManagerService service) {
-            super(context, handler, service);
+        OrientationListener(Context context, Handler handler) {
+            super(context, handler);
         }
 
         private class UpdateRunnable implements Runnable {
