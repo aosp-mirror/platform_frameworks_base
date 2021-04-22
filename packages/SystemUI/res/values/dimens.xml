@@ -1293,7 +1293,7 @@
     <dimen name="magnification_drag_view_size">36dp</dimen>
     <dimen name="magnification_controls_size">90dp</dimen>
     <dimen name="magnification_switch_button_size">48dp</dimen>
-    <dimen name="magnification_switch_button_padding">6dp</dimen>
+    <dimen name="magnification_switch_button_margin">16dp</dimen>
     <dimen name="magnifier_left_right_controls_width">35dp</dimen>
     <dimen name="magnifier_left_right_controls_height">45dp</dimen>
     <dimen name="magnifier_up_down_controls_width">45dp</dimen>

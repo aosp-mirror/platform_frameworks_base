@@ -22,14 +22,17 @@ import android.annotation.NonNull;
 import android.annotation.UiContext;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.MathUtils;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityManager;
@@ -38,6 +41,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
 
 import java.util.Collections;
@@ -45,8 +49,8 @@ import java.util.Collections;
 /**
  * Shows/hides a {@link android.widget.ImageView} on the screen and changes the values of
  * {@link Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE} when the UI is toggled.
- * The button icon is movable by dragging. And the button UI would automatically be dismissed after
- * displaying for a period of time.
+ * The button icon is movable by dragging and it would not overlap navigation bar window.
+ * And the button UI would automatically be dismissed after displaying for a period of time.
  */
 class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureListener {
 
@@ -64,25 +68,29 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     private final AccessibilityManager mAccessibilityManager;
     private final WindowManager mWindowManager;
     private final ImageView mImageView;
+    private final Runnable mWindowInsetChangeRunnable;
+    private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private int mMagnificationMode = Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     private final LayoutParams mParams;
+    @VisibleForTesting
+    final Rect mDraggableWindowBounds = new Rect();
     private boolean mIsVisible = false;
     private final MagnificationGestureDetector mGestureDetector;
     private boolean mSingleTapDetected = false;
 
     MagnificationModeSwitch(@UiContext Context context) {
-        this(context, createView(context));
+        this(context, createView(context), new SfVsyncFrameCallbackProvider());
     }
 
     @VisibleForTesting
-    MagnificationModeSwitch(Context context, @NonNull ImageView imageView) {
+    MagnificationModeSwitch(Context context, @NonNull ImageView imageView,
+            SfVsyncFrameCallbackProvider sfVsyncFrameProvider) {
         mContext = context;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
-        mWindowManager = (WindowManager) mContext.getSystemService(
-                Context.WINDOW_SERVICE);
+        mWindowManager = mContext.getSystemService(WindowManager.class);
+        mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mParams = createLayoutParams(context);
         mImageView = imageView;
-        applyResourcesValues();
         mImageView.setOnTouchListener(this::onTouch);
         mImageView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
             @Override
@@ -106,6 +114,15 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                 }
                 return super.performAccessibilityAction(host, action, args);
             }
+        });
+        mWindowInsetChangeRunnable = this::onWindowInsetChanged;
+        mImageView.setOnApplyWindowInsetsListener((v, insets) -> {
+            // Adds a pending post check to avoiding redundant calculation because this callback
+            // is sent frequently when the switch icon window dragged by the users.
+            if (!mImageView.getHandler().hasCallbacks(mWindowInsetChangeRunnable)) {
+                mImageView.getHandler().post(mWindowInsetChangeRunnable);
+            }
+            return v.onApplyWindowInsets(insets);
         });
 
         mFadeInAnimationTask = () -> {
@@ -133,11 +150,16 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         return mContext.getResources().getString(stringId);
     }
 
-    private void applyResourcesValues() {
-        final int padding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.magnification_switch_button_padding);
-        mImageView.setPadding(padding, padding, padding, padding);
-        mImageView.setImageResource(getIconResId(mMagnificationMode));
+    private void applyResourcesValuesWithDensityChanged() {
+        final int size = mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnification_switch_button_size);
+        mParams.height = size;
+        mParams.width = size;
+        if (mIsVisible) {
+            mWindowManager.updateViewLayout(mImageView, mParams);
+            // Exclude magnification switch button from system gesture area.
+            setSystemGestureExclusion();
+        }
     }
 
     private boolean onTouch(View v, MotionEvent event) {
@@ -176,9 +198,11 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     }
 
     private void moveButton(float offsetX, float offsetY) {
-        mParams.x -= offsetX;
-        mParams.y -= offsetY;
-        mWindowManager.updateViewLayout(mImageView, mParams);
+        mSfVsyncFrameProvider.postFrameCallback(l -> {
+            mParams.x += offsetX;
+            mParams.y += offsetY;
+            updateButtonViewLayoutIfNeeded();
+        });
     }
 
     void removeButton() {
@@ -193,16 +217,31 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         mImageView.setAlpha(0f);
         mWindowManager.removeView(mImageView);
         mIsVisible = false;
-        mParams.x = 0;
-        mParams.y = 0;
     }
 
     void showButton(int mode) {
+        showButton(mode, true);
+    }
+
+    /**
+     * Shows magnification switch button for the specified magnification mode.
+     * When the button is going to be visible by calling this method, the layout position can be
+     * reset depending on the flag.
+     *
+     * @param mode          The magnification mode
+     * @param resetPosition if the button position needs be reset
+     */
+    private void showButton(int mode, boolean resetPosition) {
         if (mMagnificationMode != mode) {
             mMagnificationMode = mode;
             mImageView.setImageResource(getIconResId(mode));
         }
         if (!mIsVisible) {
+            if (resetPosition) {
+                mDraggableWindowBounds.set(getDraggableWindowBounds());
+                mParams.x = mDraggableWindowBounds.right;
+                mParams.y = mDraggableWindowBounds.bottom;
+            }
             mWindowManager.addView(mImageView, mParams);
             // Exclude magnification switch button from system gesture area.
             setSystemGestureExclusion();
@@ -229,17 +268,31 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
 
     void onConfigurationChanged(int configDiff) {
         if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
-            applyResourcesValues();
-            if (mIsVisible) {
-                mWindowManager.updateViewLayout(mImageView, mParams);
-                // Exclude magnification switch button from system gesture area.
-                setSystemGestureExclusion();
-            }
+            applyResourcesValuesWithDensityChanged();
             return;
         }
         if ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0) {
             updateAccessibilityWindowTitle();
             return;
+        }
+    }
+
+    private void onWindowInsetChanged() {
+        final Rect newBounds = getDraggableWindowBounds();
+        if (mDraggableWindowBounds.equals(newBounds)) {
+            return;
+        }
+        mDraggableWindowBounds.set(newBounds);
+        updateButtonViewLayoutIfNeeded();
+    }
+
+    private void updateButtonViewLayoutIfNeeded() {
+        if (mIsVisible) {
+            mParams.x = MathUtils.constrain(mParams.x, mDraggableWindowBounds.left,
+                    mDraggableWindowBounds.right);
+            mParams.y = MathUtils.constrain(mParams.y, mDraggableWindowBounds.top,
+                    mDraggableWindowBounds.bottom);
+            mWindowManager.updateViewLayout(mImageView, mParams);
         }
     }
 
@@ -283,15 +336,32 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     }
 
     private static LayoutParams createLayoutParams(Context context) {
+        final int size = context.getResources().getDimensionPixelSize(
+                R.dimen.magnification_switch_button_size);
         final LayoutParams params = new LayoutParams(
-                LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT,
+                size,
+                size,
                 LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
                 LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSPARENT);
-        params.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        params.gravity = Gravity.TOP | Gravity.LEFT;
         params.accessibilityTitle = getAccessibilityWindowTitle(context);
         return params;
+    }
+
+    private Rect getDraggableWindowBounds() {
+        final int layoutMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnification_switch_button_margin);
+        final Rect boundRect = new Rect(mWindowManager.getCurrentWindowMetrics().getBounds());
+        final Insets systemBars =
+                mWindowManager.getCurrentWindowMetrics().getWindowInsets()
+                        .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
+        final Rect insets = new Rect(layoutMargin,
+                systemBars.top + layoutMargin,
+                mParams.width + layoutMargin,
+                mParams.height + layoutMargin + systemBars.bottom);
+        boundRect.inset(insets);
+        return boundRect;
     }
 
     private static String getAccessibilityWindowTitle(Context context) {
@@ -305,5 +375,4 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                             new Rect(0, 0, mImageView.getWidth(), mImageView.getHeight())));
         });
     }
-
 }

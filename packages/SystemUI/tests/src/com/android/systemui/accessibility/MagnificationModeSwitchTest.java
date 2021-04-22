@@ -22,6 +22,7 @@ import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
+import static android.view.WindowInsets.Type.systemBars;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK;
 
 import static com.android.systemui.accessibility.MagnificationModeSwitch.DEFAULT_FADE_OUT_ANIMATION_DELAY_MS;
@@ -33,6 +34,7 @@ import static junit.framework.Assert.assertNotNull;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -41,19 +43,27 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Insets;
+import android.graphics.Rect;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewPropertyAnimator;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -61,6 +71,7 @@ import android.widget.ImageView;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
@@ -77,6 +88,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class MagnificationModeSwitchTest extends SysuiTestCase {
 
     private static final float FADE_IN_ALPHA = 1f;
@@ -86,7 +98,10 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     @Mock
     private AccessibilityManager mAccessibilityManager;
     @Mock
-    private WindowManager mWindowManager;
+    private SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
+    @Mock
+    private Handler mHandler;
+    private TestableWindowManager mWindowManager;
     private ViewPropertyAnimator mViewPropertyAnimator;
     private MagnificationModeSwitch mMagnificationModeSwitch;
     private View.OnTouchListener mTouchListener;
@@ -96,10 +111,8 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        WindowManager wm = mContext.getSystemService(WindowManager.class);
-        doAnswer(invocation ->
-                wm.getMaximumWindowMetrics()
-        ).when(mWindowManager).getMaximumWindowMetrics();
+        final WindowManager wm = mContext.getSystemService(WindowManager.class);
+        mWindowManager = spy(new TestableWindowManager(wm));
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
         mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
         mSpyImageView = Mockito.spy(new ImageView(mContext));
@@ -110,7 +123,14 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
             return null;
         }).when(mSpyImageView).setOnTouchListener(
                 any(View.OnTouchListener.class));
-        mMagnificationModeSwitch = new MagnificationModeSwitch(mContext, mSpyImageView);
+        doAnswer(invocation -> {
+            Choreographer.FrameCallback callback = invocation.getArgument(0);
+            callback.doFrame(0);
+            return null;
+        }).when(mSfVsyncFrameProvider).postFrameCallback(
+                any(Choreographer.FrameCallback.class));
+        mMagnificationModeSwitch = new MagnificationModeSwitch(mContext, mSpyImageView,
+                mSfVsyncFrameProvider);
         assertNotNull(mTouchListener);
     }
 
@@ -178,17 +198,39 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void onConfigurationChanged_buttonIsShowing_updateResourcesAndLayout() {
+    public void onDensityChanged_buttonIsShowing_updateResourcesAndLayout() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         resetAndStubMockImageViewAndAnimator();
 
         mMagnificationModeSwitch.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
 
-        verify(mSpyImageView).setPadding(anyInt(), anyInt(), anyInt(), anyInt());
-        verify(mSpyImageView).setImageResource(
-                getIconResId(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN));
         verify(mWindowManager).updateViewLayout(eq(mSpyImageView), any());
         verify(mSpyImageView).setSystemGestureExclusionRects(any(List.class));
+    }
+
+    @Test
+    public void onApplyWindowInsetsWithBoundsChange_buttonIsShowing_updateLayoutPosition() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        mMagnificationModeSwitch.mDraggableWindowBounds.inset(10, 10);
+        mSpyImageView.onApplyWindowInsets(WindowInsets.CONSUMED);
+
+        verify(mWindowManager).updateViewLayout(eq(mSpyImageView),
+                any(WindowManager.LayoutParams.class));
+        assertLayoutPosition();
+    }
+
+    @Test
+    public void onApplyWindowInsetsWithWindowInsetsChange_buttonIsShowing_draggableBoundsChanged() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        final Rect oldDraggableBounds = new Rect(mMagnificationModeSwitch.mDraggableWindowBounds);
+
+        mWindowManager.setWindowInsets(new WindowInsets.Builder()
+                .setInsetsIgnoringVisibility(systemBars(), Insets.of(0, 20, 0, 20))
+                .build());
+        mSpyImageView.onApplyWindowInsets(WindowInsets.CONSUMED);
+
+        assertNotEquals(oldDraggableBounds, mMagnificationModeSwitch.mDraggableWindowBounds);
     }
 
     @Test
@@ -344,12 +386,12 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     public void showButton_hasAccessibilityWindowTitle() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
 
-        ArgumentCaptor<WindowManager.LayoutParams> paramsArgumentCaptor = ArgumentCaptor.forClass(
-                WindowManager.LayoutParams.class);
-        verify(mWindowManager).addView(eq(mSpyImageView), paramsArgumentCaptor.capture());
+        final WindowManager.LayoutParams layoutPrams =
+                mWindowManager.getLayoutParamsFromAttachedView();
+        assertNotNull(layoutPrams);
         assertEquals(getContext().getResources().getString(
                 com.android.internal.R.string.android_system_label),
-                paramsArgumentCaptor.getValue().accessibilityTitle);
+                layoutPrams.accessibilityTitle);
     }
 
     @Test
@@ -361,10 +403,10 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
                 com.android.internal.R.string.android_system_label, newA11yWindowTitle);
         mMagnificationModeSwitch.onConfigurationChanged(ActivityInfo.CONFIG_LOCALE);
 
-        ArgumentCaptor<WindowManager.LayoutParams> paramsArgumentCaptor = ArgumentCaptor.forClass(
-                WindowManager.LayoutParams.class);
-        verify(mWindowManager).updateViewLayout(eq(mSpyImageView), paramsArgumentCaptor.capture());
-        assertEquals(newA11yWindowTitle, paramsArgumentCaptor.getValue().accessibilityTitle);
+        final WindowManager.LayoutParams layoutParams =
+                mWindowManager.getLayoutParamsFromAttachedView();
+        assertNotNull(layoutParams);
+        assertEquals(newA11yWindowTitle, layoutParams.accessibilityTitle);
     }
 
     private void assertModeUnchanged(int expectedMode) {
@@ -392,6 +434,13 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     private void resetAndStubMockImageViewAndAnimator() {
         resetAndStubMockAnimator();
         Mockito.reset(mSpyImageView);
+        final Handler handler = mock(Handler.class);
+        when(mSpyImageView.getHandler()).thenReturn(handler);
+        doAnswer(invocation -> {
+            final Runnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(handler).post(any(Runnable.class));
         doAnswer(invocation -> {
             final Runnable runnable = invocation.getArgument(0);
             runnable.run();
@@ -439,5 +488,15 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         assertNotNull(mFadeOutAnimation);
         mFadeOutAnimation.run();
         mFadeOutAnimation = null;
+    }
+
+    private void assertLayoutPosition() {
+        final int expectedX = mMagnificationModeSwitch.mDraggableWindowBounds.right;
+        final int expectedY = mMagnificationModeSwitch.mDraggableWindowBounds.bottom;
+        final WindowManager.LayoutParams layoutParams =
+                mWindowManager.getLayoutParamsFromAttachedView();
+        assertNotNull(layoutParams);
+        assertEquals(expectedX, layoutParams.x);
+        assertEquals(expectedY, layoutParams.y);
     }
 }
