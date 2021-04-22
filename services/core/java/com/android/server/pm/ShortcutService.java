@@ -1319,7 +1319,7 @@ public class ShortcutService extends IShortcutService.Stub {
             mUsers.put(userId, userPackages);
 
             // Also when a user's data is first accessed, scan all packages.
-            injectPostToHandler(() -> checkPackageChanges(userId));
+            checkPackageChanges(userId);
         }
         return userPackages;
     }
