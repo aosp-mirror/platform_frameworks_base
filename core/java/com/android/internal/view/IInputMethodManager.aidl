@@ -68,6 +68,12 @@ interface IInputMethodManager {
             int unverifiedTargetSdkVersion,
             in IInputBindResultResultCallback inputBindResult);
 
+    oneway void reportWindowGainedFocusAsync(
+            boolean nextFocusHasConnection, in IInputMethodClient client, in IBinder windowToken,
+            /* @StartInputFlags */ int startInputFlags,
+            /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
+            int windowFlags, int unverifiedTargetSdkVersion);
+
     oneway void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode, in IVoidResultCallback resultCallback);
     oneway void showInputMethodPickerFromSystem(in IInputMethodClient client,
