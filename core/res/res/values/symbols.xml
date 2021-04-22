@@ -4357,4 +4357,7 @@
   <java-symbol type="string" name="view_and_control_notification_content" />
 
   <java-symbol type="layout" name="notification_expand_button"/>
+
+  <java-symbol type="bool" name="config_supportsMicToggle" />
+  <java-symbol type="bool" name="config_supportsCamToggle" />
 </resources>

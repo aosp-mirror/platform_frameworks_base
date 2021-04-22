@@ -111,9 +111,10 @@ class SensorUseStartedActivity @Inject constructor(
                     }
             sensorPrivacyController.addCallback(sensorPrivacyListener)
 
-            if (!sensorPrivacyController.isSensorBlocked(sensor)) {
-                finish()
-                return
+            sensorPrivacyController.addCallback { _, isBlocked ->
+                if (!isBlocked) {
+                    dismiss()
+                }
             }
         }
 

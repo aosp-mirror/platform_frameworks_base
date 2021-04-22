@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles;
 
-import static android.content.pm.PackageManager.FEATURE_MICROPHONE_TOGGLE;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
@@ -63,8 +62,7 @@ public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
 
     @Override
     public boolean isAvailable() {
-        return getHost().getContext().getPackageManager()
-                .hasSystemFeature(FEATURE_MICROPHONE_TOGGLE)
+        return mSensorPrivacyController.supportsSensorToggle(MICROPHONE)
                 && whitelistIpcs(() -> DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                 "mic_toggle_enabled",
                 true));

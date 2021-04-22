@@ -49,7 +49,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
         IndividualSensorPrivacyController.Callback {
 
     private final KeyguardStateController mKeyguard;
-    private IndividualSensorPrivacyController mSensorPrivacyController;
+    protected IndividualSensorPrivacyController mSensorPrivacyController;
 
     /**
      * @return Id of the sensor that will be toggled
