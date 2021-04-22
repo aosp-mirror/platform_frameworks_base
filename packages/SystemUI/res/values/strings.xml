@@ -2904,15 +2904,15 @@
     <!-- Status text on the Conversation widget for a birthday today [CHAR LIMIT=20] -->
     <string name="birthday_status">Birthday</string>
     <!-- Content description text on the Conversation widget for a birthday today [CHAR LIMIT=150] -->
-    <string name="birthday_status_content_description">It\’s <xliff:g id="name" example="Anna">%1$s</xliff:g>\’s birthday</string>
+    <string name="birthday_status_content_description">It\'s <xliff:g id="name" example="Anna">%1$s</xliff:g>\’s birthday</string>
     <!-- Status text on the Conversation widget for an upcoming birthday [CHAR LIMIT=20] -->
     <string name="upcoming_birthday_status">Birthday soon</string>
     <!-- Content description text on the Conversation widget for an upcoming birthday [CHAR LIMIT=150] -->
-    <string name="upcoming_birthday_status_content_description">It\’s <xliff:g id="name" example="Anna">%1$s</xliff:g>\’s birthday soon</string>
+    <string name="upcoming_birthday_status_content_description">It\'s <xliff:g id="name" example="Anna">%1$s</xliff:g>\’s birthday soon</string>
     <!-- Status text on the Conversation widget for an anniversary [CHAR LIMIT=20] -->
     <string name="anniversary_status">Anniversary</string>
     <!-- Content description text on the Conversation widget for an anniversary [CHAR LIMIT=150] -->
-    <string name="anniversary_status_content_description">It\’s <xliff:g id="name" example="Anna">%1$s</xliff:g>\’s anniversary</string>
+    <string name="anniversary_status_content_description">It\'s <xliff:g id="name" example="Anna">%1$s</xliff:g>\’s anniversary</string>
     <!-- Status text on the Conversation widget for sharing location [CHAR LIMIT=20] -->
     <string name="location_status">Sharing location</string>
     <!-- Content description text on the Conversation widget for sharing location [CHAR LIMIT=150] -->
