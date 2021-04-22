@@ -4658,9 +4658,12 @@ public final class Settings {
         public static final String AUTO_TIME_ZONE = Global.AUTO_TIME_ZONE;
 
         /**
-         * Display times as 12 or 24 hours
-         *   12
-         *   24
+         * Display the user's times, e.g. in the status bar, as 12 or 24 hours.
+         * <ul>
+         *    <li>24 = 24 hour</li>
+         *    <li>12 = 12 hour</li>
+         *    <li>[unset] = use the device locale's default</li>
+         * </ul>
          */
         @Readable
         public static final String TIME_12_24 = "time_12_24";
@@ -10243,15 +10246,16 @@ public final class Settings {
         public static final int WIFI_SLEEP_POLICY_NEVER = 2;
 
         /**
-         * Value to specify if the user prefers the date, time and time zone
-         * to be automatically fetched from the network (NITZ). 1=yes, 0=no
+         * Value to specify if the device's UTC system clock should be set automatically, e.g. using
+         * telephony signals like NITZ, or other sources like GNSS or NTP. 1=yes, 0=no (manual)
          */
         @Readable
         public static final String AUTO_TIME = "auto_time";
 
         /**
-         * Value to specify if the user prefers the time zone
-         * to be automatically fetched from the network (NITZ). 1=yes, 0=no
+         * Value to specify if the device's time zone system property should be set automatically,
+         * e.g. using telephony signals like MCC and NITZ, or other mechanisms like the location.
+         * 1=yes, 0=no (manual).
          */
         @Readable
         public static final String AUTO_TIME_ZONE = "auto_time_zone";
