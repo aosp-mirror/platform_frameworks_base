@@ -43,6 +43,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -422,7 +423,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             final boolean deviceCredentialAllowed = mPromptInfo.isDeviceCredentialAllowed();
             final @Authenticators.Types int authenticators = mPromptInfo.getAuthenticators();
             final boolean willShowDeviceCredentialButton = deviceCredentialAllowed
-                    || (authenticators & Authenticators.DEVICE_CREDENTIAL) != 0;
+                    || isCredentialAllowed(authenticators);
 
             if (TextUtils.isEmpty(title) && !useDefaultTitle) {
                 throw new IllegalArgumentException("Title must be set and non-empty");
@@ -916,6 +917,14 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback) {
+
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_PROMPT_AUTHENTICATE_INVOKED,
+                true /* isCrypto */,
+                mPromptInfo.isConfirmationRequested(),
+                mPromptInfo.isDeviceCredentialAllowed(),
+                mPromptInfo.getAuthenticators() != Authenticators.EMPTY_SET,
+                mPromptInfo.getAuthenticators());
+
         if (crypto == null) {
             throw new IllegalArgumentException("Must supply a crypto object");
         }
@@ -973,6 +982,14 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     public void authenticate(@NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback) {
+
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_PROMPT_AUTHENTICATE_INVOKED,
+                false /* isCrypto */,
+                mPromptInfo.isConfirmationRequested(),
+                mPromptInfo.isDeviceCredentialAllowed(),
+                mPromptInfo.getAuthenticators() != Authenticators.EMPTY_SET,
+                mPromptInfo.getAuthenticators());
+
         if (cancel == null) {
             throw new IllegalArgumentException("Must supply a cancellation signal");
         }
@@ -1057,5 +1074,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                     BiometricPrompt.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                     mContext.getString(R.string.biometric_error_hw_unavailable)));
         }
+    }
+
+    private static boolean isCredentialAllowed(@Authenticators.Types int allowedAuthenticators) {
+        return (allowedAuthenticators & Authenticators.DEVICE_CREDENTIAL) != 0;
     }
 }
