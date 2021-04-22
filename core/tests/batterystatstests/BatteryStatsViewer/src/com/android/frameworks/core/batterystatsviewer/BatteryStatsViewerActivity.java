@@ -17,7 +17,6 @@
 package com.android.frameworks.core.batterystatsviewer;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.BatteryStatsManager;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
@@ -27,9 +26,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.ComponentActivity;
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.loader.app.LoaderManager;
@@ -45,14 +44,14 @@ import java.util.List;
 import java.util.Locale;
 
 public class BatteryStatsViewerActivity extends ComponentActivity {
+    public static final String EXTRA_BATTERY_CONSUMER = "batteryConsumerId";
+
     private static final int BATTERY_STATS_REFRESH_RATE_MILLIS = 60 * 1000;
     private static final int MILLIS_IN_MINUTE = 60000;
-    private static final String PREF_SELECTED_BATTERY_CONSUMER = "batteryConsumerId";
     private static final int LOADER_BATTERY_USAGE_STATS = 1;
 
     private BatteryStatsDataAdapter mBatteryStatsDataAdapter;
     private final Runnable mBatteryStatsRefresh = this::periodicBatteryStatsRefresh;
-    private SharedPreferences mSharedPref;
     private String mBatteryConsumerId;
     private TextView mTitleView;
     private TextView mDetailsView;
@@ -62,20 +61,15 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     private RecyclerView mBatteryConsumerDataView;
     private View mLoadingView;
     private View mEmptyView;
-    private final ActivityResultLauncher<Void> mStartAppPicker = registerForActivityResult(
-            BatteryConsumerPickerActivity.CONTRACT, this::onApplicationSelected);
     private List<BatteryUsageStats> mBatteryUsageStats;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mSharedPref = getPreferences(Context.MODE_PRIVATE);
+        mBatteryConsumerId = getIntent().getStringExtra(EXTRA_BATTERY_CONSUMER);
 
         setContentView(R.layout.battery_stats_viewer_layout);
-
-        View appCard = findViewById(R.id.app_card);
-        appCard.setOnClickListener((e) -> startAppPicker());
 
         mTitleView = findViewById(android.R.id.title);
         mDetailsView = findViewById(R.id.details);
@@ -91,11 +85,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         mLoadingView = findViewById(R.id.loading_view);
         mEmptyView = findViewById(R.id.empty_view);
 
-        mBatteryConsumerId = mSharedPref.getString(PREF_SELECTED_BATTERY_CONSUMER, null);
         loadBatteryStats();
-        if (mBatteryConsumerId == null) {
-            startAppPicker();
-        }
     }
 
     @Override
@@ -108,25 +98,6 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     protected void onPause() {
         super.onPause();
         getMainThreadHandler().removeCallbacks(mBatteryStatsRefresh);
-    }
-
-    private void startAppPicker() {
-        mStartAppPicker.launch(null);
-    }
-
-    private void onApplicationSelected(String batteryConsumerId) {
-        if (batteryConsumerId == null) {
-            if (mBatteryConsumerId == null) {
-                finish();
-            }
-        } else {
-            mBatteryConsumerId = batteryConsumerId;
-            mSharedPref.edit()
-                    .putString(PREF_SELECTED_BATTERY_CONSUMER, mBatteryConsumerId)
-                    .apply();
-            mLoadingView.setVisibility(View.VISIBLE);
-            loadBatteryStats();
-        }
     }
 
     private void periodicBatteryStatsRefresh() {
@@ -200,9 +171,10 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         BatteryConsumerInfoHelper.BatteryConsumerInfo
                 batteryConsumerInfo = batteryConsumerData.getBatteryConsumerInfo();
         if (batteryConsumerInfo == null) {
-            mTitleView.setText("Battery consumer not found");
-            mPackagesView.setVisibility(View.GONE);
-            mHeadingsView.setVisibility(View.GONE);
+            Toast.makeText(this, "Battery consumer not found: " + mBatteryConsumerId,
+                    Toast.LENGTH_SHORT).show();
+            finish();
+            return;
         } else {
             mTitleView.setText(batteryConsumerInfo.label);
             if (batteryConsumerInfo.details != null) {
