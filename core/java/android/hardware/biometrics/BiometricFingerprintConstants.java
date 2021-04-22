@@ -57,7 +57,10 @@ public interface BiometricFingerprintConstants {
             FINGERPRINT_ERROR_HW_NOT_PRESENT,
             FINGERPRINT_ERROR_NEGATIVE_BUTTON,
             BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
-            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED})
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
+            BIOMETRIC_ERROR_RE_ENROLL,
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
+            FINGERPRINT_ERROR_UNKNOWN})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintError {}
 
@@ -163,13 +166,19 @@ public interface BiometricFingerprintConstants {
      * sensor's strength can currently only meet {@link Authenticators#BIOMETRIC_WEAK}.
      * @hide
      */
-    public static final int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED = 15;
+    int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED = 15;
 
     /**
      * Authentication cannot proceed because re-enrollment is required.
      * @hide
      */
     int BIOMETRIC_ERROR_RE_ENROLL = 16;
+
+    /**
+     * Unknown error received from the HAL.
+     * @hide
+     */
+    int FINGERPRINT_ERROR_UNKNOWN = 17;
 
     /**
      * @hide
@@ -191,7 +200,8 @@ public interface BiometricFingerprintConstants {
             FINGERPRINT_ACQUIRED_TOO_SLOW,
             FINGERPRINT_ACQUIRED_TOO_FAST,
             FINGERPRINT_ACQUIRED_VENDOR,
-            FINGERPRINT_ACQUIRED_START})
+            FINGERPRINT_ACQUIRED_START,
+            FINGERPRINT_ACQUIRED_UNKNOWN})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintAcquired {}
 
@@ -253,6 +263,12 @@ public interface BiometricFingerprintConstants {
      * @hide
      */
     int FINGERPRINT_ACQUIRED_START = 7;
+
+    /**
+     * Unknown acquired code received from the HAL.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_UNKNOWN = 8;
 
     /**
      * @hide
