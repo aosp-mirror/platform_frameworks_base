@@ -4124,9 +4124,9 @@ public class UserManager {
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     @UserHandleAware
     @SuppressAutoDoc
-    public boolean sharesMediaWithParent() {
+    public boolean isMediaSharedWithParent() {
         try {
-            return mService.sharesMediaWithParent(mUserId);
+            return mService.isMediaSharedWithParent(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
