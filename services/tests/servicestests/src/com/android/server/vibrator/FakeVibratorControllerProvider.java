@@ -156,7 +156,7 @@ final class FakeVibratorControllerProvider {
                     mMinFrequency, mResonantFrequency, mFrequencyResolution,
                     suggestedFrequencyRange, mMaxAmplitudes);
             return new VibratorInfo(vibratorId, mCapabilities, mSupportedEffects, mSupportedBraking,
-                    mSupportedPrimitives, mQFactor, frequencyMapping);
+                    mSupportedPrimitives, null, mQFactor, frequencyMapping);
         }
 
         private void applyLatency() {
