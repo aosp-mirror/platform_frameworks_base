@@ -21,6 +21,7 @@ import android.annotation.SystemApi;
 import android.telephony.ims.DelegateRegistrationState;
 import android.telephony.ims.DelegateRequest;
 import android.telephony.ims.FeatureTagState;
+import android.telephony.ims.SipDelegateConfiguration;
 import android.telephony.ims.SipDelegateConnection;
 import android.telephony.ims.SipDelegateImsConfiguration;
 import android.telephony.ims.SipDelegateManager;
@@ -44,7 +45,7 @@ import java.util.Set;
  * <p>
  * In order to start sending SIP messages, the SIP configuration parameters will need to be
  * received, so the messaging application should make no assumptions about these parameters and wait
- * until {@link #onImsConfigurationChanged(SipDelegateImsConfiguration)} has been called. This is
+ * until {@link #onConfigurationChanged(SipDelegateConfiguration)} has been called. This is
  * guaranteed to happen after the first {@link #onFeatureTagStatusChanged} if there is at least one
  * feature tag that has been successfully associated with the {@link SipDelegateConnection}. If all
  * feature tags were denied, no IMS configuration will be sent.
@@ -135,8 +136,32 @@ public interface DelegateConnectionStateCallback {
      * not compleed yet.
      *
      * @param registeredSipConfig The configuration of the IMS stack registered on the IMS network.
+     * @deprecated Will not be in final API, use
+     * {@link #onConfigurationChanged(SipDelegateConfiguration)} instead}.
      */
-    void onImsConfigurationChanged(@NonNull SipDelegateImsConfiguration registeredSipConfig);
+    @Deprecated
+    default void onImsConfigurationChanged(
+            @NonNull SipDelegateImsConfiguration registeredSipConfig) {
+        onConfigurationChanged(registeredSipConfig.toNewConfig());
+    }
+
+    /**
+     * IMS configuration of the underlying IMS stack used by this IMS application for construction
+     * of the SIP messages that will be sent over the carrier's network.
+     * <p>
+     * There should never be assumptions made about the configuration of the underling IMS stack and
+     * the IMS application should wait for this indication before sending out any outgoing SIP
+     * messages.
+     * <p>
+     * Configuration may change due to IMS registration changes as well as
+     * other optional events on the carrier network. If IMS stack is already registered at the time
+     * of callback registration, then this method shall be invoked with the current configuration.
+     * Otherwise, there may be a delay in this method being called if initial IMS registration has
+     * not compleed yet.
+     *
+     * @param registeredSipConfig The configuration of the IMS stack registered on the IMS network.
+     */
+    default void onConfigurationChanged(@NonNull SipDelegateConfiguration registeredSipConfig) {}
 
     /**
      * The previously created {@link SipDelegateConnection} instance delivered via
