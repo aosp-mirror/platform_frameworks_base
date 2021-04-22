@@ -196,9 +196,8 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
         String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
         assertThat(fontPath).startsWith(DATA_FONTS_DIR);
 
-        expectRemoteCommandToSucceed("stop");
-        expectRemoteCommandToSucceed("start");
-        waitUntilFontCommandIsReady();
+        // Emulate reboot by 'cmd font restart'.
+        expectRemoteCommandToSucceed("cmd font restart");
         String fontPathAfterReboot = getFontPath(NOTO_COLOR_EMOJI_TTF);
         assertThat(fontPathAfterReboot).isEqualTo(fontPath);
     }
@@ -240,17 +239,6 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
         assertWithMessage("Unexpected success from `" + cmd + "`: " + result.getStderr())
                 .that(result.getStatus())
                 .isNotEqualTo(CommandStatus.SUCCESS);
-    }
-
-    private void waitUntilFontCommandIsReady() {
-        waitUntil(SECONDS.toMillis(30), () -> {
-            try {
-                return getDevice().executeShellV2Command("cmd font status").getStatus()
-                        == CommandStatus.SUCCESS;
-            } catch (DeviceNotAvailableException e) {
-                return false;
-            }
-        });
     }
 
     private void waitUntil(long timeoutMillis, ThrowingSupplier<Boolean> func) {

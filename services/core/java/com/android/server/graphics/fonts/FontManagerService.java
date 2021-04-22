@@ -314,6 +314,10 @@ public final class FontManagerService extends IFontManager.Stub {
         }
     }
 
+    /* package */ void restart() {
+        initialize();
+    }
+
     /* package */ Map<String, File> getFontFileMap() {
         if (mUpdatableFontDir == null) {
             return Collections.emptyMap();
