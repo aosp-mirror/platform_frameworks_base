@@ -92,7 +92,6 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
-import android.window.ITaskOrganizer;
 import android.window.ITransitionPlayer;
 import android.window.StartingWindowInfo;
 import android.window.TransitionInfo;
@@ -1216,7 +1215,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
-    static class TestStartingWindowOrganizer extends ITaskOrganizer.Stub {
+    static class TestStartingWindowOrganizer extends WindowOrganizerTests.StubOrganizer {
         private final ActivityTaskManagerService mAtm;
         private final WindowManagerService mWMService;
         private final WindowState.PowerManagerWrapper mPowerManagerWrapper;
@@ -1281,24 +1280,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 }
             }
         }
-        @Override
-        public void copySplashScreenView(int taskId) {
-        }
-        @Override
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
-        }
-        @Override
-        public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
-        }
-        @Override
-        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
-        }
-        @Override
-        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
-        }
     }
 
-    static class TestSplitOrganizer extends ITaskOrganizer.Stub {
+    static class TestSplitOrganizer extends WindowOrganizerTests.StubOrganizer {
         final ActivityTaskManagerService mService;
         Task mPrimary;
         Task mSecondary;
@@ -1332,22 +1316,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         public void setMoveToSecondaryOnEnter(boolean move) {
             mMoveToSecondaryOnEnter = move;
         }
-        @Override
-        public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
-        }
-        @Override
-        public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-                boolean playRevealAnimation) {
-        }
-        @Override
-        public void copySplashScreenView(int taskId) {
-        }
-        @Override
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
-        }
-        @Override
-        public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
-        }
+
         @Override
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
             if (mInSplit) {
@@ -1373,9 +1342,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     rootTask.reparent(mSecondary, POSITION_BOTTOM);
                 }
             });
-        }
-        @Override
-        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
         }
     }
 

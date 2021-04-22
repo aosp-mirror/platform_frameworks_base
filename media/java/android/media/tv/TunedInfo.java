@@ -25,6 +25,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Surface;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -92,18 +93,20 @@ public final class TunedInfo implements Parcelable {
     private final String mInputId;
     @Nullable private final Uri mChannelUri;
     private final boolean mIsRecordingSession;
-    private final boolean mIsForeground;
+    private final boolean mIsVisible;
+    private final boolean mIsMainSession;
     @AppType private final int mAppType;
     private final int mAppTag;
 
     /** @hide */
     public TunedInfo(
             String inputId, @Nullable Uri channelUri, boolean isRecordingSession,
-            boolean isForeground, @AppType int appType, int appTag) {
+            boolean isVisible, boolean isMainSession, @AppType int appType, int appTag) {
         mInputId = inputId;
         mChannelUri = channelUri;
         mIsRecordingSession = isRecordingSession;
-        mIsForeground = isForeground;
+        mIsVisible = isVisible;
+        mIsMainSession = isMainSession;
         mAppType = appType;
         mAppTag = appTag;
     }
@@ -114,7 +117,8 @@ public final class TunedInfo implements Parcelable {
         String uriString = source.readString();
         mChannelUri = uriString == null ? null : Uri.parse(uriString);
         mIsRecordingSession = (source.readInt() == 1);
-        mIsForeground = (source.readInt() == 1);
+        mIsVisible = (source.readInt() == 1);
+        mIsMainSession = (source.readInt() == 1);
         mAppType = source.readInt();
         mAppTag = source.readInt();
     }
@@ -145,11 +149,23 @@ public final class TunedInfo implements Parcelable {
     }
 
     /**
-     * Returns {@code true} if the application is a foreground application.
-     * @see android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+     * Returns {@code true} if the corresponding session is visible.
+     * <p>The system checks whether the {@link Surface} of the session is {@code null} or not. When
+     * it becomes invisible, the surface is destroyed and set to null.
+     * @see TvInputService.Session#onSetSurface(Surface)
+     * @see android.view.SurfaceView#notifySurfaceDestroyed
      */
-    public boolean isForeground() {
-        return mIsForeground;
+    public boolean isVisible() {
+        return mIsVisible;
+    }
+
+    /**
+     * Returns {@code true} if the corresponding session is set as main session.
+     * @see TvView#setMain
+     * @see TvInputService.Session#onSetMain
+     */
+    public boolean isMainSession() {
+        return mIsMainSession;
     }
 
     /**
@@ -180,7 +196,8 @@ public final class TunedInfo implements Parcelable {
         String uriString = mChannelUri == null ? null : mChannelUri.toString();
         dest.writeString(uriString);
         dest.writeInt(mIsRecordingSession ? 1 : 0);
-        dest.writeInt(mIsForeground ? 1 : 0);
+        dest.writeInt(mIsVisible ? 1 : 0);
+        dest.writeInt(mIsMainSession ? 1 : 0);
         dest.writeInt(mAppType);
         dest.writeInt(mAppTag);
     }
@@ -190,7 +207,8 @@ public final class TunedInfo implements Parcelable {
         return "inputID=" + mInputId
                 + ";channelUri=" + mChannelUri
                 + ";isRecording=" + mIsRecordingSession
-                + ";isForeground=" + mIsForeground
+                + ";isVisible=" + mIsVisible
+                + ";isMainSession=" + mIsMainSession
                 + ";appType=" + mAppType
                 + ";appTag=" + mAppTag;
     }
@@ -206,7 +224,8 @@ public final class TunedInfo implements Parcelable {
         return TextUtils.equals(mInputId, other.getInputId())
                 && Objects.equals(mChannelUri, other.mChannelUri)
                 && mIsRecordingSession == other.mIsRecordingSession
-                && mIsForeground == other.mIsForeground
+                && mIsVisible == other.mIsVisible
+                && mIsMainSession == other.mIsMainSession
                 && mAppType == other.mAppType
                 && mAppTag == other.mAppTag;
     }
@@ -214,6 +233,7 @@ public final class TunedInfo implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(
-                mInputId, mChannelUri, mIsRecordingSession, mIsForeground, mAppType, mAppTag);
+                mInputId, mChannelUri, mIsRecordingSession, mIsVisible, mIsMainSession, mAppType,
+                mAppTag);
     }
 }

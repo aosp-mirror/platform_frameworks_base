@@ -125,6 +125,17 @@ public class UsageProgressBarPreferenceTest {
     }
 
     @Test
+    public void setPercent_totalSizeZero_getProgressZero() {
+        mUsageProgressBarPreference.setPercent(0 /* usage */, 0 /* total */);
+
+        mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
+
+        final ProgressBar progressBar = (ProgressBar) mViewHolder
+                .findViewById(android.R.id.progress);
+        assertThat(progressBar.getProgress()).isEqualTo(0);
+    }
+
+    @Test
     public void setCustomContent_setNullImageView_noChild() {
         mUsageProgressBarPreference.setCustomContent(null /* imageView */);
 

@@ -112,14 +112,6 @@ final class LetterboxUiController {
         return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect);
     }
 
-    /**
-     * @return {@code true} if there is a letterbox and any part of that letterbox overlaps with
-     * the given {@code rect}.
-     */
-    boolean isLetterboxOverlappingWith(Rect rect) {
-        return mLetterbox != null && mLetterbox.isOverlappingWith(rect);
-    }
-
     void updateLetterboxSurface(WindowState winHint) {
         final WindowState w = mActivityRecord.findMainWindow();
         if (w != winHint && winHint != null && w != null) {

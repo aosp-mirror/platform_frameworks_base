@@ -163,6 +163,7 @@
     <uses-permission android:name="android.permission.SET_ORIENTATION" />
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
     <uses-permission android:name="com.android.permission.USE_INSTALLER_V2" />
+    <uses-permission android:name="android.permission.INSTALL_TEST_ONLY_PACKAGE" />
     <uses-permission android:name="com.android.permission.USE_SYSTEM_DATA_LOADERS" />
     <uses-permission android:name="android.permission.MOVE_PACKAGE" />
     <uses-permission android:name="android.permission.KEEP_UNINSTALLED_PACKAGES" />
@@ -299,6 +300,7 @@
     <uses-permission android:name="android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS" />
 
     <uses-permission android:name="android.permission.MANAGE_APPOPS" />
+    <uses-permission android:name="android.permission.WATCH_APPOPS" />
 
     <!-- Permission required for IncrementalLogCollectionTest -->
     <uses-permission android:name="android.permission.LOADER_USAGE_STATS" />
@@ -429,6 +431,7 @@
     <uses-permission android:name="android.permission.ACCESS_SHARED_LIBRARIES" />
 
     <!-- Permissions required for CTS test - TVInputManagerTest -->
+    <uses-permission android:name="android.permission.ACCESS_TUNED_INFO" />
     <uses-permission android:name="android.permission.TV_INPUT_HARDWARE" />
 
     <!-- Permission needed for CTS test - PrivilegedLocationPermissionTest -->
@@ -540,13 +543,14 @@
     <uses-permission android:name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
 
     <!-- Permission required for CTS test - SystemMediaRouter2Test -->
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
+    <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
 
     <!-- Permission required for CTS test - CtsRotationResolverServiceDeviceTestCases -->
     <uses-permission android:name="android.permission.MANAGE_ROTATION_RESOLVER" />
 
     <!-- Permission required for CTS test - CtsUwbTestCases -->
     <uses-permission android:name="android.permission.UWB_PRIVILEGED" />
+    <uses-permission android:name="android.permission.UWB_RANGING" />
 
     <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />

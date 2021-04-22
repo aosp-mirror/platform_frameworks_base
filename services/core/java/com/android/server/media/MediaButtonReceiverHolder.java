@@ -195,6 +195,7 @@ final class MediaButtonReceiverHolder {
         options.setTemporaryAppAllowlist(fgsAllowlistDurationMs,
                 PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                 PowerWhitelistManager.REASON_MEDIA_BUTTON, "");
+        options.setBackgroundActivityStartsAllowed(true);
         if (mPendingIntent != null) {
             if (DEBUG_KEY_EVENT) {
                 Log.d(TAG, "Sending " + keyEvent + " to the last known PendingIntent "

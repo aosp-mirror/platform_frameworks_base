@@ -2046,7 +2046,11 @@ public class VcnGatewayConnection extends StateMachine {
         pw.println("VcnGatewayConnection (" + mConnectionConfig.getGatewayConnectionName() + "):");
         pw.increaseIndent();
 
-        pw.println("Current state: " + getCurrentState().getClass().getSimpleName());
+        pw.println(
+                "Current state: "
+                        + (getCurrentState() == null
+                                ? null
+                                : getCurrentState().getClass().getSimpleName()));
         pw.println("mIsQuitting: " + mIsQuitting);
         pw.println("mIsInSafeMode: " + mIsInSafeMode);
         pw.println("mCurrentToken: " + mCurrentToken);
@@ -2057,7 +2061,11 @@ public class VcnGatewayConnection extends StateMachine {
 
         pw.println("mUnderlying:");
         pw.increaseIndent();
-        mUnderlying.dump(pw);
+        if (mUnderlying != null) {
+            mUnderlying.dump(pw);
+        } else {
+            pw.println("null");
+        }
         pw.decreaseIndent();
         pw.println();
 

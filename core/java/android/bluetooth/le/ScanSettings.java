@@ -20,7 +20,6 @@ import android.annotation.SystemApi;
 import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.DeviceConfig;
 
 /**
  * Bluetooth LE scan settings are passed to {@link BluetoothLeScanner#startScan} to define the
@@ -141,12 +140,6 @@ public final class ScanSettings implements Parcelable {
      * the 1Mbit PHY only.
      */
     public static final int PHY_LE_ALL_SUPPORTED = 255;
-
-    /**
-     * The default floor value for report delays greater than 0 in
-     * {@link Builder#setReportDelay(long)}.
-     */
-    private static final long DEFAULT_REPORT_DELAY_FLOOR = 5000;
 
     // Bluetooth LE scan mode.
     private int mScanMode;
@@ -365,15 +358,7 @@ public final class ScanSettings implements Parcelable {
             if (reportDelayMillis < 0) {
                 throw new IllegalArgumentException("reportDelay must be > 0");
             }
-
-            long floor = DeviceConfig.getLong(DeviceConfig.NAMESPACE_BLUETOOTH, "report_delay",
-                    DEFAULT_REPORT_DELAY_FLOOR);
-
-            if (reportDelayMillis > 0 && reportDelayMillis < floor) {
-                mReportDelayMillis = floor;
-            } else {
-                mReportDelayMillis = reportDelayMillis;
-            }
+            mReportDelayMillis = reportDelayMillis;
             return this;
         }
 

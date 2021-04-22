@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -59,6 +58,7 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflaterKt;
 import com.android.systemui.statusbar.policy.SmartReplyView;
+import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1315,11 +1315,6 @@ public class NotificationContentView extends FrameLayout {
         applyBubbleAction(mExpandedChild, entry);
     }
 
-    private boolean isBubblesEnabled() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.NOTIFICATION_BUBBLES, 0) == 1;
-    }
-
     /**
      * Setup icon buttons provided by System UI.
      */
@@ -1340,7 +1335,7 @@ public class NotificationContentView extends FrameLayout {
         boolean isPersonWithShortcut =
                 mPeopleIdentifier.getPeopleNotificationType(entry)
                         >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
-        boolean showButton = isBubblesEnabled()
+        boolean showButton = BubblesManager.areBubblesEnabled(mContext, entry.getSbn().getUser())
                 && isPersonWithShortcut
                 && entry.getBubbleMetadata() != null;
         if (showButton) {
@@ -1481,18 +1476,26 @@ public class NotificationContentView extends FrameLayout {
             return null;
         }
 
-        SmartReplyView smartReplyView = null;
-        if (smartReplyContainer.getChildCount() == 1
-                && smartReplyContainer.getChildAt(0) instanceof SmartReplyView) {
+        // Search for an existing SmartReplyView
+        int index = 0;
+        final int childCount = smartReplyContainer.getChildCount();
+        for (; index < childCount; index++) {
+            View child = smartReplyContainer.getChildAt(index);
+            if (child.getId() == R.id.smart_reply_view && child instanceof SmartReplyView) {
+                break;
+            }
+        }
+
+        if (index < childCount) {
             // If we already have a SmartReplyView - replace it with the newly inflated one. The
             // newly inflated one is connected to the new inflated smart reply/action buttons.
-            smartReplyContainer.removeAllViews();
+            smartReplyContainer.removeViewAt(index);
         }
-        if (smartReplyContainer.getChildCount() == 0
-                && inflatedSmartReplyViewHolder != null
+        SmartReplyView smartReplyView = null;
+        if (inflatedSmartReplyViewHolder != null
                 && inflatedSmartReplyViewHolder.getSmartReplyView() != null) {
             smartReplyView = inflatedSmartReplyViewHolder.getSmartReplyView();
-            smartReplyContainer.addView(smartReplyView);
+            smartReplyContainer.addView(smartReplyView, index);
         }
         if (smartReplyView != null) {
             smartReplyView.resetSmartSuggestions(smartReplyContainer);

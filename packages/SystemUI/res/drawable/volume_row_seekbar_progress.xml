@@ -18,12 +18,13 @@
 <!-- Progress drawable for volume row SeekBars. This is the accent-colored round rect that moves up
      and down as the progress value changes. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:autoMirrored="true">
     <item android:id="@+id/volume_seekbar_progress_solid">
         <shape>
-            <size android:height="@dimen/volume_dialog_panel_width" />
+            <size android:height="@dimen/volume_dialog_slider_width" />
             <solid android:color="?android:attr/colorAccent" />
-            <corners android:radius="@dimen/volume_dialog_panel_width_half"/>
+            <corners android:radius="@dimen/volume_dialog_slider_corner_radius"/>
         </shape>
     </item>
     <item
@@ -38,7 +39,7 @@
             <!-- A placeholder drawable is required here - it'll be replaced in code. -->
             <com.android.systemui.util.AlphaTintDrawableWrapper
                 android:drawable="@drawable/ic_volume_media"
-                android:tint="?android:attr/colorBackgroundFloating" />
+                android:tint="?androidprv:attr/colorAccentPrimaryVariant" />
         </rotate>
     </item>
 </layer-list>

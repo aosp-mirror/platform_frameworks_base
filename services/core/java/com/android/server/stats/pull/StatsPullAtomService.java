@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -432,6 +432,7 @@ public class StatsPullAtomService extends SystemService {
         mContext = context;
     }
 
+    private native void initializeNativePullers();
     /**
      * Use of this StatsPullAtomCallbackImpl means we avoid one class per tagId, which we would
      * get if we used lambdas.
@@ -713,6 +714,7 @@ public class StatsPullAtomService extends SystemService {
         super.onBootPhase(phase);
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             BackgroundThread.getHandler().post(() -> {
+                initializeNativePullers(); // Initialize pullers that need JNI.
                 initializePullersState();
                 registerPullers();
                 registerEventListeners();

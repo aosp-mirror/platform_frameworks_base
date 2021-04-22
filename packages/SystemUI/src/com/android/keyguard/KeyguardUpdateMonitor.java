@@ -2009,9 +2009,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         // TODO: Add support for multiple fingerprint sensors, b/173730729
         updateUdfpsEnrolled(getCurrentUser());
-        boolean shouldListenForFingerprint =
-                isUdfpsEnrolled() ? shouldListenForUdfps() : shouldListenForFingerprint();
-        boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
+        final boolean shouldListenForFingerprint = shouldListenForFingerprint(isUdfpsEnrolled());
+        final boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
                 || mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING;
         if (runningOrRestarting && !shouldListenForFingerprint) {
             stopListeningForFingerprint();
@@ -2092,28 +2091,36 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && !mUserHasTrust.get(getCurrentUser(), false);
     }
 
-    private boolean shouldListenForFingerprint() {
-        final boolean allowedOnBouncer =
-                !(mFingerprintLockedOut && mBouncer && mCredentialAttempted);
+    @VisibleForTesting
+    protected boolean shouldListenForFingerprint(boolean isUdfps) {
+        final boolean shouldListenKeyguardState =
+                 mKeyguardIsVisible
+                     || !mDeviceInteractive
+                     || (mBouncer && !mKeyguardGoingAway)
+                     || mGoingToSleep
+                     || shouldListenForFingerprintAssistant()
+                     || (mKeyguardOccluded && mIsDreaming)
+                     || (isUdfps && mKeyguardOccluded);
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
-        final boolean shouldListen = (mKeyguardIsVisible || !mDeviceInteractive ||
-                (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
-                shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
-                && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
-                && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser
-                && allowedOnBouncer && mBiometricEnabledForUser.get(getCurrentUser());
-        return shouldListen;
-    }
+        final boolean shouldListenUserState =
+                !mSwitchingUser
+                        && !isFingerprintDisabled(getCurrentUser())
+                        && (!mKeyguardGoingAway || !mDeviceInteractive)
+                        && mIsPrimaryUser
+                        && mBiometricEnabledForUser.get(getCurrentUser());
 
-    @VisibleForTesting
-    boolean shouldListenForUdfps() {
-        return shouldListenForFingerprint()
-                && !mBouncer
-                && !getUserCanSkipBouncer(getCurrentUser())
+        final boolean shouldListenBouncerState =
+                isUdfps ? !mBouncer
+                        : !(mFingerprintLockedOut && mBouncer && mCredentialAttempted);
+
+        final boolean shouldListenUdfpsState = !isUdfps
+                || (!getUserCanSkipBouncer(getCurrentUser())
                 && !isEncryptedOrLockdown(getCurrentUser())
-                && mStrongAuthTracker.hasUserAuthenticatedSinceBoot();
+                && mStrongAuthTracker.hasUserAuthenticatedSinceBoot());
+        return shouldListenKeyguardState && shouldListenUserState && shouldListenBouncerState
+                && shouldListenUdfpsState;
     }
 
     /**
@@ -3235,13 +3242,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    disabled(DPM)=" + isFingerprintDisabled(userId));
             pw.println("    possible=" + isUnlockWithFingerprintPossible(userId));
             pw.println("    listening: actual=" + mFingerprintRunningState
-                    + " expected=" + (shouldListenForFingerprint() ? 1 : 0));
+                    + " expected=" + (shouldListenForFingerprint(false) ? 1 : 0));
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
             pw.println("    udfpsEnrolled=" + isUdfpsEnrolled());
             pw.println("    enabledByUser=" + mBiometricEnabledForUser.get(userId));
             if (isUdfpsEnrolled()) {
-                pw.println("        shouldListenForUdfps=" + shouldListenForUdfps());
+                pw.println("        shouldListenForUdfps=" + shouldListenForFingerprint(true));
                 pw.println("        bouncerVisible=" + mBouncer);
                 pw.println("        mStatusBarState="
                         + StatusBarState.toShortString(mStatusBarState));

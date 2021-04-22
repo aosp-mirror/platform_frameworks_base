@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,5 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.telephony;
-parcelable CarrierBandwidth;
+
+package android.uwb;
+
+/**
+ * @hide
+ */
+@Backing(type="int")
+enum AdapterState {
+ /**
+   * The state when UWB is disabled.
+   */
+  STATE_DISABLED,
+
+  /**
+   * The state when UWB is enabled but has no active sessions.
+   */
+  STATE_ENABLED_INACTIVE,
+
+  /**
+   * The state when UWB is enabled and has active sessions.
+   */
+  STATE_ENABLED_ACTIVE,
+}

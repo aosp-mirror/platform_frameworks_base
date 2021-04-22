@@ -85,10 +85,13 @@ public class QuickStatusBarHeader extends FrameLayout {
     private int mTopViewMeasureHeight;
 
     private final String mMobileSlotName;
+    private final String mCallStrengthSlotName;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
         mMobileSlotName = context.getString(com.android.internal.R.string.status_bar_no_calling);
+        mCallStrengthSlotName =
+                context.getString(com.android.internal.R.string.status_bar_call_strength);
     }
 
     /**
@@ -218,28 +221,38 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     private void updateAlphaAnimator() {
-        StatusBarIconView icon =
+        StatusBarIconView noCallingIcon =
                 ((StatusBarIconView) mIconContainer.getViewForSlot(mMobileSlotName));
+        StatusBarIconView callStrengthIcon =
+                ((StatusBarIconView) mIconContainer.getViewForSlot(mCallStrengthSlotName));
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
                 .addFloat(mQSCarriers, "alpha", 0, 1)
                 .addFloat(mDatePrivacyView, "alpha", 0, mDatePrivacyAlpha);
-        if (icon != null) {
-            builder.addFloat(icon, "alpha", 1, 0);
+        if (noCallingIcon != null || callStrengthIcon != null) {
+            if (noCallingIcon != null) {
+                builder.addFloat(noCallingIcon, "alpha", 1, 0);
+            }
+            if (callStrengthIcon != null) {
+                builder.addFloat(callStrengthIcon, "alpha", 1, 0);
+            }
             builder.setListener(new TouchAnimator.ListenerAdapter() {
                 @Override
                 public void onAnimationAtEnd() {
                     mIconContainer.addIgnoredSlot(mMobileSlotName);
+                    mIconContainer.addIgnoredSlot(mCallStrengthSlotName);
                 }
 
                 @Override
                 public void onAnimationStarted() {
                     mIconContainer.removeIgnoredSlot(mMobileSlotName);
+                    mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
                 }
 
                 @Override
                 public void onAnimationAtStart() {
                     super.onAnimationAtStart();
                     mIconContainer.removeIgnoredSlot(mMobileSlotName);
+                    mIconContainer.removeIgnoredSlot(mCallStrengthSlotName);
                 }
             });
         }

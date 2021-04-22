@@ -59,6 +59,14 @@ public interface BcSmartspaceDataPlugin extends Plugin {
     interface SmartspaceView {
         void registerDataProvider(BcSmartspaceDataPlugin plugin);
 
+        /**
+         * Primary color for unprotected text
+         */
         void setPrimaryTextColor(int color);
+
+        /**
+         * Range [0.0 - 1.0] when transitioning from Lockscreen to/from AOD
+         */
+        void setDozeAmount(float amount);
     }
 }

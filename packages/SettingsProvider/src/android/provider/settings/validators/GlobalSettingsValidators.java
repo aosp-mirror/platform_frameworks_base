@@ -128,7 +128,6 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.POWER_BUTTON_VERY_LONG_PRESS, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Global.KEY_CHORD_POWER_VOLUME_UP, new InclusiveIntegerRangeValidator(0, 2));
-        VALIDATORS.put(Global.NOTIFICATION_BUBBLES, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.CUSTOM_BUGREPORT_HANDLER_APP, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.CUSTOM_BUGREPORT_HANDLER_USER, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.DEVELOPMENT_SETTINGS_ENABLED, BOOLEAN_VALIDATOR);

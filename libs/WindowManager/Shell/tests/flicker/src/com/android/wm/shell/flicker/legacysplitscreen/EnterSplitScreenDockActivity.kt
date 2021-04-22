@@ -74,12 +74,6 @@ class EnterSplitScreenDockActivity(
     @Test
     fun dockedStackDividerBecomesVisible() = testSpec.dockedStackDividerBecomesVisible()
 
-    @FlakyTest(bugId = 178531736)
-    @Test
-    // b/178531736
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
     @Presubmit
     @Test
     fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
@@ -87,12 +81,6 @@ class EnterSplitScreenDockActivity(
     @Presubmit
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
-
-    @FlakyTest(bugId = 178531736)
-    @Test
-    // b/178531736
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     @Presubmit
     @Test

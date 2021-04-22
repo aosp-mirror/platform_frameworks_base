@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2016 The Android Open Source Project
+  ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:theme="@style/Theme.SystemUI.QuickSettings"
-    android:id="@+id/brightness_mirror"
-    android:layout_width="@dimen/qs_panel_width"
-    android:layout_height="@dimen/brightness_mirror_height"
-    android:layout_gravity="@integer/notification_panel_layout_gravity"
-    android:visibility="invisible">
-
-</FrameLayout>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+    <item>
+        <shape>
+            <size android:width="@dimen/volume_dialog_panel_width" />
+            <solid android:color="?androidprv:attr/colorSurface" />
+            <corners android:radius="@dimen/volume_dialog_panel_width_half"/>
+        </shape>
+    </item>
+</layer-list>

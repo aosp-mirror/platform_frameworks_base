@@ -388,7 +388,7 @@
     </style>
 
     <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
-        <item name="android:dialogCornerRadius">8dp</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="Theme.SystemUI.QuickSettings.Dialog" parent="@android:style/Theme.DeviceDefault.Dialog">
@@ -678,9 +678,9 @@
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:windowContentTransitions">false</item>
         <item name="android:windowIsTranslucent">false</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/black</item>
         <item name="android:windowAnimationStyle">@null</item>
-        <item name="android:statusBarColor">@*android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/black</item>
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 

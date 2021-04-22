@@ -311,7 +311,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取您的日曆"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短訊"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"傳送和查看短訊"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"檔案及媒體"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"檔案和媒體"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"存取裝置上的相片、媒體和檔案"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"錄音"</string>

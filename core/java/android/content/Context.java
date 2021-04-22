@@ -4814,6 +4814,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
+    @SystemApi
     public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
 
     /**

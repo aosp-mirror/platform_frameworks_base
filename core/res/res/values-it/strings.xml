@@ -1692,10 +1692,10 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vuoi consentire a <xliff:g id="SERVICE">%1$s</xliff:g> di avere il controllo totale del tuo dispositivo?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se attivi <xliff:g id="SERVICE">%1$s</xliff:g>, il dispositivo non utilizzerà il blocco schermo per migliorare la crittografia dei dati."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Il pieno controllo è appropriato per le app che rispondono alle tue esigenze di accessibilità, ma non per gran parte delle app."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visualizza e controlla lo schermo"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Il controllo totale è appropriato per le app che rispondono alle tue esigenze di accessibilità, ma non per gran parte delle app."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visualizzare e controllare lo schermo"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Può leggere i contenuti presenti sullo schermo e mostrare i contenuti su altre app."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Visualizza ed esegui azioni"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Visualizzare ed eseguire azioni"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Può tenere traccia delle tue interazioni con un\'app o un sensore hardware e interagire con app per tuo conto."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Consenti"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rifiuta"</string>
@@ -2274,5 +2274,5 @@
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Icona dell\'applicazione"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Immagine del branding dell\'applicazione"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Controlla le impostazioni di accesso"</string>
-    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> può visualizzare e controllare il tuo schermo. Tocca per esaminare."</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> può visualizzare e controllare il tuo schermo. Tocca per verificare."</string>
 </resources>

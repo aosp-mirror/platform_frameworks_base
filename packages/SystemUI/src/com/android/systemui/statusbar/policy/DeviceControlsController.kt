@@ -24,7 +24,7 @@ interface DeviceControlsController {
         /**
          * If controls become available, initiate this callback with the desired position
          */
-        fun onControlsAvailable(position: Int)
+        fun onControlsUpdate(position: Int?)
     }
 
     /** Add callback, supporting only a single callback at once */

@@ -83,13 +83,6 @@ class EnterSplitScreenLaunchToSide(
     // b/169271943
     fun dockedStackDividerBecomesVisible() = testSpec.dockedStackDividerBecomesVisible()
 
-    @FlakyTest(bugId = 178447631)
-    @Test
-    // TODO(b/178447631) Remove Splash Screen from white list when flicker lib
-    //                   add a wait for splash screen be gone
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
     @Presubmit
     @Test
     fun appWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp.defaultWindowName)
@@ -101,11 +94,6 @@ class EnterSplitScreenLaunchToSide(
     @Presubmit
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
-
-    @Presubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

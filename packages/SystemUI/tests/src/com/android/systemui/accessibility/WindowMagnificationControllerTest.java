@@ -97,6 +97,9 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         doAnswer(invocation ->
                 wm.getMaximumWindowMetrics()
         ).when(mWindowManager).getMaximumWindowMetrics();
+        doAnswer(invocation ->
+                wm.getCurrentWindowMetrics()
+        ).when(mWindowManager).getCurrentWindowMetrics();
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
         doAnswer(invocation -> {
             mMirrorView = invocation.getArgument(0);
@@ -200,7 +203,6 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
                     Float.NaN);
-            Mockito.reset(mWindowManager);
         });
 
         mInstrumentation.runOnMainSync(() -> {

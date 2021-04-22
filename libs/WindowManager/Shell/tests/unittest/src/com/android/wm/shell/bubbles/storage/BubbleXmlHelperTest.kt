@@ -18,10 +18,12 @@ package com.android.wm.shell.bubbles.storage
 
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.testing.AndroidTestingRunner
+import android.util.SparseArray
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.ByteArrayInputStream
@@ -31,21 +33,65 @@ import java.io.ByteArrayOutputStream
 @RunWith(AndroidTestingRunner::class)
 class BubbleXmlHelperTest : ShellTestCase() {
 
-    private val bubbles = listOf(
-            // user, package, shortcut, notification key, height, res-height, title, taskId, locusId
-            BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0, null, 1),
-            BubbleEntity(10, "com.example.chat", "alice and bob", "k2", 0, 16537428, "title",
-                    2, null),
-            BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0, null,
+    private val user0Bubbles = listOf(
+            BubbleEntity(0, "com.example.messenger", "shortcut-1", "0k1", 120, 0, null, 1),
+            BubbleEntity(10, "com.example.chat", "alice and bob", "0k2", 0, 16537428, "title", 2,
+                    null),
+            BubbleEntity(0, "com.example.messenger", "shortcut-2", "0k3", 120, 0, null,
                     INVALID_TASK_ID, "l3")
     )
+
+    private val user1Bubbles = listOf(
+            BubbleEntity(1, "com.example.messenger", "shortcut-1", "1k1", 120, 0, null, 3),
+            BubbleEntity(12, "com.example.chat", "alice and bob", "1k2", 0, 16537428, "title", 4,
+                    null),
+            BubbleEntity(1, "com.example.messenger", "shortcut-2", "1k3", 120, 0, null,
+                    INVALID_TASK_ID, "l4")
+    )
+
+    private val bubbles = SparseArray<List<BubbleEntity>>()
+
+    // Checks that the contents of the two sparse arrays are the same.
+    companion object {
+        fun sparseArraysEqual(
+            one: SparseArray<List<BubbleEntity>>?,
+            two: SparseArray<List<BubbleEntity>>?
+        ): Boolean {
+            if (one == null && two == null) return true
+            if ((one == null) != (two == null)) return false
+            if (one!!.size() != two!!.size()) return false
+            for (i in 0 until one.size()) {
+                val k1 = one.keyAt(i)
+                val v1 = one.valueAt(i)
+                val k2 = two.keyAt(i)
+                val v2 = two.valueAt(i)
+                if (k1 != k2 && v1 != v2) {
+                    return false
+                }
+            }
+            return true
+        }
+    }
+
+    @Before
+    fun setup() {
+        bubbles.put(0, user0Bubbles)
+        bubbles.put(1, user1Bubbles)
+    }
 
     @Test
     fun testWriteXml() {
         val expectedEntries = """
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" tid="1" />
-<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" tid="2" />
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" tid="-1" l="l3" />
+<bs uid="0">
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="0k1" h="120" hid="0" tid="1" />
+<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="0k2" h="0" hid="16537428" t="title" tid="2" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="0k3" h="120" hid="0" tid="-1" l="l3" />
+</bs>
+<bs uid="1">
+<bb uid="1" pkg="com.example.messenger" sid="shortcut-1" key="1k1" h="120" hid="0" tid="3" />
+<bb uid="12" pkg="com.example.chat" sid="alice and bob" key="1k2" h="0" hid="16537428" t="title" tid="4" />
+<bb uid="1" pkg="com.example.messenger" sid="shortcut-2" key="1k3" h="120" hid="0" tid="-1" l="l4" />
+</bs>
         """.trimIndent()
         ByteArrayOutputStream().use {
             writeXml(it, bubbles)
@@ -59,19 +105,26 @@ class BubbleXmlHelperTest : ShellTestCase() {
     fun testReadXml() {
         val src = """
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
-<bs v="1">
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" tid="1" />
-<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" tid="2" />
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" tid="-1" l="l3" />
+<bs v="2">
+<bs uid="0">
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="0k1" h="120" hid="0" tid="1" />
+<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="0k2" h="0" hid="16537428" t="title" tid="2" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="0k3" h="120" hid="0" tid="-1" l="l3" />
+</bs>
+<bs uid="1">
+<bb uid="1" pkg="com.example.messenger" sid="shortcut-1" key="1k1" h="120" hid="0" tid="3" />
+<bb uid="12" pkg="com.example.chat" sid="alice and bob" key="1k2" h="0" hid="16537428" t="title" tid="4" />
+<bb uid="1" pkg="com.example.messenger" sid="shortcut-2" key="1k3" h="120" hid="0" tid="-1" l="l4" />
+</bs>
 </bs>
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
-        assertEquals("failed parsing bubbles from xml\n$src", bubbles, actual)
+        assertTrue("failed parsing bubbles from xml\n$src", sparseArraysEqual(bubbles, actual))
     }
 
-    // TODO: We should handle upgrades gracefully but this is v1
+    // V0 -> V1 happened prior to release / during dogfood so nothing is saved
     @Test
-    fun testUpgradeDropsPreviousData() {
+    fun testUpgradeFromV0DropsPreviousData() {
         val src = """
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
 <bs>
@@ -81,7 +134,7 @@ class BubbleXmlHelperTest : ShellTestCase() {
 </bs>
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
-        assertEquals("failed parsing bubbles from xml\n$src", emptyList<BubbleEntity>(), actual)
+        assertEquals("failed parsing bubbles from xml\n$src", 0, actual.size())
     }
 
     /**
@@ -91,24 +144,25 @@ class BubbleXmlHelperTest : ShellTestCase() {
      */
     @Test
     fun testReadXMLWithoutTaskId() {
-        val expectedBubbles = listOf(
-                BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0, null,
-                        INVALID_TASK_ID),
-                BubbleEntity(10, "com.example.chat", "alice and bob", "k2", 0, 16537428, "title",
-                        INVALID_TASK_ID),
-                BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0, null,
-                        INVALID_TASK_ID)
-        )
+        val expectedBubbles = SparseArray<List<BubbleEntity>>()
+        expectedBubbles.put(0, listOf(
+                        BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0,
+                                null, INVALID_TASK_ID),
+                        BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0,
+                                null, INVALID_TASK_ID))
+                )
         val src = """
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
-<bs v="1">
+<bs v="2">
+<bs uid="0">
 <bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" />
-<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" />
 <bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" />
+</bs>
 </bs>
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
-        assertEquals("failed parsing bubbles from xml\n$src", expectedBubbles, actual)
+        assertTrue("failed parsing bubbles from xml\n$src",
+                sparseArraysEqual(expectedBubbles, actual))
     }
 
     /**
@@ -117,23 +171,45 @@ class BubbleXmlHelperTest : ShellTestCase() {
      */
     @Test
     fun testXMLWithoutLocusToLocus() {
-        val expectedBubbles = listOf(
-            BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0, null,
-                    INVALID_TASK_ID, null),
-            BubbleEntity(10, "com.example.chat", "alice and bob", "k2", 0, 16537428, "title",
-                    INVALID_TASK_ID, null),
-            BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0, null,
-                    INVALID_TASK_ID, null)
+        val expectedBubbles = SparseArray<List<BubbleEntity>>()
+        expectedBubbles.put(0, listOf(
+                BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0,
+                        null, INVALID_TASK_ID),
+                BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0,
+                        null, INVALID_TASK_ID))
         )
         val src = """
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
 <bs v="1">
 <bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" />
-<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" />
 <bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" />
 </bs>
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
-        assertEquals("failed parsing bubbles from xml\n$src", expectedBubbles, actual)
+        assertTrue("failed parsing bubbles from xml\n$src",
+                sparseArraysEqual(expectedBubbles, actual))
+    }
+
+    @Test
+    fun testUpgradeToV2SavesPreviousData() {
+        val src = """
+ <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+ <bs v="1">
+ <bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" />
+ <bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" />
+ <bb uid="2" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" />
+  <bb uid="0" pkg="com.example.messenger" sid="shortcut-4" key="k4" h="0" hid="16537428" />
+ </bs>
+        """.trimIndent()
+        val expectedBubbles = SparseArray<List<BubbleEntity>>()
+        expectedBubbles.put(0, listOf(
+                BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0,
+                        null, INVALID_TASK_ID, null),
+                BubbleEntity(0, "com.example.messenger", "shortcut-4", "k4", 0, 16537428,
+                        null, INVALID_TASK_ID, null))
+        )
+        val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
+        assertTrue("failed parsing bubbles from xml\n$src",
+                sparseArraysEqual(expectedBubbles, actual))
     }
 }
