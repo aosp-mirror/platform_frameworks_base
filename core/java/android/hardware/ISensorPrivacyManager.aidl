@@ -24,6 +24,8 @@ interface ISensorPrivacyManager {
     // the ones in
     //   frameworks/native/libs/sensorprivacy/aidl/android/hardware/ISensorPrivacyManager.aidl
     // =============== Beginning of transactions used on native side as well ======================
+    boolean supportsSensorToggle(int sensor);
+
     void addSensorPrivacyListener(in ISensorPrivacyListener listener);
 
     void addIndividualSensorPrivacyListener(int userId, int sensor,
