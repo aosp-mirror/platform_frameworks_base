@@ -445,6 +445,14 @@ public final class Dataset implements Parcelable {
          * <p>For a given field, either a {@link AutofillValue value} or content can be filled, but
          * not both. Furthermore, when filling content, only a single field can be filled.
          *
+         * <p>The provided {@link ClipData} can contain content URIs (e.g. a URI for an image).
+         * The augmented autofill provider setting the content here must itself have at least
+         * read permissions to any passed content URIs. If the user accepts the suggestion backed
+         * by the content URI(s), the platform will automatically grant read URI permissions to
+         * the app being autofilled, just before passing the content URI(s) to it. The granted
+         * permissions will be transient and tied to the lifecycle of the activity being filled
+         * (when the activity finishes, permissions will automatically be revoked by the platform).
+         *
          * @param id id returned by
          * {@link android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
          * @param content content to be autofilled. Pass {@code null} if you do not have the content
