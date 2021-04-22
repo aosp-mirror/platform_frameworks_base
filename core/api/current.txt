@@ -32949,6 +32949,7 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize NA_QUARTO;
     field @NonNull public static final android.print.PrintAttributes.MediaSize NA_SUPER_B;
     field public static final android.print.PrintAttributes.MediaSize NA_TABLOID;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize OE_PHOTO_L;
     field public static final android.print.PrintAttributes.MediaSize OM_DAI_PA_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_JUURO_KU_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_PA_KAI;
