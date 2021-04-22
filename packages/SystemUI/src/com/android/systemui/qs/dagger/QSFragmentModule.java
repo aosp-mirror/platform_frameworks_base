@@ -129,7 +129,7 @@ public interface QSFragmentModule {
             @QSThemedContext LayoutInflater layoutInflater,
             QSPanel qsPanel
     ) {
-        return layoutInflater.inflate(R.layout.quick_settings_footer, qsPanel, false);
+        return layoutInflater.inflate(R.layout.quick_settings_security_footer, qsPanel, false);
     }
 
     /** */
