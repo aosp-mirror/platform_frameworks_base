@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<com.android.systemui.biometrics.AuthBiometricFaceToUdfpsView
+<com.android.systemui.biometrics.AuthBiometricFaceToFingerprintView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -22,4 +22,4 @@
 
     <include layout="@layout/auth_biometric_contents"/>
 
-</com.android.systemui.biometrics.AuthBiometricFaceToUdfpsView>
+</com.android.systemui.biometrics.AuthBiometricFaceToFingerprintView>
