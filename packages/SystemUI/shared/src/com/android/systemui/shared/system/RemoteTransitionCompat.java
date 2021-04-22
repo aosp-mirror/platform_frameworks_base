@@ -25,6 +25,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
@@ -65,7 +66,8 @@ public class RemoteTransitionCompat implements Parcelable {
             @NonNull Executor executor) {
         mTransition = new IRemoteTransition.Stub() {
             @Override
-            public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+            public void startAnimation(IBinder transition, TransitionInfo info,
+                    SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishedCallback) {
                 final Runnable finishAdapter = () ->  {
                     try {
@@ -74,7 +76,22 @@ public class RemoteTransitionCompat implements Parcelable {
                         Log.e(TAG, "Failed to call transition finished callback", e);
                     }
                 };
-                executor.execute(() -> runner.startAnimation(info, t, finishAdapter));
+                executor.execute(() -> runner.startAnimation(transition, info, t, finishAdapter));
+            }
+
+            @Override
+            public void mergeAnimation(IBinder transition, TransitionInfo info,
+                    SurfaceControl.Transaction t, IBinder mergeTarget,
+                    IRemoteTransitionFinishedCallback finishedCallback) {
+                final Runnable finishAdapter = () ->  {
+                    try {
+                        finishedCallback.onTransitionFinished(null /* wct */);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Failed to call transition finished callback", e);
+                    }
+                };
+                executor.execute(() -> runner.mergeAnimation(transition, info, t, mergeTarget,
+                        finishAdapter));
             }
         };
     }
@@ -84,7 +101,8 @@ public class RemoteTransitionCompat implements Parcelable {
             RecentsAnimationControllerCompat controller) {
         mTransition = new IRemoteTransition.Stub() {
             @Override
-            public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+            public void startAnimation(IBinder transition, TransitionInfo info,
+                    SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishedCallback) {
                 final RemoteAnimationTargetCompat[] apps =
                         RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */);
@@ -112,6 +130,13 @@ public class RemoteTransitionCompat implements Parcelable {
                         new RecentsControllerWrap(controller, finishedCallback, pausingTask);
                 recents.onAnimationStart(wrapControl, apps, wallpapers, new Rect(0, 0, 0, 0),
                         new Rect());
+            }
+
+            @Override
+            public void mergeAnimation(IBinder transition, TransitionInfo info,
+                    SurfaceControl.Transaction t, IBinder mergeTarget,
+                    IRemoteTransitionFinishedCallback finishedCallback) {
+                // TODO: hook up merge to onTaskAppeared. Until then, just ignore incoming merges.
             }
         };
     }

@@ -82,15 +82,36 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             if (mRemote.asBinder() != null) {
                 mRemote.asBinder().linkToDeath(remoteDied, 0 /* flags */);
             }
-            mRemote.startAnimation(info, t, cb);
+            mRemote.startAnimation(transition, info, t, cb);
         } catch (RemoteException e) {
+            Log.e(Transitions.TAG, "Error running remote transition.", e);
             if (mRemote.asBinder() != null) {
                 mRemote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
             }
-            Log.e(Transitions.TAG, "Error running remote transition.", e);
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         }
         return true;
+    }
+
+    @Override
+    public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Using registered One-shot remote"
+                + " transition %s for %s.", mRemote, transition);
+
+        IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
+            @Override
+            public void onTransitionFinished(WindowContainerTransaction wct) {
+                mMainExecutor.execute(
+                        () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
+            }
+        };
+        try {
+            mRemote.mergeAnimation(transition, info, t, mergeTarget, cb);
+        } catch (RemoteException e) {
+            Log.e(Transitions.TAG, "Error merging remote transition.", e);
+        }
     }
 
     @Override
