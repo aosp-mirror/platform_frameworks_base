@@ -28,6 +28,7 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -48,6 +49,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Tests for the {@link DisplayAreaPolicy}.
@@ -181,6 +183,43 @@ public class DisplayAreaPolicyTests extends WindowTestsBase {
 
         assertTaskDisplayAreasOrder(policy, taskDisplayArea4, taskDisplayArea3, taskDisplayArea2,
                 taskDisplayArea5, taskDisplayArea1);
+    }
+
+    @Test
+    public void testTaskDisplayAreasCanHostHomeTask() {
+        final WindowManagerService wms = mWm;
+        final DisplayContent displayContent = mock(DisplayContent.class);
+        doReturn(true).when(displayContent).isTrusted();
+        doReturn(true).when(displayContent).supportsSystemDecorations();
+        final RootDisplayArea root = new SurfacelessDisplayAreaRoot(wms);
+        final TaskDisplayArea taskDisplayAreaWithHome = new TaskDisplayArea(displayContent, wms,
+                "Tasks1", FEATURE_DEFAULT_TASK_CONTAINER);
+        final TaskDisplayArea taskDisplayAreaWithNoHome = new TaskDisplayArea(displayContent, wms,
+                "Tasks2", FEATURE_VENDOR_FIRST + 1, false, false);
+        final DisplayArea.Tokens ime = new DisplayArea.Tokens(wms, ABOVE_TASKS, "Ime");
+        final DisplayAreaPolicy policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(root)
+                        .setImeContainer(ime)
+                        .setTaskDisplayAreas(Lists.newArrayList(taskDisplayAreaWithHome,
+                                taskDisplayAreaWithNoHome))
+                )
+                .build(wms);
+        assertTaskDisplayAreaPresentAndCanHaveHome(policy, FEATURE_DEFAULT_TASK_CONTAINER, true);
+        assertTaskDisplayAreaPresentAndCanHaveHome(policy, FEATURE_VENDOR_FIRST + 1, false);
+        final Task stackHome = taskDisplayAreaWithHome.getOrCreateRootHomeTask(true);
+        final Task stackNoHome = taskDisplayAreaWithNoHome.getOrCreateRootHomeTask(true);
+        assertNotNull(stackHome);
+        assertNull(stackNoHome);
+    }
+
+    private void assertTaskDisplayAreaPresentAndCanHaveHome(DisplayAreaPolicy policy,
+                                                            int featureId,
+                                                            boolean canHaveHome) {
+        Optional<DisplayArea> optionalDisplayArea = policy.mRoot.mChildren
+                .stream().filter(displayArea -> displayArea.mFeatureId == featureId)
+                .findAny();
+        assertTrue(optionalDisplayArea.isPresent());
+        assertEquals(canHaveHome, optionalDisplayArea.get().asTaskDisplayArea().canHostHomeTask());
     }
 
     private void assertTaskDisplayAreasOrder(DisplayAreaPolicy policy,
