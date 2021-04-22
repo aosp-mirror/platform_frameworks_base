@@ -2118,8 +2118,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     void scheduleProcessStoppingAndFinishingActivitiesIfNeeded() {
-        if ((!mStoppingActivities.isEmpty() || !mFinishingActivities.isEmpty())
-                && !mHandler.hasMessages(PROCESS_STOPPING_AND_FINISHING_MSG)
+        if (mStoppingActivities.isEmpty() && mFinishingActivities.isEmpty()) {
+            return;
+        }
+        if (mRootWindowContainer.allResumedActivitiesIdle()) {
+            scheduleIdle();
+            return;
+        }
+        if (!mHandler.hasMessages(PROCESS_STOPPING_AND_FINISHING_MSG)
                 && mRootWindowContainer.allResumedActivitiesVisible()) {
             mHandler.sendEmptyMessage(PROCESS_STOPPING_AND_FINISHING_MSG);
         }
