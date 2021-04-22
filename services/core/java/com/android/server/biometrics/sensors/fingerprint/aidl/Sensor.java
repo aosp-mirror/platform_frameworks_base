@@ -179,7 +179,8 @@ class Sensor {
                 }
 
                 final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
-                acquisitionClient.onAcquired(info, vendorCode);
+                acquisitionClient.onAcquired(AidlConversionUtils.toFrameworkAcquiredInfo(info),
+                        vendorCode);
             });
         }
 
@@ -198,7 +199,7 @@ class Sensor {
                 }
 
                 final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-                errorConsumer.onError(error, vendorCode);
+                errorConsumer.onError(AidlConversionUtils.toFrameworkError(error), vendorCode);
 
                 if (error == Error.HW_UNAVAILABLE) {
                     mCallback.onHardwareUnavailable();

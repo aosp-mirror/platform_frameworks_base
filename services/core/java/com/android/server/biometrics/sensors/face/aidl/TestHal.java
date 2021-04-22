@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors.face.aidl;
 
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.face.EnrollmentStageConfig;
 import android.hardware.biometrics.face.Error;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
@@ -54,6 +55,11 @@ public class TestHal extends IFace.Stub {
             public void revokeChallenge(long challenge) throws RemoteException {
                 Slog.w(TAG, "revokeChallenge: " + challenge);
                 cb.onChallengeRevoked(challenge);
+            }
+
+            @Override
+            public EnrollmentStageConfig[] getEnrollmentConfig(byte enrollmentType) {
+                return new EnrollmentStageConfig[0];
             }
 
             @Override
