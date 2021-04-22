@@ -62,10 +62,10 @@
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"گپ بااستفاده از حبابک‌ها"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"مکالمه‌های جدید به‌صورت نمادهای شناور یا حبابک‌ها نشان داده می‌شوند. برای باز کردن حبابک‌ها ضربه بزنید. برای جابه‌جایی، آن را بکشید."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"کنترل حبابک‌ها در هرزمانی"</string>
-    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"برای خاموش کردن «حبابک‌ها» از این برنامه، روی «مدیریت» ضربه بزنید"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"برای خاموش کردن حبابک‌ها از این برنامه، روی «مدیریت» ضربه بزنید"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"متوجه‌ام"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"هیچ حبابک جدیدی وجود ندارد"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"حبابک‌ها اخیر و حبابک‌ها ردشده اینجا ظاهر خواهند شد"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"حبابک‌های اخیر و حبابک‌های ردشده اینجا ظاهر خواهند شد"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"حباب"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"مدیریت"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"حبابک رد شد."</string>
