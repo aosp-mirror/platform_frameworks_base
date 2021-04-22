@@ -220,7 +220,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"വയർലെസ് ഓണാക്കുക"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"വയർലെസ്സ് ഓഫാക്കുക"</string>
     <string name="screen_lock" msgid="2072642720826409809">"സ്‌ക്രീൻ ലോക്ക്"</string>
-    <string name="power_off" msgid="4111692782492232778">"പവർ ഓഫാക്കുക"</string>
+    <string name="power_off" msgid="4111692782492232778">"പവർ ഓഫ്"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"റിംഗർ ഓഫുചെയ്യുക"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"റിംഗർ വൈബ്രേറ്റുചെയ്യുക"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"റിംഗർ ഓൺചെയ്യുക"</string>
@@ -244,10 +244,10 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ഓപ്‌ഷനുകൾ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ഫോൺ ഓപ്‌ഷനുകൾ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"സ്‌ക്രീൻ ലോക്ക്"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"പവർ ഓഫാക്കുക"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"പവർ ഓഫ്"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"പവർ"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"റീസ്റ്റാർട്ട് ചെയ്യുക"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"അടിയന്തരാവശ്യം"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"എമർജൻസി"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"സെഷൻ അവസാനിപ്പിക്കുക"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"സ്‌ക്രീൻഷോട്ട്"</string>
@@ -1194,7 +1194,7 @@
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ആക്‌സസ് നൽകുക"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"ഇത് ഉപയോഗിച്ച് എഡിറ്റുചെയ്യുക"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s ഉപയോഗിച്ച് എഡിറ്റുചെയ്യുക"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"എഡിറ്റുചെയ്യുക"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"പങ്കിടുക"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$s എന്നതുമായി പങ്കിടുക"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"പങ്കിടുക"</string>
@@ -1497,7 +1497,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"നെറ്റ്‍വര്‍ക്ക് അല്ലെങ്കിൽ VPN ക്രമീകരണം മാറ്റുക"</string>
     <string name="upload_file" msgid="8651942222301634271">"ഫയല്‍‌ തിരഞ്ഞെടുക്കുക"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"ഫയലൊന്നും തിരഞ്ഞെടുത്തില്ല"</string>
-    <string name="reset" msgid="3865826612628171429">"പുനഃസജ്ജമാക്കുക"</string>
+    <string name="reset" msgid="3865826612628171429">"റീസെറ്റ് ചെയ്യുക"</string>
     <string name="submit" msgid="862795280643405865">"സമർപ്പിക്കുക"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"ഡ്രൈവിംഗ് ആപ്പ് റൺ ചെയ്യുകയാണ്"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"ഡ്രൈവിംഗ് ആപ്പിൽ നിന്ന് പുറത്തുകടക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
@@ -1572,7 +1572,7 @@
     <string name="storage_usb_drive" msgid="448030813201444573">"USB ഡ്രൈവ്"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ഡ്രൈവ്"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB സ്റ്റോറേജ്"</string>
-    <string name="extract_edit_menu_button" msgid="63954536535863040">"എഡിറ്റുചെയ്യുക"</string>
+    <string name="extract_edit_menu_button" msgid="63954536535863040">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"ഡാറ്റാ മുന്നറിയിപ്പ്"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"നിങ്ങൾ ഡാറ്റയുടെ <xliff:g id="APP">%s</xliff:g> ഉപയോഗിച്ചു"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"മൊബൈൽ ഡാറ്റ പരിധി എത്തി"</string>
@@ -1929,8 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"അവസാനിപ്പിക്കുക"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"മറുപടി നൽകുക"</string>
-    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
-    <skip />
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"വീഡിയോ"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"നിരസിക്കുക"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"കോൾ നിർത്തുക"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ഇൻകമിംഗ് കോൾ"</string>

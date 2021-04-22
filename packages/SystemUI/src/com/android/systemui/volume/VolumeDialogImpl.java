@@ -53,6 +53,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -95,6 +96,8 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
 import com.android.settingslib.Utils;
@@ -162,6 +165,9 @@ public class VolumeDialogImpl implements VolumeDialog,
     private ViewGroup mDialogRowsView;
     private ViewGroup mRinger;
 
+    @Nullable private View mRingerAndRowsContainer;
+    @Nullable private Drawable mRingerAndRowsContainerBackground;
+
     private ViewGroup mSelectedRingerContainer;
     private ImageView mSelectedRingerIcon;
 
@@ -182,6 +188,12 @@ public class VolumeDialogImpl implements VolumeDialog,
     private final ValueAnimator mRingerDrawerIconColorAnimator = ValueAnimator.ofFloat(0f, 1f);
     private ImageView mRingerDrawerIconAnimatingSelected;
     private ImageView mRingerDrawerIconAnimatingDeselected;
+
+    /**
+     * Animates the volume dialog's background drawable bounds upwards, to match the height of the
+     * expanded ringer drawer.
+     */
+    private final ValueAnimator mAnimateUpBackgroundToMatchDrawer = ValueAnimator.ofFloat(1f, 0f);
 
     private boolean mIsRingerDrawerOpen = false;
 
@@ -586,19 +598,25 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         row.anim = null;
 
+        mRingerAndRowsContainer = mDialogView.findViewById(
+                R.id.volume_dialog_ringer_and_rows_container);
+
+        if (mRingerAndRowsContainer != null) {
+            // Wait for layout so the background bounds are set, then set the background top to the
+            // ringer drawer closed position.
+            mRingerAndRowsContainer.post(() -> {
+                final LayerDrawable bgWrapper =
+                        ((LayerDrawable) mRingerAndRowsContainer.getBackground());
+
+                if (bgWrapper != null) {
+                    mRingerAndRowsContainerBackground = bgWrapper.getDrawable(0);
+                    setRingerAndRowsBackgroundTop(1f /* closedAmount */);
+                }
+            });
+        }
+
         final LayerDrawable seekbarDrawable =
                 (LayerDrawable) mContext.getDrawable(R.drawable.volume_row_seekbar);
-
-        final LayerDrawable seekbarBgDrawable =
-                (LayerDrawable) seekbarDrawable.findDrawableByLayerId(android.R.id.background);
-
-        row.sliderBgSolid = seekbarBgDrawable.findDrawableByLayerId(
-                R.id.volume_seekbar_background_solid);
-
-        final Drawable sliderBgIcon = seekbarBgDrawable.findDrawableByLayerId(
-                        R.id.volume_seekbar_background_icon);
-        row.sliderBgIcon =  sliderBgIcon != null ? (AlphaTintDrawableWrapper)
-                ((RotateDrawable) sliderBgIcon).getDrawable() : null;
 
         final LayerDrawable seekbarProgressDrawable = (LayerDrawable)
                 ((RoundedCornerProgressDrawable) seekbarDrawable.findDrawableByLayerId(
@@ -679,10 +697,10 @@ public class VolumeDialogImpl implements VolumeDialog,
                     mDialogView.getPaddingLeft(),
                     mDialogView.getPaddingTop(),
                     mDialogView.getPaddingRight(),
-                    mDialogView.getPaddingBottom() + (mRingerCount - 1) * mRingerDrawerItemSize);
+                    mDialogView.getPaddingBottom() + getRingerDrawerOpenExtraHeight());
         } else {
             mDialogView.setPadding(
-                    mDialogView.getPaddingLeft() + (mRingerCount - 1) * mRingerDrawerItemSize,
+                    mDialogView.getPaddingLeft() + getRingerDrawerOpenExtraHeight(),
                     mDialogView.getPaddingTop(),
                     mDialogView.getPaddingRight(),
                     mDialogView.getPaddingBottom());
@@ -731,6 +749,9 @@ public class VolumeDialogImpl implements VolumeDialog,
             }
         });
         mRingerDrawerIconColorAnimator.setDuration(DRAWER_ANIMATION_DURATION_SHORT);
+
+        mAnimateUpBackgroundToMatchDrawer.addUpdateListener(valueAnimator ->
+                setRingerAndRowsBackgroundTop((float) valueAnimator.getAnimatedValue()));
     }
 
     private ImageView getDrawerIconViewForMode(int mode) {
@@ -789,14 +810,16 @@ public class VolumeDialogImpl implements VolumeDialog,
         mRingerDrawerContainer.setAlpha(0f);
         mRingerDrawerContainer.setVisibility(VISIBLE);
 
+        final int ringerDrawerAnimationDuration = mState.ringerModeInternal == RINGER_MODE_VIBRATE
+                ? DRAWER_ANIMATION_DURATION_SHORT
+                : DRAWER_ANIMATION_DURATION;
+
         // Animate the drawer up and visible.
         mRingerDrawerContainer.animate()
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 // Vibrate is way farther up, so give the selected ringer icon a head start if
                 // vibrate is selected.
-                .setDuration(mState.ringerModeInternal == RINGER_MODE_VIBRATE
-                        ? DRAWER_ANIMATION_DURATION_SHORT
-                        : DRAWER_ANIMATION_DURATION)
+                .setDuration(ringerDrawerAnimationDuration)
                 .setStartDelay(mState.ringerModeInternal == RINGER_MODE_VIBRATE
                         ? DRAWER_ANIMATION_DURATION - DRAWER_ANIMATION_DURATION_SHORT
                         : 0)
@@ -811,6 +834,10 @@ public class VolumeDialogImpl implements VolumeDialog,
                 .setDuration(DRAWER_ANIMATION_DURATION)
                 .withEndAction(() ->
                         getDrawerIconViewForMode(mState.ringerModeInternal).setVisibility(VISIBLE));
+
+        mAnimateUpBackgroundToMatchDrawer.setDuration(ringerDrawerAnimationDuration);
+        mAnimateUpBackgroundToMatchDrawer.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mAnimateUpBackgroundToMatchDrawer.start();
 
         if (!isLandscape()) {
             mSelectedRingerContainer.animate()
@@ -852,6 +879,10 @@ public class VolumeDialogImpl implements VolumeDialog,
                     .translationX(mRingerDrawerItemSize * 2)
                     .start();
         }
+
+        mAnimateUpBackgroundToMatchDrawer.setDuration(DRAWER_ANIMATION_DURATION);
+        mAnimateUpBackgroundToMatchDrawer.setInterpolator(Interpolators.FAST_OUT_SLOW_IN_REVERSE);
+        mAnimateUpBackgroundToMatchDrawer.reverse();
 
         mSelectedRingerContainer.animate()
                 .translationX(0f)
@@ -1524,7 +1555,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
         final ColorStateList colorTint = useActiveColoring
                 ? Utils.getColorAccent(mContext)
-                : Utils.getColorAttr(mContext, android.R.attr.colorForeground);
+                : Utils.getColorAttr(mContext, com.android.internal.R.attr.colorAccentSecondary);
         final int alpha = useActiveColoring
                 ? Color.alpha(colorTint.getDefaultColor())
                 : getAlphaAttr(android.R.attr.secondaryContentAlpha);
@@ -1532,18 +1563,24 @@ public class VolumeDialogImpl implements VolumeDialog,
         final ColorStateList bgTint = Utils.getColorAttr(
                 mContext, android.R.attr.colorBackgroundFloating);
 
+        final ColorStateList inverseTextTint = Utils.getColorAttr(
+                mContext, com.android.internal.R.attr.textColorPrimaryInverse);
+
         row.sliderProgressSolid.setTintList(colorTint);
         if (row.sliderBgIcon != null) {
             row.sliderBgIcon.setTintList(colorTint);
         }
 
-        row.sliderBgSolid.setTintList(bgTint);
+        if (row.sliderBgSolid != null) {
+            row.sliderBgSolid.setTintList(bgTint);
+        }
+
         if (row.sliderProgressIcon != null) {
             row.sliderProgressIcon.setTintList(bgTint);
         }
 
         if (row.icon != null) {
-            row.icon.setImageTintList(colorTint);
+            row.icon.setImageTintList(inverseTextTint);
             row.icon.setImageAlpha(alpha);
         }
 
@@ -1680,6 +1717,28 @@ public class VolumeDialogImpl implements VolumeDialog,
                 button.setPressed(false);
             }
         };
+    }
+
+    /**
+     * Return the height of the 1-2 extra ringer options that are made visible when the ringer
+     * drawer is opened.
+     */
+    private int getRingerDrawerOpenExtraHeight() {
+        return (mRingerCount - 1) * mRingerDrawerItemSize;
+    }
+
+    /**
+     * Sets the top of the background drawable behind the container view for the ringer icon and the
+     * volume rows, depending on whether the ringer drawer is open or closed.
+     */
+    private void setRingerAndRowsBackgroundTop(float drawerClosedAmount) {
+        if (mRingerAndRowsContainerBackground == null) {
+            return;
+        }
+
+        final Rect bounds = mRingerAndRowsContainerBackground.copyBounds();
+        bounds.top = (int) (drawerClosedAmount * getRingerDrawerOpenExtraHeight());
+        mRingerAndRowsContainerBackground.setBounds(bounds);
     }
 
     private final VolumeDialogController.Callbacks mControllerCallbackH

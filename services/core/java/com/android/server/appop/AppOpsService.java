@@ -565,6 +565,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 } else if (mActivityManagerInternal != null
                         && mActivityManagerInternal.isPendingTopUid(uid)) {
                     return MODE_ALLOWED;
+                } else if (mActivityManagerInternal != null
+                        && mActivityManagerInternal.isTempAllowlistedForFgsWhileInUse(uid)) {
+                    return MODE_ALLOWED;
                 } else if (state <= UID_STATE_TOP) {
                     // process is in TOP.
                     return MODE_ALLOWED;
@@ -3506,9 +3509,19 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public SyncNotedAppOp startOperation(IBinder clientId, int code, int uid, String packageName,
-            String attributionTag, boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
+    public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+            @Nullable String packageName, @Nullable String attributionTag,
+            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
             String message, boolean shouldCollectMessage) {
+        return mCheckOpsDelegateDispatcher.startOperation(token, code, uid, packageName,
+                attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                shouldCollectMessage);
+    }
+
+    private SyncNotedAppOp startOperationImpl(@NonNull IBinder clientId, int code, int uid,
+            @Nullable String packageName, @Nullable String attributionTag,
+            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, @NonNull String message,
+            boolean shouldCollectMessage) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
@@ -3532,7 +3545,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         return startOperationUnchecked(clientId, code, uid, packageName, attributionTag,
                 Process.INVALID_UID, null, null, OP_FLAG_SELF, startIfModeDefault,
                 shouldCollectAsyncNotedOp, message, shouldCollectMessage, false);
-
     }
 
     @Override
@@ -6970,8 +6982,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public SyncNotedAppOp noteProxyOperation(int code, AttributionSource attributionSource,
-                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-                boolean skipProxyOperation) {
+                boolean shouldCollectAsyncNotedOp, @Nullable String message,
+                boolean shouldCollectMessage, boolean skipProxyOperation) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
                     return mPolicy.noteProxyOperation(code, attributionSource,
@@ -6998,6 +7010,38 @@ public class AppOpsService extends IAppOpsService.Stub {
             return mCheckOpsDelegate.noteProxyOperation(code, attributionSource,
                     shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation,
                     AppOpsService.this::noteProxyOperationImpl);
+        }
+
+        public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+                @Nullable String packageName, @NonNull String attributionTag,
+                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message, boolean shouldCollectMessage) {
+            if (mPolicy != null) {
+                if (mCheckOpsDelegate != null) {
+                    return mPolicy.startOperation(token, code, uid, packageName,
+                            attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage, this::startDelegateOperationImpl);
+                } else {
+                    return mPolicy.startOperation(token, code, uid, packageName, attributionTag,
+                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage, AppOpsService.this::startOperationImpl);
+                }
+            } else if (mCheckOpsDelegate != null) {
+                return startDelegateOperationImpl(token, code, uid, packageName, attributionTag,
+                        startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                        shouldCollectMessage);
+            }
+            return startOperationImpl(token, code, uid, packageName, attributionTag,
+                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+        }
+
+        private SyncNotedAppOp startDelegateOperationImpl(IBinder token, int code, int uid,
+                @Nullable String packageName, @Nullable String attributionTag,
+                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
+                boolean shouldCollectMessage) {
+            return mCheckOpsDelegate.startOperation(token, code, uid, packageName, attributionTag,
+                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                    AppOpsService.this::startOperationImpl);
         }
 
         public SyncNotedAppOp startProxyOperation(IBinder clientId, int code,

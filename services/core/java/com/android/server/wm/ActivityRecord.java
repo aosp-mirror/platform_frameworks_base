@@ -1419,14 +1419,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mLetterboxUiController.isFullyTransparentBarAllowed(rect);
     }
 
-    /**
-     * @return {@code true} if there is a letterbox and any part of that letterbox overlaps with
-     * the given {@code rect}.
-     */
-    boolean isLetterboxOverlappingWith(Rect rect) {
-        return mLetterboxUiController.isLetterboxOverlappingWith(rect);
-    }
-
     static class Token extends IApplicationToken.Stub {
         private WeakReference<ActivityRecord> weakActivity;
         private final String name;
@@ -5162,6 +5154,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Task#ensureActivitiesVisible will bring the activity to a proper
         // active state.
         if (!isState(STARTED, RESUMED, PAUSED, STOPPED, STOPPING)
+                // TODO (b/185876784) Check could we remove the check condition
+                //  mTranslucentActivityWaiting != null here
                 || getRootTask().mTranslucentActivityWaiting != null) {
             return false;
         }
@@ -7326,11 +7320,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (info != null && info.alwaysSandboxDisplayApis()) {
             return true;
         }
-        // Max bounds should be sandboxed where an activity is letterboxed (activity bounds will be
-        // smaller than task bounds).
-        if (!matchParentBounds()) {
-            return true;
-        }
         // Max bounds should be sandboxed when an activity should have compatDisplayInsets, and it
         // will keep the same bounds and screen configuration when it was first launched regardless
         // how its parent window changes, so that the sandbox API will provide a consistent result.
@@ -7338,8 +7327,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return true;
         }
 
-        // No need to sandbox for resizable apps in multi-window because resizableActivity=true
-        // indicates that they support multi-window.
+        // No need to sandbox for resizable apps in (including in multi-window) because
+        // resizableActivity=true indicates that they support multi-window. Likewise, do not sandbox
+        // for activities in letterbox since the activity has declared it can handle resizing.
         return false;
     }
 
@@ -7814,7 +7804,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             configChangeFlags = 0;
             return;
         }
-
+        // Do not waiting for translucent activity if it is going to relaunch.
+        final Task rootTask = getRootTask();
+        if (rootTask != null && rootTask.mTranslucentActivityWaiting == this) {
+            rootTask.checkTranslucentActivityWaiting(null);
+        }
         final boolean andResume = shouldBeResumed(null /*activeActivity*/);
         List<ResultInfo> pendingResults = null;
         List<ReferrerIntent> pendingNewIntents = null;

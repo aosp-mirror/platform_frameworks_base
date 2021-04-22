@@ -24,7 +24,6 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.UserHandle
-import android.provider.Settings
 import android.service.controls.Control
 import android.service.controls.DeviceTypes
 import android.service.controls.actions.ControlAction
@@ -141,11 +140,6 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        Settings.Secure.putInt(mContext.contentResolver,
-                ControlsControllerImpl.CONTROLS_AVAILABLE, 1)
-        Settings.Secure.putIntForUser(mContext.contentResolver,
-                ControlsControllerImpl.CONTROLS_AVAILABLE, 1, otherUser)
-
         `when`(userTracker.userHandle).thenReturn(UserHandle.of(user))
 
         delayableExecutor = FakeExecutor(FakeSystemClock())
@@ -172,7 +166,6 @@ class ControlsControllerImplTest : SysuiTestCase() {
         )
         controller.auxiliaryPersistenceWrapper = auxiliaryPersistenceWrapper
 
-        assertTrue(controller.available)
         verify(broadcastDispatcher).registerReceiver(
                 capture(broadcastReceiverCaptor), any(), any(), eq(UserHandle.ALL))
 
@@ -527,58 +520,6 @@ class ControlsControllerImplTest : SysuiTestCase() {
         verify(listingController).changeUser(UserHandle.of(otherUser))
         assertTrue(controller.getFavorites().isEmpty())
         assertEquals(otherUser, controller.currentUserId)
-        assertTrue(controller.available)
-    }
-
-    @Test
-    fun testDisableFeature_notAvailable() {
-        Settings.Secure.putIntForUser(mContext.contentResolver,
-                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, user)
-        controller.settingObserver.onChange(false, listOf(ControlsControllerImpl.URI), 0, 0)
-        assertFalse(controller.available)
-    }
-
-    @Test
-    fun testDisableFeature_clearFavorites() {
-        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
-        delayableExecutor.runAllReady()
-
-        assertFalse(controller.getFavorites().isEmpty())
-
-        Settings.Secure.putIntForUser(mContext.contentResolver,
-                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, user)
-        controller.settingObserver.onChange(false, listOf(ControlsControllerImpl.URI), 0, user)
-        assertTrue(controller.getFavorites().isEmpty())
-    }
-
-    @Test
-    fun testDisableFeature_noChangeForNotCurrentUser() {
-        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
-        delayableExecutor.runAllReady()
-
-        Settings.Secure.putIntForUser(mContext.contentResolver,
-                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, otherUser)
-        controller.settingObserver.onChange(false, listOf(ControlsControllerImpl.URI), 0, otherUser)
-
-        assertTrue(controller.available)
-        assertFalse(controller.getFavorites().isEmpty())
-    }
-
-    @Test
-    fun testCorrectUserSettingOnUserChange() {
-        Settings.Secure.putIntForUser(mContext.contentResolver,
-                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, otherUser)
-
-        val intent = Intent(Intent.ACTION_USER_SWITCHED).apply {
-            putExtra(Intent.EXTRA_USER_HANDLE, otherUser)
-        }
-        val pendingResult = mock(BroadcastReceiver.PendingResult::class.java)
-        `when`(pendingResult.sendingUserId).thenReturn(otherUser)
-        broadcastReceiverCaptor.value.pendingResult = pendingResult
-
-        broadcastReceiverCaptor.value.onReceive(mContext, intent)
-
-        assertFalse(controller.available)
     }
 
     @Test

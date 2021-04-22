@@ -40,10 +40,12 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.IWindowManager;
+import android.view.View;
 import android.view.WindowManagerGlobal;
 import android.widget.Switch;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -311,7 +313,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (mTile.getState() == Tile.STATE_UNAVAILABLE) {
             return;
         }

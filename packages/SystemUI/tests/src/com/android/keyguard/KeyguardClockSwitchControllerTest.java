@@ -262,5 +262,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         public void registerDataProvider(BcSmartspaceDataPlugin plugin) { }
 
         public void setPrimaryTextColor(int color) { }
+
+        public void setDozeAmount(float amount) { }
     }
 }

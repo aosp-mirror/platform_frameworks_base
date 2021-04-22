@@ -29,7 +29,10 @@ import android.provider.Settings.Global;
 import android.service.quicksettings.Tile;
 import android.sysprop.TelephonyProperties;
 import android.telephony.TelephonyManager;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -92,7 +95,7 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    public void handleClick() {
+    public void handleClick(@Nullable View view) {
         boolean airplaneModeEnabled = mState.value;
         MetricsLogger.action(mContext, getMetricsCategory(), !airplaneModeEnabled);
         if (!airplaneModeEnabled && TelephonyProperties.in_ecm_mode().orElse(false)) {

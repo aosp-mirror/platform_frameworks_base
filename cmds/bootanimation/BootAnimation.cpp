@@ -1210,9 +1210,12 @@ bool BootAnimation::movie() {
     return false;
 }
 
-bool BootAnimation::shouldStopPlayingPart(const Animation::Part& part, const int fadedFramesCount) {
+bool BootAnimation::shouldStopPlayingPart(const Animation::Part& part,
+                                          const int fadedFramesCount,
+                                          const int lastDisplayedProgress) {
     // stop playing only if it is time to exit and it's a partial part which has been faded out
-    return exitPending() && !part.playUntilComplete && fadedFramesCount >= part.framesToFadeCount;
+    return exitPending() && !part.playUntilComplete && fadedFramesCount >= part.framesToFadeCount &&
+        (lastDisplayedProgress == 0 || lastDisplayedProgress == 100);
 }
 
 bool BootAnimation::playAnimation(const Animation& animation) {
@@ -1239,7 +1242,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
 
         // process the part not only while the count allows but also if already fading
         for (int r=0 ; !part.count || r<part.count || fadedFramesCount > 0 ; r++) {
-            if (shouldStopPlayingPart(part, fadedFramesCount)) break;
+            if (shouldStopPlayingPart(part, fadedFramesCount, lastDisplayedProgress)) break;
 
             mCallbacks->playPart(i, part, r);
 
@@ -1256,7 +1259,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 (i == (pcount -1)) && currentProgress != 0;
 
             for (size_t j=0 ; j<fcount ; j++) {
-                if (shouldStopPlayingPart(part, fadedFramesCount)) break;
+                if (shouldStopPlayingPart(part, fadedFramesCount, lastDisplayedProgress)) break;
 
                 processDisplayEvents();
 
@@ -1355,6 +1358,10 @@ bool BootAnimation::playAnimation(const Animation& animation) {
 
             if (exitPending() && !part.count && mCurrentInset >= mTargetInset &&
                 !part.hasFadingPhase()) {
+                if (lastDisplayedProgress != 0 && lastDisplayedProgress != 100) {
+                    android::base::SetProperty(PROGRESS_PROP_NAME, "100");
+                    continue;
+                }
                 break; // exit the infinite non-fading part when it has been played at least once
             }
         }

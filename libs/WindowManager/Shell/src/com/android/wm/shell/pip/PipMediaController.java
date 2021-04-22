@@ -21,6 +21,7 @@ import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 import android.annotation.DrawableRes;
 import android.annotation.StringRes;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
@@ -210,13 +211,16 @@ public class PipMediaController {
     /**
      * Gets the set of media actions currently available.
      */
+    // This is due to using PlaybackState#isActive, which is added in API 31.
+    // It can be removed when min_sdk of the app is set to 31 or greater.
+    @SuppressLint("NewApi")
     private List<RemoteAction> getMediaActions() {
         if (mMediaController == null || mMediaController.getPlaybackState() == null) {
             return Collections.emptyList();
         }
 
         ArrayList<RemoteAction> mediaActions = new ArrayList<>();
-        boolean isPlaying = mMediaController.getPlaybackState().isActiveState();
+        boolean isPlaying = mMediaController.getPlaybackState().isActive();
         long actions = mMediaController.getPlaybackState().getActions();
 
         // Prev action

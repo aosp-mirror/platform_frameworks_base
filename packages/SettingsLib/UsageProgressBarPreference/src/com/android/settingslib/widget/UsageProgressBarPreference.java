@@ -113,7 +113,14 @@ public class UsageProgressBarPreference extends Preference {
 
     /** Set percentage of the progress bar. */
     public void setPercent(long usage, long total) {
-        if (total == 0L || usage >  total) {
+        if (usage >  total) {
+            return;
+        }
+        if (total == 0L) {
+            if (mPercent != 0) {
+                mPercent = 0;
+                notifyChanged();
+            }
             return;
         }
         final int percent = (int) (usage / (double) total * 100);

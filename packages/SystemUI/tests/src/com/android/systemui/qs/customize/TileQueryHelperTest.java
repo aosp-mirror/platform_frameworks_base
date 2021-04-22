@@ -34,7 +34,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -49,6 +48,7 @@ import android.util.ArraySet;
 import android.util.FeatureFlagUtils;
 import android.view.View;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -414,10 +414,10 @@ public class TileQueryHelperTest extends SysuiTestCase {
         }
 
         @Override
-        public void click() {}
+        public void click(@Nullable View view) {}
 
         @Override
-        public void secondaryClick() {}
+        public void secondaryClick(@Nullable View view) {}
 
         @Override
         public void longClick(@Nullable View view) {}

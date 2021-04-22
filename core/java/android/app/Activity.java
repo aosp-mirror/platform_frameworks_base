@@ -2813,6 +2813,29 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Called by the system when the activity is in PiP and has state changes.
+     *
+     * Compare to {@link #onPictureInPictureModeChanged(boolean, Configuration)}, which is only
+     * called when PiP mode changes (meaning, enters or exits PiP), this can be called at any time
+     * while the activity is in PiP mode. Therefore, all invocation can only happen after
+     * {@link #onPictureInPictureModeChanged(boolean, Configuration)} is called with true, and
+     * before {@link #onPictureInPictureModeChanged(boolean, Configuration)} is called with false.
+     * You would not need to worry about cases where this is called and the activity is not in
+     * Picture-In-Picture mode. For managing cases where the activity enters/exits
+     * Picture-in-Picture (e.g. resources clean-up on exit), use
+     * {@link #onPictureInPictureModeChanged(boolean, Configuration)}.
+     *
+     * The default state is everything declared in {@link PictureInPictureUiState} is false, such as
+     * {@link PictureInPictureUiState#isStashed()}.
+     *
+     * @param pipState the new Picture-in-Picture state.
+     */
+    public void onPictureInPictureUiStateChanged(@NonNull PictureInPictureUiState pipState) {
+        // Left deliberately empty. There should be no side effects if a direct
+        // subclass of Activity does not call super.
+    }
+
+    /**
      * Called by the system when the activity changes to and from picture-in-picture mode.
      *
      * @see android.R.attr#supportsPictureInPicture

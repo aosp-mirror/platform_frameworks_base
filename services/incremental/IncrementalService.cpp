@@ -2189,29 +2189,6 @@ bool IncrementalService::unregisterLoadingProgressListener(StorageId storage) {
     return removeTimedJobs(*mProgressUpdateJobQueue, storage);
 }
 
-bool IncrementalService::registerStorageHealthListener(
-        StorageId storage, const StorageHealthCheckParams& healthCheckParams,
-        StorageHealthListener healthListener) {
-    DataLoaderStubPtr dataLoaderStub;
-    {
-        const auto& ifs = getIfs(storage);
-        if (!ifs) {
-            return false;
-        }
-        std::unique_lock l(ifs->lock);
-        dataLoaderStub = ifs->dataLoaderStub;
-        if (!dataLoaderStub) {
-            return false;
-        }
-    }
-    dataLoaderStub->setHealthListener(healthCheckParams, std::move(healthListener));
-    return true;
-}
-
-void IncrementalService::unregisterStorageHealthListener(StorageId storage) {
-    registerStorageHealthListener(storage, {}, {});
-}
-
 bool IncrementalService::perfLoggingEnabled() {
     static const bool enabled = base::GetBoolProperty("incremental.perflogging", false);
     return enabled;
@@ -2779,25 +2756,6 @@ void IncrementalService::DataLoaderStub::setCurrentStatus(int newStatus) {
     mStatusCondition.notify_all();
 }
 
-binder::Status IncrementalService::DataLoaderStub::reportStreamHealth(MountId mountId,
-                                                                      int newStatus) {
-    if (!isValid()) {
-        return binder::Status::
-                fromServiceSpecificError(-EINVAL,
-                                         "reportStreamHealth came to invalid DataLoaderStub");
-    }
-    if (id() != mountId) {
-        LOG(ERROR) << "reportStreamHealth: mount ID mismatch: expected " << id()
-                   << ", but got: " << mountId;
-        return binder::Status::fromServiceSpecificError(-EPERM, "Mount ID mismatch.");
-    }
-    {
-        std::lock_guard lock(mMutex);
-        mStreamStatus = newStatus;
-    }
-    return binder::Status::ok();
-}
-
 bool IncrementalService::DataLoaderStub::isHealthParamsValid() const {
     return mHealthCheckParams.blockedTimeoutMs > 0 &&
             mHealthCheckParams.blockedTimeoutMs < mHealthCheckParams.unhealthyTimeoutMs;
@@ -2809,33 +2767,6 @@ void IncrementalService::DataLoaderStub::onHealthStatus(const StorageHealthListe
     if (healthListener) {
         healthListener->onHealthStatus(id(), healthStatus);
     }
-}
-
-static int adjustHealthStatus(int healthStatus, int streamStatus) {
-    if (healthStatus == IStorageHealthListener::HEALTH_STATUS_OK) {
-        // everything is good; no need to change status
-        return healthStatus;
-    }
-    int newHeathStatus = healthStatus;
-    switch (streamStatus) {
-        case IDataLoaderStatusListener::STREAM_STORAGE_ERROR:
-            // storage is limited and storage not healthy
-            newHeathStatus = IStorageHealthListener::HEALTH_STATUS_UNHEALTHY_STORAGE;
-            break;
-        case IDataLoaderStatusListener::STREAM_INTEGRITY_ERROR:
-            // fall through
-        case IDataLoaderStatusListener::STREAM_SOURCE_ERROR:
-            // fall through
-        case IDataLoaderStatusListener::STREAM_TRANSPORT_ERROR:
-            if (healthStatus == IStorageHealthListener::HEALTH_STATUS_UNHEALTHY) {
-                newHeathStatus = IStorageHealthListener::HEALTH_STATUS_UNHEALTHY_TRANSPORT;
-            }
-            // pending/blocked status due to transportation issues is not regarded as unhealthy
-            break;
-        default:
-            break;
-    }
-    return newHeathStatus;
 }
 
 void IncrementalService::DataLoaderStub::updateHealthStatus(bool baseline) {
@@ -2915,8 +2846,6 @@ void IncrementalService::DataLoaderStub::updateHealthStatus(bool baseline) {
             checkBackAfter = unhealthyMonitoring;
             healthStatusToReport = IStorageHealthListener::HEALTH_STATUS_UNHEALTHY;
         }
-        // Adjust health status based on stream status
-        healthStatusToReport = adjustHealthStatus(healthStatusToReport, mStreamStatus);
         LOG(DEBUG) << id() << ": updateHealthStatus in " << double(checkBackAfter.count()) / 1000.0
                    << "secs";
         mService.addTimedJob(*mService.mTimedQueue, id(), checkBackAfter,

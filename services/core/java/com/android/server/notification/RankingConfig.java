@@ -30,7 +30,8 @@ public interface RankingConfig {
     boolean canShowBadge(String packageName, int uid);
     boolean badgingEnabled(UserHandle userHandle);
     int getBubblePreference(String packageName, int uid);
-    boolean bubblesEnabled();
+    /** Returns true when the bubbles feature is enabled for this user. */
+    boolean bubblesEnabled(UserHandle userHandle);
     /** Returns true when feature is enabled that shows media notifications in quick settings. */
     boolean isMediaNotificationFilteringEnabled();
     boolean isGroupBlocked(String packageName, int uid, String groupId);

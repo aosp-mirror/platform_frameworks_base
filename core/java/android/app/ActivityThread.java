@@ -3999,6 +3999,12 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
+    @Override
+    public void handlePictureInPictureStateChanged(@NonNull ActivityClientRecord r,
+            PictureInPictureUiState pipState) {
+        r.activity.onPictureInPictureUiStateChanged(pipState);
+    }
+
     /**
      * Register a splash screen manager to this process.
      */

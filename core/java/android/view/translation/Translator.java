@@ -231,9 +231,8 @@ public class Translator {
      *
      * @throws IllegalStateException if this Translator session was destroyed when called.
      *
-     * @deprecated use {@link #translate(TranslationRequest, CancellationSignal,
+     * @removed use {@link #translate(TranslationRequest, CancellationSignal,
      *             Executor, Consumer)} instead.
-     * @hide
      */
     @Deprecated
     @Nullable
@@ -369,25 +368,6 @@ public class Translator {
             final Consumer<TranslationResponse> callback = mCallback.get();
             final Runnable runnable =
                     () -> callback.accept(response);
-            if (callback != null) {
-                final Executor executor = mExecutor.get();
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    executor.execute(runnable);
-                } finally {
-                    restoreCallingIdentity(token);
-                }
-            }
-        }
-
-        @Override
-        public void onError() throws RemoteException {
-            final Consumer<TranslationResponse>  callback = mCallback.get();
-            final Runnable runnable = () -> callback.accept(
-                    new TranslationResponse.Builder(
-                            TranslationResponse.TRANSLATION_STATUS_UNKNOWN_ERROR)
-                            .build());
-
             if (callback != null) {
                 final Executor executor = mExecutor.get();
                 final long token = Binder.clearCallingIdentity();

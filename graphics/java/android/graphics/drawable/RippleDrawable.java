@@ -23,6 +23,7 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.ValueAnimator;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -960,9 +961,11 @@ public class RippleDrawable extends LayerDrawable {
         float radius = getComputedRadius();
         RippleAnimationSession.AnimationProperties<Float, Paint> properties;
         RippleShader shader = new RippleShader();
-        final int color = mMaskColorFilter == null
+        // Grab the color for the current state and cut the alpha channel in
+        // half so that the ripple and background together yield full alpha.
+        final int color = clampAlpha(mMaskColorFilter == null
                 ? mState.mColor.getColorForState(getState(), Color.BLACK)
-                : mMaskColorFilter.getColor();
+                : mMaskColorFilter.getColor());
         final int effectColor = mState.mEffectColor.getColorForState(getState(), Color.MAGENTA);
         shader.setColor(color, effectColor);
         shader.setOrigin(cx, cy);
@@ -982,6 +985,13 @@ public class RippleDrawable extends LayerDrawable {
         p.setColorFilter(null);
         p.setColor(color);
         return properties;
+    }
+
+    private int clampAlpha(@ColorInt int color) {
+        if (Color.alpha(color) > 128) {
+            return  (color & 0x00FFFFFF) | 0x80000000;
+        }
+        return color;
     }
 
     private boolean shouldUseCanvasProps(Canvas c) {
@@ -1194,10 +1204,7 @@ public class RippleDrawable extends LayerDrawable {
 
         // Grab the color for the current state and cut the alpha channel in
         // half so that the ripple and background together yield full alpha.
-        int color = mState.mColor.getColorForState(getState(), Color.BLACK);
-        if (Color.alpha(color) > 128) {
-            color = (color & 0x00FFFFFF) | 0x80000000;
-        }
+        final int color = clampAlpha(mState.mColor.getColorForState(getState(), Color.BLACK));
         final Paint p = mRipplePaint;
 
         if (mMaskColorFilter != null) {

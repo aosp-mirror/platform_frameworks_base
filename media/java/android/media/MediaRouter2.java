@@ -18,6 +18,7 @@ package android.media;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -93,7 +94,7 @@ public final class MediaRouter2 {
 
     // TODO: Specify the fields that are only used (or not used) by system media router.
     private final String mClientPackageName;
-    private final ManagerCallback mManagerCallback;
+    final ManagerCallback mManagerCallback;
 
     private final String mPackageName;
 
@@ -164,12 +165,23 @@ public final class MediaRouter2 {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     @Nullable
     public static MediaRouter2 getInstance(@NonNull Context context,
             @NonNull String clientPackageName) {
         Objects.requireNonNull(context, "context must not be null");
         Objects.requireNonNull(clientPackageName, "clientPackageName must not be null");
+
+        // Note: Even though this check could be somehow bypassed, the other permission checks
+        // in system server will not allow MediaRouter2Manager to be registered.
+        IMediaRouterService serviceBinder = IMediaRouterService.Stub.asInterface(
+                ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
+        try {
+            // SecurityException will be thrown if there's no permission.
+            serviceBinder.enforceMediaContentControlPermission();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to check MEDIA_CONTENT_CONTROL permission.");
+        }
 
         PackageManager pm = context.getPackageManager();
         try {
@@ -183,20 +195,13 @@ public final class MediaRouter2 {
             MediaRouter2 instance = sSystemMediaRouter2Map.get(clientPackageName);
             if (instance == null) {
                 if (sManager == null) {
-                    IMediaRouterService serviceBinder = IMediaRouterService.Stub.asInterface(
-                            ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
-                    try {
-                        // MediaRouterService will throw a SecurityException if the caller
-                        // doesn't have MODIFY_AUDIO_ROUTING permission.
-                        serviceBinder.checkModifyAudioRoutingPermission();
-                    } catch (RemoteException e) {
-                        e.rethrowAsRuntimeException();
-                    }
                     sManager = MediaRouter2Manager.getInstance(context.getApplicationContext());
                 }
                 instance = new MediaRouter2(context, clientPackageName);
                 sSystemMediaRouter2Map.put(clientPackageName, instance);
-                instance.registerManagerCallbackForSystemRouter();
+                // Using direct executor here, since MediaRouter2Manager also posts
+                // to the main handler.
+                sManager.registerCallback(Runnable::run, instance.mManagerCallback);
             }
             return instance;
         }
@@ -213,11 +218,15 @@ public final class MediaRouter2 {
      * Use {@link RouteCallback} to get the route related events.
      * <p>
      * Note that calling start/stopScan is applied to all system routers in the same process.
+     * <p>
+     * This will be no-op for non-system media routers.
      *
      * @see #stopScan()
+     * @see #getInstance(Context, String)
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void startScan() {
         if (isSystemRouter()) {
             sManager.startScan();
@@ -236,11 +245,15 @@ public final class MediaRouter2 {
      * Use {@link RouteCallback} to get the route related events.
      * <p>
      * Note that calling start/stopScan is applied to all system routers in the same process.
+     * <p>
+     * This will be no-op for non-system media routers.
      *
      * @see #startScan()
+     * @see #getInstance(Context, String)
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void stopScan() {
         if (isSystemRouter()) {
             sManager.stopScan();
@@ -314,7 +327,8 @@ public final class MediaRouter2 {
 
     /**
      * Gets the client package name of the app which this media router controls.
-     * This is only non-null when the router instance is created with the client package name.
+     * <p>
+     * This will return null for non-system media routers.
      *
      * @see #getInstance(Context, String)
      * @hide
@@ -573,9 +587,25 @@ public final class MediaRouter2 {
             return;
         }
 
-        Objects.requireNonNull(route, "route must not be null");
         Log.v(TAG, "Transferring to route: " + route);
-        transfer(getCurrentController(), route);
+
+        boolean routeFound;
+        synchronized (mLock) {
+            // TODO: Check thread-safety
+            routeFound = mRoutes.containsKey(route.getId());
+        }
+        if (!routeFound) {
+            notifyTransferFailure(route);
+            return;
+        }
+
+        RoutingController controller = getCurrentController();
+        if (controller.getRoutingSessionInfo().getTransferableRoutes().contains(route.getId())) {
+            controller.transferToRoute(route);
+            return;
+        }
+
+        requestCreateController(controller, route, MANAGER_REQUEST_ID_NONE);
     }
 
     /**
@@ -594,36 +624,20 @@ public final class MediaRouter2 {
 
     /**
      * Transfers the media of a routing controller to the given route.
+     * <p>
+     * This will be no-op for non-system media routers.
+     *
      * @param controller a routing controller controlling media routing.
      * @param route the route you want to transfer the media to.
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void transfer(@NonNull RoutingController controller, @NonNull MediaRoute2Info route) {
         if (isSystemRouter()) {
             sManager.transfer(controller.getRoutingSessionInfo(), route);
             return;
         }
-
-        Objects.requireNonNull(controller, "controller must not be null");
-        Objects.requireNonNull(route, "route must not be null");
-
-        boolean routeFound;
-        synchronized (mLock) {
-            // TODO: Check thread-safety
-            routeFound = mRoutes.containsKey(route.getId());
-        }
-        if (!routeFound) {
-            notifyTransferFailure(route);
-            return;
-        }
-
-        if (controller.getRoutingSessionInfo().getTransferableRoutes().contains(route.getId())) {
-            controller.transferToRoute(route);
-            return;
-        }
-
-        requestCreateController(controller, route, MANAGER_REQUEST_ID_NONE);
     }
 
     void requestCreateController(@NonNull RoutingController controller,
@@ -687,9 +701,7 @@ public final class MediaRouter2 {
     /**
      * Gets a {@link RoutingController} whose ID is equal to the given ID.
      * Returns {@code null} if there is no matching controller.
-     * @hide
      */
-    @SystemApi
     @Nullable
     public RoutingController getController(@NonNull String id) {
         Objects.requireNonNull(id, "id must not be null");
@@ -739,14 +751,16 @@ public final class MediaRouter2 {
 
     /**
      * Requests a volume change for the route asynchronously.
-     * <p>
      * It may have no effect if the route is currently not selected.
-     * </p>
+     * <p>
+     * This will be no-op for non-system media routers.
      *
      * @param volume The new volume value between 0 and {@link MediaRoute2Info#getVolumeMax}.
+     * @see #getInstance(Context, String)
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void setRouteVolume(@NonNull MediaRoute2Info route, int volume) {
         Objects.requireNonNull(route, "route must not be null");
 
@@ -754,18 +768,7 @@ public final class MediaRouter2 {
             sManager.setRouteVolume(route, volume);
             return;
         }
-
-        MediaRouter2Stub stub;
-        synchronized (mLock) {
-            stub = mStub;
-        }
-        if (stub != null) {
-            try {
-                mMediaRouterService.setRouteVolumeWithRouter2(stub, route, volume);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to set route volume.", ex);
-            }
-        }
+        // If this API needs to be public, use IMediaRouterService#setRouteVolumeWithRouter2()
     }
 
     void syncRoutesOnHandler(List<MediaRoute2Info> currentRoutes,
@@ -1040,15 +1043,6 @@ public final class MediaRouter2 {
     }
 
     /**
-     * Registers {@link MediaRouter2Manager.Callback} for getting events.
-     * Should only used for system media routers.
-     */
-    private void registerManagerCallbackForSystemRouter() {
-        // Using direct executor here, since MediaRouter2Manager also posts to the main handler.
-        sManager.registerCallback(Runnable::run, mManagerCallback);
-    }
-
-    /**
      * Returns a {@link RoutingSessionInfo} which has the client package name.
      * The client package name is set only when the given sessionInfo doesn't have it.
      * Should only used for system media routers.
@@ -1073,6 +1067,9 @@ public final class MediaRouter2 {
     }
 
     private void updateAllRoutesFromManager() {
+        if (!isSystemRouter()) {
+            return;
+        }
         synchronized (mLock) {
             mRoutes.clear();
             for (MediaRoute2Info route : sManager.getAllRoutes()) {

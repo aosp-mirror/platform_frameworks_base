@@ -189,7 +189,8 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
                                             jobject jaa, jintArray jSampleRate, jint channelMask,
                                             jint channelIndexMask, jint audioFormat,
                                             jint buffSizeInBytes, jintArray jSession,
-                                            jobject jIdentity, jlong nativeRecordInJavaObj) {
+                                            jobject jIdentity, jlong nativeRecordInJavaObj,
+                                            jint sharedAudioHistoryMs) {
     //ALOGV(">> Entering android_media_AudioRecord_setup");
     //ALOGV("sampleRate=%d, audioFormat=%d, channel mask=%x, buffSizeInBytes=%d "
     //     "nativeRecordInJavaObj=0x%llX",
@@ -288,20 +289,18 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
         lpCallbackData->audioRecord_ref = env->NewGlobalRef(weak_this);
         lpCallbackData->busy = false;
 
-        const status_t status = lpRecorder->set(paa->source,
-            sampleRateInHertz,
-            format,        // word length, PCM
-            localChanMask,
-            frameCount,
-            recorderCallback,// callback_t
-            lpCallbackData,// void* user
-            0,             // notificationFrames,
-            true,          // threadCanCallJava
-            sessionId,
-            AudioRecord::TRANSFER_DEFAULT,
-            flags,
-            -1, -1,        // default uid, pid
-            paa.get());
+        const status_t status =
+                lpRecorder->set(paa->source, sampleRateInHertz,
+                                format, // word length, PCM
+                                localChanMask, frameCount,
+                                recorderCallback, // callback_t
+                                lpCallbackData,   // void* user
+                                0,                // notificationFrames,
+                                true,             // threadCanCallJava
+                                sessionId, AudioRecord::TRANSFER_DEFAULT, flags, -1,
+                                -1, // default uid, pid
+                                paa.get(), AUDIO_PORT_HANDLE_NONE, MIC_DIRECTION_UNSPECIFIED,
+                                MIC_FIELD_DIMENSION_DEFAULT, sharedAudioHistoryMs);
 
         if (status != NO_ERROR) {
             ALOGE("Error creating AudioRecord instance: initialization check failed with status %d.",
@@ -877,6 +876,23 @@ static void android_media_AudioRecord_setLogSessionId(JNIEnv *env, jobject thiz,
     record->setLogSessionId(logSessionId.c_str());
 }
 
+static jint android_media_AudioRecord_shareAudioHistory(JNIEnv *env, jobject thiz,
+                                                        jstring jSharedPackageName,
+                                                        jlong jSharedStartMs) {
+    sp<AudioRecord> record = getAudioRecord(env, thiz);
+    if (record == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Unable to retrieve AudioRecord pointer for setLogSessionId()");
+    }
+    if (jSharedPackageName == nullptr) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "package name cannot be null");
+    }
+    ScopedUtfChars nSharedPackageName(env, jSharedPackageName);
+    ALOGV("%s: nSharedPackageName '%s'", __func__, nSharedPackageName.c_str());
+    return nativeToJavaStatus(record->shareAudioHistory(nSharedPackageName.c_str(),
+                                                        static_cast<int64_t>(jSharedStartMs)));
+}
+
 // ----------------------------------------------------------------------------
 static jint android_media_AudioRecord_get_port_id(JNIEnv *env,  jobject thiz) {
     sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
@@ -896,7 +912,7 @@ static const JNINativeMethod gMethods[] = {
         {"native_start", "(II)I", (void *)android_media_AudioRecord_start},
         {"native_stop", "()V", (void *)android_media_AudioRecord_stop},
         {"native_setup",
-         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILandroid/media/permission/Identity;J)I",
+         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILandroid/media/permission/Identity;JI)I",
          (void *)android_media_AudioRecord_setup},
         {"native_finalize", "()V", (void *)android_media_AudioRecord_finalize},
         {"native_release", "()V", (void *)android_media_AudioRecord_release},
@@ -936,6 +952,8 @@ static const JNINativeMethod gMethods[] = {
          (void *)android_media_AudioRecord_set_preferred_microphone_field_dimension},
         {"native_setLogSessionId", "(Ljava/lang/String;)V",
          (void *)android_media_AudioRecord_setLogSessionId},
+        {"native_shareAudioHistory", "(Ljava/lang/String;J)I",
+         (void *)android_media_AudioRecord_shareAudioHistory},
 };
 
 // field names found in android/media/AudioRecord.java

@@ -384,7 +384,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         if (mPlaybackState == null) {
             return false;
         }
-        return mPlaybackState.isActiveState() == expected;
+        return mPlaybackState.isActive() == expected;
     }
 
     /**

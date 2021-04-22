@@ -299,6 +299,7 @@ static std::unique_ptr<ResourceTable> BuildTableWithSparseEntries(
           .Build();
 
   // Add regular entries.
+  CloningValueTransformer cloner(&table->string_pool);
   int stride = static_cast<int>(1.0f / load);
   for (int i = 0; i < 100; i++) {
     const ResourceName name = test::ParseNameOrDie(
@@ -308,7 +309,7 @@ static std::unique_ptr<ResourceTable> BuildTableWithSparseEntries(
         util::make_unique<BinaryPrimitive>(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(i));
     CHECK(table->AddResource(NewResourceBuilder(name)
                                  .SetId(resid)
-                                 .SetValue(std::unique_ptr<Value>(value->Clone(nullptr)))
+                                 .SetValue(std::unique_ptr<Value>(value->Transform(cloner)))
                                  .Build(),
                              context->GetDiagnostics()));
 
@@ -317,7 +318,7 @@ static std::unique_ptr<ResourceTable> BuildTableWithSparseEntries(
       CHECK(table->AddResource(
           NewResourceBuilder(name)
               .SetId(resid)
-              .SetValue(std::unique_ptr<Value>(value->Clone(nullptr)), sparse_config)
+              .SetValue(std::unique_ptr<Value>(value->Transform(cloner)), sparse_config)
               .Build(),
           context->GetDiagnostics()));
     }

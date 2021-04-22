@@ -15,6 +15,8 @@
  */
 package com.android.server.pm;
 
+import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
+
 import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -85,6 +87,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.ArraySet;
@@ -104,6 +107,7 @@ import android.view.IWindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
@@ -447,6 +451,8 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mLock")
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
+    private final boolean mIsAppSearchEnabled;
+
     static class InvalidFileFormatException extends Exception {
         public InvalidFileFormatException(String message, Throwable cause) {
             super(message, cause);
@@ -481,6 +487,8 @@ public class ShortcutService extends IShortcutService.Stub {
         mShortcutRequestPinProcessor = new ShortcutRequestPinProcessor(this, mLock);
         mShortcutBitmapSaver = new ShortcutBitmapSaver(this);
         mShortcutDumpFiles = new ShortcutDumpFiles(this);
+        mIsAppSearchEnabled = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, false);
 
         if (onlyForPackageManagerApis) {
             return; // Don't do anything further.  For unit tests only.
@@ -516,6 +524,10 @@ public class ShortcutService extends IShortcutService.Stub {
                 | ActivityManager.UID_OBSERVER_GONE);
 
         injectRegisterRoleHoldersListener(mOnRoleHoldersChangedListener);
+    }
+
+    boolean isAppSearchEnabled() {
+        return mIsAppSearchEnabled;
     }
 
     long getStatStartTime() {

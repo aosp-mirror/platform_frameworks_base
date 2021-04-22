@@ -1842,7 +1842,7 @@
     <string name="select_day" msgid="2060371240117403147">"Sélectionner un mois et un jour"</string>
     <string name="select_year" msgid="1868350712095595393">"Sélectionner une année"</string>
     <string name="deleted_key" msgid="9130083334943364001">"\"<xliff:g id="KEY">%1$s</xliff:g>\" supprimé"</string>
-    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
+    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (pro)"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2e <xliff:g id="LABEL">%1$s</xliff:g> professionnelle"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3e <xliff:g id="LABEL">%1$s</xliff:g> professionnelle"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Demander le code avant d\'annuler l\'épinglage"</string>
@@ -1854,7 +1854,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités comme \"Hey Google\"\n\n"<annotation id="url">"En savoir plus"</annotation></string>
     <string name="battery_saver_description" msgid="7695751399533397741">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités comme \"Hey Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation de données, l\'économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Ainsi, les applications que vous utilisez peuvent toujours accéder aux données, mais pas en permanence. Par exemple, il se peut que les images ne s\'affichent pas tant que vous n\'appuyez pas dessus."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation des données, l\'Économiseur de données empêche certaines applis d\'envoyer ou de recevoir des données en arrière-plan. Les applis que vous utiliserez pourront toujours accéder aux données, mais le feront moins fréquemment. Par exemple, les images pourront ne pas s\'afficher tant que vous n\'aurez pas appuyé pas dessus."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'économiseur de données ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1929,8 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Fermer"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g> : <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Répondre"</string>
-    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
-    <skip />
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Vidéo"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Refuser"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Raccrocher"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Appel entrant"</string>

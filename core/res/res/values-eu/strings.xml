@@ -1723,7 +1723,7 @@
     <string name="user_switched" msgid="7249833311585228097">"Erabiltzailea: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"\"<xliff:g id="NAME">%1$s</xliff:g>\" erabiltzailera aldatzen…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailearen saioa amaitzen…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"Jabea"</string>
+    <string name="owner_name" msgid="8713560351570795743">"Jabe"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Errorea"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Administratzaileak ez du eman aldaketa egiteko baimena"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Ez da ekintza gauza dezakeen aplikaziorik aurkitu"</string>
@@ -1929,8 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Itxi"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Erantzun"</string>
-    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
-    <skip />
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Bideoa"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Baztertu"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Amaitu deia"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Jasotako deia"</string>
@@ -2274,6 +2273,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sentsoreen pribatutasuna"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Aplikazioaren ikonoa"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Aplikazioaren marka-irudia"</string>
-    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Begiratu sarbide-ezarpenak"</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Egiaztatu sarbide-ezarpenak"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> zerbitzuak pantaila ikusi eta kontrola dezake. Sakatu berrikusteko."</string>
 </resources>

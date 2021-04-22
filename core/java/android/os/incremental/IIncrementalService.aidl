@@ -163,16 +163,6 @@ interface IIncrementalService {
     boolean unregisterLoadingProgressListener(int storageId);
 
     /**
-     * Register storage health status listener.
-     */
-    boolean registerStorageHealthListener(int storageId, in StorageHealthCheckParams params, in IStorageHealthListener listener);
-
-    /**
-     * Register storage health status listener.
-     */
-    void unregisterStorageHealthListener(int storageId);
-
-    /**
      * Metrics key for the duration in milliseconds between now and the oldest pending read. The value is a long.
      */
     const @utf8InCpp String METRICS_MILLIS_SINCE_OLDEST_PENDING_READ = "millisSinceOldestPendingRead";

@@ -9,9 +9,11 @@ import android.provider.AlarmClock
 import android.service.quicksettings.Tile
 import android.text.TextUtils
 import android.text.format.DateFormat
+import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.R
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -73,14 +75,15 @@ class AlarmTile @Inject constructor(
         }
     }
 
-    private fun startDefaultSetAlarm() {
-        mActivityStarter.postStartActivityDismissingKeyguard(defaultIntent, 0)
-    }
-
-    override fun handleClick() {
-        lastAlarmInfo?.showIntent?.let {
-                mActivityStarter.postStartActivityDismissingKeyguard(it)
-        } ?: startDefaultSetAlarm()
+    override fun handleClick(view: View?) {
+        val animationController = view?.let { ActivityLaunchAnimator.Controller.fromView(it) }
+        val pendingIntent = lastAlarmInfo?.showIntent
+        if (pendingIntent != null) {
+            mActivityStarter.postStartActivityDismissingKeyguard(pendingIntent, animationController)
+        } else {
+            mActivityStarter.postStartActivityDismissingKeyguard(defaultIntent, 0,
+                    animationController)
+        }
     }
 
     override fun handleUpdateState(state: QSTile.State, arg: Any?) {

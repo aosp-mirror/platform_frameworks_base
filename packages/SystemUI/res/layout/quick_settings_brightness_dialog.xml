@@ -13,16 +13,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
-    android:layout_gravity="center">
-
     <com.android.systemui.settings.brightness.BrightnessSliderView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/brightness_slider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/brightness_mirror_height"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="center"
         android:contentDescription="@string/accessibility_brightness"
         android:importantForAccessibility="no" >
 
@@ -40,4 +36,3 @@
             android:splitTrack="false"
         />
     </com.android.systemui.settings.brightness.BrightnessSliderView>
-</FrameLayout>

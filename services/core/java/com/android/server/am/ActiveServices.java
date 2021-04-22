@@ -26,6 +26,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
+import static android.os.PowerExemptionManager.REASON_TEMP_ALLOWED_WHILE_IN_USE;
 import static android.os.PowerWhitelistManager.REASON_ACTIVITY_STARTER;
 import static android.os.PowerWhitelistManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerWhitelistManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
@@ -5644,6 +5645,12 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
+            if (mAm.mInternal.isTempAllowlistedForFgsWhileInUse(callingUid)) {
+                return REASON_TEMP_ALLOWED_WHILE_IN_USE;
+            }
+        }
+
+        if (ret == REASON_DENIED) {
             if (targetService != null && targetService.app != null) {
                 ActiveInstrumentation instr = targetService.app.getActiveInstrumentation();
                 if (instr != null && instr.mHasBackgroundActivityStartsPermission) {
@@ -5691,7 +5698,7 @@ public final class ActiveServices {
     private @ReasonCode int shouldAllowFgsStartForegroundLocked(
             @ReasonCode int allowWhileInUse, String callingPackage, int callingPid,
             int callingUid, Intent intent, ServiceRecord r, int userId) {
-        FgsStartTempAllowList.TempFgsAllowListEntry tempAllowListReason =
+        ActivityManagerService.FgsTempAllowListItem tempAllowListReason =
                 r.mInfoTempFgsAllowListReason = mAm.isAllowlistedForFgsStartLOSP(callingUid);
         int ret = shouldAllowFgsStartForegroundLocked(allowWhileInUse, callingPid, callingUid,
                 callingPackage, r);
@@ -5790,13 +5797,13 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
-            FgsStartTempAllowList.TempFgsAllowListEntry entry =
+            ActivityManagerService.FgsTempAllowListItem item =
                     mAm.isAllowlistedForFgsStartLOSP(callingUid);
-            if (entry != null) {
-                if (entry == ActivityManagerService.FAKE_TEMP_ALLOWLIST_ENTRY) {
+            if (item != null) {
+                if (item == ActivityManagerService.FAKE_TEMP_ALLOW_LIST_ITEM) {
                     ret = REASON_SYSTEM_ALLOW_LISTED;
                 } else {
-                    ret = entry.mReasonCode;
+                    ret = item.mReasonCode;
                 }
             }
         }
@@ -5920,5 +5927,13 @@ public final class ActiveServices {
                 r.mFgsNotificationShown,
                 durationMs,
                 r.mStartForegroundCount);
+    }
+
+    boolean canAllowWhileInUsePermissionInFgsLocked(int callingPid, int callingUid,
+            String callingPackage) {
+        return shouldAllowFgsWhileInUsePermissionLocked(callingPackage, callingPid, callingUid,
+                /* targetService */ null,
+                /* allowBackgroundActivityStarts */ false)
+                != REASON_DENIED;
     }
 }

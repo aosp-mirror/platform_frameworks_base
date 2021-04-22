@@ -106,7 +106,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         assertTrue(mTile.getState().secondaryLabel.toString().equals(
                 mContext.getString(R.string.quick_settings_screen_record_start)));
 
-        mTile.handleClick();
+        mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
         verify(mController, times(1)).getPromptIntent();
     }
@@ -130,7 +130,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         when(mController.isStarting()).thenReturn(true);
         when(mController.isRecording()).thenReturn(false);
 
-        mTile.handleClick();
+        mTile.handleClick(null /* view */);
 
         verify(mController, times(1)).cancelCountdown();
     }
@@ -155,7 +155,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         when(mController.isStarting()).thenReturn(false);
         when(mController.isRecording()).thenReturn(true);
 
-        mTile.handleClick();
+        mTile.handleClick(null /* view */);
 
         verify(mController, times(1)).stopRecording();
     }
