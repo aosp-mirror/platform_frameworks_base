@@ -87,6 +87,7 @@ public class NotificationShadeWindowViewController {
     private final ShadeController mShadeController;
     private final NotificationShadeDepthController mDepthController;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
@@ -135,7 +136,8 @@ public class NotificationShadeWindowViewController {
             NotificationShadeWindowView notificationShadeWindowView,
             NotificationPanelViewController notificationPanelViewController,
             SuperStatusBarViewFactory statusBarViewFactory,
-            NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
+            NotificationStackScrollLayoutController notificationStackScrollLayoutController,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mInjectionInflationController = injectionInflationController;
         mCoordinator = coordinator;
         mPulseExpansionHandler = pulseExpansionHandler;
@@ -159,6 +161,7 @@ public class NotificationShadeWindowViewController {
         mDepthController = depthController;
         mStatusBarViewFactory = statusBarViewFactory;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -239,6 +242,7 @@ public class NotificationShadeWindowViewController {
                 }
                 mFalsingCollector.onTouchEvent(ev);
                 mGestureDetector.onTouchEvent(ev);
+                mStatusBarKeyguardViewManager.onTouch(ev);
                 if (mBrightnessMirror != null
                         && mBrightnessMirror.getVisibility() == View.VISIBLE) {
                     // Disallow new pointers while the brightness mirror is visible. This is so that
