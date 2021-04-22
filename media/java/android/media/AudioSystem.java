@@ -430,6 +430,8 @@ public class AudioSystem
                 return "AUDIO_FORMAT_MAT_2_1"; // (MAT | MAT_SUB_2_1)
             case /* AUDIO_FORMAT_DTS_UHD */           0x2E000000:
                 return "AUDIO_FORMAT_DTS_UHD";
+            case /* AUDIO_FORMAT_DRA */           0x2F000000:
+                return "AUDIO_FORMAT_DRA";
             default:
                 return "AUDIO_FORMAT_(" + audioFormat + ")";
         }
@@ -1464,6 +1466,10 @@ public class AudioSystem
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
     /** @hide */ public static final int SYNC_EVENT_NONE = 0;
     /** @hide */ public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1;
+    /** @hide
+     *  Not used by native implementation.
+     *  See {@link AudioRecord.Builder#setSharedAudioEvent(MediaSyncEvent) */
+    public static final int SYNC_EVENT_SHARE_AUDIO_HISTORY = 100;
 
     /**
      * @hide
@@ -2019,7 +2025,8 @@ public class AudioSystem
     };
 
     /** @hide */
-    public static String streamToString(int stream) {
+    @TestApi
+    public static @NonNull String streamToString(int stream) {
         if (stream >= 0 && stream < STREAM_NAMES.length) return STREAM_NAMES[stream];
         if (stream == AudioManager.USE_DEFAULT_STREAM_TYPE) return "USE_DEFAULT_STREAM_TYPE";
         return "UNKNOWN_STREAM_" + stream;

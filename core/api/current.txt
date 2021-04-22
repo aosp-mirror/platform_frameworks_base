@@ -9046,8 +9046,8 @@ package android.bluetooth {
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CLASS_CHANGED = "android.bluetooth.device.action.CLASS_CHANGED";
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public static final String ACTION_FOUND = "android.bluetooth.device.action.FOUND";
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_NAME_CHANGED = "android.bluetooth.device.action.NAME_CHANGED";
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public static final String ACTION_PAIRING_REQUEST = "android.bluetooth.device.action.PAIRING_REQUEST";
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public static final String ACTION_UUID = "android.bluetooth.device.action.UUID";
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_PAIRING_REQUEST = "android.bluetooth.device.action.PAIRING_REQUEST";
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_UUID = "android.bluetooth.device.action.UUID";
     field public static final int ADDRESS_TYPE_PUBLIC = 0; // 0x0
     field public static final int ADDRESS_TYPE_RANDOM = 1; // 0x1
     field public static final int BOND_BONDED = 12; // 0xc
@@ -11870,6 +11870,7 @@ package android.content.pm {
     field public static final int SCREEN_ORIENTATION_USER_LANDSCAPE = 11; // 0xb
     field public static final int SCREEN_ORIENTATION_USER_PORTRAIT = 12; // 0xc
     field public static final int UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW = 1; // 0x1
+    field public String[] attributionTags;
     field public int colorMode;
     field public int configChanges;
     field public int documentLaunchMode;
@@ -12414,9 +12415,6 @@ package android.content.pm {
     field public static final int STAGED_SESSION_NO_ERROR = 0; // 0x0
     field public static final int STAGED_SESSION_UNKNOWN = 3; // 0x3
     field public static final int STAGED_SESSION_VERIFICATION_FAILED = 1; // 0x1
-    field public static final int USER_ACTION_NOT_REQUIRED = 2; // 0x2
-    field public static final int USER_ACTION_REQUIRED = 1; // 0x1
-    field public static final int USER_ACTION_UNSPECIFIED = 0; // 0x0
   }
 
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
@@ -12433,7 +12431,7 @@ package android.content.pm {
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(@Nullable android.net.Uri);
     method public void setReferrerUri(@Nullable android.net.Uri);
-    method public void setRequireUserAction(boolean);
+    method public void setRequireUserAction(int);
     method public void setSize(long);
     method public void setWhitelistedRestrictedPermissions(@Nullable java.util.Set<java.lang.String>);
     method public void writeToParcel(android.os.Parcel, int);
@@ -12441,6 +12439,9 @@ package android.content.pm {
     field public static final int MODE_FULL_INSTALL = 1; // 0x1
     field public static final int MODE_INHERIT_EXISTING = 2; // 0x2
     field @NonNull public static final java.util.Set<java.lang.String> RESTRICTED_PERMISSIONS_ALL;
+    field public static final int USER_ACTION_NOT_REQUIRED = 2; // 0x2
+    field public static final int USER_ACTION_REQUIRED = 1; // 0x1
+    field public static final int USER_ACTION_UNSPECIFIED = 0; // 0x0
   }
 
   public class PackageItemInfo {
@@ -17723,9 +17724,7 @@ package android.hardware.biometrics {
   public class BiometricManager {
     method @Deprecated @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public int canAuthenticate();
     method @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public int canAuthenticate(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getButtonLabel(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getPromptMessage(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getSettingName(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public android.hardware.biometrics.BiometricManager.Strings getStrings(int);
     field public static final int BIOMETRIC_ERROR_HW_UNAVAILABLE = 1; // 0x1
     field public static final int BIOMETRIC_ERROR_NONE_ENROLLED = 11; // 0xb
     field public static final int BIOMETRIC_ERROR_NO_HARDWARE = 12; // 0xc
@@ -17737,6 +17736,12 @@ package android.hardware.biometrics {
     field public static final int BIOMETRIC_STRONG = 15; // 0xf
     field public static final int BIOMETRIC_WEAK = 255; // 0xff
     field public static final int DEVICE_CREDENTIAL = 32768; // 0x8000
+  }
+
+  public static class BiometricManager.Strings {
+    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getButtonLabel();
+    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getPromptMessage();
+    method @Nullable @RequiresPermission(android.Manifest.permission.USE_BIOMETRIC) public CharSequence getSettingName();
   }
 
   public class BiometricPrompt {
@@ -18033,6 +18038,7 @@ package android.hardware.camera2 {
   }
 
   public final class CameraExtensionCharacteristics {
+    method @Nullable public android.util.Range<java.lang.Long> getEstimatedCaptureLatencyRange(int, @NonNull android.util.Size, int);
     method @NonNull public <T> java.util.List<android.util.Size> getExtensionSupportedSizes(int, @NonNull Class<T>);
     method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
     method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();
@@ -20317,6 +20323,7 @@ package android.media {
     field public static final int ENCODING_DEFAULT = 1; // 0x1
     field public static final int ENCODING_DOLBY_MAT = 19; // 0x13
     field public static final int ENCODING_DOLBY_TRUEHD = 14; // 0xe
+    field public static final int ENCODING_DRA = 28; // 0x1c
     field public static final int ENCODING_DTS = 7; // 0x7
     field public static final int ENCODING_DTS_HD = 8; // 0x8
     field public static final int ENCODING_DTS_UHD = 27; // 0x1b
@@ -22488,6 +22495,9 @@ package android.media {
     field public static final String KEY_MAX_PTS_GAP_TO_ENCODER = "max-pts-gap-to-encoder";
     field public static final String KEY_MAX_WIDTH = "max-width";
     field public static final String KEY_MIME = "mime";
+    field public static final String KEY_MPEGH_COMPATIBLE_SETS = "mpegh-compatible-sets";
+    field public static final String KEY_MPEGH_PROFILE_LEVEL_INDICATION = "mpegh-profile-level-indication";
+    field public static final String KEY_MPEGH_REFERENCE_CHANNEL_LAYOUT = "mpegh-reference-channel-layout";
     field public static final String KEY_OPERATING_RATE = "operating-rate";
     field public static final String KEY_OUTPUT_REORDER_DEPTH = "output-reorder-depth";
     field public static final String KEY_PCM_ENCODING = "pcm-encoding";
@@ -23307,6 +23317,7 @@ package android.media {
   }
 
   public final class MediaRouter2 {
+    method @Nullable public android.media.MediaRouter2.RoutingController getController(@NonNull String);
     method @NonNull public java.util.List<android.media.MediaRouter2.RoutingController> getControllers();
     method @NonNull public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context);
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getRoutes();
@@ -23409,11 +23420,14 @@ package android.media {
     method public void onError(@NonNull android.media.MediaSync, int, int);
   }
 
-  public class MediaSyncEvent {
+  public class MediaSyncEvent implements android.os.Parcelable {
     method public static android.media.MediaSyncEvent createEvent(int) throws java.lang.IllegalArgumentException;
+    method public int describeContents();
     method public int getAudioSessionId();
     method public int getType();
     method public android.media.MediaSyncEvent setAudioSessionId(int) throws java.lang.IllegalArgumentException;
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.MediaSyncEvent> CREATOR;
     field public static final int SYNC_EVENT_NONE = 0; // 0x0
     field public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1; // 0x1
   }
@@ -25201,6 +25215,7 @@ package android.media.session {
     method public float getPlaybackSpeed();
     method public long getPosition();
     method public int getState();
+    method public boolean isActive();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final long ACTION_FAST_FORWARD = 64L; // 0x40L
     field public static final long ACTION_PAUSE = 2L; // 0x2L
@@ -27084,7 +27099,7 @@ package android.net.vcn {
     method @NonNull public int[] getExposedCapabilities();
     method @NonNull public String getGatewayConnectionName();
     method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
-    method @NonNull public long[] getRetryInterval();
+    method @NonNull public long[] getRetryIntervalsMs();
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
@@ -27093,7 +27108,7 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryInterval(@NonNull long[]);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMs(@NonNull long[]);
   }
 
   public class VcnManager {
@@ -32053,6 +32068,8 @@ package android.os {
     field public static final int PRIMITIVE_QUICK_FALL = 6; // 0x6
     field public static final int PRIMITIVE_QUICK_RISE = 4; // 0x4
     field public static final int PRIMITIVE_SLOW_RISE = 5; // 0x5
+    field public static final int PRIMITIVE_SPIN = 3; // 0x3
+    field public static final int PRIMITIVE_THUD = 2; // 0x2
     field public static final int PRIMITIVE_TICK = 7; // 0x7
   }
 
@@ -32856,6 +32873,10 @@ package android.print {
     method @NonNull public String getLabel(@NonNull android.content.pm.PackageManager);
     method @IntRange(from=1) public int getWidthMils();
     method public boolean isPortrait();
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_C;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_D;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_E;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_F;
     field public static final android.print.PrintAttributes.MediaSize ISO_A0;
     field public static final android.print.PrintAttributes.MediaSize ISO_A1;
     field public static final android.print.PrintAttributes.MediaSize ISO_A10;
@@ -32909,6 +32930,12 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize JPN_KAKU2;
     field public static final android.print.PrintAttributes.MediaSize JPN_OUFUKU;
     field public static final android.print.PrintAttributes.MediaSize JPN_YOU4;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_A;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_B;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_C;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_D;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_E;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_E1;
     field public static final android.print.PrintAttributes.MediaSize NA_FOOLSCAP;
     field public static final android.print.PrintAttributes.MediaSize NA_GOVT_LETTER;
     field public static final android.print.PrintAttributes.MediaSize NA_INDEX_3X5;
@@ -32920,6 +32947,7 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize NA_LETTER;
     field public static final android.print.PrintAttributes.MediaSize NA_MONARCH;
     field public static final android.print.PrintAttributes.MediaSize NA_QUARTO;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_SUPER_B;
     field public static final android.print.PrintAttributes.MediaSize NA_TABLOID;
     field public static final android.print.PrintAttributes.MediaSize OM_DAI_PA_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_JUURO_KU_KAI;
@@ -35350,7 +35378,7 @@ package android.provider {
     field @Deprecated public static final String BLUETOOTH_ON = "bluetooth_on";
     field public static final android.net.Uri CONTENT_URI;
     field @Deprecated public static final String DATA_ROAMING = "data_roaming";
-    field public static final String DATE_FORMAT = "date_format";
+    field @Deprecated public static final String DATE_FORMAT = "date_format";
     field @Deprecated public static final String DEBUG_APP = "debug_app";
     field public static final android.net.Uri DEFAULT_ALARM_ALERT_URI;
     field public static final android.net.Uri DEFAULT_NOTIFICATION_URI;
@@ -37737,16 +37765,16 @@ package android.service.autofill {
     method @NonNull public java.util.Map<android.view.autofill.AutofillId,android.service.autofill.FieldClassification> getFieldsClassification();
     method @NonNull public java.util.Set<java.lang.String> getIgnoredDatasetIds();
     method @NonNull public java.util.Map<android.view.autofill.AutofillId,java.util.Set<java.lang.String>> getManuallyEnteredField();
-    method public int getNoSaveReason();
+    method public int getNoSaveUiReason();
     method @NonNull public java.util.Set<java.lang.String> getSelectedDatasetIds();
     method public int getType();
-    field public static final int NO_SAVE_REASON_DATASET_MATCH = 6; // 0x6
-    field public static final int NO_SAVE_REASON_FIELD_VALIDATION_FAILED = 5; // 0x5
-    field public static final int NO_SAVE_REASON_HAS_EMPTY_REQUIRED = 3; // 0x3
-    field public static final int NO_SAVE_REASON_NONE = 0; // 0x0
-    field public static final int NO_SAVE_REASON_NO_SAVE_INFO = 1; // 0x1
-    field public static final int NO_SAVE_REASON_NO_VALUE_CHANGED = 4; // 0x4
-    field public static final int NO_SAVE_REASON_WITH_DELAY_SAVE_FLAG = 2; // 0x2
+    field public static final int NO_SAVE_UI_REASON_DATASET_MATCH = 6; // 0x6
+    field public static final int NO_SAVE_UI_REASON_FIELD_VALIDATION_FAILED = 5; // 0x5
+    field public static final int NO_SAVE_UI_REASON_HAS_EMPTY_REQUIRED = 3; // 0x3
+    field public static final int NO_SAVE_UI_REASON_NONE = 0; // 0x0
+    field public static final int NO_SAVE_UI_REASON_NO_SAVE_INFO = 1; // 0x1
+    field public static final int NO_SAVE_UI_REASON_NO_VALUE_CHANGED = 4; // 0x4
+    field public static final int NO_SAVE_UI_REASON_WITH_DELAY_SAVE_FLAG = 2; // 0x2
     field public static final int TYPE_AUTHENTICATION_SELECTED = 2; // 0x2
     field public static final int TYPE_CONTEXT_COMMITTED = 4; // 0x4
     field public static final int TYPE_DATASETS_SHOWN = 5; // 0x5
@@ -39117,6 +39145,7 @@ package android.speech {
     field public static final String ACTION_VOICE_SEARCH_HANDS_FREE = "android.speech.action.VOICE_SEARCH_HANDS_FREE";
     field public static final String ACTION_WEB_SEARCH = "android.speech.action.WEB_SEARCH";
     field public static final String DETAILS_META_DATA = "android.speech.DETAILS";
+    field public static final String EXTRA_AUDIO_INJECT_SOURCE = "android.speech.extra.AUDIO_INJECT_SOURCE";
     field public static final String EXTRA_CALLING_PACKAGE = "calling_package";
     field public static final String EXTRA_CONFIDENCE_SCORES = "android.speech.extra.CONFIDENCE_SCORES";
     field public static final String EXTRA_LANGUAGE = "android.speech.extra.LANGUAGE";
@@ -43071,6 +43100,13 @@ package android.telephony.data {
     method @Nullable public byte[] getOsAppId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.TrafficDescriptor> CREATOR;
+  }
+
+  public static final class TrafficDescriptor.Builder {
+    ctor public TrafficDescriptor.Builder();
+    method @NonNull public android.telephony.data.TrafficDescriptor build();
+    method @NonNull public android.telephony.data.TrafficDescriptor.Builder setDataNetworkName(@NonNull String);
+    method @NonNull public android.telephony.data.TrafficDescriptor.Builder setOsAppId(@NonNull byte[]);
   }
 
   public final class UrspRule implements android.os.Parcelable {
@@ -48325,7 +48361,6 @@ package android.view {
     ctor public SurfaceView(android.content.Context, android.util.AttributeSet);
     ctor public SurfaceView(android.content.Context, android.util.AttributeSet, int);
     ctor public SurfaceView(android.content.Context, android.util.AttributeSet, int, int);
-    method public boolean gatherTransparentRegion(android.graphics.Region);
     method public android.view.SurfaceHolder getHolder();
     method @Nullable public android.os.IBinder getHostToken();
     method public android.view.SurfaceControl getSurfaceControl();
@@ -48459,6 +48494,7 @@ package android.view {
     method public boolean checkInputConnectionProxy(android.view.View);
     method public void clearAnimation();
     method public void clearFocus();
+    method public void clearViewTranslationCallback();
     method public static int combineMeasuredStates(int, int);
     method protected int computeHorizontalScrollExtent();
     method protected int computeHorizontalScrollOffset();
@@ -48495,7 +48531,7 @@ package android.view {
     method public boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public void dispatchProvideAutofillStructure(@NonNull android.view.ViewStructure, int);
     method public void dispatchProvideStructure(android.view.ViewStructure);
-    method public void dispatchRequestTranslation(@NonNull java.util.Map<android.view.autofill.AutofillId,long[]>, @NonNull int[], @Nullable android.view.translation.TranslationCapability, @NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
+    method public void dispatchRequestTranslation(@NonNull java.util.Map<android.view.autofill.AutofillId,long[]>, @NonNull int[], @NonNull android.view.translation.TranslationCapability, @NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
     method protected void dispatchRestoreInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSaveInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method public void dispatchScrollCaptureSearch(@NonNull android.graphics.Rect, @NonNull android.graphics.Point, @NonNull java.util.function.Consumer<android.view.ScrollCaptureTarget>);
@@ -48526,6 +48562,7 @@ package android.view {
     method public android.view.View focusSearch(int);
     method public void forceHasOverlappingRendering(boolean);
     method public void forceLayout();
+    method public boolean gatherTransparentRegion(@Nullable android.graphics.Region);
     method public void generateDisplayHash(@NonNull String, @Nullable android.graphics.Rect, @NonNull java.util.concurrent.Executor, @NonNull android.view.displayhash.DisplayHashResultCallback);
     method public static int generateViewId();
     method public CharSequence getAccessibilityClassName();
@@ -48692,7 +48729,7 @@ package android.view {
     method @Nullable public android.graphics.drawable.Drawable getVerticalScrollbarTrackDrawable();
     method public int getVerticalScrollbarWidth();
     method @Nullable public android.view.ViewRoot getViewRoot();
-    method @Nullable public android.view.translation.ViewTranslationCallback getViewTranslationCallback();
+    method @Nullable public android.view.translation.ViewTranslationResponse getViewTranslationResponse();
     method public android.view.ViewTreeObserver getViewTreeObserver();
     method public int getVisibility();
     method public final int getWidth();
@@ -48792,8 +48829,8 @@ package android.view {
     method protected void onCreateContextMenu(android.view.ContextMenu);
     method protected int[] onCreateDrawableState(int);
     method public android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);
-    method @Nullable public android.view.translation.ViewTranslationRequest onCreateTranslationRequest(@NonNull int[]);
-    method public void onCreateTranslationRequests(@NonNull long[], @NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
+    method public void onCreateViewTranslationRequest(@NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
+    method public void onCreateVirtualViewTranslationRequests(@NonNull long[], @NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
     method @CallSuper protected void onDetachedFromWindow();
     method protected void onDisplayHint(int);
     method public boolean onDragEvent(android.view.DragEvent);
@@ -48838,8 +48875,8 @@ package android.view {
     method public void onStartTemporaryDetach();
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
-    method public void onTranslationResponse(@NonNull android.view.translation.ViewTranslationResponse);
-    method public void onTranslationResponse(@NonNull android.util.LongSparseArray<android.view.translation.ViewTranslationResponse>);
+    method public void onViewTranslationResponse(@NonNull android.view.translation.ViewTranslationResponse);
+    method public void onVirtualViewTranslationResponses(@NonNull android.util.LongSparseArray<android.view.translation.ViewTranslationResponse>);
     method @CallSuper public void onVisibilityAggregated(boolean);
     method protected void onVisibilityChanged(@NonNull android.view.View, int);
     method public void onWindowFocusChanged(boolean);
@@ -49507,7 +49544,6 @@ package android.view {
     method public void endViewTransition(android.view.View);
     method public android.view.View focusSearch(android.view.View, int);
     method public void focusableViewAvailable(android.view.View);
-    method public boolean gatherTransparentRegion(android.graphics.Region);
     method protected android.view.ViewGroup.LayoutParams generateDefaultLayoutParams();
     method public android.view.ViewGroup.LayoutParams generateLayoutParams(android.util.AttributeSet);
     method protected android.view.ViewGroup.LayoutParams generateLayoutParams(android.view.ViewGroup.LayoutParams);
@@ -52875,10 +52911,12 @@ package android.view.translation {
   }
 
   public final class TranslationSpec implements android.os.Parcelable {
-    ctor public TranslationSpec(@NonNull String, int);
+    ctor @Deprecated public TranslationSpec(@NonNull String, int);
+    ctor public TranslationSpec(@NonNull android.icu.util.ULocale, int);
     method public int describeContents();
     method public int getDataFormat();
-    method @NonNull public String getLanguage();
+    method @Deprecated @NonNull public String getLanguage();
+    method @NonNull public android.icu.util.ULocale getLocale();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationSpec> CREATOR;
     field public static final int DATA_FORMAT_TEXT = 1; // 0x1
@@ -52898,7 +52936,8 @@ package android.view.translation {
   public interface UiTranslationStateCallback {
     method public void onFinished();
     method public void onPaused();
-    method public void onStarted(@NonNull String, @NonNull String);
+    method @Deprecated public void onStarted(@NonNull String, @NonNull String);
+    method public default void onStarted(@NonNull android.icu.util.ULocale, @NonNull android.icu.util.ULocale);
   }
 
   @UiThread public interface ViewTranslationCallback {

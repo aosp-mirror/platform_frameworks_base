@@ -365,14 +365,14 @@ public interface WebViewProvider {
         }
 
         @SuppressLint("NullableCollection")
-        default void onCreateTranslationRequests(
-                @NonNull @SuppressWarnings("unused") long[] virtualChildIds,
+        default void onCreateVirtualViewTranslationRequests(
+                @NonNull @SuppressWarnings("unused") long[] virtualIds,
                 @NonNull @SuppressWarnings("unused") @DataFormat int[] supportedFormats,
                 @NonNull @SuppressWarnings("unused")
                         Consumer<ViewTranslationRequest> requestsCollector) {
         }
 
-        default void onTranslationResponse(
+        default void onVirtualViewTranslationResponses(
                 @NonNull @SuppressWarnings("unused")
                         LongSparseArray<ViewTranslationResponse> response) {
         }

@@ -237,12 +237,17 @@ public class TimeZoneDetectorStrategyImplTest {
         // The settings should not have been changed: user shouldn't have the capabilities.
         script.verifyConfigurationNotChanged();
 
-        // Try to update the configuration to enable geolocation time zone detection.
+        // Try to update the configuration to enable geolocation time zone detection: this should
+        // succeed, the geolocation time zone detection setting is not covered by the restriction).
         script.simulateUpdateConfiguration(
-                USER_ID, CONFIG_GEO_DETECTION_ENABLED,  false /* expectedResult */);
+                USER_ID, CONFIG_GEO_DETECTION_DISABLED,  true /* expectedResult */);
 
-        // The settings should not have been changed: user shouldn't have the capabilities.
-        script.verifyConfigurationNotChanged();
+        // The settings should have been changed.
+        ConfigurationInternal expectedConfig = new ConfigurationInternal.Builder(
+                CONFIG_INT_USER_RESTRICTED_AUTO_ENABLED)
+                .setGeoDetectionEnabled(false)
+                .build();
+        script.verifyConfigurationChangedAndReset(expectedConfig);
     }
 
     @Test

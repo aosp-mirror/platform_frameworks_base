@@ -2861,16 +2861,17 @@ public class WebView extends AbsoluteLayout
 
     @Override
     @Nullable
-    public void onCreateTranslationRequests(@NonNull long[] virtualChildIds,
+    public void onCreateVirtualViewTranslationRequests(@NonNull long[] virtualIds,
             @NonNull @DataFormat int[] supportedFormats,
             @NonNull Consumer<ViewTranslationRequest> requestsCollector) {
-        mProvider.getViewDelegate().onCreateTranslationRequests(virtualChildIds, supportedFormats,
-                requestsCollector);
+        mProvider.getViewDelegate().onCreateVirtualViewTranslationRequests(virtualIds,
+                supportedFormats, requestsCollector);
     }
 
     @Override
-    public void onTranslationResponse(@NonNull LongSparseArray<ViewTranslationResponse> response) {
-        mProvider.getViewDelegate().onTranslationResponse(response);
+    public void onVirtualViewTranslationResponses(
+            @NonNull LongSparseArray<ViewTranslationResponse> response) {
+        mProvider.getViewDelegate().onVirtualViewTranslationResponses(response);
     }
 
     /** @hide */

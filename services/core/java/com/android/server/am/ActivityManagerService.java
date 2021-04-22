@@ -27,6 +27,7 @@ import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
+import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -346,6 +347,7 @@ import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
@@ -4814,10 +4816,27 @@ public class ActivityManagerService extends IActivityManager.Stub
     public IIntentSender getIntentSenderWithFeature(int type, String packageName, String featureId,
             IBinder token, String resultWho, int requestCode, Intent[] intents,
             String[] resolvedTypes, int flags, Bundle bOptions, int userId) {
+        enforceNotIsolatedCaller("getIntentSender");
+
+        return getIntentSenderWithFeatureAsApp(type, packageName, featureId, token, resultWho,
+                requestCode, intents, resolvedTypes, flags, bOptions, userId,
+                Binder.getCallingUid());
+    }
+
+    /**
+     * System-internal callers can invoke this with owningUid being the app's own identity
+     * rather than the public API's behavior of always assigning ownership to the actual
+     * caller identity.  This will create an IntentSender as though the package/userid/uid app
+     * were the caller, so that the ultimate PendingIntent is triggered with only the app's
+     * capabilities and not the system's.  Used in cases like notification groups where
+     * the OS must synthesize a PendingIntent on an app's behalf.
+     */
+    public IIntentSender getIntentSenderWithFeatureAsApp(int type, String packageName,
+            String featureId, IBinder token, String resultWho, int requestCode, Intent[] intents,
+            String[] resolvedTypes, int flags, Bundle bOptions, int userId, int owningUid) {
         // NOTE: The service lock isn't held in this method because nothing in the method requires
         // the service lock to be held.
 
-        enforceNotIsolatedCaller("getIntentSender");
         // Refuse possible leaked file descriptors
         if (intents != null) {
             if (intents.length < 1) {
@@ -4848,9 +4867,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        int callingUid = Binder.getCallingUid();
         int origUserId = userId;
-        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
+        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), owningUid, userId,
                 type == ActivityManager.INTENT_SENDER_BROADCAST,
                 ALLOW_NON_FULL, "getIntentSender", null);
         if (origUserId == UserHandle.USER_CURRENT) {
@@ -4860,27 +4878,27 @@ public class ActivityManagerService extends IActivityManager.Stub
             userId = UserHandle.USER_CURRENT;
         }
         try {
-            if (callingUid != 0 && callingUid != SYSTEM_UID) {
+            if (owningUid != 0 && owningUid != SYSTEM_UID) {
                 final int uid = AppGlobals.getPackageManager().getPackageUid(packageName,
-                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(callingUid));
-                if (!UserHandle.isSameApp(callingUid, uid)) {
+                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(owningUid));
+                if (!UserHandle.isSameApp(owningUid, uid)) {
                     String msg = "Permission Denial: getIntentSender() from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + ", (need uid=" + uid + ")"
-                        + " is not allowed to send as package " + packageName;
+                            + Binder.getCallingPid()
+                            + ", uid=" + owningUid
+                            + ", (need uid=" + uid + ")"
+                            + " is not allowed to send as package " + packageName;
                     Slog.w(TAG, msg);
                     throw new SecurityException(msg);
                 }
             }
 
             if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
-                return mAtmInternal.getIntentSender(type, packageName, featureId, callingUid,
+                return mAtmInternal.getIntentSender(type, packageName, featureId, owningUid,
                         userId, token, resultWho, requestCode, intents, resolvedTypes, flags,
                         bOptions);
             }
             return mPendingIntentController.getIntentSender(type, packageName, featureId,
-                    callingUid, userId, token, resultWho, requestCode, intents, resolvedTypes,
+                    owningUid, userId, token, resultWho, requestCode, intents, resolvedTypes,
                     flags, bOptions);
         } catch (RemoteException e) {
             throw new SecurityException(e);
@@ -16058,6 +16076,32 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public PendingIntent getPendingIntentActivityAsApp(
+                int requestCode, @NonNull Intent intent, int flags, Bundle options,
+                String ownerPkg, int ownerUid) {
+            // system callers must explicitly set mutability state
+            final boolean flagImmutableSet = (flags & PendingIntent.FLAG_IMMUTABLE) != 0;
+            final boolean flagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
+            if (flagImmutableSet == flagMutableSet) {
+                throw new IllegalArgumentException(
+                        "Must set exactly one of FLAG_IMMUTABLE or FLAG_MUTABLE");
+            }
+
+            final Context context = ActivityManagerService.this.mContext;
+            String resolvedType = intent.resolveTypeIfNeeded(context.getContentResolver());
+            intent.migrateExtraStreamToClipData(context);
+            intent.prepareToLeaveProcess(context);
+            IIntentSender target =
+                    ActivityManagerService.this.getIntentSenderWithFeatureAsApp(
+                            INTENT_SENDER_ACTIVITY, ownerPkg,
+                            context.getAttributionTag(), null, null, requestCode,
+                            new Intent[] { intent },
+                            resolvedType != null ? new String[] { resolvedType } : null,
+                            flags, options, UserHandle.getUserId(ownerUid), ownerUid);
+            return target != null ? new PendingIntent(target) : null;
+        }
+
+        @Override
         public long getBootTimeTempAllowListDuration() {
             // Do not lock ActivityManagerService.this here, this API is called by
             // PackageManagerService.
@@ -16728,6 +16772,29 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return superImpl.apply(code, attributionSource, shouldCollectAsyncNotedOp,
                     message, shouldCollectMessage, skiProxyOperation);
+        }
+
+        @Override
+        public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+                @Nullable String packageName, @Nullable String attributionTag,
+                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message, boolean shouldCollectMessage,
+                @NonNull NonaFunction<IBinder, Integer, Integer, String, String, Boolean,
+                        Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
+            if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(token, code, shellUid, "com.android.shell",
+                            attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(token, code, uid, packageName, attributionTag,
+                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
         }
 
         @Override

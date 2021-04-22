@@ -27,6 +27,7 @@ import android.annotation.SystemApi;
 import android.media.AudioFormat;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
+import android.os.SharedMemory;
 import android.service.voice.HotwordDetectionService.InitializationStatus;
 
 /**
@@ -106,6 +107,21 @@ public interface HotwordDetector {
             @Nullable PersistableBundle options);
 
     /**
+     * Set configuration and pass read-only data to hotword detection service.
+     *
+     * @param options Application configuration data to provide to the
+     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob to provide to the
+     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
+     * such data to the trusted process.
+     *
+     * @throws IllegalStateException if this HotwordDetector wasn't specified to use a
+     * {@link HotwordDetectionService} when it was created.
+     */
+    void updateState(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory);
+
+    /**
      * The callback to notify of detection events.
      */
     interface Callback {
@@ -153,5 +169,13 @@ public interface HotwordDetector {
          * @param status Info about initialization state of {@link HotwordDetectionService}.
          */
         void onHotwordDetectionServiceInitialized(@InitializationStatus int status);
+
+        /**
+         * Called with the {@link HotwordDetectionService} is restarted.
+         *
+         * Clients are expected to call {@link HotwordDetector#updateState} to share the state with
+         * the newly created service.
+         */
+        void onHotwordDetectionServiceRestarted();
     }
 }

@@ -28,7 +28,6 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Environment
 import android.os.UserHandle
-import android.provider.Settings
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.util.ArrayMap
@@ -70,15 +69,10 @@ class ControlsControllerImpl @Inject constructor (
 
     companion object {
         private const val TAG = "ControlsControllerImpl"
-        internal const val CONTROLS_AVAILABLE = Settings.Secure.CONTROLS_ENABLED
-        internal val URI = Settings.Secure.getUriFor(CONTROLS_AVAILABLE)
         private const val USER_CHANGE_RETRY_DELAY = 500L // ms
         private const val DEFAULT_ENABLED = 1
         private const val PERMISSION_SELF = "com.android.systemui.permission.SELF"
         const val SUGGESTED_CONTROLS_PER_STRUCTURE = 6
-
-        private fun isAvailable(userId: Int, cr: ContentResolver) = Settings.Secure.getIntForUser(
-            cr, CONTROLS_AVAILABLE, DEFAULT_ENABLED, userId) != 0
     }
 
     private var userChanging: Boolean = true
@@ -93,8 +87,6 @@ class ControlsControllerImpl @Inject constructor (
 
     private val contentResolver: ContentResolver
         get() = context.contentResolver
-    override var available = isAvailable(currentUserId, contentResolver)
-        private set
 
     private val persistenceWrapper: ControlsFavoritePersistenceWrapper
     @VisibleForTesting
@@ -126,8 +118,7 @@ class ControlsControllerImpl @Inject constructor (
                 BackupManager(userStructure.userContext)
         )
         auxiliaryPersistenceWrapper.changeFile(userStructure.auxiliaryFile)
-        available = isAvailable(newUser.identifier, contentResolver)
-        resetFavorites(available)
+        resetFavorites()
         bindingController.changeUser(newUser)
         listingController.changeUser(newUser)
         userChanging = false
@@ -157,7 +148,7 @@ class ControlsControllerImpl @Inject constructor (
                     Log.d(TAG, "Restore finished, storing auxiliary favorites")
                     auxiliaryPersistenceWrapper.initialize()
                     persistenceWrapper.storeFavorites(auxiliaryPersistenceWrapper.favorites)
-                    resetFavorites(available)
+                    resetFavorites()
                 }
             }
         }
@@ -176,8 +167,7 @@ class ControlsControllerImpl @Inject constructor (
             if (userChanging || userId != currentUserId) {
                 return
             }
-            available = isAvailable(currentUserId, contentResolver)
-            resetFavorites(available)
+            resetFavorites()
         }
     }
 
@@ -242,7 +232,7 @@ class ControlsControllerImpl @Inject constructor (
 
     init {
         dumpManager.registerDumpable(javaClass.name, this)
-        resetFavorites(available)
+        resetFavorites()
         userChanging = false
         broadcastDispatcher.registerReceiver(
                 userSwitchReceiver,
@@ -256,32 +246,23 @@ class ControlsControllerImpl @Inject constructor (
             PERMISSION_SELF,
             null
         )
-        contentResolver.registerContentObserver(URI, false, settingObserver, UserHandle.USER_ALL)
         listingController.addCallback(listingCallback)
     }
 
     fun destroy() {
         broadcastDispatcher.unregisterReceiver(userSwitchReceiver)
         context.unregisterReceiver(restoreFinishedReceiver)
-        contentResolver.unregisterContentObserver(settingObserver)
         listingController.removeCallback(listingCallback)
     }
 
-    private fun resetFavorites(shouldLoad: Boolean) {
+    private fun resetFavorites() {
         Favorites.clear()
-
-        if (shouldLoad) {
-            Favorites.load(persistenceWrapper.readFavorites())
-        }
+        Favorites.load(persistenceWrapper.readFavorites())
     }
 
     private fun confirmAvailability(): Boolean {
         if (userChanging) {
             Log.w(TAG, "Controls not available while user is changing")
-            return false
-        }
-        if (!available) {
-            Log.d(TAG, "Controls not available")
             return false
         }
         return true
@@ -577,7 +558,6 @@ class ControlsControllerImpl @Inject constructor (
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("ControlsController state:")
-        pw.println("  Available: $available")
         pw.println("  Changing users: $userChanging")
         pw.println("  Current user: ${currentUser.identifier}")
         pw.println("  Favorites:")

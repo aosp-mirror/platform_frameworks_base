@@ -104,6 +104,8 @@ public final class BluetoothA2dp implements BluetoothProfile {
             "android.bluetooth.a2dp.profile.action.PLAYING_STATE_CHANGED";
 
     /** @hide */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_AVRCP_CONNECTION_STATE_CHANGED =
             "android.bluetooth.a2dp.profile.action.AVRCP_CONNECTION_STATE_CHANGED";

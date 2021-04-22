@@ -310,6 +310,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     @RequiresLegacyBluetoothPermission
     @RequiresBluetoothConnectPermission
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_HF_INDICATORS_VALUE_CHANGED =
             "android.bluetooth.headset.action.HF_INDICATORS_VALUE_CHANGED";
 

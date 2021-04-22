@@ -972,6 +972,14 @@ public final class AccessibilityInteractionClient
             finalizeAndCacheAccessibilityNodeInfos(
                     infos, connectionIdWaitingForPrefetchResultCopy, false,
                     packageNamesForNextPrefetchResultCopy);
+            if (mAccessibilityManager != null
+                    && mAccessibilityManager.isAccessibilityTracingEnabled()) {
+                logTrace(getConnection(connectionIdWaitingForPrefetchResultCopy),
+                        "setPrefetchAccessibilityNodeInfoResult",
+                        "InteractionId:" + interactionId + ";Result: " + infos
+                                + ";connectionId=" + connectionIdWaitingForPrefetchResultCopy,
+                        Binder.getCallingUid());
+            }
         } else if (DEBUG) {
             Log.w(LOG_TAG, "Prefetching for interaction with id " + interactionId + " dropped "
                     + infos.size() + " nodes");
@@ -1212,7 +1220,8 @@ public final class AccessibilityInteractionClient
     }
 
     private void logTrace(
-            IAccessibilityServiceConnection connection, String method, String params) {
+            IAccessibilityServiceConnection connection, String method, String params,
+            int callingUid) {
         try {
             Bundle b = new Bundle();
             ArrayList<StackTraceElement> callStack = new ArrayList<StackTraceElement>(
@@ -1220,9 +1229,14 @@ public final class AccessibilityInteractionClient
             b.putSerializable(CALL_STACK, callStack);
             connection.logTrace(SystemClock.elapsedRealtimeNanos(),
                     LOG_TAG + ".callback for " + method, params, Process.myPid(),
-                    Thread.currentThread().getId(), mCallingUid, b);
+                    Thread.currentThread().getId(), callingUid, b);
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Failed to log trace. " + e);
         }
+    }
+
+    private void logTrace(
+            IAccessibilityServiceConnection connection, String method, String params) {
+        logTrace(connection, method, params, mCallingUid);
     }
 }

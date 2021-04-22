@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles;
 
-import android.annotation.Nullable;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,7 +23,10 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -105,7 +107,7 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         final boolean isEnabled = mState.value;
         if (!isEnabled && mDataSaverController.isDataSaverEnabled()) {
             return;

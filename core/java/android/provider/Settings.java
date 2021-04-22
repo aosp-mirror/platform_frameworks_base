@@ -4666,11 +4666,9 @@ public final class Settings {
         public static final String TIME_12_24 = "time_12_24";
 
         /**
-         * Date format string
-         *   mm/dd/yyyy
-         *   dd/mm/yyyy
-         *   yyyy/mm/dd
+         * @deprecated No longer used. Use {@link #TIME_12_24} instead.
          */
+        @Deprecated
         @Readable
         public static final String DATE_FORMAT = "date_format";
 
@@ -9428,9 +9426,12 @@ public final class Settings {
          * 0 indicates disabled and 1 indicates enabled. A non existent value should be treated as
          * enabled.
          *
+         * @deprecated Controls are migrated to Quick Settings, rendering this unnecessary and will
+         *             be removed in a future release.
          * @hide
          */
         @Readable
+        @Deprecated
         public static final String CONTROLS_ENABLED = "controls_enabled";
 
         /**

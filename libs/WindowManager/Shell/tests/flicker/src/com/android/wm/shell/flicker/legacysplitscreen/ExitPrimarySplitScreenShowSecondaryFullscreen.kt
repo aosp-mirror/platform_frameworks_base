@@ -82,11 +82,6 @@ class ExitPrimarySplitScreenShowSecondaryFullscreen(
     @Test
     fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(splitScreenApp.defaultWindowName)
 
-    @FlakyTest(bugId = 178447631)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
     @FlakyTest
     @Test
     fun appWindowBecomesInVisible() =
@@ -99,11 +94,6 @@ class ExitPrimarySplitScreenShowSecondaryFullscreen(
     @Presubmit
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
-
-    @FlakyTest(bugId = 178447631)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

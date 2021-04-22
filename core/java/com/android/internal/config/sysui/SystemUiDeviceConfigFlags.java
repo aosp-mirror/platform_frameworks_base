@@ -483,6 +483,12 @@ public final class SystemUiDeviceConfigFlags {
     public static final String HOME_BUTTON_LONG_PRESS_DURATION_MS =
             "home_button_long_press_duration_ms";
 
+    /**
+     * (boolean) Whether shortcut integration over app search service is enabled.
+     */
+    public static final String SHORTCUT_APPSEARCH_INTEGRATION =
+            "shortcut_appsearch_integration";
+
     private SystemUiDeviceConfigFlags() {
     }
 }

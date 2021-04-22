@@ -24,7 +24,10 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -101,7 +104,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (getState().state == Tile.STATE_UNAVAILABLE) {
             return;
         }

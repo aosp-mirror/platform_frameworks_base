@@ -38,6 +38,7 @@ public class ContextUserIdCheckerTest {
         compilationHelper
                 .addSourceFile("/android/annotation/SystemService.java")
                 .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/content/Intent.java")
                 .addSourceFile("/android/foo/IFooService.java")
                 .addSourceFile("/android/os/IInterface.java")
                 .addSourceFile("/android/os/RemoteException.java")
@@ -68,6 +69,7 @@ public class ContextUserIdCheckerTest {
         compilationHelper
                 .addSourceFile("/android/annotation/SystemService.java")
                 .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/content/Intent.java")
                 .addSourceFile("/android/foo/IFooService.java")
                 .addSourceFile("/android/os/IInterface.java")
                 .addSourceFile("/android/os/UserHandle.java")
@@ -98,6 +100,7 @@ public class ContextUserIdCheckerTest {
         compilationHelper
                 .addSourceFile("/android/annotation/SystemService.java")
                 .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/content/Intent.java")
                 .addSourceFile("/android/foo/IFooService.java")
                 .addSourceFile("/android/os/IInterface.java")
                 .addSourceFile("/android/os/UserHandle.java")
@@ -124,6 +127,7 @@ public class ContextUserIdCheckerTest {
         compilationHelper
                 .addSourceFile("/android/annotation/SystemService.java")
                 .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/content/Intent.java")
                 .addSourceFile("/android/foo/IFooService.java")
                 .addSourceFile("/android/os/IInterface.java")
                 .addSourceFile("/android/os/UserHandle.java")

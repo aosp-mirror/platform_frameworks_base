@@ -1423,8 +1423,8 @@ public class RecoverySystem {
     private boolean requestLskf(String packageName, IntentSender sender) throws IOException {
         try {
             return mService.requestLskf(packageName, sender);
-        } catch (RemoteException e) {
-            throw new IOException("could request LSKF capture");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not request LSKF capture", e);
         }
     }
 
@@ -1437,8 +1437,8 @@ public class RecoverySystem {
     private boolean clearLskf(String packageName) throws IOException {
         try {
             return mService.clearLskf(packageName);
-        } catch (RemoteException e) {
-            throw new IOException("could not clear LSKF");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not clear LSKF", e);
         }
     }
 
@@ -1452,8 +1452,8 @@ public class RecoverySystem {
     private boolean isLskfCaptured(String packageName) throws IOException {
         try {
             return mService.isLskfCaptured(packageName);
-        } catch (RemoteException e) {
-            throw new IOException("could not get LSKF capture state");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not get LSKF capture state", e);
         }
     }
 
@@ -1465,11 +1465,10 @@ public class RecoverySystem {
             boolean slotSwitch) throws IOException {
         try {
             return mService.rebootWithLskf(packageName, reason, slotSwitch);
-        } catch (RemoteException e) {
-            throw new IOException("could not reboot for update");
+        } catch (RemoteException | SecurityException e) {
+            throw new IOException("could not reboot for update", e);
         }
     }
-
 
     /**
      * Calls the recovery system service to reboot and apply update. This is the legacy API and
@@ -1480,8 +1479,8 @@ public class RecoverySystem {
             String reason) throws IOException {
         try {
             return mService.rebootWithLskfAssumeSlotSwitch(packageName, reason);
-        } catch (RemoteException e) {
-            throw new IOException("could not reboot for update");
+        } catch (RemoteException | RuntimeException e) {
+            throw new IOException("could not reboot for update", e);
         }
     }
 

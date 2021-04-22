@@ -387,6 +387,27 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRelaunchClearTopWaitingTranslucent() {
+        final ActivityRecord activity = createActivityWithTask();
+        final Task task = activity.getTask();
+        activity.setState(Task.ActivityState.RESUMED, "Testing");
+
+        task.onRequestedOverrideConfigurationChanged(task.getConfiguration());
+        activity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
+                activity.getConfiguration()));
+
+        activity.info.configChanges &= ~CONFIG_ORIENTATION;
+        final Configuration newConfig = new Configuration(task.getConfiguration());
+        newConfig.orientation = newConfig.orientation == ORIENTATION_PORTRAIT
+                ? ORIENTATION_LANDSCAPE
+                : ORIENTATION_PORTRAIT;
+        task.onRequestedOverrideConfigurationChanged(newConfig);
+        task.mTranslucentActivityWaiting = activity;
+        ensureActivityConfiguration(activity);
+        assertNull(task.mTranslucentActivityWaiting);
+    }
+
+    @Test
     public void testSetsRelaunchReason_NonResizeConfigChanges() {
         final ActivityRecord activity = createActivityWithTask();
         final Task task = activity.getTask();

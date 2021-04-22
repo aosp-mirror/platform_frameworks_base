@@ -19,7 +19,6 @@ package android.provider.settings.validators;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COMPONENT_NAME_VALIDATOR;
-import static android.provider.settings.validators.SettingsValidators.DATE_FORMAT_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.URI_VALIDATOR;
@@ -146,7 +145,6 @@ public class SystemSettingsValidators {
                 });
         VALIDATORS.put(
                 System.TIME_12_24, new DiscreteValueValidator(new String[] {"12", "24", null}));
-        VALIDATORS.put(System.DATE_FORMAT, DATE_FORMAT_VALIDATOR);
         VALIDATORS.put(System.SETUP_WIZARD_HAS_RUN, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.ACCELEROMETER_ROTATION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.USER_ROTATION, new InclusiveIntegerRangeValidator(0, 3));

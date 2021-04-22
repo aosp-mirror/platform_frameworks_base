@@ -20,8 +20,7 @@
     android:id="@+id/control_detail_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/black">
+    android:orientation="vertical">
 
   <com.android.systemui.globalactions.MinHeightScrollView
       android:layout_width="match_parent"

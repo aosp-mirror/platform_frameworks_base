@@ -220,6 +220,10 @@ public class NetworkRequest implements Parcelable {
         public Builder(@NonNull final NetworkRequest request) {
             Objects.requireNonNull(request);
             mNetworkCapabilities = request.networkCapabilities;
+            // If the caller constructed the builder from a request, it means the user
+            // might explicitly want the capabilities from the request. Thus, the NOT_VCN_MANAGED
+            // capabilities should not be touched later.
+            mModifiedNotVcnManaged = true;
         }
 
         /**

@@ -21,6 +21,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.uwb.UwbManager.AdapterStateCallback;
+import android.uwb.UwbManager.AdapterStateCallback.State;
 import android.uwb.UwbManager.AdapterStateCallback.StateChangedReason;
 
 import java.util.HashMap;
@@ -40,7 +41,8 @@ public class AdapterStateListener extends IUwbAdapterStateCallbacks.Stub {
 
     @StateChangedReason
     private int mAdapterStateChangeReason = AdapterStateCallback.STATE_CHANGED_REASON_ERROR_UNKNOWN;
-    private boolean mAdapterEnabledState = false;
+    @State
+    private int mAdapterState = AdapterStateCallback.STATE_DISABLED;
 
     public AdapterStateListener(@NonNull IUwbAdapter adapter) {
         mAdapter = adapter;
@@ -66,7 +68,7 @@ public class AdapterStateListener extends IUwbAdapterStateCallbacks.Stub {
                     mIsRegistered = true;
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to register adapter state callback");
-                    executor.execute(() -> callback.onStateChanged(false,
+                    executor.execute(() -> callback.onStateChanged(mAdapterState,
                             AdapterStateCallback.STATE_CHANGED_REASON_ERROR_UNKNOWN));
                 }
             } else {
@@ -99,6 +101,42 @@ public class AdapterStateListener extends IUwbAdapterStateCallbacks.Stub {
         }
     }
 
+    /**
+     * Sets the adapter enabled state
+     *
+     * @param isEnabled value of new adapter state
+     */
+    public void setEnabled(boolean isEnabled) {
+        synchronized (this) {
+            if (!mIsRegistered) {
+                return;
+            } else {
+                try {
+                    mAdapter.setEnabled(isEnabled);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to set adapter state");
+                    sendErrorState();
+                }
+            }
+        }
+    }
+
+    private void sendErrorState() {
+        synchronized (this) {
+            for (AdapterStateCallback callback: mCallbackMap.keySet()) {
+                Executor executor = mCallbackMap.get(callback);
+
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> callback.onStateChanged(
+                            mAdapterState, mAdapterStateChangeReason));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+        }
+    }
+
     private void sendCurrentState(@NonNull AdapterStateCallback callback) {
         synchronized (this) {
             Executor executor = mCallbackMap.get(callback);
@@ -106,7 +144,7 @@ public class AdapterStateListener extends IUwbAdapterStateCallbacks.Stub {
             final long identity = Binder.clearCallingIdentity();
             try {
                 executor.execute(() -> callback.onStateChanged(
-                        mAdapterEnabledState, mAdapterStateChangeReason));
+                        mAdapterState, mAdapterStateChangeReason));
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -114,12 +152,13 @@ public class AdapterStateListener extends IUwbAdapterStateCallbacks.Stub {
     }
 
     @Override
-    public void onAdapterStateChanged(boolean isEnabled, int reason) {
+    public void onAdapterStateChanged(int state, int reason) {
         synchronized (this) {
             @StateChangedReason int localReason =
                     convertToStateChangedReason(reason);
-            mAdapterEnabledState = isEnabled;
+            @State int localState = convertToState(state);
             mAdapterStateChangeReason = localReason;
+            mAdapterState = localState;
             for (AdapterStateCallback cb : mCallbackMap.keySet()) {
                 sendCurrentState(cb);
             }
@@ -144,6 +183,20 @@ public class AdapterStateListener extends IUwbAdapterStateCallbacks.Stub {
             case StateChangeReason.UNKNOWN:
             default:
                 return AdapterStateCallback.STATE_CHANGED_REASON_ERROR_UNKNOWN;
+        }
+    }
+
+    private static @State int convertToState(@AdapterState int state) {
+        switch (state) {
+            case AdapterState.STATE_ENABLED_INACTIVE:
+                return AdapterStateCallback.STATE_ENABLED_INACTIVE;
+
+            case AdapterState.STATE_ENABLED_ACTIVE:
+                return AdapterStateCallback.STATE_ENABLED_ACTIVE;
+
+            case AdapterState.STATE_DISABLED:
+            default:
+                return AdapterStateCallback.STATE_DISABLED;
         }
     }
 }

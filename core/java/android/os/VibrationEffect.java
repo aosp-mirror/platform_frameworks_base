@@ -749,14 +749,10 @@ public abstract class VibrationEffect implements Parcelable {
          * A haptic effect that simulates downwards movement with gravity. Often
          * followed by extra energy of hitting and reverberation to augment
          * physicality.
-         *
-         * @hide Not confident enough to expose publicly yet
          */
         public static final int PRIMITIVE_THUD = 2;
         /**
          * A haptic effect that simulates spinning momentum.
-         *
-         * @hide Not confident enough to expose publicly yet
          */
         public static final int PRIMITIVE_SPIN = 3;
         /**

@@ -1783,8 +1783,6 @@ public class NotificationManagerService extends SystemService {
                 }
             } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                // Work profile user may now be locked. Refresh cache.
-                mUserProfiles.updateCache(context);
                 if (userHandle >= 0) {
                     cancelAllNotificationsInt(MY_UID, MY_PID, null, null, 0, 0, true, userHandle,
                             REASON_PROFILE_TURNED_OFF, null);
@@ -5681,9 +5679,11 @@ public class NotificationManagerService extends SystemService {
                 summaryNotification.extras.putAll(extras);
                 Intent appIntent = getContext().getPackageManager().getLaunchIntentForPackage(pkg);
                 if (appIntent != null) {
-                    summaryNotification.contentIntent = PendingIntent.getActivityAsUser(
-                            getContext(), 0, appIntent, PendingIntent.FLAG_IMMUTABLE, null,
-                            UserHandle.of(userId));
+                    final ActivityManagerInternal ami = LocalServices
+                            .getService(ActivityManagerInternal.class);
+                    summaryNotification.contentIntent = ami.getPendingIntentActivityAsApp(
+                            0, appIntent, PendingIntent.FLAG_IMMUTABLE, null,
+                            pkg, appInfo.uid);
                 }
                 final StatusBarNotification summarySbn =
                         new StatusBarNotification(adjustedSbn.getPackageName(),
