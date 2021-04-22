@@ -743,6 +743,16 @@ public final class SensorPrivacyService extends SystemService {
             }
         }
 
+        @Override
+        public boolean supportsSensorToggle(int sensor) {
+            if (sensor == MICROPHONE) {
+                return mContext.getResources().getBoolean(R.bool.config_supportsMicToggle);
+            } else if (sensor == CAMERA) {
+                return mContext.getResources().getBoolean(R.bool.config_supportsCamToggle);
+            }
+            throw new IllegalArgumentException("Unable to find value " + sensor);
+        }
+
         /**
          * Registers a listener to be notified when the sensor privacy state changes.
          */
