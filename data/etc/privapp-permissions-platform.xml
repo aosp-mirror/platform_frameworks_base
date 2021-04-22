@@ -153,6 +153,7 @@ applications that come with the platform
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
         <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
+        <permission name="android.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING" />
 
         <!-- For permission hub 2 debugging only -->
         <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
@@ -344,6 +345,7 @@ applications that come with the platform
         <permission name="android.permission.ACTIVITY_EMBEDDING"/>
         <permission name="android.permission.FORCE_STOP_PACKAGES"/>
         <permission name="android.permission.GET_APP_OPS_STATS"/>
+        <permission name="android.permission.WATCH_APPOPS"/>
         <permission name="android.permission.INSTALL_DYNAMIC_SYSTEM"/>
         <permission name="android.permission.INSTALL_LOCATION_PROVIDER"/>
         <permission name="android.permission.INSTALL_PACKAGES"/>
@@ -458,6 +460,7 @@ applications that come with the platform
         <permission name="android.permission.ACCESS_TV_TUNER" />
         <permission name="android.permission.TUNER_RESOURCE_ACCESS" />
         <!-- Permissions required for CTS test - TVInputManagerTest -->
+        <permission name="android.permission.ACCESS_TUNED_INFO" />
         <permission name="android.permission.TV_INPUT_HARDWARE" />
         <!-- Permission required for CTS test - PrivilegedLocationPermissionTest -->
         <permission name="android.permission.LOCATION_HARDWARE" />
@@ -508,7 +511,7 @@ applications that come with the platform
         <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
         <permission name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
         <!-- Permission required for CTS test - SystemMediaRouter2Test -->
-        <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
+        <permission name="android.permission.MEDIA_CONTENT_CONTROL"/>
         <!-- Permission required for CTS test - CtsPermission5TestCases -->
         <permission name="android.permission.RENOUNCE_PERMISSIONS" />
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />

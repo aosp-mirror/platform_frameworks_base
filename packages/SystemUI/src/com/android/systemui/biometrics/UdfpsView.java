@@ -130,6 +130,10 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
         }
     }
 
+    void onTouchOutsideView() {
+        mAnimationViewController.onTouchOutsideView();
+    }
+
     void setAnimationViewController(UdfpsAnimationViewController animationViewController) {
         mAnimationViewController = animationViewController;
     }

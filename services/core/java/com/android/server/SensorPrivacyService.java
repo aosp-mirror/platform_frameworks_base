@@ -197,16 +197,16 @@ public final class SensorPrivacyService extends SystemService {
                 if (readPersistedSensorPrivacyStateLocked()) {
                     persistSensorPrivacyStateLocked();
                 }
-            }
 
-            for (int i = 0; i < mIndividualEnabled.size(); i++) {
-                int userId = mIndividualEnabled.keyAt(i);
-                SparseBooleanArray userIndividualEnabled =
-                        mIndividualEnabled.get(i);
-                for (int j = 0; j < userIndividualEnabled.size(); j++) {
-                    int sensor = userIndividualEnabled.keyAt(i);
-                    boolean enabled = userIndividualEnabled.valueAt(j);
-                    setUserRestriction(userId, sensor, enabled);
+                for (int i = 0; i < mIndividualEnabled.size(); i++) {
+                    int userId = mIndividualEnabled.keyAt(i);
+                    SparseBooleanArray userIndividualEnabled =
+                            mIndividualEnabled.valueAt(i);
+                    for (int j = 0; j < userIndividualEnabled.size(); j++) {
+                        int sensor = userIndividualEnabled.keyAt(i);
+                        boolean enabled = userIndividualEnabled.valueAt(j);
+                        setUserRestriction(userId, sensor, enabled);
+                    }
                 }
             }
 

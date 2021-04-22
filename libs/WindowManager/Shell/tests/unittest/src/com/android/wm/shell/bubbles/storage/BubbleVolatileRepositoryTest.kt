@@ -21,32 +21,40 @@ import android.content.pm.LauncherApps
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import org.junit.Test
 import com.android.wm.shell.ShellTestCase
 import junit.framework.Assert.assertEquals
 import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.Mockito.reset
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class BubbleVolatileRepositoryTest : ShellTestCase() {
 
     private val user0 = UserHandle.of(0)
-    private val user10 = UserHandle.of(10)
+    private val user10_managed = UserHandle.of(10) // In test, acts as workprofile of user0
+    private val user11 = UserHandle.of(11)
 
     // user, package, shortcut, notification key, height, res-height, title, taskId, locusId
-    private val bubble1 = BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1", 120, 0,
-            null, 1, null)
+    private val bubble1 = BubbleEntity(0, "com.example.messenger", "shortcut-1",
+            "0key-1", 120, 0, null, 1, null)
     private val bubble2 = BubbleEntity(10, "com.example.chat", "alice and bob",
-            "key-2", 0, 16537428, "title", 2, null)
-    private val bubble3 = BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3", 120, 0,
-            null, INVALID_TASK_ID, "key-3")
+            "10key-2", 0, 16537428, "title", 2, null)
+    private val bubble3 = BubbleEntity(0, "com.example.messenger", "shortcut-2",
+            "0key-3", 120, 0, null, INVALID_TASK_ID, null)
 
-    private val bubbles = listOf(bubble1, bubble2, bubble3)
+    private val bubble11 = BubbleEntity(11, "com.example.messenger",
+            "shortcut-1", "01key-1", 120, 0, null, 3)
+    private val bubble12 = BubbleEntity(11, "com.example.chat", "alice and bob",
+            "11key-2", 0, 16537428, "title", INVALID_TASK_ID)
+
+    private val user0bubbles = listOf(bubble1, bubble2, bubble3)
+    private val user11bubbles = listOf(bubble11, bubble12)
 
     private lateinit var repository: BubbleVolatileRepository
     private lateinit var launcherApps: LauncherApps
@@ -59,29 +67,52 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
 
     @Test
     fun testAddBubbles() {
-        repository.addBubbles(bubbles)
-        assertEquals(bubbles, repository.bubbles)
+        repository.addBubbles(user0.identifier, user0bubbles)
+        repository.addBubbles(user11.identifier, user11bubbles)
+
+        assertEquals(user0bubbles, repository.getEntities(user0.identifier).toList())
+        assertEquals(user11bubbles, repository.getEntities(user11.identifier).toList())
+
         verify(launcherApps).cacheShortcuts(eq(PKG_MESSENGER),
                 eq(listOf("shortcut-1", "shortcut-2")), eq(user0),
                 eq(LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS))
         verify(launcherApps).cacheShortcuts(eq(PKG_CHAT),
-                eq(listOf("alice and bob")), eq(user10),
+                eq(listOf("alice and bob")), eq(user10_managed),
                 eq(LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS))
 
-        repository.addBubbles(listOf(bubble1))
-        assertEquals(listOf(bubble2, bubble3, bubble1), repository.bubbles)
-        verifyNoMoreInteractions(launcherApps)
+        verify(launcherApps).cacheShortcuts(eq(PKG_MESSENGER),
+                eq(listOf("shortcut-1")), eq(user11),
+                eq(LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS))
+        verify(launcherApps).cacheShortcuts(eq(PKG_CHAT),
+                eq(listOf("alice and bob")), eq(user11),
+                eq(LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS))
+
+        repository.addBubbles(user0.identifier, listOf(bubble1))
+        assertEquals(listOf(bubble2, bubble3, bubble1), repository.getEntities(user0.identifier))
+
+        repository.addBubbles(user11.identifier, listOf(bubble12))
+        assertEquals(listOf(bubble11, bubble12), repository.getEntities(user11.identifier))
+
+        Mockito.verifyNoMoreInteractions(launcherApps)
     }
 
     @Test
     fun testRemoveBubbles() {
-        repository.addBubbles(bubbles)
-        assertEquals(bubbles, repository.bubbles)
+        repository.addBubbles(user0.identifier, user0bubbles)
+        repository.addBubbles(user11.identifier, user11bubbles)
 
-        repository.removeBubbles(listOf(bubble3))
-        assertEquals(listOf(bubble1, bubble2), repository.bubbles)
+        repository.removeBubbles(user0.identifier, listOf(bubble3))
+        assertEquals(listOf(bubble1, bubble2), repository.getEntities(user0.identifier).toList())
         verify(launcherApps).uncacheShortcuts(eq(PKG_MESSENGER),
                 eq(listOf("shortcut-2")), eq(user0),
+                eq(LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS))
+
+        reset(launcherApps)
+
+        repository.removeBubbles(user11.identifier, listOf(bubble12))
+        assertEquals(listOf(bubble11), repository.getEntities(user11.identifier).toList())
+        verify(launcherApps).uncacheShortcuts(eq(PKG_CHAT),
+                eq(listOf("alice and bob")), eq(user11),
                 eq(LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS))
     }
 
@@ -89,21 +120,21 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
     fun testAddAndRemoveBubblesWhenExceedingCapacity() {
         repository.capacity = 2
         // push bubbles beyond capacity
-        repository.addBubbles(bubbles)
+        repository.addBubbles(user0.identifier, user0bubbles)
         // verify it is trim down to capacity
-        assertEquals(listOf(bubble2, bubble3), repository.bubbles)
+        assertEquals(listOf(bubble2, bubble3), repository.getEntities(user0.identifier).toList())
         verify(launcherApps).cacheShortcuts(eq(PKG_MESSENGER),
                 eq(listOf("shortcut-2")), eq(user0),
                 eq(LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS))
         verify(launcherApps).cacheShortcuts(eq(PKG_CHAT),
-                eq(listOf("alice and bob")), eq(user10),
+                eq(listOf("alice and bob")), eq(user10_managed),
                 eq(LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS))
 
-        repository.addBubbles(listOf(bubble1))
-        // verify the oldest bubble is popped
-        assertEquals(listOf(bubble3, bubble1), repository.bubbles)
+        repository.addBubbles(user0.identifier, listOf(bubble1))
+        // verify the oldest bubble is popped 2, 3
+        assertEquals(listOf(bubble3, bubble1), repository.getEntities(user0.identifier).toList())
         verify(launcherApps).uncacheShortcuts(eq(PKG_CHAT),
-                eq(listOf("alice and bob")), eq(user10),
+                eq(listOf("alice and bob")), eq(user10_managed),
                 eq(LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS))
     }
 
@@ -111,14 +142,14 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
     fun testAddBubbleMatchesByKey() {
         val bubble = BubbleEntity(0, "com.example.pkg", "shortcut-id", "key", 120, 0, "title",
                 1, null)
-        repository.addBubbles(listOf(bubble))
-        assertEquals(bubble, repository.bubbles.get(0))
+        repository.addBubbles(user0.identifier, listOf(bubble))
+        assertEquals(bubble, repository.getEntities(user0.identifier).get(0))
 
         // Same key as first bubble but different entry
         val bubbleModified = BubbleEntity(0, "com.example.pkg", "shortcut-id", "key", 120, 0,
-                "different title", 2, null)
-        repository.addBubbles(listOf(bubbleModified))
-        assertEquals(bubbleModified, repository.bubbles.get(0))
+                "different title", 2)
+        repository.addBubbles(user0.identifier, listOf(bubbleModified))
+        assertEquals(bubbleModified, repository.getEntities(user0.identifier).get(0))
     }
 }
 

@@ -24,7 +24,6 @@
     android:orientation="vertical"
     android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
-    android:paddingTop="16dp"
     android:paddingBottom="16dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -64,8 +63,8 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scaleY="4"
-        android:max="100"/>
+        android:max="100"
+        android:scaleY="1"/>
 
     <TextView
         android:id="@+id/bottom_summary"

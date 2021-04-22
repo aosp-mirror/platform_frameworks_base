@@ -21,9 +21,11 @@ import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -87,19 +89,7 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
     @Override
     public int checkDeviceIdentifierAccess(@Nullable String packageName, @Nullable String message,
             @Nullable String callingFeatureId, int pid, int uid) {
-        // If the check is being requested by an app then only allow the app to query its own
-        // access status.
-        int callingUid = mInjector.getCallingUid();
-        int callingPid = mInjector.getCallingPid();
-        if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID && (callingUid != uid
-                || callingPid != pid)) {
-            String response = String.format(
-                    "Calling uid %d, pid %d cannot check device identifier access for package %s "
-                            + "(uid=%d, pid=%d)",
-                    callingUid, callingPid, packageName, uid, pid);
-            Log.w(TAG, response);
-            throw new SecurityException(response);
-        }
+        verifyCallerCanCheckAccess(packageName, message, pid, uid);
         // Allow system and root access to the device identifiers.
         final int appId = UserHandle.getAppId(uid);
         if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
@@ -135,6 +125,110 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
             }
         }
         return PackageManager.PERMISSION_DENIED;
+    }
+
+    @Override
+    public int checkPhoneNumberAccess(@Nullable String packageName, @Nullable String message,
+            @Nullable String callingFeatureId, int pid, int uid) {
+        verifyCallerCanCheckAccess(packageName, message, pid, uid);
+        if (mInjector.checkPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, pid,
+                uid) == PackageManager.PERMISSION_GRANTED) {
+            // Skip checking for runtime permission since caller has privileged permission
+            return PackageManager.PERMISSION_GRANTED;
+        }
+        // if the packageName is null then just return now as the rest of the checks require a
+        // valid package name.
+        if (packageName == null) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+        // If the target SDK version is below R then also check for READ_PHONE_STATE; prior to R
+        // the phone number was accessible with the READ_PHONE_STATE permission granted.
+        boolean preR = false;
+        int result = PackageManager.PERMISSION_DENIED;
+        try {
+            ApplicationInfo info = mInjector.getApplicationInfo(packageName, uid);
+            preR = info.targetSdkVersion <= Build.VERSION_CODES.Q;
+        } catch (PackageManager.NameNotFoundException nameNotFoundException) {
+        }
+        if (preR) {
+            // For target SDK < R if the READ_PHONE_STATE permission is granted but the appop
+            // is not granted then the caller should receive null / empty data instead of a
+            // potentially crashing SecurityException. Save the result of the READ_PHONE_STATE
+            // permission / appop check; if both do not pass then first check if the app meets
+            // any of the other requirements for access, if not then return the result of this
+            // check.
+            result = checkPermissionAndAppop(packageName,
+                    android.Manifest.permission.READ_PHONE_STATE,
+                    AppOpsManager.OPSTR_READ_PHONE_STATE, callingFeatureId, message, pid, uid);
+            if (result == PackageManager.PERMISSION_GRANTED) {
+                return result;
+            }
+        }
+        // Default SMS app can always read it.
+        if (checkPermissionAndAppop(packageName, null, AppOpsManager.OPSTR_WRITE_SMS,
+                callingFeatureId, message, pid, uid) == PackageManager.PERMISSION_GRANTED) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+        // Can be read with READ_PHONE_NUMBERS too.
+        if (checkPermissionAndAppop(packageName, android.Manifest.permission.READ_PHONE_NUMBERS,
+                AppOpsManager.OPSTR_READ_PHONE_NUMBERS, callingFeatureId, message, pid, uid)
+                == PackageManager.PERMISSION_GRANTED) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+        // Can be read with READ_SMS too.
+        if (checkPermissionAndAppop(packageName, android.Manifest.permission.READ_SMS,
+                AppOpsManager.OPSTR_READ_SMS, callingFeatureId, message, pid, uid)
+                == PackageManager.PERMISSION_GRANTED) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+        return result;
+    }
+
+    private void verifyCallerCanCheckAccess(String packageName, String message, int pid, int uid) {
+        // If the check is being requested by an app then only allow the app to query its own
+        // access status.
+        int callingUid = mInjector.getCallingUid();
+        int callingPid = mInjector.getCallingPid();
+        if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID && (callingUid != uid
+                || callingPid != pid)) {
+            String response = String.format(
+                    "Calling uid %d, pid %d cannot access for package %s (uid=%d, pid=%d): %s",
+                    callingUid, callingPid, packageName, uid, pid, message);
+            Log.w(TAG, response);
+            throw new SecurityException(response);
+        }
+    }
+
+    /**
+     * Returns whether the specified {@code packageName} with {@code pid} and {@code uid} has been
+     * granted the provided {@code permission} and {@code appop}, using the {@code callingFeatureId}
+     * and {@code message} for the {@link
+     * AppOpsManager#noteOpNoThrow(int, int, String, String, String)} call.
+
+     * @return <ul>
+     *     <li>{@link PackageManager#PERMISSION_GRANTED} if both the permission and the appop
+     *     are granted to the package</li>
+     *     <li>{@link android.app.AppOpsManager#MODE_IGNORED} if the permission is granted to the
+     *     package but the appop is not</li>
+     *     <li>{@link PackageManager#PERMISSION_DENIED} if the permission is not granted to the
+     *     package</li>
+     * </ul>
+     */
+    private int checkPermissionAndAppop(String packageName, String permission, String appop,
+            String callingFeatureId, String message, int pid, int uid) {
+        if (permission != null) {
+            if (mInjector.checkPermission(permission, pid, uid)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return PackageManager.PERMISSION_DENIED;
+            }
+        }
+        AppOpsManager appOpsManager = (AppOpsManager) mInjector.getSystemService(
+                Context.APP_OPS_SERVICE);
+        if (appOpsManager.noteOpNoThrow(appop, uid, packageName, callingFeatureId, message)
+                != AppOpsManager.MODE_ALLOWED) {
+            return AppOpsManager.MODE_IGNORED;
+        }
+        return PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -347,6 +441,17 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
          */
         public Object getSystemService(@NonNull String name) {
             return mContext.getSystemService(name);
+        }
+
+        /**
+         * Returns the {@link ApplicationInfo} for the specified {@code packageName} under the
+         * provided {@code uid}.
+         */
+        public ApplicationInfo getApplicationInfo(@Nullable String packageName, int uid)
+                throws PackageManager.NameNotFoundException {
+
+            return mContext.getPackageManager().getApplicationInfoAsUser(packageName, 0,
+                    UserHandle.getUserHandleForUid(uid));
         }
     }
 }

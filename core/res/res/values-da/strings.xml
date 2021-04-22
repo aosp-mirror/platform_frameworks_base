@@ -321,8 +321,8 @@
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"tage billeder og optage video"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Enheder i nærheden"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"finde og oprette forbindelse til enheder i nærheder"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Opkaldslister"</string>
-    <string name="permgroupdesc_calllog" msgid="2026996642917801803">"læse og redigere opkaldslisten"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"Opkaldshistorik"</string>
+    <string name="permgroupdesc_calllog" msgid="2026996642917801803">"læse og redigere opkaldshistorik"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"foretage og administrere telefonopkald"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Kropssensorer"</string>
@@ -363,10 +363,8 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Tillader, at appen kan modtage og behandle mms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Videresend Cell Broadcast-meddelelser"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Tillader, at appen bindes til Cell Broadcast-modulet, så Cell Broadcast-meddelelser kan videresendes, når de modtages. I nogle områder sendes der Cell Broadcast-underretninger for at advare dig om nødsituationer. Ondsindede apps kan forstyrre effektiviteten eller driften af din enhed, når den modtager en Cell Broadcast-meddelelse om en nødsituation."</string>
-    <!-- no translation found for permlab_manageOngoingCalls (281244770664231782) -->
-    <skip />
-    <!-- no translation found for permdesc_manageOngoingCalls (7003138133829915265) -->
-    <skip />
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Administrere igangværende opkald"</string>
+    <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Giver appen tilladelse til at se oplysninger om igangværende opkald på din enhed og styre disse opkald."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"læse Cell Broadcast-meddelelser"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Tillader, at appen læser Cell Broadcast-underretninger, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-underretninger for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-meddelelse om en nødsituation."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"læse feeds, jeg abonnerer på"</string>
@@ -421,12 +419,12 @@
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din tablet. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din Android TV-enhed. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Tillader, at appen kan ændre data om de kontakter, der er gemt på din telefon. Denne tilladelse giver apps mulighed for at slette kontaktdata."</string>
-    <string name="permlab_readCallLog" msgid="1739990210293505948">"læse opkaldsliste"</string>
+    <string name="permlab_readCallLog" msgid="1739990210293505948">"læse opkaldshistorik"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Denne app kan læse din opkaldshistorik."</string>
-    <string name="permlab_writeCallLog" msgid="670292975137658895">"skriv opkaldsliste"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Tillader, at appen ændrer din tablets opkaldsliste, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldsliste."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Tillader, at appen ændrer din Android TV-enheds opkaldsliste, bl.a. data om indgående og udgående opkald. Skadelige apps kan bruge dette til at rydde eller ændre din opkaldsliste."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Tillader, at appen ændrer telefonens opkaldsliste, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldsliste."</string>
+    <string name="permlab_writeCallLog" msgid="670292975137658895">"skriv opkaldshistorik"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Tillader, at appen ændrer din tablets opkaldshistorik, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldshistorik."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Tillader, at appen ændrer din Android TV-enheds opkaldshistorik, bl.a. data om indgående og udgående opkald. Skadelige apps kan bruge dette til at rydde eller ændre din opkaldshistorik."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Tillader, at appen ændrer telefonens opkaldshistorik, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldshistorik."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"få adgang til kropssensorer (f.eks. pulsmålere)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Giver appen adgang til data fra sensorer, der overvåger din fysiske tilstand, f.eks. din puls."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Læs kalenderbegivenheder og -info"</string>
@@ -1697,7 +1695,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Fuld kontrol er velegnet til apps, der hjælper dig med hjælpefunktioner, men ikke de fleste apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Se og styre skærm"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan læse alt indhold på skærmen og vise indhold oven på andre apps."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Se og udfør handlinger"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Se og udføre handlinger"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan spore dine interaktioner med en app eller en hardwaresensor og interagere med apps på dine vegne."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Tillad"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Afvis"</string>
@@ -1931,8 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Luk"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Besvar"</string>
-    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
-    <skip />
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Afvis"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Læg på"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Indgående opkald"</string>

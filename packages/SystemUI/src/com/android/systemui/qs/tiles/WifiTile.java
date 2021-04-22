@@ -30,6 +30,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Switch;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.wifi.AccessPoint;
@@ -129,7 +131,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         // Secondary clicks are header clicks, just toggle.
         mState.copyTo(mStateBeforeClick);
         boolean wifiEnabled = mState.value;
@@ -148,7 +150,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    protected void handleSecondaryClick() {
+    protected void handleSecondaryClick(@Nullable View view) {
         if (!mWifiController.canConfigWifi()) {
             mActivityStarter.postStartActivityDismissingKeyguard(
                     new Intent(Settings.ACTION_WIFI_SETTINGS), 0);

@@ -40,7 +40,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.FeatureFlagUtils;
+import android.view.View;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -430,7 +432,7 @@ public class QSTileHostTest extends SysuiTestCase {
         }
 
         @Override
-        protected void handleClick() {}
+        protected void handleClick(@Nullable View view) {}
 
         @Override
         protected void handleUpdateState(State state, Object arg) {}

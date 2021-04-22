@@ -543,33 +543,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @Test
     public void testTileAddRemoveChild() {
-        ITaskOrganizer listener = new ITaskOrganizer.Stub() {
-            @Override
-            public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
-
-            }
-
-            @Override
-            public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-                    boolean playRevealAnimation) { }
-
-            @Override
-            public void copySplashScreenView(int taskId) { }
-
-            @Override
-            public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
-
-            @Override
-            public void onTaskVanished(RunningTaskInfo container) { }
-
-            @Override
-            public void onTaskInfoChanged(RunningTaskInfo info) throws RemoteException {
-            }
-
-            @Override
-            public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
-            }
-        };
+        final StubOrganizer listener = new StubOrganizer();
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         Task task = mWm.mAtmService.mTaskOrganizerController.createRootTask(
                 mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
@@ -612,30 +586,11 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testTaskInfoCallback() {
         final ArrayList<RunningTaskInfo> lastReportedTiles = new ArrayList<>();
         final boolean[] called = {false};
-        ITaskOrganizer listener = new ITaskOrganizer.Stub() {
+        final StubOrganizer listener = new StubOrganizer() {
             @Override
-            public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
-
-            }
-            @Override
-            public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-                    boolean playRevealAnimation) { }
-            @Override
-            public void copySplashScreenView(int taskId) { }
-            @Override
-            public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
-
-            @Override
-            public void onTaskVanished(RunningTaskInfo container) { }
-
-            @Override
-            public void onTaskInfoChanged(RunningTaskInfo info) throws RemoteException {
+            public void onTaskInfoChanged(RunningTaskInfo info) {
                 lastReportedTiles.add(info);
                 called[0] = true;
-            }
-
-            @Override
-            public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
             }
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
@@ -689,30 +644,10 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testHierarchyTransaction() {
         final ArrayMap<IBinder, RunningTaskInfo> lastReportedTiles = new ArrayMap<>();
-        ITaskOrganizer listener = new ITaskOrganizer.Stub() {
-            @Override
-            public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
-
-            }
-
-            @Override
-            public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-                    boolean playRevealAnimation) { }
-            @Override
-            public void copySplashScreenView(int taskId) { }
-            @Override
-            public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
-
-            @Override
-            public void onTaskVanished(RunningTaskInfo container) { }
-
+        final StubOrganizer listener = new StubOrganizer() {
             @Override
             public void onTaskInfoChanged(RunningTaskInfo info) {
                 lastReportedTiles.put(info.token.asBinder(), info);
-            }
-
-            @Override
-            public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
             }
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
@@ -838,7 +773,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(transactionListener).onTransactionReady(anyInt(), any());
     }
 
-    class StubOrganizer extends ITaskOrganizer.Stub {
+    static class StubOrganizer extends ITaskOrganizer.Stub {
         RunningTaskInfo mInfo;
 
         @Override

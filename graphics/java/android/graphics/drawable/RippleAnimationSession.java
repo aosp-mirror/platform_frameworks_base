@@ -39,7 +39,7 @@ import java.util.function.Consumer;
 public final class RippleAnimationSession {
     private static final String TAG = "RippleAnimationSession";
     private static final int ENTER_ANIM_DURATION = 450;
-    private static final int EXIT_ANIM_DURATION = 300;
+    private static final int EXIT_ANIM_DURATION = 225;
     private static final long NOISE_ANIMATION_DURATION = 7000;
     private static final long MAX_NOISE_PHASE = NOISE_ANIMATION_DURATION / 120;
     private static final TimeInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();

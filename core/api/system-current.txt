@@ -19,6 +19,7 @@ package android {
     field public static final String ACCESS_SHARED_LIBRARIES = "android.permission.ACCESS_SHARED_LIBRARIES";
     field public static final String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field public static final String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
+    field public static final String ACCESS_TUNED_INFO = "android.permission.ACCESS_TUNED_INFO";
     field public static final String ACCESS_TV_DESCRAMBLER = "android.permission.ACCESS_TV_DESCRAMBLER";
     field public static final String ACCESS_TV_TUNER = "android.permission.ACCESS_TV_TUNER";
     field public static final String ACCESS_VIBRATOR_STATE = "android.permission.ACCESS_VIBRATOR_STATE";
@@ -106,6 +107,7 @@ package android {
     field public static final String GET_APP_OPS_STATS = "android.permission.GET_APP_OPS_STATS";
     field public static final String GET_PROCESS_STATE_AND_OOM_SCORE = "android.permission.GET_PROCESS_STATE_AND_OOM_SCORE";
     field public static final String GET_RUNTIME_PERMISSIONS = "android.permission.GET_RUNTIME_PERMISSIONS";
+    field public static final String GET_RUNTIME_PERMISSION_GROUP_MAPPING = "android.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING";
     field public static final String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
     field @Deprecated public static final String GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS = "android.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS";
     field public static final String GRANT_RUNTIME_PERMISSIONS = "android.permission.GRANT_RUNTIME_PERMISSIONS";
@@ -380,6 +382,7 @@ package android {
     field public static final int config_systemSpeechRecognizer;
     field public static final int config_systemTelevisionNotificationHandler;
     field public static final int config_systemTextIntelligence;
+    field public static final int config_systemUi;
     field public static final int config_systemUiIntelligence;
     field public static final int config_systemVisualIntelligence;
     field public static final int config_systemWellbeing;
@@ -2310,6 +2313,7 @@ package android.content {
     field public static final String NETD_SERVICE = "netd";
     field public static final String NETWORK_SCORE_SERVICE = "network_score";
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
+    field public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
     field public static final String PERMISSION_SERVICE = "permission";
     field public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
     field public static final String REBOOT_READINESS_SERVICE = "reboot_readiness";
@@ -3314,7 +3318,7 @@ package android.hardware.hdmi {
     field public static final int AVR_VOLUME_MUTED = 101; // 0x65
     field public static final String CEC_SETTING_NAME_HDMI_CEC_ENABLED = "hdmi_cec_enabled";
     field public static final String CEC_SETTING_NAME_HDMI_CEC_VERSION = "hdmi_cec_version";
-    field public static final String CEC_SETTING_NAME_POWER_CONTROL_MODE = "send_standby_on_sleep";
+    field public static final String CEC_SETTING_NAME_POWER_CONTROL_MODE = "power_control_mode";
     field public static final String CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST = "power_state_change_on_active_source_lost";
     field public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING = "system_audio_mode_muting";
     field public static final String CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP = "tv_send_standby_on_sleep";
@@ -5269,11 +5273,15 @@ package android.media {
 
   public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {
     ctor @RequiresPermission(android.Manifest.permission.RECORD_AUDIO) public AudioRecord(android.media.AudioAttributes, android.media.AudioFormat, int, int) throws java.lang.IllegalArgumentException;
+    method public static long getMaxSharedAudioHistoryMillis();
+    method @NonNull @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD) public android.media.MediaSyncEvent shareAudioHistory(@NonNull String, @IntRange(from=0) long);
   }
 
   public static class AudioRecord.Builder {
     method public android.media.AudioRecord.Builder setAudioAttributes(@NonNull android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
+    method @NonNull @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD) public android.media.AudioRecord.Builder setMaxSharedAudioHistoryMillis(long) throws java.lang.IllegalArgumentException;
     method public android.media.AudioRecord.Builder setSessionId(int) throws java.lang.IllegalArgumentException;
+    method @NonNull public android.media.AudioRecord.Builder setSharedAudioEvent(@NonNull android.media.MediaSyncEvent) throws java.lang.IllegalArgumentException;
   }
 
   public final class AudioRecordingConfiguration implements android.os.Parcelable {
@@ -5325,16 +5333,19 @@ package android.media {
   public final class MediaRouter2 {
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getAllRoutes();
     method @Nullable public String getClientPackageName();
-    method @Nullable public android.media.MediaRouter2.RoutingController getController(@NonNull String);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context, @NonNull String);
-    method public void setRouteVolume(@NonNull android.media.MediaRoute2Info, int);
-    method public void startScan();
-    method public void stopScan();
-    method public void transfer(@NonNull android.media.MediaRouter2.RoutingController, @NonNull android.media.MediaRoute2Info);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context, @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void setRouteVolume(@NonNull android.media.MediaRoute2Info, int);
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void startScan();
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void stopScan();
+    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void transfer(@NonNull android.media.MediaRouter2.RoutingController, @NonNull android.media.MediaRoute2Info);
   }
 
   public abstract static class MediaRouter2.RouteCallback {
     method public void onPreferredFeaturesChanged(@NonNull java.util.List<java.lang.String>);
+  }
+
+  public class MediaSyncEvent implements android.os.Parcelable {
+    field public static final int SYNC_EVENT_SHARE_AUDIO_HISTORY = 100; // 0x64
   }
 
   public class PlayerProxy {
@@ -5634,8 +5645,9 @@ package android.media.tv {
     method public int getAppType();
     method @Nullable public android.net.Uri getChannelUri();
     method @NonNull public String getInputId();
-    method public boolean isForeground();
+    method public boolean isMainSession();
     method public boolean isRecordingSession();
+    method public boolean isVisible();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int APP_TAG_SELF = 0; // 0x0
     field public static final int APP_TYPE_NON_SYSTEM = 3; // 0x3
@@ -5759,7 +5771,7 @@ package android.media.tv {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void addBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean captureFrame(String, android.view.Surface, android.media.tv.TvStreamConfig);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
-    method @NonNull @RequiresPermission("com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS") public java.util.List<android.media.tv.TunedInfo> getCurrentTunedInfos();
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TUNED_INFO) public java.util.List<android.media.tv.TunedInfo> getCurrentTunedInfos();
     method @NonNull @RequiresPermission("android.permission.DVB_DEVICE") public java.util.List<android.media.tv.DvbDeviceInfo> getDvbDeviceList();
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public java.util.List<android.media.tv.TvInputHardwareInfo> getHardwareList();
     method @RequiresPermission(android.Manifest.permission.READ_CONTENT_RATING_SYSTEMS) public java.util.List<android.media.tv.TvContentRatingSystemInfo> getTvContentRatingSystemList();
@@ -5786,7 +5798,7 @@ package android.media.tv {
   }
 
   public abstract static class TvInputManager.TvInputCallback {
-    method public void onCurrentTunedInfosUpdated(@NonNull java.util.List<android.media.tv.TunedInfo>);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TUNED_INFO) public void onCurrentTunedInfosUpdated(@NonNull java.util.List<android.media.tv.TunedInfo>);
   }
 
   public abstract class TvInputService extends android.app.Service {
@@ -8827,8 +8839,8 @@ package android.permission {
 
   public final class PermissionControllerManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void applyStagedRuntimePermissionBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
-    method @Nullable public String getGroupOfPlatformPermission(@NonNull String);
-    method @NonNull public java.util.Set<java.lang.String> getPlatformPermissionsForGroup(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING) public void getGroupOfPlatformPermission(@NonNull String, @NonNull java.util.function.Consumer<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSION_GROUP_MAPPING) public void getPlatformPermissionsForGroup(@NonNull String, @NonNull java.util.function.Consumer<java.util.List<java.lang.String>>);
     method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void getRuntimePermissionBackup(@NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<byte[]>);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull java.util.concurrent.Executor, @NonNull android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
     method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void stageAndApplyRuntimePermissionsBackup(@NonNull byte[], @NonNull android.os.UserHandle);
@@ -10407,7 +10419,7 @@ package android.service.translation {
   }
 
   public static interface TranslationService.OnTranslationResultCallback {
-    method public void onError();
+    method @Deprecated public void onError();
     method public void onTranslationSuccess(@NonNull android.view.translation.TranslationResponse);
   }
 
@@ -10548,6 +10560,7 @@ package android.service.voice {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition();
     method public boolean startRecognition(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle);
     method public boolean stopRecognition();
+    method public void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
     field public static final int CONFIDENCE_LEVEL_HIGH = 3; // 0x3
     field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
     field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
@@ -11080,17 +11093,6 @@ package android.telephony {
     field public static final int CALL_QUALITY_NOT_AVAILABLE = 5; // 0x5
     field public static final int CALL_QUALITY_POOR = 3; // 0x3
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallQuality> CREATOR;
-  }
-
-  public final class CarrierBandwidth implements android.os.Parcelable {
-    ctor public CarrierBandwidth(int, int, int, int);
-    method public int describeContents();
-    method public int getPrimaryDownlinkCapacityKbps();
-    method public int getPrimaryUplinkCapacityKbps();
-    method public int getSecondaryDownlinkCapacityKbps();
-    method public int getSecondaryUplinkCapacityKbps();
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CarrierBandwidth> CREATOR;
-    field public static final int INVALID = -1; // 0xffffffff
   }
 
   public class CarrierConfigManager {
@@ -14320,12 +14322,15 @@ package android.uwb {
   }
 
   public static interface UwbManager.AdapterStateCallback {
-    method public void onStateChanged(boolean, int);
+    method public void onStateChanged(int, int);
     field public static final int STATE_CHANGED_REASON_ALL_SESSIONS_CLOSED = 1; // 0x1
     field public static final int STATE_CHANGED_REASON_ERROR_UNKNOWN = 4; // 0x4
     field public static final int STATE_CHANGED_REASON_SESSION_STARTED = 0; // 0x0
     field public static final int STATE_CHANGED_REASON_SYSTEM_BOOT = 3; // 0x3
     field public static final int STATE_CHANGED_REASON_SYSTEM_POLICY = 2; // 0x2
+    field public static final int STATE_DISABLED = 0; // 0x0
+    field public static final int STATE_ENABLED_ACTIVE = 2; // 0x2
+    field public static final int STATE_ENABLED_INACTIVE = 1; // 0x1
   }
 
 }
@@ -14833,7 +14838,7 @@ package android.webkit {
     method public default boolean onCheckIsTextEditor();
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);
-    method public default void onCreateTranslationRequests(@NonNull long[], @NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
+    method public default void onCreateVirtualViewTranslationRequests(@NonNull long[], @NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
     method public void onDetachedFromWindow();
     method public boolean onDragEvent(android.view.DragEvent);
     method public void onDraw(android.graphics.Canvas);
@@ -14858,7 +14863,7 @@ package android.webkit {
     method public void onStartTemporaryDetach();
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
-    method public default void onTranslationResponse(@NonNull android.util.LongSparseArray<android.view.translation.ViewTranslationResponse>);
+    method public default void onVirtualViewTranslationResponses(@NonNull android.util.LongSparseArray<android.view.translation.ViewTranslationResponse>);
     method public void onVisibilityChanged(android.view.View, int);
     method public void onWindowFocusChanged(boolean);
     method public void onWindowVisibilityChanged(int);

@@ -69,7 +69,6 @@ public class GlobalSettings {
         Settings.Global.ZEN_DURATION,
         Settings.Global.CHARGING_VIBRATION_ENABLED,
         Settings.Global.AWARE_ALLOWED,
-        Settings.Global.NOTIFICATION_BUBBLES,
         Settings.Global.CUSTOM_BUGREPORT_HANDLER_APP,
         Settings.Global.CUSTOM_BUGREPORT_HANDLER_USER,
         Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,

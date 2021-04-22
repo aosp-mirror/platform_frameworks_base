@@ -87,7 +87,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -110,7 +109,6 @@ import android.util.Xml;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
 
 import org.json.JSONArray;
@@ -120,8 +118,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -202,7 +198,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         contentResolver.setFallbackToExisting(false);
         Secure.putIntForUser(contentResolver,
                 Secure.NOTIFICATION_BADGING, 1, UserHandle.getUserId(UID_N_MR1));
-        Global.putInt(contentResolver, Global.NOTIFICATION_BUBBLES, 1);
+        Secure.putIntForUser(contentResolver, Secure.NOTIFICATION_BUBBLES, 1,
+                UserHandle.getUserId(UID_N_MR1));
 
         ContentProvider testContentProvider = mock(ContentProvider.class);
         mTestIContentProvider = mock(IContentProvider.class, invocation -> {
@@ -2131,18 +2128,33 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testBubblesOverrideTrue() {
-        Global.putInt(getContext().getContentResolver(),
-                Global.NOTIFICATION_BUBBLES, 1);
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BUBBLES, 1,
+                USER.getIdentifier());
         mHelper.updateBubblesEnabled(); // would be called by settings observer
-        assertTrue(mHelper.bubblesEnabled());
+        assertTrue(mHelper.bubblesEnabled(USER));
     }
 
     @Test
     public void testBubblesOverrideFalse() {
-        Global.putInt(getContext().getContentResolver(),
-                Global.NOTIFICATION_BUBBLES, 0);
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BUBBLES, 0,
+                USER.getIdentifier());
         mHelper.updateBubblesEnabled(); // would be called by settings observer
-        assertFalse(mHelper.bubblesEnabled());
+        assertFalse(mHelper.bubblesEnabled(USER));
+    }
+
+    @Test
+    public void testBubblesOverrideUserIsolation() throws Exception {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BUBBLES, 0,
+                USER.getIdentifier());
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.NOTIFICATION_BUBBLES, 1,
+                USER2.getIdentifier());
+        mHelper.updateBubblesEnabled(); // would be called by settings observer
+        assertFalse(mHelper.bubblesEnabled(USER));
+        assertTrue(mHelper.bubblesEnabled(USER2));
     }
 
     @Test

@@ -18,8 +18,6 @@ package com.android.systemui.settings.brightness
 
 import android.testing.AndroidTestingRunner
 import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.test.filters.SmallTest
 import com.android.settingslib.RestrictedLockUtils
@@ -39,7 +37,6 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.isNull
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.notNull
 import org.mockito.Mockito.verify
@@ -50,8 +47,6 @@ import org.mockito.Mockito.`when` as whenever
 @RunWith(AndroidTestingRunner::class)
 class BrightnessSliderTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var rootView: View
     @Mock
     private lateinit var brightnessSliderView: BrightnessSliderView
     @Mock
@@ -80,7 +75,7 @@ class BrightnessSliderTest : SysuiTestCase() {
         whenever(mirrorController.toggleSlider).thenReturn(mirror)
         whenever(motionEvent.copy()).thenReturn(motionEvent)
 
-        mController = BrightnessSlider(rootView, brightnessSliderView, mFalsingManager)
+        mController = BrightnessSlider(brightnessSliderView, mFalsingManager)
         mController.init()
         mController.setOnChangedListener(listener)
     }
@@ -203,9 +198,7 @@ class BrightnessSliderTest : SysuiTestCase() {
 
     @Test
     fun testSeekBarTrackingStarted() {
-        val parent = mock(ViewGroup::class.java)
         whenever(brightnessSliderView.value).thenReturn(42)
-        whenever(brightnessSliderView.parent).thenReturn(parent)
 
         mController.onViewAttached()
         mController.setMirrorControllerAndMirror(mirrorController)
@@ -215,7 +208,7 @@ class BrightnessSliderTest : SysuiTestCase() {
 
         verify(listener).onChanged(eq(true), eq(42), eq(false))
         verify(mirrorController).showMirror()
-        verify(mirrorController).setLocation(parent)
+        verify(mirrorController).setLocationAndSize(brightnessSliderView)
     }
 
     @Test

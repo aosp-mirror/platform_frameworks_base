@@ -44,11 +44,10 @@ import javax.inject.Inject;
  *
  * @see BrightnessMirrorController
  */
-public class BrightnessSlider extends ViewController<View> implements ToggleSlider {
+public class BrightnessSlider extends ViewController<BrightnessSliderView> implements ToggleSlider {
 
     private Listener mListener;
     private ToggleSlider mMirror;
-    private final BrightnessSliderView mBrightnessSliderView;
     private BrightnessMirrorController mMirrorController;
     private boolean mTracking;
     private final FalsingManager mFalsingManager;
@@ -71,11 +70,9 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
     };
 
     BrightnessSlider(
-            View rootView,
             BrightnessSliderView brightnessSliderView,
             FalsingManager falsingManager) {
-        super(rootView);
-        mBrightnessSliderView = brightnessSliderView;
+        super(brightnessSliderView);
         mFalsingManager = falsingManager;
     }
 
@@ -86,21 +83,18 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
         return mView;
     }
 
-    private void enableSlider(boolean enable) {
-        mBrightnessSliderView.enableSlider(enable);
-    }
 
     @Override
     protected void onViewAttached() {
-        mBrightnessSliderView.setOnSeekBarChangeListener(mSeekListener);
-        mBrightnessSliderView.setOnInterceptListener(mOnInterceptListener);
+        mView.setOnSeekBarChangeListener(mSeekListener);
+        mView.setOnInterceptListener(mOnInterceptListener);
     }
 
     @Override
     protected void onViewDetached() {
-        mBrightnessSliderView.setOnSeekBarChangeListener(null);
-        mBrightnessSliderView.setOnDispatchTouchEventListener(null);
-        mBrightnessSliderView.setOnInterceptListener(null);
+        mView.setOnSeekBarChangeListener(null);
+        mView.setOnDispatchTouchEventListener(null);
+        mView.setOnInterceptListener(null);
     }
 
     @Override
@@ -109,7 +103,7 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
             return copyEventToMirror(ev);
         } else {
             // We are the mirror, so we have to dispatch the event
-            return mBrightnessSliderView.dispatchTouchEvent(ev);
+            return mView.dispatchTouchEvent(ev);
         }
     }
 
@@ -122,19 +116,19 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
 
     @Override
     public void setEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin) {
-        mBrightnessSliderView.setEnforcedAdmin(admin);
+        mView.setEnforcedAdmin(admin);
     }
 
     private void setMirror(ToggleSlider toggleSlider) {
         mMirror = toggleSlider;
         if (mMirror != null) {
-            mMirror.setMax(mBrightnessSliderView.getMax());
-            mMirror.setValue(mBrightnessSliderView.getValue());
-            mBrightnessSliderView.setOnDispatchTouchEventListener(this::mirrorTouchEvent);
+            mMirror.setMax(mView.getMax());
+            mMirror.setValue(mView.getValue());
+            mView.setOnDispatchTouchEventListener(this::mirrorTouchEvent);
         } else {
             // If there's no mirror, we may be the ones dispatching, events but we should not mirror
             // them
-            mBrightnessSliderView.setOnDispatchTouchEventListener(null);
+            mView.setOnDispatchTouchEventListener(null);
         }
     }
 
@@ -151,7 +145,7 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
         } else {
             // If there's no mirror, we may be the ones dispatching, events but we should not mirror
             // them
-            mBrightnessSliderView.setOnDispatchTouchEventListener(null);
+            mView.setOnDispatchTouchEventListener(null);
         }
     }
 
@@ -162,7 +156,7 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
 
     @Override
     public void setMax(int max) {
-        mBrightnessSliderView.setMax(max);
+        mView.setMax(max);
         if (mMirror != null) {
             mMirror.setMax(max);
         }
@@ -170,12 +164,12 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
 
     @Override
     public int getMax() {
-        return mBrightnessSliderView.getMax();
+        return mView.getMax();
     }
 
     @Override
     public void setValue(int value) {
-        mBrightnessSliderView.setValue(value);
+        mView.setValue(value);
         if (mMirror != null) {
             mMirror.setValue(value);
         }
@@ -183,7 +177,7 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
 
     @Override
     public int getValue() {
-        return mBrightnessSliderView.getValue();
+        return mView.getValue();
     }
 
     private final SeekBar.OnSeekBarChangeListener mSeekListener =
@@ -205,7 +199,7 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
 
             if (mMirrorController != null) {
                 mMirrorController.showMirror();
-                mMirrorController.setLocation((View) mBrightnessSliderView.getParent());
+                mMirrorController.setLocationAndSize(mView);
             }
         }
 
@@ -244,15 +238,9 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
          */
         public BrightnessSlider create(Context context, @Nullable ViewGroup viewRoot) {
             int layout = getLayout();
-            ViewGroup root = (ViewGroup) LayoutInflater.from(context)
+            BrightnessSliderView root = (BrightnessSliderView) LayoutInflater.from(context)
                     .inflate(layout, viewRoot, false);
-            return fromTree(root);
-        }
-
-        private BrightnessSlider fromTree(ViewGroup root) {
-            BrightnessSliderView v = root.requireViewById(R.id.brightness_slider);
-
-            return new BrightnessSlider(root, v, mFalsingManager);
+            return new BrightnessSlider(root, mFalsingManager);
         }
 
         /** Get the layout to inflate based on what slider to use */

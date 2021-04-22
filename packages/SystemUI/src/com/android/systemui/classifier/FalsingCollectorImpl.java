@@ -44,6 +44,7 @@ class FalsingCollectorImpl implements FalsingCollector {
     private static final boolean DEBUG = false;
     private static final String TAG = "FalsingManager";
     private static final String PROXIMITY_SENSOR_TAG = "FalsingManager";
+    private static final long GESTURE_PROCESSING_DELAY_MS = 100;
 
     private final FalsingDataProvider mFalsingDataProvider;
     private final FalsingManager mFalsingManager;
@@ -281,7 +282,18 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onMotionEventComplete() {
-        mMainExecutor.executeDelayed(mFalsingDataProvider::onMotionEventComplete , 50);
+        // We must delay processing the completion because of the way Android handles click events.
+        // It generally delays executing them immediately, instead choosing to give the UI a chance
+        // to respond to touch events before acknowledging the click. As such, we must also delay,
+        // giving click handlers a chance to analyze it.
+        // You might think we could do something clever to remove this delay - adding non-committed
+        // results that can later be changed - but this won't help. Calling the code
+        // below can eventually end up in a "Falsing Event" being fired. If we remove the delay
+        // here, we would still have to add the delay to the event, but we'd also have to make all
+        // the intervening code more complicated in the process. This is the simplest insertion
+        // point for the delay.
+        mMainExecutor.executeDelayed(
+                mFalsingDataProvider::onMotionEventComplete, GESTURE_PROCESSING_DELAY_MS);
     }
 
     @Override

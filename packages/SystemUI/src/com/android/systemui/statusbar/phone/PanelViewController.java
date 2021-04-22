@@ -83,7 +83,7 @@ public abstract class PanelViewController {
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mPanelUpdateWhenAnimatorEnds;
     private boolean mVibrateOnOpening;
-    protected boolean mLaunchingNotification;
+    protected boolean mIsLaunchAnimationRunning;
     private int mFixedDuration = NO_FIXED_DURATION;
     protected ArrayList<PanelExpansionListener> mExpansionListeners = new ArrayList<>();
 
@@ -830,7 +830,7 @@ public abstract class PanelViewController {
     }
 
     public boolean isCollapsing() {
-        return mClosing || mLaunchingNotification;
+        return mClosing || mIsLaunchAnimationRunning;
     }
 
     public boolean isTracking() {
@@ -1130,8 +1130,8 @@ public abstract class PanelViewController {
         mHeadsUpManager = headsUpManager;
     }
 
-    public void setLaunchingNotification(boolean launchingNotification) {
-        mLaunchingNotification = launchingNotification;
+    public void setIsLaunchAnimationRunning(boolean running) {
+        mIsLaunchAnimationRunning = running;
     }
 
     public void collapseWithDuration(int animationDuration) {

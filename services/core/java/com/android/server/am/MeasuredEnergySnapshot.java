@@ -345,10 +345,27 @@ public class MeasuredEnergySnapshot {
         for (int idx = 0; idx < size; idx++) {
             final EnergyConsumer consumer = mEnergyConsumers.valueAt(idx);
             if (consumer.type == (int) EnergyConsumerType.OTHER) {
-                names[consumerIndex++] = consumer.name;
+                names[consumerIndex++] = sanitizeCustomBucketName(consumer.name);
             }
         }
         return names;
+    }
+
+    private String sanitizeCustomBucketName(String bucketName) {
+        if (bucketName == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(bucketName.length());
+        for (char c : bucketName.toCharArray()) {
+            if (Character.isWhitespace(c)) {
+                sb.append(' ');
+            } else if (Character.isISOControl(c)) {
+                sb.append('_');
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     /** Determines the number of ordinals for a given {@link EnergyConsumerType}. */

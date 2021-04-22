@@ -231,7 +231,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
              * @return this Builder
              */
             public Builder withMatrix(Matrix matrix) {
-                this.matrix = matrix;
+                this.matrix = new Matrix(matrix);
                 flags |= FLAG_MATRIX;
                 return this;
             }
@@ -241,7 +241,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
              * @return this Builder
              */
             public Builder withWindowCrop(Rect windowCrop) {
-                this.windowCrop = windowCrop;
+                this.windowCrop = new Rect(windowCrop);
                 flags |= FLAG_WINDOW_CROP;
                 return this;
             }
@@ -324,8 +324,8 @@ public class SyncRtSurfaceTransactionApplierCompat {
             this.flags = flags;
             this.surface = surface;
             this.alpha = alpha;
-            this.matrix = new Matrix(matrix);
-            this.windowCrop = windowCrop != null ? new Rect(windowCrop) : null;
+            this.matrix = matrix;
+            this.windowCrop = windowCrop;
             this.layer = layer;
             this.relativeTo = relativeTo;
             this.relativeLayer = relativeLayer;
