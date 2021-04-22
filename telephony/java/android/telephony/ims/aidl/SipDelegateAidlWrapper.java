@@ -24,6 +24,7 @@ import android.telephony.ims.DelegateMessageCallback;
 import android.telephony.ims.DelegateRegistrationState;
 import android.telephony.ims.DelegateStateCallback;
 import android.telephony.ims.FeatureTagState;
+import android.telephony.ims.SipDelegateConfiguration;
 import android.telephony.ims.SipDelegateImsConfiguration;
 import android.telephony.ims.SipDelegateManager;
 import android.telephony.ims.SipMessage;
@@ -160,6 +161,15 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
     public void onImsConfigurationChanged(@NonNull SipDelegateImsConfiguration config) {
         try {
             mStateBinder.onImsConfigurationChanged(config);
+        } catch (RemoteException e) {
+            // BinderDied will trigger destroySipDelegate, so just ignore this locally.
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull SipDelegateConfiguration config) {
+        try {
+            mStateBinder.onConfigurationChanged(config);
         } catch (RemoteException e) {
             // BinderDied will trigger destroySipDelegate, so just ignore this locally.
         }
