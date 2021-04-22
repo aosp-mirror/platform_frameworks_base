@@ -18,6 +18,7 @@ package android.app.backup;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.backup.BackupAgent.BackupTransportFlags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -54,6 +55,7 @@ public class RestoreSet implements Parcelable {
      * Properties of the {@link BackupTransport} transport that was used to obtain the data in
      * this restore set.
      */
+    @BackupTransportFlags
     public final int backupTransportFlags;
 
     /**
@@ -87,7 +89,7 @@ public class RestoreSet implements Parcelable {
      *                             flag values.
      */
     public RestoreSet(@Nullable String name, @Nullable String device, long token,
-            int backupTransportFlags) {
+            @BackupTransportFlags int backupTransportFlags) {
         this.name = name;
         this.device = device;
         this.token = token;
