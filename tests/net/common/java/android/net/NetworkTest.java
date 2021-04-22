@@ -29,6 +29,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRule.IgnoreAfter;
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
 
 import org.junit.Rule;
@@ -158,21 +159,37 @@ public class NetworkTest {
         assertEquals(16290598925L, three.getNetworkHandle());
     }
 
+    // getNetId() did not exist in Q
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testGetNetId() {
+        assertEquals(1234, new Network(1234).getNetId());
+        assertEquals(2345, new Network(2345, true).getNetId());
+    }
+
     @Test
     public void testFromNetworkHandle() {
         final Network network = new Network(1234);
-        assertEquals(network.getNetId(),
-                Network.fromNetworkHandle(network.getNetworkHandle()).getNetId());
+        assertEquals(network.netId, Network.fromNetworkHandle(network.getNetworkHandle()).netId);
     }
 
     // Parsing private DNS bypassing handle was not supported until S
     @Test @IgnoreUpTo(Build.VERSION_CODES.R)
-    public void testFromNetworkHandle_S() {
+    public void testFromNetworkHandlePrivateDnsBypass_S() {
         final Network network = new Network(1234, true);
 
         final Network recreatedNetwork = Network.fromNetworkHandle(network.getNetworkHandle());
         assertEquals(network.netId, recreatedNetwork.netId);
         assertEquals(network.getNetIdForResolv(), recreatedNetwork.getNetIdForResolv());
+    }
+
+    @Test @IgnoreAfter(Build.VERSION_CODES.R)
+    public void testFromNetworkHandlePrivateDnsBypass_R() {
+        final Network network = new Network(1234, true);
+
+        final Network recreatedNetwork = Network.fromNetworkHandle(network.getNetworkHandle());
+        assertEquals(network.netId, recreatedNetwork.netId);
+        // Until R included, fromNetworkHandle would not parse the private DNS bypass flag
+        assertEquals(network.netId, recreatedNetwork.getNetIdForResolv());
     }
 
     @Test
