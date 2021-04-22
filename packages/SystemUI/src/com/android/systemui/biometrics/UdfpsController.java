@@ -260,10 +260,36 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         }
     };
 
-    @SuppressLint("ClickableViewAccessibility")
-    private final UdfpsView.OnTouchListener mOnTouchListener = this::onTouch;
+    /**
+     * Forwards touches to the udfps controller / view
+     */
+    public boolean onTouch(MotionEvent event) {
+        if (mView == null) {
+            return false;
+        }
+        return onTouch(mView, event, false);
+    }
 
-    private boolean onTouch(View view, MotionEvent event) {
+    @SuppressLint("ClickableViewAccessibility")
+    private final UdfpsView.OnTouchListener mOnTouchListener = (view, event) ->
+            onTouch(view, event, true);
+
+    /**
+     * @param x coordinate
+     * @param y coordinate
+     * @param relativeToUdfpsView true if the coordinates are relative to the udfps view; else,
+     *                            calculate from the display dimensions in portrait orientation
+     */
+    private boolean isWithinSensorArea(UdfpsView udfpsView, float x, float y,
+            boolean relativeToUdfpsView) {
+        if (relativeToUdfpsView) {
+            // TODO: move isWithinSensorArea to UdfpsController.
+            return udfpsView.isWithinSensorArea(x, y);
+        }
+        return getSensorLocation().contains(x, y);
+    }
+
+    private boolean onTouch(View view, MotionEvent event, boolean fromUdfpsView) {
         UdfpsView udfpsView = (UdfpsView) view;
         final boolean isFingerDown = udfpsView.isIlluminationRequested();
         boolean handled = false;
@@ -281,8 +307,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                     // ACTION_DOWN, in that case we should just reuse the old instance.
                     mVelocityTracker.clear();
                 }
-                // TODO: move isWithinSensorArea to UdfpsController.
-                if (udfpsView.isWithinSensorArea(event.getX(), event.getY())) {
+                if (isWithinSensorArea(udfpsView, event.getX(), event.getY(), fromUdfpsView)) {
                     Trace.beginAsyncSection(
                             "UdfpsController.mOnTouchListener#isWithinSensorArea", 1);
                     // The pointer that causes ACTION_DOWN is always at index 0.
@@ -290,37 +315,23 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                     // data for many other pointers because of multi-touch support.
                     mActivePointerId = event.getPointerId(0);
                     mVelocityTracker.addMovement(event);
-
-                    // TODO: (b/185124905) these settings are for ux testing purposes and should
-                    // be removed (or cached) before going into production
-                    final ContentResolver contentResolver = mContext.getContentResolver();
-                    int startEnabled = Settings.Global.getInt(contentResolver,
-                            "udfps_start", 0);
-                    if (startEnabled > 0) {
-                        String startEffectSetting = Settings.Global.getString(contentResolver,
-                                "udfps_start_type");
-                        mVibrator.vibrate(getVibration(startEffectSetting, mEffectClick),
-                                VIBRATION_SONIFICATION_ATTRIBUTES);
-                    }
-
-                    int acquiredEnabled = Settings.Global.getInt(contentResolver,
-                            "udfps_acquired", 0);
-                    if (acquiredEnabled > 0) {
-                        int delay = Settings.Global.getInt(contentResolver,
-                                "udfps_acquired_delay", 500);
-                        mMainHandler.removeCallbacks(mAcquiredVibration);
-                        mMainHandler.postDelayed(mAcquiredVibration, delay);
-                    }
                     handled = true;
                 }
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                final int idx = event.findPointerIndex(mActivePointerId);
+                final int idx = mActivePointerId == -1
+                        ? event.getPointerId(0)
+                        : event.findPointerIndex(mActivePointerId);
                 if (idx == event.getActionIndex()) {
                     final float x = event.getX(idx);
                     final float y = event.getY(idx);
-                    if (udfpsView.isWithinSensorArea(x, y)) {
+                    if (isWithinSensorArea(udfpsView, x, y, fromUdfpsView)) {
+                        if (mVelocityTracker == null) {
+                            // touches could be injected, so the velocity tracker may not have
+                            // been initialized (via ACTION_DOWN).
+                            mVelocityTracker = VelocityTracker.obtain();
+                        }
                         mVelocityTracker.addMovement(event);
                         // Compute pointer velocity in pixels per second.
                         mVelocityTracker.computeCurrentVelocity(1000);
@@ -328,10 +339,12 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                         final float v = computePointerSpeed(mVelocityTracker, mActivePointerId);
                         final float minor = event.getTouchMinor(idx);
                         final float major = event.getTouchMajor(idx);
-                        final String touchInfo = String.format("minor: %.1f, major: %.1f, v: %.1f",
-                                minor, major, v);
+                        final boolean exceedsVelocityThreshold = v > 750f;
+                        final String touchInfo = String.format(
+                                "minor: %.1f, major: %.1f, v: %.1f, exceedsVelocityThreshold: %b",
+                                minor, major, v, exceedsVelocityThreshold);
                         final long sinceLastLog = SystemClock.elapsedRealtime() - mTouchLogTime;
-                        if (!isFingerDown) {
+                        if (!isFingerDown && !exceedsVelocityThreshold) {
                             Trace.endAsyncSection(
                                     "UdfpsController.mOnTouchListener#isWithinSensorArea", 1);
                             onFingerDown((int) x, (int) y, minor, major);
@@ -339,6 +352,26 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                             mTouchLogTime = SystemClock.elapsedRealtime();
                             mPowerManager.userActivity(SystemClock.uptimeMillis(),
                                     PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
+
+                            // TODO: this should eventually be removed after ux testing
+                            final ContentResolver contentResolver = mContext.getContentResolver();
+                            int startEnabled = Settings.Global.getInt(contentResolver,
+                                    "udfps_start", 0);
+                            if (startEnabled > 0) {
+                                String startEffectSetting = Settings.Global.getString(
+                                        contentResolver, "udfps_start_type");
+                                mVibrator.vibrate(getVibration(startEffectSetting, mEffectClick),
+                                        VIBRATION_SONIFICATION_ATTRIBUTES);
+                            }
+
+                            int acquiredEnabled = Settings.Global.getInt(contentResolver,
+                                    "udfps_acquired", 0);
+                            if (acquiredEnabled > 0) {
+                                int delay = Settings.Global.getInt(contentResolver,
+                                        "udfps_acquired_delay", 500);
+                                mMainHandler.removeCallbacks(mAcquiredVibration);
+                                mMainHandler.postDelayed(mAcquiredVibration, delay);
+                            }
                             handled = true;
                         } else if (sinceLastLog >= MIN_TOUCH_LOG_INTERVAL) {
                             Log.v(TAG, "onTouch | finger move: " + touchInfo);
@@ -353,6 +386,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                mActivePointerId = -1;
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
@@ -577,7 +611,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                         mKeyguardUpdateMonitor,
                         mFgExecutor,
                         mDumpManager,
-                        mKeyguardViewMediator
+                        mKeyguardViewMediator,
+                        this
                 );
             case IUdfpsOverlayController.REASON_AUTH_BP:
                 // note: empty controller, currently shows no visual affordance
@@ -679,6 +714,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
     // This method can be called from the UI thread.
     private void onFingerUp() {
+        mActivePointerId = -1;
         mMainHandler.removeCallbacks(mAcquiredVibration);
         if (mView == null) {
             Log.w(TAG, "Null view in onFingerUp");
