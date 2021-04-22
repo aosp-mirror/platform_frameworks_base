@@ -846,8 +846,8 @@ public class AudioService extends IAudioService.Stub
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();
 
-        mSupportsMicPrivacyToggle = mContext.getPackageManager()
-                .hasSystemFeature(PackageManager.FEATURE_MICROPHONE_TOGGLE);
+        mSupportsMicPrivacyToggle = context.getSystemService(SensorPrivacyManager.class)
+                .supportsSensorToggle(SensorPrivacyManager.Sensors.MICROPHONE);
 
         // Initialize volume
         // Priority 1 - Android Property
