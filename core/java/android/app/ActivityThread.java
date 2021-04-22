@@ -52,6 +52,7 @@ import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.TransactionExecutor;
 import android.app.servertransaction.TransactionExecutorHelper;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -2296,6 +2297,12 @@ public final class ActivityThread extends ClientTransactionHandler
         ActivityThread am = currentActivityThread();
         return (am != null && am.getApplication() != null)
                 ? am.getApplication().getOpPackageName() : null;
+    }
+
+    public static AttributionSource currentAttributionSource() {
+        ActivityThread am = currentActivityThread();
+        return (am != null && am.getApplication() != null)
+                ? am.getApplication().getAttributionSource() : null;
     }
 
     @UnsupportedAppUsage

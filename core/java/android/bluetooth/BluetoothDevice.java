@@ -24,6 +24,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
 import android.app.PropertyInvalidatedCache;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresBluetoothLocationPermission;
@@ -1102,10 +1103,10 @@ public final class BluetoothDevice implements Parcelable {
      */
     private static volatile IBluetooth sService;
 
-    private final AttributionSource mAttributionSource;
-
     private final String mAddress;
     @AddressType private final int mAddressType;
+
+    private AttributionSource mAttributionSource;
 
     /*package*/
     @UnsupportedAppUsage
@@ -1157,7 +1158,8 @@ public final class BluetoothDevice implements Parcelable {
      * @throws IllegalArgumentException address is invalid
      * @hide
      */
-    public BluetoothDevice(String address, AttributionSource attributionSource) {
+    @UnsupportedAppUsage
+    /*package*/ BluetoothDevice(String address) {
         getService();  // ensures sService is initialized
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             throw new IllegalArgumentException(address + " is not a valid Bluetooth address");
@@ -1165,12 +1167,15 @@ public final class BluetoothDevice implements Parcelable {
 
         mAddress = address;
         mAddressType = ADDRESS_TYPE_PUBLIC;
+    }
+
+    void setAttributionSource(AttributionSource attributionSource) {
         mAttributionSource = attributionSource;
     }
 
-    @UnsupportedAppUsage
-    /*package*/ BluetoothDevice(String address) {
-        this(address, BluetoothAdapter.getDefaultAdapter().getAttributionSource());
+    private AttributionSource resolveAttributionSource() {
+        return (mAttributionSource != null) ? mAttributionSource
+                : ActivityThread.currentAttributionSource();
     }
 
     @Override
@@ -1208,8 +1213,7 @@ public final class BluetoothDevice implements Parcelable {
     public static final @android.annotation.NonNull Parcelable.Creator<BluetoothDevice> CREATOR =
             new Parcelable.Creator<BluetoothDevice>() {
                 public BluetoothDevice createFromParcel(Parcel in) {
-                    return new BluetoothDevice(
-                            in.readString(), in.readParcelable(getClass().getClassLoader()));
+                    return new BluetoothDevice(in.readString());
                 }
 
                 public BluetoothDevice[] newArray(int size) {
@@ -1220,7 +1224,6 @@ public final class BluetoothDevice implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mAddress);
-        out.writeParcelable(mAttributionSource, 0);
     }
 
     /**
@@ -1265,7 +1268,7 @@ public final class BluetoothDevice implements Parcelable {
             return null;
         }
         try {
-            String name = service.getRemoteName(this, mAttributionSource);
+            String name = service.getRemoteName(this, resolveAttributionSource());
             if (name != null) {
                 // remove whitespace characters from the name
                 return name
@@ -1296,7 +1299,7 @@ public final class BluetoothDevice implements Parcelable {
             return DEVICE_TYPE_UNKNOWN;
         }
         try {
-            return service.getRemoteType(this, mAttributionSource);
+            return service.getRemoteType(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1320,7 +1323,7 @@ public final class BluetoothDevice implements Parcelable {
             return null;
         }
         try {
-            String alias = service.getRemoteAliasWithAttribution(this, mAttributionSource);
+            String alias = service.getRemoteAliasWithAttribution(this, resolveAttributionSource());
             if (alias == null) {
                 return getName();
             }
@@ -1361,9 +1364,9 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-            return service.setRemoteAlias(
-                    this, alias, adapter.getOpPackageName(), mAttributionSource);
+            return service.setRemoteAlias(this, alias,
+                    resolveAttributionSource().getPackageName(),
+                    resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1389,7 +1392,7 @@ public final class BluetoothDevice implements Parcelable {
             return BATTERY_LEVEL_BLUETOOTH_OFF;
         }
         try {
-            return service.getBatteryLevel(this, mAttributionSource);
+            return service.getBatteryLevel(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1480,7 +1483,7 @@ public final class BluetoothDevice implements Parcelable {
         }
         try {
             return service.createBond(
-                    this, transport, remoteP192Data, remoteP256Data, mAttributionSource);
+                    this, transport, remoteP192Data, remoteP256Data, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1505,7 +1508,7 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return service.isBondingInitiatedLocally(this, mAttributionSource);
+            return service.isBondingInitiatedLocally(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1530,7 +1533,7 @@ public final class BluetoothDevice implements Parcelable {
             Log.i(TAG, "cancelBondProcess() for device " + getAddress()
                     + " called by pid: " + Process.myPid()
                     + " tid: " + Process.myTid());
-            return service.cancelBondProcess(this, mAttributionSource);
+            return service.cancelBondProcess(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1558,7 +1561,7 @@ public final class BluetoothDevice implements Parcelable {
             Log.i(TAG, "removeBond() for device " + getAddress()
                     + " called by pid: " + Process.myPid()
                     + " tid: " + Process.myTid());
-            return service.removeBond(this, mAttributionSource);
+            return service.removeBond(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1574,7 +1577,7 @@ public final class BluetoothDevice implements Parcelable {
                 @SuppressLint("AndroidFrameworkRequiresPermission")
                 protected Integer recompute(BluetoothDevice query) {
                     try {
-                        return sService.getBondState(query, mAttributionSource);
+                        return sService.getBondState(query, resolveAttributionSource());
                     } catch (RemoteException e) {
                         throw e.rethrowAsRuntimeException();
                     }
@@ -1664,7 +1667,7 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return service.getConnectionStateWithAttribution(this, mAttributionSource)
+            return service.getConnectionStateWithAttribution(this, resolveAttributionSource())
                     != CONNECTION_STATE_DISCONNECTED;
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1690,7 +1693,7 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return service.getConnectionStateWithAttribution(this, mAttributionSource)
+            return service.getConnectionStateWithAttribution(this, resolveAttributionSource())
                     > CONNECTION_STATE_CONNECTED;
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1713,7 +1716,7 @@ public final class BluetoothDevice implements Parcelable {
             return null;
         }
         try {
-            int classInt = service.getRemoteClass(this, mAttributionSource);
+            int classInt = service.getRemoteClass(this, resolveAttributionSource());
             if (classInt == BluetoothClass.ERROR) return null;
             return new BluetoothClass(classInt);
         } catch (RemoteException e) {
@@ -1742,7 +1745,7 @@ public final class BluetoothDevice implements Parcelable {
             return null;
         }
         try {
-            return service.getRemoteUuids(this, mAttributionSource);
+            return service.getRemoteUuids(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1772,7 +1775,7 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return service.fetchRemoteUuidsWithAttribution(this, mAttributionSource);
+            return service.fetchRemoteUuidsWithAttribution(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1809,7 +1812,7 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return service.sdpSearch(this, uuid, mAttributionSource);
+            return service.sdpSearch(this, uuid, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1831,7 +1834,7 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return service.setPin(this, true, pin.length, pin, mAttributionSource);
+            return service.setPin(this, true, pin.length, pin, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1894,7 +1897,7 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return service.cancelBondProcess(this, mAttributionSource);
+            return service.cancelBondProcess(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1927,7 +1930,7 @@ public final class BluetoothDevice implements Parcelable {
             return ACCESS_UNKNOWN;
         }
         try {
-            return service.getPhonebookAccessPermission(this, mAttributionSource);
+            return service.getPhonebookAccessPermission(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -2033,7 +2036,7 @@ public final class BluetoothDevice implements Parcelable {
             return ACCESS_UNKNOWN;
         }
         try {
-            return service.getMessageAccessPermission(this, mAttributionSource);
+            return service.getMessageAccessPermission(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -2084,7 +2087,7 @@ public final class BluetoothDevice implements Parcelable {
             return ACCESS_UNKNOWN;
         }
         try {
-            return service.getSimAccessPermission(this, mAttributionSource);
+            return service.getSimAccessPermission(this, resolveAttributionSource());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
