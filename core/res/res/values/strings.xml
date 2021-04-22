@@ -4746,6 +4746,8 @@
     <string name="mediasize_japanese_kaku2">Kaku2</string>
     <!-- Japanese You4 media (paper) size: 105mm x 235mm (4.134" x 9.252") -->
     <string name="mediasize_japanese_you4">You4</string>
+    <!-- Japanese Photo L (paper) size: 89mm x 127mm (3.5 x 5") [CHAR LIMIT=20] -->
+    <string name="mediasize_japanese_l">L</string>
 
     <!-- Media (paper) size for specifying any paper size in portrait.-->
     <string name="mediasize_unknown_portrait">Unknown portrait</string>
