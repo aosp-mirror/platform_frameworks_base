@@ -20973,8 +20973,8 @@ package android.media {
   }
 
   public class CamcorderProfile {
-    method public static android.media.CamcorderProfile get(int);
-    method public static android.media.CamcorderProfile get(int, int);
+    method @Deprecated public static android.media.CamcorderProfile get(int);
+    method @Deprecated public static android.media.CamcorderProfile get(int, int);
     method @Nullable public static android.media.EncoderProfiles getAll(@NonNull String, int);
     method public static boolean hasProfile(int);
     method public static boolean hasProfile(int, int);
@@ -21056,14 +21056,14 @@ package android.media {
     field @NonNull public final java.util.UUID uuid;
   }
 
-  public class EncoderProfiles {
+  public final class EncoderProfiles {
     method @NonNull public java.util.List<android.media.EncoderProfiles.AudioProfile> getAudioProfiles();
-    method public int getDurationSeconds();
-    method public int getFileFormat();
+    method public int getDefaultDurationSeconds();
+    method public int getRecommendedFileFormat();
     method @NonNull public java.util.List<android.media.EncoderProfiles.VideoProfile> getVideoProfiles();
   }
 
-  public static class EncoderProfiles.AudioProfile {
+  public static final class EncoderProfiles.AudioProfile {
     method public int getBitrate();
     method public int getChannels();
     method public int getCodec();
@@ -21072,7 +21072,7 @@ package android.media {
     method public int getSampleRate();
   }
 
-  public static class EncoderProfiles.VideoProfile {
+  public static final class EncoderProfiles.VideoProfile {
     method public int getBitrate();
     method public int getCodec();
     method public int getFrameRate();

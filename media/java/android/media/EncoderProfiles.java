@@ -51,14 +51,14 @@ import java.util.List;
  * <li> Number of audio channels for recording.
  * </ul>
  */
-public class EncoderProfiles
+public final class EncoderProfiles
 {
     /**
      * Default recording duration in seconds before the session is terminated.
-     * This is useful for applications like MMS has limited file size requirement.
+     * This is useful for applications like MMS that have a limited file size requirement.
      * This could be 0 if there is no default recording duration.
      */
-    public int getDurationSeconds() {
+    public int getDefaultDurationSeconds() {
         return durationSecs;
     }
 
@@ -66,19 +66,19 @@ public class EncoderProfiles
      * Recommended output file format
      * @see android.media.MediaRecorder.OutputFormat
      */
-    public int getFileFormat() {
+    public @MediaRecorder.OutputFormatValues int getRecommendedFileFormat() {
         return fileFormat;
     }
 
     /**
      * Configuration for a video encoder.
      */
-    public static class VideoProfile {
+    public final static class VideoProfile {
         /**
          * The video encoder being used for the video track
          * @see android.media.MediaRecorder.VideoEncoder
          */
-        public int getCodec() {
+        public @MediaRecorder.VideoEncoderValues int getCodec() {
             return codec;
         }
 
@@ -238,12 +238,12 @@ public class EncoderProfiles
     /**
      * Configuration for an audio encoder.
      */
-    public static class AudioProfile {
+    public final static class AudioProfile {
         /**
          * The audio encoder being used for the audio track.
          * @see android.media.MediaRecorder.AudioEncoder
          */
-        public int getCodec() {
+        public @MediaRecorder.AudioEncoderValues int getCodec() {
             return codec;
         }
 
@@ -325,11 +325,6 @@ public class EncoderProfiles
         private int sampleRate;
         private int bitrate;
     }
-
-    //static {
-    //    System.loadLibrary("media_jni");
-    //native_init();
-    //}
 
     private int durationSecs;
     private int fileFormat;
