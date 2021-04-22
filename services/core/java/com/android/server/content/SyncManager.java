@@ -1500,6 +1500,10 @@ public class SyncManager {
 
         if (minDelay < 0) {
             minDelay = 0;
+        } else if (minDelay > 0) {
+            // We can't apply a delay to an EJ. If we want to delay it, we must demote it to a
+            // regular job.
+            syncOperation.scheduleEjAsRegularJob = true;
         }
 
         // Check if duplicate syncs are pending. If found, keep one with least expected run time.
@@ -1711,6 +1715,8 @@ public class SyncManager {
         }
 
         operation.enableBackoff();
+        // Never run a rescheduled requested-EJ-sync as an EJ.
+        operation.scheduleEjAsRegularJob = true;
 
         if (operation.hasDoNotRetry() && !syncResult.syncAlreadyInProgress) {
             // syncAlreadyInProgress flag is set by AbstractThreadedSyncAdapter. The sync adapter
@@ -3120,7 +3126,7 @@ public class SyncManager {
                 scheduleSyncOperationH(op.createOneTimeSyncOperation(), delay);
             } else {
                 // mSyncJobService.callJobFinished is async, so cancel the job to ensure we don't
-                // find the this job in the pending jobs list while looking for duplicates
+                // find this job in the pending jobs list while looking for duplicates
                 // before scheduling it at a later time.
                 cancelJob(op, "deferSyncH()");
                 scheduleSyncOperationH(op, delay);
