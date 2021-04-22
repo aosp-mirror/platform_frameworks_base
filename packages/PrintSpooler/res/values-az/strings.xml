@@ -83,7 +83,7 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ləğv edilir"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Printer xətası <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Printer <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> işini blokladı"</string>
-    <string name="cancel" msgid="4373674107267141885">"Ləğv et"</string>
+    <string name="cancel" msgid="4373674107267141885">"Ləğv edin"</string>
     <string name="restart" msgid="2472034227037808749">"Yenidən başlat"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Printerə heç bir bağlantı yoxdur"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"naməlum"</string>
