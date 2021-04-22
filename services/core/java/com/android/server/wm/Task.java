@@ -3150,11 +3150,14 @@ class Task extends WindowContainer<WindowContainer> {
 
         // Figure-out min/max possible position depending on if child can show for current user.
         int minPosition = (canShowChild) ? computeMinUserPosition(0, size) : 0;
-        int maxPosition = (canShowChild) ? size : computeMaxUserPosition(size - 1);
+        int maxPosition = (canShowChild) ? size - 1 : computeMaxUserPosition(size - 1);
+        if (!hasChild(wc)) {
+            // Increase the maxPosition because children size will grow once wc is added.
+            ++maxPosition;
+        }
 
         // Factor in always-on-top children in max possible position.
         if (!wc.isAlwaysOnTop()) {
-
             // We want to place all non-always-on-top containers below always-on-top ones.
             while (maxPosition > minPosition) {
                 if (!mChildren.get(maxPosition - 1).isAlwaysOnTop()) break;
