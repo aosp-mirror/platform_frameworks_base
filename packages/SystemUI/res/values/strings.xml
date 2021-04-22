@@ -2837,6 +2837,9 @@
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
     <string name="controls_media_settings_button">Settings</string>
 
+    <!-- Title for Smartspace recommendation card within media controls [CHAR_LIMIT=50] -->
+    <string name="controls_media_smartspace_rec_title">Play</string>
+
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
     <!-- Error message indicating that an unspecified error occurred while getting the status, and
