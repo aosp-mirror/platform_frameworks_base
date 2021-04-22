@@ -28,9 +28,9 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Sélectionner pour partager le rapport de bug sans capture d\'écran ou attendre la fin de la capture"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Appuyer pour partager rapport de bug sans capture d\'écran ou attendre finalisation capture d\'écran"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Appuyer pour partager rapport de bug sans capture d\'écran ou attendre finalisation capture d\'écran"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Les rapports de bug contiennent des données des fichiers journaux du système, y compris des informations que vous considérez sensibles concernant, par exemple, la consommation par application et la localisation. Nous vous recommandons de ne partager ces rapports qu\'avec des personnes et des applications que vous estimez fiables."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Les rapports de bugs contiennent des données des fichiers journaux du système, y compris des informations que vous considérez sensibles concernant, par exemple, la consommation par application et la localisation. Nous vous recommandons de ne partager ces rapports qu\'avec des personnes et des applications que vous estimez fiables."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Ne plus afficher"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"Rapports d\'erreur"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Rapports de bugs"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Impossible de lire le fichier de rapport de bug."</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Impossible d\'ajouter les détails du rapport de bug au fichier .zip"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"sans nom"</string>

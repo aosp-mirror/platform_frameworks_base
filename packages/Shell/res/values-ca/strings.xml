@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="3701846017049540910">"Protecció"</string>
+    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"Informes d\'errors"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"S\'està generant l\'informe d\'errors <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"S\'ha capturat l\'informe d\'errors <xliff:g id="ID">#%d</xliff:g>"</string>
@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Selecciona per compartir l\'informe d\'errors sense captura de pantalla o espera que es faci la captura"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Toca per compartir l\'informe d\'errors sense captura de pantalla o espera que es creï la captura"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Toca per compartir l\'informe d\'errors sense captura de pantalla o espera que es creï la captura"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Els informes d\'errors contenen dades dels diferents fitxers de registre del sistema, inclosa informació que pot ser confidencial (com ara l\'ús d\'aplicacions i les dades d\'ubicació). Comparteix-los només amb aplicacions i persones de confiança."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Els informes d\'errors contenen dades dels diferents fitxers de registre del sistema, que poden incloure informació sensible (com ara l\'ús d\'aplicacions i les dades d\'ubicació). Comparteix els informes d\'errors només amb aplicacions i persones de confiança."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"No ho tornis a mostrar"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Informes d\'errors"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"No s\'ha pogut llegir el fitxer de l\'informe d\'errors"</string>
