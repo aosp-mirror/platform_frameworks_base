@@ -16,9 +16,14 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.RunningTasks.FLAG_ALLOWED;
+import static com.android.server.wm.RunningTasks.FLAG_CROSS_USERS;
+import static com.android.server.wm.RunningTasks.FLAG_KEEP_INTENT_EXTRA;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityManager.RunningTaskInfo;
@@ -83,8 +88,8 @@ public class RunningTasksTest extends WindowTestsBase {
         // collected from all tasks across all the stacks
         final int numFetchTasks = 5;
         ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
-        mRunningTasks.getTasks(5, tasks, false /* filterOnlyVisibleRecents */, mRootWindowContainer,
-                -1 /* callingUid */, true /* allowed */, true /*crossUser */, PROFILE_IDS);
+        mRunningTasks.getTasks(5, tasks, FLAG_ALLOWED | FLAG_CROSS_USERS, mRootWindowContainer,
+                -1 /* callingUid */, PROFILE_IDS);
         assertThat(tasks).hasSize(numFetchTasks);
         for (int i = 0; i < numFetchTasks; i++) {
             assertEquals(numTasks - i - 1, tasks.get(i).id);
@@ -93,9 +98,8 @@ public class RunningTasksTest extends WindowTestsBase {
         // Ensure that requesting more than the total number of tasks only returns the subset
         // and does not crash
         tasks.clear();
-        mRunningTasks.getTasks(100, tasks, false /* filterOnlyVisibleRecents */,
-                mRootWindowContainer, -1 /* callingUid */, true /* allowed */, true /* crossUser */,
-                PROFILE_IDS);
+        mRunningTasks.getTasks(100, tasks, FLAG_ALLOWED | FLAG_CROSS_USERS,
+                mRootWindowContainer, -1 /* callingUid */, PROFILE_IDS);
         assertThat(tasks).hasSize(numTasks);
         for (int i = 0; i < numTasks; i++) {
             assertEquals(numTasks - i - 1, tasks.get(i).id);
@@ -103,7 +107,7 @@ public class RunningTasksTest extends WindowTestsBase {
     }
 
     @Test
-    public void testTaskInfo_expectNoExtras() {
+    public void testTaskInfo_expectNoExtrasByDefault() {
         final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
         final int numTasks = 10;
         for (int i = 0; i < numTasks; i++) {
@@ -118,9 +122,8 @@ public class RunningTasksTest extends WindowTestsBase {
 
         final int numFetchTasks = 5;
         final ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
-        mRunningTasks.getTasks(numFetchTasks, tasks, false /* filterOnlyVisibleRecents */,
-                mRootWindowContainer, -1 /* callingUid */, true /* allowed */, true /*crossUser */,
-                PROFILE_IDS);
+        mRunningTasks.getTasks(numFetchTasks, tasks, FLAG_ALLOWED | FLAG_CROSS_USERS,
+                mRootWindowContainer, -1 /* callingUid */, PROFILE_IDS);
         assertThat(tasks).hasSize(numFetchTasks);
         for (int i = 0; i < tasks.size(); i++) {
             final Bundle extras = tasks.get(i).baseIntent.getExtras();
@@ -128,6 +131,32 @@ public class RunningTasksTest extends WindowTestsBase {
         }
     }
 
+    @Test
+    public void testTaskInfo_expectExtrasWithKeepExtraFlag() {
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500).build();
+        final int numTasks = 10;
+        for (int i = 0; i < numTasks; i++) {
+            final Task stack = new TaskBuilder(mSupervisor)
+                    .setDisplay(display)
+                    .setOnTop(true)
+                    .build();
+            final Bundle data = new Bundle();
+            data.putInt("key", 100);
+            createTask(stack, ".Task" + i, i, i, data);
+        }
+
+        final int numFetchTasks = 5;
+        final ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
+        mRunningTasks.getTasks(numFetchTasks, tasks,
+                FLAG_ALLOWED | FLAG_CROSS_USERS | FLAG_KEEP_INTENT_EXTRA, mRootWindowContainer,
+                -1 /* callingUid */, PROFILE_IDS);
+        assertThat(tasks).hasSize(numFetchTasks);
+        for (int i = 0; i < tasks.size(); i++) {
+            final Bundle extras = tasks.get(i).baseIntent.getExtras();
+            assertNotNull(extras);
+            assertEquals(100, extras.getInt("key"));
+        }
+    }
 
     /**
      * Create a task with a single activity in it, with the given last active time.
@@ -145,6 +174,7 @@ public class RunningTasksTest extends WindowTestsBase {
                 .setComponent(new ComponentName(mContext.getPackageName(), ".TaskActivity"))
                 .setIntentExtras(extras)
                 .build();
+        task.intent = activity.intent;
         return task;
     }
 }
