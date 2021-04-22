@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 충전 중"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 고속 충전 중"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 저속 충전 중"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 배터리 상태 최적화 중"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"충전기를 연결하세요."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"잠금 해제하려면 메뉴를 누르세요."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"네트워크 잠김"</string>
@@ -62,7 +63,7 @@
     <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"패턴을 잊음"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"잘못된 패턴"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"잘못된 비밀번호"</string>
-    <string name="kg_wrong_pin" msgid="4160978845968732624">"잘못된 PIN"</string>
+    <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN 오류"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
       <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g>초 후에 다시 시도하세요.</item>
       <item quantity="one">1초 후에 다시 시도하세요.</item>

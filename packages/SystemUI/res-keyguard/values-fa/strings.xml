@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ شدن"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ سریع"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آهسته‌آهسته شارژ می‌شود"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • بهینه‌سازی برای سلامت باتری"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"شارژر را وصل کنید."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"برای باز کردن قفل روی «منو» فشار دهید."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"شبکه قفل شد"</string>
