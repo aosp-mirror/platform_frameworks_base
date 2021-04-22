@@ -175,7 +175,7 @@ public final class UwbManager {
      * <p>The provided callback will be invoked by the given {@link Executor}.
      *
      * <p>When first registering a callback, the callbacks's
-     * {@link AdapterStateCallback#onStateChanged(boolean, int)} is immediately invoked to indicate
+     * {@link AdapterStateCallback#onStateChanged(int, int)} is immediately invoked to indicate
      * the current state of the underlying UWB adapter with the most recent
      * {@link AdapterStateCallback.StateChangedReason} that caused the change.
      *
@@ -269,6 +269,21 @@ public final class UwbManager {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull RangingSession.Callback callbacks) {
         return mRangingManager.openSession(parameters, executor, callbacks);
+    }
+
+    /**
+     * Returns the current enabled/disabled state for UWB.
+     *
+     * Possible values are:
+     * AdapterStateCallback#STATE_DISABLED
+     * AdapterStateCallback#STATE_ENABLED_INACTIVE
+     * AdapterStateCallback#STATE_ENABLED_ACTIVE
+     *
+     * @return value representing current enabled/disabled state for UWB.
+     * @hide
+     */
+    public @AdapterStateCallback.State int getAdapterState() {
+        return mAdapterStateListener.getAdapterState();
     }
 
     /**
