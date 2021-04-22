@@ -1686,6 +1686,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return false;
         }
 
+        if (!taskDisplayArea.canHostHomeTask()) {
+            // Can't launch home on a TaskDisplayArea that does not support root home task
+            return false;
+        }
+
         if (taskDisplayArea.getDisplayId() != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
             // Can't launch home on secondary display if device does not support multi-display.
             return false;
