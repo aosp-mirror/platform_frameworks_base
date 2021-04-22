@@ -21,6 +21,8 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.WRITE_DEVICE_CONFIG;
 
+import static com.android.internal.util.FrameworkStatsLog.AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_BIOMETRIC_MANAGER_CAN_AUTHENTICATE;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,6 +35,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.security.keystore.KeyProperties;
 import android.util.Slog;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -405,7 +409,17 @@ public class BiometricManager {
     @RequiresPermission(USE_BIOMETRIC)
     @BiometricError
     public int canAuthenticate() {
-        return canAuthenticate(Authenticators.BIOMETRIC_WEAK);
+        @BiometricError final int result = canAuthenticate(mContext.getUserId(),
+                Authenticators.BIOMETRIC_WEAK);
+
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_MANAGER_CAN_AUTHENTICATE_INVOKED,
+                false /* isAllowedAuthenticatorsSet */, Authenticators.EMPTY_SET, result);
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_DEPRECATED_API_USED,
+                AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_BIOMETRIC_MANAGER_CAN_AUTHENTICATE,
+                mContext.getApplicationInfo().uid,
+                mContext.getApplicationInfo().targetSdkVersion);
+
+        return result;
     }
 
     /**
@@ -436,7 +450,12 @@ public class BiometricManager {
     @RequiresPermission(USE_BIOMETRIC)
     @BiometricError
     public int canAuthenticate(@Authenticators.Types int authenticators) {
-        return canAuthenticate(mContext.getUserId(), authenticators);
+        @BiometricError final int result = canAuthenticate(mContext.getUserId(), authenticators);
+
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_MANAGER_CAN_AUTHENTICATE_INVOKED,
+                true /* isAllowedAuthenticatorsSet */, authenticators, result);
+
+        return result;
     }
 
     /**
@@ -444,9 +463,7 @@ public class BiometricManager {
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     @BiometricError
-    public int canAuthenticate(
-            int userId, @Authenticators.Types int authenticators) {
-
+    public int canAuthenticate(int userId, @Authenticators.Types int authenticators) {
         if (mService != null) {
             try {
                 final String opPackageName = mContext.getOpPackageName();
