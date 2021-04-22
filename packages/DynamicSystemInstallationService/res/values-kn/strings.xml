@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ ನಂತರ ಡೈನಾಮಿಕ್ ಸಿಸ್ಟಂ ಅಪ್‌ಡೇಟ್‌ಗಳಿಗೆ ಮುಂದುವರಿಯಿರಿ"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"ಡೈನಾಮಿಕ್ ಸಿಸ್ಟಂ ಸಿದ್ದವಾಗಿದೆ. ಇದನ್ನು ಬಳಸಲು, ನಿಮ್ಮ ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿ."</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"ಇನ್‌ಸ್ಟಾಲ್ ಆಗುತ್ತಿದೆ"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ಇಮೇಜ್ ಮೌಲ್ಯೀಕರಣ ವಿಫಲವಾಗಿದೆ. ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡುವಿಕೆಯನ್ನು ರದ್ದುಗೊಳಿಸಿ."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"ಪ್ರಸ್ತುತವಾಗಿ ಡೈನಾಮಿಕ್ ಸಿಸ್ಟಂ ರನ್ ಆಗುತ್ತಿದೆ ಮೂಲ Android ಆವೃತ್ತಿ ಬಳಸಲು, ಮರುಪ್ರಾರಂಭಿಸಿ."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"ರದ್ದುಗೊಳಿಸಿ"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"ತ್ಯಜಿಸಿ"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"ಮರುಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"ಮರುಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"ಡೈನಮಿಕ್ ಸಿಸ್ಟಂ ಅನ್ನು ತ್ಯಜಿಸಲಾಗಿದೆ"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"ಡೈನಾಮಿಕ್ ಸಿಸ್ಟಂ ಅನ್ನು ಮರುಪ್ರಾರಂಭಿಸಲು ಅಥವಾ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"ಡೈನಾಮಿಕ್ ಸಿಸ್ಟಂ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ವಿಫಲವಾಗಿದೆ"</string>
+</resources>
