@@ -3403,6 +3403,7 @@
   <java-symbol type="drawable" name="ic_accessibility_color_inversion" />
   <java-symbol type="drawable" name="ic_accessibility_color_correction" />
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
+  <java-symbol type="drawable" name="ic_accessibility_reduce_bright_colors" />
 
   <java-symbol type="string" name="reduce_bright_colors_feature_name" />
 
