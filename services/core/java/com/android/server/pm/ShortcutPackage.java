@@ -191,6 +191,10 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private boolean mIsInitilized;
 
+    private boolean mRescanRequired;
+    private boolean mIsNewApp;
+    private List<ShortcutInfo> mManifestShortcuts;
+
     private ShortcutPackage(ShortcutUser shortcutUser,
             int packageUserId, String packageName, ShortcutPackageInfo spi) {
         super(shortcutUser, packageUserId, packageName,
@@ -1124,8 +1128,22 @@ class ShortcutPackage extends ShortcutPackageItem {
                     (isNewApp ? "added" : "updated"),
                     getPackageInfo().getVersionCode(), pi.getLongVersionCode()));
         }
-
         getPackageInfo().updateFromPackageInfo(pi);
+        if (isAppSearchEnabled()) {
+            // Save the states in memory and resume package rescan when needed
+            mRescanRequired = true;
+            mIsNewApp = isNewApp;
+            mManifestShortcuts = newManifestShortcutList;
+        } else {
+            rescanPackage(isNewApp, newManifestShortcutList);
+        }
+        return true; // true means changed.
+    }
+
+    private void rescanPackage(
+            final boolean isNewApp, @NonNull final List<ShortcutInfo> newManifestShortcutList) {
+        final ShortcutService s = mShortcutUser.mService;
+
         final long newVersionCode = getPackageInfo().getVersionCode();
 
         // See if there are any shortcuts that were prevented restoring because the app was of a
@@ -1204,7 +1222,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         // This will send a notification to the launcher, and also save .
         // TODO: List changed and removed manifest shortcuts and pass to packageShortcutsChanged()
         s.packageShortcutsChanged(getPackageName(), getPackageUserId(), null, null);
-        return true; // true means changed.
+        mManifestShortcuts = null;
     }
 
     private boolean publishManifestShortcuts(List<ShortcutInfo> newManifestShortcutList) {
@@ -1699,13 +1717,25 @@ class ShortcutPackage extends ShortcutPackageItem {
         return result;
     }
 
+    private boolean hasNoShortcut() {
+        if (!isAppSearchEnabled()) {
+            return getShortcutCount() == 0;
+        }
+        final boolean[] hasAnyShortcut = new boolean[1];
+        forEachShortcutStopWhen(si -> {
+            hasAnyShortcut[0] = true;
+            return true;
+        });
+        return !hasAnyShortcut[0];
+    }
+
     @Override
     public void saveToXml(@NonNull TypedXmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
         final int size = mShortcuts.size();
         final int shareTargetSize = mShareTargets.size();
 
-        if (size == 0 && shareTargetSize == 0 && mApiCallCount == 0) {
+        if (hasNoShortcut() && shareTargetSize == 0 && mApiCallCount == 0) {
             return; // nothing to write.
         }
 
@@ -2591,6 +2621,10 @@ class ShortcutPackage extends ShortcutPackageItem {
                 mIsInitilized = true;
                 if (!wasInitialized) {
                     restoreParsedShortcuts(false);
+                }
+                if (mRescanRequired) {
+                    mRescanRequired = false;
+                    rescanPackage(mIsNewApp, mManifestShortcuts);
                 }
                 return ConcurrentUtils.waitForFutureNoInterrupt(cb.apply(session), description);
             } catch (Exception e) {
