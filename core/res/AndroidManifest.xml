@@ -2708,10 +2708,9 @@
     <permission android:name="android.permission.CREATE_USERS"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi @hide Allows an application to access data blobs across users.
-         This permission is not available to third party applications. -->
+    <!-- Allows an application to access data blobs across users. -->
     <permission android:name="android.permission.ACCESS_BLOBS_ACROSS_USERS"
-        android:protectionLevel="signature|privileged|development" />
+        android:protectionLevel="signature|privileged|development|role" />
 
     <!-- @hide Allows an application to set the profile owners and the device owner.
          This permission is not available to third party applications.-->
