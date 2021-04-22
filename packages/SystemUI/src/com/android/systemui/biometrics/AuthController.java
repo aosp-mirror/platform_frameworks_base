@@ -265,7 +265,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     /**
      * @return where the UDFPS exists on the screen in pixels in portrait mode.
      */
-    public RectF getUdfpsRegion() {
+    @Nullable public RectF getUdfpsRegion() {
         return mUdfpsController == null
                 ? null
                 : mUdfpsController.getSensorLocation();
@@ -274,7 +274,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     /**
      * @return where the UDFPS exists on the screen in pixels in portrait mode.
      */
-    public PointF getUdfpsSensorLocation() {
+    @Nullable public PointF getUdfpsSensorLocation() {
         if (mUdfpsController == null) {
             return null;
         }
@@ -286,7 +286,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
      * @return where the face authentication sensor exists relative to the screen in pixels in
      * portrait mode.
      */
-    public PointF getFaceAuthSensorLocation() {
+    @Nullable public PointF getFaceAuthSensorLocation() {
         if (mFaceProps == null || mFaceAuthSensorLocation == null) {
             return null;
         }
