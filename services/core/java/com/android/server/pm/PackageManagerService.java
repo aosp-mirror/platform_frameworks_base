@@ -15038,6 +15038,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 uid = UserHandle.getUid(id, UserHandle.getAppId(uid));
                 intent.putExtra(Intent.EXTRA_UID, uid);
             }
+            if (broadcastAllowList != null && PLATFORM_PACKAGE_NAME.equals(targetPkg)) {
+                intent.putExtra(Intent.EXTRA_VISIBILITY_ALLOW_LIST, broadcastAllowList.get(id));
+            }
             intent.putExtra(Intent.EXTRA_USER_HANDLE, id);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT | flags);
             if (DEBUG_BROADCASTS) {
@@ -21003,6 +21006,10 @@ public class PackageManagerService extends IPackageManager.Stub
                             removedPackage, extras, 0 /*flags*/,
                             installerPackageName, null, broadcastUsers, instantUserIds, null, null);
                 }
+                packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED_INTERNAL,
+                        removedPackage, extras, 0 /*flags*/, PLATFORM_PACKAGE_NAME,
+                        null /*finishedReceiver*/, broadcastUsers, instantUserIds,
+                        broadcastAllowList, null /*bOptions*/);
                 if (dataRemoved && !isRemovedPackageSystemUpdate) {
                     packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED,
                             removedPackage, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, null,
