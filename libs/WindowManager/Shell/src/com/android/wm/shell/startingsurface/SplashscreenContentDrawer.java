@@ -435,6 +435,18 @@ public class SplashscreenContentDrawer {
         if (a == b) {
             return true;
         }
+        final float lumA = Color.luminance(a);
+        final float lumB = Color.luminance(b);
+        final float contrastRatio = lumA > lumB
+                ? (lumA + 0.05f) / (lumB + 0.05f) : (lumB + 0.05f) / (lumA + 0.05f);
+        if (DEBUG) {
+            Slog.d(TAG, "isRgbSimilarInHsv a: " + Integer.toHexString(a)
+                    + " b " + Integer.toHexString(b) + " contrast ratio: " + contrastRatio);
+        }
+        if (contrastRatio < 2) {
+            return true;
+        }
+
         final float[] aHsv = new float[3];
         final float[] bHsv = new float[3];
         Color.colorToHSV(a, aHsv);
@@ -445,14 +457,18 @@ public class SplashscreenContentDrawer {
 
         // Calculate the difference between two colors based on the HSV dimensions.
         final float normalizeH = minAngle / 180f;
-        final double square = Math.pow(normalizeH, 2)
-                + Math.pow(aHsv[1] - bHsv[1], 2)
-                + Math.pow(aHsv[2] - bHsv[2], 2);
+        final double squareH = Math.pow(normalizeH, 2);
+        final double squareS = Math.pow(aHsv[1] - bHsv[1], 2);
+        final double squareV = Math.pow(aHsv[2] - bHsv[2], 2);
+        final double square = squareH + squareS + squareV;
         final double mean = square / 3;
         final double root = Math.sqrt(mean);
         if (DEBUG) {
-            Slog.d(TAG, "hsvDiff " + minAngle + " a: " + Integer.toHexString(a)
-                    + " b " + Integer.toHexString(b) + " ah " + aHsv[0] + " bh " + bHsv[0]
+            Slog.d(TAG, "hsvDiff " + minAngle
+                    + " ah " + aHsv[0] + " bh " + bHsv[0]
+                    + " as " + aHsv[1] + " bs " + bHsv[1]
+                    + " av " + aHsv[2] + " bv " + bHsv[2]
+                    + " sqH " + squareH + " sqS " + squareS + " sqV " + squareV
                     + " root " + root);
         }
         return root < 0.1;
