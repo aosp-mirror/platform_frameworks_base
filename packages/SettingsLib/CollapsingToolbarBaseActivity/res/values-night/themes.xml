@@ -15,8 +15,9 @@
   limitations under the License.
 -->
 <resources>
-    <style name="Theme.CollapsingToolbar.Settings"
-           parent="@style/Theme.MaterialComponents.DayNight">
+    <style name="Theme.CollapsingToolbar.Settings" parent="@style/Theme.MaterialComponents.DayNight">
+        <item name="elevationOverlayEnabled">true</item>
+        <item name="elevationOverlayColor">?attr/colorPrimary</item>
         <item name="colorPrimary">@*android:color/primary_dark_device_default_settings</item>
         <item name="colorAccent">@*android:color/accent_device_default_dark</item>
     </style>
