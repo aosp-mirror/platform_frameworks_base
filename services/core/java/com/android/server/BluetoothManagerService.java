@@ -1099,7 +1099,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (isBleAppPresent()) {
             // Need to stay at BLE ON. Disconnect all Gatt connections
             try {
-                mBluetoothGatt.unregAll();
+                mBluetoothGatt.unregAll(mContext.getAttributionSource());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to disconnect all apps.", e);
             }
