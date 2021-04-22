@@ -1883,6 +1883,7 @@
   <java-symbol type="array" name="config_autoBrightnessButtonBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessKeyboardBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLcdBacklightValues" />
+  <java-symbol type="array" name="config_autoBrightnessLcdBacklightValues_doze" />
   <java-symbol type="array" name="config_autoBrightnessLevels" />
   <java-symbol type="array" name="config_ambientThresholdLevels" />
   <java-symbol type="array" name="config_ambientBrighteningThresholds" />
