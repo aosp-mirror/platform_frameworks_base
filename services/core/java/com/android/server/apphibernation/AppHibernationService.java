@@ -16,6 +16,7 @@
 
 package com.android.server.apphibernation;
 
+import static android.app.AppOpsManager.OP_NONE;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REMOVED_FOR_ALL_USERS;
@@ -25,8 +26,10 @@ import static android.provider.DeviceConfig.NAMESPACE_APP_HIBERNATION;
 
 import static com.android.server.apphibernation.AppHibernationConstants.KEY_APP_HIBERNATION_ENABLED;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
@@ -366,6 +369,49 @@ public final class AppHibernationService extends SystemService {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackage");
         pkgState.hibernated = false;
         pkgState.lastUnhibernatedMs = System.currentTimeMillis();
+        // Deliver LOCKED_BOOT_COMPLETE AND BOOT_COMPLETE broadcast so app can re-register
+        // their alarms/jobs/etc.
+        try {
+            Intent lockedBcIntent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
+                    .setPackage(packageName);
+            final String[] requiredPermissions = {Manifest.permission.RECEIVE_BOOT_COMPLETED};
+            mIActivityManager.broadcastIntentWithFeature(
+                    null /* caller */,
+                    null /* callingFeatureId */,
+                    lockedBcIntent,
+                    null /* resolvedType */,
+                    null /* resultTo */,
+                    Activity.RESULT_OK,
+                    null /* resultData */,
+                    null /* resultExtras */,
+                    requiredPermissions,
+                    null /* excludedPermissions */,
+                    OP_NONE,
+                    null /* bOptions */,
+                    false /* serialized */,
+                    false /* sticky */,
+                    userId);
+
+            Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED).setPackage(packageName);
+            mIActivityManager.broadcastIntentWithFeature(
+                    null /* caller */,
+                    null /* callingFeatureId */,
+                    bcIntent,
+                    null /* resolvedType */,
+                    null /* resultTo */,
+                    Activity.RESULT_OK,
+                    null /* resultData */,
+                    null /* resultExtras */,
+                    requiredPermissions,
+                    null /* excludedPermissions */,
+                    OP_NONE,
+                    null /* bOptions */,
+                    false /* serialized */,
+                    false /* sticky */,
+                    userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
