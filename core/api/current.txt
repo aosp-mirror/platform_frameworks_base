@@ -20359,6 +20359,7 @@ package android.media {
     method @Deprecated public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener);
     method public int abandonAudioFocusRequest(@NonNull android.media.AudioFocusRequest);
     method public void addOnCommunicationDeviceChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnCommunicationDeviceChangedListener);
+    method public void addOnModeChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnModeChangedListener);
     method public void adjustStreamVolume(int, int, int);
     method public void adjustSuggestedStreamVolume(int, int, int);
     method public void adjustVolume(int, int);
@@ -20409,6 +20410,7 @@ package android.media {
     method @Deprecated public void registerRemoteControlClient(android.media.RemoteControlClient);
     method @Deprecated public boolean registerRemoteController(android.media.RemoteController);
     method public void removeOnCommunicationDeviceChangedListener(@NonNull android.media.AudioManager.OnCommunicationDeviceChangedListener);
+    method public void removeOnModeChangedListener(@NonNull android.media.AudioManager.OnModeChangedListener);
     method @Deprecated public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int);
     method public int requestAudioFocus(@NonNull android.media.AudioFocusRequest);
     method public void setAllowedCapturePolicy(int);
@@ -20562,6 +20564,10 @@ package android.media {
 
   public static interface AudioManager.OnCommunicationDeviceChangedListener {
     method public void onCommunicationDeviceChanged(@Nullable android.media.AudioDeviceInfo);
+  }
+
+  public static interface AudioManager.OnModeChangedListener {
+    method public void onModeChanged(int);
   }
 
   public final class AudioMetadata {
