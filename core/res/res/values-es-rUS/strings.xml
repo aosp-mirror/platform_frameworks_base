@@ -258,7 +258,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"El sonido está Desactivado"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"El sonido está Activado"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Modo avión"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Modo de avión"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"El modo avión está Activado"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"El modo avión está Desactivado"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Configuración"</string>
