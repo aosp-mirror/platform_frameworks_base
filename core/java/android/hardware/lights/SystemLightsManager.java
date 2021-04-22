@@ -102,7 +102,28 @@ public final class SystemLightsManager extends LightsManager {
     public @NonNull LightsSession openSession() {
         try {
             final LightsSession session = new SystemLightsSession();
-            mService.openSession(session.getToken());
+            mService.openSession(session.getToken(), 0);
+            return session;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     *
+     * Creates a new {@link LightsSession}
+     *
+     * @param priority the larger this number, the higher the priority of this session when multiple
+     *                 light state requests arrive simultaneously.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS)
+    @Override
+    public @NonNull LightsSession openSession(int priority) {
+        try {
+            final LightsSession session = new SystemLightsSession();
+            mService.openSession(session.getToken(), priority);
             return session;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

@@ -81,6 +81,11 @@ class InputDeviceLightsManager extends LightsManager {
         return session;
     }
 
+    @Override
+    public @NonNull LightsSession openSession(int priority) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Encapsulates a session that can be used to control device lights and represents the lifetime
      * of the requests.
