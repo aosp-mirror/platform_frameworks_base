@@ -57,7 +57,7 @@
     <string name="imei" msgid="2157082351232630390">"IMEI-kod"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Nummerpresentatör för inkommande samtal"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"Nummerpresentatör för utgående samtal"</string>
+    <string name="ClirMmi" msgid="6752346475055446417">"Dölj nummerpresentatör för utgående samtal"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"Visning av uppkopplat nummer"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Blockera visning av uppkopplat nummer"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Vidarekoppla samtal"</string>
@@ -191,13 +191,19 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratören tillåter inte längre privat bruk av enheten"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Enheten hanteras"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organisationen hanterar den här enheten och kan övervaka nätverkstrafiken. Tryck om du vill veta mer."</string>
-    <string name="location_changed_notification_title" msgid="4119726617105166830">"Platsinställningarna har ändrats av administratören"</string>
-    <string name="location_changed_notification_text" msgid="198907268219396399">"Tryck för att se dina platsinställningar."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Appar har åtkomst till din plats"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Kontakta IT-administratören om du vill veta mer"</string>
+    <string name="country_detector" msgid="7023275114706088854">"Country Detector"</string>
+    <string name="location_service" msgid="2439187616018455546">"Location Service"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"Sensor Notification Service"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Enheten kommer att rensas"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Det går inte att använda administratörsappen. Enheten rensas.\n\nKontakta organisationens administratör om du har några frågor."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Utskrift har inaktiverats av <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Administratören har stängt av privata appar"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Tryck här för att kontrollera att policyn följs."</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktivera jobbprofilen"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Privata appar blockeras tills du aktiverar jobbprofilen"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Privata appar blockeras den <xliff:g id="DATE">%1$s</xliff:g> kl. <xliff:g id="TIME">%2$s</xliff:g>. IT-administratören tillåter inte att din jobbprofil är inaktiverad i mer än <xliff:g id="NUMBER">%3$d</xliff:g> dagar."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktivera"</string>
     <string name="me" msgid="6207584824693813140">"Jag"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Alternativ för surfplattan"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Alternativ för Android TV"</string>
@@ -231,20 +237,24 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Skärmlås"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Stäng av"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Strömbrytare"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Starta om"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Nödsituation"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Felrapport"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Avsluta session"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"Skärmdump"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"Skärmbild"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Felrapport"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Nu hämtas information om aktuell status för enheten, som sedan skickas i ett e-postmeddelade. Det tar en liten stund innan felrapporten är färdig och kan skickas, så vi ber dig ha tålamod."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktiv rapport"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Bör användas i de flesta fall. Då kan du spåra rapportförloppet, ange mer information om problemet och ta skärmdumpar. En del mindre använda avsnitt, som det tar lång tid att rapportera om, kan uteslutas."</string>
+    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Bör användas i de flesta fall. Då kan du spåra rapportförloppet, ange mer information om problemet och ta skärmbilder. En del mindre använda avsnitt, som det tar lång tid att rapportera om, kan uteslutas."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Fullständig rapport"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Alternativet innebär minsta möjliga störning när enheten inte svarar eller är långsam, eller när alla avsnitt ska ingå i rapporten. Du kan inte ange mer information eller ta ytterligare skärmdumpar."</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Alternativet innebär minsta möjliga störning när enheten inte svarar eller är långsam, eller när alla avsnitt ska ingå i rapporten. Du kan inte ange mer information eller ta ytterligare skärmbilder."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">Tar en skärmdump till felrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder.</item>
-      <item quantity="one">Tar en skärmdump till felrapporten om <xliff:g id="NUMBER_0">%d</xliff:g> sekund.</item>
+      <item quantity="other">Tar en skärmbild till felrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder.</item>
+      <item quantity="one">Tar en skärmbild till felrapporten om <xliff:g id="NUMBER_0">%d</xliff:g> sekund.</item>
     </plurals>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Skärmbild med felrapport har tagits"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Det gick inte att ta en skärmbild med felrapport"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Tyst läge"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Ljudet är AV"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Ljudet är PÅ"</string>
@@ -285,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Byt till jobbprofilen"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"få tillgång till dina kontakter"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Plats"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"plats"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"komma åt enhetens platsuppgifter"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"få tillgång till din kalender"</string>
@@ -317,8 +327,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Kan trycka, svepa, nypa och göra andra rörelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Fingeravtrycksrörelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan registrera rörelser som utförs med hjälp av enhetens fingeravtryckssensor."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skärmdump"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Du kan ta en skärmdump av skärmen."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skärmbild"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Du kan ta en skärmbild av skärmen."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tillåter att appen inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"visas i statusfältet"</string>
@@ -339,6 +349,8 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Tillåter att appen tar emot och hanterar MMS-meddelanden. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Vidarebefordra massutskick via sms"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Tillåter att appen binds till cellsändningsmodulen så att massutskick via sms kan vidarebefordras vid mottagandet. I vissa områden används massutskick via sms för att varna om nödsituationer. Skadliga appar kan påverka enhetens prestanda eller funktioner när ett massutskick via sms tas emot."</string>
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Hantera pågående samtal"</string>
+    <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Tillåter att en app får åtkomst till information om pågående samtal på enheten och kan kontrollera dessa samtal."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"läsa SMS-meddelanden"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Appen tillåts läsa SMS som skickas till din enhet. På vissa platser skickas SMS för att varna för nödsituationer. Skadliga appar kan påverka enhetens prestanda eller funktionalitet när du får ett meddelande om en nödsituation via SMS."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"läsa flöden som du prenumererar på"</string>
@@ -412,11 +424,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"få åtkomst till extra kommandon för platsleverantör"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tillåter att appen får åtkomst till extra kommandon för platsleverantör. Detta kan innebära att appen tillåts störa funktionen för GPS eller andra platskällor."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"endast åtkomst till exakt plats i förgrunden"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Den här appen kan endast få information om din exakta plats när den körs i förgrunden. Platstjänsterna måste ha aktiverats och vara tillgängliga på enheten om appen ska kunna använda dem. Detta kan leda till ökad batteriförbrukning."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Den här appen kan få åtkomst till din exakta plats från platstjänster när appen används. Platstjänster för enheten måste vara aktiverat för att appen ska få åtkomst till plats. Detta kan öka batteriförbrukningen."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"endast åtkomst till ungefärlig plats i förgrunden"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Den här appen kan endast få information om din ungefärliga plats när den körs i förgrunden. Platstjänsterna måste ha aktiverats och vara tillgängliga på enheten om appen ska kunna använda dem."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Den här appen kan få åtkomst till din ungefärliga plats från platstjänster när appen används. Platstjänster för enheten måste vara aktiverat för att appen ska få åtkomst till plats."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"få åtkomst till platsinformation i bakgrunden"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Appen får åtkomst till platsinformation när appen körs i bakgrunden, förutom att den har åtkomst när den körs i förgrunden."</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Den här appen har platsåtkomst hela tiden, även när appen inte används."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ändra dina ljudinställningar"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tillåter att appen ändrar globala ljudinställningar som volym och vilken högtalarutgång som används."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"spela in ljud"</string>
@@ -428,7 +440,9 @@
     <string name="permlab_camera" msgid="6320282492904119413">"ta bilder och spela in videoklipp"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Appen kan ta kort och spela in video med kameran när som helst."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Ge en app eller tjänst behörighet att ta bilder och spela in videor med systemets kameror"</string>
-    <string name="permdesc_systemCamera" msgid="544730545441964482">"Denna systemapp | med behörighet kan ta bilder och spela in videor med systemets kamera när som helst. Appen måste även ha behörigheten android.permission.CAMERA"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Denna systemapp med särskild behörighet kan ta bilder och spela in videor med systemets kamera när som helst. Appen måste även ha behörigheten android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillåt att en app eller tjänst får återanrop när en kameraenhet öppnas eller stängs."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Den här appen kan få återanrop när en kameraenhet öppnas (efter app) eller stängs."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"styra vibration"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillåter att appen styr vibrationen."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Appen beviljas åtkomst till vibrationsstatus."</string>
@@ -442,13 +456,17 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Appen tillåts att dirigera samtal via systemet för att förbättra samtalsupplevelsen."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"visa och styra samtal via systemet."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Tillåter att appen kan visa och styra pågående samtal på enheten. Detta omfattar information som telefonnummer för samtal och samtalens status."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"undanta från begränsningar för ljudinspelning"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Undanta appen från begränsningar för ljudinspelning."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"fortsätta ett samtal från en annan app"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Tillåter att appen fortsätter ett samtal som har startats i en annan app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"läsa telefonnummer"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Appen beviljas åtkomst till enhetens telefonnummer."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"låta bilens skärm vara på"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"förhindra att surfplattan går in i viloläge"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"förhindra att Android TV-enheten försätts i viloläge"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"förhindra att telefonen sätts i viloläge"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Tillåter appen att låta bilens skärm vara på."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Tillåter att appen förhindrar att surfplattan går in i viloläge."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Tillåter att appen förhindrar att Android TV-enheten försätts i viloläge."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Tillåter att appen förhindrar att mobilen går in i viloläge."</string>
@@ -520,7 +538,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Tillåter att appen gör ändringar i din fotosamling."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"läsa av platser i din mediesamling"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tillåter att appen läser av platser i din mediesamling."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Verifiera din identitet"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifiera din identitet"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk maskinvara är inte tillgänglig"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentiseringen avbröts"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Identifierades inte"</string>
@@ -529,7 +547,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Ofullständigt fingeravtryck. Försök igen."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Fingeravtryckssensorn är smutsig. Rengör den och försök igen."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Du rörde fingret för snabbt. Försök igen"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Du rörde fingret för snabbt. Försök igen."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du rörde fingret för långsamt. Försök igen."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -546,8 +564,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Försök igen."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Inga fingeravtryck har registrerats."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Enheten har ingen fingeravtryckssensor."</string>
-    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensorn har tillfälligt inaktiverats."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -591,8 +608,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Det gick inte att verifiera ansiktet. Försök igen."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Du har inte konfigurerat ansiktslås."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Ansiktslås stöds inte på den här enheten."</string>
-    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
-    <skip />
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensorn har tillfälligt inaktiverats."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Ansikte <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -815,7 +831,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Tryck på Menu för att låsa upp eller ringa nödsamtal."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Tryck på Menu för att låsa upp."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Rita grafiskt lösenord för att låsa upp"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Nödsamtal"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Nödsamtal"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Tillbaka till samtal"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Korrekt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Försök igen"</string>
@@ -1093,28 +1109,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Ta bort"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Indatametod"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Textåtgärder"</string>
-    <string name="email" msgid="2503484245190492693">"Skicka e-post"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Skicka e-post till vald adress"</string>
-    <string name="dial" msgid="4954567785798679706">"Ring"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Ring valt telefonnummer"</string>
-    <string name="map" msgid="6865483125449986339">"Öppna karta"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Hitta den valda adressen"</string>
-    <string name="browse" msgid="8692753594669717779">"Öppna"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Öppna vald webbadress"</string>
-    <string name="sms" msgid="3976991545867187342">"Sms:a"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Skicka meddelande till valt telefonnummer"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Lägg till"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Lägg till i Kontakter"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Visa"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Visa vald tid i kalendern"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Schemalägg"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Schemalägg händelse på den valda tiden"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Spåra"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Spåra valt flyg"</string>
-    <string name="translate" msgid="1416909787202727524">"Översätt"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Översätt markerad text"</string>
-    <string name="define" msgid="5214255850068764195">"Definiera"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Definiera markerad text"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Lagringsutrymmet börjar ta slut"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Det kan hända att vissa systemfunktioner inte fungerar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Det finns inte tillräckligt med utrymme för systemet. Kontrollera att du har ett lagringsutrymme på minst 250 MB och starta om."</string>
@@ -1253,7 +1247,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobilnätverket har ingen internetanslutning"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Nätverket har ingen internetanslutning"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Det går inte att komma åt den privata DNS-servern."</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Ansluten"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> har begränsad anslutning"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Tryck för att ansluta ändå"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Byte av nätverk till <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1318,6 +1311,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB-felsökning ansluten"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Tryck för att inaktivera USB-felsökning"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Välj för att inaktivera USB-felsökning."</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Trådlös felsökning ansluten"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Tryck för att inaktivera trådlös felsökning"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Välj för att inaktivera trådlös felsökning."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Läget för testverktyg har aktiverats"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Inaktivera testverktygsläget genom att göra en återställning till standardinställningarna."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Seriekonsolen är aktiverad"</string>
@@ -1346,15 +1342,24 @@
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Inaktivera"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> kontrolleras …"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Granskar nuvarande innehåll"</string>
+    <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"Analyserar medialagring"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nytt <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> fungerar inte"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Tryck för att konfigurera"</string>
+    <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Välj för att konfigurera"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Du måste eventuellt formatera om enheten. Tryck för att mata ut."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"För överföring av foton och media"</string>
+    <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Bläddra bland mediefiler"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem med <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> fungerar inte"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tryck och åtgärda"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> har skadats. Välj för att åtgärda."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Du måste eventuellt formatera om enheten. Tryck för att mata ut."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> stöds inte"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> fungerar inte"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Enheten har inte stöd för <xliff:g id="NAME">%s</xliff:g>. Tryck här om du vill konfigurera i ett format som stöds."</string>
-    <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Enheten stöder inte detta <xliff:g id="NAME">%s</xliff:g>. Välj för att konfigurera i ett format som stöds."</string>
+    <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Välj för att konfigurera <xliff:g id="NAME">%s</xliff:g> i ett format som stöds."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Du måste eventuellt formatera om enheten"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> togs bort oväntat"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Mata ut media innan du tar bort den för att inte förlora innehåll"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> har tagits bort"</string>
@@ -1413,7 +1418,7 @@
     <string name="deny" msgid="6632259981847676572">"Neka"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Begärd behörighet"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Begärd behörighet\nför kontot <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du använder den här appen i din arbetsprofil"</string>
+    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du använder den här appen i din jobbprofil"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Du använder den här appen i din jobbprofil"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Indatametod"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Synkronisera"</string>
@@ -1460,6 +1465,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Begärt av <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Ja"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nej"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Åtkomst till platsen för nödsituationen"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Din enhetstillverkare kom åt till din plats vid en nödsituation nyligen"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Din operatör kom åt till din plats vid en nödsituation nyligen"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Gränsen för borttagning har överskridits"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Det finns <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> borttagna objekt för <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, konto <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Vad vill du göra?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Ta bort objekten"</string>
@@ -1545,10 +1553,8 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Vill du öppna webbläsaren?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Vill du ta emot samtal?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Alltid"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Ställ in på att alltid öppnas"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Bara en gång"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Inställningar"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s har inte stöd för arbetsprofil"</string>
+    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s har inte stöd för jobbprofil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Surfplatta"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Mobil"</string>
@@ -1618,20 +1624,46 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> försök ombeds du låsa upp mobilen med hjälp av ett e-postkonto.\n\n Försök igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Ta bort"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Förgrundstjänsten från <xliff:g id="PACKAGENAME">%1$s</xliff:g> som startades i bakgrunden får inte behörighet som gäller vid användning i framtida R-versioner. Besök go/r-bg-fgs-restriction och skicka en felrapport."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vill du höja volymen över den rekommenderade nivån?\n\nAtt lyssna med stark volym långa stunder åt gången kan skada hörseln."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vill du använda Aktivera tillgänglighet snabbt?"</string>
-    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
-    <skip />
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"När kortkommandot har aktiverats startar du en tillgänglighetsfunktion genom att trycka ned båda volymknapparna i tre sekunder."</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Vill du aktivera tillgänglighetsfunktionerna?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Om du trycker ned båda volymknapparna i ett par sekunder aktiveras tillgänglighetsfunktionerna. Det kan få enheten ett fungera annorlunda.\n\nAktuella funktioner:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nDu kan ändra vilka funktioner som aktiveras under Inställningar &gt; Tillgänglighet."</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Vill du aktivera <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Om du trycker ned båda volymknapparna i ett par sekunder aktiveras <xliff:g id="SERVICE">%1$s</xliff:g>, en tillgänglighetsfunktion. Det kan leda till att enheten fungerar annorlunda.\n\nDu kan ändra vilken funktion som ska aktiveras med genvägen under Inställningar &gt; Tillgänglighet."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivera"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Aktivera inte"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"PÅ"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AV"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vill du tillåta att <xliff:g id="SERVICE">%1$s</xliff:g> får fullständig kontroll över enheten?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Om du aktiverar <xliff:g id="SERVICE">%1$s</xliff:g> används inte skärmlåset för att förbättra datakryptering på enheten."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Fullständig kontroll lämpar sig för appar med tillgänglighetsfunktioner, men är inte lämplig för de flesta appar."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visa och styra skärmen"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan läsa allt innehåll på skärmen och visa innehåll över andra appar."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Visa och vidta åtgärder"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan registrera din användning av en app eller maskinvarusensor och interagera med appar åt dig."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Tillåt"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Neka"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tryck på funktioner som du vill aktivera:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Välj vilka funktioner du vill använda med hjälp av tillgänglighetsknappen"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Välj att funktioner att använda med hjälp av volymknappskortkommandot"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> har inaktiverats"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Redigera genvägar"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Avbryt"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Klar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Inaktivera kortkommandot"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Använd kortkommandot"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverterade färger"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Färgkorrigering"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktiverades av Aktivera tillgänglighet snabbt"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> inaktiverades av Aktivera tillgänglighet snabbt"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har aktiverats."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har inaktiverats."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Tryck och håll båda volymknapparna i tre sekunder för att använda <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Välj en funktion som ska användas när du trycker på tillgänglighetsknappen:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Välj en funktion som ska användas med tillgänglighetsrörelsen (svepa uppåt med två fingrar från skärmens nederkant):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Välj en funktion som ska användas med tillgänglighetsrörelsen (svepa uppåt med tre fingrar från skärmens nederkant):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Byt mellan funktionerna genom att trycka länge på tillgänglighetsknappen."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Byt funktion genom att svepa uppåt med två fingrar och hålla kvar dem."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Byt funktion genom att svepa uppåt med tre fingrar och hålla kvar dem."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Förstoring"</string>
     <string name="user_switched" msgid="7249833311585228097">"Nuvarande användare: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Byter till <xliff:g id="NAME">%1$s</xliff:g> …"</string>
@@ -1686,6 +1718,28 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
+    <skip />
+    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
+    <skip />
+    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
+    <skip />
+    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
+    <skip />
+    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
+    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1722,6 +1776,8 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
+    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Porträtt – okänd storlek"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Landskap – okänd storlek"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Inställd"</string>
@@ -1765,10 +1821,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratören uppdaterade paketet"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratören raderade paketet"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"I syfte att förlänga batteritiden sker följande i batterisparläget:\n·mörkt tema aktiveras\n·aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”, inaktiveras eller begränsas\n\n"<annotation id="url">"Läs mer"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"I syfte att förlänga batteritiden sker följande i batterisparläget:\n·mörkt tema aktiveras\n·aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”, inaktiveras eller begränsas"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Aktivera Databesparing?"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Batterisparläget förlänger batteritiden genom att\n\n• aktivera mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”\n\n"<annotation id="url">"Läs mer"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Batterisparläget förlänger batteritiden genom att\n\n• aktivera Mörkt tema\n• inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Med Databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Vill du aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivera"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">I %1$d minuter (till kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1802,7 +1858,7 @@
       <item quantity="other">I %d tim</item>
       <item quantity="one">I en 1 tim</item>
     </plurals>
-    <string name="zen_mode_until" msgid="2250286190237669079">"Till kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_until" msgid="2250286190237669079">"Till <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Till <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nästa alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Tills du stänger av"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Tills du inaktiverar Stör ej"</string>
@@ -1845,6 +1901,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Okategoriserad"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Du anger hur viktiga aviseringarna är."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Detta är viktigt på grund av personerna som deltar."</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Anpassad appavisering"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Tillåter du att <xliff:g id="APP">%1$s</xliff:g> skapar en ny användare för <xliff:g id="ACCOUNT">%2$s</xliff:g> (det finns redan en användare med det här kontot)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Tillåter du att <xliff:g id="APP">%1$s</xliff:g> skapar en ny användare för <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Lägg till ett språk"</string>
@@ -2001,7 +2058,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> filer</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fil</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="492542066060841139">"Dela direkt är inte tillgängligt"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Inga rekommenderade personer att dela med"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Applista"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Appen har inte fått inspelningsbehörighet men kan spela in ljud via denna USB-enhet."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Startsida"</string>
@@ -2010,28 +2067,146 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Aviseringar"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Snabbinställningar"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialogruta för ström"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Aktivera och inaktivera delad skärm"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Låsskärm"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skärmdump"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Tillgänglighetsmenyn"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skärmbild"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Tillgänglighetsgenväg på skärmen"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Valfunktion för tillgänglighetsgenväg på skärmen"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Aktivera tillgänglighet snabbt"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Textningsfält för <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> har placerats i hinken RESTRICTED"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"har skickat en bild"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Konversation"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Gruppkonversation"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Privat"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Jobb"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
-    <skip />
-    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
-    <skip />
-    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personlig vy"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Jobbvy"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Det går inte att dela detta med jobbappar"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT-administratören tillåter inte att du delar innehållet med appar i din jobbprofil"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Det går inte att öppna detta med jobbappar"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT-administratören tillåter inte att du öppnar innehållet med appar i din jobbprofil"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Det går inte att dela detta med privata appar"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT-administratören tillåter inte att du delar innehållet med appar i din privata profil"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Det går inte att öppna detta med privata appar"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT-administratören tillåter inte att du öppnar innehållet med appar i din privata profil"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Jobbprofilen är pausad"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Aktivera"</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Inga jobbappar har stöd för det här innehållet"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Det går inte att öppna innehållet med några jobbappar"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Inga privata appar har stöd för det här innehållet"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Det går inte att öppna innehållet med några privata appar"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Pinkod för upplåsning av nätverk för SIM-kort"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Pinkod för upplåsning av delnätverk för SIM-kort"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Pinkod för upplåsning av företag för SIM-kort"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"Pinkod för upplåsning av operatör för SIM-kort"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"Pinkod för upplåsning av SIM-kort"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"Pinkod för upplåsning av nätverk 1 för RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"Pinkod för upplåsning av nätverk 2 för RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"Pinkod för upplåsning av HRPD för RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"Pinkod för upplåsning av företag för RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"Pinkod för upplåsning av operatör för RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"Pinkod för upplåsning av RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"Ange PUK-kod"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"Pinkod för upplåsning av SPN"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"Pinkod för upplåsning av operatör och likvärdig hem-PLMN"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"Pinkod för upplåsning med ICCID"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"Pinkod för upplåsning med IMPI"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"Pinkod för upplåsning av operatör för delnätverk"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"Begär upplåsning av nätverk för SIM-kort …"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"Begär upplåsning av delnätverk för SIM-kort …"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"Begär upplåsning av operatör för SIM-kort …"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"Begär upplåsning av företag för SIM-kort …"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"Begär upplåsning av SIM-kort …"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"Begär upplåsning av nätverk 1 för RUIM …"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"Begär upplåsning av nätverk 2 för RUIM …"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"Begär upplåsning av HRPD för RUIM …"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"Begär upplåsning av operatör för RUIM …"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"Begär upplåsning av företag för RUIM …"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"Begär upplåsning av SPN …"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"Begär upplåsning av operatör och likvärdig hem-PLMN …"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"Begär upplåsning med ICCID …"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"Begär upplåsning med IMPI …"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"Begär upplåsning av operatör för delnätverk …"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"Begär upplåsning av RUIM …"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"Begär upplåsning med PUK-kod …"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"Begäran om upplåsning av nätverk för SIM-kort misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"Begäran om upplåsning av delnätverk för SIM-kort misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"Begäran om upplåsning av operatör för SIM-kort misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"Begäran om upplåsning av företag för SIM-kort misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"Begäran om upplåsning av SIM-kort misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"Begäran om upplåsning av nätverk 1 för RUIM misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"Begäran om upplåsning av nätverk 2 för RUIM misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"Begäran om upplåsning av HRPD för RUIM misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"Begäran om upplåsning av företag för RUIM misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"Begäran om upplåsning av operatör för RUIM misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"Begäran om upplåsning av RUIM misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"Upplåsning med PUK-kod misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"Begäran om upplåsning av SPN misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"Begäran om upplåsning av operatör och likvärdig hem-PLMN misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"Begäran om upplåsning med ICCID misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"Begäran om upplåsning med IMPI misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"Begäran om upplåsning av operatör för delnätverk misslyckades."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"Nätverk upplåst för SIM-kort."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"Delnätverk upplåst för SIM-kort."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"Operatör upplåst för SIM-kort."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"SIM upplåst för företag."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"SIM-kort upplåst."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"Nätverk 1 upplåst för RUIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"Nätverk 2 upplåst för RUIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"HRPD upplåst för RUIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"Operatör upplåst för RUIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"Företag upplåst för RUIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"RUIM upplåst."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"Upplåst med PUK-kod."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"SPN upplåst."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"Operatör och likvärdig hem-PLMN upplåst."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"Upplåst med ICCID."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"Upplåst med IMPI."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Operatör upplåst för delnätverk."</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>
