@@ -25,6 +25,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.TransitionOldType;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
+import android.annotation.SuppressLint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -241,10 +242,16 @@ public class RemoteAnimationAdapterCompat {
 
                 final Runnable animationFinishedCallback = new Runnable() {
                     @Override
+                    @SuppressLint("NewApi")
                     public void run() {
                         try {
                             counterLauncher.cleanUp(info.getRootLeash());
                             counterWallpaper.cleanUp(info.getRootLeash());
+                            // Release surface references now. This is apparently to free GPU
+                            // memory while doing quick operations (eg. during CTS).
+                            for (int i = 0; i < info.getChanges().size(); ++i) {
+                                info.getChanges().get(i).getLeash().release();
+                            }
                             finishCallback.onTransitionFinished(null /* wct */);
                         } catch (RemoteException e) {
                             Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"
