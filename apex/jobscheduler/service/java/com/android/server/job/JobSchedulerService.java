@@ -758,7 +758,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                                             // put USER instead of UNINSTALL or DISABLED.
                                             cancelJobsForPackageAndUidLocked(pkgName, pkgUid,
                                                     JobParameters.STOP_REASON_USER,
-                                                    JobParameters.DEBUG_REASON_UNINSTALL,
+                                                    JobParameters.INTERNAL_STOP_REASON_UNINSTALL,
                                                     "app disabled");
                                         }
                                     }
@@ -809,7 +809,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // be fine to just put USER instead of UNINSTALL or DISABLED.
                     cancelJobsForPackageAndUidLocked(pkgName, uidRemoved,
                             JobParameters.STOP_REASON_USER,
-                            JobParameters.DEBUG_REASON_UNINSTALL, "app uninstalled");
+                            JobParameters.INTERNAL_STOP_REASON_UNINSTALL, "app uninstalled");
                     for (int c = 0; c < mControllers.size(); ++c) {
                         mControllers.get(c).onAppRemovedLocked(pkgName, pkgUid);
                     }
@@ -863,7 +863,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     synchronized (mLock) {
                         cancelJobsForPackageAndUidLocked(pkgName, pkgUid,
-                                JobParameters.STOP_REASON_USER, JobParameters.REASON_CANCELED,
+                                JobParameters.STOP_REASON_USER,
+                                JobParameters.INTERNAL_STOP_REASON_CANCELED,
                                 "app force stopped");
                     }
                 }
@@ -1074,7 +1075,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (toCancel != null) {
                 // Implicitly replaces the existing job record with the new instance
                 cancelJobImplLocked(toCancel, jobStatus, JobParameters.STOP_REASON_CANCELLED_BY_APP,
-                        JobParameters.REASON_CANCELED, "job rescheduled by app");
+                        JobParameters.INTERNAL_STOP_REASON_CANCELED, "job rescheduled by app");
             } else {
                 startTrackingJobLocked(jobStatus, null);
             }
@@ -1155,7 +1156,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             // but since this is a user-initiated action, it should be fine to just put USER
             // instead of UNINSTALL or DISABLED.
             cancelJobImplLocked(toRemove, null, JobParameters.STOP_REASON_USER,
-                    JobParameters.DEBUG_REASON_UNINSTALL, "user removed");
+                    JobParameters.INTERNAL_STOP_REASON_UNINSTALL, "user removed");
         }
     }
 
@@ -1167,7 +1168,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     private void cancelJobsForPackageAndUidLocked(String pkgName, int uid,
-            @JobParameters.StopReason int reason, int debugReasonCode, String debugReason) {
+            @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
         if ("android".equals(pkgName)) {
             Slog.wtfStack(TAG, "Can't cancel all jobs for system package");
             return;
@@ -1176,7 +1177,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         for (int i = jobsForUid.size() - 1; i >= 0; i--) {
             final JobStatus job = jobsForUid.get(i);
             if (job.getSourcePackageName().equals(pkgName)) {
-                cancelJobImplLocked(job, null, reason, debugReasonCode, debugReason);
+                cancelJobImplLocked(job, null, reason, internalReasonCode, debugReason);
             }
         }
     }
@@ -1189,7 +1190,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * @param uid Uid to check against for removal of a job.
      */
     public boolean cancelJobsForUid(int uid, @JobParameters.StopReason int reason,
-            int debugReasonCode, String debugReason) {
+            int internalReasonCode, String debugReason) {
         if (uid == Process.SYSTEM_UID) {
             Slog.wtfStack(TAG, "Can't cancel all jobs for system uid");
             return false;
@@ -1200,7 +1201,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             final List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
             for (int i = 0; i < jobsForUid.size(); i++) {
                 JobStatus toRemove = jobsForUid.get(i);
-                cancelJobImplLocked(toRemove, null, reason, debugReasonCode, debugReason);
+                cancelJobImplLocked(toRemove, null, reason, internalReasonCode, debugReason);
                 jobsCanceled = true;
             }
         }
@@ -1222,7 +1223,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             toCancel = mJobs.getJobByUidAndJobId(uid, jobId);
             if (toCancel != null) {
                 cancelJobImplLocked(toCancel, null, reason,
-                        JobParameters.REASON_CANCELED,
+                        JobParameters.INTERNAL_STOP_REASON_CANCELED,
                         "cancel() called by app, callingUid=" + callingUid
                                 + " uid=" + uid + " jobId=" + jobId);
             }
@@ -1237,7 +1238,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * currently scheduled jobs.
      */
     private void cancelJobImplLocked(JobStatus cancelled, JobStatus incomingJob,
-            @JobParameters.StopReason int reason, int debugReasonCode, String debugReason) {
+            @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
         cancelled.unprepareLocked();
         stopTrackingJobLocked(cancelled, incomingJob, true /* writeBack */);
@@ -1246,7 +1247,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             mJobPackageTracker.noteNonpending(cancelled);
         }
         // Cancel if running.
-        stopJobOnServiceContextLocked(cancelled, reason, debugReasonCode, debugReason);
+        stopJobOnServiceContextLocked(cancelled, reason, internalReasonCode, debugReason);
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
             if (DEBUG) Slog.i(TAG, "Tracking replacement job " + incomingJob.toShortString());
@@ -1297,7 +1298,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     final JobStatus executing = jsc.getRunningJobLocked();
                     if (executing != null && !executing.canRunInDoze()) {
                         jsc.cancelExecutingJobLocked(JobParameters.STOP_REASON_DEVICE_STATE,
-                                JobParameters.REASON_DEVICE_IDLE,
+                                JobParameters.INTERNAL_STOP_REASON_DEVICE_IDLE,
                                 "cancelled due to doze");
                     }
                 }
@@ -1496,7 +1497,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.v(TAG, "  replacing " + oldJob + " with " + newJob);
                 }
                 cancelJobImplLocked(oldJob, newJob, JobParameters.STOP_REASON_SYSTEM_PROCESSING,
-                        JobParameters.REASON_CANCELED, "deferred rtc calculation");
+                        JobParameters.INTERNAL_STOP_REASON_RTC_UPDATED, "deferred rtc calculation");
             }
         }
     };
@@ -1618,12 +1619,12 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     private boolean stopJobOnServiceContextLocked(JobStatus job,
-            @JobParameters.StopReason int reason, int legacyReason, String debugReason) {
-        for (int i=0; i<mActiveServices.size(); i++) {
+            @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
+        for (int i = 0; i < mActiveServices.size(); i++) {
             JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus executing = jsc.getRunningJobLocked();
             if (executing != null && executing.matches(job.getUid(), job.getJobId())) {
-                jsc.cancelExecutingJobLocked(reason, legacyReason, debugReason);
+                jsc.cancelExecutingJobLocked(reason, internalReasonCode, debugReason);
                 return true;
             }
         }
@@ -1819,8 +1820,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         mLastCompletedJobTimeElapsed[mLastCompletedJobIndex] = sElapsedRealtimeClock.millis();
         mLastCompletedJobIndex = (mLastCompletedJobIndex + 1) % NUM_COMPLETED_JOB_HISTORY;
 
-        if (debugStopReason == JobParameters.DEBUG_REASON_UNINSTALL
-                || debugStopReason == JobParameters.DEBUG_REASON_DATA_CLEARED) {
+        if (debugStopReason == JobParameters.INTERNAL_STOP_REASON_UNINSTALL
+                || debugStopReason == JobParameters.INTERNAL_STOP_REASON_DATA_CLEARED) {
             // The job should have already been cleared from the rest of the JS tracking. No need
             // to go through all that flow again.
             jobStatus.unprepareLocked();
@@ -1838,8 +1839,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         final JobStatus rescheduledJob = needsReschedule
                 ? getRescheduleJobForFailureLocked(jobStatus) : null;
         if (rescheduledJob != null
-                && (debugStopReason == JobParameters.REASON_TIMEOUT
-                || debugStopReason == JobParameters.REASON_PREEMPT)) {
+                && (debugStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT
+                || debugStopReason == JobParameters.INTERNAL_STOP_REASON_PREEMPT)) {
             rescheduledJob.disallowRunInBatterySaverAndDoze();
         }
 
@@ -1944,7 +1945,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         break;
                     case MSG_STOP_JOB:
                         cancelJobImplLocked((JobStatus) message.obj, null, message.arg1,
-                                JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED,
+                                JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED,
                                 "app no longer allowed to run");
                         break;
 
@@ -1961,7 +1962,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                         if (disabled) {
                             cancelJobsForUid(uid,
                                     JobParameters.STOP_REASON_BACKGROUND_RESTRICTION,
-                                    JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED, "uid gone");
+                                    JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED,
+                                    "uid gone");
                         }
                         synchronized (mLock) {
                             mDeviceIdleJobsController.setUidActiveLocked(uid, false);
@@ -1981,7 +1983,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                         if (disabled) {
                             cancelJobsForUid(uid,
                                     JobParameters.STOP_REASON_BACKGROUND_RESTRICTION,
-                                    JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED, "app uid idle");
+                                    JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED,
+                                    "app uid idle");
                         }
                         synchronized (mLock) {
                             mDeviceIdleJobsController.setUidActiveLocked(uid, false);
@@ -2034,22 +2037,23 @@ public class JobSchedulerService extends com.android.server.SystemService
                         && !running.areDynamicConstraintsSatisfied()) {
                     serviceContext.cancelExecutingJobLocked(
                             running.getStopReason(),
-                            JobParameters.REASON_RESTRICTED_BUCKET,
+                            JobParameters.INTERNAL_STOP_REASON_RESTRICTED_BUCKET,
                             "cancelled due to restricted bucket");
                 } else {
                     serviceContext.cancelExecutingJobLocked(
                             running.getStopReason(),
-                            JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED,
+                            JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED,
                             "cancelled due to unsatisfied constraints");
                 }
             } else {
                 final JobRestriction restriction = checkIfRestricted(running);
                 if (restriction != null) {
-                    final int reason = restriction.getReason();
-                    serviceContext.cancelExecutingJobLocked(reason,
-                            restriction.getLegacyReason(),
-                            "restricted due to " + JobParameters.getLegacyReasonCodeDescription(
-                                    reason));
+                    final int internalReasonCode = restriction.getInternalReason();
+                    serviceContext.cancelExecutingJobLocked(restriction.getReason(),
+                            internalReasonCode,
+                            "restricted due to "
+                                    + JobParameters.getInternalReasonCodeDescription(
+                                    internalReasonCode));
                 }
             }
         }
@@ -2354,7 +2358,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (restriction != null) {
             if (DEBUG) {
                 Slog.v(TAG, "areComponentsInPlaceLocked: " + job.toShortString()
-                        + " restricted due to " + restriction.getLegacyReason());
+                        + " restricted due to " + restriction.getInternalReason());
             }
             return false;
         }
@@ -2446,8 +2450,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @Override
         public void cancelJobsForUid(int uid, @JobParameters.StopReason int reason,
-                int debugReasonCode, String debugReason) {
-            JobSchedulerService.this.cancelJobsForUid(uid, reason, debugReasonCode, debugReason);
+                int internalReasonCode, String debugReason) {
+            JobSchedulerService.this.cancelJobsForUid(uid, reason, internalReasonCode, debugReason);
         }
 
         @Override
@@ -2786,7 +2790,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             try {
                 JobSchedulerService.this.cancelJobsForUid(uid,
                         JobParameters.STOP_REASON_CANCELLED_BY_APP,
-                        JobParameters.REASON_CANCELED,
+                        JobParameters.INTERNAL_STOP_REASON_CANCELED,
                         "cancelAll() called by app, callingUid=" + uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -3007,7 +3011,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (!hasJobId) {
             pw.println("Canceling all jobs for " + pkgName + " in user " + userId);
             if (!cancelJobsForUid(pkgUid, JobParameters.STOP_REASON_USER,
-                    JobParameters.REASON_CANCELED, "cancel shell command for package")) {
+                    JobParameters.INTERNAL_STOP_REASON_CANCELED,
+                    "cancel shell command for package")) {
                 pw.println("No matching jobs found.");
             }
         } else {
@@ -3247,9 +3252,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                         for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
                             final JobRestriction restriction = mJobRestrictions.get(i);
                             if (restriction.isJobRestricted(job)) {
-                                final int reason = restriction.getLegacyReason();
+                                final int reason = restriction.getInternalReason();
                                 pw.print(" ");
-                                pw.print(JobParameters.getLegacyReasonCodeDescription(reason));
+                                pw.print(JobParameters.getInternalReasonCodeDescription(reason));
                             }
                         }
                     } else {
@@ -3534,7 +3539,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         final long restrictionsToken = proto.start(
                                 JobSchedulerServiceDumpProto.RegisteredJob.RESTRICTIONS);
                         proto.write(JobSchedulerServiceDumpProto.JobRestriction.REASON,
-                                restriction.getLegacyReason());
+                                restriction.getInternalReason());
                         proto.write(JobSchedulerServiceDumpProto.JobRestriction.IS_RESTRICTING,
                                 restriction.isJobRestricted(job));
                         proto.end(restrictionsToken);
