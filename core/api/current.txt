@@ -27113,6 +27113,7 @@ package android.net.vcn {
 
   public class VcnManager {
     method @RequiresPermission("carrier privileges") public void clearVcnConfig(@NonNull android.os.ParcelUuid) throws java.io.IOException;
+    method @NonNull public java.util.List<android.os.ParcelUuid> getConfiguredSubscriptionGroups();
     method public void registerVcnStatusCallback(@NonNull android.os.ParcelUuid, @NonNull java.util.concurrent.Executor, @NonNull android.net.vcn.VcnManager.VcnStatusCallback);
     method @RequiresPermission("carrier privileges") public void setVcnConfig(@NonNull android.os.ParcelUuid, @NonNull android.net.vcn.VcnConfig) throws java.io.IOException;
     method public void unregisterVcnStatusCallback(@NonNull android.net.vcn.VcnManager.VcnStatusCallback);
