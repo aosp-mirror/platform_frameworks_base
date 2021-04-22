@@ -305,7 +305,9 @@ public class PeopleTileViewHelper {
                 views.setViewVisibility(R.id.availability, View.GONE);
             }
 
-            views.setTextViewText(R.id.name, mTile.getUserName().toString());
+            if (mTile.getUserName() != null) {
+                views.setTextViewText(R.id.name, mTile.getUserName().toString());
+            }
             views.setBoolean(R.id.image, "setClipToOutline", true);
             views.setImageViewBitmap(R.id.person_icon,
                     getPersonIconBitmap(mContext, mTile, maxAvatarSize));
