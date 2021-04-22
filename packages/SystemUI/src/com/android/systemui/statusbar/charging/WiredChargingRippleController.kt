@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.charging
 import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.PointF
+import android.os.SystemProperties
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
@@ -47,7 +48,8 @@ class WiredChargingRippleController @Inject constructor(
     private val context: Context
 ) {
     private var charging: Boolean? = null
-    private val rippleEnabled: Boolean = featureFlags.isChargingRippleEnabled
+    private val rippleEnabled: Boolean = featureFlags.isChargingRippleEnabled &&
+            !SystemProperties.getBoolean("persist.debug.suppress-charging-ripple", false)
     private val windowLayoutParams = WindowManager.LayoutParams().apply {
         width = WindowManager.LayoutParams.MATCH_PARENT
         height = WindowManager.LayoutParams.MATCH_PARENT
@@ -104,7 +106,7 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     fun startRipple() {
-        if (rippleView.rippleInProgress || rippleView.parent != null) {
+        if (!rippleEnabled || rippleView.rippleInProgress || rippleView.parent != null) {
             // Skip if ripple is still playing, or not playing but already added the parent
             // (which might happen just before the animation starts or right after
             // the animation ends.)
