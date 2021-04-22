@@ -25701,15 +25701,6 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnConfig build();
   }
 
-  public abstract class VcnControlPlaneConfig {
-  }
-
-  public final class VcnControlPlaneIkeConfig extends android.net.vcn.VcnControlPlaneConfig {
-    ctor public VcnControlPlaneIkeConfig(@NonNull android.net.ipsec.ike.IkeSessionParams, @NonNull android.net.ipsec.ike.TunnelModeChildSessionParams);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams getChildSessionParams();
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams getIkeSessionParams();
-  }
-
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
     method @NonNull public String getGatewayConnectionName();
@@ -25718,7 +25709,7 @@ package android.net.vcn {
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
-    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.vcn.VcnControlPlaneConfig);
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.TunnelConnectionParams);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
