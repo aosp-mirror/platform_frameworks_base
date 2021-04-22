@@ -257,8 +257,10 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     void dumpDebug(ProtoOutputStream proto, long fieldId, @WindowTraceLogLevel int logLevel) {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, INSETS_SOURCE_PROVIDER, logLevel);
-        if (mImeRequester != null) {
-            mImeRequester.getWindow().dumpDebug(proto, IME_TARGET_FROM_IME, logLevel);
+        final WindowState imeRequesterWindow =
+                mImeRequester != null ? mImeRequester.getWindow() : null;
+        if (imeRequesterWindow != null) {
+            imeRequesterWindow.dumpDebug(proto, IME_TARGET_FROM_IME, logLevel);
         }
         proto.write(IS_IME_LAYOUT_DRAWN, mIsImeLayoutDrawn);
         proto.end(token);
