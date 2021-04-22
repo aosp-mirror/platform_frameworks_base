@@ -25,6 +25,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.Range;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +52,7 @@ public class VibratorInfo implements Parcelable {
     @Nullable
     private final SparseBooleanArray mSupportedBraking;
     @Nullable
-    private final SparseBooleanArray mSupportedPrimitives;
+    private final SparseIntArray mSupportedPrimitives;
     private final float mQFactor;
     private final FrequencyMapping mFrequencyMapping;
 
@@ -60,19 +61,37 @@ public class VibratorInfo implements Parcelable {
         mCapabilities = in.readLong();
         mSupportedEffects = in.readSparseBooleanArray();
         mSupportedBraking = in.readSparseBooleanArray();
-        mSupportedPrimitives = in.readSparseBooleanArray();
+        mSupportedPrimitives = in.readSparseIntArray();
         mQFactor = in.readFloat();
         mFrequencyMapping = in.readParcelable(VibratorInfo.class.getClassLoader());
     }
 
-    /** @hide */
+    /**
+     * Default constructor.
+     *
+     * @param id                  The vibrator id.
+     * @param capabilities        All capability flags of the vibrator, defined in IVibrator.CAP_*.
+     * @param supportedEffects    All supported predefined effects, enum values from {@link
+     *                            android.hardware.vibrator.Effect}.
+     * @param supportedBraking    All supported braking types, enum values from {@link Braking}.
+     * @param supportedPrimitives All supported primitive effects, enum values from {@link
+     *                            android.hardware.vibrator.CompositePrimitive}.
+     * @param primitiveDurations  A mapping of primitive durations, where indexes are enum values
+     *                            from {@link android.hardware.vibrator.CompositePrimitive} and the
+     *                            values are estimated durations in milliseconds.
+     * @param qFactor             The vibrator quality factor.
+     * @param frequencyMapping    The description of the vibrator supported frequencies and max
+     *                            amplitude mappings.
+     * @hide
+     */
     public VibratorInfo(int id, long capabilities, int[] supportedEffects, int[] supportedBraking,
-            int[] supportedPrimitives, float qFactor, @NonNull FrequencyMapping frequencyMapping) {
+            int[] supportedPrimitives, int[] primitiveDurations, float qFactor,
+            @NonNull FrequencyMapping frequencyMapping) {
         mId = id;
         mCapabilities = capabilities;
         mSupportedEffects = toSparseBooleanArray(supportedEffects);
         mSupportedBraking = toSparseBooleanArray(supportedBraking);
-        mSupportedPrimitives = toSparseBooleanArray(supportedPrimitives);
+        mSupportedPrimitives = toSparseIntArray(supportedPrimitives, primitiveDurations);
         mQFactor = qFactor;
         mFrequencyMapping = frequencyMapping;
     }
@@ -100,7 +119,7 @@ public class VibratorInfo implements Parcelable {
         dest.writeLong(mCapabilities);
         dest.writeSparseBooleanArray(mSupportedEffects);
         dest.writeSparseBooleanArray(mSupportedBraking);
-        dest.writeSparseBooleanArray(mSupportedPrimitives);
+        dest.writeSparseIntArray(mSupportedPrimitives);
         dest.writeFloat(mQFactor);
         dest.writeParcelable(mFrequencyMapping, flags);
     }
@@ -119,18 +138,41 @@ public class VibratorInfo implements Parcelable {
             return false;
         }
         VibratorInfo that = (VibratorInfo) o;
+        if (mSupportedPrimitives == null || that.mSupportedPrimitives == null) {
+            if (mSupportedPrimitives != that.mSupportedPrimitives) {
+                return false;
+            }
+        } else {
+            if (mSupportedPrimitives.size() != that.mSupportedPrimitives.size()) {
+                return false;
+            }
+            for (int i = 0; i < mSupportedPrimitives.size(); i++) {
+                if (mSupportedPrimitives.keyAt(i) != that.mSupportedPrimitives.keyAt(i)) {
+                    return false;
+                }
+                if (mSupportedPrimitives.valueAt(i) != that.mSupportedPrimitives.valueAt(i)) {
+                    return false;
+                }
+            }
+        }
         return mId == that.mId && mCapabilities == that.mCapabilities
                 && Objects.equals(mSupportedEffects, that.mSupportedEffects)
                 && Objects.equals(mSupportedBraking, that.mSupportedBraking)
-                && Objects.equals(mSupportedPrimitives, that.mSupportedPrimitives)
                 && Objects.equals(mQFactor, that.mQFactor)
                 && Objects.equals(mFrequencyMapping, that.mFrequencyMapping);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
-                mSupportedPrimitives, mQFactor, mFrequencyMapping);
+        int hashCode = Objects.hash(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
+                mQFactor, mFrequencyMapping);
+        if (mSupportedPrimitives != null) {
+            for (int i = 0; i < mSupportedPrimitives.size(); i++) {
+                hashCode = 31 * hashCode + mSupportedPrimitives.keyAt(i);
+                hashCode = 31 * hashCode + mSupportedPrimitives.valueAt(i);
+            }
+        }
+        return hashCode;
     }
 
     @Override
@@ -206,7 +248,19 @@ public class VibratorInfo implements Parcelable {
     public boolean isPrimitiveSupported(
             @VibrationEffect.Composition.PrimitiveType int primitiveId) {
         return hasCapability(IVibrator.CAP_COMPOSE_EFFECTS) && mSupportedPrimitives != null
-                && mSupportedPrimitives.get(primitiveId);
+                && (mSupportedPrimitives.indexOfKey(primitiveId) >= 0);
+    }
+
+    /**
+     * Query the estimated duration of given primitive.
+     *
+     * @param primitiveId Which primitives to query for.
+     * @return The duration in milliseconds estimated for the primitive, or zero if primitive not
+     * supported.
+     */
+    public int getPrimitiveDuration(
+            @VibrationEffect.Composition.PrimitiveType int primitiveId) {
+        return mSupportedPrimitives.get(primitiveId);
     }
 
     /**
@@ -364,14 +418,37 @@ public class VibratorInfo implements Parcelable {
         return names;
     }
 
+    /**
+     * Create a {@link SparseBooleanArray} from given {@code supportedKeys} where each key is mapped
+     * to {@code true}.
+     */
     @Nullable
-    private static SparseBooleanArray toSparseBooleanArray(int[] values) {
-        if (values == null) {
+    private static SparseBooleanArray toSparseBooleanArray(int[] supportedKeys) {
+        if (supportedKeys == null) {
             return null;
         }
         SparseBooleanArray array = new SparseBooleanArray();
-        for (int value : values) {
-            array.put(value, true);
+        for (int key : supportedKeys) {
+            array.put(key, true);
+        }
+        return array;
+    }
+
+    /**
+     * Create a {@link SparseIntArray} from given {@code supportedKeys} where each key is mapped
+     * to the value indexed by it.
+     *
+     * <p>If {@code values} is null or does not contain a given key as a index, then zero is stored
+     * to the sparse array so it can still be used to query the supported keys.
+     */
+    @Nullable
+    private static SparseIntArray toSparseIntArray(int[] supportedKeys, int[] values) {
+        if (supportedKeys == null) {
+            return null;
+        }
+        SparseIntArray array = new SparseIntArray();
+        for (int key : supportedKeys) {
+            array.put(key, (values == null || key >= values.length) ? 0 : values[key]);
         }
         return array;
     }
@@ -419,7 +496,20 @@ public class VibratorInfo implements Parcelable {
                     in.createFloatArray());
         }
 
-        /** @hide */
+        /**
+         * Default constructor.
+         *
+         * @param minFrequencyHz        Minimum supported frequency, in hertz.
+         * @param resonantFrequencyHz   The vibrator resonant frequency, in hertz.
+         * @param frequencyResolutionHz The frequency resolution, in hertz, used by the max
+         *                              amplitudes mapping.
+         * @param suggestedSafeRangeHz  The suggested range, in hertz, for the safe relative
+         *                              frequency range represented by [-1, 1].
+         * @param maxAmplitudes         The max amplitude supported by each supported frequency,
+         *                              starting at minimum frequency with jumps of frequency
+         *                              resolution.
+         * @hide
+         */
         public FrequencyMapping(float minFrequencyHz, float resonantFrequencyHz,
                 float frequencyResolutionHz, float suggestedSafeRangeHz, float[] maxAmplitudes) {
             mMinFrequencyHz = minFrequencyHz;
@@ -547,8 +637,10 @@ public class VibratorInfo implements Parcelable {
 
         @Override
         public int hashCode() {
-            return Objects.hash(mMinFrequencyHz, mFrequencyResolutionHz, mFrequencyResolutionHz,
-                    mSuggestedSafeRangeHz, mMaxAmplitudes);
+            int hashCode = Objects.hash(mMinFrequencyHz, mFrequencyResolutionHz,
+                    mFrequencyResolutionHz, mSuggestedSafeRangeHz);
+            hashCode = 31 * hashCode + Arrays.hashCode(mMaxAmplitudes);
+            return hashCode;
         }
 
         @Override
@@ -587,6 +679,7 @@ public class VibratorInfo implements Parcelable {
         private int[] mSupportedEffects = null;
         private int[] mSupportedBraking = null;
         private int[] mSupportedPrimitives = null;
+        private int[] mPrimitiveDurations = new int[0];
         private float mQFactor = Float.NaN;
         private FrequencyMapping mFrequencyMapping =
                 new FrequencyMapping(Float.NaN, Float.NaN, Float.NaN, Float.NaN, null);
@@ -627,6 +720,16 @@ public class VibratorInfo implements Parcelable {
             return this;
         }
 
+        /** Configure the duration of a {@link android.hardware.vibrator.CompositePrimitive}. */
+        @NonNull
+        public Builder setPrimitiveDuration(int primitiveId, int duration) {
+            if (mPrimitiveDurations.length <= primitiveId) {
+                mPrimitiveDurations = Arrays.copyOf(mPrimitiveDurations, primitiveId + 1);
+            }
+            mPrimitiveDurations[primitiveId] = duration;
+            return this;
+        }
+
         /** Configure the vibrator quality factor. */
         @NonNull
         public Builder setQFactor(float qFactor) {
@@ -645,7 +748,7 @@ public class VibratorInfo implements Parcelable {
         @NonNull
         public VibratorInfo build() {
             return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
-                    mSupportedPrimitives, mQFactor, mFrequencyMapping);
+                    mSupportedPrimitives, mPrimitiveDurations, mQFactor, mFrequencyMapping);
         }
     }
 

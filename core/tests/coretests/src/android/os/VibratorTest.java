@@ -80,6 +80,16 @@ public class VibratorTest {
     }
 
     @Test
+    public void getPrimitivesDurations_returnsArrayOfSameSize() {
+        assertEquals(0, mVibratorSpy.getPrimitiveDurations(new int[0]).length);
+        assertEquals(1, mVibratorSpy.getPrimitiveDurations(
+                new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK}).length);
+        assertEquals(2, mVibratorSpy.getPrimitiveDurations(
+                new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK,
+                        VibrationEffect.Composition.PRIMITIVE_QUICK_RISE}).length);
+    }
+
+    @Test
     public void vibrate_withAudioAttributes_createsVibrationAttributesWithSameUsage() {
         VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(
