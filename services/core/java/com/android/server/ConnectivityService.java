@@ -77,7 +77,6 @@ import static android.net.NetworkCapabilities.REDACT_FOR_NETWORK_SETTINGS;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
-import static android.net.NetworkPolicyManager.blockedReasonsToString;
 import static android.net.NetworkRequest.Type.LISTEN_FOR_BEST;
 import static android.net.shared.NetworkMonitorUtils.isPrivateDnsValidationRequired;
 import static android.os.Process.INVALID_UID;
@@ -1636,7 +1635,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 ? nri.getActiveRequest().requestId : nri.mRequests.get(0).requestId;
         mNetworkInfoBlockingLogs.log(String.format(
                 "%s %d(%d) on netId %d: %s", action, nri.mAsUid, requestId, net.getNetId(),
-                blockedReasonsToString(blocked)));
+                Integer.toHexString(blocked)));
     }
 
     /**
@@ -2920,7 +2919,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 final int uid = mUidBlockedReasons.keyAt(i);
                 final int blockedReasons = mUidBlockedReasons.valueAt(i);
                 pw.println("UID=" + uid + " blockedReasons="
-                        + blockedReasonsToString(blockedReasons));
+                        + Integer.toHexString(blockedReasons));
             } catch (ArrayIndexOutOfBoundsException e) {
                 pw.println("  ArrayIndexOutOfBoundsException");
             } catch (ConcurrentModificationException e) {
