@@ -26,6 +26,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -101,7 +102,8 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      */
     public static final int GROUP_ID_INVALID = IBluetoothLeAudio.LE_AUDIO_GROUP_ID_INVALID;
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothLeAudio> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.LE_AUDIO, "BluetoothLeAudio",
                     IBluetoothLeAudio.class.getName()) {
@@ -115,8 +117,10 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * Create a BluetoothLeAudio proxy object for interacting with the local
      * Bluetooth LeAudio service.
      */
-    /*package*/ BluetoothLeAudio(Context context, ServiceListener listener) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    /* package */ BluetoothLeAudio(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
         mCloseGuard = new CloseGuard();
         mCloseGuard.open("close");
@@ -223,7 +227,8 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()) {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(), mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -245,7 +250,8 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()) {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
