@@ -26526,6 +26526,9 @@ package android.net {
     field public static final int UNSUPPORTED = -1; // 0xffffffff
   }
 
+  public interface TunnelConnectionParams {
+  }
+
   public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
     method public abstract android.net.Uri.Builder buildUpon();
     method public int compareTo(android.net.Uri);
