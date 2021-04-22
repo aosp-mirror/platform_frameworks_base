@@ -325,6 +325,7 @@ java_defaults {
         "tv_tuner_resource_manager_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
         "modules-utils-os",
+        "framework-permission-aidl-java",
     ],
 }
 
