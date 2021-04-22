@@ -101,6 +101,8 @@
 
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
 
+    <include layout="@layout/dock_info_bottom_area_overlay" />
+
     <include
         layout="@layout/keyguard_bottom_area"
         android:visibility="gone" />
