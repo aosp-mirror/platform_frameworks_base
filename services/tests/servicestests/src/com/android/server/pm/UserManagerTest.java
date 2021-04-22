@@ -175,7 +175,7 @@ public final class UserManagerTest {
         final Context userContext = mContext.createPackageContextAsUser("system", 0,
                 UserHandle.of(userInfo.id));
         assertThat(userContext.getSystemService(
-                UserManager.class).sharesMediaWithParent()).isTrue();
+                UserManager.class).isMediaSharedWithParent()).isTrue();
 
         List<UserInfo> list = mUserManager.getUsers();
         List<UserInfo> cloneUsers = list.stream().filter(
