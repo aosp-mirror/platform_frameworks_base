@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Szybkie ładowanie"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wolne ładowanie"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optymalizuję, aby utrzymać baterię w dobrym stanie"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"Podłącz ładowarkę."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Naciśnij Menu, aby odblokować."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sieć zablokowana"</string>
@@ -54,7 +55,7 @@
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"Miejsce na kod PIN karty SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"Miejsce na kod PUK karty SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="4492876946798984630">"Następny alarm ustawiony na: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
-    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Usuwanie"</string>
+    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Usuń"</string>
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"Wyłącz eSIM"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"Nie można wyłączyć karty eSIM"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Nie można wyłączyć karty eSIM z powodu błędu."</string>
