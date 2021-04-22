@@ -21,35 +21,21 @@ import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.net.InetAddresses;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.telephony.ims.stub.SipDelegate;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.InetSocketAddress;
 
 /**
- * The IMS registration and other attributes that the {@link SipDelegateConnection} used by the
- * IMS application will need to be aware of to correctly generate outgoing {@link SipMessage}s.
- * <p>
- * The IMS service must generate new instances of this configuration as the IMS configuration
- * managed by the IMS service changes. Along with each {@link SipDelegateImsConfiguration} instance
- * containing the configuration is the "version", which should be incremented every time a new
- * {@link SipDelegateImsConfiguration} instance is created. The {@link SipDelegateConnection} will
- * include the version of the {@link SipDelegateImsConfiguration} instance that it used in order for
- * the {@link SipDelegate} to easily identify if the IMS application used a now stale configuration
- * to generate the {@link SipMessage} and return
- * {@link SipDelegateManager#MESSAGE_FAILURE_REASON_STALE_IMS_CONFIGURATION} in
- * {@link DelegateMessageCallback#onMessageSendFailure(String, int)} so that the IMS application can
- * regenerate that {@link SipMessage} using the correct {@link SipDelegateImsConfiguration}
- * instance.
- * <p>
- * Every time the IMS configuration state changes in the IMS service, a full configuration should
- * be generated. The new  {@link SipDelegateImsConfiguration} instance should not be an incremental
- * update.
  * @hide
+ * @deprecated Use {@link SipDelegateConfiguration} instead.
  */
+@Deprecated
 @SystemApi
 public final class SipDelegateImsConfiguration implements Parcelable {
 
@@ -535,4 +521,68 @@ public final class SipDelegateImsConfiguration implements Parcelable {
             return new SipDelegateImsConfiguration[size];
         }
     };
+
+    /**
+     * Temporary helper to transition from old form of config to new form.
+     * @return new config
+     * @hide
+     */
+    public SipDelegateConfiguration toNewConfig() {
+        // IP version is now included in call to InetSocketAddr
+        String transportTypeString = getString(KEY_SIP_CONFIG_TRANSPORT_TYPE_STRING);
+        int transportType = (transportTypeString != null
+                && transportTypeString.equals(SIP_TRANSPORT_UDP))
+                ? SipDelegateConfiguration.SIP_TRANSPORT_UDP
+                : SipDelegateConfiguration.SIP_TRANSPORT_TCP;
+        SipDelegateConfiguration.Builder builder = new SipDelegateConfiguration.Builder(mVersion,
+                transportType,
+                getSocketAddr(getString(KEY_SIP_CONFIG_UE_DEFAULT_IPADDRESS_STRING),
+                        getInt(KEY_SIP_CONFIG_UE_DEFAULT_PORT_INT, -1)),
+                getSocketAddr(getString(KEY_SIP_CONFIG_SERVER_DEFAULT_IPADDRESS_STRING),
+                        getInt(KEY_SIP_CONFIG_SERVER_DEFAULT_PORT_INT, -1)));
+        builder.setSipCompactFormEnabled(
+                getBoolean(KEY_SIP_CONFIG_IS_COMPACT_FORM_ENABLED_BOOL, false));
+        builder.setSipKeepaliveEnabled(
+                getBoolean(KEY_SIP_CONFIG_IS_KEEPALIVE_ENABLED_BOOL, false));
+        builder.setMaxUdpPayloadSizeBytes(getInt(KEY_SIP_CONFIG_MAX_PAYLOAD_SIZE_ON_UDP_INT, -1));
+        builder.setPublicUserIdentifier(getString(KEY_SIP_CONFIG_UE_PUBLIC_USER_ID_STRING));
+        builder.setPrivateUserIdentifier(getString(KEY_SIP_CONFIG_UE_PRIVATE_USER_ID_STRING));
+        builder.setHomeDomain(getString(KEY_SIP_CONFIG_HOME_DOMAIN_STRING));
+        builder.setImei(getString(KEY_SIP_CONFIG_IMEI_STRING));
+        builder.setSipAuthenticationHeader(getString(KEY_SIP_CONFIG_AUTHENTICATION_HEADER_STRING));
+        builder.setSipAuthenticationNonce(getString(KEY_SIP_CONFIG_AUTHENTICATION_NONCE_STRING));
+        builder.setSipServiceRouteHeader(getString(KEY_SIP_CONFIG_SERVICE_ROUTE_HEADER_STRING));
+        builder.setSipPathHeader(getString(KEY_SIP_CONFIG_PATH_HEADER_STRING));
+        builder.setSipUserAgentHeader(getString(KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING));
+        builder.setSipContactUserParameter(getString(KEY_SIP_CONFIG_URI_USER_PART_STRING));
+        builder.setSipPaniHeader(getString(KEY_SIP_CONFIG_P_ACCESS_NETWORK_INFO_HEADER_STRING));
+        builder.setSipPlaniHeader(
+                getString(KEY_SIP_CONFIG_P_LAST_ACCESS_NETWORK_INFO_HEADER_STRING));
+        builder.setSipCniHeader(getString(KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING));
+        builder.setSipAssociatedUriHeader(getString(KEY_SIP_CONFIG_P_ASSOCIATED_URI_HEADER_STRING));
+        if (getBoolean(KEY_SIP_CONFIG_IS_GRUU_ENABLED_BOOL, false)) {
+            builder.setPublicGruuUri(Uri.parse(getString(KEY_SIP_CONFIG_UE_PUBLIC_GRUU_STRING)));
+        }
+        if (getBoolean(KEY_SIP_CONFIG_IS_IPSEC_ENABLED_BOOL, false)) {
+            builder.setIpSecConfiguration(new SipDelegateConfiguration.IpSecConfiguration(
+                    getInt(KEY_SIP_CONFIG_UE_IPSEC_CLIENT_PORT_INT, -1),
+                    getInt(KEY_SIP_CONFIG_UE_IPSEC_SERVER_PORT_INT, -1),
+                    getInt(KEY_SIP_CONFIG_UE_IPSEC_OLD_CLIENT_PORT_INT, -1),
+                    getInt(KEY_SIP_CONFIG_SERVER_IPSEC_CLIENT_PORT_INT, -1),
+                    getInt(KEY_SIP_CONFIG_SERVER_IPSEC_SERVER_PORT_INT, -1),
+                    getInt(KEY_SIP_CONFIG_SERVER_IPSEC_OLD_CLIENT_PORT_INT, -1),
+                    getString(KEY_SIP_CONFIG_SECURITY_VERIFY_HEADER_STRING))
+            );
+        }
+        if (getBoolean(KEY_SIP_CONFIG_IS_NAT_ENABLED_BOOL, false)) {
+            builder.setNatSocketAddress(getSocketAddr(
+                    getString(KEY_SIP_CONFIG_UE_PUBLIC_IPADDRESS_WITH_NAT_STRING),
+                    getInt(KEY_SIP_CONFIG_UE_PUBLIC_PORT_WITH_NAT_INT, -1)));
+        }
+        return builder.build();
+    }
+
+    private InetSocketAddress getSocketAddr(String ipAddr, int port) {
+        return new InetSocketAddress(InetAddresses.parseNumericAddress(ipAddr), port);
+    }
 }
