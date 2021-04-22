@@ -1869,7 +1869,11 @@ android_media_AudioSystem_startAudioSource(JNIEnv *env, jobject clazz,
     audio_port_handle_t handle;
     status_t status = AudioSystem::startAudioSource(&nAudioPortConfig, paa.get(), &handle);
     ALOGV("AudioSystem::startAudioSource() returned %d handle %d", status, handle);
-    return handle > 0 ? handle : nativeToJavaStatus(status);
+    if (status != NO_ERROR) {
+        return nativeToJavaStatus(status);
+    }
+    ALOG_ASSERT(handle > 0, "%s: invalid handle reported on successful call", __func__);
+    return handle;
 }
 
 static jint
