@@ -5560,7 +5560,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean hasKeyPair(String callerPackage, String alias) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
         final boolean isCredentialManagementApp = isCredentialManagementApp(caller);
-        Preconditions.checkCallAuthorization(canManageCertificates(caller)
+        Preconditions.checkCallAuthorization(canInstallCertificates(caller)
                 || isCredentialManagementApp);
         if (isCredentialManagementApp) {
             Preconditions.checkCallAuthorization(
@@ -5582,9 +5582,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
-    private boolean canManageCertificates(CallerIdentity caller) {
+    private boolean canInstallCertificates(CallerIdentity caller) {
         return isProfileOwner(caller) || isDeviceOwner(caller)
                 || isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+    }
+
+    private boolean canChooseCertificates(CallerIdentity caller) {
+        return isProfileOwner(caller) || isDeviceOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_CERT_SELECTION);
     }
 
     @Override
@@ -5592,7 +5597,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkStringNotEmpty(alias, "Alias to grant cannot be empty");
 
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        Preconditions.checkCallAuthorization(canManageCertificates(caller));
+        Preconditions.checkCallAuthorization(canChooseCertificates(caller));
 
         return setKeyChainGrantInternal(alias, hasGrant, Process.WIFI_UID, caller.getUserHandle());
     }
@@ -5602,7 +5607,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkStringNotEmpty(alias, "Alias to check cannot be empty");
 
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        Preconditions.checkCallAuthorization(canManageCertificates(caller));
+        Preconditions.checkCallAuthorization(canChooseCertificates(caller));
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
             try (KeyChainConnection keyChainConnection =
@@ -5632,7 +5637,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_CERT_INSTALL)));
+                || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_CERT_SELECTION)));
 
         final int granteeUid;
         try {
@@ -5673,7 +5678,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public ParcelableGranteeMap getKeyPairGrants(String callerPackage, String alias) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        Preconditions.checkCallAuthorization(canManageCertificates(caller));
+        Preconditions.checkCallAuthorization(canChooseCertificates(caller));
 
         final ArrayMap<Integer, Set<String>> result = new ArrayMap<>();
         mInjector.binderWithCleanCallingIdentity(() -> {
@@ -5733,7 +5738,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
          */
         if (hasProfileOwner(caller.getUserId())) {
             // Make sure that the caller is the profile owner or delegate.
-            Preconditions.checkCallAuthorization(canManageCertificates(caller));
+            Preconditions.checkCallAuthorization(canInstallCertificates(caller));
             // Verify that the managed profile is on an organization-owned device and as such
             // the profile owner can access Device IDs.
             if (isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId())) {
