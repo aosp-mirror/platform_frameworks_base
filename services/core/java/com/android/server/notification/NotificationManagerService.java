@@ -5177,8 +5177,13 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void resetDefaultNotificationAssistant(boolean loadFromConfig) {
+        public void setNASMigrationDoneAndResetDefault(int userId, boolean loadFromConfig) {
             checkCallerIsSystem();
+            setNASMigrationDone(userId);
+            cancelNotificationInternal(getContext().getPackageName(),
+                    getContext().getOpPackageName(), Binder.getCallingUid(),
+                    Binder.getCallingPid(), TAG,
+                    SystemMessageProto.SystemMessage.NOTE_NAS_UPGRADE, userId);
             if (loadFromConfig) {
                 mAssistants.resetDefaultFromConfig();
             } else {
