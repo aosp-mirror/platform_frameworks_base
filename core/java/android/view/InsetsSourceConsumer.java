@@ -46,6 +46,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -120,7 +121,11 @@ public class InsetsSourceConsumer {
             ImeTracing.getInstance().triggerClientDump("InsetsSourceConsumer#setControl",
                     mController.getHost().getInputMethodManager(), null /* icProto */);
         }
-        if (mSourceControl == control) {
+        if (Objects.equals(mSourceControl, control)) {
+            if (mSourceControl != null && mSourceControl != control) {
+                mSourceControl.release(SurfaceControl::release);
+                mSourceControl = control;
+            }
             return;
         }
         SurfaceControl oldLeash = mSourceControl != null ? mSourceControl.getLeash() : null;
