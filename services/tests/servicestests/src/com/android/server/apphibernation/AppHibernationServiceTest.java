@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.IActivityManager;
@@ -262,6 +263,25 @@ public final class AppHibernationServiceTest {
 
         // THEN the package is no longer globally hibernating
         assertFalse(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
+    }
+
+    @Test
+    public void testUnhibernatingPackageForUserSendsBootCompleteBroadcast()
+            throws RemoteException {
+        // GIVEN a hibernating package for a user
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
+
+        // WHEN we unhibernate the package
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, false);
+
+        // THEN we send the boot complete broadcasts
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mIActivityManager, times(2)).broadcastIntentWithFeature(any(), any(),
+                intentArgumentCaptor.capture(), any(), any(), anyInt(), any(), any(), any(), any(),
+                anyInt(), any(), anyBoolean(), anyBoolean(), eq(USER_ID_1));
+        List<Intent> capturedIntents = intentArgumentCaptor.getAllValues();
+        assertEquals(capturedIntents.get(0).getAction(), Intent.ACTION_LOCKED_BOOT_COMPLETED);
+        assertEquals(capturedIntents.get(1).getAction(), Intent.ACTION_BOOT_COMPLETED);
     }
 
     /**
