@@ -90,7 +90,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Use for contact sharing"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internet connection sharing"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Text messages"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM Access"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM access"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hearing Aids"</string>
@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Wireless debugging"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"To see and use available devices, turn on wireless debugging"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Pair device with QR code"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Pair new devices using QR code scanner"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Pair new devices using QR code scanner"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Pair device with pairing code"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Pair new devices using six-digit code"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Paired devices"</string>
@@ -229,9 +229,10 @@
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Pair device over Wi‑Fi by scanning a QR code"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Pairing device…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Failed to pair the device. Either the QR code was incorrect, or the device is not connected to the same network."</string>
-    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP address &amp; port"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP address and port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scan QR code"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Pair device over Wi‑Fi by scanning a QR code"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Pair device over Wi‑Fi by scanning a QR code"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Please connect to a Wi‑Fi network"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Bug report shortcut"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Show a button in the power menu for taking a bug report"</string>
@@ -250,6 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Wireless display certification"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Enable Wi‑Fi verbose logging"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi scan throttling"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑enhanced MAC randomisation"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobile data always active"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering hardware acceleration"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Show Bluetooth devices without names"</string>
@@ -272,7 +274,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Trigger Bluetooth Audio LDAC\nCodec Selection: Playback Quality"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Private DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Select private DNS mode"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Select Private DNS Mode"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Off"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatic"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Private DNS provider hostname"</string>
@@ -281,6 +283,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Show options for wireless display certification"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Increase Wi‑Fi logging level, show per SSID RSSI in Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduces battery drain and improves network performance"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"When this mode is enabled, this device’s MAC address may change each time that it connects to a network that has MAC randomisation enabled."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Metered"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Unmetered"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger buffer sizes"</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth devices without names (MAC addresses only) will be displayed"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Enables the Bluetooth Gabeldorsche feature stack."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Enables the enhanced connectivity feature."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Local terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Enable terminal app that offers local shell access"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP checking"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Profile HWUI rendering"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Enable GPU debug layers"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Allow loading GPU debug layers for debug apps"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Enable verbose vendor logging"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Include additional device-specific vendor logs in bug reports, which may contain private information, use more battery and/or use more storage."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Window animation scale"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Transition animation scale"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator duration scale"</string>
@@ -412,7 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (red-green)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (blue-yellow)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Colour correction"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Colour correction helps people with colour blindness see more accurate colours"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Colour correction allows you to adjust how colours are displayed on your device"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overridden by <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"About <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left"</string>
@@ -426,11 +432,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Should last until about <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Until <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Extend battery life past <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Less than <xliff:g id="THRESHOLD">%1$s</xliff:g> remaining"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Less than <xliff:g id="THRESHOLD">%1$s</xliff:g> remaining (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"More than <xliff:g id="TIME_REMAINING">%1$s</xliff:g> remaining (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"More than <xliff:g id="TIME_REMAINING">%1$s</xliff:g> remaining"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Battery may run out by <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Less than <xliff:g id="THRESHOLD">%1$s</xliff:g> left"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Less than <xliff:g id="THRESHOLD">%1$s</xliff:g> left (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"More than <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"More than <xliff:g id="TIME_REMAINING">%1$s</xliff:g> left"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Phone may shut down soon"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet may shut down soon"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Device may shut down soon"</string>
@@ -440,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> left until charged"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> until charged"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimising for battery health"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Unknown"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Charging"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Charging rapidly"</string>
@@ -501,6 +508,50 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Ask every time"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Until you turn off"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Just now"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"This device"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Phone speaker"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem connecting. Turn device off and back on"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Wired audio device"</string>
+    <string name="help_label" msgid="3528360748637781274">"Help and feedback"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Storage"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Shared data"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"View and modify shared data"</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"There is no shared data for this user."</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"There was an error fetching shared data. Try again."</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Shared data ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Expires on <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"There was an error deleting the shared data."</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"There are no leases acquired for this shared data. Would you like to delete it?"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Apps sharing data"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"No description provided by the app."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Lease expires on <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Delete shared data"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Are you sure that you want to delete this shared data?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Users have their own apps and content"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"You can restrict access to apps and content from your account"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"User"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Restricted profile"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Add new user?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"You can share this device with other people by creating additional users. Each user has their own space, which they can customise with apps, wallpaper and so on. Users can also adjust device settings such as Wi‑Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Set up user now?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Make sure that the person is available to take the device and set up their space."</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Set up profile now?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Set up now"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Not now"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Add"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"New user"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"New profile"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"User info"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profile info"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Before you can create a restricted profile, you\'ll need to set up a screen lock to protect your apps and personal data."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Set lock"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Switch to <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Add guest"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Remove guest"</string>
+    <string name="guest_nickname" msgid="6332276931583337261">"Guest"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Device default"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Disabled"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Enabled"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Your device must be rebooted for this change to apply. Reboot now or cancel."</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Wired headphones"</string>
 </resources>
