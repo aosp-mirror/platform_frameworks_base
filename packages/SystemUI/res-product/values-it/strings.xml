@@ -40,4 +40,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Hai tentato di sbloccare il telefono senza riuscirci per <xliff:g id="NUMBER">%d</xliff:g> volte. Il profilo di lavoro verrà rimosso e verranno quindi eliminati tutti i dati associati."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"<xliff:g id="NUMBER_0">%1$d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il tablet con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%3$d</xliff:g> secondi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"<xliff:g id="NUMBER_0">%1$d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%3$d</xliff:g> secondi."</string>
+    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Sblocca il telefono per visualizzare altre opzioni"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Sblocca il tablet per visualizzare altre opzioni"</string>
+    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Sblocca il dispositivo per visualizzare altre opzioni"</string>
 </resources>
