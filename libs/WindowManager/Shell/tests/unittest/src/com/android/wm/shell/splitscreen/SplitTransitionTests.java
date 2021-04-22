@@ -332,10 +332,17 @@ public class SplitTransitionTests extends ShellTestCase {
         final WindowContainerTransaction mRemoteFinishWCT = new WindowContainerTransaction();
 
         @Override
-        public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
-                IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
+        public void startAnimation(IBinder transition, TransitionInfo info,
+                SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
+                throws RemoteException {
             mCalled = true;
             finishCallback.onTransitionFinished(mRemoteFinishWCT);
+        }
+
+        @Override
+        public void mergeAnimation(IBinder transition, TransitionInfo info,
+                SurfaceControl.Transaction t, IBinder mergeTarget,
+                IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
         }
     }
 
