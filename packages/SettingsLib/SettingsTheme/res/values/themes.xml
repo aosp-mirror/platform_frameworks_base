@@ -26,7 +26,11 @@
 
     <!-- Using in SubSettings page including injected settings page -->
     <style name="Theme.SubSettingsBase" parent="Theme.SettingsBase">
+        <!-- Suppress the built-in action bar -->
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
+        <!-- Set up edge-to-edge configuration for top app bar -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 </resources>
