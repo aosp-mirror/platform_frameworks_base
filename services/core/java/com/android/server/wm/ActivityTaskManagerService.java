@@ -5598,10 +5598,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     mTaskSupervisor.endDeferResume();
                 }
 
-                if (wpc.isInstrumenting()) {
-                    finishInstrumentationCallback.run();
-                }
-
                 if (!restarting && hasVisibleActivities) {
                     deferWindowLayout();
                     try {
@@ -5617,6 +5613,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         continueWindowLayout();
                     }
                 }
+            }
+            if (wpc.isInstrumenting()) {
+                finishInstrumentationCallback.run();
             }
         }
 
@@ -6117,6 +6116,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public boolean handleAppCrashInActivityController(String processName, int pid,
                 String shortMsg, String longMsg, long timeMillis, String stackTrace,
                 Runnable killCrashingAppCallback) {
+            Runnable targetRunnable = null;
             synchronized (mGlobalLock) {
                 if (mController == null) {
                     return false;
@@ -6125,15 +6125,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 try {
                     if (!mController.appCrashed(processName, pid, shortMsg, longMsg, timeMillis,
                             stackTrace)) {
-                        killCrashingAppCallback.run();
-                        return true;
+                        targetRunnable = killCrashingAppCallback;
                     }
                 } catch (RemoteException e) {
                     mController = null;
                     Watchdog.getInstance().setActivityController(null);
                 }
-                return false;
             }
+            if (targetRunnable != null) {
+                targetRunnable.run();
+                return true;
+            }
+            return false;
         }
 
         @Override
