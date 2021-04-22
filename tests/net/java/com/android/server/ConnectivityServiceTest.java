@@ -2974,15 +2974,9 @@ public class ConnectivityServiceTest {
 
         mEthernetNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_ETHERNET);
         mEthernetNetworkAgent.connect(true);
-        // BUG: with the legacy int-based scoring code, the network will no longer linger, even
-        // though it's validated and outscored.
-        // The new policy-based scoring code fixes this.
-        // TODO: remove the line below and replace with the three commented lines when
-        // the policy-based scoring code is turned on.
-        callback.expectAvailableThenValidatedCallbacks(mEthernetNetworkAgent);
-        // callback.expectAvailableCallbacksUnvalidated(mEthernetNetworkAgent);
-        // callback.expectCallback(CallbackEntry.LOSING, mWiFiNetworkAgent);
-        // callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mEthernetNetworkAgent);
+        callback.expectAvailableCallbacksUnvalidated(mEthernetNetworkAgent);
+        callback.expectCallback(CallbackEntry.LOSING, mWiFiNetworkAgent);
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mEthernetNetworkAgent);
         assertEquals(mEthernetNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         callback.assertNoCallback();
 
