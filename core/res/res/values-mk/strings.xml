@@ -1507,7 +1507,7 @@
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Повеќе опции"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="8490227947584914460">"Внатрешно заедничко место за складирање"</string>
+    <string name="storage_internal" msgid="8490227947584914460">"Внатрешен споделен капацитет"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"СД картичка"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> СД-картичка"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB-меморија"</string>
@@ -1562,7 +1562,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Безжичен приказ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Емитувај"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Поврзи се со уред"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Префрли екран на уред"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Емитување екран на уред"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Се бараат уреди..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Поставки"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Прекини врска"</string>
