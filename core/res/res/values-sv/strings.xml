@@ -1854,7 +1854,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"I batterisparläget aktiveras mörkt tema och bakgrundsaktivitet som vissa visuella effekter och funktioner som ”Hey Google” begränsas eller inaktiveras\n\n"<annotation id="url">"Läs mer"</annotation></string>
     <string name="battery_saver_description" msgid="7695751399533397741">"I batterisparläget aktiveras mörkt tema och bakgrundsaktivitet som vissa visuella effekter och funktioner som ”Hey Google” begränsas eller inaktiveras."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Med Databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vill du aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivera"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1929,8 +1929,7 @@
     <string name="close_button_text" msgid="10603510034455258">"Stäng"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"Svara"</string>
-    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
-    <skip />
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Video"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Avvisa"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Lägg på"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Inkommande samtal"</string>

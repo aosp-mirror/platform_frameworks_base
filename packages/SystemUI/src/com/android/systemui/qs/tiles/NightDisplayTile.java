@@ -18,7 +18,6 @@ package com.android.systemui.qs.tiles;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_MODE;
 
-import android.annotation.Nullable;
 import android.content.Intent;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
@@ -29,8 +28,10 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Switch;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.android.internal.logging.MetricsLogger;
@@ -107,7 +108,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         // Enroll in forced auto mode if eligible.
         if ("1".equals(Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE))

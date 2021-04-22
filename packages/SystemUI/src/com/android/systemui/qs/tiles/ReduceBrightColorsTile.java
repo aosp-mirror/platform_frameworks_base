@@ -23,7 +23,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
@@ -92,7 +95,7 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         mReduceBrightColorsController.setReduceBrightColorsActivated(!mState.value);
     }
 

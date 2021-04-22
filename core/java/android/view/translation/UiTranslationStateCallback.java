@@ -17,6 +17,7 @@
 package android.view.translation;
 
 import android.annotation.NonNull;
+import android.icu.util.ULocale;
 
 import java.util.concurrent.Executor;
 
@@ -27,13 +28,21 @@ import java.util.concurrent.Executor;
 public interface UiTranslationStateCallback {
 
     /**
+     * @deprecated use {@link #onStarted(ULocale, ULocale)} instead.
+     */
+    @Deprecated
+    void onStarted(@NonNull String sourceLocale, @NonNull String targetLocale);
+
+    /**
      * The system is requesting translation of the UI from {@code sourceLocale} to {@code
      * targetLocale}.
      * <p>
      * This is also called if either the requested {@code sourceLocale} or {@code targetLocale} has
      * changed; or called again after {@link #onPaused()}.
      */
-    void onStarted(@NonNull String sourceLocale, @NonNull String targetLocale);
+    default void onStarted(@NonNull ULocale sourceLocale, @NonNull ULocale targetLocale) {
+        onStarted(sourceLocale.getLanguage(), targetLocale.getLanguage());
+    }
 
     /**
      * The system is requesting that the application temporarily show the UI contents in their

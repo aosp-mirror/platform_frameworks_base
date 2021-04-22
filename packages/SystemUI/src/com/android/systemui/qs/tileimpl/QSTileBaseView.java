@@ -170,7 +170,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
 
     @Override
     public void init(QSTile tile) {
-        init(v -> tile.click(), v -> tile.secondaryClick(), view -> {
+        init(v -> tile.click(this), v -> tile.secondaryClick(this), view -> {
             tile.longClick(this);
             return true;
         });

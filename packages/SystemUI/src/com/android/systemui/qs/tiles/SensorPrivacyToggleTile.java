@@ -21,9 +21,11 @@ import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
+import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
@@ -82,7 +84,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
             mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 mSensorPrivacyController.setSensorBlocked(getSensorId(),

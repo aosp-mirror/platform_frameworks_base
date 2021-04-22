@@ -42,6 +42,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.Manifest;
+import android.app.UiAutomation;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
@@ -87,6 +89,7 @@ public class MediaRouter2ManagerTest {
     private static final String TEST_NAME_UNKNOWN = "unknown";
 
     private Context mContext;
+    private UiAutomation mUiAutomation;
     private MediaRouter2Manager mManager;
     private MediaRouter2 mRouter2;
     private Executor mExecutor;
@@ -110,6 +113,8 @@ public class MediaRouter2ManagerTest {
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
+        mUiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        mUiAutomation.adoptShellPermissionIdentity(Manifest.permission.MEDIA_CONTENT_CONTROL);
         mManager = MediaRouter2Manager.getInstance(mContext);
         mRouter2 = MediaRouter2.getInstance(mContext);
         // If we need to support thread pool executors, change this to thread pool executor.
@@ -129,6 +134,8 @@ public class MediaRouter2ManagerTest {
             instance.setProxy(null);
             instance.setSpy(null);
         }
+
+        mUiAutomation.dropShellPermissionIdentity();
     }
 
     @Test

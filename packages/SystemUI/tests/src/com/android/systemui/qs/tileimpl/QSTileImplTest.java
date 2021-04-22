@@ -49,7 +49,9 @@ import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.View;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
@@ -124,7 +126,7 @@ public class QSTileImplTest extends SysuiTestCase {
 
     @Test
     public void testClick_Metrics() {
-        mTile.click();
+        mTile.click(null /* view */);
         verify(mMetricsLogger).write(argThat(new TileLogMatcher(ACTION_QS_CLICK)));
         assertEquals(1, mUiEventLoggerFake.numLogs());
         UiEventLoggerFake.FakeUiEvent event = mUiEventLoggerFake.get(0);
@@ -135,14 +137,14 @@ public class QSTileImplTest extends SysuiTestCase {
     public void testClick_log() {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
 
-        mTile.click();
+        mTile.click(null /* view */);
         verify(mQsLogger).logTileClick(SPEC, StatusBarState.SHADE, Tile.STATE_ACTIVE);
     }
 
     @Test
     public void testClick_Metrics_Status_Bar_Status() {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
-        mTile.click();
+        mTile.click(null /* view */);
         verify(mMetricsLogger).write(mLogCaptor.capture());
         assertEquals(StatusBarState.SHADE, mLogCaptor.getValue()
                 .getTaggedData(FIELD_STATUS_BAR_STATE));
@@ -151,19 +153,19 @@ public class QSTileImplTest extends SysuiTestCase {
     @Test
     public void testClick_falsing() {
         mFalsingManager.setFalseTap(true);
-        mTile.click();
+        mTile.click(null /* view */);
         mTestableLooper.processAllMessages();
         assertThat(mTile.mClicked).isFalse();
 
         mFalsingManager.setFalseTap(false);
-        mTile.click();
+        mTile.click(null /* view */);
         mTestableLooper.processAllMessages();
         assertThat(mTile.mClicked).isTrue();
     }
 
     @Test
     public void testSecondaryClick_Metrics() {
-        mTile.secondaryClick();
+        mTile.secondaryClick(null /* view */);
         verify(mMetricsLogger).write(argThat(new TileLogMatcher(ACTION_QS_SECONDARY_CLICK)));
         assertEquals(1, mUiEventLoggerFake.numLogs());
         UiEventLoggerFake.FakeUiEvent event = mUiEventLoggerFake.get(0);
@@ -174,14 +176,14 @@ public class QSTileImplTest extends SysuiTestCase {
     public void testSecondaryClick_log() {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
 
-        mTile.secondaryClick();
+        mTile.secondaryClick(null /* view */);
         verify(mQsLogger).logTileSecondaryClick(SPEC, StatusBarState.SHADE, Tile.STATE_ACTIVE);
     }
 
     @Test
     public void testSecondaryClick_Metrics_Status_Bar_Status() {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
-        mTile.secondaryClick();
+        mTile.secondaryClick(null /* view */);
         verify(mMetricsLogger).write(mLogCaptor.capture());
         assertEquals(StatusBarState.KEYGUARD, mLogCaptor.getValue()
                 .getTaggedData(FIELD_STATUS_BAR_STATE));
@@ -208,7 +210,7 @@ public class QSTileImplTest extends SysuiTestCase {
     @Test
     public void testLongClick_Metrics_Status_Bar_Status() {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
-        mTile.click();
+        mTile.click(null /* view */);
         verify(mMetricsLogger).write(mLogCaptor.capture());
         assertEquals(StatusBarState.SHADE_LOCKED, mLogCaptor.getValue()
                 .getTaggedData(FIELD_STATUS_BAR_STATE));
@@ -401,7 +403,7 @@ public class QSTileImplTest extends SysuiTestCase {
         }
 
         @Override
-        protected void handleClick() {
+        protected void handleClick(@Nullable View view) {
             mClicked = true;
         }
 

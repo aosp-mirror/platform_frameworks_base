@@ -22,6 +22,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Pair;
+import android.view.View;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -78,7 +81,7 @@ public class UserTile extends QSTileImpl<State> implements UserInfoController.On
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         showDetail(true);
     }
 

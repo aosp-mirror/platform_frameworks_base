@@ -23,6 +23,7 @@ import android.animation.ValueAnimator
 import android.annotation.IntDef
 import android.content.Context
 import android.os.Process
+import android.provider.DeviceConfig
 import android.util.Log
 import android.view.View
 
@@ -62,6 +63,14 @@ class SystemStatusAnimationScheduler @Inject constructor(
     @Main private val executor: DelayableExecutor
 ) : CallbackController<SystemStatusAnimationCallback> {
 
+    companion object {
+        private const val PROPERTY_ENABLE_IMMERSIVE_INDICATOR = "enable_immersive_indicator"
+    }
+    private fun isImmersiveIndicatorEnabled(): Boolean {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_ENABLE_IMMERSIVE_INDICATOR, false)
+    }
+
     /** True from the time a scheduled event starts until it's animation finishes */
     var isActive = false
         private set
@@ -83,7 +92,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
 
     fun onStatusEvent(event: StatusEvent) {
         // Ignore any updates until the system is up and running
-        if (isTooEarly()) {
+        if (isTooEarly() || !isImmersiveIndicatorEnabled()) {
             return
         }
 
@@ -106,7 +115,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
     }
 
     fun setShouldShowPersistentPrivacyIndicator(should: Boolean) {
-        if (hasPersistentDot == should) {
+        if (hasPersistentDot == should || !isImmersiveIndicatorEnabled()) {
             return
         }
 

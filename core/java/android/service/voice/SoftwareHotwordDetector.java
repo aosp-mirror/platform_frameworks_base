@@ -51,7 +51,6 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
     private final HotwordDetector.Callback mCallback;
     private final AudioFormat mAudioFormat;
     private final Handler mHandler;
-    private final Object mLock = new Object();
 
     SoftwareHotwordDetector(
             IVoiceInteractionManagerService managerService,
@@ -65,12 +64,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         mAudioFormat = audioFormat;
         mCallback = callback;
         mHandler = new Handler(Looper.getMainLooper());
-
-        try {
-            mManagerService.updateState(options, sharedMemory, null /* callback */);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        updateStateLocked(options, sharedMemory, null /* callback */);
     }
 
     @RequiresPermission(RECORD_AUDIO)

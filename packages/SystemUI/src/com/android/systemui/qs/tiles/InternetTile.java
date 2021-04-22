@@ -29,7 +29,10 @@ import android.service.quicksettings.Tile;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -110,7 +113,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         mActivityStarter.postStartActivityDismissingKeyguard(INTERNET_PANEL, 0);
     }
 

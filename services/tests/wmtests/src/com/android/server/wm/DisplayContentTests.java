@@ -1292,7 +1292,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertNull(displayContent.getFadeRotationAnimationController());
     }
 
-    @UseTestDisplay(addWindows = { W_ACTIVITY, W_WALLPAPER, W_STATUS_BAR, W_NAVIGATION_BAR })
+    @UseTestDisplay(addWindows = { W_ACTIVITY, W_WALLPAPER, W_STATUS_BAR, W_NAVIGATION_BAR,
+            W_NOTIFICATION_SHADE })
     @Test
     public void testApplyTopFixedRotationTransform() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -1300,6 +1301,7 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(false).when(displayPolicy).navigationBarCanMove();
         displayPolicy.addWindowLw(mStatusBarWindow, mStatusBarWindow.mAttrs);
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
+        displayPolicy.addWindowLw(mNotificationShadeWindow, mNotificationShadeWindow.mAttrs);
         makeWindowVisible(mStatusBarWindow, mNavBarWindow);
         final Configuration config90 = new Configuration();
         mDisplayContent.computeScreenConfiguration(config90, ROTATION_90);
@@ -1324,10 +1326,10 @@ public class DisplayContentTests extends WindowTestsBase {
                 false /* forceUpdate */));
 
         assertNotNull(mDisplayContent.getFadeRotationAnimationController());
-        assertTrue(mStatusBarWindow.getParent().isAnimating(WindowContainer.AnimationFlags.PARENTS,
-                ANIMATION_TYPE_FIXED_TRANSFORM));
-        assertTrue(mNavBarWindow.getParent().isAnimating(WindowContainer.AnimationFlags.PARENTS,
-                ANIMATION_TYPE_FIXED_TRANSFORM));
+        assertTrue(mStatusBarWindow.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
+        assertTrue(mNavBarWindow.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
+        // Notification shade may have its own view animation in real case so do not fade out it.
+        assertFalse(mNotificationShadeWindow.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
 
         // If the visibility of insets state is changed, the rotated state should be updated too.
         final InsetsState rotatedState = app.getFixedRotationTransformInsetsState();

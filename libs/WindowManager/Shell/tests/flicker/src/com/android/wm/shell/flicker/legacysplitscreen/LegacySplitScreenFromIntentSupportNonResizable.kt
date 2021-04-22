@@ -19,7 +19,6 @@ package com.android.wm.shell.flicker.legacysplitscreen
 import android.platform.test.annotations.Postsubmit
 import android.provider.Settings
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -93,16 +92,6 @@ class LegacySplitScreenFromIntentSupportNonResizable(
                 Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
                 prevSupportNonResizableInMultiWindow)
     }
-
-    @FlakyTest(bugId = 178447631)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-            super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    @FlakyTest(bugId = 178447631)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     @Test
     fun nonResizableAppLayerBecomesVisible() =

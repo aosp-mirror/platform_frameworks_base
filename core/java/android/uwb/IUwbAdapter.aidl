@@ -16,6 +16,7 @@
 
 package android.uwb;
 
+import android.content.AttributionSource;
 import android.os.PersistableBundle;
 import android.uwb.IUwbAdapterStateCallbacks;
 import android.uwb.IUwbRangingCallbacks;
@@ -77,11 +78,13 @@ interface IUwbAdapter {
    * If the provided sessionHandle is already open for the calling client, then
    * #onRangingOpenFailed must be called and the new session must not be opened.
    *
+   * @param attributionSource AttributionSource to use for permission enforcement.
    * @param sessionHandle the session handle to open ranging for
    * @param rangingCallbacks the callbacks used to deliver ranging information
    * @param parameters the configuration to use for ranging
    */
-  void openRanging(in SessionHandle sessionHandle,
+  void openRanging(in AttributionSource attributionSource,
+                   in SessionHandle sessionHandle,
                    in IUwbRangingCallbacks rangingCallbacks,
                    in PersistableBundle parameters);
 
@@ -144,6 +147,19 @@ interface IUwbAdapter {
    * @param sessionHandle the session handle to close ranging for
    */
   void closeRanging(in SessionHandle sessionHandle);
+
+   /**
+     * Disables or enables UWB for a user
+     *
+     * The provided callback's IUwbAdapterStateCallbacks#onAdapterStateChanged
+     * function must be called immediately following state change.
+     *
+     * @param enabled value representing intent to disable or enable UWB. If
+     * true, any subsequent calls to #openRanging will be allowed. If false,
+     * all active ranging sessions will be closed and subsequent calls to
+     * #openRanging will be disallowed.
+     */
+    void setEnabled(boolean enabled);
 
   /**
    * The maximum allowed time to open a ranging session.

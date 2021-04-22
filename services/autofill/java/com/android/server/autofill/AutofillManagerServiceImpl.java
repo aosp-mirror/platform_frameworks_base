@@ -431,7 +431,7 @@ final class AutofillManagerServiceImpl
 
         final Session.SaveResult saveResult = session.showSaveLocked();
 
-        session.logContextCommitted(saveResult.getNoSaveReason());
+        session.logContextCommitted(saveResult.getNoSaveUiReason());
 
         if (saveResult.isLogSaveShown()) {
             session.logSaveUiShown();
@@ -876,7 +876,7 @@ final class AutofillManagerServiceImpl
                 changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
                 manuallyFilledDatasetIds, /* detectedFieldIdsList= */ null,
                 /* detectedFieldClassificationsList= */ null, appComponentName, compatMode,
-                Event.NO_SAVE_REASON_NONE);
+                Event.NO_SAVE_UI_REASON_NONE);
     }
 
     @GuardedBy("mLock")

@@ -4929,6 +4929,14 @@ public class CarrierConfigManager {
     public static final String KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL =
             "display_no_data_notification_on_permanent_failure_bool";
 
+    /**
+     * Determine whether unthrottle data retry when tracking area code (TAC/LAC) from cell changes
+     *
+     * @hide
+     */
+    public static final String KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL =
+            "unthrottle_data_retry_when_tac_changes_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -5069,6 +5077,7 @@ public class CarrierConfigManager {
                         + "320000:5000,640000:5000,1280000:5000,1800000:5000",
                 "mms:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
                         + "320000:5000,640000:5000,1280000:5000,1800000:5000",
+                "ims:max_retries=10, 5000, 5000, 5000",
                 "others:max_retries=3, 5000, 5000, 5000"});
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
@@ -5508,6 +5517,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL, true);
         sDefaults.putString(KEY_CARRIER_PROVISIONING_APP_STRING, "");
         sDefaults.putBoolean(KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL, false);
+        sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
     }
 
     /**

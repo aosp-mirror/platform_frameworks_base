@@ -108,6 +108,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private IUdfpsOverlayControllerCallback mUdfpsOverlayControllerCallback;
     @Mock
     private FalsingManager mFalsingManager;
+    @Mock
+    private PowerManager mPowerManager;
 
     private FakeExecutor mFgExecutor;
 
@@ -160,7 +162,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mDumpManager,
                 mKeyguardUpdateMonitor,
                 mKeyguardViewMediator,
-                mFalsingManager);
+                mFalsingManager,
+                mPowerManager);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
 

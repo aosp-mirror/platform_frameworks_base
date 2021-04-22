@@ -40,11 +40,6 @@ import java.util.function.Consumer
  */
 interface ControlsController : UserAwareController {
 
-    /**
-     * Whether the controls system is available for the current user.
-     */
-    val available: Boolean
-
     // SERVICE COMMUNICATION
 
     /**

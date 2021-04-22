@@ -28,6 +28,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
@@ -40,6 +41,7 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
@@ -47,6 +49,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -105,7 +108,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
         doNothing().`when`(spiedContext).startActivity(any(Intent::class.java))
         `when`(qsHost.context).thenReturn(spiedContext)
         `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
-        `when`(controlsController.available).thenReturn(true)
         `when`(controlsComponent.isEnabled()).thenReturn(true)
         secureSettings.putInt(Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT, 1)
 
@@ -151,14 +153,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile = createTile()
 
         assertThat(tile.isAvailable).isFalse()
-    }
-
-    @Test
-    fun testAvailableControlsSettingOff() {
-        `when`(controlsController.available).thenReturn(false)
-
-        tile = createTile()
-        assertThat(tile.isAvailable).isTrue()
     }
 
     @Test
@@ -253,10 +247,11 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun testNoDialogWhenUnavailable() {
-        tile.click()
+        tile.click(null /* view */)
         testableLooper.processAllMessages()
 
-        verify(spiedContext, never()).startActivity(any(Intent::class.java))
+        verify(activityStarter, never()).startActivity(any(), anyBoolean(),
+                any<ActivityLaunchAnimator.Controller>())
     }
 
     @Test
@@ -270,10 +265,11 @@ class DeviceControlsTileTest : SysuiTestCase() {
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
 
-        tile.click()
+        tile.click(null /* view */)
         testableLooper.processAllMessages()
 
-        verify(spiedContext).startActivity(any(Intent::class.java))
+        verify(activityStarter).startActivity(any(), eq(true) /* dismissShade */,
+                eq(null) as ActivityLaunchAnimator.Controller?)
     }
 
     @Test
@@ -288,10 +284,11 @@ class DeviceControlsTileTest : SysuiTestCase() {
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
 
-        tile.click()
+        tile.click(null /* view */)
         testableLooper.processAllMessages()
 
-        verify(spiedContext, never()).startActivity(any(Intent::class.java))
+        verify(activityStarter, never()).startActivity(any(), anyBoolean(),
+                any<ActivityLaunchAnimator.Controller>())
     }
 
     private fun createTile(): DeviceControlsTile {

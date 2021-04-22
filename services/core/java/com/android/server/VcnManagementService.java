@@ -953,6 +953,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             pw.decreaseIndent();
             pw.println();
 
+            pw.println("mConfigs:");
+            pw.increaseIndent();
+            for (Entry<ParcelUuid, VcnConfig> entry : mConfigs.entrySet()) {
+                pw.println(entry.getKey() + ": " + entry.getValue().getProvisioningPackageName());
+            }
+            pw.decreaseIndent();
+            pw.println();
+
             pw.println("mVcns:");
             pw.increaseIndent();
             for (Vcn vcn : mVcns.values()) {

@@ -240,7 +240,7 @@ public class CastTileTest extends SysuiTestCase {
         when(mController.getCastDevices()).thenReturn(devices);
 
         enableWifiAndProcessMessages();
-        mCastTile.handleClick();
+        mCastTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
         verify(mActivityStarter, times(1)).postQSRunnableDismissingKeyguard(any());
@@ -256,7 +256,7 @@ public class CastTileTest extends SysuiTestCase {
         when(mController.getCastDevices()).thenReturn(devices);
 
         enableWifiAndProcessMessages();
-        mCastTile.handleClick();
+        mCastTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
         verify(mController, times(1)).stopCasting(same(device));

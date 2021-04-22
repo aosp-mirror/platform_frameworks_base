@@ -1900,7 +1900,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"אישור"</string>
     <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"‏התכונה \'חיסכון בסוללה\' מפעילה עיצוב כהה ומגבילה או מכבה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות כמו \"Hey Google\"\n\n"<annotation id="url">"מידע נוסף"</annotation></string>
     <string name="battery_saver_description" msgid="7695751399533397741">"‏התכונה \'חיסכון בסוללה\' מפעילה עיצוב כהה ומגבילה או מכבה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות כמו \"Hey Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה נעשה שימוש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות לשלוח או לקבל נתונים ברקע. אפליקציות שבהן נעשה שימוש כרגע יכולות לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"להפעיל את חוסך הנתונים?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"הפעלה"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1991,8 +1991,7 @@
     <string name="close_button_text" msgid="10603510034455258">"סגירה"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"תשובה"</string>
-    <!-- no translation found for call_notification_answer_video_action (2086030940195382249) -->
-    <skip />
+    <string name="call_notification_answer_video_action" msgid="2086030940195382249">"וידאו"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"דחייה"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ניתוק"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"שיחה נכנסת"</string>

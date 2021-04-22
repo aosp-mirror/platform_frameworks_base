@@ -39,7 +39,7 @@ class ActivityLaunchAnimator(context: Context) {
                 ANIMATION_DURATION - ANIMATION_DURATION_NAV_FADE_IN
         private const val LAUNCH_TIMEOUT = 1000L
 
-        private val CONTENT_FADE_OUT_INTERPOLATOR = PathInterpolator(0f, 0f, 0.2f, 1f)
+        @JvmField val CONTENT_FADE_OUT_INTERPOLATOR = PathInterpolator(0f, 0f, 0.2f, 1f)
         private val WINDOW_FADE_IN_INTERPOLATOR = PathInterpolator(0f, 0f, 0.6f, 1f)
         private val NAV_FADE_IN_INTERPOLATOR = PathInterpolator(0f, 0f, 0f, 1f)
         private val NAV_FADE_OUT_INTERPOLATOR = PathInterpolator(0.2f, 0f, 1f, 1f)

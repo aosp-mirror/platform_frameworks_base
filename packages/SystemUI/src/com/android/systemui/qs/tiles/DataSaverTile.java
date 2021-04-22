@@ -20,7 +20,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -73,7 +76,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
         return new Intent(Settings.ACTION_DATA_SAVER_SETTINGS);
     }
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (mState.value
                 || Prefs.getBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, false)) {
             // Do it right away.

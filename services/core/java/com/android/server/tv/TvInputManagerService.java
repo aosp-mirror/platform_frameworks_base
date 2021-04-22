@@ -24,7 +24,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -109,6 +108,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -511,11 +511,21 @@ public final class TvInputManagerService extends SystemService {
                 sessionStatesToRelease.add(sessionState);
             }
         }
+        boolean notifyInfoUpdated = false;
         for (SessionState sessionState : sessionStatesToRelease) {
             try {
                 sessionState.session.release();
+                sessionState.currentChannel = null;
+                if (sessionState.isCurrent) {
+                    sessionState.isCurrent = false;
+                    notifyInfoUpdated = true;
+                }
             } catch (RemoteException e) {
                 Slog.e(TAG, "error in release", e);
+            } finally {
+                if (notifyInfoUpdated) {
+                    notifyCurrentChannelInfosUpdatedLocked(userState);
+                }
             }
             clearSessionAndNotifyClientLocked(sessionState);
         }
@@ -576,12 +586,22 @@ public final class TvInputManagerService extends SystemService {
                 return;
             }
             // Release all created sessions.
+            boolean notifyInfoUpdated = false;
             for (SessionState state : userState.sessionStateMap.values()) {
                 if (state.session != null) {
                     try {
                         state.session.release();
+                        state.currentChannel = null;
+                        if (state.isCurrent) {
+                            state.isCurrent = false;
+                            notifyInfoUpdated = true;
+                        }
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in release", e);
+                    } finally {
+                        if (notifyInfoUpdated) {
+                            notifyCurrentChannelInfosUpdatedLocked(userState);
+                        }
                     }
                 }
             }
@@ -826,9 +846,11 @@ public final class TvInputManagerService extends SystemService {
                 sessionState.session.asBinder().unlinkToDeath(sessionState, 0);
                 sessionState.session.release();
             }
-            sessionState.isCurrent = false;
             sessionState.currentChannel = null;
-            notifyCurrentChannelInfosUpdatedLocked(userState);
+            if (sessionState.isCurrent) {
+                sessionState.isCurrent = false;
+                notifyCurrentChannelInfosUpdatedLocked(userState);
+            }
         } catch (RemoteException | SessionNotFoundException e) {
             Slog.e(TAG, "error in releaseSession", e);
         } finally {
@@ -898,6 +920,11 @@ public final class TvInputManagerService extends SystemService {
             }
             ITvInputSession session = getSessionLocked(sessionState);
             session.setMain(isMain);
+            if (sessionState.isMainSession != isMain) {
+                UserState userState = getUserStateLocked(userId);
+                sessionState.isMainSession = isMain;
+                notifyCurrentChannelInfosUpdatedLocked(userState);
+            }
         } catch (RemoteException | SessionNotFoundException e) {
             Slog.e(TAG, "error in setMain", e);
         }
@@ -987,6 +1014,10 @@ public final class TvInputManagerService extends SystemService {
             try {
                 ITvInputManagerCallback callback = userState.mCallbacks.getBroadcastItem(i);
                 Pair<Integer, Integer> pidUid = userState.callbackPidUidMap.get(callback);
+                if (mContext.checkPermission(android.Manifest.permission.ACCESS_TUNED_INFO,
+                        pidUid.first, pidUid.second) != PackageManager.PERMISSION_GRANTED) {
+                    continue;
+                }
                 List<TunedInfo> infos = getCurrentTunedInfosInternalLocked(
                         userState, pidUid.first, pidUid.second);
                 callback.onCurrentTunedInfosUpdated(infos);
@@ -1517,6 +1548,11 @@ public final class TvInputManagerService extends SystemService {
                             getSessionLocked(sessionState.hardwareSessionToken,
                                     Process.SYSTEM_UID, resolvedUserId).setSurface(surface);
                         }
+                        boolean isVisible = (surface == null);
+                        if (sessionState.isVisible != isVisible) {
+                            sessionState.isVisible = isVisible;
+                            notifyCurrentChannelInfosUpdatedLocked(userState);
+                        }
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in setSurface", e);
                     }
@@ -1609,9 +1645,12 @@ public final class TvInputManagerService extends SystemService {
                         UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                         SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
                                 userState);
-                        sessionState.isCurrent = true;
-                        sessionState.currentChannel = channelUri;
-                        notifyCurrentChannelInfosUpdatedLocked(userState);
+                        if (!sessionState.isCurrent
+                                || !Objects.equals(sessionState.currentChannel, channelUri)) {
+                            sessionState.isCurrent = true;
+                            sessionState.currentChannel = channelUri;
+                            notifyCurrentChannelInfosUpdatedLocked(userState);
+                        }
                         if (TvContract.isChannelUriForPassthroughInput(channelUri)) {
                             // Do not log the watch history for passthrough inputs.
                             return;
@@ -2309,6 +2348,11 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public List<TunedInfo> getCurrentTunedInfos(@UserIdInt int userId) {
+            if (mContext.checkCallingPermission(android.Manifest.permission.ACCESS_TUNED_INFO)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "The caller does not have access tuned info permission");
+            }
             int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
@@ -2524,29 +2568,13 @@ public final class TvInputManagerService extends SystemService {
                         state.inputId,
                         watchedProgramsAccess ? state.currentChannel : null,
                         state.isRecordingSession,
-                        isForeground(state.callingPid),
+                        state.isVisible,
+                        state.isMainSession,
                         appType,
                         appTag));
             }
         }
         return channelInfos;
-    }
-
-    private boolean isForeground(int pid) {
-        if (mActivityManager == null) {
-            return false;
-        }
-        List<RunningAppProcessInfo> appProcesses = mActivityManager.getRunningAppProcesses();
-        if (appProcesses == null) {
-            return false;
-        }
-        for (RunningAppProcessInfo appProcess : appProcesses) {
-            if (appProcess.pid == pid
-                    && appProcess.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean hasAccessWatchedProgramsPermission(int callingPid, int callingUid) {
@@ -2788,6 +2816,8 @@ public final class TvInputManagerService extends SystemService {
 
         private boolean isCurrent = false;
         private Uri currentChannel = null;
+        private boolean isVisible = false;
+        private boolean isMainSession = false;
 
         private SessionState(IBinder sessionToken, String inputId, ComponentName componentName,
                 boolean isRecordingSession, ITvInputClient client, int seq, int callingUid,
@@ -3039,16 +3069,19 @@ public final class TvInputManagerService extends SystemService {
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
-                mSessionState.isCurrent = true;
-                mSessionState.currentChannel = channelUri;
-                UserState userState = getOrCreateUserStateLocked(mSessionState.userId);
-                notifyCurrentChannelInfosUpdatedLocked(userState);
                 try {
                     // TODO: Consider adding this channel change in the watch log. When we do
                     // that, how we can protect the watch log from malicious tv inputs should
                     // be addressed. e.g. add a field which represents where the channel change
                     // originated from.
                     mSessionState.client.onChannelRetuned(channelUri, mSessionState.seq);
+                    if (!mSessionState.isCurrent
+                            || !Objects.equals(mSessionState.currentChannel, channelUri)) {
+                        UserState userState = getOrCreateUserStateLocked(mSessionState.userId);
+                        mSessionState.isCurrent = true;
+                        mSessionState.currentChannel = channelUri;
+                        notifyCurrentChannelInfosUpdatedLocked(userState);
+                    }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onChannelRetuned", e);
                 }

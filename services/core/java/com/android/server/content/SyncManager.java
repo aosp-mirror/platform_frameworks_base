@@ -243,8 +243,7 @@ public class SyncManager {
     volatile private PowerManager.WakeLock mSyncManagerWakeLock;
     volatile private boolean mDataConnectionIsConnected = false;
     volatile private boolean mStorageIsLow = false;
-    volatile private boolean mDeviceIsIdle = false;
-    volatile private boolean mReportedSyncActive = false;
+    private volatile int mNextJobIdOffset = 0;
 
     private final NotificationManager mNotificationMgr;
     private final IBatteryStats mBatteryStats;
@@ -264,17 +263,17 @@ public class SyncManager {
 
     protected final SyncAdaptersCache mSyncAdapters;
 
-    private final Random mRand;
-
     private final SyncLogger mLogger;
 
     private boolean isJobIdInUseLockedH(int jobId, List<JobInfo> pendingJobs) {
-        for (JobInfo job: pendingJobs) {
+        for (int i = 0, size = pendingJobs.size(); i < size; i++) {
+            JobInfo job = pendingJobs.get(i);
             if (job.getId() == jobId) {
                 return true;
             }
         }
-        for (ActiveSyncContext asc: mActiveSyncContexts) {
+        for (int i = 0, size = mActiveSyncContexts.size(); i < size; i++) {
+            ActiveSyncContext asc = mActiveSyncContexts.get(i);
             if (asc.mSyncOperation.jobId == jobId) {
                 return true;
             }
@@ -283,19 +282,28 @@ public class SyncManager {
     }
 
     private int getUnusedJobIdH() {
-        int newJobId;
-        do {
-            newJobId = MIN_SYNC_JOB_ID + mRand.nextInt(MAX_SYNC_JOB_ID - MIN_SYNC_JOB_ID);
-        } while (isJobIdInUseLockedH(newJobId,
-                mJobSchedulerInternal.getSystemScheduledPendingJobs()));
-        return newJobId;
+        final int maxNumSyncJobIds = MAX_SYNC_JOB_ID - MIN_SYNC_JOB_ID;
+        final List<JobInfo> pendingJobs = mJobSchedulerInternal.getSystemScheduledPendingJobs();
+        for (int i = 0; i < maxNumSyncJobIds; ++i) {
+            int newJobId = MIN_SYNC_JOB_ID + ((mNextJobIdOffset + i) % maxNumSyncJobIds);
+            if (!isJobIdInUseLockedH(newJobId, pendingJobs)) {
+                mNextJobIdOffset = (mNextJobIdOffset + i + 1) % maxNumSyncJobIds;
+                return newJobId;
+            }
+        }
+        // We've used all 10,000 intended job IDs.... We're probably in a world of pain right now :/
+        Slog.wtf(TAG, "All " + maxNumSyncJobIds + " possible sync job IDs are taken :/");
+        mNextJobIdOffset = (mNextJobIdOffset + 1) % maxNumSyncJobIds;
+        return MIN_SYNC_JOB_ID + mNextJobIdOffset;
     }
 
     private List<SyncOperation> getAllPendingSyncs() {
         verifyJobScheduler();
         List<JobInfo> pendingJobs = mJobSchedulerInternal.getSystemScheduledPendingJobs();
-        List<SyncOperation> pendingSyncs = new ArrayList<SyncOperation>(pendingJobs.size());
-        for (JobInfo job: pendingJobs) {
+        final int numJobs = pendingJobs.size();
+        final List<SyncOperation> pendingSyncs = new ArrayList<>(numJobs);
+        for (int i = 0; i < numJobs; ++i) {
+            final JobInfo job = pendingJobs.get(i);
             SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
             if (op != null) {
                 pendingSyncs.add(op);
@@ -637,7 +645,6 @@ public class SyncManager {
             }
         }, mSyncHandler);
 
-        mRand = new Random(System.currentTimeMillis());
         mConstants = new SyncManagerConstants(context);
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -2184,8 +2191,6 @@ public class SyncManager {
             pw.println();
         }
         pw.print("Memory low: "); pw.println(mStorageIsLow);
-        pw.print("Device idle: "); pw.println(mDeviceIsIdle);
-        pw.print("Reported active: "); pw.println(mReportedSyncActive);
         pw.print("Clock valid: "); pw.println(mSyncStorageEngine.isClockValid());
 
         final AccountAndUser[] accounts = AccountManagerService.getSingleton().getAllAccounts();
@@ -3265,7 +3270,8 @@ public class SyncManager {
                 removeStaleAccounts();
 
                 AccountAndUser[] accounts = mRunningAccounts;
-                for (ActiveSyncContext currentSyncContext : mActiveSyncContexts) {
+                for (int i = 0, size = mActiveSyncContexts.size(); i < size; i++) {
+                    ActiveSyncContext currentSyncContext = mActiveSyncContexts.get(i);
                     if (!containsAccountAndUser(accounts,
                             currentSyncContext.mSyncOperation.target.account,
                             currentSyncContext.mSyncOperation.target.userId)) {
@@ -3277,7 +3283,8 @@ public class SyncManager {
 
                 if (syncTargets != null) {
                     // On account add, check if there are any settings to be restored.
-                    for (AccountAndUser aau : mRunningAccounts) {
+                    for (int i = 0, length = mRunningAccounts.length; i < length; i++) {
+                        AccountAndUser aau = mRunningAccounts[i];
                         if (!containsAccountAndUser(oldAccounts, aau.account, aau.userId)) {
                             if (Log.isLoggable(TAG, Log.DEBUG)) {
                                 Log.d(TAG, "Account " + aau.account
@@ -3294,7 +3301,8 @@ public class SyncManager {
             // Cancel all jobs from non-existent accounts.
             AccountAndUser[] allAccounts = AccountManagerService.getSingleton().getAllAccounts();
             List<SyncOperation> ops = getAllPendingSyncs();
-            for (SyncOperation op: ops) {
+            for (int i = 0, opsSize = ops.size(); i < opsSize; i++) {
+                SyncOperation op = ops.get(i);
                 if (!containsAccountAndUser(allAccounts, op.target.account, op.target.userId)) {
                     mLogger.log("canceling: ", op);
                     cancelJob(op, "updateRunningAccountsH()");

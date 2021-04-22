@@ -24,7 +24,6 @@ import android.app.smartspace.SmartspaceConfig;
 import android.app.smartspace.SmartspaceManager;
 import android.app.smartspace.SmartspaceSession;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
@@ -33,7 +32,6 @@ import android.widget.RelativeLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.graphics.ColorUtils;
 import com.android.keyguard.clock.ClockManager;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
@@ -87,9 +85,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private SmartspaceSession mSmartspaceSession;
     private SmartspaceSession.OnTargetsAvailableListener mSmartspaceCallback;
-    private float mDozeAmount;
     private int mWallpaperTextColor;
-    private int mDozeColor = Color.WHITE;
     private ConfigurationController mConfigurationController;
 
     /**
@@ -121,8 +117,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onDozeAmountChanged(float linear, float eased) {
-                    mDozeAmount = eased;
-                    updateSmartspaceColor();
+                    if (mSmartspaceView != null) {
+                        mSmartspaceView.setDozeAmount(eased);
+                    }
                 }
             };
 
@@ -192,9 +189,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 mBatteryController);
         mLargeClockViewController.init();
 
-        mDozeAmount = mStatusBarStateController.getDozeAmount();
-        updateWallpaperColor();
-
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mConfigurationController.addCallback(mConfigurationListener);
 
@@ -206,7 +200,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
             mSmartspaceView = smartspaceDataPlugin.getView(mView);
             mSmartspaceView.registerDataProvider(smartspaceDataPlugin);
-            updateSmartspaceColor();
+            updateWallpaperColor();
             View asView = (View) mSmartspaceView;
 
             // Place smartspace view below normal clock...
@@ -237,17 +231,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             mSmartspaceSession.addOnTargetsAvailableListener(mUiExecutor, mSmartspaceCallback);
             mSmartspaceSession.requestSmartspaceUpdate();
         }
+
+        float dozeAmount = mStatusBarStateController.getDozeAmount();
+        mStatusBarStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
     }
 
     private void updateWallpaperColor() {
-        mWallpaperTextColor = Utils.getColorAttrDefaultColor(getContext(),
-                R.attr.wallpaperTextColor);
-        updateSmartspaceColor();
-    }
-
-    private void updateSmartspaceColor() {
         if (mSmartspaceView != null) {
-            int color = ColorUtils.blendARGB(mWallpaperTextColor, mDozeColor, mDozeAmount);
+            int color = Utils.getColorAttrDefaultColor(getContext(), R.attr.wallpaperTextColor);
             mSmartspaceView.setPrimaryTextColor(color);
         }
     }

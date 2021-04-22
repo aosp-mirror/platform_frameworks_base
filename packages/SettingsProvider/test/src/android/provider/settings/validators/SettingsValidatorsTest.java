@@ -220,11 +220,6 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void dateFormatValidator_onNullValue_returnsTrue() {
-        assertTrue(SettingsValidators.DATE_FORMAT_VALIDATOR.validate(null));
-    }
-
-    @Test
     public void testJSONObjectValidator() throws JSONException {
         Validator v = SettingsValidators.JSON_OBJECT_VALIDATOR;
 

@@ -188,6 +188,140 @@ public class BiometricManager {
         int DEVICE_CREDENTIAL = 1 << 15;
     }
 
+    /**
+     * Provides localized strings for an application that uses {@link BiometricPrompt} to
+     * authenticate the user.
+     */
+    public static class Strings {
+        @NonNull private final Context mContext;
+        @NonNull private final IAuthService mService;
+        @Authenticators.Types int mAuthenticators;
+
+        @Nullable CharSequence mButtonLabel;
+        @Nullable CharSequence mPromptMessage;
+        @Nullable CharSequence mSettingName;
+
+        private Strings(@NonNull Context context, @NonNull IAuthService service,
+                @Authenticators.Types int authenticators) {
+            mContext = context;
+            mService = service;
+            mAuthenticators = authenticators;
+        }
+
+        /**
+         * Provides a localized string that can be used as the label for a button that invokes
+         * {@link BiometricPrompt}.
+         *
+         * <p>When possible, this method should use the given authenticator requirements to more
+         * precisely specify the authentication type that will be used. For example, if
+         * <strong>Class 3</strong> biometric authentication is requested on a device with a
+         * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor,
+         * the returned string should indicate that fingerprint authentication will be used.
+         *
+         * <p>This method should also try to specify which authentication method(s) will be used in
+         * practice when multiple authenticators meet the given requirements. For example, if
+         * biometric authentication is requested on a device with both face and fingerprint sensors
+         * but the user has selected face as their preferred method, the returned string should
+         * indicate that face authentication will be used.
+         *
+         * <p>This method may return {@code null} if none of the requested authenticator types are
+         * available, but this should <em>not</em> be relied upon for checking the status of
+         * authenticators. Instead, use {@link #canAuthenticate(int)}.
+         *
+         * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
+         */
+        @RequiresPermission(USE_BIOMETRIC)
+        @Nullable
+        public CharSequence getButtonLabel() {
+            if (mButtonLabel == null) {
+                final int userId = mContext.getUserId();
+                final String opPackageName = mContext.getOpPackageName();
+                try {
+                    mButtonLabel = mService.getButtonLabel(userId, opPackageName, mAuthenticators);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            return mButtonLabel;
+        }
+
+        /**
+         * Provides a localized string that can be shown while the user is authenticating with
+         * {@link BiometricPrompt}.
+         *
+         * <p>When possible, this method should use the given authenticator requirements to more
+         * precisely specify the authentication type that will be used. For example, if
+         * <strong>Class 3</strong> biometric authentication is requested on a device with a
+         * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor,
+         * the returned string should indicate that fingerprint authentication will be used.
+         *
+         * <p>This method should also try to specify which authentication method(s) will be used in
+         * practice when multiple authenticators meet the given requirements. For example, if
+         * biometric authentication is requested on a device with both face and fingerprint sensors
+         * but the user has selected face as their preferred method, the returned string should
+         * indicate that face authentication will be used.
+         *
+         * <p>This method may return {@code null} if none of the requested authenticator types are
+         * available, but this should <em>not</em> be relied upon for checking the status of
+         * authenticators. Instead, use {@link #canAuthenticate(int)}.
+         *
+         * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
+         */
+        @RequiresPermission(USE_BIOMETRIC)
+        @Nullable
+        public CharSequence getPromptMessage() {
+            if (mPromptMessage == null) {
+                final int userId = mContext.getUserId();
+                final String opPackageName = mContext.getOpPackageName();
+                try {
+                    return mService.getPromptMessage(userId, opPackageName, mAuthenticators);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            return mPromptMessage;
+        }
+
+        /**
+         * Provides a localized string that can be shown as the title for an app setting that
+         * enables authentication with {@link BiometricPrompt}.
+         *
+         * <p>When possible, this method should use the given authenticator requirements to more
+         * precisely specify the authentication type that will be used. For example, if
+         * <strong>Class 3</strong> biometric authentication is requested on a device with a
+         * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor,
+         * the returned string should indicate that fingerprint authentication will be used.
+         *
+         * <p>This method should <em>not</em> try to specify which authentication method(s) will be
+         * used in practice when multiple authenticators meet the given requirements. For example,
+         * if biometric authentication is requested on a device with both face and fingerprint
+         * sensors, the returned string should indicate that either face or fingerprint
+         * authentication may be used, regardless of whether the user has enrolled or selected
+         * either as their preferred method.
+         *
+         * <p>This method may return {@code null} if none of the requested authenticator types are
+         * supported by the system, but this should <em>not</em> be relied upon for checking the
+         * status of authenticators. Instead, use {@link #canAuthenticate(int)} or
+         * {@link android.content.pm.PackageManager#hasSystemFeature(String)}.
+         *
+         * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
+         */
+        @RequiresPermission(USE_BIOMETRIC)
+        @Nullable
+        public CharSequence getSettingName() {
+            if (mSettingName == null) {
+                final int userId = mContext.getUserId();
+                final String opPackageName = mContext.getOpPackageName();
+                try {
+                    return mService.getSettingName(userId, opPackageName, mAuthenticators);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            return mSettingName;
+        }
+    }
+
     @NonNull private final Context mContext;
     @NonNull private final IAuthService mService;
 
@@ -327,6 +461,20 @@ public class BiometricManager {
     }
 
     /**
+     * Produces an instance of the {@link Strings} class, which provides localized strings for an
+     * application, given a set of allowed authenticator types.
+     *
+     * @param authenticators A bit field representing the types of {@link Authenticators} that may
+     *                       be used for authentication.
+     * @return A {@link Strings} collection for the given allowed authenticator types.
+     */
+    @RequiresPermission(USE_BIOMETRIC)
+    @NonNull
+    public Strings getStrings(@Authenticators.Types int authenticators) {
+        return new Strings(mContext, mService, authenticators);
+    }
+
+    /**
      * @hide
      * @param userId
      * @return
@@ -430,117 +578,6 @@ public class BiometricManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
-        }
-    }
-
-    /**
-     * Provides a localized string that may be used as the label for a button that invokes
-     * {@link BiometricPrompt}.
-     *
-     * <p>When possible, this method should use the given authenticator requirements to more
-     * precisely specify the authentication type that will be used. For example, if
-     * <strong>Class 3</strong> biometric authentication is requested on a device with a
-     * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor, the
-     * returned string should indicate that fingerprint authentication will be used.
-     *
-     * <p>This method should also try to specify which authentication method(s) will be used in
-     * practice when multiple authenticators meet the given requirements. For example, if biometric
-     * authentication is requested on a device with both face and fingerprint sensors but the user
-     * has selected face as their preferred method, the returned string should indicate that face
-     * authentication will be used.
-     *
-     * @param authenticators A bit field representing the types of {@link Authenticators} that may
-     *                       be used for authentication.
-     * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
-     */
-    @RequiresPermission(USE_BIOMETRIC)
-    @Nullable
-    public CharSequence getButtonLabel(@Authenticators.Types int authenticators) {
-        if (mService != null) {
-            final int userId = mContext.getUserId();
-            final String opPackageName = mContext.getOpPackageName();
-            try {
-                return mService.getButtonLabel(userId, opPackageName, authenticators);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Slog.w(TAG, "getButtonLabel(): Service not connected");
-            return null;
-        }
-    }
-
-    /**
-     * Provides a localized string that may be shown while the user is authenticating with
-     * {@link BiometricPrompt}.
-     *
-     * <p>When possible, this method should use the given authenticator requirements to more
-     * precisely specify the authentication type that will be used. For example, if
-     * <strong>Class 3</strong> biometric authentication is requested on a device with a
-     * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor, the
-     * returned string should indicate that fingerprint authentication will be used.
-     *
-     * <p>This method should also try to specify which authentication method(s) will be used in
-     * practice when multiple authenticators meet the given requirements. For example, if biometric
-     * authentication is requested on a device with both face and fingerprint sensors but the user
-     * has selected face as their preferred method, the returned string should indicate that face
-     * authentication will be used.
-     *
-     * @param authenticators A bit field representing the types of {@link Authenticators} that may
-     *                       be used for authentication.
-     * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
-     */
-    @RequiresPermission(USE_BIOMETRIC)
-    @Nullable
-    public CharSequence getPromptMessage(@Authenticators.Types int authenticators) {
-        if (mService != null) {
-            final int userId = mContext.getUserId();
-            final String opPackageName = mContext.getOpPackageName();
-            try {
-                return mService.getPromptMessage(userId, opPackageName, authenticators);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Slog.w(TAG, "getPromptMessage(): Service not connected");
-            return null;
-        }
-    }
-
-    /**
-     * Provides a localized string that may be shown as the title for an app setting that enables
-     * biometric authentication.
-     *
-     * <p>When possible, this method should use the given authenticator requirements to more
-     * precisely specify the authentication type that will be used. For example, if
-     * <strong>Class 3</strong> biometric authentication is requested on a device with a
-     * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor, the
-     * returned string should indicate that fingerprint authentication will be used.
-     *
-     * <p>This method should <em>not</em> try to specify which authentication method(s) will be used
-     * in practice when multiple authenticators meet the given requirements. For example, if
-     * biometric authentication is requested on a device with both face and fingerprint sensors, the
-     * returned string should indicate that either face or fingerprint authentication may be used,
-     * regardless of whether the user has enrolled or selected either as their preferred method.
-     *
-     * @param authenticators A bit field representing the types of {@link Authenticators} that may
-     *                       be used for authentication.
-     * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
-     */
-    @RequiresPermission(USE_BIOMETRIC)
-    @Nullable
-    public CharSequence getSettingName(@Authenticators.Types int authenticators) {
-        if (mService != null) {
-            final int userId = mContext.getUserId();
-            final String opPackageName = mContext.getOpPackageName();
-            try {
-                return mService.getSettingName(userId, opPackageName, authenticators);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Slog.w(TAG, "getSettingName(): Service not connected");
-            return null;
         }
     }
 }
