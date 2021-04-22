@@ -25,6 +25,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
+import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
 import android.media.ICapturePresetDevicesRoleDispatcher;
@@ -383,4 +384,8 @@ interface IAudioService {
             in AudioAttributes aa, in String callingPackageName);
 
     long getFadeOutDurationOnFocusLossMillis(in AudioAttributes aa);
+
+    void registerModeDispatcher(IAudioModeDispatcher dispatcher);
+
+    oneway void unregisterModeDispatcher(IAudioModeDispatcher dispatcher);
 }
