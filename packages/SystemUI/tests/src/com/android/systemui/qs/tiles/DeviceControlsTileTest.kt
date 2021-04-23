@@ -165,7 +165,12 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun testLongClickIntent() {
-        assertThat(tile.longClickIntent.action).isEqualTo(Settings.ACTION_DEVICE_CONTROLS_SETTINGS)
+        assertThat(tile.longClickIntent).isNull()
+    }
+
+    @Test
+    fun testDoesNotHandleLongClick() {
+        assertThat(tile.state.handlesLongClick).isFalse()
     }
 
     @Test
