@@ -3969,6 +3969,7 @@ public abstract class PackageManager {
      * @hide
      */
     @TestApi
+    @SystemApi
     public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED =  1 << 7;
 
     /**
