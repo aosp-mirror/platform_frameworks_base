@@ -90,7 +90,6 @@ public final class InputConfiguration {
     public InputConfiguration(@NonNull Collection<MultiResolutionStreamInfo> multiResolutionInputs,
             @Format int format) {
         checkCollectionNotEmpty(multiResolutionInputs, "Input multi-resolution stream info");
-        //TODO: Pick the default mode stream info for ultra-high resolution sensor camera
         MultiResolutionStreamInfo info = multiResolutionInputs.iterator().next();
         mWidth = info.getWidth();
         mHeight = info.getHeight();
