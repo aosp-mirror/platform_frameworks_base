@@ -36,7 +36,12 @@ package android.renderscript;
  * Element#U8_2}, {@link Element#U8_3}, {@link Element#U8_4},
  * {@link Element#F32}, {@link Element#F32_2}, {@link
  * Element#F32_3}, and {@link Element#F32_4}.
+ *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
     private final Matrix4f mMatrix = new Matrix4f();
     private final Float4 mAdd = new Float4();
