@@ -48,6 +48,9 @@
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncrease">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="sensorDetails" name="lightSensor">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -119,4 +122,18 @@
             <xs:minInclusive value="0.0"/>
         </xs:restriction>
     </xs:simpleType>
+
+    <xs:complexType name="sensorDetails">
+        <xs:sequence>
+            <xs:element type="xs:string" name="type" minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nullable" />
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="xs:string" name="name" minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nullable" />
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
 </xs:schema>
