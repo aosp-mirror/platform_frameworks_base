@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CO
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
 import static com.android.server.accessibility.AccessibilityTraceFileProto.ENTRY;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER;
@@ -938,8 +939,7 @@ final class AccessibilityController {
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     WindowState windowState = visibleWindows.valueAt(i);
                     final int windowType = windowState.mAttrs.type;
-                    if ((windowType == TYPE_MAGNIFICATION_OVERLAY
-                            || windowType == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                    if (isExcludedWindowType(windowType)
                             || ((windowState.mAttrs.privateFlags
                             & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0)) {
                         continue;
@@ -1038,6 +1038,17 @@ final class AccessibilityController {
                             MyHandler.MESSAGE_NOTIFY_MAGNIFICATION_REGION_CHANGED, args)
                             .sendToTarget();
                 }
+            }
+
+            private boolean isExcludedWindowType(int windowType) {
+                return windowType == TYPE_MAGNIFICATION_OVERLAY
+                        // Omit the touch region to avoid the cut out of the magnification
+                        // bounds because nav bar panel is unmagnifiable.
+                        || windowType == TYPE_NAVIGATION_BAR_PANEL
+                        // Omit the touch region of window magnification to avoid the cut out of the
+                        // magnification and the magnified center of window magnification could be
+                        // in the bounds
+                        || windowType == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
             }
 
             void onRotationChanged(SurfaceControl.Transaction t) {
