@@ -23,10 +23,10 @@ import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
 import android.app.appsearch.GenericDocument;
-import android.app.appsearch.GetByUriRequest;
+import android.app.appsearch.GetByDocumentIdRequest;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.PutDocumentsRequest;
-import android.app.appsearch.RemoveByUriRequest;
+import android.app.appsearch.RemoveByDocumentIdRequest;
 import android.app.appsearch.ReportUsageRequest;
 import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResults;
@@ -158,6 +158,8 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String KEY_BITMAPS = "bitmaps";
     private static final String KEY_BITMAP_BYTES = "bitmapBytes";
 
+    private final Object mLock = new Object();
+
     /**
      * An temp in-memory copy of shortcuts for this package that was loaded from xml, keyed on IDs.
      */
@@ -167,6 +169,11 @@ class ShortcutPackage extends ShortcutPackageItem {
      * All the share targets from the package
      */
     private final ArrayList<ShareTargetInfo> mShareTargets = new ArrayList<>(0);
+
+    /**
+     * All external packages that have gained access to the shortcuts from this package
+     */
+    private final Map<String, PackageIdentifier> mPackageIdentifiers = new ArrayMap<>(0);
 
     /**
      * # of times the package has called rate-limited APIs.
@@ -182,14 +189,11 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private long mLastKnownForegroundElapsedTime;
 
-    private final Object mLock = new Object();
-
-    /**
-     * All external packages that have gained access to the shortcuts from this package
-     */
-    private final Map<String, PackageIdentifier> mPackageIdentifiers = new ArrayMap<>(0);
-
     private boolean mIsInitilized;
+
+    private boolean mRescanRequired;
+    private boolean mIsNewApp;
+    private List<ShortcutInfo> mManifestShortcuts;
 
     private ShortcutPackage(ShortcutUser shortcutUser,
             int packageUserId, String packageName, ShortcutPackageInfo spi) {
@@ -449,8 +453,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                     session -> {
                         final AndroidFuture<Boolean> future = new AndroidFuture<>();
                         session.reportUsage(
-                                new ReportUsageRequest.Builder(getPackageName())
-                                        .setUri(newShortcut.getId()).build(),
+                                new ReportUsageRequest.Builder(
+                                        getPackageName(), newShortcut.getId()).build(),
                                 mShortcutUser.mExecutor,
                                 result -> future.complete(result.isSuccess()));
                         return future;
@@ -1124,8 +1128,22 @@ class ShortcutPackage extends ShortcutPackageItem {
                     (isNewApp ? "added" : "updated"),
                     getPackageInfo().getVersionCode(), pi.getLongVersionCode()));
         }
-
         getPackageInfo().updateFromPackageInfo(pi);
+        if (isAppSearchEnabled()) {
+            // Save the states in memory and resume package rescan when needed
+            mRescanRequired = true;
+            mIsNewApp = isNewApp;
+            mManifestShortcuts = newManifestShortcutList;
+        } else {
+            rescanPackage(isNewApp, newManifestShortcutList);
+        }
+        return true; // true means changed.
+    }
+
+    private void rescanPackage(
+            final boolean isNewApp, @NonNull final List<ShortcutInfo> newManifestShortcutList) {
+        final ShortcutService s = mShortcutUser.mService;
+
         final long newVersionCode = getPackageInfo().getVersionCode();
 
         // See if there are any shortcuts that were prevented restoring because the app was of a
@@ -1204,7 +1222,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         // This will send a notification to the launcher, and also save .
         // TODO: List changed and removed manifest shortcuts and pass to packageShortcutsChanged()
         s.packageShortcutsChanged(getPackageName(), getPackageUserId(), null, null);
-        return true; // true means changed.
+        mManifestShortcuts = null;
     }
 
     private boolean publishManifestShortcuts(List<ShortcutInfo> newManifestShortcutList) {
@@ -1699,13 +1717,25 @@ class ShortcutPackage extends ShortcutPackageItem {
         return result;
     }
 
+    private boolean hasNoShortcut() {
+        if (!isAppSearchEnabled()) {
+            return getShortcutCount() == 0;
+        }
+        final boolean[] hasAnyShortcut = new boolean[1];
+        forEachShortcutStopWhen(si -> {
+            hasAnyShortcut[0] = true;
+            return true;
+        });
+        return !hasAnyShortcut[0];
+    }
+
     @Override
     public void saveToXml(@NonNull TypedXmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
         final int size = mShortcuts.size();
         final int shareTargetSize = mShareTargets.size();
 
-        if (size == 0 && shareTargetSize == 0 && mApiCallCount == 0) {
+        if (hasNoShortcut() && shareTargetSize == 0 && mApiCallCount == 0) {
             return; // nothing to write.
         }
 
@@ -2377,7 +2407,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         awaitInAppSearch("Removing shortcut with id=" + id, session -> {
             final AndroidFuture<Boolean> future = new AndroidFuture<>();
-            session.remove(new RemoveByUriRequest.Builder(getPackageName()).addUris(id).build(),
+            session.remove(
+                    new RemoveByDocumentIdRequest.Builder(getPackageName()).addIds(id).build(),
                     mShortcutUser.mExecutor, result -> {
                         if (!result.isSuccess()) {
                             final Map<String, AppSearchResult<Void>> failures =
@@ -2420,8 +2451,9 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         return awaitInAppSearch("Getting shortcut by id", session -> {
             final AndroidFuture<List<ShortcutInfo>> future = new AndroidFuture<>();
-            session.getByUri(
-                    new GetByUriRequest.Builder(getPackageName()).addUris(shortcutIds).build(),
+            session.getByDocumentId(
+                    new GetByDocumentIdRequest.Builder(getPackageName())
+                            .addIds(shortcutIds).build(),
                     mShortcutUser.mExecutor,
                     results -> {
                         final List<ShortcutInfo> ret = new ArrayList<>(1);
@@ -2589,6 +2621,10 @@ class ShortcutPackage extends ShortcutPackageItem {
                 mIsInitilized = true;
                 if (!wasInitialized) {
                     restoreParsedShortcuts(false);
+                }
+                if (mRescanRequired) {
+                    mRescanRequired = false;
+                    rescanPackage(mIsNewApp, mManifestShortcuts);
                 }
                 return ConcurrentUtils.waitForFutureNoInterrupt(cb.apply(session), description);
             } catch (Exception e) {

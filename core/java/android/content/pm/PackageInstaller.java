@@ -1529,6 +1529,33 @@ public class PackageInstaller {
          */
         public static final int MAX_PACKAGE_NAME_LENGTH = 255;
 
+        /** @hide */
+        @IntDef(prefix = {"USER_ACTION_"}, value = {
+                USER_ACTION_UNSPECIFIED,
+                USER_ACTION_REQUIRED,
+                USER_ACTION_NOT_REQUIRED
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface UserActionRequirement {}
+
+        /**
+         * The installer did not call {@link SessionParams#setRequireUserAction(int)} to
+         * specify whether user action should be required for the install.
+         */
+        public static final int USER_ACTION_UNSPECIFIED = 0;
+
+        /**
+         * The installer called {@link SessionParams#setRequireUserAction(int)} with
+         * {@code true} to require user action for the install to complete.
+         */
+        public static final int USER_ACTION_REQUIRED = 1;
+
+        /**
+         * The installer called {@link SessionParams#setRequireUserAction(int)} with
+         * {@code false} to request that user action not be required for this install.
+         */
+        public static final int USER_ACTION_NOT_REQUIRED = 2;
+
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int mode = MODE_INVALID;
@@ -1593,7 +1620,7 @@ public class PackageInstaller {
         /** {@hide} */
         public boolean forceQueryableOverride;
         /** {@hide} */
-        public int requireUserAction = SessionInfo.USER_ACTION_UNSPECIFIED;
+        public int requireUserAction = USER_ACTION_UNSPECIFIED;
 
         /**
          * Construct parameters for a new package install session.
@@ -2082,11 +2109,14 @@ public class PackageInstaller {
          * Optionally indicate whether user action should be required when the session is
          * committed.
          * <p>
-         * Defaults to {@code true} for installers using the
+         * Defaults to {@link #USER_ACTION_UNSPECIFIED} unless otherwise set. When unspecified for
+         * installers using the
          * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES android.permission
-         * #REQUEST_INSTALL_PACKAGES} permission, and {@code false} otherwise. When {@code true},
-         * installers will receive a {@link #STATUS_PENDING_USER_ACTION} callback once the
-         * session is committed, indicating that user action is required for the install to proceed.
+         * #REQUEST_INSTALL_PACKAGES} permission will behave as if set to
+         * {@link #USER_ACTION_REQUIRED}, and {@link #USER_ACTION_NOT_REQUIRED} otherwise.
+         * When {@code requireUserAction} is set to {@link #USER_ACTION_REQUIRED}, installers will
+         * receive a {@link #STATUS_PENDING_USER_ACTION} callback once the session is committed,
+         * indicating that user action is required for the install to proceed.
          * <p>
          * For installers that have been granted the
          * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES android.permission
@@ -2094,7 +2124,7 @@ public class PackageInstaller {
          * the following conditions are met:
          *
          * <ul>
-         *     <li>{@code requireUserAction} is set to {@code false}.</li>
+         *     <li>{@code requireUserAction} is set to {@link #USER_ACTION_NOT_REQUIRED}.</li>
          *     <li>The app being installed targets {@link android.os.Build.VERSION_CODES#Q API 29}
          *     or higher.</li>
          *     <li>The installer is the {@link InstallSourceInfo#getInstallingPackageName()
@@ -2110,10 +2140,17 @@ public class PackageInstaller {
          *
          * @param requireUserAction whether user action should be required.
          */
-        public void setRequireUserAction(boolean requireUserAction) {
-            this.requireUserAction = requireUserAction
-                    ? SessionInfo.USER_ACTION_REQUIRED
-                    : SessionInfo.USER_ACTION_NOT_REQUIRED;
+        public void setRequireUserAction(
+                @SessionParams.UserActionRequirement int requireUserAction) {
+            if (requireUserAction != USER_ACTION_UNSPECIFIED
+                    && requireUserAction != USER_ACTION_REQUIRED
+                    && requireUserAction != USER_ACTION_NOT_REQUIRED) {
+                throw new IllegalArgumentException("requireUserAction set as invalid value of "
+                        + requireUserAction + ", but must be one of ["
+                        + "USER_ACTION_UNSPECIFIED, USER_ACTION_REQUIRED, USER_ACTION_NOT_REQUIRED"
+                        + "]");
+            }
+            this.requireUserAction = requireUserAction;
         }
 
         /**
@@ -2255,36 +2292,11 @@ public class PackageInstaller {
          */
         public static final int STAGED_SESSION_CONFLICT = 4;
 
-        /** @hide */
-        @IntDef(prefix = {"USER_ACTION"}, value = {
-                USER_ACTION_UNSPECIFIED,
-                USER_ACTION_REQUIRED,
-                USER_ACTION_NOT_REQUIRED
-        })
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface UserActionRequirement {}
-
-        /**
-         * The installer did not call {@link SessionParams#setRequireUserAction(boolean)} to
-         * specify whether user action should be required for the install.
-         */
-        public static final int USER_ACTION_UNSPECIFIED = 0;
-        /**
-         * The installer called {@link SessionParams#setRequireUserAction(boolean)} with
-         * {@code true} to require user action for the install to complete.
-         */
-        public static final int USER_ACTION_REQUIRED = 1;
-        /**
-         * The installer called {@link SessionParams#setRequireUserAction(boolean)} with
-         * {@code false} to request that user action not be required for this install.
-         */
-        public static final int USER_ACTION_NOT_REQUIRED = 2;
-
         private static String userActionToString(int requireUserAction) {
             switch(requireUserAction) {
-                case SessionInfo.USER_ACTION_REQUIRED:
+                case SessionParams.USER_ACTION_REQUIRED:
                     return "REQUIRED";
-                case SessionInfo.USER_ACTION_NOT_REQUIRED:
+                case SessionParams.USER_ACTION_NOT_REQUIRED:
                     return "NOT_REQUIRED";
                 default:
                     return "UNSPECIFIED";
@@ -2941,10 +2953,11 @@ public class PackageInstaller {
          * Note: a return value of {@code USER_ACTION_NOT_REQUIRED} does not guarantee that the
          * install will not result in user action.
          *
-         * @return {@link #USER_ACTION_NOT_REQUIRED}, {@link #USER_ACTION_REQUIRED} or
-         *         {@link #USER_ACTION_UNSPECIFIED}
+         * @return {@link SessionParams#USER_ACTION_NOT_REQUIRED},
+         *         {@link SessionParams#USER_ACTION_REQUIRED} or
+         *         {@link SessionParams#USER_ACTION_UNSPECIFIED}
          */
-        @UserActionRequirement
+        @SessionParams.UserActionRequirement
         public int getRequireUserAction() {
             return requireUserAction;
         }

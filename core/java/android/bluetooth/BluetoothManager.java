@@ -16,19 +16,15 @@
 
 package android.bluetooth;
 
-import android.Manifest;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.annotation.SystemService;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -66,27 +62,9 @@ public final class BluetoothManager {
      * @hide
      */
     public BluetoothManager(Context context) {
-        if (context.getAttributionTag() == null) {
-            context = context.getApplicationContext();
-            if (context == null) {
-                throw new IllegalArgumentException(
-                        "context not associated with any application (using a mock context?)");
-            }
-
-            mAdapter = BluetoothAdapter.getDefaultAdapter();
-        } else {
-            IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE);
-            if (b != null) {
-                mAdapter = new BluetoothAdapter(IBluetoothManager.Stub.asInterface(b));
-            } else {
-                Log.e(TAG, "Bluetooth binder is null");
-                mAdapter = null;
-            }
-        }
-
-        // Context is not initialized in constructor
-        if (mAdapter != null) {
-            mAdapter.setContext(context);
+        mAdapter = BluetoothAdapter.createAdapter();
+        if (context != null) {
+            mAdapter.setAttributionSource(context.getAttributionSource());
         }
     }
 

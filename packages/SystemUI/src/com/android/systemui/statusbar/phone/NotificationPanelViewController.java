@@ -3439,9 +3439,6 @@ public class NotificationPanelViewController extends PanelViewController {
         return new TouchHandler() {
             @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
-                if (mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()) {
-                    return true;
-                }
                 if (mBlockTouches || mQsFullyExpanded && mQs.disallowPanelTouches()) {
                     return false;
                 }

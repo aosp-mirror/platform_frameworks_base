@@ -404,7 +404,6 @@ java_library_static {
 
 java_defaults {
     name: "android_defaults_stubs_current",
-    static_libs: ["art-notices-for-framework-stubs-jar"], // License notices from art module
     sdk_version: "none",
     system_modules: "none",
     java_version: "1.8",

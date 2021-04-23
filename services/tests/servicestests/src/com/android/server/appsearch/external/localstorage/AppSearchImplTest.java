@@ -307,13 +307,13 @@ public class AppSearchImplTest {
     public void testAddDocumentTypePrefix() {
         DocumentProto insideDocument =
                 DocumentProto.newBuilder()
-                        .setUri("inside-uri")
+                        .setUri("inside-id")
                         .setSchema("type")
                         .setNamespace("namespace")
                         .build();
         DocumentProto documentProto =
                 DocumentProto.newBuilder()
-                        .setUri("uri")
+                        .setUri("id")
                         .setSchema("type")
                         .setNamespace("namespace")
                         .addProperties(PropertyProto.newBuilder().addDocumentValues(insideDocument))
@@ -321,13 +321,13 @@ public class AppSearchImplTest {
 
         DocumentProto expectedInsideDocument =
                 DocumentProto.newBuilder()
-                        .setUri("inside-uri")
+                        .setUri("inside-id")
                         .setSchema("package$databaseName/type")
                         .setNamespace("package$databaseName/namespace")
                         .build();
         DocumentProto expectedDocumentProto =
                 DocumentProto.newBuilder()
-                        .setUri("uri")
+                        .setUri("id")
                         .setSchema("package$databaseName/type")
                         .setNamespace("package$databaseName/namespace")
                         .addProperties(
@@ -344,13 +344,13 @@ public class AppSearchImplTest {
     public void testRemoveDocumentTypePrefixes() throws Exception {
         DocumentProto insideDocument =
                 DocumentProto.newBuilder()
-                        .setUri("inside-uri")
+                        .setUri("inside-id")
                         .setSchema("package$databaseName/type")
                         .setNamespace("package$databaseName/namespace")
                         .build();
         DocumentProto documentProto =
                 DocumentProto.newBuilder()
-                        .setUri("uri")
+                        .setUri("id")
                         .setSchema("package$databaseName/type")
                         .setNamespace("package$databaseName/namespace")
                         .addProperties(PropertyProto.newBuilder().addDocumentValues(insideDocument))
@@ -358,14 +358,14 @@ public class AppSearchImplTest {
 
         DocumentProto expectedInsideDocument =
                 DocumentProto.newBuilder()
-                        .setUri("inside-uri")
+                        .setUri("inside-id")
                         .setSchema("type")
                         .setNamespace("namespace")
                         .build();
 
         DocumentProto expectedDocumentProto =
                 DocumentProto.newBuilder()
-                        .setUri("uri")
+                        .setUri("id")
                         .setSchema("type")
                         .setNamespace("namespace")
                         .addProperties(
@@ -383,7 +383,7 @@ public class AppSearchImplTest {
         // Set two different database names in the document, which should never happen
         DocumentProto documentProto =
                 DocumentProto.newBuilder()
-                        .setUri("uri")
+                        .setUri("id")
                         .setSchema("prefix1/type")
                         .setNamespace("prefix2/namespace")
                         .build();
@@ -401,13 +401,13 @@ public class AppSearchImplTest {
         // happen.
         DocumentProto insideDocument =
                 DocumentProto.newBuilder()
-                        .setUri("inside-uri")
+                        .setUri("inside-id")
                         .setSchema("prefix1/type")
                         .setNamespace("prefix1/namespace")
                         .build();
         DocumentProto documentProto =
                 DocumentProto.newBuilder()
-                        .setUri("uri")
+                        .setUri("id")
                         .setSchema("prefix2/type")
                         .setNamespace("prefix2/namespace")
                         .addProperties(PropertyProto.newBuilder().addDocumentValues(insideDocument))
@@ -441,7 +441,7 @@ public class AppSearchImplTest {
                                 + AppSearchImpl.CHECK_OPTIMIZE_INTERVAL;
                 i++) {
             GenericDocument document =
-                    new GenericDocument.Builder<>("namespace", "uri" + i, "type").build();
+                    new GenericDocument.Builder<>("namespace", "id" + i, "type").build();
             mAppSearchImpl.putDocument("package", "database", document, /*logger=*/ null);
         }
 
@@ -452,7 +452,7 @@ public class AppSearchImplTest {
         // delete 999 documents, we will reach the threshold to trigger optimize() in next
         // deletion.
         for (int i = 0; i < AppSearchImpl.OPTIMIZE_THRESHOLD_DOC_COUNT - 1; i++) {
-            mAppSearchImpl.remove("package", "database", "namespace", "uri" + i);
+            mAppSearchImpl.remove("package", "database", "namespace", "id" + i);
         }
 
         // Updates the check for optimize counter, checkForOptimize() will be triggered since
@@ -472,7 +472,7 @@ public class AppSearchImplTest {
                         < AppSearchImpl.OPTIMIZE_THRESHOLD_DOC_COUNT
                                 + AppSearchImpl.CHECK_OPTIMIZE_INTERVAL;
                 i++) {
-            mAppSearchImpl.remove("package", "database", "namespace", "uri" + i);
+            mAppSearchImpl.remove("package", "database", "namespace", "id" + i);
         }
         // updates the check for optimize counter, will reach both CHECK_OPTIMIZE_INTERVAL and
         // OPTIMIZE_THRESHOLD_DOC_COUNT this time and trigger a optimize().
@@ -501,8 +501,7 @@ public class AppSearchImplTest {
                 /*version=*/ 0);
 
         // Insert document
-        GenericDocument document =
-                new GenericDocument.Builder<>("namespace", "uri", "type").build();
+        GenericDocument document = new GenericDocument.Builder<>("namespace", "id", "type").build();
         mAppSearchImpl.putDocument("package", "database", document, /*logger=*/ null);
 
         // Rewrite SearchSpec
@@ -544,11 +543,11 @@ public class AppSearchImplTest {
 
         // Insert documents
         GenericDocument document1 =
-                new GenericDocument.Builder<>("namespace", "uri", "typeA").build();
+                new GenericDocument.Builder<>("namespace", "id", "typeA").build();
         mAppSearchImpl.putDocument("package", "database1", document1, /*logger=*/ null);
 
         GenericDocument document2 =
-                new GenericDocument.Builder<>("namespace", "uri", "typeB").build();
+                new GenericDocument.Builder<>("namespace", "id", "typeB").build();
         mAppSearchImpl.putDocument("package", "database2", document2, /*logger=*/ null);
 
         // Rewrite SearchSpec
@@ -587,8 +586,7 @@ public class AppSearchImplTest {
                 /*version=*/ 0);
 
         // Insert document
-        GenericDocument document =
-                new GenericDocument.Builder<>("namespace", "uri", "type").build();
+        GenericDocument document = new GenericDocument.Builder<>("namespace", "id", "type").build();
         mAppSearchImpl.putDocument("package", "database", document, /*logger=*/ null);
 
         // If 'allowedPrefixedSchemas' is empty, this returns false since there's nothing to
@@ -642,7 +640,7 @@ public class AppSearchImplTest {
 
         // Insert package1 document
         GenericDocument document =
-                new GenericDocument.Builder<>("namespace", "uri", "schema1").build();
+                new GenericDocument.Builder<>("namespace", "id", "schema1").build();
         mAppSearchImpl.putDocument("package1", "database1", document, /*logger=*/ null);
 
         // No query filters specified, package2 shouldn't be able to query for package1's documents.
@@ -653,7 +651,7 @@ public class AppSearchImplTest {
         assertThat(searchResultPage.getResults()).isEmpty();
 
         // Insert package2 document
-        document = new GenericDocument.Builder<>("namespace", "uri", "schema2").build();
+        document = new GenericDocument.Builder<>("namespace", "id", "schema2").build();
         mAppSearchImpl.putDocument("package2", "database2", document, /*logger=*/ null);
 
         // No query filters specified. package2 should only get its own documents back.
@@ -694,7 +692,7 @@ public class AppSearchImplTest {
 
         // Insert package1 document
         GenericDocument document =
-                new GenericDocument.Builder<>("namespace", "uri", "schema1").build();
+                new GenericDocument.Builder<>("namespace", "id", "schema1").build();
         mAppSearchImpl.putDocument("package1", "database1", document, /*logger=*/ null);
 
         // "package1" filter specified, but package2 shouldn't be able to query for package1's
@@ -709,7 +707,7 @@ public class AppSearchImplTest {
         assertThat(searchResultPage.getResults()).isEmpty();
 
         // Insert package2 document
-        document = new GenericDocument.Builder<>("namespace", "uri", "schema2").build();
+        document = new GenericDocument.Builder<>("namespace", "id", "schema2").build();
         mAppSearchImpl.putDocument("package2", "database2", document, /*logger=*/ null);
 
         // "package2" filter specified, package2 should only get its own documents back.
@@ -1028,7 +1026,7 @@ public class AppSearchImplTest {
 
         // Insert package document
         GenericDocument document =
-                new GenericDocument.Builder<>("namespace", "uri", "schema").build();
+                new GenericDocument.Builder<>("namespace", "id", "schema").build();
         mAppSearchImpl.putDocument("package", "database", document, /*logger=*/ null);
 
         // Verify the document is indexed.
@@ -1135,14 +1133,14 @@ public class AppSearchImplTest {
                         + PrefixUtil.PACKAGE_DELIMITER
                         + "databaseName"
                         + PrefixUtil.DATABASE_DELIMITER;
-        final String uri = "uri";
+        final String id = "id";
         final String namespace = prefix + "namespace";
         final String schemaType = prefix + "schema";
 
         // Building the SearchResult received from query.
         DocumentProto documentProto =
                 DocumentProto.newBuilder()
-                        .setUri(uri)
+                        .setUri(id)
                         .setNamespace(namespace)
                         .setSchema(schemaType)
                         .build();
@@ -1185,32 +1183,32 @@ public class AppSearchImplTest {
 
         // Insert two docs
         GenericDocument document1 =
-                new GenericDocument.Builder<>("namespace", "uri1", "type").build();
+                new GenericDocument.Builder<>("namespace", "id1", "type").build();
         GenericDocument document2 =
-                new GenericDocument.Builder<>("namespace", "uri2", "type").build();
+                new GenericDocument.Builder<>("namespace", "id2", "type").build();
         mAppSearchImpl.putDocument("package", "database", document1, /*logger=*/ null);
         mAppSearchImpl.putDocument("package", "database", document2, /*logger=*/ null);
 
-        // Report some usages. uri1 has 2 app and 1 system usage, uri2 has 1 app and 2 system usage.
+        // Report some usages. id1 has 2 app and 1 system usage, id2 has 1 app and 2 system usage.
         mAppSearchImpl.reportUsage(
                 "package",
                 "database",
                 "namespace",
-                "uri1",
+                "id1",
                 /*usageTimestampMillis=*/ 10,
                 /*systemUsage=*/ false);
         mAppSearchImpl.reportUsage(
                 "package",
                 "database",
                 "namespace",
-                "uri1",
+                "id1",
                 /*usageTimestampMillis=*/ 20,
                 /*systemUsage=*/ false);
         mAppSearchImpl.reportUsage(
                 "package",
                 "database",
                 "namespace",
-                "uri1",
+                "id1",
                 /*usageTimestampMillis=*/ 1000,
                 /*systemUsage=*/ true);
 
@@ -1218,25 +1216,25 @@ public class AppSearchImplTest {
                 "package",
                 "database",
                 "namespace",
-                "uri2",
+                "id2",
                 /*usageTimestampMillis=*/ 100,
                 /*systemUsage=*/ false);
         mAppSearchImpl.reportUsage(
                 "package",
                 "database",
                 "namespace",
-                "uri2",
+                "id2",
                 /*usageTimestampMillis=*/ 200,
                 /*systemUsage=*/ true);
         mAppSearchImpl.reportUsage(
                 "package",
                 "database",
                 "namespace",
-                "uri2",
+                "id2",
                 /*usageTimestampMillis=*/ 150,
                 /*systemUsage=*/ true);
 
-        // Sort by app usage count: uri1 should win
+        // Sort by app usage count: id1 should win
         List<SearchResult> page =
                 mAppSearchImpl
                         .query(
@@ -1249,10 +1247,10 @@ public class AppSearchImplTest {
                                         .build())
                         .getResults();
         assertThat(page).hasSize(2);
-        assertThat(page.get(0).getGenericDocument().getUri()).isEqualTo("uri1");
-        assertThat(page.get(1).getGenericDocument().getUri()).isEqualTo("uri2");
+        assertThat(page.get(0).getGenericDocument().getId()).isEqualTo("id1");
+        assertThat(page.get(1).getGenericDocument().getId()).isEqualTo("id2");
 
-        // Sort by app usage timestamp: uri2 should win
+        // Sort by app usage timestamp: id2 should win
         page =
                 mAppSearchImpl
                         .query(
@@ -1267,10 +1265,10 @@ public class AppSearchImplTest {
                                         .build())
                         .getResults();
         assertThat(page).hasSize(2);
-        assertThat(page.get(0).getGenericDocument().getUri()).isEqualTo("uri2");
-        assertThat(page.get(1).getGenericDocument().getUri()).isEqualTo("uri1");
+        assertThat(page.get(0).getGenericDocument().getId()).isEqualTo("id2");
+        assertThat(page.get(1).getGenericDocument().getId()).isEqualTo("id1");
 
-        // Sort by system usage count: uri2 should win
+        // Sort by system usage count: id2 should win
         page =
                 mAppSearchImpl
                         .query(
@@ -1284,10 +1282,10 @@ public class AppSearchImplTest {
                                         .build())
                         .getResults();
         assertThat(page).hasSize(2);
-        assertThat(page.get(0).getGenericDocument().getUri()).isEqualTo("uri2");
-        assertThat(page.get(1).getGenericDocument().getUri()).isEqualTo("uri1");
+        assertThat(page.get(0).getGenericDocument().getId()).isEqualTo("id2");
+        assertThat(page.get(1).getGenericDocument().getId()).isEqualTo("id1");
 
-        // Sort by system usage timestamp: uri1 should win
+        // Sort by system usage timestamp: id1 should win
         page =
                 mAppSearchImpl
                         .query(
@@ -1302,8 +1300,8 @@ public class AppSearchImplTest {
                                         .build())
                         .getResults();
         assertThat(page).hasSize(2);
-        assertThat(page.get(0).getGenericDocument().getUri()).isEqualTo("uri1");
-        assertThat(page.get(1).getGenericDocument().getUri()).isEqualTo("uri2");
+        assertThat(page.get(0).getGenericDocument().getId()).isEqualTo("id1");
+        assertThat(page.get(1).getGenericDocument().getId()).isEqualTo("id2");
     }
 
     @Test
@@ -1353,7 +1351,7 @@ public class AppSearchImplTest {
 
         // Insert document for "package1"
         GenericDocument document =
-                new GenericDocument.Builder<>("namespace", "uri1", "type").build();
+                new GenericDocument.Builder<>("namespace", "id1", "type").build();
         mAppSearchImpl.putDocument("package1", "database", document, /*logger=*/ null);
 
         // Insert schema for "package2"
@@ -1367,9 +1365,9 @@ public class AppSearchImplTest {
                 /*version=*/ 0);
 
         // Insert two documents for "package2"
-        document = new GenericDocument.Builder<>("namespace", "uri1", "type").build();
+        document = new GenericDocument.Builder<>("namespace", "id1", "type").build();
         mAppSearchImpl.putDocument("package2", "database", document, /*logger=*/ null);
-        document = new GenericDocument.Builder<>("namespace", "uri2", "type").build();
+        document = new GenericDocument.Builder<>("namespace", "id2", "type").build();
         mAppSearchImpl.putDocument("package2", "database", document, /*logger=*/ null);
 
         StorageInfo storageInfo = mAppSearchImpl.getStorageInfoForPackage("package1");
@@ -1467,13 +1465,13 @@ public class AppSearchImplTest {
 
         // Add a document for "package1", "database1"
         GenericDocument document =
-                new GenericDocument.Builder<>("namespace1", "uri1", "type").build();
+                new GenericDocument.Builder<>("namespace1", "id1", "type").build();
         mAppSearchImpl.putDocument("package1", "database1", document, /*logger=*/ null);
 
         // Add two documents for "package1", "database2"
-        document = new GenericDocument.Builder<>("namespace1", "uri1", "type").build();
+        document = new GenericDocument.Builder<>("namespace1", "id1", "type").build();
         mAppSearchImpl.putDocument("package1", "database2", document, /*logger=*/ null);
-        document = new GenericDocument.Builder<>("namespace1", "uri2", "type").build();
+        document = new GenericDocument.Builder<>("namespace1", "id2", "type").build();
         mAppSearchImpl.putDocument("package1", "database2", document, /*logger=*/ null);
 
         StorageInfo storageInfo = mAppSearchImpl.getStorageInfoForDatabase("package1", "database1");
@@ -1543,7 +1541,7 @@ public class AppSearchImplTest {
                     appSearchImpl.putDocument(
                             "package",
                             "database",
-                            new GenericDocument.Builder<>("namespace", "uri", "type").build(),
+                            new GenericDocument.Builder<>("namespace", "id", "type").build(),
                             /*logger=*/ null);
                 });
 
@@ -1551,7 +1549,7 @@ public class AppSearchImplTest {
                 IllegalStateException.class,
                 () -> {
                     appSearchImpl.getDocument(
-                            "package", "database", "namespace", "uri", Collections.emptyMap());
+                            "package", "database", "namespace", "id", Collections.emptyMap());
                 });
 
         expectThrows(
@@ -1597,7 +1595,7 @@ public class AppSearchImplTest {
                             "package",
                             "database",
                             "namespace",
-                            "uri",
+                            "id",
                             /*usageTimestampMillis=*/ 1000L,
                             /*systemUsage=*/ false);
                 });
@@ -1605,7 +1603,7 @@ public class AppSearchImplTest {
         expectThrows(
                 IllegalStateException.class,
                 () -> {
-                    appSearchImpl.remove("package", "database", "namespace", "uri");
+                    appSearchImpl.remove("package", "database", "namespace", "id");
                 });
 
         expectThrows(
@@ -1664,13 +1662,13 @@ public class AppSearchImplTest {
 
         // Add a document and persist it.
         GenericDocument document =
-                new GenericDocument.Builder<>("namespace1", "uri1", "type").build();
+                new GenericDocument.Builder<>("namespace1", "id1", "type").build();
         appSearchImpl.putDocument("package", "database", document, /*logger=*/ null);
         appSearchImpl.persistToDisk(PersistType.Code.LITE);
 
         GenericDocument getResult =
                 appSearchImpl.getDocument(
-                        "package", "database", "namespace1", "uri1", Collections.emptyMap());
+                        "package", "database", "namespace1", "id1", Collections.emptyMap());
         assertThat(getResult).isEqualTo(document);
 
         // That document should be visible even from another instance.
@@ -1682,7 +1680,7 @@ public class AppSearchImplTest {
                         /*globalQuerierPackage=*/ "");
         getResult =
                 appSearchImpl2.getDocument(
-                        "package", "database", "namespace1", "uri1", Collections.emptyMap());
+                        "package", "database", "namespace1", "id1", Collections.emptyMap());
         assertThat(getResult).isEqualTo(document);
     }
 
@@ -1711,24 +1709,24 @@ public class AppSearchImplTest {
 
         // Add two documents and persist them.
         GenericDocument document1 =
-                new GenericDocument.Builder<>("namespace1", "uri1", "type").build();
+                new GenericDocument.Builder<>("namespace1", "id1", "type").build();
         appSearchImpl.putDocument("package", "database", document1, /*logger=*/ null);
         GenericDocument document2 =
-                new GenericDocument.Builder<>("namespace1", "uri2", "type").build();
+                new GenericDocument.Builder<>("namespace1", "id2", "type").build();
         appSearchImpl.putDocument("package", "database", document2, /*logger=*/ null);
         appSearchImpl.persistToDisk(PersistType.Code.LITE);
 
         GenericDocument getResult =
                 appSearchImpl.getDocument(
-                        "package", "database", "namespace1", "uri1", Collections.emptyMap());
+                        "package", "database", "namespace1", "id1", Collections.emptyMap());
         assertThat(getResult).isEqualTo(document1);
         getResult =
                 appSearchImpl.getDocument(
-                        "package", "database", "namespace1", "uri2", Collections.emptyMap());
+                        "package", "database", "namespace1", "id2", Collections.emptyMap());
         assertThat(getResult).isEqualTo(document2);
 
         // Delete the first document
-        appSearchImpl.remove("package", "database", "namespace1", "uri1");
+        appSearchImpl.remove("package", "database", "namespace1", "id1");
         appSearchImpl.persistToDisk(PersistType.Code.LITE);
         expectThrows(
                 AppSearchException.class,
@@ -1737,11 +1735,11 @@ public class AppSearchImplTest {
                                 "package",
                                 "database",
                                 "namespace1",
-                                "uri1",
+                                "id1",
                                 Collections.emptyMap()));
         getResult =
                 appSearchImpl.getDocument(
-                        "package", "database", "namespace1", "uri2", Collections.emptyMap());
+                        "package", "database", "namespace1", "id2", Collections.emptyMap());
         assertThat(getResult).isEqualTo(document2);
 
         // Only the second document should be retrievable from another instance.
@@ -1758,11 +1756,11 @@ public class AppSearchImplTest {
                                 "package",
                                 "database",
                                 "namespace1",
-                                "uri1",
+                                "id1",
                                 Collections.emptyMap()));
         getResult =
                 appSearchImpl2.getDocument(
-                        "package", "database", "namespace1", "uri2", Collections.emptyMap());
+                        "package", "database", "namespace1", "id2", Collections.emptyMap());
         assertThat(getResult).isEqualTo(document2);
     }
 
@@ -1791,20 +1789,20 @@ public class AppSearchImplTest {
 
         // Add two documents and persist them.
         GenericDocument document1 =
-                new GenericDocument.Builder<>("namespace1", "uri1", "type").build();
+                new GenericDocument.Builder<>("namespace1", "id1", "type").build();
         appSearchImpl.putDocument("package", "database", document1, /*logger=*/ null);
         GenericDocument document2 =
-                new GenericDocument.Builder<>("namespace2", "uri2", "type").build();
+                new GenericDocument.Builder<>("namespace2", "id2", "type").build();
         appSearchImpl.putDocument("package", "database", document2, /*logger=*/ null);
         appSearchImpl.persistToDisk(PersistType.Code.LITE);
 
         GenericDocument getResult =
                 appSearchImpl.getDocument(
-                        "package", "database", "namespace1", "uri1", Collections.emptyMap());
+                        "package", "database", "namespace1", "id1", Collections.emptyMap());
         assertThat(getResult).isEqualTo(document1);
         getResult =
                 appSearchImpl.getDocument(
-                        "package", "database", "namespace2", "uri2", Collections.emptyMap());
+                        "package", "database", "namespace2", "id2", Collections.emptyMap());
         assertThat(getResult).isEqualTo(document2);
 
         // Delete the first document
@@ -1824,11 +1822,11 @@ public class AppSearchImplTest {
                                 "package",
                                 "database",
                                 "namespace1",
-                                "uri1",
+                                "id1",
                                 Collections.emptyMap()));
         getResult =
                 appSearchImpl.getDocument(
-                        "package", "database", "namespace2", "uri2", Collections.emptyMap());
+                        "package", "database", "namespace2", "id2", Collections.emptyMap());
         assertThat(getResult).isEqualTo(document2);
 
         // Only the second document should be retrievable from another instance.
@@ -1845,11 +1843,11 @@ public class AppSearchImplTest {
                                 "package",
                                 "database",
                                 "namespace1",
-                                "uri1",
+                                "id1",
                                 Collections.emptyMap()));
         getResult =
                 appSearchImpl2.getDocument(
-                        "package", "database", "namespace2", "uri2", Collections.emptyMap());
+                        "package", "database", "namespace2", "id2", Collections.emptyMap());
         assertThat(getResult).isEqualTo(document2);
     }
 }

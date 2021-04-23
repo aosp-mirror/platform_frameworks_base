@@ -36,6 +36,11 @@ import java.util.TreeSet;
  */
 class RunningTasks {
 
+    static final int FLAG_FILTER_ONLY_VISIBLE_RECENTS = 1;
+    static final int FLAG_ALLOWED = 1 << 1;
+    static final int FLAG_CROSS_USERS = 1 << 2;
+    static final int FLAG_KEEP_INTENT_EXTRA = 1 << 3;
+
     // Comparator to sort by last active time (descending)
     private static final Comparator<Task> LAST_ACTIVE_TIME_COMPARATOR =
             (o1, o2) -> Long.signum(o2.lastActiveTime - o1.lastActiveTime);
@@ -50,10 +55,10 @@ class RunningTasks {
     private boolean mFilterOnlyVisibleRecents;
     private Task mTopDisplayFocusRootTask;
     private RecentTasks mRecentTasks;
+    private boolean mKeepIntentExtra;
 
-    void getTasks(int maxNum, List<RunningTaskInfo> list, boolean filterOnlyVisibleRecents,
-            RootWindowContainer root, int callingUid, boolean allowed, boolean crossUser,
-            ArraySet<Integer> profileIds) {
+    void getTasks(int maxNum, List<RunningTaskInfo> list, int flags,
+            RootWindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {
             return;
@@ -63,12 +68,14 @@ class RunningTasks {
         mTmpSortedSet.clear();
         mCallingUid = callingUid;
         mUserId = UserHandle.getUserId(callingUid);
-        mCrossUser = crossUser;
+        mCrossUser = (flags & FLAG_CROSS_USERS) == FLAG_CROSS_USERS;
         mProfileIds = profileIds;
-        mAllowed = allowed;
-        mFilterOnlyVisibleRecents = filterOnlyVisibleRecents;
+        mAllowed = (flags & FLAG_ALLOWED) == FLAG_ALLOWED;
+        mFilterOnlyVisibleRecents =
+                (flags & FLAG_FILTER_ONLY_VISIBLE_RECENTS) == FLAG_FILTER_ONLY_VISIBLE_RECENTS;
         mTopDisplayFocusRootTask = root.getTopDisplayFocusedRootTask();
         mRecentTasks = root.mService.getRecentTasks();
+        mKeepIntentExtra = (flags & FLAG_KEEP_INTENT_EXTRA) == FLAG_KEEP_INTENT_EXTRA;
 
         final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,
                 PooledLambda.__(Task.class));
@@ -126,7 +133,8 @@ class RunningTasks {
 
     /** Constructs a {@link RunningTaskInfo} from a given {@param task}. */
     private RunningTaskInfo createRunningTaskInfo(Task task) {
-        final RunningTaskInfo rti = task.getTaskInfo();
+        final RunningTaskInfo rti = new RunningTaskInfo();
+        task.fillTaskInfo(rti, !mKeepIntentExtra);
         // Fill in some deprecated values
         rti.id = rti.taskId;
         return rti;

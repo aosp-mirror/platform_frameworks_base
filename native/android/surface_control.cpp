@@ -260,6 +260,7 @@ struct ASurfaceTransactionStats {
     std::unordered_map<ASurfaceControl*, ASurfaceControlStats> aSurfaceControlStats;
     int64_t latchTime;
     sp<Fence> presentFence;
+    bool transactionCompleted;
 };
 
 int64_t ASurfaceTransactionStats_getLatchTime(ASurfaceTransactionStats* aSurfaceTransactionStats) {
@@ -269,6 +270,9 @@ int64_t ASurfaceTransactionStats_getLatchTime(ASurfaceTransactionStats* aSurface
 
 int ASurfaceTransactionStats_getPresentFenceFd(ASurfaceTransactionStats* aSurfaceTransactionStats) {
     CHECK_NOT_NULL(aSurfaceTransactionStats);
+    LOG_ALWAYS_FATAL_IF(!aSurfaceTransactionStats->transactionCompleted,
+                        "ASurfaceTransactionStats queried from an incomplete transaction callback");
+
     auto& presentFence = aSurfaceTransactionStats->presentFence;
     return (presentFence) ? presentFence->dup() : -1;
 }
@@ -313,6 +317,8 @@ int ASurfaceTransactionStats_getPreviousReleaseFenceFd(
             ASurfaceTransactionStats* aSurfaceTransactionStats, ASurfaceControl* aSurfaceControl) {
     CHECK_NOT_NULL(aSurfaceTransactionStats);
     CHECK_NOT_NULL(aSurfaceControl);
+    LOG_ALWAYS_FATAL_IF(!aSurfaceTransactionStats->transactionCompleted,
+                        "ASurfaceTransactionStats queried from an incomplete transaction callback");
 
     const auto& aSurfaceControlStats =
             aSurfaceTransactionStats->aSurfaceControlStats.find(aSurfaceControl);
@@ -334,7 +340,6 @@ void ASurfaceTransactionStats_releaseASurfaceControls(ASurfaceControl** aSurface
 void ASurfaceTransaction_setOnComplete(ASurfaceTransaction* aSurfaceTransaction, void* context,
                                        ASurfaceTransaction_OnComplete func) {
     CHECK_NOT_NULL(aSurfaceTransaction);
-    CHECK_NOT_NULL(context);
     CHECK_NOT_NULL(func);
 
     TransactionCompletedCallbackTakesContext callback = [func](void* callback_context,
@@ -345,6 +350,7 @@ void ASurfaceTransaction_setOnComplete(ASurfaceTransaction* aSurfaceTransaction,
 
         aSurfaceTransactionStats.latchTime = latchTime;
         aSurfaceTransactionStats.presentFence = presentFence;
+        aSurfaceTransactionStats.transactionCompleted = true;
 
         auto& aSurfaceControlStats = aSurfaceTransactionStats.aSurfaceControlStats;
 
@@ -694,4 +700,34 @@ void ASurfaceTransaction_setEnableBackPressure(ASurfaceTransaction* aSurfaceTran
     const uint32_t flags = enableBackpressure ?
                       layer_state_t::eEnableBackpressure : 0;
     transaction->setFlags(surfaceControl, flags, layer_state_t::eEnableBackpressure);
+}
+
+void ASurfaceTransaction_setOnCommit(ASurfaceTransaction* aSurfaceTransaction, void* context,
+                                     ASurfaceTransaction_OnCommit func) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(func);
+
+    TransactionCompletedCallbackTakesContext callback =
+            [func](void* callback_context, nsecs_t latchTime, const sp<Fence>& /* presentFence */,
+                   const std::vector<SurfaceControlStats>& surfaceControlStats) {
+                ASurfaceTransactionStats aSurfaceTransactionStats;
+                aSurfaceTransactionStats.latchTime = latchTime;
+                aSurfaceTransactionStats.transactionCompleted = false;
+
+                auto& aSurfaceControlStats = aSurfaceTransactionStats.aSurfaceControlStats;
+                for (const auto&
+                             [surfaceControl, latchTime, acquireTime, presentFence,
+                              previousReleaseFence, transformHint,
+                              frameEvents] : surfaceControlStats) {
+                    ASurfaceControl* aSurfaceControl =
+                            reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
+                    aSurfaceControlStats[aSurfaceControl].acquireTime = acquireTime;
+                }
+
+                (*func)(callback_context, &aSurfaceTransactionStats);
+            };
+
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->addTransactionCommittedCallback(callback, context);
 }

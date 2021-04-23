@@ -33,7 +33,7 @@ oneway interface IInputMethodPrivilegedOperations {
     void reportStartInputAsync(in IBinder startInputToken);
     void createInputContentUriToken(in Uri contentUri, in String packageName,
             in IIInputContentUriTokenResultCallback resultCallback);
-    void reportFullscreenMode(boolean fullscreen, in IVoidResultCallback resultCallback);
+    void reportFullscreenModeAsync(boolean fullscreen);
     void setInputMethod(String id, in IVoidResultCallback resultCallback);
     void setInputMethodAndSubtype(String id, in InputMethodSubtype subtype,
             in IVoidResultCallback resultCallback);
