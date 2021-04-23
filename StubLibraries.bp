@@ -403,16 +403,6 @@ java_library_static {
 }
 
 java_defaults {
-    name: "android_defaults_stubs_current",
-    sdk_version: "none",
-    system_modules: "none",
-    java_version: "1.8",
-    compile_dex: true,
-    defaults_visibility: ["//visibility:private"],
-    visibility: ["//visibility:public"],
-}
-
-java_defaults {
     name: "android_stubs_dists_default",
     dist: {
         targets: [
@@ -431,7 +421,7 @@ java_library_static {
         "android-non-updatable.stubs",
         "private-stub-annotations-jar",
     ],
-    defaults: ["android_defaults_stubs_current"],
+    defaults: ["android.jar_defaults"],
 }
 
 java_library_static {
@@ -441,7 +431,7 @@ java_library_static {
         "private-stub-annotations-jar",
     ],
     defaults: [
-        "android_defaults_stubs_current",
+        "android.jar_defaults",
         "android_stubs_dists_default",
     ],
     dist: {
@@ -469,7 +459,7 @@ java_library_static {
         "private-stub-annotations-jar",
     ],
     defaults: [
-        "android_defaults_stubs_current",
+        "android.jar_defaults",
         "android_stubs_dists_default",
     ],
     dist: {
@@ -480,7 +470,7 @@ java_library_static {
 java_library_static {
     name: "android_module_lib_stubs_current",
     defaults: [
-        "android_defaults_stubs_current",
+        "android.jar_defaults",
         "android_stubs_dists_default",
     ],
     static_libs: [
