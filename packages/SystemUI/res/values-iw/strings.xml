@@ -102,7 +102,7 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"מתבצעת הקלטה של המסך"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"מתבצעת הקלטה של המסך והאודיו"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"הצגת מיקומים של נגיעות במסך"</string>
-    <string name="screenrecord_stop_text" msgid="6549288689506057686">"אפשר להקיש כדי להפסיק"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"אפשר להקיש כדי להפסיק את ההקלטה"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"עצירה"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"השהיה"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"המשך"</string>
@@ -997,7 +997,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"מצב חיסכון בסוללה יופעל באופן אוטומטי כשרמת טעינת הסוללה תהיה נמוכה מ-<xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"הגדרות"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"הבנתי"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"‏ערימת Dump SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"החיישנים כבויים"</string>
     <string name="device_services" msgid="1549944177856658705">"שירותים למכשיר"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ללא שם"</string>

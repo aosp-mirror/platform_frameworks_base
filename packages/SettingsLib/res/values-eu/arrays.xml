@@ -141,13 +141,13 @@
     <item msgid="1241278021345116816">"Audioaren kalitatea areagotzeko optimizatua (990 Kb/s / 909 Kb/s)"</item>
     <item msgid="3523665555859696539">"Audioaren eta konexioaren kalitate orekatua (660 Kb/s / 606 Kb/s)"</item>
     <item msgid="886408010459747589">"Konexioaren kalitatea areagotzeko optimizatua (330 Kb/s / 303 Kb/s)"</item>
-    <item msgid="3808414041654351577">"Emaitzarik onenak (bit-abiadura doigarria)"</item>
+    <item msgid="3808414041654351577">"Emaitzarik onenak (bit-abiadura egokitua)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="804499336721569838">"Audioaren kalitatea areagotzeko optimizatua"</item>
     <item msgid="7451422070435297462">"Orekatu audioaren eta konexioaren kalitateak"</item>
     <item msgid="6173114545795428901">"Konexioaren kalitatea areagotzeko optimizatua"</item>
-    <item msgid="4349908264188040530">"Emaitzarik onenak (bit-abiadura doigarria)"</item>
+    <item msgid="4349908264188040530">"Emaitzarik onenak (bit-abiadura egokitua)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="8019740759207729126"></item>

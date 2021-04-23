@@ -203,9 +203,9 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Налады VPN недаступныя для гэтага карыстальніка"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Налады мадэма недаступныя для гэтага карыстальніка"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Налады Імя пункту доступу недаступныя для гэтага карыстальніка"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"Адладка USB"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"Адладка па USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Рэжым адладкі, калі USB падключаны"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Адклікаць дазвол USB-адладкі"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Скасаваць дазвол да адладкі па USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Адладка па Wi-Fi"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Рэжым адладкі з падключанай сеткай Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Памылка"</string>
@@ -300,17 +300,17 @@
     <string name="debug_view_attributes" msgid="3539609843984208216">"Уключыць прагляд атрыбутаў"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Перадача даных мабільнай сувязі заўсёды актыўная, нават калі актыўная сетка Wi‑Fi (для хуткага пераключэння паміж сеткамі)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Выкарыстоўваць апаратнае паскарэнне ў рэжыме мадэма пры наяўнасці"</string>
-    <string name="adb_warning_title" msgid="7708653449506485728">"Дазволіць адладку USB?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"Адладка USB прызначана толькі для мэтаў распрацоўкі. Яна можа выкарыстоўвацца, каб капіяваць дадзеныя паміж кампутарам і прыладай, усталёўваць прыкладанні на прыладзе без папярэдняга апавяшчэння і чытаць дадзеныя дзённiка."</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"Дазволіць адладку па USB?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"Адладка па USB прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп\'ютарам і прыладай, усталёўваць праграмы на прыладзе без папярэдняга апавяшчэння і чытаць даныя журнала."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Дазволіць адладку па Wi-Fi?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Адладка па Wi-Fi прызначана толькі для мэт распрацоўкі. Яна можа выкарыстоўвацца, каб капіраваць даныя паміж камп\'ютарам і прыладай, усталёўваць праграмы на прыладзе без апавяшчэння і чытаць даныя журнала."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Адклікаць доступ да адладкі USB з усіх камп\'ютараў, на якiх вы уваходзiлi ў сiстэму?"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Скасаваць доступ да адладкі па USB з усіх камп\'ютараў, на якiх вы уваходзiлi ў сiстэму?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Дазволiць налады распрацоўшчыка?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Гэтыя налады прызначаны толькi для распрацоўшыкаў. Яны могуць выклікаць збоi прылад i ўсталяваных на iх прыкладанняў, а таксама перашкаджаць iх працы."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Праверце праграмы па USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Праверка бяспекі праграм, усталяваных з дапамогай ADB/ADT."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Прылады Bluetooth будуць паказаны без назваў (толькі MAC-адрасы)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Адключыць функцыю абсалютнага гуку Bluetooth у выпадку праблем з гукам на аддаленых прыладах, напрыклад, пры непрымальна высокай гучнасці або адсутнасці кіравання."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Адключыць функцыю абсалютнага гуку Bluetooth у выпадку праблем з гукам на аддаленых прыладах, напрыклад пры непрымальна высокай гучнасці або адсутнасці кіравання."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Уключае стос функцый Bluetooth Gabeldorsche."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Уключае функцыю \"Палепшанае падключэнне\"."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Лакальны тэрмінал"</string>
@@ -418,8 +418,8 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Дэйтэранамалія (чырвоны-зялёны)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Пратанамалія (чырвоны-зялёны)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Трытанамалія (сіні-жоўты)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Карэкцыя колеру"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Карэкцыя колеру дазволіць вам наладзіць адлюстраванне колераў на экране прылады"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Карэкцыя колераў"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Карэкцыя колераў дазволіць вам наладзіць адлюстраванне колераў на экране прылады"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Перавызначаны <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Зараду хопіць прыблізна на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>

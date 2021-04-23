@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Zrušiť"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Párovaním udelíte zariadeniam po pripojení prístup k svojim kontaktom a histórii hovorov."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nepodarilo sa spárovať so zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nepodarilo sa spárovať so zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, pretože ste zadali nesprávny kód PIN alebo prístupový kľúč."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"So zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g> sa nespárovalo pre nesprávny kód PIN alebo prístupový kľúč."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"So zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nie je možné komunikovať."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Párovanie odmietnuté zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Počítač"</string>
@@ -279,7 +279,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Vypnuté"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automaticky"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Názov hostiteľa poskytovateľa súkromného DNS"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Zadajte názov hostiteľa poskytovateľa DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Zadajte hostiteľa poskytovateľa DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nepodarilo sa pripojiť"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>

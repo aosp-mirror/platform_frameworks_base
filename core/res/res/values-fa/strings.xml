@@ -84,7 +84,7 @@
     <string name="RestrictedStateContent" msgid="7693575344608618926">"شرکت مخابراتی شما موقتاً آن را خاموش کرده است"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"شرکت مخابراتی‌تان موقتاً آن را برای سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> خاموش کرده است"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"شبکه تلفن همراه دردسترس نیست"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"تغییر شبکه برگزیده را امتحان کنید. برای تغییر ضربه بزنید."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"تغییر شبکه ترجیحی را امتحان کنید. برای تغییر، ضربه بزنید."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"تماس اضطراری امکان‌پذیر نیست"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏تماس اضطراری ازطریق Wi‑Fi امکان‌پذیر نیست"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"هشدارها"</string>
@@ -113,7 +113,7 @@
     <string name="roamingText2" msgid="2834048284153110598">"نشانگر چشمک زن فراگردی"</string>
     <string name="roamingText3" msgid="831690234035748988">"خارج از محله"</string>
     <string name="roamingText4" msgid="2171252529065590728">"خارج از ساختمان"</string>
-    <string name="roamingText5" msgid="4294671587635796641">"فراگردی - سیستم برگزیده"</string>
+    <string name="roamingText5" msgid="4294671587635796641">"فراگردی - سیستم ترجیحی"</string>
     <string name="roamingText6" msgid="5536156746637992029">"فراگردی - سیستم موجود"</string>
     <string name="roamingText7" msgid="1783303085512907706">"فراگردی - شریک"</string>
     <string name="roamingText8" msgid="7774800704373721973">"فراگردی - شریک ویژه"</string>
@@ -1263,7 +1263,7 @@
     <string name="select_character" msgid="3352797107930786979">"درج نویسه"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"درحال ارسال پیامک‌ها"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; درحال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
-    <string name="sms_control_yes" msgid="4858845109269524622">"مجاز است"</string>
+    <string name="sms_control_yes" msgid="4858845109269524622">"مجاز بودن"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"مجاز نبودن"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; مایل است پیامی به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ارسال کند."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"این مورد "<b>"شاید هزینه‌ای"</b>" را به حساب دستگاه همراهتان بگذارد."</string>

@@ -309,7 +309,7 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Աշխատանքային ռեժիմը միացվեց:"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Տվյալների խնայումն անջատվեց:"</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Թրաֆիկի տնտեսումը միացվեց:"</string>
-    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Տվիչների գաղտնիությունն անջատած է:"</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Տվիչների գաղտնիությունն անջատված է:"</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"Տվիչների գաղտնիությունը միացված է:"</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Ցուցադրել պայծառությունը"</string>
     <string name="accessibility_ambient_display_charging" msgid="7725523068728128968">"Լիցքավորում"</string>
@@ -624,7 +624,7 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Թրթռոց"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Անձայն"</string>
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"Հեռախոսում միացված է թրթռոցը"</string>
-    <string name="qs_status_phone_muted" msgid="3763664791309544103">"Հեռախոսի ձայնն անջատած է"</string>
+    <string name="qs_status_phone_muted" msgid="3763664791309544103">"Հեռախոսի ձայնն անջատված է"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s: Հպեք՝ ձայնը միացնելու համար:"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s: Հպեք՝ թրթռումը միացնելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s: Հպեք՝ ձայնն անջատելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
@@ -828,7 +828,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Միացնել"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Անջատել"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Հասանելի չէ"</string>
-    <string name="nav_bar" msgid="4642708685386136807">"Նավարկման գոտի"</string>
+    <string name="nav_bar" msgid="4642708685386136807">"Նավիգացիայի գոտի"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Դասավորություն"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Լրացուցիչ ձախ կոճակի տեսակ"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"Լրացուցիչ աջ կոճակի տեսակ"</string>
@@ -850,7 +850,7 @@
     <string name="reset" msgid="8715144064608810383">"Վերակայել"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Կարգավորել կոճակի լայնությունը"</string>
     <string name="clipboard" msgid="8517342737534284617">"Սեղմատախտակ"</string>
-    <string name="accessibility_key" msgid="3471162841552818281">"Հատուկ նավարկման կոճակ"</string>
+    <string name="accessibility_key" msgid="3471162841552818281">"Հատուկ նավիգացիայի կոճակ"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Ձախ ստեղնային կոդ"</string>
     <string name="right_keycode" msgid="2480715509844798438">"Աջ ստեղնային կոդ"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ձախ պատկերակ"</string>
@@ -923,7 +923,7 @@
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Փոխել չափը"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Հեռախոսն անջատվել էր տաքանալու պատճառով"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Հեռախոսն այժմ նորմալ աշխատում է"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ձեր հեռախոսը չափազանց տաք էր, այդ պատճառով այն անջատվել է՝ հովանալու համար: Հեռախոսն այժմ նորմալ աշխատում է:\n\nՀեռախոսը կարող է տաքանալ, եթե՝\n	• Օգտագործում եք ռեսուրսատար հավելվածներ (օրինակ՝ խաղեր, տեսանյութեր կամ նավարկման հավելվածներ)\n	• Ներբեռնում կամ վերբեռնում եք ծանր ֆայլեր\n	• Օգտագործում եք ձեր հեռախոսը բարձր ջերմային պայմաններում"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ձեր հեռախոսը չափազանց տաք էր, այդ պատճառով այն անջատվել է՝ հովանալու համար: Հեռախոսն այժմ նորմալ աշխատում է:\n\nՀեռախոսը կարող է տաքանալ, եթե՝\n	• Օգտագործում եք ռեսուրսատար հավելվածներ (օրինակ՝ խաղեր, տեսանյութեր կամ նավիգացիայի հավելվածներ)\n	• Ներբեռնում կամ վերբեռնում եք ծանր ֆայլեր\n	• Օգտագործում եք ձեր հեռախոսը բարձր ջերմային պայմաններում"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Հեռախոսը տաքանում է"</string>
     <string name="high_temp_notif_message" msgid="163928048626045592">"Հովանալու ընթացքում հեռախոսի որոշ գործառույթներ սահմանափակ են"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ձեր հեռախոսն ավտոմատ կերպով կփորձի hովանալ: Կարող եք շարունակել օգտագործել հեռախոսը, սակայն հնարավոր է, որ այն ավելի դանդաղ աշխատի:\n\nՀովանալուց հետո հեռախոսը կաշխատի կանոնավոր կերպով:"</string>
