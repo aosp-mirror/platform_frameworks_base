@@ -170,7 +170,7 @@ public class PeopleSpaceTile implements Parcelable {
     /** Converts a {@link PeopleSpaceTile} into a {@link PeopleSpaceTile.Builder}. */
     public Builder toBuilder() {
         Builder builder =
-                new Builder(mId, mUserName.toString(), mUserIcon, mIntent);
+                new Builder(mId, mUserName, mUserIcon, mIntent);
         builder.setContactUri(mContactUri);
         builder.setUserHandle(mUserHandle);
         builder.setPackageName(mPackageName);
@@ -209,7 +209,7 @@ public class PeopleSpaceTile implements Parcelable {
         private List<ConversationStatus> mStatuses;
 
         /** Builder for use only if a shortcut is not available for the tile. */
-        public Builder(String id, String userName, Icon userIcon, Intent intent) {
+        public Builder(String id, CharSequence userName, Icon userIcon, Intent intent) {
             mId = id;
             mUserName = userName;
             mUserIcon = userIcon;
