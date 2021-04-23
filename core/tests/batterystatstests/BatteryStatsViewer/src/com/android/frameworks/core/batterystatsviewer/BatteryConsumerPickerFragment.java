@@ -112,14 +112,25 @@ public class BatteryConsumerPickerFragment extends Fragment {
         @Override
         public List<BatteryConsumerInfo> loadInBackground() {
             final BatteryUsageStats batteryUsageStats = mBatteryStatsManager.getBatteryUsageStats();
-
             List<BatteryConsumerInfo> batteryConsumerList = new ArrayList<>();
+
+            for (int scope = 0;
+                    scope < BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT;
+                    scope++) {
+                batteryConsumerList.add(
+                        BatteryConsumerInfoHelper.makeBatteryConsumerInfo(
+                                batteryUsageStats.getAggregateBatteryConsumer(scope),
+                                BatteryConsumerData.batteryConsumerId(scope),
+                                mPackageManager));
+            }
+
             switch (mPickerType) {
                 case PICKER_TYPE_APP:
                     for (UidBatteryConsumer consumer : batteryUsageStats.getUidBatteryConsumers()) {
                         batteryConsumerList.add(
-                                BatteryConsumerInfoHelper.makeBatteryConsumerInfo(mPackageManager,
-                                        consumer));
+                                BatteryConsumerInfoHelper.makeBatteryConsumerInfo(consumer,
+                                        BatteryConsumerData.batteryConsumerId(consumer),
+                                        mPackageManager));
                     }
                     break;
                 case PICKER_TYPE_DRAIN:
@@ -127,8 +138,9 @@ public class BatteryConsumerPickerFragment extends Fragment {
                     for (SystemBatteryConsumer consumer :
                             batteryUsageStats.getSystemBatteryConsumers()) {
                         batteryConsumerList.add(
-                                BatteryConsumerInfoHelper.makeBatteryConsumerInfo(mPackageManager,
-                                        consumer));
+                                BatteryConsumerInfoHelper.makeBatteryConsumerInfo(consumer,
+                                        BatteryConsumerData.batteryConsumerId(consumer),
+                                        mPackageManager));
                     }
                     break;
             }
@@ -208,8 +220,12 @@ public class BatteryConsumerPickerFragment extends Fragment {
             }
             viewHolder.powerView.setText(
                     String.format(Locale.getDefault(), "%.1f mAh", item.powerMah));
-            viewHolder.iconView.setImageDrawable(
-                    item.iconInfo.loadIcon(getContext().getPackageManager()));
+            if (item.iconInfo != null) {
+                viewHolder.iconView.setImageDrawable(
+                        item.iconInfo.loadIcon(getContext().getPackageManager()));
+            } else {
+                viewHolder.iconView.setImageResource(R.drawable.gm_device_24);
+            }
             if (item.packages != null) {
                 viewHolder.packagesView.setText(item.packages);
                 viewHolder.packagesView.setVisibility(View.VISIBLE);
