@@ -306,8 +306,8 @@ public class PowerMetricsCollector implements TestRule {
         return null;
     }
 
-    public PowerMetrics.Metric getTimeMetric(@BatteryConsumer.TimeComponent int component) {
-        final String name = PowerMetrics.getTimeMetricName(component);
+    public PowerMetrics.Metric getTimeMetric(@BatteryConsumer.PowerComponent int component) {
+        final String name = PowerMetrics.getDurationMetricName(component);
         for (PowerMetrics.Metric metric : mPowerMetricsDelta) {
             if (metric.metricName.equals(name)) {
                 return metric;

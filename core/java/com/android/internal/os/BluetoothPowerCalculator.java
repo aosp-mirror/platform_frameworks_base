@@ -88,7 +88,7 @@ public class BluetoothPowerCalculator extends PowerCalculator {
                     + " power=" + formatCharge(systemPowerMah));
         }
         systemBatteryConsumerBuilder
-                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_BLUETOOTH,
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
                         systemComponentDurationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
                         Math.max(systemPowerMah, total.powerMah), powerModel)
@@ -105,7 +105,7 @@ public class BluetoothPowerCalculator extends PowerCalculator {
         final long durationMs = calculateDuration(activityCounter);
         final double powerMah = calculatePowerMah(powerModel, measuredChargeUC, activityCounter);
 
-        app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_BLUETOOTH, durationMs)
+        app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_BLUETOOTH, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH, powerMah, powerModel);
 
         total.durationMs += durationMs;

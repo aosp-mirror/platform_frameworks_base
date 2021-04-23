@@ -67,7 +67,7 @@ public class BatteryUsageStatsTest {
         final BatteryStatsImpl.Uid batteryStatsUid = batteryStats.getUidStatsLocked(2000);
 
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[]{"FOO"}, 1)
+                new BatteryUsageStats.Builder(new String[]{"FOO"})
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
                         .setStatsStartTimestamp(1000);
@@ -83,11 +83,9 @@ public class BatteryUsageStatsTest {
                 .setConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 500)
                 .setUsageDurationMillis(
-                        BatteryConsumer.TIME_COMPONENT_CPU, 600)
-                .setUsageDurationMillis(
-                        BatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND, 700)
+                        BatteryConsumer.POWER_COMPONENT_CPU, 600)
                 .setUsageDurationForCustomComponentMillis(
-                        BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID, 800);
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 800);
 
         builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_CAMERA)
                 .setConsumedPower(
@@ -95,9 +93,9 @@ public class BatteryUsageStatsTest {
                 .setConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10200)
                 .setUsageDurationMillis(
-                        BatteryConsumer.TIME_COMPONENT_CPU, 10300)
+                        BatteryConsumer.POWER_COMPONENT_CPU, 10300)
                 .setUsageDurationForCustomComponentMillis(
-                        BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID, 10400)
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10400)
                 .setPowerConsumedByApps(20000);
 
         return builder.build();
@@ -129,11 +127,9 @@ public class BatteryUsageStatsTest {
                 assertThat(uidBatteryConsumer.getConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(500);
                 assertThat(uidBatteryConsumer.getUsageDurationMillis(
-                        BatteryConsumer.TIME_COMPONENT_CPU)).isEqualTo(600);
-                assertThat(uidBatteryConsumer.getUsageDurationMillis(
-                        BatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND)).isEqualTo(700);
+                        BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(600);
                 assertThat(uidBatteryConsumer.getUsageDurationForCustomComponentMillis(
-                        BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID)).isEqualTo(800);
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(800);
                 assertThat(uidBatteryConsumer.getConsumedPower()).isEqualTo(1200);
                 assertThat(uidBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);
                 assertThat(uidBatteryConsumer.getCustomPowerComponentName(
@@ -152,9 +148,9 @@ public class BatteryUsageStatsTest {
                 assertThat(systemBatteryConsumer.getConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(10200);
                 assertThat(systemBatteryConsumer.getUsageDurationMillis(
-                        BatteryConsumer.TIME_COMPONENT_CPU)).isEqualTo(10300);
+                        BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(10300);
                 assertThat(systemBatteryConsumer.getUsageDurationForCustomComponentMillis(
-                        BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID)).isEqualTo(10400);
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(10400);
                 assertThat(systemBatteryConsumer.getConsumedPower()).isEqualTo(20300);
                 assertThat(systemBatteryConsumer.getPowerConsumedByApps()).isEqualTo(20000);
                 assertThat(systemBatteryConsumer.getUsageDurationMillis())
