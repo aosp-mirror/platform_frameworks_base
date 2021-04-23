@@ -2854,7 +2854,6 @@ public final class ViewRootImpl implements ViewParent,
                             return;
                         }
                     }
-                    notifySurfaceCreated();
                 } else if (surfaceDestroyed) {
                     // If the surface has been removed, then reset the scroll
                     // positions.
@@ -2892,10 +2891,6 @@ public final class ViewRootImpl implements ViewParent,
                         handleOutOfResourcesException(e);
                         return;
                     }
-                }
-
-                if (!surfaceCreated && surfaceReplaced) {
-                    notifySurfaceReplaced();
                 }
 
                 if (mDragResizing != dragResizing) {
@@ -3110,7 +3105,14 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (surfaceDestroyed) {
+        // These callbacks will trigger SurfaceView SurfaceHolder.Callbacks and must be invoked
+        // after the measure pass. If its invoked before the measure pass and the app modifies
+        // the view hierarchy in the callbacks, we could leave the views in a broken state.
+        if (surfaceCreated) {
+            notifySurfaceCreated();
+        } else if (surfaceReplaced) {
+            notifySurfaceReplaced();
+        } else if (surfaceDestroyed)  {
             notifySurfaceDestroyed();
         }
 
