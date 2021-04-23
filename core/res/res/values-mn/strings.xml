@@ -1773,6 +1773,28 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
+    <skip />
+    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
+    <skip />
+    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
+    <skip />
+    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
+    <skip />
+    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
+    <skip />
+    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
+    <skip />
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1809,6 +1831,8 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
+    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Тодорхойгүй босоо цаас"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Тодорхойгүй хөндлөн цаас"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Цуцлагдсан"</string>
@@ -1852,8 +1876,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Таны админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Таны админ устгасан"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"Батарей хэмнэгч нь Бараан загварыг асааж, дэвсгэрийн үйл ажиллагаа, зарим визуал эффект болон “Hey Google” зэрэг онцлогуудыг хязгаарлаж эсвэл унтраана\n\n"<annotation id="url">"Нэмэлт мэдээлэл авах"</annotation></string>
-    <string name="battery_saver_description" msgid="7695751399533397741">"Батарей хэмнэгч нь Бараан загварыг асааж, дэвсгэрийн үйл ажиллагаа, зарим визуал эффект болон “Hey Google” зэрэг онцлогуудыг хязгаарлаж эсвэл унтраана."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (5693741424234005958) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь ар талд ажиллаж буй зарим апп-н өгөгдлийг илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Энэ нь жишээлбэл зургийг товших хүртэл харагдахгүй гэсэн үг юм."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Дата хэмнэгчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Асаах"</string>
