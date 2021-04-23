@@ -79,15 +79,14 @@ package android.app.appsearch {
 
   public static final class AppSearchSchema.DocumentPropertyConfig extends android.app.appsearch.AppSearchSchema.PropertyConfig {
     method @NonNull public String getSchemaType();
-    method public boolean isIndexNestedProperties();
+    method public boolean shouldIndexNestedProperties();
   }
 
   public static final class AppSearchSchema.DocumentPropertyConfig.Builder {
-    ctor public AppSearchSchema.DocumentPropertyConfig.Builder(@NonNull String);
+    ctor public AppSearchSchema.DocumentPropertyConfig.Builder(@NonNull String, @NonNull String);
     method @NonNull public android.app.appsearch.AppSearchSchema.DocumentPropertyConfig build();
     method @NonNull public android.app.appsearch.AppSearchSchema.DocumentPropertyConfig.Builder setCardinality(int);
-    method @NonNull public android.app.appsearch.AppSearchSchema.DocumentPropertyConfig.Builder setIndexNestedProperties(boolean);
-    method @NonNull public android.app.appsearch.AppSearchSchema.DocumentPropertyConfig.Builder setSchemaType(@NonNull String);
+    method @NonNull public android.app.appsearch.AppSearchSchema.DocumentPropertyConfig.Builder setShouldIndexNestedProperties(boolean);
   }
 
   public static final class AppSearchSchema.DoublePropertyConfig extends android.app.appsearch.AppSearchSchema.PropertyConfig {
@@ -136,12 +135,12 @@ package android.app.appsearch {
 
   public final class AppSearchSession implements java.io.Closeable {
     method public void close();
-    method public void getByUri(@NonNull android.app.appsearch.GetByUriRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,android.app.appsearch.GenericDocument>);
+    method public void getByDocumentId(@NonNull android.app.appsearch.GetByDocumentIdRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,android.app.appsearch.GenericDocument>);
     method public void getNamespaces(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.util.Set<java.lang.String>>>);
     method public void getSchema(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<android.app.appsearch.GetSchemaResponse>>);
     method public void getStorageInfo(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<android.app.appsearch.StorageInfo>>);
     method public void put(@NonNull android.app.appsearch.PutDocumentsRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
-    method public void remove(@NonNull android.app.appsearch.RemoveByUriRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
+    method public void remove(@NonNull android.app.appsearch.RemoveByDocumentIdRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
     method public void remove(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
     method public void reportUsage(@NonNull android.app.appsearch.ReportUsageRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
     method @NonNull public android.app.appsearch.SearchResults search(@NonNull String, @NonNull android.app.appsearch.SearchSpec);
@@ -156,6 +155,7 @@ package android.app.appsearch {
   public class GenericDocument {
     ctor protected GenericDocument(@NonNull android.app.appsearch.GenericDocument);
     method public long getCreationTimestampMillis();
+    method @NonNull public String getId();
     method public static int getMaxIndexedProperties();
     method @NonNull public String getNamespace();
     method @Nullable public Object getProperty(@NonNull String);
@@ -175,7 +175,6 @@ package android.app.appsearch {
     method @NonNull public String getSchemaType();
     method public int getScore();
     method public long getTtlMillis();
-    method @NonNull public String getUri();
   }
 
   public static class GenericDocument.Builder<BuilderType extends android.app.appsearch.GenericDocument.Builder> {
@@ -192,19 +191,19 @@ package android.app.appsearch {
     method @NonNull public BuilderType setTtlMillis(long);
   }
 
-  public final class GetByUriRequest {
+  public final class GetByDocumentIdRequest {
+    method @NonNull public java.util.Set<java.lang.String> getIds();
     method @NonNull public String getNamespace();
     method @NonNull public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getProjections();
-    method @NonNull public java.util.Set<java.lang.String> getUris();
     field public static final String PROJECTION_SCHEMA_TYPE_WILDCARD = "*";
   }
 
-  public static final class GetByUriRequest.Builder {
-    ctor public GetByUriRequest.Builder(@NonNull String);
-    method @NonNull public android.app.appsearch.GetByUriRequest.Builder addProjection(@NonNull String, @NonNull java.util.Collection<java.lang.String>);
-    method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUris(@NonNull java.lang.String...);
-    method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUris(@NonNull java.util.Collection<java.lang.String>);
-    method @NonNull public android.app.appsearch.GetByUriRequest build();
+  public static final class GetByDocumentIdRequest.Builder {
+    ctor public GetByDocumentIdRequest.Builder(@NonNull String);
+    method @NonNull public android.app.appsearch.GetByDocumentIdRequest.Builder addIds(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.GetByDocumentIdRequest.Builder addIds(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.GetByDocumentIdRequest.Builder addProjection(@NonNull String, @NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.GetByDocumentIdRequest build();
   }
 
   public class GetSchemaResponse {
@@ -249,44 +248,42 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.PutDocumentsRequest build();
   }
 
-  public final class RemoveByUriRequest {
+  public final class RemoveByDocumentIdRequest {
+    method @NonNull public java.util.Set<java.lang.String> getIds();
     method @NonNull public String getNamespace();
-    method @NonNull public java.util.Set<java.lang.String> getUris();
   }
 
-  public static final class RemoveByUriRequest.Builder {
-    ctor public RemoveByUriRequest.Builder(@NonNull String);
-    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUris(@NonNull java.lang.String...);
-    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUris(@NonNull java.util.Collection<java.lang.String>);
-    method @NonNull public android.app.appsearch.RemoveByUriRequest build();
+  public static final class RemoveByDocumentIdRequest.Builder {
+    ctor public RemoveByDocumentIdRequest.Builder(@NonNull String);
+    method @NonNull public android.app.appsearch.RemoveByDocumentIdRequest.Builder addIds(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.RemoveByDocumentIdRequest.Builder addIds(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.RemoveByDocumentIdRequest build();
   }
 
   public final class ReportSystemUsageRequest {
     method @NonNull public String getDatabaseName();
+    method @NonNull public String getDocumentId();
     method @NonNull public String getNamespace();
     method @NonNull public String getPackageName();
-    method @NonNull public String getUri();
-    method public long getUsageTimeMillis();
+    method public long getUsageTimestampMillis();
   }
 
   public static final class ReportSystemUsageRequest.Builder {
-    ctor public ReportSystemUsageRequest.Builder(@NonNull String, @NonNull String, @NonNull String);
+    ctor public ReportSystemUsageRequest.Builder(@NonNull String, @NonNull String, @NonNull String, @NonNull String);
     method @NonNull public android.app.appsearch.ReportSystemUsageRequest build();
-    method @NonNull public android.app.appsearch.ReportSystemUsageRequest.Builder setUri(@NonNull String);
-    method @NonNull public android.app.appsearch.ReportSystemUsageRequest.Builder setUsageTimeMillis(long);
+    method @NonNull public android.app.appsearch.ReportSystemUsageRequest.Builder setUsageTimestampMillis(long);
   }
 
   public final class ReportUsageRequest {
+    method @NonNull public String getDocumentId();
     method @NonNull public String getNamespace();
-    method @NonNull public String getUri();
-    method public long getUsageTimeMillis();
+    method public long getUsageTimestampMillis();
   }
 
   public static final class ReportUsageRequest.Builder {
-    ctor public ReportUsageRequest.Builder(@NonNull String);
+    ctor public ReportUsageRequest.Builder(@NonNull String, @NonNull String);
     method @NonNull public android.app.appsearch.ReportUsageRequest build();
-    method @NonNull public android.app.appsearch.ReportUsageRequest.Builder setUri(@NonNull String);
-    method @NonNull public android.app.appsearch.ReportUsageRequest.Builder setUsageTimeMillis(long);
+    method @NonNull public android.app.appsearch.ReportUsageRequest.Builder setUsageTimestampMillis(long);
   }
 
   public final class SearchResult {
@@ -315,10 +312,9 @@ package android.app.appsearch {
   }
 
   public static final class SearchResult.MatchInfo.Builder {
-    ctor public SearchResult.MatchInfo.Builder();
+    ctor public SearchResult.MatchInfo.Builder(@NonNull String);
     method @NonNull public android.app.appsearch.SearchResult.MatchInfo build();
     method @NonNull public android.app.appsearch.SearchResult.MatchInfo.Builder setExactMatchRange(@NonNull android.app.appsearch.SearchResult.MatchRange);
-    method @NonNull public android.app.appsearch.SearchResult.MatchInfo.Builder setPropertyPath(@NonNull String);
     method @NonNull public android.app.appsearch.SearchResult.MatchInfo.Builder setSnippetRange(@NonNull android.app.appsearch.SearchResult.MatchRange);
   }
 
@@ -427,19 +423,11 @@ package android.app.appsearch {
   }
 
   public static class SetSchemaResponse.MigrationFailure {
+    ctor public SetSchemaResponse.MigrationFailure(@NonNull String, @NonNull String, @NonNull String, @NonNull android.app.appsearch.AppSearchResult<?>);
     method @NonNull public android.app.appsearch.AppSearchResult<java.lang.Void> getAppSearchResult();
+    method @NonNull public String getDocumentId();
     method @NonNull public String getNamespace();
     method @NonNull public String getSchemaType();
-    method @NonNull public String getUri();
-  }
-
-  public static final class SetSchemaResponse.MigrationFailure.Builder {
-    ctor public SetSchemaResponse.MigrationFailure.Builder();
-    method @NonNull public android.app.appsearch.SetSchemaResponse.MigrationFailure build();
-    method @NonNull public android.app.appsearch.SetSchemaResponse.MigrationFailure.Builder setAppSearchResult(@NonNull android.app.appsearch.AppSearchResult<java.lang.Void>);
-    method @NonNull public android.app.appsearch.SetSchemaResponse.MigrationFailure.Builder setNamespace(@NonNull String);
-    method @NonNull public android.app.appsearch.SetSchemaResponse.MigrationFailure.Builder setSchemaType(@NonNull String);
-    method @NonNull public android.app.appsearch.SetSchemaResponse.MigrationFailure.Builder setUri(@NonNull String);
   }
 
   public class StorageInfo {

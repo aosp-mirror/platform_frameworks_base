@@ -20,6 +20,8 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricSourceType;
+import android.util.MathUtils;
+import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 
@@ -29,6 +31,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -50,6 +53,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final DelayableExecutor mExecutor;
     @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
+    @NonNull private final UdfpsController mUdfpsController;
 
     @Nullable private Runnable mCancelRunnable;
     private boolean mShowingUdfpsBouncer;
@@ -60,6 +64,13 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     private int mStatusBarState;
     private boolean mKeyguardIsVisible;
 
+    /**
+     * hidden amount of pin/pattern/password bouncer
+     * {@link KeyguardBouncer#EXPANSION_VISIBLE} (0f) to
+     * {@link KeyguardBouncer#EXPANSION_HIDDEN} (1f)
+     */
+    private float mInputBouncerHiddenAmount;
+
     protected UdfpsKeyguardViewController(
             @NonNull UdfpsKeyguardView view,
             @NonNull StatusBarStateController statusBarStateController,
@@ -68,12 +79,14 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull DelayableExecutor mainDelayableExecutor,
             @NonNull DumpManager dumpManager,
-            @NonNull KeyguardViewMediator keyguardViewMediator) {
+            @NonNull KeyguardViewMediator keyguardViewMediator,
+            @NonNull UdfpsController udfpsController) {
         super(view, statusBarStateController, statusBar, dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mExecutor = mainDelayableExecutor;
         mKeyguardViewMediator = keyguardViewMediator;
+        mUdfpsController = udfpsController;
     }
 
     @Override
@@ -89,11 +102,14 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         updateFaceDetectRunning(mKeyguardUpdateMonitor.isFaceDetectionRunning());
 
         final float dozeAmount = mStatusBarStateController.getDozeAmount();
-        mStatusBarStateController.addCallback(mStateListener);
         mStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
+        mStatusBarStateController.addCallback(mStateListener);
+
         mStatusBarState = mStatusBarStateController.getState();
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
         mKeyguardIsVisible = mKeyguardUpdateMonitor.isKeyguardVisible();
+        mInputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN;
+        updateAlpha();
         updatePauseAuth();
 
         mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
@@ -124,6 +140,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         pw.println("mStatusBarState" + StatusBarState.toShortString(mStatusBarState));
         pw.println("mQsExpanded=" + mQsExpanded);
         pw.println("mKeyguardVisible=" + mKeyguardIsVisible);
+        pw.println("mInputBouncerHiddenAmount=" + mInputBouncerHiddenAmount);
+        pw.println("mAlpha=" + mView.getAlpha());
     }
 
     /**
@@ -140,7 +158,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         if (mShowingUdfpsBouncer) {
             mView.animateUdfpsBouncer();
         } else {
-            // TODO: beverlyt, we not always want to cancelPostAuthActions
             mView.animateAwayUdfpsBouncer(() -> mKeyguardViewManager.cancelPostAuthActions());
         }
         return true;
@@ -169,6 +186,10 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
 
         if (!mKeyguardIsVisible) {
+            return true;
+        }
+
+        if (mInputBouncerHiddenAmount < .4f) {
             return true;
         }
 
@@ -226,6 +247,14 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             mHintShown = true;
             mView.animateHint();
         }
+    }
+
+    private void updateAlpha() {
+        // fade icon on transition to showing bouncer
+        int alpha = mShowingUdfpsBouncer ? 255
+                : Math.abs((int) MathUtils.map(.4f, 0f, .7f, 255f,
+                        mInputBouncerHiddenAmount));
+        mView.setUnpausedAlpha(alpha);
     }
 
     private final StatusBarStateController.StateListener mStateListener =
@@ -311,6 +340,18 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 @Override
                 public void setQsExpanded(boolean expanded) {
                     mQsExpanded = expanded;
+                    updatePauseAuth();
+                }
+
+                @Override
+                public boolean onTouch(MotionEvent event) {
+                    return mUdfpsController.onTouch(event);
+                }
+
+                @Override
+                public void setBouncerExpansionChanged(float expansion) {
+                    mInputBouncerHiddenAmount = expansion;
+                    updateAlpha();
                     updatePauseAuth();
                 }
 

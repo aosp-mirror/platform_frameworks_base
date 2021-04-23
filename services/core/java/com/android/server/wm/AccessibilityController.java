@@ -59,6 +59,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -188,22 +189,28 @@ final class AccessibilityController {
         }
 
         if (callback != null) {
+            WindowsForAccessibilityObserver observer =
+                    mWindowsForAccessibilityObserver.get(displayId);
             if (isEmbeddedDisplay(dc)) {
                 // If this display is an embedded one, its window observer should have been set from
                 // window manager after setting its parent window. But if its window observer is
                 // empty, that means this mapping didn't be set, and needs to do this again.
                 // This happened when accessibility window observer is disabled and enabled again.
-                if (mWindowsForAccessibilityObserver.get(displayId) == null) {
+                if (observer == null) {
                     handleWindowObserverOfEmbeddedDisplay(displayId, dc.getParentWindow());
                 }
                 return false;
-            } else if (mWindowsForAccessibilityObserver.get(displayId) != null) {
-                throw new IllegalStateException(
-                        "Windows for accessibility callback of display "
-                                + displayId + " already set!");
+            } else if (observer != null) {
+                final String errorMessage = "Windows for accessibility callback of display "
+                        + displayId + " already set!";
+                Slog.e(TAG, errorMessage);
+                if (Build.IS_DEBUGGABLE) {
+                    throw new IllegalStateException(errorMessage);
+                }
+                removeObserverOfEmbeddedDisplay(observer);
+                mWindowsForAccessibilityObserver.remove(displayId);
             }
-            final WindowsForAccessibilityObserver observer =
-                    new WindowsForAccessibilityObserver(mService, displayId, callback);
+            observer = new WindowsForAccessibilityObserver(mService, displayId, callback);
             mWindowsForAccessibilityObserver.put(displayId, observer);
             mAllObserversInitialized &= observer.mInitialized;
         } else {
@@ -218,9 +225,12 @@ final class AccessibilityController {
             final WindowsForAccessibilityObserver windowsForA11yObserver =
                     mWindowsForAccessibilityObserver.get(displayId);
             if (windowsForA11yObserver == null) {
-                throw new IllegalStateException(
-                        "Windows for accessibility callback of display " + displayId
-                                + " already cleared!");
+                final String errorMessage = "Windows for accessibility callback of display "
+                        + displayId + " already cleared!";
+                Slog.e(TAG, errorMessage);
+                if (Build.IS_DEBUGGABLE) {
+                    throw new IllegalStateException(errorMessage);
+                }
             }
             removeObserverOfEmbeddedDisplay(windowsForA11yObserver);
             mWindowsForAccessibilityObserver.remove(displayId);
@@ -974,7 +984,7 @@ final class AccessibilityController {
                     }
 
                     // Count letterbox into nonMagnifiedBounds
-                    if (windowState.isLetterboxedForDisplayCutout()) {
+                    if (windowState.isLetterboxedAppWindow()) {
                         Region letterboxBounds = getLetterboxBounds(windowState);
                         nonMagnifiedBounds.op(letterboxBounds, Region.Op.UNION);
                         availableBounds.op(letterboxBounds, Region.Op.DIFFERENCE);
@@ -1028,25 +1038,6 @@ final class AccessibilityController {
                             MyHandler.MESSAGE_NOTIFY_MAGNIFICATION_REGION_CHANGED, args)
                             .sendToTarget();
                 }
-            }
-
-            private Region getLetterboxBounds(WindowState windowState) {
-                final ActivityRecord appToken = windowState.mActivityRecord;
-                if (appToken == null) {
-                    return new Region();
-                }
-
-                mDisplay.getRealSize(mTempPoint);
-                final Rect letterboxInsets = appToken.getLetterboxInsets();
-                final int screenWidth = mTempPoint.x;
-                final int screenHeight = mTempPoint.y;
-                final Rect nonLetterboxRect = mTempRect1;
-                final Region letterboxBounds = mTempRegion3;
-                nonLetterboxRect.set(0, 0, screenWidth, screenHeight);
-                nonLetterboxRect.inset(letterboxInsets);
-                letterboxBounds.set(0, 0, screenWidth, screenHeight);
-                letterboxBounds.op(nonLetterboxRect, Region.Op.DIFFERENCE);
-                return letterboxBounds;
             }
 
             void onRotationChanged(SurfaceControl.Transaction t) {
@@ -1430,6 +1421,20 @@ final class AccessibilityController {
         return source != null ? source.getFrame() : EMPTY_RECT;
     }
 
+    static Region getLetterboxBounds(WindowState windowState) {
+        final ActivityRecord appToken = windowState.mActivityRecord;
+        if (appToken == null) {
+            return new Region();
+        }
+        final Rect letterboxInsets = appToken.getLetterboxInsets();
+        final Rect nonLetterboxRect = windowState.getBounds();
+        nonLetterboxRect.inset(letterboxInsets);
+        final Region letterboxBounds = new Region();
+        letterboxBounds.set(windowState.getBounds());
+        letterboxBounds.op(nonLetterboxRect, Region.Op.DIFFERENCE);
+        return letterboxBounds;
+    }
+
     /**
      * This class encapsulates the functionality related to computing the windows
      * reported for accessibility purposes. These windows are all windows a sighted
@@ -1733,6 +1738,12 @@ final class AccessibilityController {
                         // it doesn't has tap exclude region.
                         unaccountedSpace.setEmpty();
                     }
+                }
+
+                // Account for the space of letterbox.
+                if (windowState.isLetterboxedAppWindow()) {
+                    unaccountedSpace.op(getLetterboxBounds(windowState), unaccountedSpace,
+                            Region.Op.REVERSE_DIFFERENCE);
                 }
             }
         }

@@ -442,6 +442,7 @@ public class CamcorderProfile
      * camera on the device. If the device has no back-facing camera, this returns null.
      * @param quality the target quality level for the camcorder profile
      * @see #get(int, int)
+     * @deprecated Use {@link #getAll} instead
      */
     public static CamcorderProfile get(int quality) {
         int numberOfCameras = Camera.getNumberOfCameras();
@@ -508,6 +509,7 @@ public class CamcorderProfile
      * @see #QUALITY_HIGH_SPEED_720P
      * @see #QUALITY_HIGH_SPEED_1080P
      * @see #QUALITY_HIGH_SPEED_2160P
+     * @deprecated Use {@link #getAll} instead
      * @throws IllegalArgumentException if quality is not one of the defined QUALITY_ values.
     */
     public static CamcorderProfile get(int cameraId, int quality) {
@@ -549,9 +551,9 @@ public class CamcorderProfile
      * resolution and higher audio sampling rate, etc, than those with lower quality
      * level.
      *
-     * @param cameraId the id for the camera. Numeric camera ids parsed from the list received by
-     *                 invoking {@link CameraManager#getCameraIdList} can be used as long as they
-     *                 are {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE}
+     * @param cameraId the id for the camera. Numeric camera ids from the list received by invoking
+     *                 {@link CameraManager#getCameraIdList} can be used as long as they are
+     *                 {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE}
      *                 and not
      *                 {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL EXTERNAL}.
      * @param quality the target quality level for the camcorder profile.
