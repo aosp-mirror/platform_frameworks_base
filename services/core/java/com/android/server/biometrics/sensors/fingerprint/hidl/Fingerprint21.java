@@ -74,7 +74,7 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalConsumer;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.ServiceProvider;
@@ -574,7 +574,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             @NonNull byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
             @FingerprintManager.EnrollReason int enrollReason,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback) {
+            @NonNull FingerprintStateCallback fingerprintStateCallback) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -614,7 +614,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     public void scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter listener, @NonNull String opPackageName,
             int statsClient,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback) {
+            @NonNull FingerprintStateCallback fingerprintStateCallback) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -632,7 +632,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter listener,
             @NonNull String opPackageName, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback) {
+            @NonNull FingerprintStateCallback fingerprintStateCallback) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -896,7 +896,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @NonNull
     @Override
     public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback,
+            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull String opPackageName) {
         return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, callback,
                 fingerprintStateCallback, this, mHalResultController);
