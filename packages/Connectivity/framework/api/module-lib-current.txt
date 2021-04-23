@@ -11,7 +11,7 @@ package android.net {
     method @Nullable public android.net.ProxyInfo getGlobalProxy();
     method @NonNull public static android.util.Range<java.lang.Integer> getIpSecNetIdRange();
     method @NonNull public static String getPrivateDnsMode(@NonNull android.content.Context);
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerDefaultNetworkCallbackAsUid(int, @NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerDefaultNetworkCallbackForUid(int, @NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerSystemDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void requestBackgroundNetwork(@NonNull android.net.NetworkRequest, @NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @Deprecated public boolean requestRouteToHostAddress(int, java.net.InetAddress);
@@ -166,11 +166,11 @@ package android.net {
   public final class VpnTransportInfo implements android.os.Parcelable android.net.TransportInfo {
     ctor public VpnTransportInfo(int, @Nullable String);
     method public int describeContents();
+    method @Nullable public String getSessionId();
+    method public int getType();
     method @NonNull public android.net.VpnTransportInfo makeCopy(long);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnTransportInfo> CREATOR;
-    field @Nullable public final String sessionId;
-    field public final int type;
   }
 
 }
