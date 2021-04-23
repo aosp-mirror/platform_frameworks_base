@@ -5177,8 +5177,13 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void resetDefaultNotificationAssistant(boolean loadFromConfig) {
+        public void setNASMigrationDoneAndResetDefault(int userId, boolean loadFromConfig) {
             checkCallerIsSystem();
+            setNASMigrationDone(userId);
+            cancelNotificationInternal(getContext().getPackageName(),
+                    getContext().getOpPackageName(), Binder.getCallingUid(),
+                    Binder.getCallingPid(), TAG,
+                    SystemMessageProto.SystemMessage.NOTE_NAS_UPGRADE, userId);
             if (loadFromConfig) {
                 mAssistants.resetDefaultFromConfig();
             } else {
@@ -5677,9 +5682,11 @@ public class NotificationManagerService extends SystemService {
                 summaryNotification.extras.putAll(extras);
                 Intent appIntent = getContext().getPackageManager().getLaunchIntentForPackage(pkg);
                 if (appIntent != null) {
-                    summaryNotification.contentIntent = PendingIntent.getActivityAsUser(
-                            getContext(), 0, appIntent, PendingIntent.FLAG_IMMUTABLE, null,
-                            UserHandle.of(userId));
+                    final ActivityManagerInternal ami = LocalServices
+                            .getService(ActivityManagerInternal.class);
+                    summaryNotification.contentIntent = ami.getPendingIntentActivityAsApp(
+                            0, appIntent, PendingIntent.FLAG_IMMUTABLE, null,
+                            pkg, appInfo.uid);
                 }
                 final StatusBarNotification summarySbn =
                         new StatusBarNotification(adjustedSbn.getPackageName(),

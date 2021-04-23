@@ -48,6 +48,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     private ImageView mBgProtection;
 
     private AnimatorSet mAnimatorSet;
+    private int mAlpha; // 0-255
 
     public UdfpsKeyguardView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -97,9 +98,20 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         }
     }
 
+    /**
+     * @param alpha between 0 and 255
+     */
+    void setUnpausedAlpha(int alpha) {
+        mAlpha = alpha;
+        updateAlpha();
+    }
+
     @Override
     int calculateAlpha() {
-        return mPauseAuth ? 0 : 255;
+        if (mPauseAuth) {
+            return 0;
+        }
+        return mAlpha;
     }
 
     void onDozeAmountChanged(float linear, float eased) {

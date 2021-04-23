@@ -137,5 +137,5 @@
     </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"မူလ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ပူဖောင်းကွက်"</string>
-    <string name="clock_title_analog" msgid="8409262532900918273">"လက်တံနာရီ"</string>
+    <string name="clock_title_analog" msgid="8409262532900918273">"ရိုးရိုး"</string>
 </resources>

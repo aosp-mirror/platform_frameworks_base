@@ -9046,8 +9046,8 @@ package android.bluetooth {
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CLASS_CHANGED = "android.bluetooth.device.action.CLASS_CHANGED";
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public static final String ACTION_FOUND = "android.bluetooth.device.action.FOUND";
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_NAME_CHANGED = "android.bluetooth.device.action.NAME_CHANGED";
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public static final String ACTION_PAIRING_REQUEST = "android.bluetooth.device.action.PAIRING_REQUEST";
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public static final String ACTION_UUID = "android.bluetooth.device.action.UUID";
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_PAIRING_REQUEST = "android.bluetooth.device.action.PAIRING_REQUEST";
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_UUID = "android.bluetooth.device.action.UUID";
     field public static final int ADDRESS_TYPE_PUBLIC = 0; // 0x0
     field public static final int ADDRESS_TYPE_RANDOM = 1; // 0x1
     field public static final int BOND_BONDED = 12; // 0xc
@@ -12415,9 +12415,6 @@ package android.content.pm {
     field public static final int STAGED_SESSION_NO_ERROR = 0; // 0x0
     field public static final int STAGED_SESSION_UNKNOWN = 3; // 0x3
     field public static final int STAGED_SESSION_VERIFICATION_FAILED = 1; // 0x1
-    field public static final int USER_ACTION_NOT_REQUIRED = 2; // 0x2
-    field public static final int USER_ACTION_REQUIRED = 1; // 0x1
-    field public static final int USER_ACTION_UNSPECIFIED = 0; // 0x0
   }
 
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
@@ -12434,7 +12431,7 @@ package android.content.pm {
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(@Nullable android.net.Uri);
     method public void setReferrerUri(@Nullable android.net.Uri);
-    method public void setRequireUserAction(boolean);
+    method public void setRequireUserAction(int);
     method public void setSize(long);
     method public void setWhitelistedRestrictedPermissions(@Nullable java.util.Set<java.lang.String>);
     method public void writeToParcel(android.os.Parcel, int);
@@ -12442,6 +12439,9 @@ package android.content.pm {
     field public static final int MODE_FULL_INSTALL = 1; // 0x1
     field public static final int MODE_INHERIT_EXISTING = 2; // 0x2
     field @NonNull public static final java.util.Set<java.lang.String> RESTRICTED_PERMISSIONS_ALL;
+    field public static final int USER_ACTION_NOT_REQUIRED = 2; // 0x2
+    field public static final int USER_ACTION_REQUIRED = 1; // 0x1
+    field public static final int USER_ACTION_UNSPECIFIED = 0; // 0x0
   }
 
   public class PackageItemInfo {
@@ -17705,6 +17705,15 @@ package android.hardware {
     method public void onDynamicSensorDisconnected(android.hardware.Sensor);
   }
 
+  public final class SensorPrivacyManager {
+    method public boolean supportsSensorToggle(int);
+  }
+
+  public static class SensorPrivacyManager.Sensors {
+    field public static final int CAMERA = 2; // 0x2
+    field public static final int MICROPHONE = 1; // 0x1
+  }
+
   public final class TriggerEvent {
     field public android.hardware.Sensor sensor;
     field public long timestamp;
@@ -18037,6 +18046,7 @@ package android.hardware.camera2 {
   }
 
   public final class CameraExtensionCharacteristics {
+    method @Nullable public android.util.Range<java.lang.Long> getEstimatedCaptureLatencyRange(int, @NonNull android.util.Size, int);
     method @NonNull public <T> java.util.List<android.util.Size> getExtensionSupportedSizes(int, @NonNull Class<T>);
     method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
     method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();
@@ -20321,6 +20331,7 @@ package android.media {
     field public static final int ENCODING_DEFAULT = 1; // 0x1
     field public static final int ENCODING_DOLBY_MAT = 19; // 0x13
     field public static final int ENCODING_DOLBY_TRUEHD = 14; // 0xe
+    field public static final int ENCODING_DRA = 28; // 0x1c
     field public static final int ENCODING_DTS = 7; // 0x7
     field public static final int ENCODING_DTS_HD = 8; // 0x8
     field public static final int ENCODING_DTS_UHD = 27; // 0x1b
@@ -20356,6 +20367,7 @@ package android.media {
     method @Deprecated public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener);
     method public int abandonAudioFocusRequest(@NonNull android.media.AudioFocusRequest);
     method public void addOnCommunicationDeviceChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnCommunicationDeviceChangedListener);
+    method public void addOnModeChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnModeChangedListener);
     method public void adjustStreamVolume(int, int, int);
     method public void adjustSuggestedStreamVolume(int, int, int);
     method public void adjustVolume(int, int);
@@ -20406,6 +20418,7 @@ package android.media {
     method @Deprecated public void registerRemoteControlClient(android.media.RemoteControlClient);
     method @Deprecated public boolean registerRemoteController(android.media.RemoteController);
     method public void removeOnCommunicationDeviceChangedListener(@NonNull android.media.AudioManager.OnCommunicationDeviceChangedListener);
+    method public void removeOnModeChangedListener(@NonNull android.media.AudioManager.OnModeChangedListener);
     method @Deprecated public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int);
     method public int requestAudioFocus(@NonNull android.media.AudioFocusRequest);
     method public void setAllowedCapturePolicy(int);
@@ -20559,6 +20572,10 @@ package android.media {
 
   public static interface AudioManager.OnCommunicationDeviceChangedListener {
     method public void onCommunicationDeviceChanged(@Nullable android.media.AudioDeviceInfo);
+  }
+
+  public static interface AudioManager.OnModeChangedListener {
+    method public void onModeChanged(int);
   }
 
   public final class AudioMetadata {
@@ -20956,8 +20973,8 @@ package android.media {
   }
 
   public class CamcorderProfile {
-    method public static android.media.CamcorderProfile get(int);
-    method public static android.media.CamcorderProfile get(int, int);
+    method @Deprecated public static android.media.CamcorderProfile get(int);
+    method @Deprecated public static android.media.CamcorderProfile get(int, int);
     method @Nullable public static android.media.EncoderProfiles getAll(@NonNull String, int);
     method public static boolean hasProfile(int);
     method public static boolean hasProfile(int, int);
@@ -21039,14 +21056,14 @@ package android.media {
     field @NonNull public final java.util.UUID uuid;
   }
 
-  public class EncoderProfiles {
+  public final class EncoderProfiles {
     method @NonNull public java.util.List<android.media.EncoderProfiles.AudioProfile> getAudioProfiles();
-    method public int getDurationSeconds();
-    method public int getFileFormat();
+    method public int getDefaultDurationSeconds();
+    method public int getRecommendedFileFormat();
     method @NonNull public java.util.List<android.media.EncoderProfiles.VideoProfile> getVideoProfiles();
   }
 
-  public static class EncoderProfiles.AudioProfile {
+  public static final class EncoderProfiles.AudioProfile {
     method public int getBitrate();
     method public int getChannels();
     method public int getCodec();
@@ -21055,7 +21072,7 @@ package android.media {
     method public int getSampleRate();
   }
 
-  public static class EncoderProfiles.VideoProfile {
+  public static final class EncoderProfiles.VideoProfile {
     method public int getBitrate();
     method public int getCodec();
     method public int getFrameRate();
@@ -26524,6 +26541,9 @@ package android.net {
     field public static final int UNSUPPORTED = -1; // 0xffffffff
   }
 
+  public interface TunnelConnectionParams {
+  }
+
   public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
     method public abstract android.net.Uri.Builder buildUpon();
     method public int compareTo(android.net.Uri);
@@ -27084,15 +27104,6 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnConfig build();
   }
 
-  public abstract class VcnControlPlaneConfig {
-  }
-
-  public final class VcnControlPlaneIkeConfig extends android.net.vcn.VcnControlPlaneConfig {
-    ctor public VcnControlPlaneIkeConfig(@NonNull android.net.ipsec.ike.IkeSessionParams, @NonNull android.net.ipsec.ike.TunnelModeChildSessionParams);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams getChildSessionParams();
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams getIkeSessionParams();
-  }
-
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
     method @NonNull public String getGatewayConnectionName();
@@ -27101,7 +27112,7 @@ package android.net.vcn {
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
-    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.vcn.VcnControlPlaneConfig);
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.TunnelConnectionParams);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
@@ -27111,6 +27122,7 @@ package android.net.vcn {
 
   public class VcnManager {
     method @RequiresPermission("carrier privileges") public void clearVcnConfig(@NonNull android.os.ParcelUuid) throws java.io.IOException;
+    method @NonNull public java.util.List<android.os.ParcelUuid> getConfiguredSubscriptionGroups();
     method public void registerVcnStatusCallback(@NonNull android.os.ParcelUuid, @NonNull java.util.concurrent.Executor, @NonNull android.net.vcn.VcnManager.VcnStatusCallback);
     method @RequiresPermission("carrier privileges") public void setVcnConfig(@NonNull android.os.ParcelUuid, @NonNull android.net.vcn.VcnConfig) throws java.io.IOException;
     method public void unregisterVcnStatusCallback(@NonNull android.net.vcn.VcnManager.VcnStatusCallback);
@@ -32078,6 +32090,7 @@ package android.os {
     method @NonNull public boolean[] arePrimitivesSupported(@NonNull int...);
     method @RequiresPermission(android.Manifest.permission.VIBRATE) public abstract void cancel();
     method public int getId();
+    method @NonNull public int[] getPrimitiveDurations(@NonNull int...);
     method public abstract boolean hasAmplitudeControl();
     method public abstract boolean hasVibrator();
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long);
@@ -32871,6 +32884,10 @@ package android.print {
     method @NonNull public String getLabel(@NonNull android.content.pm.PackageManager);
     method @IntRange(from=1) public int getWidthMils();
     method public boolean isPortrait();
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_C;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_D;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_E;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize ANSI_F;
     field public static final android.print.PrintAttributes.MediaSize ISO_A0;
     field public static final android.print.PrintAttributes.MediaSize ISO_A1;
     field public static final android.print.PrintAttributes.MediaSize ISO_A10;
@@ -32924,6 +32941,12 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize JPN_KAKU2;
     field public static final android.print.PrintAttributes.MediaSize JPN_OUFUKU;
     field public static final android.print.PrintAttributes.MediaSize JPN_YOU4;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_A;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_B;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_C;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_D;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_E;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_ARCH_E1;
     field public static final android.print.PrintAttributes.MediaSize NA_FOOLSCAP;
     field public static final android.print.PrintAttributes.MediaSize NA_GOVT_LETTER;
     field public static final android.print.PrintAttributes.MediaSize NA_INDEX_3X5;
@@ -32935,7 +32958,9 @@ package android.print {
     field public static final android.print.PrintAttributes.MediaSize NA_LETTER;
     field public static final android.print.PrintAttributes.MediaSize NA_MONARCH;
     field public static final android.print.PrintAttributes.MediaSize NA_QUARTO;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize NA_SUPER_B;
     field public static final android.print.PrintAttributes.MediaSize NA_TABLOID;
+    field @NonNull public static final android.print.PrintAttributes.MediaSize OE_PHOTO_L;
     field public static final android.print.PrintAttributes.MediaSize OM_DAI_PA_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_JUURO_KU_KAI;
     field public static final android.print.PrintAttributes.MediaSize OM_PA_KAI;
@@ -48348,7 +48373,6 @@ package android.view {
     ctor public SurfaceView(android.content.Context, android.util.AttributeSet);
     ctor public SurfaceView(android.content.Context, android.util.AttributeSet, int);
     ctor public SurfaceView(android.content.Context, android.util.AttributeSet, int, int);
-    method public boolean gatherTransparentRegion(android.graphics.Region);
     method public android.view.SurfaceHolder getHolder();
     method @Nullable public android.os.IBinder getHostToken();
     method public android.view.SurfaceControl getSurfaceControl();
@@ -48550,6 +48574,7 @@ package android.view {
     method public android.view.View focusSearch(int);
     method public void forceHasOverlappingRendering(boolean);
     method public void forceLayout();
+    method public boolean gatherTransparentRegion(@Nullable android.graphics.Region);
     method public void generateDisplayHash(@NonNull String, @Nullable android.graphics.Rect, @NonNull java.util.concurrent.Executor, @NonNull android.view.displayhash.DisplayHashResultCallback);
     method public static int generateViewId();
     method public CharSequence getAccessibilityClassName();
@@ -49531,7 +49556,6 @@ package android.view {
     method public void endViewTransition(android.view.View);
     method public android.view.View focusSearch(android.view.View, int);
     method public void focusableViewAvailable(android.view.View);
-    method public boolean gatherTransparentRegion(android.graphics.Region);
     method protected android.view.ViewGroup.LayoutParams generateDefaultLayoutParams();
     method public android.view.ViewGroup.LayoutParams generateLayoutParams(android.util.AttributeSet);
     method protected android.view.ViewGroup.LayoutParams generateLayoutParams(android.view.ViewGroup.LayoutParams);

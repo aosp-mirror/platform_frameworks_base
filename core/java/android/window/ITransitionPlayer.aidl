@@ -47,9 +47,12 @@ oneway interface ITransitionPlayer {
      * @param transitionToken An identifying token for the transition that is now ready to animate.
      * @param info A collection of all the changes encapsulated by this transition.
      * @param t A surface transaction containing the surface state prior to animating.
+     * @param finishT A surface transaction that will reset parenting/layering and generally put
+     *                surfaces into their final (post-transition) state. Apply this after playing
+     *                the animation but before calling finish.
      */
     void onTransitionReady(in IBinder transitionToken, in TransitionInfo info,
-            in SurfaceControl.Transaction t);
+            in SurfaceControl.Transaction t, in SurfaceControl.Transaction finishT);
 
     /**
      * Called when something in WMCore requires a transition to play -- for example when an Activity

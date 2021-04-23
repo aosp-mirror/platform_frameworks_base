@@ -32,12 +32,12 @@ import android.widget.TextView;
 import com.android.systemui.R;
 
 /**
- * Manages the layout of an auth dialog for devices with a face sensor and an under-display
- * fingerprint sensor (UDFPS). Face authentication is attempted first, followed by fingerprint if
- * the initial attempt is unsuccessful.
+ * Manages the layout of an auth dialog for devices with both a face sensor and a fingerprint
+ * sensor. Face authentication is attempted first, followed by fingerprint if the initial attempt is
+ * unsuccessful.
  */
-public class AuthBiometricFaceToUdfpsView extends AuthBiometricFaceView {
-    private static final String TAG = "BiometricPrompt/AuthBiometricFaceToUdfpsView";
+public class AuthBiometricFaceToFingerprintView extends AuthBiometricFaceView {
+    private static final String TAG = "BiometricPrompt/AuthBiometricFaceToFingerprintView";
 
     protected static class UdfpsIconController extends IconController {
         protected UdfpsIconController(
@@ -87,20 +87,23 @@ public class AuthBiometricFaceToUdfpsView extends AuthBiometricFaceView {
 
     @BiometricAuthenticator.Modality private int mActiveSensorType = TYPE_FACE;
 
-    @Nullable UdfpsDialogMeasureAdapter mMeasureAdapter;
-    @Nullable private UdfpsIconController mUdfpsIconController;
+    @Nullable UdfpsDialogMeasureAdapter mUdfpsMeasureAdapter;
 
-    public AuthBiometricFaceToUdfpsView(Context context) {
+    public AuthBiometricFaceToFingerprintView(Context context) {
         super(context);
     }
 
-    public AuthBiometricFaceToUdfpsView(Context context, AttributeSet attrs) {
+    public AuthBiometricFaceToFingerprintView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     void setFingerprintSensorProps(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
-        if (mMeasureAdapter == null || mMeasureAdapter.getSensorProps() != sensorProps) {
-            mMeasureAdapter = new UdfpsDialogMeasureAdapter(this, sensorProps);
+        if (!sensorProps.isAnyUdfpsType()) {
+            return;
+        }
+
+        if (mUdfpsMeasureAdapter == null || mUdfpsMeasureAdapter.getSensorProps() != sensorProps) {
+            mUdfpsMeasureAdapter = new UdfpsDialogMeasureAdapter(this, sensorProps);
         }
     }
 
@@ -140,8 +143,8 @@ public class AuthBiometricFaceToUdfpsView extends AuthBiometricFaceView {
     @NonNull
     AuthDialog.LayoutParams onMeasureInternal(int width, int height) {
         final AuthDialog.LayoutParams layoutParams = super.onMeasureInternal(width, height);
-        return mMeasureAdapter != null
-                ? mMeasureAdapter.onMeasureInternal(width, height, layoutParams)
+        return mUdfpsMeasureAdapter != null
+                ? mUdfpsMeasureAdapter.onMeasureInternal(width, height, layoutParams)
                 : layoutParams;
     }
 }

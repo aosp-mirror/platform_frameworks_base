@@ -189,7 +189,7 @@ interface INotificationManager
     ComponentName getAllowedNotificationAssistantForUser(int userId);
     ComponentName getAllowedNotificationAssistant();
     ComponentName getDefaultNotificationAssistant();
-    void resetDefaultNotificationAssistant(boolean loadFromConfig);
+    void setNASMigrationDoneAndResetDefault(int userId, boolean loadFromConfig);
     boolean hasEnabledNotificationListener(String packageName, int userId);
 
     @UnsupportedAppUsage

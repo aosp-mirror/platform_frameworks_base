@@ -26,29 +26,29 @@ import com.android.internal.infra.AndroidFuture;
 /** {@hide} */
 interface IShortcutService {
 
-    oneway void setDynamicShortcuts(String packageName, in ParceledListSlice shortcutInfoList,
-            int userId, in AndroidFuture callback);
+    AndroidFuture setDynamicShortcuts(String packageName,
+            in ParceledListSlice shortcutInfoList, int userId);
 
-    oneway void addDynamicShortcuts(String packageName, in ParceledListSlice shortcutInfoList,
-            int userId, in AndroidFuture callback);
+    AndroidFuture addDynamicShortcuts(String packageName,
+            in ParceledListSlice shortcutInfoList, int userId);
 
-    oneway void removeDynamicShortcuts(String packageName, in List shortcutIds, int userId);
+    AndroidFuture removeDynamicShortcuts(String packageName, in List shortcutIds, int userId);
 
-    oneway void removeAllDynamicShortcuts(String packageName, int userId);
+    AndroidFuture removeAllDynamicShortcuts(String packageName, int userId);
 
-    oneway void updateShortcuts(String packageName, in ParceledListSlice shortcuts, int userId,
-            in AndroidFuture callback);
+    AndroidFuture updateShortcuts(String packageName, in ParceledListSlice shortcuts,
+            int userId);
 
-    oneway void requestPinShortcut(String packageName, in ShortcutInfo shortcut,
-            in IntentSender resultIntent, int userId, in AndroidFuture callback);
+    AndroidFuture requestPinShortcut(String packageName, in ShortcutInfo shortcut,
+            in IntentSender resultIntent, int userId);
 
-    oneway void createShortcutResultIntent(String packageName, in ShortcutInfo shortcut,
-            int userId, in AndroidFuture callback);
+    AndroidFuture<Intent> createShortcutResultIntent(String packageName, in ShortcutInfo shortcut,
+            int userId);
 
-    oneway void disableShortcuts(String packageName, in List shortcutIds,
+    AndroidFuture disableShortcuts(String packageName, in List shortcutIds,
             CharSequence disabledMessage, int disabledMessageResId, int userId);
 
-    oneway void enableShortcuts(String packageName, in List shortcutIds, int userId);
+    AndroidFuture enableShortcuts(String packageName, in List shortcutIds, int userId);
 
     int getMaxShortcutCountPerActivity(String packageName, int userId);
 
@@ -58,31 +58,30 @@ interface IShortcutService {
 
     int getIconMaxDimensions(String packageName, int userId);
 
-    oneway void reportShortcutUsed(String packageName, String shortcutId, int userId);
+    AndroidFuture reportShortcutUsed(String packageName, String shortcutId, int userId);
 
-    oneway void resetThrottling(); // system only API for developer opsions
+    void resetThrottling(); // system only API for developer opsions
 
-    oneway void onApplicationActive(String packageName, int userId); // system only API for sysUI
+    AndroidFuture onApplicationActive(String packageName, int userId); // system only API for sysUI
 
     byte[] getBackupPayload(int user);
 
-    oneway void applyRestore(in byte[] payload, int user);
+    AndroidFuture applyRestore(in byte[] payload, int user);
 
     boolean isRequestPinItemSupported(int user, int requestType);
 
     // System API used by framework's ShareSheet (ChooserActivity)
-    oneway void getShareTargets(String packageName, in IntentFilter filter, int userId,
-           in AndroidFuture<ParceledListSlice> callback);
+    AndroidFuture<ParceledListSlice> getShareTargets(String packageName, in IntentFilter filter,
+            int userId);
 
     boolean hasShareTargets(String packageName, String packageToCheck, int userId);
 
-    oneway void removeLongLivedShortcuts(String packageName, in List shortcutIds, int userId);
+    AndroidFuture removeLongLivedShortcuts(String packageName, in List shortcutIds, int userId);
 
-    oneway void getShortcuts(String packageName, int matchFlags, int userId,
-            in AndroidFuture<ParceledListSlice<ShortcutInfo>> callback);
+    AndroidFuture<ParceledListSlice> getShortcuts(String packageName, int matchFlags, int userId);
 
-    oneway void pushDynamicShortcut(String packageName, in ShortcutInfo shortcut, int userId);
+    AndroidFuture pushDynamicShortcut(String packageName, in ShortcutInfo shortcut, int userId);
 
-    oneway void updateShortcutVisibility(String callingPkg, String packageName,
+    AndroidFuture updateShortcutVisibility(String callingPkg, String packageName,
             in byte[] certificate, in boolean visible, int userId);
 }

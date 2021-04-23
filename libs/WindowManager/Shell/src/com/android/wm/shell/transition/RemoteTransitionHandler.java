@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.transition;
 
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
@@ -52,7 +50,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     private final ShellExecutor mMainExecutor;
 
     /** Includes remotes explicitly requested by, eg, ActivityOptions */
-    private final ArrayMap<IBinder, IRemoteTransition> mPendingRemotes = new ArrayMap<>();
+    private final ArrayMap<IBinder, IRemoteTransition> mRequestedRemotes = new ArrayMap<>();
 
     /** Ordered by specificity. Last filters will be checked first */
     private final ArrayList<Pair<TransitionFilter, IRemoteTransition>> mFilters =
@@ -63,9 +61,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                 @Override
                 @BinderThread
                 public void binderDied() {
-                    mMainExecutor.execute(() -> {
-                        mFilters.clear();
-                    });
+                    mMainExecutor.execute(() -> mFilters.clear());
                 }
             };
 
@@ -97,10 +93,15 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     }
 
     @Override
+    public void onTransitionMerged(@NonNull IBinder transition) {
+        mRequestedRemotes.remove(transition);
+    }
+
+    @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        IRemoteTransition pendingRemote = mPendingRemotes.remove(transition);
+        IRemoteTransition pendingRemote = mRequestedRemotes.get(transition);
         if (pendingRemote == null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s doesn't have "
                     + "explicit remote, search filters for match for %s", transition, info);
@@ -110,6 +111,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                         mFilters.get(i));
                 if (mFilters.get(i).first.matches(info)) {
                     pendingRemote = mFilters.get(i).second;
+                    // Add to requested list so that it can be found for merge requests.
+                    mRequestedRemotes.put(transition, pendingRemote);
                     break;
                 }
             }
@@ -122,8 +125,10 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         final IRemoteTransition remote = pendingRemote;
         final IBinder.DeathRecipient remoteDied = () -> {
             Log.e(Transitions.TAG, "Remote transition died, finishing");
-            mMainExecutor.execute(
-                    () -> finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */));
+            mMainExecutor.execute(() -> {
+                mRequestedRemotes.remove(transition);
+                finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            });
         };
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
@@ -131,24 +136,57 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                 if (remote.asBinder() != null) {
                     remote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
                 }
-                mMainExecutor.execute(
-                        () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
+                mMainExecutor.execute(() -> {
+                    mRequestedRemotes.remove(transition);
+                    finishCallback.onTransitionFinished(wct, null /* wctCB */);
+                });
             }
         };
         try {
             if (remote.asBinder() != null) {
                 remote.asBinder().linkToDeath(remoteDied, 0 /* flags */);
             }
-            remote.startAnimation(info, t, cb);
+            remote.startAnimation(transition, info, t, cb);
         } catch (RemoteException e) {
+            Log.e(Transitions.TAG, "Error running remote transition.", e);
             if (remote.asBinder() != null) {
                 remote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
             }
-            Log.e(Transitions.TAG, "Error running remote transition.", e);
+            mRequestedRemotes.remove(transition);
             mMainExecutor.execute(
                     () -> finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */));
         }
         return true;
+    }
+
+    @Override
+    public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        final IRemoteTransition remote = mRequestedRemotes.get(mergeTarget);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt merge %s into %s",
+                transition, remote);
+        if (remote == null) return;
+
+        IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
+            @Override
+            public void onTransitionFinished(WindowContainerTransaction wct) {
+                mMainExecutor.execute(() -> {
+                    if (!mRequestedRemotes.containsKey(mergeTarget)) {
+                        Log.e(TAG, "Merged transition finished after it's mergeTarget (the "
+                                + "transition it was supposed to merge into). This usually means "
+                                + "that the mergeTarget's RemoteTransition impl erroneously "
+                                + "accepted/ran the merge request after finishing the mergeTarget");
+                    }
+                    finishCallback.onTransitionFinished(wct, null /* wctCB */);
+                });
+            }
+        };
+        try {
+            remote.mergeAnimation(transition, info, t, mergeTarget, cb);
+        } catch (RemoteException e) {
+            Log.e(Transitions.TAG, "Error attempting to merge remote transition.", e);
+        }
     }
 
     @Override
@@ -157,7 +195,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             @Nullable TransitionRequestInfo request) {
         IRemoteTransition remote = request.getRemoteTransition();
         if (remote == null) return null;
-        mPendingRemotes.put(transition, remote);
+        mRequestedRemotes.put(transition, remote);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "RemoteTransition directly requested"
                 + " for %s: %s", transition, remote);
         return new WindowContainerTransaction();

@@ -86,7 +86,7 @@ public class SetSchemaResponse {
      * <p>A {@link MigrationFailure} will be generated if the system trying to save a post-migrated
      * {@link GenericDocument} but fail.
      *
-     * <p>{@link MigrationFailure} contains the uri, namespace and schemaType of the post-migrated
+     * <p>{@link MigrationFailure} contains the namespace, id and schemaType of the post-migrated
      * {@link GenericDocument} and the error reason. Mostly it will be mismatch the schema it
      * migrated to.
      */
@@ -257,14 +257,40 @@ public class SetSchemaResponse {
     public static class MigrationFailure {
         private static final String SCHEMA_TYPE_FIELD = "schemaType";
         private static final String NAMESPACE_FIELD = "namespace";
-        private static final String URI_FIELD = "uri";
+        private static final String DOCUMENT_ID_FIELD = "id";
         private static final String ERROR_MESSAGE_FIELD = "errorMessage";
         private static final String RESULT_CODE_FIELD = "resultCode";
 
         private final Bundle mBundle;
 
+        /**
+         * Constructs a new {@link MigrationFailure}.
+         *
+         * @param namespace The namespace of the document which failed to be migrated.
+         * @param documentId The id of the document which failed to be migrated.
+         * @param schemaType The type of the document which failed to be migrated.
+         * @param failedResult The reason why the document failed to be indexed.
+         * @throws IllegalArgumentException if the provided {@code failedResult} was not a failure.
+         */
+        public MigrationFailure(
+                @NonNull String namespace,
+                @NonNull String documentId,
+                @NonNull String schemaType,
+                @NonNull AppSearchResult<?> failedResult) {
+            mBundle = new Bundle();
+            mBundle.putString(NAMESPACE_FIELD, Objects.requireNonNull(namespace));
+            mBundle.putString(DOCUMENT_ID_FIELD, Objects.requireNonNull(documentId));
+            mBundle.putString(SCHEMA_TYPE_FIELD, Objects.requireNonNull(schemaType));
+
+            Objects.requireNonNull(failedResult);
+            Preconditions.checkArgument(
+                    !failedResult.isSuccess(), "failedResult was actually successful");
+            mBundle.putString(ERROR_MESSAGE_FIELD, failedResult.getErrorMessage());
+            mBundle.putInt(RESULT_CODE_FIELD, failedResult.getResultCode());
+        }
+
         MigrationFailure(@NonNull Bundle bundle) {
-            mBundle = bundle;
+            mBundle = Objects.requireNonNull(bundle);
         }
 
         /**
@@ -277,89 +303,33 @@ public class SetSchemaResponse {
             return mBundle;
         }
 
-        /** Returns the schema type of the {@link GenericDocument} that fails to be migrated. */
-        @NonNull
-        public String getSchemaType() {
-            return mBundle.getString(SCHEMA_TYPE_FIELD, /*defaultValue=*/ "");
-        }
-
-        /** Returns the namespace of the {@link GenericDocument} that fails to be migrated. */
+        /** Returns the namespace of the {@link GenericDocument} that failed to be migrated. */
         @NonNull
         public String getNamespace() {
             return mBundle.getString(NAMESPACE_FIELD, /*defaultValue=*/ "");
         }
 
-        /** Returns the uri of the {@link GenericDocument} that fails to be migrated. */
+        /** Returns the id of the {@link GenericDocument} that failed to be migrated. */
         @NonNull
-        public String getUri() {
-            return mBundle.getString(URI_FIELD, /*defaultValue=*/ "");
+        public String getDocumentId() {
+            return mBundle.getString(DOCUMENT_ID_FIELD, /*defaultValue=*/ "");
+        }
+
+        /** Returns the schema type of the {@link GenericDocument} that failed to be migrated. */
+        @NonNull
+        public String getSchemaType() {
+            return mBundle.getString(SCHEMA_TYPE_FIELD, /*defaultValue=*/ "");
         }
 
         /**
-         * Returns the {@link AppSearchResult} that indicates why the post-migrated {@link
-         * GenericDocument} fails to be saved.
+         * Returns the {@link AppSearchResult} that indicates why the post-migration {@link
+         * GenericDocument} failed to be indexed.
          */
         @NonNull
         public AppSearchResult<Void> getAppSearchResult() {
             return AppSearchResult.newFailedResult(
                     mBundle.getInt(RESULT_CODE_FIELD),
                     mBundle.getString(ERROR_MESSAGE_FIELD, /*defaultValue=*/ ""));
-        }
-
-        /** Builder for {@link MigrationFailure} objects. */
-        public static final class Builder {
-            private String mSchemaType;
-            private String mNamespace;
-            private String mUri;
-            private final Bundle mBundle = new Bundle();
-            private AppSearchResult<Void> mFailureResult;
-            private boolean mBuilt = false;
-
-            /** Sets the schema type for the {@link MigrationFailure}. */
-            @NonNull
-            public Builder setSchemaType(@NonNull String schemaType) {
-                Preconditions.checkState(!mBuilt, "Builder has already been used");
-                mSchemaType = Objects.requireNonNull(schemaType);
-                return this;
-            }
-
-            /** Sets the namespace for the {@link MigrationFailure}. */
-            @NonNull
-            public Builder setNamespace(@NonNull String namespace) {
-                Preconditions.checkState(!mBuilt, "Builder has already been used");
-                mNamespace = Objects.requireNonNull(namespace);
-                return this;
-            }
-
-            /** Sets the uri for the {@link MigrationFailure}. */
-            @NonNull
-            public Builder setUri(@NonNull String uri) {
-                Preconditions.checkState(!mBuilt, "Builder has already been used");
-                mUri = Objects.requireNonNull(uri);
-                return this;
-            }
-
-            /** Sets the failure {@link AppSearchResult} for the {@link MigrationFailure}. */
-            @NonNull
-            public Builder setAppSearchResult(@NonNull AppSearchResult<Void> appSearchResult) {
-                Preconditions.checkState(!mBuilt, "Builder has already been used");
-                Preconditions.checkState(!appSearchResult.isSuccess(), "Input a success result");
-                mFailureResult = Objects.requireNonNull(appSearchResult);
-                return this;
-            }
-
-            /** Builds a {@link MigrationFailure} object. */
-            @NonNull
-            public MigrationFailure build() {
-                Preconditions.checkState(!mBuilt, "Builder has already been used");
-                mBundle.putString(SCHEMA_TYPE_FIELD, mSchemaType);
-                mBundle.putString(NAMESPACE_FIELD, mNamespace);
-                mBundle.putString(URI_FIELD, mUri);
-                mBundle.putString(ERROR_MESSAGE_FIELD, mFailureResult.getErrorMessage());
-                mBundle.putInt(RESULT_CODE_FIELD, mFailureResult.getResultCode());
-                mBuilt = true;
-                return new MigrationFailure(mBundle);
-            }
         }
     }
 }

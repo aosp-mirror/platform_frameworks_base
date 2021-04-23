@@ -15,6 +15,7 @@
  */
 package android.hardware.camera2;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Range;
 import android.util.Size;
 
 import java.util.HashSet;
@@ -565,5 +567,48 @@ public final class CameraExtensionCharacteristics {
                     + " not respond!");
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * Returns the estimated capture latency range in milliseconds for the
+     * target capture resolution during the calls to {@link CameraExtensionSession#capture}. This
+     * includes the time spent processing the multi-frame capture request along with any additional
+     * time for encoding of the processed buffer if necessary.
+     *
+     * @param extension         the extension type
+     * @param captureOutputSize size of the capture output surface. If it is not in the supported
+     *                          output sizes, maximum capture output size is used for the estimation
+     * @param format            device-specific extension output format
+     * @return the range of estimated minimal and maximal capture latency in milliseconds
+     * or null if no capture latency info can be provided
+     *
+     * @throws IllegalArgumentException in case of format different from {@link ImageFormat#JPEG} /
+     *                                  {@link ImageFormat#YUV_420_888}; or unsupported extension.
+     */
+    public @Nullable Range<Long> getEstimatedCaptureLatencyRange(@Extension int extension,
+            @NonNull Size captureOutputSize, @ImageFormat.Format int format) {
+        switch (format) {
+            case ImageFormat.YUV_420_888:
+            case ImageFormat.JPEG:
+                //No op
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported format: " + format);
+        }
+
+        long clientId = registerClient(mContext);
+        if (clientId < 0) {
+            throw new IllegalArgumentException("Unsupported extensions");
+        }
+
+        try {
+            if (!isExtensionSupported(mCameraId, extension, mChars)) {
+                throw new IllegalArgumentException("Unsupported extension");
+            }
+        } finally {
+            unregisterClient(clientId);
+        }
+
+        return null;
     }
 }

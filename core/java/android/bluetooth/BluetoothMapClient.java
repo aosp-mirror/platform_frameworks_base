@@ -20,8 +20,10 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -50,16 +52,27 @@ public final class BluetoothMapClient implements BluetoothProfile {
     private static final boolean VDBG = Log.isLoggable(TAG, Log.VERBOSE);
 
     /** @hide */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.mapmce.profile.action.CONNECTION_STATE_CHANGED";
     /** @hide */
+    @RequiresPermission(android.Manifest.permission.RECEIVE_SMS)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MESSAGE_RECEIVED =
             "android.bluetooth.mapmce.profile.action.MESSAGE_RECEIVED";
     /* Actions to be used for pending intents */
     /** @hide */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MESSAGE_SENT_SUCCESSFULLY =
             "android.bluetooth.mapmce.profile.action.MESSAGE_SENT_SUCCESSFULLY";
     /** @hide */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MESSAGE_DELIVERED_SUCCESSFULLY =
             "android.bluetooth.mapmce.profile.action.MESSAGE_DELIVERED_SUCCESSFULLY";
 
@@ -68,6 +81,9 @@ public final class BluetoothMapClient implements BluetoothProfile {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MESSAGE_READ_STATUS_CHANGED =
             "android.bluetooth.mapmce.profile.action.MESSAGE_READ_STATUS_CHANGED";
 
@@ -76,6 +92,9 @@ public final class BluetoothMapClient implements BluetoothProfile {
      *
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MESSAGE_DELETED_STATUS_CHANGED =
             "android.bluetooth.mapmce.profile.action.MESSAGE_DELETED_STATUS_CHANGED";
 

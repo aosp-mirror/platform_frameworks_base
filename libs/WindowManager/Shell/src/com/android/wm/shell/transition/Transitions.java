@@ -35,7 +35,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -91,11 +90,16 @@ public class Transitions implements RemoteCallable<Transitions> {
     private float mTransitionAnimationScaleSetting = 1.0f;
 
     private static final class ActiveTransition {
-        TransitionHandler mFirstHandler = null;
+        IBinder mToken = null;
+        TransitionHandler mHandler = null;
+        boolean mMerged = false;
+        TransitionInfo mInfo = null;
+        SurfaceControl.Transaction mStartT = null;
+        SurfaceControl.Transaction mFinishT = null;
     }
 
-    /** Keeps track of currently tracked transitions and all the animations associated with each */
-    private final ArrayMap<IBinder, ActiveTransition> mActiveTransitions = new ArrayMap<>();
+    /** Keeps track of currently playing transitions in the order of receipt. */
+    private final ArrayList<ActiveTransition> mActiveTransitions = new ArrayList<>();
 
     public Transitions(@NonNull WindowOrganizer organizer, @NonNull TransactionPool pool,
             @NonNull Context context, @NonNull ShellExecutor mainExecutor,
@@ -226,7 +230,7 @@ public class Transitions implements RemoteCallable<Transitions> {
      * type, their transit mode, and their destination z-order.
      */
     private static void setupStartState(@NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t) {
+            @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
         boolean isOpening = isOpeningType(info.getType());
         if (info.getRootLeash().isValid()) {
             t.show(info.getRootLeash());
@@ -270,6 +274,8 @@ public class Transitions implements RemoteCallable<Transitions> {
                         t.setAlpha(leash, 1.f);
                     } else {
                         t.setAlpha(leash, 0.f);
+                        // fix alpha in finish transaction in case the animator itself no-ops.
+                        finishT.setAlpha(leash, 1.f);
                     }
                 } else {
                     // put on bottom and leave it visible
@@ -290,16 +296,24 @@ public class Transitions implements RemoteCallable<Transitions> {
         }
     }
 
+    private int findActiveTransition(IBinder token) {
+        for (int i = mActiveTransitions.size() - 1; i >= 0; --i) {
+            if (mActiveTransitions.get(i).mToken == token) return i;
+        }
+        return -1;
+    }
+
     @VisibleForTesting
     void onTransitionReady(@NonNull IBinder transitionToken, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t) {
+            @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady %s: %s",
                 transitionToken, info);
-        final ActiveTransition active = mActiveTransitions.get(transitionToken);
-        if (active == null) {
+        final int activeIdx = findActiveTransition(transitionToken);
+        if (activeIdx < 0) {
             throw new IllegalStateException("Got transitionReady for non-active transition "
                     + transitionToken + ". expecting one of "
-                    + Arrays.toString(mActiveTransitions.keySet().toArray()));
+                    + Arrays.toString(mActiveTransitions.stream().map(
+                            activeTransition -> activeTransition.mToken).toArray()));
         }
         if (!info.getRootLeash().isValid()) {
             // Invalid root-leash implies that the transition is empty/no-op, so just do
@@ -307,30 +321,62 @@ public class Transitions implements RemoteCallable<Transitions> {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Invalid root leash (%s): %s",
                     transitionToken, info);
             t.apply();
-            onFinish(transitionToken, null /* wct */, null /* wctCB */);
+            onAbort(transitionToken);
             return;
         }
 
-        setupStartState(info, t);
+        final ActiveTransition active = mActiveTransitions.get(activeIdx);
+        active.mInfo = info;
+        active.mStartT = t;
+        active.mFinishT = finishT;
+        if (activeIdx > 0) {
+            // This is now playing at the same time as an existing animation, so try merging it.
+            attemptMergeTransition(mActiveTransitions.get(0), active);
+            return;
+        }
+        // The normal case, just play it.
+        playTransition(active);
+    }
 
-        final TransitionFinishCallback finishCb = (wct, cb) -> onFinish(transitionToken, wct, cb);
-        // If a handler chose to uniquely run this animation, try delegating to it.
-        if (active.mFirstHandler != null) {
+    /**
+     * Attempt to merge by delegating the transition start to the handler of the currently
+     * playing transition.
+     */
+    void attemptMergeTransition(@NonNull ActiveTransition playing,
+            @NonNull ActiveTransition merging) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s ready while"
+                + " another transition %s is still animating. Notify the animating transition"
+                + " in case they can be merged", merging.mToken, playing.mToken);
+        playing.mHandler.mergeAnimation(merging.mToken, merging.mInfo, merging.mStartT,
+                playing.mToken, (wct, cb) -> onFinish(merging.mToken, wct, cb));
+    }
+
+    boolean startAnimation(@NonNull ActiveTransition active, TransitionHandler handler) {
+        return handler.startAnimation(active.mToken, active.mInfo, active.mStartT,
+                (wct, cb) -> onFinish(active.mToken, wct, cb));
+    }
+
+    void playTransition(@NonNull ActiveTransition active) {
+        setupStartState(active.mInfo, active.mStartT, active.mFinishT);
+
+        // If a handler already chose to run this animation, try delegating to it first.
+        if (active.mHandler != null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try firstHandler %s",
-                    active.mFirstHandler);
-            if (active.mFirstHandler.startAnimation(transitionToken, info, t, finishCb)) {
+                    active.mHandler);
+            if (startAnimation(active, active.mHandler)) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by firstHandler");
                 return;
             }
         }
         // Otherwise give every other handler a chance (in order)
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
-            if (mHandlers.get(i) == active.mFirstHandler) continue;
+            if (mHandlers.get(i) == active.mHandler) continue;
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try handler %s",
                     mHandlers.get(i));
-            if (mHandlers.get(i).startAnimation(transitionToken, info, t, finishCb)) {
+            if (startAnimation(active, mHandlers.get(i))) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by %s",
                         mHandlers.get(i));
+                active.mHandler = mHandlers.get(i);
                 return;
             }
         }
@@ -338,23 +384,107 @@ public class Transitions implements RemoteCallable<Transitions> {
                 "This shouldn't happen, maybe the default handler is broken.");
     }
 
-    private void onFinish(IBinder transition, @Nullable WindowContainerTransaction wct,
+    /** Special version of finish just for dealing with no-op/invalid transitions. */
+    private void onAbort(IBinder transition) {
+        final int activeIdx = findActiveTransition(transition);
+        if (activeIdx < 0) return;
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                "Transition animation aborted due to no-op, notifying core %s", transition);
+        mActiveTransitions.remove(activeIdx);
+        mOrganizer.finishTransition(transition, null /* wct */, null /* wctCB */);
+    }
+
+    private void onFinish(IBinder transition,
+            @Nullable WindowContainerTransaction wct,
             @Nullable WindowContainerTransactionCallback wctCB) {
-        if (!mActiveTransitions.containsKey(transition)) {
-            Log.e(TAG, "Trying to finish a non-running transition. Maybe remote crashed?");
+        int activeIdx = findActiveTransition(transition);
+        if (activeIdx < 0) {
+            Log.e(TAG, "Trying to finish a non-running transition. Either remote crashed or "
+                    + " a handler didn't properly deal with a merge.", new RuntimeException());
+            return;
+        } else if (activeIdx > 0) {
+            // This transition was merged.
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition was merged: %s",
+                    transition);
+            final ActiveTransition active = mActiveTransitions.get(activeIdx);
+            active.mMerged = true;
+            if (active.mHandler != null) {
+                active.mHandler.onTransitionMerged(active.mToken);
+            }
             return;
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                "Transition animations finished, notifying core %s", transition);
-        mActiveTransitions.remove(transition);
+                "Transition animation finished, notifying core %s", transition);
+        // Merge all relevant transactions together
+        SurfaceControl.Transaction fullFinish = mActiveTransitions.get(activeIdx).mFinishT;
+        for (int iA = activeIdx + 1; iA < mActiveTransitions.size(); ++iA) {
+            final ActiveTransition toMerge = mActiveTransitions.get(iA);
+            if (!toMerge.mMerged) break;
+            // Include start. It will be a no-op if it was already applied. Otherwise, we need it
+            // to maintain consistent state.
+            fullFinish.merge(mActiveTransitions.get(iA).mStartT);
+            fullFinish.merge(mActiveTransitions.get(iA).mFinishT);
+        }
+        fullFinish.apply();
+        // Now perform all the finishes.
+        mActiveTransitions.remove(activeIdx);
         mOrganizer.finishTransition(transition, wct, wctCB);
+        while (activeIdx < mActiveTransitions.size()) {
+            if (!mActiveTransitions.get(activeIdx).mMerged) break;
+            ActiveTransition merged = mActiveTransitions.remove(activeIdx);
+            mOrganizer.finishTransition(merged.mToken, null /* wct */, null /* wctCB */);
+        }
+        if (mActiveTransitions.size() <= activeIdx) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "All active transition animations "
+                    + "finished");
+            return;
+        }
+        // Start animating the next active transition
+        final ActiveTransition next = mActiveTransitions.get(activeIdx);
+        if (next.mInfo == null) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Pending transition after one"
+                    + " finished, but it isn't ready yet.");
+            return;
+        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Pending transitions after one"
+                + " finished, so start the next one.");
+        playTransition(next);
+        // Now try to merge the rest of the transitions (re-acquire activeIdx since next may have
+        // finished immediately)
+        activeIdx = findActiveTransition(next.mToken);
+        if (activeIdx < 0) {
+            // This means 'next' finished immediately and thus re-entered this function. Since
+            // that is the case, just return here since all relevant logic has already run in the
+            // re-entered call.
+            return;
+        }
+
+        // This logic is also convoluted because 'next' may finish immediately in response to any of
+        // the merge requests (eg. if it decided to "cancel" itself).
+        int mergeIdx = activeIdx + 1;
+        while (mergeIdx < mActiveTransitions.size()) {
+            ActiveTransition mergeCandidate = mActiveTransitions.get(mergeIdx);
+            if (mergeCandidate.mMerged) {
+                throw new IllegalStateException("Can't merge a transition after not-merging"
+                        + " a preceding one.");
+            }
+            attemptMergeTransition(next, mergeCandidate);
+            mergeIdx = findActiveTransition(mergeCandidate.mToken);
+            if (mergeIdx < 0) {
+                // This means 'next' finished immediately and thus re-entered this function. Since
+                // that is the case, just return here since all relevant logic has already run in
+                // the re-entered call.
+                return;
+            }
+            ++mergeIdx;
+        }
     }
 
     void requestStartTransition(@NonNull IBinder transitionToken,
             @Nullable TransitionRequestInfo request) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition requested: %s %s",
                 transitionToken, request);
-        if (mActiveTransitions.containsKey(transitionToken)) {
+        if (findActiveTransition(transitionToken) >= 0) {
             throw new RuntimeException("Transition already started " + transitionToken);
         }
         final ActiveTransition active = new ActiveTransition();
@@ -362,23 +492,23 @@ public class Transitions implements RemoteCallable<Transitions> {
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
             wct = mHandlers.get(i).handleRequest(transitionToken, request);
             if (wct != null) {
-                active.mFirstHandler = mHandlers.get(i);
+                active.mHandler = mHandlers.get(i);
                 break;
             }
         }
-        IBinder transition = mOrganizer.startTransition(
+        active.mToken = mOrganizer.startTransition(
                 request.getType(), transitionToken, wct);
-        mActiveTransitions.put(transition, active);
+        mActiveTransitions.add(active);
     }
 
     /** Start a new transition directly. */
     public IBinder startTransition(@WindowManager.TransitionType int type,
             @NonNull WindowContainerTransaction wct, @Nullable TransitionHandler handler) {
         final ActiveTransition active = new ActiveTransition();
-        active.mFirstHandler = handler;
-        IBinder transition = mOrganizer.startTransition(type, null /* token */, wct);
-        mActiveTransitions.put(transition, active);
-        return transition;
+        active.mHandler = handler;
+        active.mToken = mOrganizer.startTransition(type, null /* token */, wct);
+        mActiveTransitions.add(active);
+        return active.mToken;
     }
 
     /**
@@ -415,6 +545,32 @@ public class Transitions implements RemoteCallable<Transitions> {
                 @NonNull TransitionFinishCallback finishCallback);
 
         /**
+         * Attempts to merge a different transition's animation into an animation that this handler
+         * is currently playing. If a merge is not possible/supported, this should be a no-op.
+         *
+         * This gets called if another transition becomes ready while this handler is still playing
+         * an animation. This is called regardless of whether this handler claims to support that
+         * particular transition or not.
+         *
+         * When this happens, there are 2 options:
+         *  1. Do nothing. This effectively rejects the merge request. This is the "safest" option.
+         *  2. Merge the incoming transition into this one. The implementation is up to this
+         *     handler. To indicate that this handler has "consumed" the merge transition, it
+         *     must call the finishCallback immediately, or at-least before the original
+         *     transition's finishCallback is called.
+         *
+         * @param transition This is the transition that wants to be merged.
+         * @param info Information about what is changing in the transition.
+         * @param t Contains surface changes that resulted from the transition.
+         * @param mergeTarget This is the transition that we are attempting to merge with (ie. the
+         *                    one this handler is currently already animating).
+         * @param finishCallback Call this if merged. This MUST be called on main thread.
+         */
+        default void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+                @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+                @NonNull TransitionFinishCallback finishCallback) { }
+
+        /**
          * Potentially handles a startTransition request.
          *
          * @param transition The transition whose start is being requested.
@@ -425,6 +581,12 @@ public class Transitions implements RemoteCallable<Transitions> {
         @Nullable
         WindowContainerTransaction handleRequest(@NonNull IBinder transition,
                 @NonNull TransitionRequestInfo request);
+
+        /**
+         * Called when a transition which was already "claimed" by this handler has been merged
+         * into another animation. Gives this handler a chance to clean-up any expectations.
+         */
+        default void onTransitionMerged(@NonNull IBinder transition) { }
 
         /**
          * Sets transition animation scale settings value to handler.
@@ -438,10 +600,10 @@ public class Transitions implements RemoteCallable<Transitions> {
     private class TransitionPlayerImpl extends ITransitionPlayer.Stub {
         @Override
         public void onTransitionReady(IBinder iBinder, TransitionInfo transitionInfo,
-                SurfaceControl.Transaction transaction) throws RemoteException {
-            mMainExecutor.execute(() -> {
-                Transitions.this.onTransitionReady(iBinder, transitionInfo, transaction);
-            });
+                SurfaceControl.Transaction t, SurfaceControl.Transaction finishT)
+                throws RemoteException {
+            mMainExecutor.execute(() -> Transitions.this.onTransitionReady(
+                    iBinder, transitionInfo, t, finishT));
         }
 
         @Override

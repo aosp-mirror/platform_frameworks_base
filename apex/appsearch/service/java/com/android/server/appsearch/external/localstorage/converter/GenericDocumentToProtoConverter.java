@@ -52,7 +52,7 @@ public final class GenericDocumentToProtoConverter {
         Objects.requireNonNull(document);
         DocumentProto.Builder mProtoBuilder = DocumentProto.newBuilder();
         mProtoBuilder
-                .setUri(document.getUri())
+                .setUri(document.getId())
                 .setSchema(document.getSchemaType())
                 .setNamespace(document.getNamespace())
                 .setScore(document.getScore())

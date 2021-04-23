@@ -6432,7 +6432,7 @@ public class DevicePolicyManager {
      * broadcast when access to a key is granted.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *        {@code null} if calling from a delegated certificate installer.
+     *        {@code null} if calling from a delegated certificate chooser.
      * @param alias The alias of the key to grant access to.
      * @param packageName The name of the (already installed) package to grant access to.
      * @return {@code true} if the grant was set successfully, {@code false} otherwise.
@@ -6498,7 +6498,7 @@ public class DevicePolicyManager {
      * broadcast when access to a key is revoked.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *        {@code null} if calling from a delegated certificate installer.
+     *        {@code null} if calling from a delegated certificate chooser.
      * @param alias The alias of the key to revoke access from.
      * @param packageName The name of the (already installed) package to revoke access from.
      * @return {@code true} if the grant was revoked successfully, {@code false} otherwise.

@@ -68,6 +68,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private KeyguardViewMediator mKeyguardViewMediator;
+    @Mock
+    private UdfpsController mUdfpsController;
 
     private UdfpsKeyguardViewController mController;
 
@@ -98,7 +100,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor,
                 mExecutor,
                 mDumpManager,
-                mKeyguardViewMediator);
+                mKeyguardViewMediator,
+                mUdfpsController);
     }
 
     @Test
@@ -150,6 +153,17 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         mStatusBarStateListener.onDozeAmountChanged(linear, eased);
 
         verify(mView).onDozeAmountChanged(linear, eased);
+    }
+
+    @Test
+    public void testShouldPauseAuthBouncerShowing() {
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureExpansionListener();
+
+        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
+
+        assertFalse(mController.shouldPauseAuth());
     }
 
     @Test

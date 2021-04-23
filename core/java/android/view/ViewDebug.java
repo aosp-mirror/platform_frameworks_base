@@ -1459,8 +1459,8 @@ public class ViewDebug {
         PropertyInfo<ExportedProperty, ?>[] properties = sExportProperties.get(klass);
 
         if (properties == null) {
-            properties = convertToPropertyInfos(klass.getDeclaredMethodsUnchecked(false),
-                    klass.getDeclaredFieldsUnchecked(false), ExportedProperty.class);
+            properties = convertToPropertyInfos(klass.getDeclaredMethods(),
+                    klass.getDeclaredFields(), ExportedProperty.class);
             map.put(klass, properties);
         }
         return properties;

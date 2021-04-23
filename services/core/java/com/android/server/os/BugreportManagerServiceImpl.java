@@ -145,10 +145,15 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         }
         // For carrier privileges, this can include user-installed apps. This is essentially a
         // function of the current active SIM(s) in the device to let carrier apps through.
-        if (checkCarrierPrivileges
-                && mTelephonyManager.checkCarrierPrivilegesForPackageAnyPhone(callingPackage)
-                        == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-            return;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (checkCarrierPrivileges
+                    && mTelephonyManager.checkCarrierPrivilegesForPackageAnyPhone(callingPackage)
+                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         String message =
