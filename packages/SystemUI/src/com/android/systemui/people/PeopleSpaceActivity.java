@@ -132,7 +132,9 @@ public class PeopleSpaceActivity extends Activity {
     /** Sets {@code tileView} with the data in {@code conversation}. */
     private void setTileView(PeopleSpaceTileView tileView, PeopleSpaceTile tile) {
         try {
-            tileView.setName(tile.getUserName().toString());
+            if (tile.getUserName() != null) {
+                tileView.setName(tile.getUserName().toString());
+            }
             tileView.setPersonIcon(getPersonIconBitmap(mContext, tile,
                     getSizeInDp(mContext, R.dimen.avatar_size_for_medium,
                             mContext.getResources().getDisplayMetrics().density)));
