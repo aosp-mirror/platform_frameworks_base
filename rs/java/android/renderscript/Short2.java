@@ -22,7 +22,12 @@ package android.renderscript;
  *
  * Vector version of the basic short type.
  * Provides two short fields packed.
+ *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  */
+@Deprecated
 public class Short2 {
     public short x;
     public short y;

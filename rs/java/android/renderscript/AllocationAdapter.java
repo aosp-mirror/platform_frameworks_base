@@ -19,7 +19,11 @@ package android.renderscript;
 /**
  * Only intended for use by generated reflected code.
  *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public class AllocationAdapter extends Allocation {
     Type mWindow;
 
