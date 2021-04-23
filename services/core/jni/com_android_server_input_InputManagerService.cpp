@@ -118,6 +118,7 @@ static struct {
     jmethodID getVirtualKeyQuietTimeMillis;
     jmethodID getExcludedDeviceNames;
     jmethodID getInputPortAssociations;
+    jmethodID getInputUniqueIdAssociations;
     jmethodID getKeyRepeatTimeout;
     jmethodID getKeyRepeatDelay;
     jmethodID getHoverTapTimeout;
@@ -578,6 +579,21 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
             outConfig->portAssociations.insert({inputPort, displayPort});
         }
         env->DeleteLocalRef(portAssociations);
+    }
+    outConfig->uniqueIdAssociations.clear();
+    jobjectArray uniqueIdAssociations = jobjectArray(
+            env->CallObjectMethod(mServiceObj, gServiceClassInfo.getInputUniqueIdAssociations));
+    if (!checkAndClearExceptionFromCallback(env, "getInputUniqueIdAssociations") &&
+        uniqueIdAssociations) {
+        jsize length = env->GetArrayLength(uniqueIdAssociations);
+        for (jsize i = 0; i < length / 2; i++) {
+            std::string inputDeviceUniqueId =
+                    getStringElementFromJavaArray(env, uniqueIdAssociations, 2 * i);
+            std::string displayUniqueId =
+                    getStringElementFromJavaArray(env, uniqueIdAssociations, 2 * i + 1);
+            outConfig->uniqueIdAssociations.insert({inputDeviceUniqueId, displayUniqueId});
+        }
+        env->DeleteLocalRef(uniqueIdAssociations);
     }
 
     jint hoverTapTimeout = env->CallIntMethod(mServiceObj,
@@ -2134,6 +2150,12 @@ static void nativeNotifyPortAssociationsChanged(JNIEnv* env, jclass /* clazz */,
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
+static void nativeChangeUniqueIdAssociation(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->getInputManager()->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+}
+
 static void nativeSetMotionClassifierEnabled(JNIEnv* /* env */, jclass /* clazz */, jlong ptr,
                                              jboolean enabled) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -2316,6 +2338,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetCustomPointerIcon},
         {"nativeCanDispatchToDisplay", "(JII)Z", (void*)nativeCanDispatchToDisplay},
         {"nativeNotifyPortAssociationsChanged", "(J)V", (void*)nativeNotifyPortAssociationsChanged},
+        {"nativeChangeUniqueIdAssociation", "(J)V", (void*)nativeChangeUniqueIdAssociation},
         {"nativeSetMotionClassifierEnabled", "(JZ)V", (void*)nativeSetMotionClassifierEnabled},
         {"nativeGetSensorList", "(JI)[Landroid/hardware/input/InputSensorInfo;",
          (void*)nativeGetSensorList},
@@ -2424,6 +2447,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.getInputPortAssociations, clazz,
             "getInputPortAssociations", "()[Ljava/lang/String;");
+
+    GET_METHOD_ID(gServiceClassInfo.getInputUniqueIdAssociations, clazz,
+                  "getInputUniqueIdAssociations", "()[Ljava/lang/String;");
 
     GET_METHOD_ID(gServiceClassInfo.getKeyRepeatTimeout, clazz,
             "getKeyRepeatTimeout", "()I");
