@@ -16,11 +16,8 @@
 
 package android.app.time;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import androidx.test.filters.SmallTest;
@@ -29,23 +26,10 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/** Also see {@link android.app.time.cts.TimeZoneConfigurationTest}, which covers the SDK APIs. */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class TimeZoneConfigurationTest {
-
-    @Test
-    public void testBuilder_copyConstructor() {
-        TimeZoneConfiguration.Builder builder1 =
-                new TimeZoneConfiguration.Builder()
-                        .setAutoDetectionEnabled(true)
-                        .setGeoDetectionEnabled(true);
-        TimeZoneConfiguration configuration1 = builder1.build();
-
-        TimeZoneConfiguration configuration2 =
-                new TimeZoneConfiguration.Builder(configuration1).build();
-
-        assertEquals(configuration1, configuration2);
-    }
 
     @Test
     public void testIntrospectionMethods() {
@@ -89,85 +73,5 @@ public class TimeZoneConfigurationTest {
                             .build();
             assertEquals(configuration2, merged1And2);
         }
-    }
-
-    @Test
-    public void testEquals() {
-        TimeZoneConfiguration.Builder builder1 =
-                new TimeZoneConfiguration.Builder();
-        {
-            TimeZoneConfiguration one = builder1.build();
-            assertEquals(one, one);
-        }
-
-        TimeZoneConfiguration.Builder builder2 =
-                new TimeZoneConfiguration.Builder();
-        {
-            TimeZoneConfiguration one = builder1.build();
-            TimeZoneConfiguration two = builder2.build();
-            assertEquals(one, two);
-            assertEquals(two, one);
-        }
-
-        builder1.setAutoDetectionEnabled(true);
-        {
-            TimeZoneConfiguration one = builder1.build();
-            TimeZoneConfiguration two = builder2.build();
-            assertNotEquals(one, two);
-        }
-
-        builder2.setAutoDetectionEnabled(false);
-        {
-            TimeZoneConfiguration one = builder1.build();
-            TimeZoneConfiguration two = builder2.build();
-            assertNotEquals(one, two);
-        }
-
-        builder1.setAutoDetectionEnabled(false);
-        {
-            TimeZoneConfiguration one = builder1.build();
-            TimeZoneConfiguration two = builder2.build();
-            assertEquals(one, two);
-        }
-
-        builder1.setGeoDetectionEnabled(true);
-        {
-            TimeZoneConfiguration one = builder1.build();
-            TimeZoneConfiguration two = builder2.build();
-            assertNotEquals(one, two);
-        }
-
-        builder2.setGeoDetectionEnabled(false);
-        {
-            TimeZoneConfiguration one = builder1.build();
-            TimeZoneConfiguration two = builder2.build();
-            assertNotEquals(one, two);
-        }
-
-        builder1.setGeoDetectionEnabled(false);
-        {
-            TimeZoneConfiguration one = builder1.build();
-            TimeZoneConfiguration two = builder2.build();
-            assertEquals(one, two);
-        }
-    }
-
-    @Test
-    public void testParcelable() {
-        TimeZoneConfiguration.Builder builder =
-                new TimeZoneConfiguration.Builder();
-        assertRoundTripParcelable(builder.build());
-
-        builder.setAutoDetectionEnabled(true);
-        assertRoundTripParcelable(builder.build());
-
-        builder.setAutoDetectionEnabled(false);
-        assertRoundTripParcelable(builder.build());
-
-        builder.setGeoDetectionEnabled(false);
-        assertRoundTripParcelable(builder.build());
-
-        builder.setGeoDetectionEnabled(true);
-        assertRoundTripParcelable(builder.build());
     }
 }
