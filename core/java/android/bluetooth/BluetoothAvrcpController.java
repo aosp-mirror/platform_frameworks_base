@@ -22,6 +22,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -86,7 +87,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     public static final String EXTRA_PLAYER_SETTING =
             "android.bluetooth.avrcp-controller.profile.extra.PLAYER_SETTING";
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothAvrcpController> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.AVRCP_CONTROLLER,
                     "BluetoothAvrcpController", IBluetoothAvrcpController.class.getName()) {
@@ -101,8 +103,10 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
      * Create a BluetoothAvrcpController proxy object for interacting with the local
      * Bluetooth AVRCP service.
      */
-    /*package*/ BluetoothAvrcpController(Context context, ServiceListener listener) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    /* package */ BluetoothAvrcpController(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
     }
 
@@ -131,7 +135,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
                 getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -153,7 +158,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
                 getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();

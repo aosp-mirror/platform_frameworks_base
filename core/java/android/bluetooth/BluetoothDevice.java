@@ -24,7 +24,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.app.ActivityThread;
 import android.app.PropertyInvalidatedCache;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresBluetoothLocationPermission;
@@ -48,6 +47,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -1167,11 +1167,27 @@ public final class BluetoothDevice implements Parcelable {
 
         mAddress = address;
         mAddressType = ADDRESS_TYPE_PUBLIC;
-        mAttributionSource = ActivityThread.currentAttributionSource();
+        mAttributionSource = BluetoothManager.resolveAttributionSource(null);
     }
 
     void setAttributionSource(AttributionSource attributionSource) {
         mAttributionSource = attributionSource;
+    }
+
+    static BluetoothDevice setAttributionSource(BluetoothDevice device,
+            AttributionSource attributionSource) {
+        device.setAttributionSource(attributionSource);
+        return device;
+    }
+
+    static List<BluetoothDevice> setAttributionSource(List<BluetoothDevice> devices,
+            AttributionSource attributionSource) {
+        if (devices != null) {
+            for (BluetoothDevice device : devices) {
+                device.setAttributionSource(attributionSource);
+            }
+        }
+        return devices;
     }
 
     @Override

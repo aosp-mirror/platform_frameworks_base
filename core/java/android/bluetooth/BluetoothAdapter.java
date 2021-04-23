@@ -752,18 +752,23 @@ public final class BluetoothAdapter {
 
     /**
      * Get a handle to the default local Bluetooth adapter.
-     * <p>Currently Android only supports one Bluetooth adapter, but the API
-     * could be extended to support more. This will always return the default
-     * adapter.
+     * <p>
+     * Currently Android only supports one Bluetooth adapter, but the API could
+     * be extended to support more. This will always return the default adapter.
      * </p>
      *
-     * @return the default local adapter, or null if Bluetooth is not supported on this hardware
-     * platform
+     * @return the default local adapter, or null if Bluetooth is not supported
+     *         on this hardware platform
+     * @deprecated this method will continue to work, but developers are
+     *             strongly encouraged to migrate to using
+     *             {@link BluetoothManager#getAdapter()}, since that approach
+     *             enables support for {@link Context#createAttributionContext}.
      */
+    @Deprecated
     @RequiresNoPermission
     public static synchronized BluetoothAdapter getDefaultAdapter() {
         if (sAdapter == null) {
-            sAdapter = createAdapter(ActivityThread.currentAttributionSource());
+            sAdapter = createAdapter(BluetoothManager.resolveAttributionSource(null));
         }
         return sAdapter;
     }
@@ -2966,50 +2971,51 @@ public final class BluetoothAdapter {
         }
 
         if (profile == BluetoothProfile.HEADSET) {
-            BluetoothHeadset headset = new BluetoothHeadset(context, listener);
+            BluetoothHeadset headset = new BluetoothHeadset(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.A2DP) {
-            BluetoothA2dp a2dp = new BluetoothA2dp(context, listener);
+            BluetoothA2dp a2dp = new BluetoothA2dp(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.A2DP_SINK) {
-            BluetoothA2dpSink a2dpSink = new BluetoothA2dpSink(context, listener);
+            BluetoothA2dpSink a2dpSink = new BluetoothA2dpSink(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.AVRCP_CONTROLLER) {
-            BluetoothAvrcpController avrcp = new BluetoothAvrcpController(context, listener);
+            BluetoothAvrcpController avrcp = new BluetoothAvrcpController(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.HID_HOST) {
-            BluetoothHidHost iDev = new BluetoothHidHost(context, listener);
+            BluetoothHidHost iDev = new BluetoothHidHost(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.PAN) {
-            BluetoothPan pan = new BluetoothPan(context, listener);
+            BluetoothPan pan = new BluetoothPan(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.PBAP) {
-            BluetoothPbap pbap = new BluetoothPbap(context, listener);
+            BluetoothPbap pbap = new BluetoothPbap(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.HEALTH) {
             Log.e(TAG, "getProfileProxy(): BluetoothHealth is deprecated");
             return false;
         } else if (profile == BluetoothProfile.MAP) {
-            BluetoothMap map = new BluetoothMap(context, listener);
+            BluetoothMap map = new BluetoothMap(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.HEADSET_CLIENT) {
-            BluetoothHeadsetClient headsetClient = new BluetoothHeadsetClient(context, listener);
+            BluetoothHeadsetClient headsetClient =
+                    new BluetoothHeadsetClient(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.SAP) {
-            BluetoothSap sap = new BluetoothSap(context, listener);
+            BluetoothSap sap = new BluetoothSap(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.PBAP_CLIENT) {
-            BluetoothPbapClient pbapClient = new BluetoothPbapClient(context, listener);
+            BluetoothPbapClient pbapClient = new BluetoothPbapClient(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.MAP_CLIENT) {
-            BluetoothMapClient mapClient = new BluetoothMapClient(context, listener);
+            BluetoothMapClient mapClient = new BluetoothMapClient(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.HID_DEVICE) {
-            BluetoothHidDevice hidDevice = new BluetoothHidDevice(context, listener);
+            BluetoothHidDevice hidDevice = new BluetoothHidDevice(context, listener, this);
             return true;
         } else if (profile == BluetoothProfile.HEARING_AID) {
             if (isHearingAidProfileSupported()) {
-                BluetoothHearingAid hearingAid = new BluetoothHearingAid(context, listener);
+                BluetoothHearingAid hearingAid = new BluetoothHearingAid(context, listener, this);
                 return true;
             }
             return false;
