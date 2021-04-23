@@ -50,7 +50,8 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:singleLine="true"
-                android:textAppearance="@style/TextAppearance.QS.Status"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="@style/TextAppearance.QS.Build"
                 android:visibility="gone" />
 
             <com.android.systemui.qs.PageIndicator
