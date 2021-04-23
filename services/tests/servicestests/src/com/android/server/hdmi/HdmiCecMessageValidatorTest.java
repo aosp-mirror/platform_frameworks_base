@@ -392,9 +392,9 @@ public class HdmiCecMessageValidatorTest {
     @Test
     public void isValid_giveFeatures() {
         assertMessageValidity("40:A5").isEqualTo(OK);
+        assertMessageValidity("F0:A5").isEqualTo(OK);
 
         assertMessageValidity("4F:A5").isEqualTo(ERROR_DESTINATION);
-        assertMessageValidity("F0:A5").isEqualTo(ERROR_SOURCE);
     }
 
     @Test
