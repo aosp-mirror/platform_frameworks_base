@@ -935,7 +935,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private void onWalletClick(View v) {
         // More coming here; need to inform the user about how to proceed
-        mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY);
+        if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+            return;
+        }
 
         if (mHasCard) {
             Intent intent = new Intent(mContext, WalletActivity.class)
