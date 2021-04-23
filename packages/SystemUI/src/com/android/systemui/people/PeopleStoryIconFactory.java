@@ -23,16 +23,17 @@ import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.TypedValue;
 
-import com.android.launcher3.icons.BaseIconFactory;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
-class PeopleStoryIconFactory extends BaseIconFactory {
+class PeopleStoryIconFactory implements AutoCloseable {
 
     private static final int PADDING = 2;
     private static final int RING_WIDTH = 2;
@@ -44,11 +45,13 @@ class PeopleStoryIconFactory extends BaseIconFactory {
     private int mAccentColor;
     private float mDensity;
     private float mIconSize;
+    private Context mContext;
+
+    private final int mIconBitmapSize;
 
     PeopleStoryIconFactory(Context context, PackageManager pm,
             IconDrawableFactory iconDrawableFactory, int iconSizeDp) {
-        super(context, context.getResources().getConfiguration().densityDpi,
-                (int) (iconSizeDp * context.getResources().getDisplayMetrics().density));
+        mIconBitmapSize = (int) (iconSizeDp * context.getResources().getDisplayMetrics().density);
         mDensity = context.getResources().getDisplayMetrics().density;
         mIconSize = mDensity * iconSizeDp;
         mPackageManager = pm;
@@ -57,6 +60,7 @@ class PeopleStoryIconFactory extends BaseIconFactory {
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(android.R.attr.colorAccent, typedValue, true);
         mAccentColor = context.getColor(typedValue.resourceId);
+        mContext = context;
     }
 
 
@@ -69,7 +73,7 @@ class PeopleStoryIconFactory extends BaseIconFactory {
         try {
             final ApplicationInfo appInfo = mPackageManager.getApplicationInfoAsUser(
                     packageName, PackageManager.GET_META_DATA, userId);
-            badge = mIconDrawableFactory.getBadgedIcon(appInfo, userId);
+            badge = Utils.getBadgedIcon(mContext, appInfo);
         } catch (PackageManager.NameNotFoundException e) {
             badge = mPackageManager.getDefaultActivityIcon();
         }
@@ -209,7 +213,11 @@ class PeopleStoryIconFactory extends BaseIconFactory {
 
         @Override
         public int getOpacity() {
-            return 0;
+            return PixelFormat.TRANSLUCENT;
         }
+    }
+
+    @Override
+    public void close() {
     }
 }
