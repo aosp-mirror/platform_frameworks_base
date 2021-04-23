@@ -26,6 +26,7 @@ import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -236,7 +237,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     public static final String EXTRA_IDLE_TIME =
             "android.bluetooth.BluetoothHidHost.extra.IDLE_TIME";
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothHidHost> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.HID_HOST,
                     "BluetoothHidHost", IBluetoothHidHost.class.getName()) {
@@ -250,8 +252,10 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * Create a BluetoothHidHost proxy object for interacting with the local
      * Bluetooth Service which handles the InputDevice profile
      */
-    /*package*/ BluetoothHidHost(Context context, ServiceListener listener) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    /* package */ BluetoothHidHost(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
     }
 
@@ -348,7 +352,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -371,7 +376,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
