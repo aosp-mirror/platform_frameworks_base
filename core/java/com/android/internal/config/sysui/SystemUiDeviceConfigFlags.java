@@ -81,6 +81,12 @@ public final class SystemUiDeviceConfigFlags {
     public static final String SCREENSHOT_NOTIFICATION_SMART_ACTIONS_TIMEOUT_MS =
             "screenshot_notification_smart_actions_timeout_ms";
 
+    /**
+     * (int) Timeout value in ms to get Quick Share actions for screenshot notification.
+     */
+    public static final String SCREENSHOT_NOTIFICATION_QUICK_SHARE_ACTIONS_TIMEOUT_MS =
+            "screenshot_notification_quick_share_actions_timeout_ms";
+
     // Flags related to Smart Suggestions - these are read in SmartReplyConstants.
 
     /** (boolean) Whether to enable smart suggestions in notifications. */
