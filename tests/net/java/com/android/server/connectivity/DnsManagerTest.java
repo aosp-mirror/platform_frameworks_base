@@ -16,10 +16,10 @@
 
 package com.android.server.connectivity;
 
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_DEFAULT_MODE;
 import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE_OFF;
+import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.net.ConnectivitySettingsManager.PRIVATE_DNS_SPECIFIER;
 import static android.net.NetworkCapabilities.MAX_TRANSPORT;
 import static android.net.NetworkCapabilities.MIN_TRANSPORT;
@@ -44,6 +44,7 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.net.ConnectivitySettingsManager;
 import android.net.IDnsResolver;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
@@ -187,9 +188,8 @@ public class DnsManagerTest {
         lp.addRoute(new RouteInfo((IpPrefix) null, InetAddress.getByName("2001:db8:1::1"),
                 TEST_IFACENAME));
 
-        Settings.Global.putString(mContentResolver,
-                PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
-        Settings.Global.putString(mContentResolver, PRIVATE_DNS_SPECIFIER, "strictmode.com");
+        ConnectivitySettingsManager.setPrivateDnsMode(mCtx, PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
+        ConnectivitySettingsManager.setPrivateDnsHostname(mCtx, "strictmode.com");
         mDnsManager.updatePrivateDns(new Network(TEST_NETID),
                 new PrivateDnsConfig("strictmode.com", new InetAddress[] {
                     InetAddress.parseNumericAddress("6.6.6.6"),
@@ -294,7 +294,7 @@ public class DnsManagerTest {
         assertNull(lp.getPrivateDnsServerName());
 
         // Turn private DNS mode off
-        Settings.Global.putString(mContentResolver, PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_OFF);
+        ConnectivitySettingsManager.setPrivateDnsMode(mCtx, PRIVATE_DNS_MODE_OFF);
         mDnsManager.updatePrivateDns(new Network(TEST_NETID),
                 mDnsManager.getPrivateDnsConfig());
         mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
@@ -318,16 +318,15 @@ public class DnsManagerTest {
         assertEquals(new InetAddress[0], cfgAuto.ips);
 
         // Pretend a gservices push sets the default to "off".
-        Settings.Global.putString(mContentResolver, PRIVATE_DNS_DEFAULT_MODE, "off");
+        ConnectivitySettingsManager.setPrivateDnsDefaultMode(mCtx, PRIVATE_DNS_MODE_OFF);
         final PrivateDnsConfig cfgOff = DnsManager.getPrivateDnsConfig(mCtx);
         assertFalse(cfgOff.useTls);
         assertEquals("", cfgOff.hostname);
         assertEquals(new InetAddress[0], cfgOff.ips);
 
         // Strict mode still works.
-        Settings.Global.putString(
-                mContentResolver, PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
-        Settings.Global.putString(mContentResolver, PRIVATE_DNS_SPECIFIER, "strictmode.com");
+        ConnectivitySettingsManager.setPrivateDnsMode(mCtx, PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
+        ConnectivitySettingsManager.setPrivateDnsHostname(mCtx, "strictmode.com");
         final PrivateDnsConfig cfgStrict = DnsManager.getPrivateDnsConfig(mCtx);
         assertTrue(cfgStrict.useTls);
         assertEquals("strictmode.com", cfgStrict.hostname);

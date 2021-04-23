@@ -91,7 +91,6 @@ import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.UserManagerInternal.OWNER_TYPE_DEVICE_OWNER;
 import static android.os.UserManagerInternal.OWNER_TYPE_PROFILE_OWNER;
 import static android.os.UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE;
-import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Telephony.Carriers.DPC_URI;
 import static android.provider.Telephony.Carriers.ENFORCE_KEY;
@@ -195,6 +194,7 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
+import android.net.ConnectivitySettingsManager;
 import android.net.IIpConnectivityMetrics;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -15566,12 +15566,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return context.getResources().getString(R.string.config_managed_provisioning_package);
     }
 
-    private void putPrivateDnsSettings(@Nullable String mode, @Nullable String host) {
+    private void putPrivateDnsSettings(int mode, @Nullable String host) {
         // Set Private DNS settings using system permissions, as apps cannot write
         // to global settings.
         mInjector.binderWithCleanCallingIdentity(() -> {
-            mInjector.settingsGlobalPutString(PRIVATE_DNS_MODE, mode);
-            mInjector.settingsGlobalPutString(PRIVATE_DNS_SPECIFIER, host);
+            ConnectivitySettingsManager.setPrivateDnsMode(mContext, mode);
+            ConnectivitySettingsManager.setPrivateDnsHostname(mContext, host);
         });
     }
 
@@ -15592,7 +15592,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     throw new IllegalArgumentException(
                             "Host provided for opportunistic mode, but is not needed.");
                 }
-                putPrivateDnsSettings(ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC, null);
+                putPrivateDnsSettings(ConnectivitySettingsManager.PRIVATE_DNS_MODE_OPPORTUNISTIC,
+                        null);
                 return PRIVATE_DNS_SET_NO_ERROR;
             case PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
                 if (TextUtils.isEmpty(privateDnsHost)
@@ -15604,7 +15605,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // Connectivity check will have been performed in the DevicePolicyManager before
                 // the call here.
                 putPrivateDnsSettings(
-                        ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
+                        ConnectivitySettingsManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
                         privateDnsHost);
                 return PRIVATE_DNS_SET_NO_ERROR;
             default:
@@ -15621,13 +15622,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         Objects.requireNonNull(who, "ComponentName is null");
         enforceDeviceOwner(who);
-        final String currentMode = ConnectivityManager.getPrivateDnsMode(mContext);
+        final int currentMode = ConnectivitySettingsManager.getPrivateDnsMode(mContext);
         switch (currentMode) {
-            case ConnectivityManager.PRIVATE_DNS_MODE_OFF:
+            case ConnectivitySettingsManager.PRIVATE_DNS_MODE_OFF:
                 return PRIVATE_DNS_MODE_OFF;
-            case ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC:
+            case ConnectivitySettingsManager.PRIVATE_DNS_MODE_OPPORTUNISTIC:
                 return PRIVATE_DNS_MODE_OPPORTUNISTIC;
-            case ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
+            case ConnectivitySettingsManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
                 return PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
         }
 
