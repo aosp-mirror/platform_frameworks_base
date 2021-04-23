@@ -20,8 +20,10 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.app.ActivityThread;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.RemoteException;
@@ -29,6 +31,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * High level manager used to obtain an instance of an {@link BluetoothAdapter}
@@ -56,16 +59,16 @@ public final class BluetoothManager {
     private static final String TAG = "BluetoothManager";
     private static final boolean DBG = false;
 
+    private final AttributionSource mAttributionSource;
     private final BluetoothAdapter mAdapter;
 
     /**
      * @hide
      */
     public BluetoothManager(Context context) {
-        mAdapter = BluetoothAdapter.createAdapter();
-        if (context != null) {
-            mAdapter.setAttributionSource(context.getAttributionSource());
-        }
+        mAttributionSource = (context != null) ? context.getAttributionSource()
+                : ActivityThread.currentAttributionSource();
+        mAdapter = BluetoothAdapter.createAdapter(mAttributionSource);
     }
 
     /**
@@ -138,7 +141,7 @@ public final class BluetoothManager {
             if (iGatt == null) return connectedDevices;
 
             connectedDevices = iGatt.getDevicesMatchingConnectionStates(
-                    new int[]{BluetoothProfile.STATE_CONNECTED});
+                    new int[]{BluetoothProfile.STATE_CONNECTED}, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -180,7 +183,8 @@ public final class BluetoothManager {
             IBluetoothManager managerService = mAdapter.getBluetoothManager();
             IBluetoothGatt iGatt = managerService.getBluetoothGatt();
             if (iGatt == null) return devices;
-            devices = iGatt.getDevicesMatchingConnectionStates(states);
+            devices = iGatt.getDevicesMatchingConnectionStates(
+                    states, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -283,7 +287,8 @@ public final class BluetoothManager {
                 Log.e(TAG, "Fail to get GATT Server connection");
                 return null;
             }
-            BluetoothGattServer mGattServer = new BluetoothGattServer(iGatt, transport);
+            BluetoothGattServer mGattServer =
+                    new BluetoothGattServer(iGatt, transport, mAttributionSource);
             Boolean regStatus = mGattServer.registerCallback(callback, eatt_support);
             return regStatus ? mGattServer : null;
         } catch (RemoteException e) {

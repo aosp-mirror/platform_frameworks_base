@@ -26,6 +26,7 @@ import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
 import android.bluetooth.annotations.RequiresBluetoothAdvertisePermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
+import android.content.AttributionSource;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
@@ -35,6 +36,7 @@ import android.util.Log;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class provides a way to perform Bluetooth LE advertise operations, such as starting and
@@ -58,9 +60,11 @@ public final class BluetoothLeAdvertiser {
     private static final int FLAGS_FIELD_BYTES = 3;
     private static final int MANUFACTURER_SPECIFIC_DATA_LENGTH = 2;
 
+    private final BluetoothAdapter mBluetoothAdapter;
     private final IBluetoothManager mBluetoothManager;
+    private final AttributionSource mAttributionSource;
+
     private final Handler mHandler;
-    private BluetoothAdapter mBluetoothAdapter;
     private final Map<AdvertiseCallback, AdvertisingSetCallback>
             mLegacyAdvertisers = new HashMap<>();
     private final Map<AdvertisingSetCallback, IAdvertisingSetCallback>
@@ -74,9 +78,10 @@ public final class BluetoothLeAdvertiser {
      * @param bluetoothManager BluetoothManager that conducts overall Bluetooth Management
      * @hide
      */
-    public BluetoothLeAdvertiser(IBluetoothManager bluetoothManager) {
-        mBluetoothManager = bluetoothManager;
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    public BluetoothLeAdvertiser(BluetoothAdapter bluetoothAdapter) {
+        mBluetoothAdapter = Objects.requireNonNull(bluetoothAdapter);
+        mBluetoothManager = mBluetoothAdapter.getBluetoothManager();
+        mAttributionSource = mBluetoothAdapter.getAttributionSource();
         mHandler = new Handler(Looper.getMainLooper());
     }
 
@@ -453,7 +458,8 @@ public final class BluetoothLeAdvertiser {
 
         try {
             gatt.startAdvertisingSet(parameters, advertiseData, scanResponse, periodicParameters,
-                    periodicData, duration, maxExtendedAdvertisingEvents, wrapped);
+                    periodicData, duration, maxExtendedAdvertisingEvents, wrapped,
+                    mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to start advertising set - ", e);
             postStartSetFailure(handler, callback,
@@ -482,7 +488,7 @@ public final class BluetoothLeAdvertiser {
         IBluetoothGatt gatt;
         try {
             gatt = mBluetoothManager.getBluetoothGatt();
-            gatt.stopAdvertisingSet(wrapped);
+            gatt.stopAdvertisingSet(wrapped, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to stop advertising - ", e);
         }
@@ -600,8 +606,8 @@ public final class BluetoothLeAdvertiser {
                             return;
                         }
 
-                        AdvertisingSet advertisingSet =
-                                new AdvertisingSet(advertiserId, mBluetoothManager);
+                        AdvertisingSet advertisingSet = new AdvertisingSet(
+                                advertiserId, mBluetoothManager, mAttributionSource);
                         mAdvertisingSets.put(advertiserId, advertisingSet);
                         callback.onAdvertisingSetStarted(advertisingSet, txPower, status);
                     }
