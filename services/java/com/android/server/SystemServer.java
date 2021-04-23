@@ -179,6 +179,7 @@ import com.android.server.rotationresolver.RotationResolverManagerService;
 import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
+import com.android.server.sensors.SensorService;
 import com.android.server.signedconfig.SignedConfigService;
 import com.android.server.soundtrigger.SoundTriggerService;
 import com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareService;
@@ -427,7 +428,6 @@ public final class SystemServer implements Dumpable {
     private final long mRuntimeStartElapsedTime;
     private final long mRuntimeStartUptime;
 
-    private static final String START_SENSOR_SERVICE = "StartSensorService";
     private static final String START_HIDL_SERVICES = "StartHidlServices";
     private static final String START_BLOB_STORE_SERVICE = "startBlobStoreManagerService";
 
@@ -435,7 +435,6 @@ public final class SystemServer implements Dumpable {
     private static final String SYSPROP_START_ELAPSED = "sys.system_server.start_elapsed";
     private static final String SYSPROP_START_UPTIME = "sys.system_server.start_uptime";
 
-    private Future<?> mSensorServiceStart;
     private Future<?> mZygotePreload;
     private Future<?> mBlobStoreServiceStart;
 
@@ -448,9 +447,6 @@ public final class SystemServer implements Dumpable {
 
     /** Start the IStats services. This is a blocking call and can take time. */
     private static native void startIStatsService();
-
-    /** Start the sensor service. This is a blocking call and can take time. */
-    private static native void startSensorService();
 
     /**
      * Start the memtrack proxy service.
@@ -1229,15 +1225,9 @@ public final class SystemServer implements Dumpable {
 
         // The sensor service needs access to package manager service, app ops
         // service, and permissions service, therefore we start it after them.
-        // Start sensor service in a separate thread. Completion should be checked
-        // before using it.
-        mSensorServiceStart = SystemServerInitThreadPool.submit(() -> {
-            TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
-            traceLog.traceBegin(START_SENSOR_SERVICE);
-            startSensorService();
-            traceLog.traceEnd();
-        }, START_SENSOR_SERVICE);
-
+        t.traceBegin("StartSensorService");
+        mSystemServiceManager.startService(SensorService.class);
+        t.traceEnd();
         t.traceEnd(); // startBootstrapServices
     }
 
@@ -1474,8 +1464,7 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartWindowManagerService");
             // WMS needs sensor service ready
-            ConcurrentUtils.waitForFutureNoInterrupt(mSensorServiceStart, START_SENSOR_SERVICE);
-            mSensorServiceStart = null;
+            mSystemServiceManager.startBootPhase(t, SystemService.PHASE_WAIT_FOR_SENSOR_SERVICE);
             wm = WindowManagerService.main(context, inputManager, !mFirstBoot, mOnlyCore,
                     new PhoneWindowManager(), mActivityManagerService.mActivityTaskManager);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
@@ -1493,8 +1482,8 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             // Start receiving calls from HIDL services. Start in in a separate thread
-            // because it need to connect to SensorManager. This have to start
-            // after START_SENSOR_SERVICE is done.
+            // because it need to connect to SensorManager. This has to start
+            // after PHASE_WAIT_FOR_SENSOR_SERVICE is done.
             SystemServerInitThreadPool.submit(() -> {
                 TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
                 traceLog.traceBegin(START_HIDL_SERVICES);
