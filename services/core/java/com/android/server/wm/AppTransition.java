@@ -986,24 +986,25 @@ public class AppTransition implements Dump {
 
         Animation a;
         if (isKeyguardGoingAwayTransitOld(transit) && enter) {
-            a = mTransitionAnimation.loadKeyguardExitAnimation(transit, mNextAppTransitionFlags);
+            a = mTransitionAnimation.loadKeyguardExitAnimation(mNextAppTransitionFlags,
+                    transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER);
         } else if (transit == TRANSIT_OLD_KEYGUARD_OCCLUDE) {
             a = null;
         } else if (transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE && !enter) {
-            a = mTransitionAnimation.loadKeyguardUnoccludeAnimation(lp);
+            a = mTransitionAnimation.loadKeyguardUnoccludeAnimation();
         } else if (transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE) {
             a = null;
         } else if (isVoiceInteraction && (transit == TRANSIT_OLD_ACTIVITY_OPEN
                 || transit == TRANSIT_OLD_TASK_OPEN
                 || transit == TRANSIT_OLD_TASK_TO_FRONT)) {
-            a = mTransitionAnimation.loadVoiceActivityOpenAnimation(lp, enter);
+            a = mTransitionAnimation.loadVoiceActivityOpenAnimation(enter);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation voice: anim=%s transit=%s isEntrance=%b Callers=%s", a,
                     appTransitionOldToString(transit), enter, Debug.getCallers(3));
         } else if (isVoiceInteraction && (transit == TRANSIT_OLD_ACTIVITY_CLOSE
                 || transit == TRANSIT_OLD_TASK_CLOSE
                 || transit == TRANSIT_OLD_TASK_TO_BACK)) {
-            a = mTransitionAnimation.loadVoiceActivityExitAnimation(lp, enter);
+            a = mTransitionAnimation.loadVoiceActivityExitAnimation(enter);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation voice: anim=%s transit=%s isEntrance=%b Callers=%s", a,
                     appTransitionOldToString(transit), enter, Debug.getCallers(3));
