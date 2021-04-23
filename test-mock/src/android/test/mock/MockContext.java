@@ -375,6 +375,13 @@ public class MockContext extends Context {
 
     /** @hide */
     @Override
+    public void sendBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions,
+            Bundle options) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
     public void sendBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
             String[] receiverPermissions) {
         throw new UnsupportedOperationException();
