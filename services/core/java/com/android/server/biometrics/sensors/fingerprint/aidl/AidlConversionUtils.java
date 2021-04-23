@@ -21,7 +21,7 @@ import android.hardware.biometrics.fingerprint.AcquiredInfo;
 import android.hardware.biometrics.fingerprint.Error;
 
 /**
- * Utilities for converting between hardware and framework-defined AIDL models.
+ * Utilities for converting from hardware to framework-defined AIDL models.
  */
 final class AidlConversionUtils {
     // Prevent instantiation.
