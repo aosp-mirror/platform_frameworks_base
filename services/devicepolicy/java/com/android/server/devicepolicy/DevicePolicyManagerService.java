@@ -16774,7 +16774,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     provisioningParams.isKeepAccountMigrated(), callerPackage);
 
             if (provisioningParams.isOrganizationOwnedProvisioning()) {
-                setProfileOwnerOnOrgOwnedDeviceState(admin, userInfo.id, caller.getUserId());
+                synchronized (getLockObject()) {
+                    markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(admin, userInfo.id);
+                }
             }
 
             return userInfo.getUserHandle();
@@ -17004,22 +17006,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } catch (OperationCanceledException | AuthenticatorException | IOException e) {
             Slogf.e(LOG_TAG, "Exception removing account from the primary user.", e);
         }
-    }
-
-    private void setProfileOwnerOnOrgOwnedDeviceState(
-            ComponentName admin, @UserIdInt int profileId, @UserIdInt int parentUserId) {
-        synchronized (getLockObject()) {
-            markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(admin, profileId);
-        }
-        restrictRemovalOfManagedProfile(parentUserId);
-    }
-
-    private void restrictRemovalOfManagedProfile(@UserIdInt int parentUserId) {
-        final UserHandle parentUserHandle = UserHandle.of(parentUserId);
-        mUserManager.setUserRestriction(
-                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
-                /* value= */ true,
-                parentUserHandle);
     }
 
     @Override
