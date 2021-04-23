@@ -22,10 +22,10 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
-import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.Context;
@@ -254,7 +254,7 @@ public final class BluetoothPan implements BluetoothProfile {
         final IBluetoothPan service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.connect(device);
+                return service.connect(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -294,7 +294,7 @@ public final class BluetoothPan implements BluetoothProfile {
         final IBluetoothPan service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.disconnect(device);
+                return service.disconnect(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -333,7 +333,7 @@ public final class BluetoothPan implements BluetoothProfile {
                         && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
                     return false;
                 }
-                return service.setConnectionPolicy(device, connectionPolicy);
+                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -360,7 +360,7 @@ public final class BluetoothPan implements BluetoothProfile {
         if (service != null && isEnabled()) {
             try {
                 return BluetoothDevice.setAttributionSource(
-                        service.getConnectedDevices(), mAttributionSource);
+                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -387,7 +387,8 @@ public final class BluetoothPan implements BluetoothProfile {
         if (service != null && isEnabled()) {
             try {
                 return BluetoothDevice.setAttributionSource(
-                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
+                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -403,13 +404,17 @@ public final class BluetoothPan implements BluetoothProfile {
      */
     @SystemApi
     @Override
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public int getConnectionState(@NonNull BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         final IBluetoothPan service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.STATE_DISCONNECTED;
@@ -438,7 +443,7 @@ public final class BluetoothPan implements BluetoothProfile {
         final IBluetoothPan service = getService();
         if (service != null && isEnabled()) {
             try {
-                service.setBluetoothTethering(value, pkgName, mContext.getAttributionTag());
+                service.setBluetoothTethering(value, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             }
@@ -459,7 +464,7 @@ public final class BluetoothPan implements BluetoothProfile {
         final IBluetoothPan service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.isTetheringOn();
+                return service.isTetheringOn(mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             }
