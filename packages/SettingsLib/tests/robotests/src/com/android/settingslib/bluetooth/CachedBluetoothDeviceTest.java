@@ -35,6 +35,7 @@ import android.media.AudioManager;
 
 import com.android.settingslib.R;
 import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
+import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -956,5 +957,42 @@ public class CachedBluetoothDeviceTest {
         mCachedDevice.onUuidChanged();
 
         // Should not crash
+    }
+
+    @Test
+    public void getDrawableWithDescription_isAdvancedDevice_returnAdvancedIcon() {
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_MAIN_ICON))
+                .thenReturn("fake_uri".getBytes());
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET))
+                .thenReturn("true".getBytes());
+
+        mCachedDevice.refresh();
+
+        assertThat(mCachedDevice.getDrawableWithDescription().first).isInstanceOf(
+                AdaptiveOutlineDrawable.class);
+    }
+
+    @Test
+    public void getDrawableWithDescription_isNotAdvancedDevice_returnBluetoothIcon() {
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET))
+                .thenReturn("false".getBytes());
+
+        mCachedDevice.refresh();
+
+        assertThat(mCachedDevice.getDrawableWithDescription().first).isNotInstanceOf(
+                AdaptiveOutlineDrawable.class);
+    }
+
+    @Test
+    public void releaseLruCache_lruCacheShouldBeRelease() {
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_MAIN_ICON))
+                .thenReturn("fake_uri".getBytes());
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET))
+                .thenReturn("true".getBytes());
+
+        mCachedDevice.refresh();
+        mCachedDevice.releaseLruCache();
+
+        assertThat(mCachedDevice.mDrawableCache.size()).isEqualTo(0);
     }
 }
