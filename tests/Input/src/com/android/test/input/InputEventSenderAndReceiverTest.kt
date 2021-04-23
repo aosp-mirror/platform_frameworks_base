@@ -145,4 +145,21 @@ class InputEventSenderAndReceiverTest {
         val received = mSender.getTimeline()
         assertEquals(sent, received)
     }
+
+    // If an invalid timeline is sent, the channel should get closed. This helps surface any
+    // app-originating bugs early, and forces the work-around to happen in the early stages of the
+    // event processing.
+    @Test
+    fun testSendAndReceiveInvalidTimeline() {
+        val sent = TestInputEventSender.Timeline(
+            inputEventId = 1, gpuCompletedTime = 3, presentTime = 2)
+        mReceiver.reportTimeline(sent.inputEventId, sent.gpuCompletedTime, sent.presentTime)
+        val received = mSender.getTimeline()
+        assertEquals(null, received)
+        // Sender will no longer receive callbacks for this fd, even if receiver sends a valid
+        // timeline later
+        mReceiver.reportTimeline(2 /*inputEventId*/, 3 /*gpuCompletedTime*/, 4 /*presentTime*/)
+        val receivedSecondTimeline = mSender.getTimeline()
+        assertEquals(null, receivedSecondTimeline)
+    }
 }
