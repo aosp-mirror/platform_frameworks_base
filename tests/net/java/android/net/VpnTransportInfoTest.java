@@ -63,6 +63,6 @@ public class VpnTransportInfoTest {
         assertEquals(v31, v32);
         assertEquals(v11.hashCode(), v13.hashCode());
         assertEquals(REDACT_FOR_NETWORK_SETTINGS, v32.getApplicableRedactions());
-        assertEquals(session1, v15.makeCopy(REDACT_NONE).sessionId);
+        assertEquals(session1, v15.makeCopy(REDACT_NONE).getSessionId());
     }
 }
