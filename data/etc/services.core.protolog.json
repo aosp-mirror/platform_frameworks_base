@@ -367,12 +367,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
-    "-1729340764": {
-      "message": "setFinishTaskBounds(%d): bounds=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
-    },
     "-1715268616": {
       "message": "Last window, removing starting window %s",
       "level": "VERBOSE",
@@ -1705,6 +1699,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-163974242": {
+      "message": "setFinishTaskTransaction(%d): transaction=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
+    },
     "-143556958": {
       "message": "resumeNextFocusableActivityWhenRootTaskIsEmpty: %s, go home",
       "level": "DEBUG",
@@ -1896,12 +1896,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
-    },
-    "86989930": {
-      "message": "setTaskWindowingMode: moving task=%d to windowingMode=%d toTop=%b",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_TASKS",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "90764070": {
       "message": "Could not report token removal to the window token client.",
