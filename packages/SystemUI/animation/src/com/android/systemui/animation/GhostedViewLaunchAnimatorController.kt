@@ -14,6 +14,7 @@ import android.graphics.drawable.LayerDrawable
 import android.view.GhostView
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroupOverlay
 import android.widget.FrameLayout
 import kotlin.math.min
 
@@ -32,9 +33,10 @@ open class GhostedViewLaunchAnimatorController(
     /** The view that will be ghosted and from which the background will be extracted. */
     private val ghostedView: View
 ) : ActivityLaunchAnimator.Controller {
-    /** The root view to which we will add the ghost view and expanding background. */
-    private val rootView = ghostedView.rootView as ViewGroup
-    private val rootViewOverlay = rootView.overlay
+    /** The container to which we will add the ghost view and expanding background. */
+    override var launchContainer = ghostedView.rootView as ViewGroup
+    private val launchContainerOverlay: ViewGroupOverlay
+        get() = launchContainer.overlay
 
     /** The ghost view that is drawn and animated instead of the ghosted view. */
     private var ghostView: GhostView? = null
@@ -42,7 +44,7 @@ open class GhostedViewLaunchAnimatorController(
     private val ghostViewMatrix = Matrix()
 
     /**
-     * The expanding background view that will be added to [rootView] (below [ghostView]) and
+     * The expanding background view that will be added to [launchContainer] (below [ghostView]) and
      * animate.
      */
     private var backgroundView: FrameLayout? = null
@@ -96,10 +98,6 @@ open class GhostedViewLaunchAnimatorController(
         return gradient.cornerRadii?.get(CORNER_RADIUS_BOTTOM_INDEX) ?: gradient.cornerRadius
     }
 
-    override fun getRootView(): View {
-        return rootView
-    }
-
     override fun createAnimatorState(): ActivityLaunchAnimator.State {
         val location = ghostedView.locationOnScreen
         return ActivityLaunchAnimator.State(
@@ -113,10 +111,10 @@ open class GhostedViewLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-        backgroundView = FrameLayout(rootView.context).apply {
+        backgroundView = FrameLayout(launchContainer.context).apply {
             forceHasOverlappingRendering(false)
         }
-        rootViewOverlay.add(backgroundView)
+        launchContainerOverlay.add(backgroundView)
 
         // We wrap the ghosted view background and use it to draw the expandable background. Its
         // alpha will be set to 0 as soon as we start drawing the expanding background.
@@ -127,7 +125,7 @@ open class GhostedViewLaunchAnimatorController(
 
         // Create a ghost of the view that will be moving and fading out. This allows to fade out
         // the content before fading out the background.
-        ghostView = GhostView.addGhost(ghostedView, rootView).apply {
+        ghostView = GhostView.addGhost(ghostedView, launchContainer).apply {
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
         }
 
@@ -169,7 +167,7 @@ open class GhostedViewLaunchAnimatorController(
         backgroundDrawable?.wrapped?.alpha = startBackgroundAlpha
 
         GhostView.removeGhost(ghostedView)
-        rootViewOverlay.remove(backgroundView)
+        launchContainerOverlay.remove(backgroundView)
         ghostedView.invalidate()
     }
 
