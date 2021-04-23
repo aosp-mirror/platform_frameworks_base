@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.service.translation.ITranslationService;
 import android.service.translation.TranslationService;
@@ -44,8 +45,10 @@ final class RemoteTranslationService extends ServiceConnector.Impl<ITranslationS
     private final int mRequestTimeoutMs;
     private final ComponentName mComponentName;
 
+    private final IBinder mRemoteCallback;
+
     RemoteTranslationService(Context context, ComponentName serviceName,
-            int userId, boolean bindInstantServiceAllowed) {
+            int userId, boolean bindInstantServiceAllowed, IBinder callback) {
         super(context,
                 new Intent(TranslationService.SERVICE_INTERFACE).setComponent(serviceName),
                 bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0,
@@ -53,7 +56,7 @@ final class RemoteTranslationService extends ServiceConnector.Impl<ITranslationS
         mIdleUnbindTimeoutMs = TIMEOUT_IDLE_UNBIND_MS;
         mRequestTimeoutMs = TIMEOUT_REQUEST_MS;
         mComponentName = serviceName;
-
+        mRemoteCallback = callback;
         // Bind right away.
         connect();
     }
@@ -67,7 +70,7 @@ final class RemoteTranslationService extends ServiceConnector.Impl<ITranslationS
             boolean connected) {
         try {
             if (connected) {
-                service.onConnected();
+                service.onConnected(mRemoteCallback);
             } else {
                 service.onDisconnected();
             }
