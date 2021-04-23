@@ -59,6 +59,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.people.widget.PeopleTileKey;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -94,6 +95,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     private static final Uri URI = Uri.parse("fake_uri");
     private static final Icon ICON = Icon.createWithResource("package", R.drawable.ic_android);
     private static final String NAME = "username";
+    private static final UserHandle USER = new UserHandle(0);
     private static final Person PERSON = new Person.Builder()
             .setName("name")
             .setKey("abc")
@@ -103,6 +105,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     private static final PeopleSpaceTile PERSON_TILE =
             new PeopleSpaceTile
                     .Builder(SHORTCUT_ID_1, NAME, ICON, new Intent())
+                    .setUserHandle(USER)
                     .setLastInteractionTimestamp(123L)
                     .setNotificationKey(NOTIFICATION_KEY)
                     .setNotificationContent(NOTIFICATION_CONTENT)
@@ -231,8 +234,9 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .setPackageName(PACKAGE_NAME)
                         .setUserHandle(new UserHandle(0))
                         .build();
+        PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromNotification(mContext, tile, mNotificationEntry1, 0);
+                .augmentTileFromNotification(mContext, tile, key, mNotificationEntry1, 0);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
     }
@@ -245,8 +249,9 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .setPackageName(PACKAGE_NAME)
                         .setUserHandle(new UserHandle(0))
                         .build();
+        PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromNotification(mContext, tile, mNotificationEntry3, 0);
+                .augmentTileFromNotification(mContext, tile, key, mNotificationEntry3, 0);
 
         assertThat(actual.getNotificationContent()).isEqualTo(null);
     }
