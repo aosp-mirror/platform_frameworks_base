@@ -173,6 +173,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
         Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
+        Settings.Secure.ONE_HANDED_MODE_ACTIVATED,
         Settings.Secure.ONE_HANDED_MODE_ENABLED,
         Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
         Settings.Secure.TAPS_APP_TO_EXIT,
