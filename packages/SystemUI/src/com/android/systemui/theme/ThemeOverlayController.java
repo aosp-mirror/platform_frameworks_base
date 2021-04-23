@@ -151,6 +151,10 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                         + wallpaperColors);
                 mDeferredThemeEvaluation = true;
                 return;
+            } else if (mDeferredThemeEvaluation) {
+                Log.i(TAG, "Wallpaper color event received, but we already were deferring eval: "
+                        + wallpaperColors);
+                return;
             } else {
                 if (DEBUG) {
                     Log.i(TAG, "During user setup, but allowing first color event: had? "
