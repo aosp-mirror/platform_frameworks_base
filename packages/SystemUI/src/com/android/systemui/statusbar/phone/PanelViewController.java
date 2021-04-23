@@ -594,6 +594,7 @@ public abstract class PanelViewController {
             float collapseSpeedUpFactor, boolean expandBecauseOfFalsing) {
         if (target == mExpandedHeight || getOverExpansionAmount() > 0f && expand) {
             InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            mKeyguardStateController.notifyPanelFlingEnd();
             notifyExpandingFinished();
             return;
         }
@@ -681,6 +682,7 @@ public abstract class PanelViewController {
 
     private void onFlingEnd(boolean cancelled) {
         setAnimator(null);
+        mKeyguardStateController.notifyPanelFlingEnd();
         if (!cancelled) {
             InteractionJankMonitor.getInstance()
                     .end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);

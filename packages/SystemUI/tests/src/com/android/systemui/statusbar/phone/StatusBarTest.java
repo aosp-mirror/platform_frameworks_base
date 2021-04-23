@@ -86,6 +86,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -271,6 +272,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private TunerService mTunerService;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private IWallpaperManager mWallpaperManager;
+    @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -439,7 +441,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mAnimationScheduler,
                 mDotViewController,
                 mTunerService,
-                mFeatureFlags);
+                mFeatureFlags,
+                mKeyguardUnlockAnimationController);
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
                 any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
                 any(ViewGroup.class), any(KeyguardBypassController.class)))

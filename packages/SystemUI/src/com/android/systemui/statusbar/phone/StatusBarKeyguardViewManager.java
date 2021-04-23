@@ -564,6 +564,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     @Override
+    public void blockPanelExpansionFromCurrentTouch() {
+        mNotificationPanelViewController.blockExpansionForCurrentTouch();
+    }
+
+    @Override
     public void hide(long startTime, long fadeoutDuration) {
         mShowing = false;
         mKeyguardStateController.notifyKeyguardState(mShowing,
@@ -576,7 +581,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         long uptimeMillis = SystemClock.uptimeMillis();
         long delay = Math.max(0, startTime + HIDE_TIMING_CORRECTION_MS - uptimeMillis);
 
-        if (mStatusBar.isInLaunchTransition() ) {
+        if (mStatusBar.isInLaunchTransition()
+                || mKeyguardStateController.isFlingingToDismissKeyguard()) {
             mStatusBar.fadeKeyguardAfterLaunchTransition(new Runnable() {
                 @Override
                 public void run() {
