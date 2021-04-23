@@ -186,7 +186,7 @@ public class Sensor {
                     return;
                 }
                 ((FaceAuthenticationClient) client).onAuthenticationFrame(
-                        AidlConversionUtils.convert(frame));
+                        AidlConversionUtils.toFrameworkAuthenticationFrame(frame));
             });
         }
 
@@ -204,7 +204,8 @@ public class Sensor {
                             + Utils.getClientName(client));
                     return;
                 }
-                ((FaceEnrollClient) client).onEnrollmentFrame(AidlConversionUtils.convert(frame));
+                ((FaceEnrollClient) client).onEnrollmentFrame(
+                        AidlConversionUtils.toFrameworkEnrollmentFrame(frame));
             });
         }
 
