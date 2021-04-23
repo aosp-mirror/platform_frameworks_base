@@ -31,7 +31,7 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"ಪ್ರಮಾಣೀಕರಣ ಸಮಸ್ಯೆ"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"ಪಾಸ್‌ವರ್ಡ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"ಪಾಸ್‌ವರ್ಡ್ ಪರಿಶೀಲಿಸಿ, ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"ವ್ಯಾಪ್ತಿಯಲ್ಲಿಲ್ಲ"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವಿಲ್ಲ"</string>

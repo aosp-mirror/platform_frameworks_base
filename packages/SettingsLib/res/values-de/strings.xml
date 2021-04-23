@@ -282,7 +282,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Verbindung nicht möglich"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"WLAN-Protokollierungsebene erhöhen, in WLAN-Auswahl pro SSID-RSSI anzeigen"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"WLAN-Protokollierungsebene erhöhen, in WLAN-Auswahl für jede SSID RSSI anzeigen"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verringert den Akkuverbrauch und verbessert die Netzwerkleistung"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Wenn dieser Modus aktiviert ist, kann sich die MAC-Adresse dieses Geräts bei jeder Verbindung mit einem Netzwerk ändern, bei dem die MAC-Adressen randomisiert werden."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Kostenpflichtig"</string>
