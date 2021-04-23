@@ -74,8 +74,8 @@ public abstract class DisplayAreaPolicy {
      */
     public abstract void addWindow(WindowToken token);
 
-    /** Gets the {@link DisplayArea} which a {@link WindowToken} is about to be attached to. */
-    public abstract DisplayArea.Tokens getDisplayAreaForWindowToken(int type, Bundle options,
+    /** Gets the {@link DisplayArea} with given window type and launched options */
+    public abstract DisplayArea.Tokens findAreaForWindowType(int type, Bundle options,
             boolean ownerCanManageAppTokens, boolean roundedCornerOverlay);
 
     /**

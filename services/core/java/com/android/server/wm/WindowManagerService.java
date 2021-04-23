@@ -2683,7 +2683,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 // TODO(b/155340867): Investigate if we still need roundedCornerOverlay after
                 // the feature b/155340867 is completed.
-                final DisplayArea da = dc.getAreaForWindowToken(type, options,
+                final DisplayArea da = dc.findAreaForWindowType(type, options,
                         callerCanManageAppTokens, false /* roundedCornerOverlay */);
                 mWindowContextListenerController.registerWindowContainerListener(clientToken, da,
                         callingUid, type, options);
