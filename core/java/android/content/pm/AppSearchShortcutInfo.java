@@ -153,8 +153,8 @@ public class AppSearchShortcutInfo extends GenericDocument {
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_REPEATED)
                     .build()
 
-            ).addProperty(new AppSearchSchema.DocumentPropertyConfig.Builder(KEY_PERSON)
-                    .setSchemaType(AppSearchPerson.SCHEMA_TYPE)
+            ).addProperty(new AppSearchSchema.DocumentPropertyConfig.Builder(
+                    KEY_PERSON, AppSearchPerson.SCHEMA_TYPE)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_REPEATED)
                     .build()
 
@@ -419,7 +419,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
         final String bitmapPath = getPropertyString(KEY_BITMAP_PATH);
         final int disabledReason = Integer.parseInt(getPropertyString(KEY_DISABLED_REASON));
         final ShortcutInfo si = new ShortcutInfo(
-                userId, getUri(), packageName, activity, icon, shortLabel, shortLabelResId,
+                userId, getId(), packageName, activity, icon, shortLabel, shortLabelResId,
                 shortLabelResName, longLabel, longLabelResId, longLabelResName, disabledMessage,
                 disabledMessageResId, disabledMessageResName, categoriesSet, intents, rank, extras,
                 getCreationTimestampMillis(), flags, iconResId, iconResName, bitmapPath, iconUri,

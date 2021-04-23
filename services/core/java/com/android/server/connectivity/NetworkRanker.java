@@ -63,7 +63,7 @@ public class NetworkRanker {
         NetworkCapabilities getCapsNoCopy();
     }
 
-    private static final boolean USE_POLICY_RANKING = false;
+    private static final boolean USE_POLICY_RANKING = true;
 
     public NetworkRanker() { }
 

@@ -100,6 +100,17 @@ public class VibratorInfoTest {
     }
 
     @Test
+    public void testGetPrimitiveDuration() {
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .setPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_CLICK, 20)
+                .build();
+        assertEquals(20, info.getPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_CLICK));
+        assertEquals(0, info.getPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_TICK));
+    }
+
+    @Test
     public void testGetDefaultBraking_returnsFirstSupportedBraking() {
         assertEquals(Braking.NONE, new VibratorInfo.Builder(
                 TEST_VIBRATOR_ID).build().getDefaultBraking());
@@ -251,12 +262,14 @@ public class VibratorInfoTest {
                 .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
                 .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
                 .setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .setPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_CLICK, 20)
                 .setQFactor(2f)
                 .setFrequencyMapping(TEST_FREQUENCY_MAPPING);
         VibratorInfo complete = completeBuilder.build();
 
         assertEquals(complete, complete);
         assertEquals(complete, completeBuilder.build());
+        assertEquals(complete.hashCode(), completeBuilder.build().hashCode());
 
         VibratorInfo completeWithComposeControl = completeBuilder
                 .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
@@ -278,6 +291,11 @@ public class VibratorInfoTest {
                 .setSupportedPrimitives(null)
                 .build();
         assertNotEquals(complete, completeWithUnknownPrimitives);
+
+        VibratorInfo completeWithDifferentPrimitiveDuration = completeBuilder
+                .setPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .build();
+        assertNotEquals(complete, completeWithDifferentPrimitiveDuration);
 
         VibratorInfo completeWithDifferentFrequencyMapping = completeBuilder
                 .setFrequencyMapping(new VibratorInfo.FrequencyMapping(TEST_MIN_FREQUENCY + 10,
@@ -314,7 +332,8 @@ public class VibratorInfoTest {
         VibratorInfo original = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
                 .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
-                .setSupportedPrimitives(null)
+                .setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .setPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_CLICK, 20)
                 .setQFactor(Float.NaN)
                 .setFrequencyMapping(TEST_FREQUENCY_MAPPING)
                 .build();
@@ -324,5 +343,6 @@ public class VibratorInfoTest {
         parcel.setDataPosition(0);
         VibratorInfo restored = VibratorInfo.CREATOR.createFromParcel(parcel);
         assertEquals(original, restored);
+        assertEquals(original.hashCode(), restored.hashCode());
     }
 }

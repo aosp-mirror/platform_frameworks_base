@@ -347,7 +347,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 addActiveLog(
                         BluetoothProtoEnums.ENABLE_DISABLE_REASON_FACTORY_RESET,
                         mContext.getPackageName(), false);
-                mBluetooth.disable();
+                mBluetooth.disable(mContext.getAttributionSource());
                 return true;
             }
         } catch (RemoteException e) {
@@ -1714,7 +1714,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         try {
             mBluetoothLock.readLock().lock();
             if (mBluetooth != null) {
-                return mBluetooth.getAddress();
+                return mBluetooth.getAddressWithAttribution(mContext.getAttributionSource());
             }
         } catch (RemoteException e) {
             Slog.e(TAG,
@@ -1743,7 +1743,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         try {
             mBluetoothLock.readLock().lock();
             if (mBluetooth != null) {
-                return mBluetooth.getName();
+                return mBluetooth.getName(mContext.getAttributionSource());
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "getName(): Unable to retrieve name remotely. Returning cached name", e);
@@ -1830,7 +1830,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             }
                         } else if (mBluetooth != null) {
                             try {
-                                storeNameAndAddress(mBluetooth.getName(), mBluetooth.getAddress());
+                                storeNameAndAddress(
+                                        mBluetooth.getName(mContext.getAttributionSource()),
+                                        mBluetooth.getAddressWithAttribution(
+                                                mContext.getAttributionSource()));
                             } catch (RemoteException re) {
                                 Slog.e(TAG, "Unable to grab names", re);
                             }
@@ -2096,7 +2099,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                         //Do enable request
                         try {
-                            if (!mBluetooth.enable(mQuietEnable)) {
+                            if (!mBluetooth.enable(mQuietEnable, mContext.getAttributionSource())) {
                                 Slog.e(TAG, "IBluetooth.enable() returned false");
                             }
                         } catch (RemoteException e) {
@@ -2417,7 +2420,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             } else if (mBluetooth != null) {
                 //Enable bluetooth
                 try {
-                    if (!mBluetooth.enable(mQuietEnable)) {
+                    if (!mBluetooth.enable(mQuietEnable, mContext.getAttributionSource())) {
                         Slog.e(TAG, "IBluetooth.enable() returned false");
                     }
                 } catch (RemoteException e) {
@@ -2447,7 +2450,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 if (DBG) {
                     Slog.d(TAG, "Sending off request.");
                 }
-                if (!mBluetooth.disable()) {
+                if (!mBluetooth.disable(mContext.getAttributionSource())) {
                     Slog.e(TAG, "IBluetooth.disable() returned false");
                 }
             }
@@ -2494,7 +2497,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, prevState);
         intent.putExtra(BluetoothAdapter.EXTRA_STATE, newState);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL, BLUETOOTH_CONNECT);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     @RequiresPermission(allOf = {
@@ -2577,7 +2580,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, prevState);
             intent.putExtra(BluetoothAdapter.EXTRA_STATE, newState);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL, BLUETOOTH_CONNECT);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
         }
     }
 

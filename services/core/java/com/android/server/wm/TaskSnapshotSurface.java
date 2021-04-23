@@ -37,6 +37,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
@@ -53,8 +54,10 @@ import android.app.ActivityThread;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -69,7 +72,6 @@ import android.util.Slog;
 import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
@@ -124,9 +126,7 @@ class TaskSnapshotSurface implements StartingSurface {
     private static final Point sTmpSurfaceSize = new Point();
 
     private final Window mWindow;
-    private final Surface mSurface;
-    private SurfaceControl mSurfaceControl;
-    private SurfaceControl mChildSurfaceControl;
+    private final SurfaceControl mSurfaceControl;
     private final IWindowSession mSession;
     private final WindowManagerService mService;
     private final int mDisplayId;
@@ -200,7 +200,7 @@ class TaskSnapshotSurface implements StartingSurface {
             // Setting as trusted overlay to let touches pass through. This is safe because this
             // window is controlled by the system.
             layoutParams.privateFlags = (windowPrivateFlags & PRIVATE_FLAG_INHERITS)
-                    | PRIVATE_FLAG_TRUSTED_OVERLAY;
+                    | PRIVATE_FLAG_TRUSTED_OVERLAY | PRIVATE_FLAG_USE_BLAST;
             layoutParams.token = activity.token;
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = LayoutParams.MATCH_PARENT;
@@ -262,7 +262,6 @@ class TaskSnapshotSurface implements StartingSurface {
             InsetsState insetsState) {
         mService = service;
         mDisplayId = displayId;
-        mSurface = service.mSurfaceFactory.get();
         mHandler = new Handler(mService.mH.getLooper());
         mSession = WindowManagerGlobal.getWindowSession();
         mWindow = window;
@@ -314,8 +313,6 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     private void drawSnapshot() {
-        mSurface.copyFrom(mSurfaceControl);
-
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Drawing snapshot surface sizeMismatch=%b",
                 mSizeMismatch);
         if (mSizeMismatch) {
@@ -337,15 +334,14 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     private void drawSizeMatchSnapshot() {
-        mSurface.attachAndQueueBufferWithColorSpace(mSnapshot.getHardwareBuffer(),
-                mSnapshot.getColorSpace());
-        mSurface.release();
+        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
+                mSnapshot.getHardwareBuffer());
+        mTransaction.setBuffer(mSurfaceControl, graphicBuffer)
+                .setColorSpace(mSurfaceControl, mSnapshot.getColorSpace())
+                .apply();
     }
 
     private void drawSizeMismatchSnapshot() {
-        if (!mSurface.isValid()) {
-            throw new IllegalStateException("mSurface does not hold a valid surface.");
-        }
         final HardwareBuffer buffer = mSnapshot.getHardwareBuffer();
         final SurfaceSession session = new SurfaceSession();
         // We consider nearly matched dimensions as there can be rounding errors and the user won't
@@ -356,26 +352,24 @@ class TaskSnapshotSurface implements StartingSurface {
 
         // Keep a reference to it such that it doesn't get destroyed when finalized.
         final String name = mTitle + " - task-snapshot-surface";
-        mChildSurfaceControl = mService.mSurfaceControlFactory.apply(session)
+        SurfaceControl childSurfaceControl = mService.mSurfaceControlFactory.apply(session)
                 .setName(name)
-                .setBufferSize(buffer.getWidth(), buffer.getHeight())
+                .setBLASTLayer()
                 .setFormat(buffer.getFormat())
                 .setParent(mSurfaceControl)
                 .setCallsite("TaskSnapshotSurface.drawSizeMismatchSnapshot")
                 .build();
-        Surface surface = mService.mSurfaceFactory.get();
-        surface.copyFrom(mChildSurfaceControl);
 
         final Rect frame;
         // We can just show the surface here as it will still be hidden as the parent is
         // still hidden.
-        mTransaction.show(mChildSurfaceControl);
+        mTransaction.show(childSurfaceControl);
         if (aspectRatioMismatch) {
             // Clip off ugly navigation bar.
             final Rect crop = calculateSnapshotCrop();
             frame = calculateSnapshotFrame(crop);
-            mTransaction.setWindowCrop(mChildSurfaceControl, crop);
-            mTransaction.setPosition(mChildSurfaceControl, frame.left, frame.top);
+            mTransaction.setWindowCrop(childSurfaceControl, crop);
+            mTransaction.setPosition(childSurfaceControl, frame.left, frame.top);
             mTmpSnapshotSize.set(crop);
             mTmpDstFrame.set(frame);
         } else {
@@ -387,23 +381,29 @@ class TaskSnapshotSurface implements StartingSurface {
 
         // Scale the mismatch dimensions to fill the task bounds
         mSnapshotMatrix.setRectToRect(mTmpSnapshotSize, mTmpDstFrame, Matrix.ScaleToFit.FILL);
-        mTransaction.setMatrix(mChildSurfaceControl, mSnapshotMatrix, mTmpFloat9);
+        mTransaction.setMatrix(childSurfaceControl, mSnapshotMatrix, mTmpFloat9);
 
+        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
+                mSnapshot.getHardwareBuffer());
+        mTransaction.setColorSpace(childSurfaceControl, mSnapshot.getColorSpace());
+        mTransaction.setBuffer(childSurfaceControl, graphicBuffer);
         // This is the way to tell the input system to exclude this surface from occlusion
         // detection since we don't have a window for it. We do this because this window is
         // generated by the system as well as its content (the snapshot of the app).
-        InputMonitor.setTrustedOverlayInputInfo(mChildSurfaceControl, mTransaction, mDisplayId,
+        InputMonitor.setTrustedOverlayInputInfo(childSurfaceControl, mTransaction, mDisplayId,
                 name);
-        mTransaction.apply();
-        surface.attachAndQueueBufferWithColorSpace(buffer, mSnapshot.getColorSpace());
-        surface.release();
 
         if (aspectRatioMismatch) {
-            final Canvas c = mSurface.lockCanvas(null);
+            GraphicBuffer background = GraphicBuffer.create(mFrame.width(), mFrame.height(),
+                    PixelFormat.RGBA_8888,
+                    GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_HW_COMPOSER
+                            | GraphicBuffer.USAGE_SW_WRITE_RARELY);
+            final Canvas c = background.lockCanvas();
             drawBackgroundAndBars(c, frame);
-            mSurface.unlockCanvasAndPost(c);
-            mSurface.release();
+            background.unlockCanvasAndPost(c);
+            mTransaction.setBuffer(mSurfaceControl, background);
         }
+        mTransaction.apply();
     }
 
     /**

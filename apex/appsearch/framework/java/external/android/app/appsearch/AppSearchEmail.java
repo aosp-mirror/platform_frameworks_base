@@ -156,10 +156,10 @@ public class AppSearchEmail extends GenericDocument {
          * Creates a new {@link AppSearchEmail.Builder}
          *
          * @param namespace The namespace of the Email.
-         * @param uri The Uri of the Email.
+         * @param id The ID of the Email.
          */
-        public Builder(@NonNull String namespace, @NonNull String uri) {
-            super(namespace, uri, SCHEMA_TYPE);
+        public Builder(@NonNull String namespace, @NonNull String id) {
+            super(namespace, id, SCHEMA_TYPE);
         }
 
         /** Sets the from address of {@link AppSearchEmail} */

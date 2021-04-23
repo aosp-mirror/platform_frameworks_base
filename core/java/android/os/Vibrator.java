@@ -552,6 +552,27 @@ public abstract class Vibrator {
     }
 
     /**
+     * Query the estimated durations of the given primitives.
+     *
+     * The returned array will be the same length as the query array and the value at a given index
+     * will contain the duration in milliseconds of the effect at the same index in the querying
+     * array.
+     *
+     * @param primitiveIds Which primitives to query for.
+     * @return The duration of each primitive, with zeroes for primitives that are not supported.
+     */
+    @NonNull
+    public int[] getPrimitiveDurations(
+            @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
+        VibratorInfo info = getInfo();
+        int[] durations = new int[primitiveIds.length];
+        for (int i = 0; i < primitiveIds.length; i++) {
+            durations[i] = info.getPrimitiveDuration(primitiveIds[i]);
+        }
+        return durations;
+    }
+
+    /**
      * Turn the vibrator off.
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)

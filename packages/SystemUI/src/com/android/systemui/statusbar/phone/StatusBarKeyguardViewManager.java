@@ -29,6 +29,7 @@ import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
@@ -119,6 +120,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         @Override
         public void onFullyHidden() {
+        }
+
+        @Override
+        public void onExpansionChanged(float expansion) {
+            if (mAlternateAuthInterceptor != null) {
+                mAlternateAuthInterceptor.setBouncerExpansionChanged(expansion);
+            }
             updateStates();
         }
     };
@@ -1072,6 +1080,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 || mAlternateAuthInterceptor.isAnimating());
     }
 
+    /**
+     * Forward touches to any alternate authentication affordances.
+     */
+    public boolean onTouch(MotionEvent event) {
+        if (mAlternateAuthInterceptor == null) {
+            return false;
+        }
+
+        return mAlternateAuthInterceptor.onTouch(event);
+    }
+
     /** Update keyguard position based on a tapped X coordinate. */
     public void updateKeyguardPosition(float x) {
         if (mBouncer != null) {
@@ -1130,5 +1149,18 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
          * Set whether qs is currently expanded.
          */
         void setQsExpanded(boolean expanded);
+
+        /**
+         * Forward potential touches to authentication interceptor
+         * @return true if event was handled
+         */
+        boolean onTouch(MotionEvent event);
+
+        /**
+         * Update pin/pattern/password bouncer expansion amount where 0 is visible and 1 is fully
+         * hidden
+         */
+        void setBouncerExpansionChanged(float expansion);
+
     }
 }

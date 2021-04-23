@@ -2112,13 +2112,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         && mBiometricEnabledForUser.get(getCurrentUser());
 
         final boolean shouldListenBouncerState =
-                isUdfps ? !mBouncer
-                        : !(mFingerprintLockedOut && mBouncer && mCredentialAttempted);
+                !(mFingerprintLockedOut && mBouncer && mCredentialAttempted);
 
         final boolean shouldListenUdfpsState = !isUdfps
                 || (!getUserCanSkipBouncer(getCurrentUser())
                 && !isEncryptedOrLockdown(getCurrentUser())
                 && mStrongAuthTracker.hasUserAuthenticatedSinceBoot());
+
         return shouldListenKeyguardState && shouldListenUserState && shouldListenBouncerState
                 && shouldListenUdfpsState;
     }

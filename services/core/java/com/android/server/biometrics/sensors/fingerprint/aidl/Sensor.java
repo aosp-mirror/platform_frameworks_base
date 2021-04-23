@@ -52,13 +52,13 @@ import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
-import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.RemovalConsumer;
 import com.android.server.biometrics.sensors.StartUserClient;
 import com.android.server.biometrics.sensors.StopUserClient;
 import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
@@ -486,9 +486,10 @@ class Sensor {
         }
     }
 
-    @NonNull ITestSession createTestSession(@NonNull ITestSessionCallback callback) {
+    @NonNull ITestSession createTestSession(@NonNull ITestSessionCallback callback,
+            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback) {
         return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, callback,
-                mProvider, this);
+                fingerprintStateCallback, mProvider, this);
     }
 
     @NonNull BiometricScheduler getScheduler() {

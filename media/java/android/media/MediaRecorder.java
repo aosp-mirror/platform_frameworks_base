@@ -609,6 +609,25 @@ public class MediaRecorder implements AudioRouting,
     };
 
     /**
+     * @hide
+     */
+    @IntDef({
+        OutputFormat.DEFAULT,
+        OutputFormat.THREE_GPP,
+        OutputFormat.MPEG_4,
+        OutputFormat.AMR_NB,
+        OutputFormat.AMR_WB,
+        OutputFormat.AAC_ADIF,
+        OutputFormat.AAC_ADTS,
+        OutputFormat.MPEG_2_TS,
+        OutputFormat.WEBM,
+        OutputFormat.HEIF,
+        OutputFormat.OGG,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OutputFormatValues {}
+
+    /**
      * Defines the audio encoding. These constants are used with
      * {@link MediaRecorder#setAudioEncoder(int)}.
      */
@@ -635,6 +654,22 @@ public class MediaRecorder implements AudioRouting,
     }
 
     /**
+     * @hide
+     */
+    @IntDef({
+        AudioEncoder.DEFAULT,
+        AudioEncoder.AMR_NB,
+        AudioEncoder.AMR_WB,
+        AudioEncoder.AAC,
+        AudioEncoder.HE_AAC,
+        AudioEncoder.AAC_ELD,
+        AudioEncoder.VORBIS,
+        AudioEncoder.OPUS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioEncoderValues {}
+
+    /**
      * Defines the video encoding. These constants are used with
      * {@link MediaRecorder#setVideoEncoder(int)}.
      */
@@ -650,6 +685,20 @@ public class MediaRecorder implements AudioRouting,
         public static final int VP8 = 4;
         public static final int HEVC = 5;
     }
+
+    /**
+     * @hide
+     */
+    @IntDef({
+        VideoEncoder.DEFAULT,
+        VideoEncoder.H263,
+        VideoEncoder.H264,
+        VideoEncoder.MPEG_4_SP,
+        VideoEncoder.VP8,
+        VideoEncoder.HEVC,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VideoEncoderValues {}
 
     /**
      * Sets the audio source to be used for recording. If this method is not
@@ -887,7 +936,7 @@ public class MediaRecorder implements AudioRouting,
      * setAudioSource()/setVideoSource().
      * @see android.media.MediaRecorder.OutputFormat
      */
-    public native void setOutputFormat(int output_format)
+    public native void setOutputFormat(@OutputFormatValues int output_format)
             throws IllegalStateException;
 
     /**
@@ -970,7 +1019,7 @@ public class MediaRecorder implements AudioRouting,
      * setOutputFormat() or after prepare().
      * @see android.media.MediaRecorder.AudioEncoder
      */
-    public native void setAudioEncoder(int audio_encoder)
+    public native void setAudioEncoder(@AudioEncoderValues int audio_encoder)
             throws IllegalStateException;
 
     /**
@@ -983,7 +1032,7 @@ public class MediaRecorder implements AudioRouting,
      * setOutputFormat() or after prepare()
      * @see android.media.MediaRecorder.VideoEncoder
      */
-    public native void setVideoEncoder(int video_encoder)
+    public native void setVideoEncoder(@VideoEncoderValues int video_encoder)
             throws IllegalStateException;
 
     /**

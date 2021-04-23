@@ -381,6 +381,21 @@ public final class UpdatableFontDirTest {
     }
 
     @Test
+    public void loadFontFileMap_twice() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile, mCurrentTimeSupplier);
+        dir.loadFontFileMap();
+        dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,1", GOOD_SIGNATURE)));
+        assertThat(dir.getFontFileMap()).containsKey("test.ttf");
+        File fontFile = dir.getFontFileMap().get("test.ttf");
+        dir.loadFontFileMap();
+        assertThat(dir.getFontFileMap().get("test.ttf")).isEqualTo(fontFile);
+    }
+
+    @Test
     public void installFontFile() throws Exception {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();

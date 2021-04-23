@@ -20,9 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentStatePagerAdapter;
@@ -32,31 +30,14 @@ import com.google.android.material.tabs.TabLayout;
 
 /**
  * Picker, showing a sorted lists of applications and other types of entities consuming power.
- * Returns the selected entity ID or null.
+ * Opens BatteryStatsViewerActivity upon item selection.
  */
 public class BatteryConsumerPickerActivity extends FragmentActivity {
-
-    public static final ActivityResultContract<Void, String> CONTRACT =
-            new ActivityResultContract<Void, String>() {
-                @NonNull
-                @Override
-                public Intent createIntent(@NonNull Context context, Void aVoid) {
-                    return new Intent(context, BatteryConsumerPickerActivity.class);
-                }
-
-                @Override
-                public String parseResult(int resultCode, @Nullable Intent intent) {
-                    if (resultCode != RESULT_OK || intent == null) {
-                        return null;
-                    }
-                    return intent.getStringExtra(Intent.EXTRA_RETURN_RESULT);
-                }
-            };
+    private static final String PREF_SELECTED_BATTERY_CONSUMER = "batteryConsumerId";
 
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         setContentView(R.layout.battery_consumer_picker_activity_layout);
 
@@ -99,18 +80,25 @@ public class BatteryConsumerPickerActivity extends FragmentActivity {
         viewPager.setAdapter(adapter);
         TabLayout tabLayout = findViewById(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
+        if (icicle == null) {
+            final String batteryConsumerId = getPreferences(Context.MODE_PRIVATE)
+                    .getString(PREF_SELECTED_BATTERY_CONSUMER, null);
+            if (batteryConsumerId != null) {
+                startBatteryStatsActivity(batteryConsumerId);
+            }
+        }
     }
 
     public void setSelectedBatteryConsumer(String batteryConsumerId) {
-        Intent intent = new Intent();
-        intent.putExtra(Intent.EXTRA_RETURN_RESULT, batteryConsumerId);
-        setResult(RESULT_OK, intent);
-        finish();
+        getPreferences(Context.MODE_PRIVATE).edit()
+                .putString(PREF_SELECTED_BATTERY_CONSUMER, batteryConsumerId)
+                .apply();
+        startBatteryStatsActivity(batteryConsumerId);
     }
 
-    @Override
-    public boolean onNavigateUp() {
-        onBackPressed();
-        return true;
+    private void startBatteryStatsActivity(String batteryConsumerId) {
+        final Intent intent = new Intent(this, BatteryStatsViewerActivity.class)
+                .putExtra(BatteryStatsViewerActivity.EXTRA_BATTERY_CONSUMER, batteryConsumerId);
+        startActivity(intent);
     }
 }

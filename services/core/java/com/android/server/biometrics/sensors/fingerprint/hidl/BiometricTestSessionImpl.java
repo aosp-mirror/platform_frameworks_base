@@ -31,6 +31,7 @@ import android.util.Slog;
 
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     @NonNull private final Context mContext;
     private final int mSensorId;
     @NonNull private final ITestSessionCallback mCallback;
+    @NonNull private final FingerprintService.FingerprintStateCallback mFingerprintStateCallback;
     @NonNull private final Fingerprint21 mFingerprint21;
     @NonNull private final Fingerprint21.HalResultController mHalResultController;
     @NonNull private final Set<Integer> mEnrollmentIds;
@@ -116,12 +118,14 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
 
     BiometricTestSessionImpl(@NonNull Context context, int sensorId,
             @NonNull ITestSessionCallback callback,
+            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback,
             @NonNull Fingerprint21 fingerprint21,
             @NonNull Fingerprint21.HalResultController halResultController) {
         mContext = context;
         mSensorId = sensorId;
         mCallback = callback;
         mFingerprint21 = fingerprint21;
+        mFingerprintStateCallback = fingerprintStateCallback;
         mHalResultController = halResultController;
         mEnrollmentIds = new HashSet<>();
         mRandom = new Random();
@@ -139,7 +143,8 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         mFingerprint21.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
-                mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL);
+                mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL,
+                mFingerprintStateCallback);
     }
 
     @Override

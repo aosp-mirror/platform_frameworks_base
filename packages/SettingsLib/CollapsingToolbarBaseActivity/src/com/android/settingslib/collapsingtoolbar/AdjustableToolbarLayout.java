@@ -19,6 +19,7 @@ package com.android.settingslib.collapsingtoolbar;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,17 +52,24 @@ public class AdjustableToolbarLayout extends CollapsingToolbarLayout {
         initCollapsingToolbar();
     }
 
+    @SuppressWarnings("RestrictTo")
     private void initCollapsingToolbar() {
         this.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom,
                     int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 v.removeOnLayoutChangeListener(this);
-                final int count = getLineCount();
+                final int count = getLineCountWithReflection();
                 if (count > TOOLBAR_MAX_LINE_NUMBER) {
-                    setExpandedTitleTextAppearance(R.style.CollapsingToolbarTitle_MoreThanTwoLines);
-                } else {
-                    setExpandedTitleTextAppearance(R.style.CollapsingToolbarTitle);
+                    final ViewGroup.LayoutParams lp = getLayoutParams();
+                    lp.height = getResources()
+                            .getDimensionPixelSize(R.dimen.toolbar_three_lines_height);
+                    setLayoutParams(lp);
+                } else if (count == TOOLBAR_MAX_LINE_NUMBER) {
+                    final ViewGroup.LayoutParams lp = getLayoutParams();
+                    lp.height = getResources()
+                            .getDimensionPixelSize(R.dimen.toolbar_two_lines_height);
+                    setLayoutParams(lp);
                 }
             }
         });
@@ -73,9 +81,10 @@ public class AdjustableToolbarLayout extends CollapsingToolbarLayout {
      * drawn in a canvas and the text process is wrapped in a CollapsingTextHelper, the way we used
      * here is to get the line count from the CollapsingTextHelper via Java Reflection.
      */
-    private int getLineCount() {
+    private int getLineCountWithReflection() {
         try {
-            final Field textHelperField = this.getClass().getDeclaredField("collapsingTextHelper");
+            final Field textHelperField =
+                    this.getClass().getSuperclass().getDeclaredField("collapsingTextHelper");
             textHelperField.setAccessible(true);
             final Object textHelperObj = textHelperField.get(this);
 

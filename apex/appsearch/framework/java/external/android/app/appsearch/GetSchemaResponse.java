@@ -75,7 +75,7 @@ public class GetSchemaResponse {
 
     /** Builder for {@link GetSchemaResponse} objects. */
     public static final class Builder {
-        private int mVersion;
+        private int mVersion = 0;
         private boolean mBuilt = false;
         private final ArrayList<Bundle> mSchemaBundles = new ArrayList<>();
 

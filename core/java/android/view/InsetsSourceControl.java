@@ -152,6 +152,34 @@ public class InsetsSourceControl implements Parcelable {
         }
     }
 
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final InsetsSourceControl that = (InsetsSourceControl) o;
+        final SurfaceControl thatLeash = that.mLeash;
+        return mType == that.mType
+                && ((mLeash == thatLeash)
+                        || (mLeash != null && thatLeash != null && mLeash.isSameSurface(thatLeash)))
+                && mSurfacePosition.equals(that.mSurfacePosition)
+                && mInsetsHint.equals(that.mInsetsHint)
+                && mSkipAnimationOnce == that.mSkipAnimationOnce;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mType;
+        result = 31 * result + (mLeash != null ? mLeash.hashCode() : 0);
+        result = 31 * result + mSurfacePosition.hashCode();
+        result = 31 * result + mInsetsHint.hashCode();
+        result = 31 * result + (mSkipAnimationOnce ? 1 : 0);
+        return result;
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
         pw.print("InsetsSourceControl type="); pw.print(InsetsState.typeToString(mType));
