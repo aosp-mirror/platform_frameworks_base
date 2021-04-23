@@ -48,6 +48,7 @@ import android.annotation.NonNull;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -1123,7 +1124,8 @@ final class AccessibilityController {
                 private final Paint mPaint = new Paint();
 
                 private final SurfaceControl mSurfaceControl;
-                private final Surface mSurface = mService.mSurfaceFactory.get();
+                private final BLASTBufferQueue mBlastBufferQueue;
+                private final Surface mSurface;
 
                 private final AnimationController mAnimationController;
 
@@ -1135,11 +1137,10 @@ final class AccessibilityController {
                 ViewportWindow(Context context) {
                     SurfaceControl surfaceControl = null;
                     try {
-                        mDisplay.getRealSize(mTempPoint);
                         surfaceControl = mDisplayContent
                                 .makeOverlay()
                                 .setName(SURFACE_TITLE)
-                                .setBufferSize(mTempPoint.x, mTempPoint.y) // not a typo
+                                .setBLASTLayer()
                                 .setFormat(PixelFormat.TRANSLUCENT)
                                 .setCallsite("ViewportWindow")
                                 .build();
@@ -1147,6 +1148,9 @@ final class AccessibilityController {
                         /* ignore */
                     }
                     mSurfaceControl = surfaceControl;
+                    mDisplay.getRealSize(mTempPoint);
+                    mBlastBufferQueue = new BLASTBufferQueue(SURFACE_TITLE, mSurfaceControl,
+                            mTempPoint.x, mTempPoint.y, PixelFormat.RGBA_8888);
 
                     final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
                     final int layer =
@@ -1156,8 +1160,7 @@ final class AccessibilityController {
                     InputMonitor.setTrustedOverlayInputInfo(mSurfaceControl, t,
                             mDisplayContent.getDisplayId(), "Magnification Overlay");
                     t.apply();
-
-                    mSurface.copyFrom(mSurfaceControl);
+                    mSurface = mBlastBufferQueue.createSurface();
 
                     mAnimationController = new AnimationController(context,
                             mService.mH.getLooper());
@@ -1282,6 +1285,9 @@ final class AccessibilityController {
                 }
 
                 void releaseSurface() {
+                    if (mBlastBufferQueue != null) {
+                        mBlastBufferQueue.destroy();
+                    }
                     mService.mTransactionFactory.get().remove(mSurfaceControl).apply();
                     mSurface.release();
                 }
