@@ -46,10 +46,11 @@ public final class BluetoothGattServer implements BluetoothProfile {
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
-    private BluetoothAdapter mAdapter;
-    private IBluetoothGatt mService;
-    private BluetoothGattServerCallback mCallback;
+    private final IBluetoothGatt mService;
+    private final BluetoothAdapter mAdapter;
     private final AttributionSource mAttributionSource;
+
+    private BluetoothGattServerCallback mCallback;
 
     private Object mServerIfLock = new Object();
     private int mServerIf;
@@ -384,15 +385,15 @@ public final class BluetoothGattServer implements BluetoothProfile {
     /**
      * Create a BluetoothGattServer proxy object.
      */
-    /*package*/ BluetoothGattServer(
-            IBluetoothGatt iGatt, int transport, AttributionSource attributionSource) {
+    /* package */ BluetoothGattServer(IBluetoothGatt iGatt, int transport,
+            BluetoothAdapter adapter) {
         mService = iGatt;
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mCallback = null;
         mServerIf = 0;
         mTransport = transport;
         mServices = new ArrayList<BluetoothGattService>();
-        mAttributionSource = attributionSource;
     }
 
     /**
