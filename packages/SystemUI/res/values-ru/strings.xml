@@ -604,11 +604,11 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Оно будет показываться на экране, пока вы его не открепите (для этого нужно провести вверх и удерживать)."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Обзор\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Главный экран\"."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Может быть получен доступ к персональным данным (например, контактам и содержимому электронных писем)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"На экране могут быть видны персональные данные (например, контакты и содержимое электронных писем)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Закрепленное приложение может открывать другие приложения."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Чтобы открепить это приложение, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\"."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Чтобы открепить это приложение, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\"."</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Чтобы открепить это приложение, проведите по экрану вверх и задержите палец."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Чтобы открепить приложение, проведите по экрану вверх и удерживайте."</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ОК"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Нет, спасибо"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Приложение закреплено."</string>
@@ -1035,7 +1035,7 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Наложение окна увеличения"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Окно увеличения"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Настройки окна увеличения"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Управление устройством"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Управление устройствами"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Добавьте виджеты для управления устройствами."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Настройте виджеты управления устройствами"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Чтобы перейти к элементам управления, удерживайте кнопку питания."</string>
