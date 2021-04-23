@@ -106,11 +106,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private final BLASTSyncEngine mSyncEngine;
     private IRemoteTransition mRemoteTransition = null;
 
-    /**
-     * This is a leash to put animating surfaces into flatly without clipping/ordering issues. It
-     * is a child of all the targets' shared ancestor.
-     */
-    private SurfaceControl mRootLeash = null;
+    /** Only use for clean-up after binder death! */
+    private SurfaceControl.Transaction mStartTransaction = null;
+    private SurfaceControl.Transaction mFinishTransaction = null;
 
     /**
      * Contains change infos for both participants and all ancestors. We have to track ancestors
@@ -229,16 +227,16 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         setReady(true);
     }
 
-    /** The transition has finished animating and is ready to finalize WM state */
-    void finishTransition() {
-        if (mState < STATE_PLAYING) {
-            throw new IllegalStateException("Can't finish a non-playing transition " + mSyncId);
-        }
+    /**
+     * Build a transaction that "resets" all the re-parenting and layer changes. This is
+     * intended to be applied at the end of the transition but before the finish callback. This
+     * needs to be passed/applied in shell because until finish is called, shell owns the surfaces.
+     * Additionally, this gives shell the ability to better deal with merged transitions.
+     */
+    private void buildFinishTransaction(SurfaceControl.Transaction t, SurfaceControl rootLeash) {
         final Point tmpPos = new Point();
         // usually only size 1
         final ArraySet<DisplayContent> displays = new ArraySet<>();
-        // Immediately apply all surface reparents, don't wait for pending/sync/etc.
-        SurfaceControl.Transaction t = mController.mAtm.mWindowManager.mTransactionFactory.get();
         for (int i = mTargets.size() - 1; i >= 0; --i) {
             final WindowContainer target = mTargets.valueAt(i);
             if (target.getParent() != null) {
@@ -247,9 +245,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 // Ensure surfaceControls are re-parented back into the hierarchy.
                 t.reparent(targetLeash, origParent);
                 t.setLayer(targetLeash, target.getLastLayer());
-                // TODO(shell-transitions): Once all remotables have been moved, see if there is
-                //                          a more appropriate place to do the following. This may
-                //                          involve passing an SF transaction from shell on finish.
                 target.getRelativePosition(tmpPos);
                 t.setPosition(targetLeash, tmpPos.x, tmpPos.y);
                 t.setCornerRadius(targetLeash, 0);
@@ -257,25 +252,26 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 displays.add(target.getDisplayContent());
             }
         }
-        // Need to update layers on ALL displays (for now) since they were all paused while
-        // the animation played.
+        // Need to update layers on involved displays since they were all paused while
+        // the animation played. This puts the layers back into the correct order.
         for (int i = displays.size() - 1; i >= 0; --i) {
             if (displays.valueAt(i) == null) continue;
             displays.valueAt(i).assignChildLayers(t);
         }
-        // Also pro-actively hide going-invisible activity surfaces in same transaction to
-        // prevent flickers due to reparenting and animation z-order mismatch.
-        for (int i = mParticipants.size() - 1; i >= 0; --i) {
-            final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
-            if (ar == null || ar.mVisibleRequested || !ar.isVisible()) continue;
-            t.hide(ar.getSurfaceControl());
+        if (rootLeash.isValid()) {
+            t.reparent(rootLeash, null);
         }
-        if (mRootLeash.isValid()) {
-            t.remove(mRootLeash);
+    }
+
+    /**
+     * The transition has finished animating and is ready to finalize WM state. This should not
+     * be called directly; use {@link TransitionController#finishTransition} instead.
+     */
+    void finishTransition() {
+        mStartTransaction = mFinishTransaction = null;
+        if (mState < STATE_PLAYING) {
+            throw new IllegalStateException("Can't finish a non-playing transition " + mSyncId);
         }
-        mRootLeash = null;
-        t.apply();
-        t.close();
 
         // Commit all going-invisible containers
         for (int i = 0; i < mParticipants.size(); ++i) {
@@ -343,27 +339,58 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // Resolve the animating targets from the participants
         mTargets = calculateTargets(mParticipants, mChanges);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, mChanges);
-        mRootLeash = info.getRootLeash();
 
         handleNonAppWindowsInTransition(displayId, mType, mFlags);
 
+        // Manually show any activities that are visibleRequested. This is needed to properly
+        // support simultaneous animation queueing/merging. Specifically, if transition A makes
+        // an activity invisible, it's finishTransaction (which is applied *after* the animation)
+        // will hide the activity surface. If transition B then makes the activity visible again,
+        // the normal surfaceplacement logic won't add a show to this start transaction because
+        // the activity visibility hasn't been committed yet. To deal with this, we have to manually
+        // show here in the same way that we manually hide in finishTransaction.
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
+            if (ar == null || !ar.mVisibleRequested) continue;
+            transaction.show(ar.getSurfaceControl());
+        }
+
+        mStartTransaction = transaction;
+        mFinishTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
+        buildFinishTransaction(mFinishTransaction, info.getRootLeash());
         if (mController.getTransitionPlayer() != null) {
             try {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Calling onTransitionReady: %s", info);
-                mController.getTransitionPlayer().onTransitionReady(this, info, transaction);
+                mController.getTransitionPlayer().onTransitionReady(
+                        this, info, transaction, mFinishTransaction);
             } catch (RemoteException e) {
                 // If there's an exception when trying to send the mergedTransaction to the
                 // client, we should finish and apply it here so the transactions aren't lost.
-                transaction.apply();
-                finishTransition();
+                cleanUpOnFailure();
             }
         } else {
             // No player registered, so just finish/apply immediately
-            transaction.apply();
-            finishTransition();
+            cleanUpOnFailure();
         }
         mSyncId = -1;
+    }
+
+    /**
+     * If the remote failed for any reason, use this to do any appropriate clean-up. Do not call
+     * this directly, it's designed to by called by {@link TransitionController} only.
+     */
+    void cleanUpOnFailure() {
+        // No need to clean-up if this isn't playing yet.
+        if (mState < STATE_PLAYING) return;
+
+        if (mStartTransaction != null) {
+            mStartTransaction.apply();
+        }
+        if (mFinishTransaction != null) {
+            mFinishTransaction.apply();
+        }
+        finishTransition();
     }
 
     private void handleNonAppWindowsInTransition(int displayId,

@@ -17,8 +17,10 @@
 package com.android.server.usage;
 
 import android.annotation.UserIdInt;
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -57,6 +59,10 @@ public class AppTimeLimitController {
     private final Lock mLock = new Lock();
 
     private final MyHandler mHandler;
+
+    private final Context mContext;
+
+    private AlarmManager mAlarmManager;
 
     private TimeLimitCallbackListener mListener;
 
@@ -434,7 +440,7 @@ public class AppTimeLimitController {
         }
     }
 
-    class SessionUsageGroup extends UsageGroup {
+    class SessionUsageGroup extends UsageGroup implements AlarmManager.OnAlarmListener {
         private long mNewSessionThresholdMs;
         private PendingIntent mSessionEndCallback;
 
@@ -466,7 +472,7 @@ public class AppTimeLimitController {
                     // New session has started, clear usage time.
                     mUsageTimeMs = 0;
                 }
-                AppTimeLimitController.this.cancelInformSessionEndListener(this);
+                getAlarmManager().cancel(this);
             }
             super.noteUsageStart(startTimeMs, currentTimeMs);
         }
@@ -479,10 +485,9 @@ public class AppTimeLimitController {
                 if (mUsageTimeMs >= mTimeLimitMs) {
                     // Usage has ended. Schedule the session end callback to be triggered once
                     // the new session threshold has been reached
-                    AppTimeLimitController.this.postInformSessionEndListenerLocked(this,
-                            mNewSessionThresholdMs);
+                    getAlarmManager().setExact(AlarmManager.ELAPSED_REALTIME,
+                            getElapsedRealtime() + mNewSessionThresholdMs, TAG, this, mHandler);
                 }
-
             }
         }
 
@@ -495,6 +500,13 @@ public class AppTimeLimitController {
                                        user.userId,
                                        mUsageTimeMs,
                                        mSessionEndCallback);
+            }
+        }
+
+        @Override
+        public void onAlarm() {
+            synchronized (mLock) {
+                onSessionEnd();
             }
         }
 
@@ -546,7 +558,6 @@ public class AppTimeLimitController {
     private class MyHandler extends Handler {
         static final int MSG_CHECK_TIMEOUT = 1;
         static final int MSG_INFORM_LIMIT_REACHED_LISTENER = 2;
-        static final int MSG_INFORM_SESSION_END = 3;
 
         MyHandler(Looper looper) {
             super(looper);
@@ -565,11 +576,6 @@ public class AppTimeLimitController {
                         ((UsageGroup) msg.obj).onLimitReached();
                     }
                     break;
-                case MSG_INFORM_SESSION_END:
-                    synchronized (mLock) {
-                        ((SessionUsageGroup) msg.obj).onSessionEnd();
-                    }
-                    break;
                 default:
                     super.handleMessage(msg);
                     break;
@@ -577,9 +583,20 @@ public class AppTimeLimitController {
         }
     }
 
-    public AppTimeLimitController(TimeLimitCallbackListener listener, Looper looper) {
+    public AppTimeLimitController(Context context, TimeLimitCallbackListener listener,
+            Looper looper) {
+        mContext = context;
         mHandler = new MyHandler(looper);
         mListener = listener;
+    }
+
+    /** Overrideable by a test */
+    @VisibleForTesting
+    protected AlarmManager getAlarmManager() {
+        if (mAlarmManager == null) {
+            mAlarmManager = mContext.getSystemService(AlarmManager.class);
+        }
+        return mAlarmManager;
     }
 
     /** Overrideable by a test */
@@ -982,18 +999,6 @@ public class AppTimeLimitController {
     private void postInformLimitReachedListenerLocked(UsageGroup group) {
         mHandler.sendMessage(mHandler.obtainMessage(MyHandler.MSG_INFORM_LIMIT_REACHED_LISTENER,
                 group));
-    }
-
-    @GuardedBy("mLock")
-    private void postInformSessionEndListenerLocked(SessionUsageGroup group, long timeout) {
-        mHandler.sendMessageDelayed(
-                mHandler.obtainMessage(MyHandler.MSG_INFORM_SESSION_END, group),
-                timeout);
-    }
-
-    @GuardedBy("mLock")
-    private void cancelInformSessionEndListener(SessionUsageGroup group) {
-        mHandler.removeMessages(MyHandler.MSG_INFORM_SESSION_END, group);
     }
 
     @GuardedBy("mLock")

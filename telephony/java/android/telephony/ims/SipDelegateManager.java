@@ -126,12 +126,12 @@ public class SipDelegateManager {
     public static final int MESSAGE_FAILURE_REASON_NOT_REGISTERED = 9;
 
     /**
-     * The outgoing SIP message has not been sent because the {@link SipDelegateImsConfiguration}
+     * The outgoing SIP message has not been sent because the {@link SipDelegateConfiguration}
      * version associated with the outgoing {@link SipMessage} is now stale and has failed
      * validation checks.
      * <p>
      * The @link SipMessage} should be recreated using the newest
-     * {@link SipDelegateImsConfiguration} and sent again.
+     * {@link SipDelegateConfiguration} and sent again.
      */
     public static final int MESSAGE_FAILURE_REASON_STALE_IMS_CONFIGURATION = 10;
 

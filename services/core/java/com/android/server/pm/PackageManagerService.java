@@ -15038,6 +15038,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 uid = UserHandle.getUid(id, UserHandle.getAppId(uid));
                 intent.putExtra(Intent.EXTRA_UID, uid);
             }
+            if (broadcastAllowList != null && PLATFORM_PACKAGE_NAME.equals(targetPkg)) {
+                intent.putExtra(Intent.EXTRA_VISIBILITY_ALLOW_LIST, broadcastAllowList.get(id));
+            }
             intent.putExtra(Intent.EXTRA_USER_HANDLE, id);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT | flags);
             if (DEBUG_BROADCASTS) {
@@ -21003,6 +21006,10 @@ public class PackageManagerService extends IPackageManager.Stub
                             removedPackage, extras, 0 /*flags*/,
                             installerPackageName, null, broadcastUsers, instantUserIds, null, null);
                 }
+                packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED_INTERNAL,
+                        removedPackage, extras, 0 /*flags*/, PLATFORM_PACKAGE_NAME,
+                        null /*finishedReceiver*/, broadcastUsers, instantUserIds,
+                        broadcastAllowList, null /*bOptions*/);
                 if (dataRemoved && !isRemovedPackageSystemUpdate) {
                     packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED,
                             removedPackage, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, null,
@@ -23353,7 +23360,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // writer
         synchronized (mLock) {
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps.getStopped(userId) && !stopped) {
+            if (ps != null && ps.getStopped(userId) && !stopped) {
                 shouldUnhibernate = true;
             }
             if (!shouldFilterApplicationLocked(ps, callingUid, userId)
@@ -26052,7 +26059,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public String[] getNamesForUids(int[] uids) throws RemoteException {
-            final String[] results = PackageManagerService.this.getNamesForUids(uids);
+            if (uids == null || uids.length == 0) {
+                return null;
+            }
+            final String[] names = PackageManagerService.this.getNamesForUids(uids);
+            final String[] results = (names != null) ? names : new String[uids.length];
             // massage results so they can be parsed by the native binder
             for (int i = results.length - 1; i >= 0; --i) {
                 if (results[i] == null) {

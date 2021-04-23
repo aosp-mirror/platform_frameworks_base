@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 
 import androidx.annotation.NonNull;
@@ -26,14 +25,12 @@ import com.android.systemui.dagger.SysUISingleton;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 /**
  * Controls sensor privacy state and notification.
  */
 @SysUISingleton
 public class SensorPrivacyControllerImpl implements SensorPrivacyController,
-        SensorPrivacyManager.OnSensorPrivacyChangedListener {
+        SensorPrivacyManager.OnAllSensorPrivacyChangedListener {
     private SensorPrivacyManager mSensorPrivacyManager;
     private final List<OnSensorPrivacyChangedListener> mListeners = new ArrayList<>(1);
     private Object mLock = new Object();
@@ -48,8 +45,8 @@ public class SensorPrivacyControllerImpl implements SensorPrivacyController,
 
     @Override
     public void init() {
-        mSensorPrivacyEnabled = mSensorPrivacyManager.isSensorPrivacyEnabled();
-        mSensorPrivacyManager.addSensorPrivacyListener(this);
+        mSensorPrivacyEnabled = mSensorPrivacyManager.isAllSensorPrivacyEnabled();
+        mSensorPrivacyManager.addAllSensorPrivacyListener(this);
     }
 
     /**
@@ -83,7 +80,7 @@ public class SensorPrivacyControllerImpl implements SensorPrivacyController,
     /**
      * Callback invoked by the SensorPrivacyService when sensor privacy state changes.
      */
-    public void onSensorPrivacyChanged(boolean enabled) {
+    public void onAllSensorPrivacyChanged(boolean enabled) {
         synchronized (mLock) {
             mSensorPrivacyEnabled = enabled;
             for (OnSensorPrivacyChangedListener listener : mListeners) {

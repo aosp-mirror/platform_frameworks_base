@@ -1686,6 +1686,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return false;
         }
 
+        if (!taskDisplayArea.canHostHomeTask()) {
+            // Can't launch home on a TaskDisplayArea that does not support root home task
+            return false;
+        }
+
         if (taskDisplayArea.getDisplayId() != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
             // Can't launch home on secondary display if device does not support multi-display.
             return false;
@@ -3474,10 +3479,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     @VisibleForTesting
     void getRunningTasks(int maxNum, List<ActivityManager.RunningTaskInfo> list,
-            boolean filterOnlyVisibleRecents, int callingUid, boolean allowed, boolean crossUser,
-            ArraySet<Integer> profileIds) {
-        mTaskSupervisor.getRunningTasks().getTasks(maxNum, list, filterOnlyVisibleRecents, this,
-                callingUid, allowed, crossUser, profileIds);
+            int flags, int callingUid, ArraySet<Integer> profileIds) {
+        mTaskSupervisor.getRunningTasks().getTasks(maxNum, list, flags, this, callingUid,
+                profileIds);
     }
 
     void startPowerModeLaunchIfNeeded(boolean forceSend, ActivityRecord targetActivity) {

@@ -23,6 +23,9 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_SDK_VERSION := 9
 
 LOCAL_PACKAGE_NAME := MultiDexLegacyVersionedTestApp_v3
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../NOTICE
 
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-multidex
 
@@ -43,4 +46,3 @@ $(mainDexList): $(full_classes_pre_proguard_jar) $(MAINDEXCLASSES) $(PROGUARD_DE
 	echo "com/android/framework/multidexlegacyversionedtestapp/MultiDexUpdateTest.class" >> $@
 
 $(built_dex_intermediate): $(mainDexList)
-

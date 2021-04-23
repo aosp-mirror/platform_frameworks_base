@@ -223,7 +223,7 @@ public class Sensor {
                 }
 
                 final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-                errorConsumer.onError(error, vendorCode);
+                errorConsumer.onError(AidlConversionUtils.toFrameworkError(error), vendorCode);
 
                 if (error == Error.HW_UNAVAILABLE) {
                     mCallback.onHardwareUnavailable();

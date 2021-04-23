@@ -172,18 +172,33 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      */
     final boolean mCreatedByOrganizer;
 
+    /**
+     * True if this TaskDisplayArea can have a home task
+     * {@link WindowConfiguration#ACTIVITY_TYPE_HOME}
+     */
+    private final boolean mCanHostHomeTask;
+
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
-            int displayAreaFeature) {
-        this(displayContent, service, name, displayAreaFeature, false /* createdByOrganizer */);
+                    int displayAreaFeature) {
+        this(displayContent, service, name, displayAreaFeature, false /* createdByOrganizer */,
+                true /* canHostHomeTask */);
     }
 
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
-            int displayAreaFeature, boolean createdByOrganizer) {
+                    int displayAreaFeature, boolean createdByOrganizer) {
+        this(displayContent, service, name, displayAreaFeature, createdByOrganizer,
+                true /* canHostHomeTask */);
+    }
+
+    TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
+                    int displayAreaFeature, boolean createdByOrganizer,
+                    boolean canHostHomeTask) {
         super(service, Type.ANY, name, displayAreaFeature);
         mDisplayContent = displayContent;
         mRootWindowContainer = service.mRoot;
         mAtmService = service.mAtmService;
         mCreatedByOrganizer = createdByOrganizer;
+        mCanHostHomeTask = canHostHomeTask;
     }
 
     /**
@@ -1667,7 +1682,9 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     @Nullable
     Task getOrCreateRootHomeTask(boolean onTop) {
         Task homeTask = getRootHomeTask();
-        if (homeTask == null && mDisplayContent.supportsSystemDecorations()) {
+        // Take into account if this TaskDisplayArea can have a home task before trying to
+        // create the root task
+        if (homeTask == null && canHostHomeTask()) {
             homeTask = createRootTask(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, onTop);
         }
         return homeTask;
@@ -1879,6 +1896,13 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     @Override
     boolean canCreateRemoteAnimationTarget() {
         return true;
+    }
+
+    /**
+     * Exposes the home task capability of the TaskDisplayArea
+     */
+    boolean canHostHomeTask() {
+        return mDisplayContent.supportsSystemDecorations() && mCanHostHomeTask;
     }
 
     /**

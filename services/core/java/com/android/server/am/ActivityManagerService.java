@@ -3525,7 +3525,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
                     // Clearing data is a user-initiated action.
                     js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER,
-                            JobParameters.DEBUG_REASON_DATA_CLEARED, "clear data");
+                            JobParameters.INTERNAL_STOP_REASON_DATA_CLEARED, "clear data");
 
                     // Clear its pending alarms
                     AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
@@ -5768,7 +5768,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public List<RunningTaskInfo> getTasks(int maxNum) {
-        return mActivityTaskManager.getTasks(maxNum, false /* filterForVisibleRecents */);
+        return mActivityTaskManager.getTasks(maxNum);
     }
 
     @Override

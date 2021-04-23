@@ -40,6 +40,7 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_REPLACED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_REPLACED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_REMOVED_INTERNAL" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_CHANGED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_FULLY_LOADED" />
@@ -4104,7 +4105,7 @@
          @hide
     -->
     <permission android:name="com.android.permission.USE_INSTALLER_V2"
-        android:protectionLevel="signature|installer" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- @TestApi Allows a testOnly application to get installed.
         <p>Not for use by third-party applications.

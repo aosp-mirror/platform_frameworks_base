@@ -348,14 +348,14 @@ public class AuthContainerView extends LinearLayout
                     }
                 }
 
-                if (fingerprintSensorProps != null && fingerprintSensorProps.isAnyUdfpsType()) {
-                    final AuthBiometricFaceToUdfpsView faceToUdfpsView =
-                            (AuthBiometricFaceToUdfpsView) factory.inflate(
-                                    R.layout.auth_biometric_face_to_udfps_view, null, false);
-                    faceToUdfpsView.setFingerprintSensorProps(fingerprintSensorProps);
-                    mBiometricView = faceToUdfpsView;
+                if (fingerprintSensorProps != null) {
+                    final AuthBiometricFaceToFingerprintView faceToFingerprintView =
+                            (AuthBiometricFaceToFingerprintView) factory.inflate(
+                                    R.layout.auth_biometric_face_to_fingerprint_view, null, false);
+                    faceToFingerprintView.setFingerprintSensorProps(fingerprintSensorProps);
+                    mBiometricView = faceToFingerprintView;
                 } else {
-                    Log.e(TAG, "Fingerprint must be UDFPS for dual-sensor config");
+                    Log.e(TAG, "Fingerprint props not found for sensor ID: " + fingerprintSensorId);
                     mBiometricView = null;
                     mBackgroundView = null;
                     mBiometricScrollView = null;

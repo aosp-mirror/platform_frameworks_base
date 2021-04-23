@@ -2104,8 +2104,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
-        return getTasks(maxNum, false /* filterForVisibleRecents */);
+    /**
+     * Gets info of running tasks up to the given number.
+     *
+     * @param maxNum the maximum number of task info returned by this method. If the total number of
+     *               running tasks is larger than it then there is no guarantee which task will be
+     *               left out.
+     * @return a list of {@link ActivityManager.RunningTaskInfo} with up to {@code maxNum} items
+     */
+    public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
+        return getTasks(maxNum, false /* filterForVisibleRecents */, false /* keepIntentExtra */);
     }
 
     /**
@@ -2114,10 +2122,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     @Override
     public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum,
-            boolean filterOnlyVisibleRecents) {
+            boolean filterOnlyVisibleRecents, boolean keepIntentExtra) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
+
+        int flags = filterOnlyVisibleRecents ? RunningTasks.FLAG_FILTER_ONLY_VISIBLE_RECENTS : 0;
+        flags |= (keepIntentExtra ? RunningTasks.FLAG_KEEP_INTENT_EXTRA : 0);
         final boolean crossUser = isCrossUserAllowed(callingPid, callingUid);
+        flags |= (crossUser ? RunningTasks.FLAG_CROSS_USERS : 0);
         final int[] profileIds = getUserManager().getProfileIds(
                 UserHandle.getUserId(callingUid), true);
         ArraySet<Integer> callingProfileIds = new ArraySet<>();
@@ -2130,8 +2142,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (DEBUG_ALL) Slog.v(TAG, "getTasks: max=" + maxNum);
 
             final boolean allowed = isGetTasksAllowed("getTasks", callingPid, callingUid);
-            mRootWindowContainer.getRunningTasks(maxNum, list, filterOnlyVisibleRecents, callingUid,
-                    allowed, crossUser, callingProfileIds);
+            flags |= (allowed ? RunningTasks.FLAG_ALLOWED : 0);
+            mRootWindowContainer.getRunningTasks(
+                    maxNum, list, flags, callingUid, callingProfileIds);
         }
 
         return list;
@@ -2829,7 +2842,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (packageName != null) {
             caller = packageName + " " + caller;
         }
-        if (!canCloseSystemDialogs(pid, uid, process)) {
+        if (!canCloseSystemDialogs(pid, uid)) {
             // The app can't close system dialogs, throw only if it targets S+
             if (CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
                 throw new SecurityException(
@@ -2854,39 +2867,37 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return true;
     }
 
-    private boolean canCloseSystemDialogs(int pid, int uid,
-            @Nullable WindowProcessController process) {
+    private boolean canCloseSystemDialogs(int pid, int uid) {
         if (checkPermission(Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, pid, uid)
                 == PERMISSION_GRANTED) {
             return true;
         }
-        if (process == null) {
-            synchronized (mGlobalLock) {
-                process = mProcessMap.getProcess(pid);
+        synchronized (mGlobalLock) {
+            // Check all the processes from the given uid, especially since for PendingIntents sent
+            // the pid equals -1
+            ArraySet<WindowProcessController> processes = mProcessMap.getProcesses(uid);
+            if (processes != null) {
+                for (int i = 0, n = processes.size(); i < n; i++) {
+                    WindowProcessController process = processes.valueAt(i);
+                    // Check if the instrumentation of the process has the permission. This covers
+                    // the usual test started from the shell (which has the permission) case. This
+                    // is needed for apps targeting SDK level < S but we are also allowing for
+                    // targetSdk S+ as a convenience to avoid breaking a bunch of existing tests and
+                    // asking them to adopt shell permissions to do this.
+                    int sourceUid = process.getInstrumentationSourceUid();
+                    if (process.isInstrumenting() && sourceUid != -1 && checkPermission(
+                            Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, -1, sourceUid)
+                            == PERMISSION_GRANTED) {
+                        return true;
+                    }
+                    // This is the notification trampoline use-case for example, where apps use
+                    // Intent.ACSD to close the shade prior to starting an activity.
+                    if (process.canCloseSystemDialogsByToken()) {
+                        return true;
+                    }
+                }
             }
-        }
-        if (process != null) {
-            // Check if the instrumentation of the process has the permission. This covers the
-            // usual test started from the shell (which has the permission) case. This is needed
-            // for apps targeting SDK level < S but we are also allowing for targetSdk S+ as a
-            // convenience to avoid breaking a bunch of existing tests and asking them to adopt
-            // shell permissions to do this.
-            // Note that these getters all read from volatile fields in WindowProcessController, so
-            // no need to lock.
-            int sourceUid = process.getInstrumentationSourceUid();
-            if (process.isInstrumenting() && sourceUid != -1 && checkPermission(
-                    Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, -1, sourceUid)
-                    == PERMISSION_GRANTED) {
-                return true;
-            }
-            // This is the notification trampoline use-case for example, where apps use Intent.ACSD
-            // to close the shade prior to starting an activity.
-            if (process.canCloseSystemDialogsByToken()) {
-                return true;
-            }
-        }
-        if (!CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
-            synchronized (mGlobalLock) {
+            if (!CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
                 // This covers the case where the app is displaying some UI on top of the
                 // notification shade and wants to start an activity. The app then sends the intent
                 // in order to move the notification shade out of the way and show the activity to
@@ -5168,8 +5179,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean canCloseSystemDialogs(int pid, int uid) {
-            return ActivityTaskManagerService.this.canCloseSystemDialogs(pid, uid,
-                    null /* process */);
+            return ActivityTaskManagerService.this.canCloseSystemDialogs(pid, uid);
         }
 
         @Override

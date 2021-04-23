@@ -1197,6 +1197,7 @@
   <java-symbol type="string" name="mediasize_japanese_kahu" />
   <java-symbol type="string" name="mediasize_japanese_kaku2" />
   <java-symbol type="string" name="mediasize_japanese_you4" />
+  <java-symbol type="string" name="mediasize_japanese_l" />
   <java-symbol type="string" name="network_partial_connectivity" />
   <java-symbol type="string" name="network_partial_connectivity_detailed" />
   <java-symbol type="string" name="reason_service_unavailable" />
@@ -4358,4 +4359,7 @@
   <java-symbol type="string" name="view_and_control_notification_content" />
 
   <java-symbol type="layout" name="notification_expand_button"/>
+
+  <java-symbol type="bool" name="config_supportsMicToggle" />
+  <java-symbol type="bool" name="config_supportsCamToggle" />
 </resources>

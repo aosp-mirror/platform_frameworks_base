@@ -94,7 +94,7 @@ public class PeopleTileViewHelper {
     private static final int FIXED_HEIGHT_DIMENS_FOR_SMALL = 6 + 4 + 8;
     private static final int FIXED_WIDTH_DIMENS_FOR_SMALL = 4 + 4;
 
-    private static final int MESSAGES_COUNT_OVERFLOW = 7;
+    private static final int MESSAGES_COUNT_OVERFLOW = 6;
 
     private static final Pattern DOUBLE_EXCLAMATION_PATTERN = Pattern.compile("[!][!]+");
     private static final Pattern DOUBLE_QUESTION_PATTERN = Pattern.compile("[?][?]+");
@@ -386,7 +386,7 @@ public class PeopleTileViewHelper {
         return views;
     }
 
-    // Some messaging apps only include up to 7 messages in their notifications.
+    // Some messaging apps only include up to 6 messages in their notifications.
     private String getMessagesCountText(int count) {
         if (count >= MESSAGES_COUNT_OVERFLOW) {
             return mContext.getResources().getString(

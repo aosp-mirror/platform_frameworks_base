@@ -166,6 +166,11 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())
                     || Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction())) {
+                if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+                    Log.i(TAG, "User setup not finished when " + intent.getAction()
+                            + " was received. Deferring...");
+                    return;
+                }
                 if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
                 reevaluateSystemTheme(true /* forceReload */);
             } else if (Intent.ACTION_WALLPAPER_CHANGED.equals(intent.getAction())) {

@@ -2859,6 +2859,159 @@ public class AudioManager {
     }
 
     /**
+     * Interface definition of a callback that is notified when the audio mode changes
+     */
+    public interface OnModeChangedListener {
+        /**
+         * Called on the listener to indicate that the audio mode has changed
+         *
+         * @param mode The current audio mode
+         */
+        void onModeChanged(@AudioMode int mode);
+    }
+
+    private final Object mModeListenerLock = new Object();
+    /**
+     * List of listeners for audio mode and their associated Executor.
+     * List is lazy-initialized on first registration
+     */
+    @GuardedBy("mModeListenerLock")
+    private @Nullable ArrayList<ModeListenerInfo> mModeListeners;
+
+    @GuardedBy("mModeListenerLock")
+    private ModeDispatcherStub mModeDispatcherStub;
+
+    private final class ModeDispatcherStub
+            extends IAudioModeDispatcher.Stub {
+
+        @Override
+        public void dispatchAudioModeChanged(int mode) {
+            // make a shallow copy of listeners so callback is not executed under lock
+            final ArrayList<ModeListenerInfo> modeListeners;
+            synchronized (mModeListenerLock) {
+                if (mModeListeners == null || mModeListeners.size() == 0) {
+                    return;
+                }
+                modeListeners = (ArrayList<ModeListenerInfo>) mModeListeners.clone();
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                for (ModeListenerInfo info : modeListeners) {
+                    info.mExecutor.execute(() ->
+                            info.mListener.onModeChanged(mode));
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    private static class ModeListenerInfo {
+        final @NonNull OnModeChangedListener mListener;
+        final @NonNull Executor mExecutor;
+
+        ModeListenerInfo(OnModeChangedListener listener, Executor exe) {
+            mListener = listener;
+            mExecutor = exe;
+        }
+    }
+
+    @GuardedBy("mModeListenerLock")
+    private boolean hasModeListener(OnModeChangedListener listener) {
+        return getModeListenerInfo(listener) != null;
+    }
+
+    @GuardedBy("mModeListenerLock")
+    private @Nullable ModeListenerInfo getModeListenerInfo(
+            OnModeChangedListener listener) {
+        if (mModeListeners == null) {
+            return null;
+        }
+        for (ModeListenerInfo info : mModeListeners) {
+            if (info.mListener == listener) {
+                return info;
+            }
+        }
+        return null;
+    }
+
+
+    @GuardedBy("mModeListenerLock")
+    /**
+     * @return true if the listener was removed from the list
+     */
+    private boolean removeModeListener(OnModeChangedListener listener) {
+        final ModeListenerInfo infoToRemove = getModeListenerInfo(listener);
+        if (infoToRemove != null) {
+            mModeListeners.remove(infoToRemove);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Adds a listener to be notified of changes to the audio mode.
+     * See {@link #getMode()}
+     * @param executor
+     * @param listener
+     */
+    public void addOnModeChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnModeChangedListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        synchronized (mModeListenerLock) {
+            if (hasModeListener(listener)) {
+                throw new IllegalArgumentException("attempt to call addOnModeChangedListener() "
+                        + "on a previously registered listener");
+            }
+            // lazy initialization of the list of strategy-preferred device listener
+            if (mModeListeners == null) {
+                mModeListeners = new ArrayList<>();
+            }
+            final int oldCbCount = mModeListeners.size();
+            mModeListeners.add(new ModeListenerInfo(listener, executor));
+            if (oldCbCount == 0) {
+                // register binder for callbacks
+                if (mModeDispatcherStub == null) {
+                    mModeDispatcherStub = new ModeDispatcherStub();
+                }
+                try {
+                    getService().registerModeDispatcher(mModeDispatcherStub);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes a previously added listener for changes to audio mode.
+     * See {@link #getMode()}
+     * @param listener
+     */
+    public void removeOnModeChangedListener(@NonNull OnModeChangedListener listener) {
+        Objects.requireNonNull(listener);
+        synchronized (mModeListenerLock) {
+            if (!removeModeListener(listener)) {
+                throw new IllegalArgumentException("attempt to call removeOnModeChangedListener() "
+                        + "on an unregistered listener");
+            }
+            if (mModeListeners.size() == 0) {
+                // unregister binder for callbacks
+                try {
+                    getService().unregisterModeDispatcher(mModeDispatcherStub);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                } finally {
+                    mModeDispatcherStub = null;
+                    mModeListeners = null;
+                }
+            }
+        }
+    }
+
+    /**
     * Indicates if the platform supports a special call screening and call monitoring mode.
     * <p>
     * When this mode is supported, it is possible to perform call screening and monitoring
