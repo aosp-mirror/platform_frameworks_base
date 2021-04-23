@@ -280,11 +280,12 @@ class MediaDataManagerTest : SysuiTestCase() {
 
     @Test
     fun testAddResumptionControls() {
-        // WHEN resumption controls are added`
+        // WHEN resumption controls are added
         val desc = MediaDescription.Builder().run {
             setTitle(SESSION_TITLE)
             build()
         }
+        val currentTimeMillis = System.currentTimeMillis()
         mediaDataManager.addResumptionControls(USER_ID, desc, Runnable {}, session.sessionToken,
                 APP_NAME, pendingIntent, PACKAGE_NAME)
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
@@ -296,6 +297,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(data.song).isEqualTo(SESSION_TITLE)
         assertThat(data.app).isEqualTo(APP_NAME)
         assertThat(data.actions).hasSize(1)
+        assertThat(data.lastActive).isAtLeast(currentTimeMillis)
     }
 
     @Test
@@ -349,5 +351,53 @@ class MediaDataManagerTest : SysuiTestCase() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
         smartspaceMediaDataProvider.onTargetsAvailable(listOf())
         verify(listener).onSmartspaceMediaDataRemoved(KEY_MEDIA_SMARTSPACE)
+    }
+
+    @Test
+    fun testOnMediaDataChanged_updatesLastActiveTime() {
+        val currentTimeMillis = System.currentTimeMillis()
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor))
+        assertThat(mediaDataCaptor.value!!.lastActive).isAtLeast(currentTimeMillis)
+    }
+
+    @Test
+    fun testOnMediaDataTimedOut_doesNotUpdateLastActiveTime() {
+        // GIVEN that the manager has a notification
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+
+        // WHEN the notification times out
+        val currentTimeMillis = System.currentTimeMillis()
+        mediaDataManager.setTimedOut(KEY, true, true)
+
+        // THEN the last active time is not changed
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY), capture(mediaDataCaptor))
+        assertThat(mediaDataCaptor.value.lastActive).isLessThan(currentTimeMillis)
+    }
+
+    @Test
+    fun testOnActiveMediaConverted_doesNotUpdateLastActiveTime() {
+        // GIVEN that the manager has a notification with a resume action
+        whenever(controller.metadata).thenReturn(metadataBuilder.build())
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor))
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isFalse()
+        mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
+
+        // WHEN the notification is removed
+        val currentTimeMillis = System.currentTimeMillis()
+        mediaDataManager.onNotificationRemoved(KEY)
+
+        // THEN the last active time is not changed
+        verify(listener).onMediaDataLoaded(eq(PACKAGE_NAME), eq(KEY), capture(mediaDataCaptor))
+        assertThat(mediaDataCaptor.value.resumption).isTrue()
+        assertThat(mediaDataCaptor.value.lastActive).isLessThan(currentTimeMillis)
     }
 }
