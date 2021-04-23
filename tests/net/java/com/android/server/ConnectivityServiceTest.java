@@ -11693,10 +11693,12 @@ public class ConnectivityServiceTest {
                 mServiceContext, "internetFactory", internetFilter, mCsHandlerThread);
         internetFactory.setScoreFilter(40);
         internetFactory.register();
-        // Default internet request & 3rd (fallback) request in OEM_PAID NRI. The unmetered request
-        // is never sent to factories (it's a LISTEN, not requestable) and the OEM_PAID request
-        // doesn't match the internetFactory filter.
-        internetFactory.expectRequestAdds(2);
+        // Default internet request only. The unmetered request is never sent to factories (it's a
+        // LISTEN, not requestable). The 3rd (fallback) request in OEM_PAID NRI is TRACK_DEFAULT
+        // which is also not sent to factories. Finally, the OEM_PAID request doesn't match the
+        // internetFactory filter.
+        internetFactory.expectRequestAdds(1);
+        internetFactory.assertRequestCountEquals(1);
 
         NetworkCapabilities oemPaidFilter = new NetworkCapabilities()
                 .addCapability(NET_CAPABILITY_INTERNET)
@@ -11719,7 +11721,7 @@ public class ConnectivityServiceTest {
         expectNoRequestChanged(oemPaidFactory);
         oemPaidFactory.assertRequestCountEquals(1);
         // The internet factory however is outscored, and should lose its requests.
-        internetFactory.expectRequestRemoves(2);
+        internetFactory.expectRequestRemove();
         internetFactory.assertRequestCountEquals(0);
 
         final NetworkCapabilities oemPaidNc = new NetworkCapabilities();
