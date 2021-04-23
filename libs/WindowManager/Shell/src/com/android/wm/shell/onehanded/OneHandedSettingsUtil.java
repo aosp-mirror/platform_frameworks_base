@@ -131,8 +131,28 @@ public final class OneHandedSettingsUtil {
      * Returns whether swipe bottom to notification gesture enabled or not.
      */
     public boolean getSettingsSwipeToNotificationEnabled(ContentResolver resolver, int userId) {
-        return Settings.Secure.getInt(resolver,
-                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 0 /* Default OFF */) == 1;
+        return Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 0, userId) == 1;
+    }
+
+    /**
+     * Sets one handed activated or not to notify state for shortcut
+     *
+     * @return activated or not
+     */
+    public boolean getOneHandedModeActivated(ContentResolver resolver, int userId) {
+        return Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.ONE_HANDED_MODE_ACTIVATED, 0, userId) == 1;
+    }
+
+    /**
+     * Sets one handed activated or not to notify state for shortcut
+     *
+     * @return activated or not
+     */
+    public boolean setOneHandedModeActivated(ContentResolver resolver, int state, int userId) {
+        return Settings.Secure.putIntForUser(resolver,
+                Settings.Secure.ONE_HANDED_MODE_ACTIVATED, state, userId);
     }
 
     void dump(PrintWriter pw, String prefix, ContentResolver resolver,
@@ -145,6 +165,8 @@ public final class OneHandedSettingsUtil {
         pw.println(getSettingsOneHandedModeTimeout(resolver, userId));
         pw.print(innerPrefix + "tapsAppToExit=");
         pw.println(getSettingsTapsAppToExit(resolver, userId));
+        pw.print(innerPrefix + "shortcutActivated=");
+        pw.println(getOneHandedModeActivated(resolver, userId));
     }
 
     public OneHandedSettingsUtil() {
