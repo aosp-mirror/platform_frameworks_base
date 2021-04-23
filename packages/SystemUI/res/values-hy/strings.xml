@@ -684,8 +684,8 @@
     <string name="do_not_silence" msgid="4982217934250511227">"Ձայնը չանջատել"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"Ձայնը չանջատել և չարգելափակել"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Ծանուցումների ընդլայնված կառավարում"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Միացնել"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Անջատել"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Միացված է"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Անջատված է"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Ծանուցումների ընդլայնված կառավարման օգնությամբ կարող եք յուրաքանչյուր հավելվածի ծանուցումների համար նշանակել կարևորության աստիճան՝ 0-5 սահմաններում: \n\n"<b>"5-րդ աստիճան"</b>" \n- Ցուցադրել ծանուցումների ցանկի վերևում \n- Թույլատրել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"4-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"3-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n\n"<b>"2-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n\n"<b>"1-ին աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n- Չցուցադրել կողպէկրանում և կարգավիճակի գոտում \n- Ցուցադրել ծանուցումների ցանկի ներքևում \n\n"<b>"0-րդ աստիճան"</b>\n"- Արգելափակել հավելվածի բոլոր ծանուցումները"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Ծանուցումներ"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Այլևս չեք ստանա նման ծանուցումներ"</string>
@@ -824,8 +824,8 @@
     <string name="data_saver" msgid="3484013368530820763">"Թրաֆիկի տնտեսում"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Թրաֆիկի տնտեսումը միացված է"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Տվյալների խնայումն անջատված է"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Միացնել"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Անջատել"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Միացված է"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Անջատված է"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Հասանելի չէ"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Նավիգացիայի գոտի"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Դասավորություն"</string>

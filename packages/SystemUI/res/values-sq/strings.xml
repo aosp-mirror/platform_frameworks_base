@@ -91,7 +91,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Regjistruesi i ekranit"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Regjistrimi i ekranit po përpunohet"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Njoftim i vazhdueshëm për një seancë regjistrimi të ekranit"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Të nis regjistrimi?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Të niset regjistrimi?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Gjatë regjistrimit, sistemi Android mund të regjistrojë çdo informacion delikat që është i dukshëm në ekranin tënd ose që luhet në pajisje. Kjo përfshin fjalëkalimet, informacionin e pagesave, fotografitë, mesazhet dhe audion."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Regjistro audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audioja e pajisjes"</string>
@@ -599,12 +599,12 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Kreu\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Të dhënat personale mund të jenë të qasshme (si kontaktet dhe përmbajtja e email-eve)"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Aplikacioni i gozhduar mund të hapë aplikacione të tjera."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Për të hequr gozhdimin e këtij aplikacioni, mbaj shtypur butonat \"Prapa\" dhe \"Përmbledhja\"."</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Për të hequr gozhdimin e këtij aplikacioni, mbaj shtypur butonat \"Prapa\" dhe \"Kreu\""</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Për të hequr gozhdimin e këtij aplikacioni, rrëshqit shpejt lart dhe mbaje të shtypur"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Për të zhgozhduar këtë aplikacion, prek dhe mbaj shtypur butonat \"Prapa\" dhe \"Përmbledhja\""</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Për të zhgozhduar këtë aplikacion, prek dhe mbaj shtypur butonat \"Prapa\" dhe \"Ekrani bazë\""</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Për të zhgozhduar këtë aplikacion, rrëshqit shpejt lart dhe mbaje të shtypur"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"E kuptova"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Jo, faleminderit!"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacioni i gozhduar"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacioni u gozhdua"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacioni i zhgozhduar"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Të fshihet <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Do të rishfaqet herën tjetër kur ta aktivizoni te cilësimet."</string>

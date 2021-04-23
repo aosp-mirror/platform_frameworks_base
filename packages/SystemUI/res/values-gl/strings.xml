@@ -643,7 +643,7 @@
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth e wifi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Configurador da IU do sistema"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Mostrar porcentaxe de batería inserida"</string>
-    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Mostrar porcentaxe do nivel de batería na icona da barra de estado cando non está en carga"</string>
+    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Mostra a porcentaxe do nivel de batería na icona da barra de estado cando non está en carga"</string>
     <string name="quick_settings" msgid="6211774484997470203">"Configuración rápida"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de estado"</string>
     <string name="overview" msgid="3522318590458536816">"Visión xeral"</string>
@@ -701,7 +701,7 @@
     <string name="inline_block_button" msgid="479892866568378793">"Bloquear"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Continuar mostrando notificacións"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Minimizar"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Silencio"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Modo silencioso"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Notificacións silenciadas"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Alertando"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Continuar recibindo notificacións"</string>

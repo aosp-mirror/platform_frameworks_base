@@ -594,7 +594,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikazioa ainguratuta dago"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Atzera\" eta \"Ikuspegi orokorra\" botoiak."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Atzera eta Hasiera botoiak."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, pasatu hatza gora eduki ezazu sakatuta."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, pasatu hatza gora eta eduki ezazu sakatuta."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Ikuspegi orokorra\" botoia."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Hasiera botoia."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Baliteke datu pertsonalak atzitu ahal izatea (adibidez, kontaktuak eta posta elektronikoko edukia)."</string>

@@ -101,7 +101,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"Başlat"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Ekran kaydediliyor"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Ekran ve ses kaydediliyor"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Dokunmaları ekranda göster"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Ekrana dokunmaları göster"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Durdurmak için dokunun"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Durdur"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Duraklat"</string>
@@ -600,8 +600,8 @@
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Kişisel verilere erişilebilir (ör. kişiler ve e-posta içerikleri)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Sabitlenmiş uygulama diğer uygulamaları açabilir."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Bu uygulamanın sabitlemesini kaldırmak için Geri ve Genel Bakış düğmelerine dokunup basılı tutun"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Bu ekranın sabitlemesini kaldırmak için Geri ve Ana sayfa düğmelerine dokunup basılı tutun"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Bu ekranın sabitlemesini kaldırmak için hızlıca yukarı kaydırıp tutun"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Bu uygulamanın sabitlemesini kaldırmak için Geri ve Ana sayfa düğmelerine dokunup basılı tutun"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Bu uygulamanın sabitlemesini kaldırmak için yukarı kaydırıp tutun"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Anladım"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Hayır, teşekkürler"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Uygulama sabitlendi"</string>
@@ -1052,8 +1052,8 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>. konuma taşı"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Güç menüsünden erişmek istediğiniz denetimleri seçin"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolleri yeniden düzenlemek için basılı tutup sürükleyin"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Tüm kontroller kaldırıldı"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Denetimleri yeniden düzenlemek için basılı tutup sürükleyin"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Tüm denetimler kaldırıldı"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Değişiklikler kaydedilmedi"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Tüm uygulamaları göster"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontroller yüklenemedi. Uygulama ayarlarının değişmediğinden emin olmak için <xliff:g id="APP">%s</xliff:g> uygulamasını kontrol edin."</string>
