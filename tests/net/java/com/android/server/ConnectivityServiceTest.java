@@ -1387,7 +1387,7 @@ public class ConnectivityServiceTest {
         final TransportInfo ti = nc.getTransportInfo();
         assertTrue("VPN TransportInfo is not a VpnTransportInfo: " + ti,
                 ti instanceof VpnTransportInfo);
-        assertEquals(type, ((VpnTransportInfo) ti).type);
+        assertEquals(type, ((VpnTransportInfo) ti).getType());
 
     }
 
@@ -2896,7 +2896,7 @@ public class ConnectivityServiceTest {
         callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
 
         // Set teardown delay and make sure CS has processed it.
-        mWiFiNetworkAgent.getNetworkAgent().setTeardownDelayMs(300);
+        mWiFiNetworkAgent.getNetworkAgent().setTeardownDelayMillis(300);
         waitForIdle();
 
         // Post the duringTeardown lambda to the handler so it fires while teardown is in progress.
@@ -4247,7 +4247,7 @@ public class ConnectivityServiceTest {
                 () -> mCm.registerSystemDefaultNetworkCallback(callback, handler));
         callback.assertNoCallback();
         assertThrows(SecurityException.class,
-                () -> mCm.registerDefaultNetworkCallbackAsUid(APP1_UID, callback, handler));
+                () -> mCm.registerDefaultNetworkCallbackForUid(APP1_UID, callback, handler));
         callback.assertNoCallback();
 
         mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
@@ -4255,7 +4255,7 @@ public class ConnectivityServiceTest {
         callback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
         mCm.unregisterNetworkCallback(callback);
 
-        mCm.registerDefaultNetworkCallbackAsUid(APP1_UID, callback, handler);
+        mCm.registerDefaultNetworkCallbackForUid(APP1_UID, callback, handler);
         callback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
         mCm.unregisterNetworkCallback(callback);
     }
@@ -5679,7 +5679,7 @@ public class ConnectivityServiceTest {
             for (int i = 0; i < SYSTEM_ONLY_MAX_REQUESTS - 1; i++) {
                 NetworkCallback cb = new NetworkCallback();
                 if (i % 2 == 0) {
-                    mCm.registerDefaultNetworkCallbackAsUid(1000000 + i, cb, handler);
+                    mCm.registerDefaultNetworkCallbackForUid(1000000 + i, cb, handler);
                 } else {
                     mCm.registerNetworkCallback(networkRequest, cb);
                 }
@@ -5688,7 +5688,7 @@ public class ConnectivityServiceTest {
             waitForIdle();
 
             assertThrows(TooManyRequestsException.class, () ->
-                    mCm.registerDefaultNetworkCallbackAsUid(1001042, new NetworkCallback(),
+                    mCm.registerDefaultNetworkCallbackForUid(1001042, new NetworkCallback(),
                             handler));
             assertThrows(TooManyRequestsException.class, () ->
                     mCm.registerNetworkCallback(networkRequest, new NetworkCallback()));
@@ -5741,7 +5741,7 @@ public class ConnectivityServiceTest {
         withPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, () -> {
             for (int i = 0; i < MAX_REQUESTS; i++) {
                 NetworkCallback networkCallback = new NetworkCallback();
-                mCm.registerDefaultNetworkCallbackAsUid(1000000 + i, networkCallback,
+                mCm.registerDefaultNetworkCallbackForUid(1000000 + i, networkCallback,
                         new Handler(ConnectivityThread.getInstanceLooper()));
                 mCm.unregisterNetworkCallback(networkCallback);
             }
@@ -7825,7 +7825,7 @@ public class ConnectivityServiceTest {
         registerDefaultNetworkCallbackAsUid(vpnUidDefaultCallback, VPN_UID);
 
         final TestNetworkCallback vpnDefaultCallbackAsUid = new TestNetworkCallback();
-        mCm.registerDefaultNetworkCallbackAsUid(VPN_UID, vpnDefaultCallbackAsUid,
+        mCm.registerDefaultNetworkCallbackForUid(VPN_UID, vpnDefaultCallbackAsUid,
                 new Handler(ConnectivityThread.getInstanceLooper()));
 
         final int uid = Process.myUid();
@@ -10991,7 +10991,7 @@ public class ConnectivityServiceTest {
 
         final TestNetworkCallback otherUidDefaultCallback = new TestNetworkCallback();
         withPermission(NETWORK_SETTINGS, () ->
-                mCm.registerDefaultNetworkCallbackAsUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
+                mCm.registerDefaultNetworkCallbackForUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
                         new Handler(ConnectivityThread.getInstanceLooper())));
 
         // Setup the test process to use networkPref for their default network.
@@ -11039,7 +11039,7 @@ public class ConnectivityServiceTest {
 
         final TestNetworkCallback otherUidDefaultCallback = new TestNetworkCallback();
         withPermission(NETWORK_SETTINGS, () ->
-                mCm.registerDefaultNetworkCallbackAsUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
+                mCm.registerDefaultNetworkCallbackForUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
                         new Handler(ConnectivityThread.getInstanceLooper())));
 
         // Bring up ethernet with OEM_PAID. This will satisfy NET_CAPABILITY_OEM_PAID.
@@ -11081,7 +11081,7 @@ public class ConnectivityServiceTest {
 
         final TestNetworkCallback otherUidDefaultCallback = new TestNetworkCallback();
         withPermission(NETWORK_SETTINGS, () ->
-                mCm.registerDefaultNetworkCallbackAsUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
+                mCm.registerDefaultNetworkCallbackForUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
                         new Handler(ConnectivityThread.getInstanceLooper())));
 
         // Setup a process different than the test process to use the default network. This means
