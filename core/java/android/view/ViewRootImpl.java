@@ -2787,8 +2787,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (!mPendingMergedConfiguration.equals(mLastReportedMergedConfiguration)) {
                     if (DEBUG_CONFIGURATION) Log.v(mTag, "Visible with new config: "
                             + mPendingMergedConfiguration.getMergedConfiguration());
-                    performConfigurationChange(mPendingMergedConfiguration, !mFirst,
-                            INVALID_DISPLAY /* same display */);
+                    performConfigurationChange(new MergedConfiguration(mPendingMergedConfiguration),
+                            !mFirst, INVALID_DISPLAY /* same display */);
                     updatedConfiguration = true;
                 }
 
@@ -5332,8 +5332,8 @@ public final class ViewRootImpl implements ViewParent,
                     mPendingMergedConfiguration.setConfiguration(config,
                             mLastReportedMergedConfiguration.getOverrideConfiguration());
 
-                    performConfigurationChange(mPendingMergedConfiguration, false /* force */,
-                            INVALID_DISPLAY /* same display */);
+                    performConfigurationChange(new MergedConfiguration(mPendingMergedConfiguration),
+                            false /* force */, INVALID_DISPLAY /* same display */);
                 } break;
                 case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
                     setAccessibilityFocus(null, null);
