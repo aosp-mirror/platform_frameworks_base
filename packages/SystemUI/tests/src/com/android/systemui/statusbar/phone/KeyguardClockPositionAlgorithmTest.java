@@ -266,6 +266,19 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     }
 
     @Test
+    public void notifPositionAlignedWithClockInSplitShadeMode() {
+        // GIVEN on lock screen and split shade mode
+        givenLockScreen();
+        mIsSplitShade = true;
+        mPreferredClockY = 100;
+        mHasCustomClock = true;
+        // WHEN the position algorithm is run
+        positionClock();
+        // THEN the notif padding DOESN'T adjust for keyguard status height.
+        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(mPreferredClockY);
+    }
+
+    @Test
     public void notifPositionWithLargeClockOnLockScreen() {
         // GIVEN on lock screen and clock has a nonzero height
         givenLockScreen();
