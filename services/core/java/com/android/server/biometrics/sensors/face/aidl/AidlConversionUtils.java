@@ -31,7 +31,7 @@ import android.hardware.face.FaceEnrollCell;
 import android.hardware.face.FaceEnrollFrame;
 
 /**
- * Utilities for converting between hardware and framework-defined AIDL models.
+ * Utilities for converting from hardware to framework-defined AIDL models.
  */
 final class AidlConversionUtils {
     // Prevent instantiation.
@@ -128,17 +128,19 @@ final class AidlConversionUtils {
     }
 
     @NonNull
-    public static FaceAuthenticationFrame convert(@NonNull AuthenticationFrame frame) {
-        return new FaceAuthenticationFrame(convert(frame.data));
+    public static FaceAuthenticationFrame toFrameworkAuthenticationFrame(
+            @NonNull AuthenticationFrame frame) {
+        return new FaceAuthenticationFrame(toFrameworkBaseFrame(frame.data));
     }
 
     @NonNull
-    public static FaceEnrollFrame convert(@NonNull EnrollmentFrame frame) {
-        return new FaceEnrollFrame(convert(frame.cell), frame.stage, convert(frame.data));
+    public static FaceEnrollFrame toFrameworkEnrollmentFrame(@NonNull EnrollmentFrame frame) {
+        return new FaceEnrollFrame(toFrameworkCell(frame.cell), frame.stage,
+                toFrameworkBaseFrame(frame.data));
     }
 
     @NonNull
-    public static FaceDataFrame convert(@NonNull BaseFrame frame) {
+    public static FaceDataFrame toFrameworkBaseFrame(@NonNull BaseFrame frame) {
         return new FaceDataFrame(
                 toFrameworkAcquiredInfo(frame.acquiredInfo),
                 frame.vendorCode,
@@ -149,7 +151,7 @@ final class AidlConversionUtils {
     }
 
     @Nullable
-    public static FaceEnrollCell convert(@Nullable Cell cell) {
+    public static FaceEnrollCell toFrameworkCell(@Nullable Cell cell) {
         return cell == null ? null : new FaceEnrollCell(cell.x, cell.y, cell.z);
     }
 }
