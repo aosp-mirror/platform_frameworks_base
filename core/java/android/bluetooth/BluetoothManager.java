@@ -21,6 +21,7 @@ import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.content.AttributionSource;
@@ -31,7 +32,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * High level manager used to obtain an instance of an {@link BluetoothAdapter}
@@ -66,9 +66,34 @@ public final class BluetoothManager {
      * @hide
      */
     public BluetoothManager(Context context) {
-        mAttributionSource = (context != null) ? context.getAttributionSource()
-                : ActivityThread.currentAttributionSource();
+        mAttributionSource = resolveAttributionSource(context);
         mAdapter = BluetoothAdapter.createAdapter(mAttributionSource);
+    }
+
+    /** {@hide} */
+    public static AttributionSource resolveAttributionSource(Context context) {
+        AttributionSource res = null;
+        if (context != null) {
+            res = context.getAttributionSource();
+        }
+        if (res == null) {
+            res = ActivityThread.currentAttributionSource();
+        }
+        if (res == null) {
+            int uid = android.os.Process.myUid();
+            if (uid == android.os.Process.ROOT_UID) {
+                uid = android.os.Process.SYSTEM_UID;
+            }
+            try {
+                res = new AttributionSource(uid,
+                        AppGlobals.getPackageManager().getPackagesForUid(uid)[0], null);
+            } catch (RemoteException ignored) {
+            }
+        }
+        if (res == null) {
+            throw new IllegalStateException("Failed to resolve AttributionSource");
+        }
+        return res;
     }
 
     /**
@@ -129,24 +154,9 @@ public final class BluetoothManager {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getConnectedDevices(int profile) {
         if (DBG) Log.d(TAG, "getConnectedDevices");
-        if (profile != BluetoothProfile.GATT && profile != BluetoothProfile.GATT_SERVER) {
-            throw new IllegalArgumentException("Profile not supported: " + profile);
-        }
-
-        List<BluetoothDevice> connectedDevices = new ArrayList<BluetoothDevice>();
-
-        try {
-            IBluetoothManager managerService = mAdapter.getBluetoothManager();
-            IBluetoothGatt iGatt = managerService.getBluetoothGatt();
-            if (iGatt == null) return connectedDevices;
-
-            connectedDevices = iGatt.getDevicesMatchingConnectionStates(
-                    new int[]{BluetoothProfile.STATE_CONNECTED}, mAttributionSource);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        }
-
-        return connectedDevices;
+        return getDevicesMatchingConnectionStates(profile, new int[] {
+                BluetoothProfile.STATE_CONNECTED
+        });
     }
 
     /**
@@ -183,8 +193,9 @@ public final class BluetoothManager {
             IBluetoothManager managerService = mAdapter.getBluetoothManager();
             IBluetoothGatt iGatt = managerService.getBluetoothGatt();
             if (iGatt == null) return devices;
-            devices = iGatt.getDevicesMatchingConnectionStates(
-                    states, mAttributionSource);
+            devices = BluetoothDevice.setAttributionSource(
+                    iGatt.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                    mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -288,7 +299,7 @@ public final class BluetoothManager {
                 return null;
             }
             BluetoothGattServer mGattServer =
-                    new BluetoothGattServer(iGatt, transport, mAttributionSource);
+                    new BluetoothGattServer(iGatt, transport, mAdapter);
             Boolean regStatus = mGattServer.registerCallback(callback, eatt_support);
             return regStatus ? mGattServer : null;
         } catch (RemoteException e) {

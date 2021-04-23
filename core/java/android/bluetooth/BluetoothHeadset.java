@@ -28,6 +28,7 @@ import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Binder;
@@ -339,7 +340,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
     private Context mContext;
     private ServiceListener mServiceListener;
     private volatile IBluetoothHeadset mService;
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
 
     @SuppressLint("AndroidFrameworkBluetoothPermission")
     private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
@@ -357,10 +359,11 @@ public final class BluetoothHeadset implements BluetoothProfile {
     /**
      * Create a BluetoothHeadset proxy object.
      */
-    /*package*/ BluetoothHeadset(Context context, ServiceListener l) {
+    /* package */ BluetoothHeadset(Context context, ServiceListener l, BluetoothAdapter adapter) {
         mContext = context;
         mServiceListener = l;
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
 
         IBluetoothManager mgr = mAdapter.getBluetoothManager();
         if (mgr != null) {
@@ -519,7 +522,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
         final IBluetoothHeadset service = mService;
         if (service != null && isEnabled()) {
             try {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -540,7 +544,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
         final IBluetoothHeadset service = mService;
         if (service != null && isEnabled()) {
             try {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();

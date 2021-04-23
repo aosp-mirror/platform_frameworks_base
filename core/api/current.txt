@@ -8633,7 +8633,7 @@ package android.bluetooth {
     method public android.bluetooth.le.BluetoothLeAdvertiser getBluetoothLeAdvertiser();
     method public android.bluetooth.le.BluetoothLeScanner getBluetoothLeScanner();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public java.util.Set<android.bluetooth.BluetoothDevice> getBondedDevices();
-    method public static android.bluetooth.BluetoothAdapter getDefaultAdapter();
+    method @Deprecated public static android.bluetooth.BluetoothAdapter getDefaultAdapter();
     method public int getLeMaximumAdvertisingDataLength();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public String getName();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getProfileConnectionState(int);
