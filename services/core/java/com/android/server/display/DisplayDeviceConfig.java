@@ -34,6 +34,7 @@ import com.android.server.display.config.HbmTiming;
 import com.android.server.display.config.HighBrightnessMode;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
+import com.android.server.display.config.SensorDetails;
 import com.android.server.display.config.XmlParser;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -74,6 +75,9 @@ public class DisplayDeviceConfig {
     private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
 
     private final Context mContext;
+
+    // The details of the ambient light sensor associated with this display.
+    private final SensorIdentifier mAmbientLightSensor = new SensorIdentifier();
 
     // Nits and backlight values that are loaded from either the display device config file, or
     // config.xml. These are the raw values and just used for the dumpsys
@@ -249,6 +253,10 @@ public class DisplayDeviceConfig {
         return mBrightnessRampSlowIncrease;
     }
 
+    SensorIdentifier getAmbientLightSensor() {
+        return mAmbientLightSensor;
+    }
+
     /**
      * @param quirkValue The quirk to test.
      * @return {@code true} if the specified quirk is present in this configuration,
@@ -291,6 +299,7 @@ public class DisplayDeviceConfig {
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
                 + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
+                + ", mAmbientLightSensor=" + mAmbientLightSensor
                 + "}";
         return str;
     }
@@ -318,7 +327,7 @@ public class DisplayDeviceConfig {
 
     private static DisplayDeviceConfig getConfigFromPmValues(Context context) {
         DisplayDeviceConfig config = new DisplayDeviceConfig(context);
-        config.initFromPmValues();
+        config.initFromDefaultValues();
         return config;
     }
 
@@ -342,6 +351,7 @@ public class DisplayDeviceConfig {
                 loadHighBrightnessModeData(config);
                 loadQuirks(config);
                 loadBrightnessRamps(config);
+                loadAmbientLightSensorFromDdc(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
@@ -357,9 +367,10 @@ public class DisplayDeviceConfig {
         loadBrightnessConstraintsFromConfigXml();
         loadBrightnessMapFromConfigXml();
         loadBrightnessRampsFromConfigXml();
+        loadAmbientLightSensorFromConfigXml();
     }
 
-    private void initFromPmValues() {
+    private void initFromDefaultValues() {
         // Set all to basic values
         mBacklightMinimum = PowerManager.BRIGHTNESS_MIN;
         mBacklightMaximum = PowerManager.BRIGHTNESS_MAX;
@@ -369,6 +380,7 @@ public class DisplayDeviceConfig {
         mBrightnessRampSlowDecrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampSlowIncrease = PowerManager.BRIGHTNESS_MAX;
         setSimpleMappingStrategyValues();
+        loadAmbientLightSensorFromConfigXml();
     }
 
     private void loadBrightnessDefaultFromDdcXml(DisplayConfiguration config) {
@@ -635,6 +647,33 @@ public class DisplayDeviceConfig {
         // transitions so we assign them to the same values here.
         mBrightnessRampFastDecrease = mBrightnessRampFastIncrease;
         mBrightnessRampSlowDecrease = mBrightnessRampSlowIncrease;
+    }
+
+    private void loadAmbientLightSensorFromConfigXml() {
+        mAmbientLightSensor.name = "";
+        mAmbientLightSensor.type = mContext.getResources().getString(
+                com.android.internal.R.string.config_displayLightSensorType);
+    }
+
+    private void loadAmbientLightSensorFromDdc(DisplayConfiguration config) {
+        final SensorDetails sensorDetails = config.getLightSensor();
+        if (sensorDetails != null) {
+            mAmbientLightSensor.type = sensorDetails.getType();
+            mAmbientLightSensor.name = sensorDetails.getName();
+        }
+    }
+
+    static class SensorIdentifier {
+        public String type;
+        public String name;
+
+        @Override
+        public String toString() {
+            return "Sensor{"
+                    + "type: \"" + type + "\""
+                    + ", name: \"" + name + "\""
+                    + "} ";
+        }
     }
 
     /**
