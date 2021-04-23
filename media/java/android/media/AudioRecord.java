@@ -845,17 +845,21 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         //--------------
         // audio format
         switch (audioFormat) {
-        case AudioFormat.ENCODING_DEFAULT:
-            mAudioFormat = AudioFormat.ENCODING_PCM_16BIT;
-            break;
-        case AudioFormat.ENCODING_PCM_FLOAT:
-        case AudioFormat.ENCODING_PCM_16BIT:
-        case AudioFormat.ENCODING_PCM_8BIT:
-            mAudioFormat = audioFormat;
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported sample encoding " + audioFormat
-                    + ". Should be ENCODING_PCM_8BIT, ENCODING_PCM_16BIT, or ENCODING_PCM_FLOAT.");
+            case AudioFormat.ENCODING_DEFAULT:
+                mAudioFormat = AudioFormat.ENCODING_PCM_16BIT;
+                break;
+            case AudioFormat.ENCODING_PCM_24BIT_PACKED:
+            case AudioFormat.ENCODING_PCM_32BIT:
+            case AudioFormat.ENCODING_PCM_FLOAT:
+            case AudioFormat.ENCODING_PCM_16BIT:
+            case AudioFormat.ENCODING_PCM_8BIT:
+                mAudioFormat = audioFormat;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported sample encoding " + audioFormat
+                        + ". Should be ENCODING_PCM_8BIT, ENCODING_PCM_16BIT,"
+                        + " ENCODING_PCM_24BIT_PACKED, ENCODING_PCM_32BIT,"
+                        + " or ENCODING_PCM_FLOAT.");
         }
     }
 
@@ -1262,6 +1266,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      */
     public int read(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes,
             @ReadMode int readMode) {
+        // Note: we allow reads of extended integers into a byte array.
         if (mState != STATE_INITIALIZED  || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
             return ERROR_INVALID_OPERATION;
         }
@@ -1334,7 +1339,10 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      */
     public int read(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts,
             @ReadMode int readMode) {
-        if (mState != STATE_INITIALIZED || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
+        if (mState != STATE_INITIALIZED
+                || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT
+                // use ByteBuffer instead for later encodings
+                || mAudioFormat > AudioFormat.ENCODING_LEGACY_SHORT_ARRAY_THRESHOLD) {
             return ERROR_INVALID_OPERATION;
         }
 
