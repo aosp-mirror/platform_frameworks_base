@@ -990,7 +990,7 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Stillingar"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Ég skil"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Vista SysUI-gögn"</string>
-    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> er að nota <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> notar eftirfarandi: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Forrit eru að nota <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" og "</string>

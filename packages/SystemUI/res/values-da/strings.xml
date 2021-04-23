@@ -994,9 +994,9 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Apps anvender enhedens <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" og "</string>
-    <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"kameraet"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"placering"</string>
-    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofonen"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Deaktiver sensorer"</string>
     <string name="device_services" msgid="1549944177856658705">"Enhedstjenester"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ingen titel"</string>

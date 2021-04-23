@@ -601,7 +601,7 @@
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Закачената апликација може да отвора други апликации."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"За откачување на апликацијава, допрете и држете на копчињата „Назад“ и „Преглед“"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"За откачување на апликацијава, допрете и држете на копчињата „Назад“ и „Почетен екран“"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"За откачување на апликацијава, повлечете нагоре и држете"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"За откачување на апликацијава, повлечете нагоре и задржете"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Сфатив"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Не, фала"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Апликацијата е закачена"</string>
@@ -1038,7 +1038,7 @@
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Додајте контроли за поврзаните уреди"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Поставете ги контролите за уредите"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Задржете го копчето за вклучување за да пристапите до контролите"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"Изберете апликација во која ќе додадате контроли"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Изберете апликација за да додадете контроли"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one">Додадена е <xliff:g id="NUMBER_1">%s</xliff:g> контрола.</item>
       <item quantity="other">Додадени се <xliff:g id="NUMBER_1">%s</xliff:g> контроли.</item>
