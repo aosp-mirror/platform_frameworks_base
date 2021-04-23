@@ -182,6 +182,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -211,6 +212,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
+import android.window.PictureInPictureSurfaceTransaction;
 import android.window.StartingWindowInfo;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
@@ -470,14 +472,14 @@ class Task extends WindowContainer<WindowContainer> {
     int mMinWidth;
     int mMinHeight;
 
-    // The bounds of the target when recents animation is finished.
+    // The surface transition of the target when recents animation is finished.
     // This is originally introduced to carry out the current surface control position and window
     // crop when a multi-activity task enters pip with autoEnterPip enabled. In such case,
     // the surface control of the task will be animated in Launcher and then the top activity is
     // reparented to pinned root task.
-    // Do not forget to reset this to null after reparenting.
+    // Do not forget to reset this after reparenting.
     // TODO: remove this once the recents animation is moved to the Shell
-    final Rect mLastRecentsAnimationBounds = new Rect();
+    PictureInPictureSurfaceTransaction mLastRecentsAnimationTransaction;
 
     static final int LAYER_RANK_INVISIBLE = -1;
     // Ranking (from top) of this task among all visible tasks. (-1 means it's not visible)
@@ -7665,14 +7667,22 @@ class Task extends WindowContainer<WindowContainer> {
         reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
     }
 
-    void maybeApplyLastRecentsAnimationBounds() {
-        if (!mLastRecentsAnimationBounds.isEmpty()) {
-            getPendingTransaction()
-                    .setPosition(mSurfaceControl, mLastRecentsAnimationBounds.left,
-                            mLastRecentsAnimationBounds.top)
-                    .setWindowCrop(mSurfaceControl, mLastRecentsAnimationBounds.width(),
-                            mLastRecentsAnimationBounds.height());
-            mLastRecentsAnimationBounds.setEmpty();
+    void setLastRecentsAnimationTransaction(
+            @NonNull PictureInPictureSurfaceTransaction transaction) {
+        mLastRecentsAnimationTransaction = new PictureInPictureSurfaceTransaction(transaction);
+    }
+
+    void clearLastRecentsAnimationTransaction() {
+        mLastRecentsAnimationTransaction = null;
+        // reset also the transform introduced by mLastRecentsAnimationTransaction
+        getPendingTransaction().setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9]);
+    }
+
+    void maybeApplyLastRecentsAnimationTransaction() {
+        if (mLastRecentsAnimationTransaction != null) {
+            PictureInPictureSurfaceTransaction.apply(mLastRecentsAnimationTransaction,
+                    mSurfaceControl, getPendingTransaction());
+            mLastRecentsAnimationTransaction = null;
         }
     }
 

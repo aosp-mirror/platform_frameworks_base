@@ -19,7 +19,6 @@ package android.view;
 import android.app.ActivityManager;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.graphics.GraphicBuffer;
-import android.graphics.Rect;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 
@@ -39,14 +38,13 @@ interface IRecentsAnimationController {
     TaskSnapshot screenshotTask(int taskId);
 
     /**
-     * Sets the final bounds on a Task. This is used by Launcher to notify the system that
-     * animating Activity to PiP has completed and the associated task surface should be updated
-     * accordingly. This should be called before `finish`
+     * Sets the final surface transaction on a Task. This is used by Launcher to notify the system
+     * that animating Activity to PiP has completed and the associated task surface should be
+     * updated accordingly. This should be called before `finish`
      * @param taskId for which the leash should be updated
-     * @param destinationBounds bounds of the final PiP window
      * @param finishTransaction leash operations for the final transform.
      */
-     void setFinishTaskBounds(int taskId, in Rect destinationBounds,
+     void setFinishTaskTransaction(int taskId,
              in PictureInPictureSurfaceTransaction finishTransaction);
 
     /**
