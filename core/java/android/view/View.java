@@ -4003,6 +4003,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to disable the ongoing call chip.
+     */
+    public static final int STATUS_BAR_DISABLE_ONGOING_CALL_CHIP = 0x04000000;
+
+    /**
+     * @hide
      */
     public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x00003FF7;
 
@@ -4227,7 +4237,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     name = "STATUS_BAR_DISABLE_RECENT"),
             @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_SEARCH,
                     equals = STATUS_BAR_DISABLE_SEARCH,
-                    name = "STATUS_BAR_DISABLE_SEARCH")
+                    name = "STATUS_BAR_DISABLE_SEARCH"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_ONGOING_CALL_CHIP,
+                    equals = STATUS_BAR_DISABLE_ONGOING_CALL_CHIP,
+                    name = "STATUS_BAR_DISABLE_ONGOING_CALL_CHIP")
     }, formatToHexString = true)
     @SystemUiVisibility
     int mSystemUiVisibility;
@@ -4256,6 +4269,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             STATUS_BAR_DISABLE_CLOCK,
             STATUS_BAR_DISABLE_RECENT,
             STATUS_BAR_DISABLE_SEARCH,
+            STATUS_BAR_DISABLE_ONGOING_CALL_CHIP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SystemUiVisibility {}

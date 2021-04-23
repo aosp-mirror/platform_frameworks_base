@@ -1139,7 +1139,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mStatusBarView.setScrimController(mScrimController);
                     mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
 
-                    statusBarFragment.initNotificationIconArea(mNotificationIconAreaController);
                     // CollapsedStatusBarFragment re-inflated PhoneStatusBarView and both of
                     // mStatusBarView.mExpanded and mStatusBarView.mBouncerShowing are false.
                     // PhoneStatusBarView's new instance will set to be gone in
@@ -1182,7 +1181,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                         new CollapsedStatusBarFragment(
                                 mOngoingCallController,
                                 mAnimationScheduler,
-                                mDotViewController),
+                                mDotViewController,
+                                mNotificationIconAreaController),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
 
