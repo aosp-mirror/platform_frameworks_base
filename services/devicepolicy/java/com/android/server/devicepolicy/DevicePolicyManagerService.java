@@ -5459,7 +5459,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
                 || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
         if (isCredentialManagementApp) {
-            Preconditions.checkCallAuthorization(isUserSelectable, "The credential "
+            Preconditions.checkCallAuthorization(!isUserSelectable, "The credential "
                     + "management app is not allowed to install a user selectable key pair");
             Preconditions.checkCallAuthorization(
                     isAliasInCredentialManagementAppPolicy(caller, alias),
