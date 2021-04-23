@@ -24,6 +24,8 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.net.ConnectivityResources;
 import android.net.NetworkCapabilities;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -34,7 +36,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
-import com.android.internal.R;
+import com.android.connectivity.resources.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.MessageUtils;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
@@ -72,6 +74,7 @@ public class LingerMonitor {
             new Class[] { LingerMonitor.class }, new String[]{ "NOTIFY_TYPE_" });
 
     private final Context mContext;
+    final Resources mResources;
     private final NetworkNotificationManager mNotifier;
     private final int mDailyLimit;
     private final long mRateLimitMillis;
@@ -89,6 +92,7 @@ public class LingerMonitor {
     public LingerMonitor(Context context, NetworkNotificationManager notifier,
             int dailyLimit, long rateLimitMillis) {
         mContext = context;
+        mResources = new ConnectivityResources(mContext).get();
         mNotifier = notifier;
         mDailyLimit = dailyLimit;
         mRateLimitMillis = rateLimitMillis;
@@ -128,8 +132,7 @@ public class LingerMonitor {
     @VisibleForTesting
     public boolean isNotificationEnabled(NetworkAgentInfo fromNai, NetworkAgentInfo toNai) {
         // TODO: Evaluate moving to CarrierConfigManager.
-        String[] notifySwitches =
-                mContext.getResources().getStringArray(R.array.config_networkNotifySwitches);
+        String[] notifySwitches = mResources.getStringArray(R.array.config_networkNotifySwitches);
 
         if (VDBG) {
             Log.d(TAG, "Notify on network switches: " + Arrays.toString(notifySwitches));
@@ -178,8 +181,7 @@ public class LingerMonitor {
 
     // Notify the user of a network switch using a notification or a toast.
     private void notify(NetworkAgentInfo fromNai, NetworkAgentInfo toNai, boolean forceToast) {
-        int notifyType =
-                mContext.getResources().getInteger(R.integer.config_networkNotifySwitchType);
+        int notifyType = mResources.getInteger(R.integer.config_networkNotifySwitchType);
         if (notifyType == NOTIFY_TYPE_NOTIFICATION && forceToast) {
             notifyType = NOTIFY_TYPE_TOAST;
         }
