@@ -19,10 +19,12 @@ package com.android.keyguard;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.app.PendingIntent;
 import android.app.WallpaperManager;
 import android.app.smartspace.SmartspaceConfig;
 import android.app.smartspace.SmartspaceManager;
 import android.app.smartspace.SmartspaceSession;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -39,8 +41,11 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
+import com.android.systemui.plugins.BcSmartspaceDataPlugin.IntentStarter;
 import com.android.systemui.plugins.ClockPlugin;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
@@ -87,6 +92,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private SmartspaceSession.OnTargetsAvailableListener mSmartspaceCallback;
     private int mWallpaperTextColor;
     private ConfigurationController mConfigurationController;
+    private ActivityStarter mActivityStarter;
+    private FalsingManager mFalsingManager;
 
     /**
      * Listener for changes to the color palette.
@@ -138,7 +145,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             @Main Executor uiExecutor,
             BatteryController batteryController,
             ConfigurationController configurationController,
-            SystemUIFactory systemUIFactory) {
+            SystemUIFactory systemUIFactory,
+            ActivityStarter activityStarter,
+            FalsingManager falsingManager) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
@@ -151,6 +160,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mBatteryController = batteryController;
         mConfigurationController = configurationController;
         mSystemUIFactory = systemUIFactory;
+        mActivityStarter = activityStarter;
+        mFalsingManager = falsingManager;
     }
 
     /**
@@ -200,6 +211,16 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
             mSmartspaceView = smartspaceDataPlugin.getView(mView);
             mSmartspaceView.registerDataProvider(smartspaceDataPlugin);
+            mSmartspaceView.setIntentStarter(new IntentStarter() {
+                public void startIntent(View v, Intent i) {
+                    mActivityStarter.startActivity(i, true /* dismissShade */);
+                }
+
+                public void startPendingIntent(PendingIntent pi) {
+                    mActivityStarter.startPendingIntentDismissingKeyguard(pi);
+                }
+            });
+            mSmartspaceView.setFalsingManager(mFalsingManager);
             updateWallpaperColor();
             View asView = (View) mSmartspaceView;
 
