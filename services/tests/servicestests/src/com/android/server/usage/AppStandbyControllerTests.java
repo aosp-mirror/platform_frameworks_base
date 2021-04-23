@@ -59,11 +59,14 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.AdditionalMatchers.not;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -77,6 +80,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -92,6 +96,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
@@ -101,6 +106,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -194,6 +201,8 @@ public class AppStandbyControllerTests {
     }
 
     static class MyInjector extends AppStandbyController.Injector {
+        @Mock
+        private PackageManagerInternal mPackageManagerInternal;
         long mElapsedRealtime;
         boolean mIsAppIdleEnabled = true;
         boolean mIsCharging;
@@ -222,6 +231,7 @@ public class AppStandbyControllerTests {
 
         MyInjector(Context context, Looper looper) {
             super(context, looper);
+            MockitoAnnotations.initMocks(this);
         }
 
         @Override
@@ -266,6 +276,11 @@ public class AppStandbyControllerTests {
         @Override
         boolean hasScheduleExactAlarm(String packageName, int uid) {
             return mClockApps.contains(Pair.create(packageName, uid));
+        }
+
+        @Override
+        PackageManagerInternal getPackageManagerInternal() {
+            return mPackageManagerInternal;
         }
 
         @Override
@@ -489,6 +504,37 @@ public class AppStandbyControllerTests {
         assertEquals(STANDBY_BUCKET_ACTIVE,
                 mController.getAppStandbyBucket(PACKAGE_EXEMPTED_1, USER_ID,
                         mInjector.mElapsedRealtime, false));
+    }
+
+    @Test
+    public void testGetIdleUidsForUser() {
+        final AppStandbyController controllerUnderTest = spy(mController);
+
+        final int userIdForTest = 325;
+        final int[] uids = new int[]{129, 23, 129, 129, 44, 23, 41, 751};
+        final boolean[] idle = new boolean[]{true, true, false, true, false, true, false, true};
+        // Based on uids[] and idle[], the only two uids that have all true's in idle[].
+        final int[] expectedIdleUids = new int[]{23, 751};
+
+        final List<ApplicationInfo> installedApps = new ArrayList<>();
+        for (int i = 0; i < uids.length; i++) {
+            final ApplicationInfo ai = mock(ApplicationInfo.class);
+            ai.uid = uids[i];
+            ai.packageName = "example.package.name." + i;
+            installedApps.add(ai);
+            when(controllerUnderTest.isAppIdleFiltered(eq(ai.packageName),
+                    eq(UserHandle.getAppId(ai.uid)), eq(userIdForTest), anyLong()))
+                    .thenReturn(idle[i]);
+        }
+        when(mInjector.mPackageManagerInternal.getInstalledApplications(anyInt(), eq(userIdForTest),
+                anyInt())).thenReturn(installedApps);
+        final int[] returnedIdleUids = controllerUnderTest.getIdleUidsForUser(userIdForTest);
+
+        assertEquals(expectedIdleUids.length, returnedIdleUids.length);
+        for (final int uid : expectedIdleUids) {
+            assertTrue("Idle uid: " + uid + " not found in result: " + Arrays.toString(
+                    returnedIdleUids), ArrayUtils.contains(returnedIdleUids, uid));
+        }
     }
 
     private static class TestParoleListener extends AppIdleStateChangeListener {
