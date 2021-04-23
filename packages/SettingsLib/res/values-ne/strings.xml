@@ -275,7 +275,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"स्ट्रिमिङ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"निजी DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"निजी DNS मोड चयन गर्नुहोस्"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"निष्क्रिय छ"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"अफ छ"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"स्वचालित"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"निजी DNS प्रदायकको होस्टनेम"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS प्रदायकको होस्टनेम हाल्नुहोस्"</string>

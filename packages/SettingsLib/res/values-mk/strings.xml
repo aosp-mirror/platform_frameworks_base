@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Не може да скенира за мрежи"</string>
-    <string name="wifi_security_none" msgid="7392696451280611452">"Ниедна"</string>
+    <string name="wifi_security_none" msgid="7392696451280611452">"Нема"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Зачувано"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Не е поврзано"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Оневозможено"</string>
@@ -387,7 +387,7 @@
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"Се вчитува…"</string>
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"Динамично (стандардно)"</item>
-    <item msgid="9112200311983078311">"Природно"</item>
+    <item msgid="9112200311983078311">"Природни"</item>
     <item msgid="6564241960833766170">"Стандардно"</item>
   </string-array>
   <string-array name="color_mode_descriptions">

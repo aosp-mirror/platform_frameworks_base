@@ -31,7 +31,7 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"認証に問題"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"接続できません"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"「<xliff:g id="AP_NAME">%1$s</xliff:g>」に接続できません"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"パスワードを確認して、もう一度お試しください"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"パスワードを再確認してください"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"圏外"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"自動的に接続されません"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"インターネット接続なし"</string>
