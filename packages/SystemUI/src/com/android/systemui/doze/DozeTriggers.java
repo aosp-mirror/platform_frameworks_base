@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.metrics.LogMaker;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.Formatter;
@@ -33,12 +32,8 @@ import android.util.Log;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.UiEventLoggerImpl;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -70,8 +65,6 @@ public class DozeTriggers implements DozeMachine.Part {
     /** adb shell am broadcast -a com.android.systemui.doze.pulse com.android.systemui */
     private static final String PULSE_ACTION = "com.android.systemui.doze.pulse";
 
-    private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
-
     /**
      * Last value sent by the wake-display sensor.
      * Assuming that the screen should start on.
@@ -99,11 +92,10 @@ public class DozeTriggers implements DozeMachine.Part {
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final AuthController mAuthController;
     private final DelayableExecutor mMainExecutor;
+    private final UiEventLogger mUiEventLogger;
 
     private long mNotificationPulseTime;
     private boolean mPulsePending;
-
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     /** see {@link #onProximityFar} prox for callback */
     private boolean mWantProxSensor;
@@ -143,7 +135,10 @@ public class DozeTriggers implements DozeMachine.Part {
         DOZING_UPDATE_AUTH_TRIGGERED(657),
 
         @UiEvent(doc = "Dozing updated because quick pickup sensor woke up.")
-        DOZING_UPDATE_QUICK_PICKUP(708);
+        DOZING_UPDATE_QUICK_PICKUP(708),
+
+        @UiEvent(doc = "Dozing updated - sensor wakeup timed out (from quick pickup or presence)")
+        DOZING_UPDATE_WAKE_TIMEOUT(794);
 
         private final int mId;
 
@@ -182,7 +177,8 @@ public class DozeTriggers implements DozeMachine.Part {
             ProximitySensor proximitySensor, ProximitySensor.ProximityCheck proxCheck,
             DozeLog dozeLog, BroadcastDispatcher broadcastDispatcher,
             SecureSettings secureSettings, AuthController authController,
-            @Main DelayableExecutor mainExecutor) {
+            @Main DelayableExecutor mainExecutor,
+            UiEventLogger uiEventLogger) {
         mContext = context;
         mDozeHost = dozeHost;
         mConfig = config;
@@ -200,6 +196,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mBroadcastDispatcher = broadcastDispatcher;
         mAuthController = authController;
         mMainExecutor = mainExecutor;
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -328,11 +325,8 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private void gentleWakeUp(int reason) {
         // Log screen wake up reason (lift/pickup, tap, double-tap)
-        mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
-                .setType(MetricsEvent.TYPE_UPDATE)
-                .setSubtype(reason));
         Optional.ofNullable(DozingUpdateUiEvent.fromReason(reason))
-                .ifPresent(UI_EVENT_LOGGER::log);
+                .ifPresent(mUiEventLogger::log);
         if (mDozeParameters.getDisplayNeedsBlanking()) {
             // Let's prepare the display to wake-up by drawing black.
             // This will cover the hardware wake-up sequence, where the display
@@ -401,10 +395,9 @@ public class DozeTriggers implements DozeMachine.Part {
                 }
                 if (state == DozeMachine.State.DOZE) {
                     mMachine.requestState(DozeMachine.State.DOZE_AOD);
-                    // Logs AOD open due to sensor wake up.
-                    mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
-                            .setType(MetricsEvent.TYPE_OPEN)
-                            .setSubtype(reason));
+                    // Log sensor triggered
+                    Optional.ofNullable(DozingUpdateUiEvent.fromReason(reason))
+                            .ifPresent(mUiEventLogger::log);
 
                     if (isQuickPickup) {
                         // schedule runnable to go back to DOZE
@@ -427,10 +420,8 @@ public class DozeTriggers implements DozeMachine.Part {
                     return;
                 }
                 mMachine.requestState(DozeMachine.State.DOZE);
-                // Logs AOD close due to sensor wake up.
-                mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
-                        .setType(MetricsEvent.TYPE_CLOSE)
-                        .setSubtype(reason));
+                // log wake timeout
+                mUiEventLogger.log(DozingUpdateUiEvent.DOZING_UPDATE_WAKE_TIMEOUT);
             }
         }
     }
@@ -563,10 +554,8 @@ public class DozeTriggers implements DozeMachine.Part {
         }, !mDozeParameters.getProxCheckBeforePulse() || performedProxCheck, reason);
 
         // Logs request pulse reason on AOD screen.
-        mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
-                .setType(MetricsEvent.TYPE_UPDATE).setSubtype(reason));
         Optional.ofNullable(DozingUpdateUiEvent.fromReason(reason))
-                .ifPresent(UI_EVENT_LOGGER::log);
+                .ifPresent(mUiEventLogger::log);
     }
 
     private boolean canPulse() {

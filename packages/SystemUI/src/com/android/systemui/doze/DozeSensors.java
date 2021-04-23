@@ -40,11 +40,9 @@ import android.view.Display;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
-import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.plugins.SensorManagerPlugin;
@@ -491,10 +489,6 @@ public class DozeSensors {
             mHandler.post(mWakeLock.wrap(() -> {
                 if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
                 if (mSensor != null && mSensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
-                    int subType = (int) event.values[0];
-                    MetricsLogger.action(
-                            mContext, MetricsProto.MetricsEvent.ACTION_AMBIENT_GESTURE,
-                            subType);
                     UI_EVENT_LOGGER.log(DozeSensorsUiEvent.ACTION_AMBIENT_GESTURE_PICKUP);
                 }
 
