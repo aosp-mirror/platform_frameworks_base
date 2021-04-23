@@ -18,6 +18,7 @@ package android.net.apf;
 
 import static com.android.testutils.ParcelUtils.assertParcelSane;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -25,12 +26,17 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
+import android.os.Build;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,6 +45,9 @@ import java.util.Arrays;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class ApfCapabilitiesTest {
+    @Rule
+    public final DevSdkIgnoreRule mIgnoreRule = new DevSdkIgnoreRule();
+
     private Context mContext;
 
     @Before
@@ -85,6 +94,17 @@ public class ApfCapabilitiesTest {
         assertEquals(shouldDrop8023Frames, actual);
     }
 
+    @Test @IgnoreUpTo(Build.VERSION_CODES.R)
+    public void testGetApfDrop8023Frames_S() {
+        // IpClient does not call getApfDrop8023Frames() since S, so any customization of the return
+        // value on S+ is a configuration error as it will not be used by IpClient.
+        assertTrue("android.R.bool.config_apfDrop802_3Frames has been modified to false, but "
+                + "starting from S its value is not used by IpClient. If the modification is "
+                + "intentional, use a runtime resource overlay for the NetworkStack package to "
+                + "overlay com.android.networkstack.R.bool.config_apfDrop802_3Frames instead.",
+                ApfCapabilities.getApfDrop8023Frames());
+    }
+
     @Test
     public void testGetApfEtherTypeBlackList() {
         // Get com.android.internal.R.array.config_apfEthTypeBlackList. The test cannot directly
@@ -95,5 +115,18 @@ public class ApfCapabilitiesTest {
         final int[] actual = ApfCapabilities.getApfEtherTypeBlackList();
         assertNotNull(actual);
         assertTrue(Arrays.equals(blacklistedEtherTypeArray, actual));
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.R)
+    public void testGetApfEtherTypeBlackList_S() {
+        // IpClient does not call getApfEtherTypeBlackList() since S, so any customization of the
+        // return value on S+ is a configuration error as it will not be used by IpClient.
+        assertArrayEquals("android.R.array.config_apfEthTypeBlackList has been modified, but "
+                        + "starting from S its value is not used by IpClient. If the modification "
+                        + "is intentional, use a runtime resource overlay for the NetworkStack "
+                        + "package to overlay "
+                        + "com.android.networkstack.R.array.config_apfEthTypeDenyList instead.",
+                new int[] { 0x88a2, 0x88a4, 0x88b8, 0x88cd, 0x88e3 },
+                ApfCapabilities.getApfEtherTypeBlackList());
     }
 }
