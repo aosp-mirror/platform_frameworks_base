@@ -157,16 +157,16 @@
     <integer name="config_screen_rotation_fade_out">116</integer>
 
     <!-- Fade in time for screen rotation -->
-    <integer name="config_screen_rotation_fade_in">233</integer>
+    <integer name="config_screen_rotation_fade_in">200</integer>
 
     <!-- Fade in delay time for screen rotation -->
-    <integer name="config_screen_rotation_fade_in_delay">100</integer>
+    <integer name="config_screen_rotation_fade_in_delay">83</integer>
 
     <!-- Total time for 90 degree screen rotation animations -->
-    <integer name="config_screen_rotation_total_90">333</integer>
+    <integer name="config_screen_rotation_total_90">283</integer>
 
     <!-- Total time for 180 degree screen rotation animation -->
-    <integer name="config_screen_rotation_total_180">433</integer>
+    <integer name="config_screen_rotation_total_180">383</integer>
 
     <!-- Total time for the rotation background color transition -->
     <integer name="config_screen_rotation_color_transition">200</integer>
