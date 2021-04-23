@@ -182,6 +182,16 @@ class MediaResumeListenerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testOnLoad_remotePlayback_doesNotCheck() {
+        // When media data is loaded that has not been checked yet, and is not local
+        val dataRemote = data.copy(isLocalSession = false)
+        resumeListener.onMediaDataLoaded(KEY, null, dataRemote)
+
+        // Then we do not take action
+        verify(mediaDataManager, never()).setResumeAction(any(), any())
+    }
+
+    @Test
     fun testOnLoad_checksForResume_hasService() {
         // Set up mocks to successfully find a MBS that returns valid media
         val pm = mock(PackageManager::class.java)

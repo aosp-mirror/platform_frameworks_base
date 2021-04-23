@@ -60,6 +60,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     @Mock lateinit var mediaControllerFactory: MediaControllerFactory
     @Mock lateinit var controller: MediaController
+    @Mock lateinit var playbackInfo: MediaController.PlaybackInfo
     lateinit var session: MediaSession
     lateinit var metadataBuilder: MediaMetadata.Builder
     lateinit var backgroundExecutor: FakeExecutor
@@ -118,6 +119,9 @@ class MediaDataManagerTest : SysuiTestCase() {
             putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
         }
         whenever(mediaControllerFactory.create(eq(session.sessionToken))).thenReturn(controller)
+        whenever(controller.playbackInfo).thenReturn(playbackInfo)
+        whenever(playbackInfo.playbackType).thenReturn(
+                MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL)
 
         // This is an ugly hack for now. The mediaSessionBasedFilter is one of the internal
         // listeners in the internal processing pipeline. It receives events, but ince it is a
@@ -227,6 +231,27 @@ class MediaDataManagerTest : SysuiTestCase() {
                 capture(mediaDataCaptor))
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         verify(listener).onMediaDataRemoved(eq(KEY_2))
+    }
+
+    @Test
+    fun testOnNotificationRemoved_withResumption_butNotLocal() {
+        // GIVEN that the manager has a notification with a resume action, but is not local
+        whenever(controller.metadata).thenReturn(metadataBuilder.build())
+        whenever(playbackInfo.playbackType).thenReturn(
+                MediaController.PlaybackInfo.PLAYBACK_TYPE_REMOTE)
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor))
+        val data = mediaDataCaptor.value
+        val dataRemoteWithResume = data.copy(resumeAction = Runnable {}, isLocalSession = false)
+        mediaDataManager.onMediaDataLoaded(KEY, null, dataRemoteWithResume)
+
+        // WHEN the notification is removed
+        mediaDataManager.onNotificationRemoved(KEY)
+
+        // THEN the media data is removed
+        verify(listener).onMediaDataRemoved(eq(KEY))
     }
 
     @Test
