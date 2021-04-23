@@ -20,14 +20,17 @@ import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.content.PermissionChecker.PERMISSION_HARD_DENIED;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.UserHandle.USER_SYSTEM;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHearingAid;
@@ -62,6 +65,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerExemptionManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -2497,7 +2501,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, prevState);
         intent.putExtra(BluetoothAdapter.EXTRA_STATE, newState);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL, null, getTempAllowlistBroadcastOptions());
     }
 
     @RequiresPermission(allOf = {
@@ -2580,7 +2584,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, prevState);
             intent.putExtra(BluetoothAdapter.EXTRA_STATE, newState);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL, null, 
+                    getTempAllowlistBroadcastOptions());
         }
     }
 
@@ -2889,5 +2894,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             throw new SecurityException("Need BLUETOOTH_CONNECT permission");
         }
         return permissionCheckResult == PERMISSION_GRANTED;
+    }
+
+    static @NonNull Bundle getTempAllowlistBroadcastOptions() {
+        final long duration = 10_000;
+        final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
+        bOptions.setTemporaryAppAllowlist(duration,
+                TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                PowerExemptionManager.REASON_BLUETOOTH_BROADCAST, "");
+        return bOptions.toBundle();
     }
 }
