@@ -210,8 +210,8 @@
     <string name="accessibility_two_bars" msgid="1335676987274417121">"Kaksi palkkia."</string>
     <string name="accessibility_three_bars" msgid="819417766606501295">"Kolme palkkia."</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"Vahva signaali."</string>
-    <string name="accessibility_desc_on" msgid="2899626845061427845">"Käytössä."</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"Pois käytöstä."</string>
+    <string name="accessibility_desc_on" msgid="2899626845061427845">"Päällä."</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"Pois päältä."</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"Yhdistetty."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Yhdistetään."</string>
     <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
@@ -232,7 +232,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobiilidata käytössä"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Mobiilidata poistettu käytöstä"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Ei käytä dataa"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"Pois käytöstä"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"Pois päältä"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Internetin jakaminen Bluetoothin kautta."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Lentokonetila."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN päällä"</string>
@@ -685,8 +685,8 @@
     <string name="do_not_silence" msgid="4982217934250511227">"Älä hiljennä"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"Älä hiljennä tai estä"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Ilmoitusten tehohallinta"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Käytössä"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Pois käytöstä"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Päällä"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Pois päältä"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Ilmoitusten tehohallinnan avulla voit määrittää sovelluksen ilmoituksille tärkeystason väliltä 0–5. \n\n"<b>"Taso 5"</b>" \n– Ilmoitukset näytetään ilmoitusluettelon yläosassa \n– Näkyminen koko näytön tilassa sallitaan \n– Ilmoitukset kurkistavat aina näytölle\n\n"<b>"Taso 4"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ilmoitukset kurkistavat aina näytölle \n\n"<b>"Taso 3"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ei kurkistamista \n\n"<b>"Taso 2"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ei kurkistamista \n– Ei ääniä eikä värinää \n\n"<b>"Taso 1"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ei kurkistamista \n– Ei ääniä eikä värinää \n– Ilmoitukset piilotetaan lukitusnäytöltä ja tilapalkista \n– Ilmoitukset näytetään ilmoitusluettelon alaosassa \n\n"<b>"Taso 0"</b>" \n– Kaikki sovelluksen ilmoitukset estetään"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Ilmoitukset"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Et näe näitä ilmoituksia enää"</string>
@@ -825,8 +825,8 @@
     <string name="data_saver" msgid="3484013368530820763">"Data Saver"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Data Saver on käytössä."</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Data Saver on pois käytöstä."</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Käytössä"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Pois käytöstä"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Päällä"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Pois päältä"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Ei käytettävissä"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigointipalkki"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Asettelu"</string>
