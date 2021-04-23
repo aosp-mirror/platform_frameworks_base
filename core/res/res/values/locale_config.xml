@@ -74,7 +74,7 @@
         <item>ar-TD-u-nu-latn</item> <!-- Arabic (Chad, Western Digits) -->
         <item>ar-TN</item> <!-- Arabic (Tunisia) -->
         <item>ar-TN-u-nu-arab</item> <!-- Arabic (Tunisia, Arabic-Indic Digits) -->
-        <item>ar-XB</item> <!-- Right-to-left pseudolocale -->
+        <item>ar-XB</item> <!-- Arabic (Pseudo-Bidi) -->
         <item>ar-YE</item> <!-- Arabic (Yemen) -->
         <item>ar-YE-u-nu-latn</item> <!-- Arabic (Yemen, Western Digits) -->
         <item>as-IN</item> <!-- Assamese (India) -->
@@ -104,6 +104,7 @@
         <item>ca-FR</item> <!-- Catalan (France) -->
         <item>ca-IT</item> <!-- Catalan (Italy) -->
         <item>ce-RU</item> <!-- Chechen (Russia) -->
+        <item>ceb-PH</item> <!-- Cebuano (Philippines) -->
         <item>cgg-UG</item> <!-- Chiga (Uganda) -->
         <item>chr-US</item> <!-- Cherokee (United States) -->
         <item>cs-CZ</item> <!-- Czech (Czechia) -->
@@ -119,15 +120,18 @@
         <item>de-LI</item> <!-- German (Liechtenstein) -->
         <item>de-LU</item> <!-- German (Luxembourg) -->
         <item>dje-NE</item> <!-- Zarma (Niger) -->
+        <item>doi-IN</item> <!-- Dogri (India) -->
         <item>dsb-DE</item> <!-- Lower Sorbian (Germany) -->
         <item>dua-CM</item> <!-- Duala (Cameroon) -->
         <item>dyo-SN</item> <!-- Jola-Fonyi (Senegal) -->
         <item>dz-BT</item> <!-- Dzongkha (Bhutan) -->
+        <item>dz-BT-u-nu-latn</item> <!-- Dzongkha (Bhutan, Western Digits) -->
         <item>ebu-KE</item> <!-- Embu (Kenya) -->
         <item>ee-GH</item> <!-- Ewe (Ghana) -->
         <item>ee-TG</item> <!-- Ewe (Togo) -->
         <item>el-CY</item> <!-- Greek (Cyprus) -->
         <item>el-GR</item> <!-- Greek (Greece) -->
+        <item>en-AE</item> <!-- English (United Arab Emirates) -->
         <item>en-AG</item> <!-- English (Antigua & Barbuda) -->
         <item>en-AI</item> <!-- English (Anguilla) -->
         <item>en-AS</item> <!-- English (American Samoa) -->
@@ -181,7 +185,7 @@
         <item>en-LS</item> <!-- English (Lesotho) -->
         <item>en-MG</item> <!-- English (Madagascar) -->
         <item>en-MH</item> <!-- English (Marshall Islands) -->
-        <item>en-MO</item> <!-- English (Macau) -->
+        <item>en-MO</item> <!-- English (Macao) -->
         <item>en-MP</item> <!-- English (Northern Mariana Islands) -->
         <item>en-MS</item> <!-- English (Montserrat) -->
         <item>en-MT</item> <!-- English (Malta) -->
@@ -212,7 +216,7 @@
         <item>en-SL</item> <!-- English (Sierra Leone) -->
         <item>en-SS</item> <!-- English (South Sudan) -->
         <item>en-SX</item> <!-- English (Sint Maarten) -->
-        <item>en-SZ</item> <!-- English (Swaziland) -->
+        <item>en-SZ</item> <!-- English (Eswatini) -->
         <item>en-TC</item> <!-- English (Turks & Caicos Islands) -->
         <item>en-TK</item> <!-- English (Tokelau) -->
         <item>en-TO</item> <!-- English (Tonga) -->
@@ -227,7 +231,7 @@
         <item>en-VI</item> <!-- English (U.S. Virgin Islands) -->
         <item>en-VU</item> <!-- English (Vanuatu) -->
         <item>en-WS</item> <!-- English (Samoa) -->
-        <item>en-XA</item> <!-- Left-to-right pseudolocale -->
+        <item>en-XA</item> <!-- English (Pseudo-Accents) -->
         <item>en-ZA</item> <!-- English (South Africa) -->
         <item>en-ZM</item> <!-- English (Zambia) -->
         <item>en-ZW</item> <!-- English (Zimbabwe) -->
@@ -265,10 +269,42 @@
         <item>fa-AF-u-nu-latn</item> <!-- Persian (Afghanistan, Western Digits) -->
         <item>fa-IR</item> <!-- Persian (Iran) -->
         <item>fa-IR-u-nu-latn</item> <!-- Persian (Iran, Western Digits) -->
-        <item>ff-CM</item> <!-- Fulah (Cameroon) -->
-        <item>ff-GN</item> <!-- Fulah (Guinea) -->
-        <item>ff-MR</item> <!-- Fulah (Mauritania) -->
-        <item>ff-SN</item> <!-- Fulah (Senegal) -->
+        <item>ff-Adlm-BF</item> <!-- Fulah (Adlam, Burkina Faso) -->
+        <item>ff-Adlm-BF-u-nu-latn</item> <!-- Fulah (Adlam, Burkina Faso, Western Digits) -->
+        <item>ff-Adlm-CM</item> <!-- Fulah (Adlam, Cameroon) -->
+        <item>ff-Adlm-CM-u-nu-latn</item> <!-- Fulah (Adlam, Cameroon, Western Digits) -->
+        <item>ff-Adlm-GH</item> <!-- Fulah (Adlam, Ghana) -->
+        <item>ff-Adlm-GH-u-nu-latn</item> <!-- Fulah (Adlam, Ghana, Western Digits) -->
+        <item>ff-Adlm-GM</item> <!-- Fulah (Adlam, Gambia) -->
+        <item>ff-Adlm-GM-u-nu-latn</item> <!-- Fulah (Adlam, Gambia, Western Digits) -->
+        <item>ff-Adlm-GN</item> <!-- Fulah (Adlam, Guinea) -->
+        <item>ff-Adlm-GN-u-nu-latn</item> <!-- Fulah (Adlam, Guinea, Western Digits) -->
+        <item>ff-Adlm-GW</item> <!-- Fulah (Adlam, Guinea-Bissau) -->
+        <item>ff-Adlm-GW-u-nu-latn</item> <!-- Fulah (Adlam, Guinea-Bissau, Western Digits) -->
+        <item>ff-Adlm-LR</item> <!-- Fulah (Adlam, Liberia) -->
+        <item>ff-Adlm-LR-u-nu-latn</item> <!-- Fulah (Adlam, Liberia, Western Digits) -->
+        <item>ff-Adlm-MR</item> <!-- Fulah (Adlam, Mauritania) -->
+        <item>ff-Adlm-MR-u-nu-latn</item> <!-- Fulah (Adlam, Mauritania, Western Digits) -->
+        <item>ff-Adlm-NE</item> <!-- Fulah (Adlam, Niger) -->
+        <item>ff-Adlm-NE-u-nu-latn</item> <!-- Fulah (Adlam, Niger, Western Digits) -->
+        <item>ff-Adlm-NG</item> <!-- Fulah (Adlam, Nigeria) -->
+        <item>ff-Adlm-NG-u-nu-latn</item> <!-- Fulah (Adlam, Nigeria, Western Digits) -->
+        <item>ff-Adlm-SL</item> <!-- Fulah (Adlam, Sierra Leone) -->
+        <item>ff-Adlm-SL-u-nu-latn</item> <!-- Fulah (Adlam, Sierra Leone, Western Digits) -->
+        <item>ff-Adlm-SN</item> <!-- Fulah (Adlam, Senegal) -->
+        <item>ff-Adlm-SN-u-nu-latn</item> <!-- Fulah (Adlam, Senegal, Western Digits) -->
+        <item>ff-Latn-BF</item> <!-- Fulah (Latin, Burkina Faso) -->
+        <item>ff-Latn-CM</item> <!-- Fulah (Latin, Cameroon) -->
+        <item>ff-Latn-GH</item> <!-- Fulah (Latin, Ghana) -->
+        <item>ff-Latn-GM</item> <!-- Fulah (Latin, Gambia) -->
+        <item>ff-Latn-GN</item> <!-- Fulah (Latin, Guinea) -->
+        <item>ff-Latn-GW</item> <!-- Fulah (Latin, Guinea-Bissau) -->
+        <item>ff-Latn-LR</item> <!-- Fulah (Latin, Liberia) -->
+        <item>ff-Latn-MR</item> <!-- Fulah (Latin, Mauritania) -->
+        <item>ff-Latn-NE</item> <!-- Fulah (Latin, Niger) -->
+        <item>ff-Latn-NG</item> <!-- Fulah (Latin, Nigeria) -->
+        <item>ff-Latn-SL</item> <!-- Fulah (Latin, Sierra Leone) -->
+        <item>ff-Latn-SN</item> <!-- Fulah (Latin, Senegal) -->
         <item>fi-FI</item> <!-- Finnish (Finland) -->
         <item>fil-PH</item> <!-- Filipino (Philippines) -->
         <item>fo-DK</item> <!-- Faroese (Denmark) -->
@@ -321,6 +357,7 @@
         <item>fr-YT</item> <!-- French (Mayotte) -->
         <item>fur-IT</item> <!-- Friulian (Italy) -->
         <item>fy-NL</item> <!-- Western Frisian (Netherlands) -->
+        <item>ga-GB</item> <!-- Irish (United Kingdom) -->
         <item>ga-IE</item> <!-- Irish (Ireland) -->
         <item>gd-GB</item> <!-- Scottish Gaelic (United Kingdom) -->
         <item>gl-ES</item> <!-- Galician (Spain) -->
@@ -340,6 +377,7 @@
         <item>hsb-DE</item> <!-- Upper Sorbian (Germany) -->
         <item>hu-HU</item> <!-- Hungarian (Hungary) -->
         <item>hy-AM</item> <!-- Armenian (Armenia) -->
+        <item>ia-001</item> <!-- Interlingua (World) -->
         <item>ig-NG</item> <!-- Igbo (Nigeria) -->
         <item>ii-CN</item> <!-- Sichuan Yi (China) -->
         <item>in-ID</item> <!-- Indonesian (Indonesia) -->
@@ -347,10 +385,12 @@
         <item>it-CH</item> <!-- Italian (Switzerland) -->
         <item>it-IT</item> <!-- Italian (Italy) -->
         <item>it-SM</item> <!-- Italian (San Marino) -->
+        <item>it-VA</item> <!-- Italian (Vatican City) -->
         <item>iw-IL</item> <!-- Hebrew (Israel) -->
         <item>ja-JP</item> <!-- Japanese (Japan) -->
         <item>jgo-CM</item> <!-- Ngomba (Cameroon) -->
         <item>jmc-TZ</item> <!-- Machame (Tanzania) -->
+        <item>jv-ID</item> <!-- Javanese (Indonesia) -->
         <item>ka-GE</item> <!-- Georgian (Georgia) -->
         <item>kab-DZ</item> <!-- Kabyle (Algeria) -->
         <item>kam-KE</item> <!-- Kamba (Kenya) -->
@@ -386,6 +426,7 @@
         <item>luo-KE</item> <!-- Luo (Kenya) -->
         <item>luy-KE</item> <!-- Luyia (Kenya) -->
         <item>lv-LV</item> <!-- Latvian (Latvia) -->
+        <item>mai-IN</item> <!-- Maithili (India) -->
         <item>mas-KE</item> <!-- Masai (Kenya) -->
         <item>mas-TZ</item> <!-- Masai (Tanzania) -->
         <item>mer-KE</item> <!-- Meru (Kenya) -->
@@ -393,23 +434,31 @@
         <item>mg-MG</item> <!-- Malagasy (Madagascar) -->
         <item>mgh-MZ</item> <!-- Makhuwa-Meetto (Mozambique) -->
         <item>mgo-CM</item> <!-- Metaʼ (Cameroon) -->
-        <item>mk-MK</item> <!-- Macedonian (Macedonia (FYROM)) -->
+        <item>mi-NZ</item> <!-- Maori (New Zealand) -->
+        <item>mk-MK</item> <!-- Macedonian (North Macedonia) -->
         <item>ml-IN</item> <!-- Malayalam (India) -->
         <item>mn-MN</item> <!-- Mongolian (Mongolia) -->
+        <item>mni-IN</item> <!-- Manipuri (India) -->
+        <item>mni-IN-u-nu-latn</item> <!-- Manipuri (India, Western Digits) -->
         <item>mr-IN</item> <!-- Marathi (India) -->
+        <item>mr-IN-u-nu-latn</item> <!-- Marathi (India, Western Digits) -->
         <item>ms-BN</item> <!-- Malay (Brunei) -->
+        <item>ms-ID</item> <!-- Malay (Indonesia) -->
         <item>ms-MY</item> <!-- Malay (Malaysia) -->
         <item>ms-SG</item> <!-- Malay (Singapore) -->
         <item>mt-MT</item> <!-- Maltese (Malta) -->
         <item>my-MM</item> <!-- Burmese (Myanmar (Burma)) -->
         <item>my-MM-u-nu-latn</item> <!-- Burmese (Myanmar (Burma), Western Digits) -->
         <item>mzn-IR</item> <!-- Mazanderani (Iran) -->
+        <item>mzn-IR-u-nu-latn</item> <!-- Mazanderani (Iran, Western Digits) -->
         <item>naq-NA</item> <!-- Nama (Namibia) -->
         <item>nb-NO</item> <!-- Norwegian Bokmål (Norway) -->
         <item>nb-SJ</item> <!-- Norwegian Bokmål (Svalbard & Jan Mayen) -->
         <item>nd-ZW</item> <!-- North Ndebele (Zimbabwe) -->
         <item>ne-IN</item> <!-- Nepali (India) -->
+        <item>ne-IN-u-nu-latn</item> <!-- Nepali (India, Western Digits) -->
         <item>ne-NP</item> <!-- Nepali (Nepal) -->
+        <item>ne-NP-u-nu-latn</item> <!-- Nepali (Nepal, Western Digits) -->
         <item>nl-AW</item> <!-- Dutch (Aruba) -->
         <item>nl-BE</item> <!-- Dutch (Belgium) -->
         <item>nl-BQ</item> <!-- Dutch (Caribbean Netherlands) -->
@@ -427,14 +476,22 @@
         <item>os-GE</item> <!-- Ossetic (Georgia) -->
         <item>os-RU</item> <!-- Ossetic (Russia) -->
         <item>pa-Arab-PK</item> <!-- Punjabi (Arabic, Pakistan) -->
+        <item>pa-Arab-PK-u-nu-latn</item> <!-- Punjabi (Arabic, Pakistan, Western Digits) -->
         <item>pa-Guru-IN</item> <!-- Punjabi (Gurmukhi, India) -->
+        <item>pcm-NG</item> <!-- Nigerian Pidgin (Nigeria) -->
         <item>pl-PL</item> <!-- Polish (Poland) -->
         <item>ps-AF</item> <!-- Pashto (Afghanistan) -->
+        <item>ps-AF-u-nu-latn</item> <!-- Pashto (Afghanistan, Western Digits) -->
+        <item>ps-PK</item> <!-- Pashto (Pakistan) -->
+        <item>ps-PK-u-nu-latn</item> <!-- Pashto (Pakistan, Western Digits) -->
         <item>pt-AO</item> <!-- Portuguese (Angola) -->
         <item>pt-BR</item> <!-- Portuguese (Brazil) -->
+        <item>pt-CH</item> <!-- Portuguese (Switzerland) -->
         <item>pt-CV</item> <!-- Portuguese (Cape Verde) -->
+        <item>pt-GQ</item> <!-- Portuguese (Equatorial Guinea) -->
         <item>pt-GW</item> <!-- Portuguese (Guinea-Bissau) -->
-        <item>pt-MO</item> <!-- Portuguese (Macau) -->
+        <item>pt-LU</item> <!-- Portuguese (Luxembourg) -->
+        <item>pt-MO</item> <!-- Portuguese (Macao) -->
         <item>pt-MZ</item> <!-- Portuguese (Mozambique) -->
         <item>pt-PT</item> <!-- Portuguese (Portugal) -->
         <item>pt-ST</item> <!-- Portuguese (São Tomé & Príncipe) -->
@@ -455,9 +512,15 @@
         <item>ru-UA</item> <!-- Russian (Ukraine) -->
         <item>rw-RW</item> <!-- Kinyarwanda (Rwanda) -->
         <item>rwk-TZ</item> <!-- Rwa (Tanzania) -->
+        <item>sa-IN</item> <!-- Sanskrit (India) -->
         <item>sah-RU</item> <!-- Sakha (Russia) -->
         <item>saq-KE</item> <!-- Samburu (Kenya) -->
+        <item>sat-IN</item> <!-- Santali (India) -->
+        <item>sat-IN-u-nu-latn</item> <!-- Santali (India, Western Digits) -->
         <item>sbp-TZ</item> <!-- Sangu (Tanzania) -->
+        <item>sd-Arab-PK</item> <!-- Sindhi (Arabic, Pakistan) -->
+        <item>sd-Arab-PK-u-nu-latn</item> <!-- Sindhi (Arabic, Pakistan, Western Digits) -->
+        <item>sd-Deva-IN</item> <!-- Sindhi (Devanagari, India) -->
         <item>se-FI</item> <!-- Northern Sami (Finland) -->
         <item>se-NO</item> <!-- Northern Sami (Norway) -->
         <item>se-SE</item> <!-- Northern Sami (Sweden) -->
@@ -474,7 +537,7 @@
         <item>so-KE</item> <!-- Somali (Kenya) -->
         <item>so-SO</item> <!-- Somali (Somalia) -->
         <item>sq-AL</item> <!-- Albanian (Albania) -->
-        <item>sq-MK</item> <!-- Albanian (Macedonia (FYROM)) -->
+        <item>sq-MK</item> <!-- Albanian (North Macedonia) -->
         <item>sq-XK</item> <!-- Albanian (Kosovo) -->
         <item>sr-Cyrl-BA</item> <!-- Serbian (Cyrillic, Bosnia & Herzegovina) -->
         <item>sr-Cyrl-ME</item> <!-- Serbian (Cyrillic, Montenegro) -->
@@ -484,6 +547,7 @@
         <item>sr-Latn-ME</item> <!-- Serbian (Latin, Montenegro) -->
         <item>sr-Latn-RS</item> <!-- Serbian (Latin, Serbia) -->
         <item>sr-Latn-XK</item> <!-- Serbian (Latin, Kosovo) -->
+        <item>su-ID</item> <!-- Sundanese (Indonesia) -->
         <item>sv-AX</item> <!-- Swedish (Åland Islands) -->
         <item>sv-FI</item> <!-- Swedish (Finland) -->
         <item>sv-SE</item> <!-- Swedish (Sweden) -->
@@ -498,10 +562,13 @@
         <item>te-IN</item> <!-- Telugu (India) -->
         <item>teo-KE</item> <!-- Teso (Kenya) -->
         <item>teo-UG</item> <!-- Teso (Uganda) -->
+        <item>tg-TJ</item> <!-- Tajik (Tajikistan) -->
         <item>th-TH</item> <!-- Thai (Thailand) -->
+        <item>tk-TM</item> <!-- Turkmen (Turkmenistan) -->
         <item>to-TO</item> <!-- Tongan (Tonga) -->
         <item>tr-CY</item> <!-- Turkish (Cyprus) -->
         <item>tr-TR</item> <!-- Turkish (Turkey) -->
+        <item>tt-RU</item> <!-- Tatar (Russia) -->
         <item>twq-NE</item> <!-- Tasawaq (Niger) -->
         <item>tzm-MA</item> <!-- Central Atlas Tamazight (Morocco) -->
         <item>ug-CN</item> <!-- Uyghur (China) -->
@@ -511,11 +578,13 @@
         <item>ur-PK</item> <!-- Urdu (Pakistan) -->
         <item>ur-PK-u-nu-arabext</item> <!-- Urdu (Pakistan, Extended Arabic-Indic Digits) -->
         <item>uz-Arab-AF</item> <!-- Uzbek (Arabic, Afghanistan) -->
+        <item>uz-Arab-AF-u-nu-latn</item> <!-- Uzbek (Arabic, Afghanistan, Western Digits) -->
         <item>uz-Cyrl-UZ</item> <!-- Uzbek (Cyrillic, Uzbekistan) -->
         <item>uz-Latn-UZ</item> <!-- Uzbek (Latin, Uzbekistan) -->
         <item>vi-VN</item> <!-- Vietnamese (Vietnam) -->
         <item>vun-TZ</item> <!-- Vunjo (Tanzania) -->
         <item>wae-CH</item> <!-- Walser (Switzerland) -->
+        <item>wo-SN</item> <!-- Wolof (Senegal) -->
         <item>xog-UG</item> <!-- Soga (Uganda) -->
         <item>yav-CM</item> <!-- Yangben (Cameroon) -->
         <item>yo-BJ</item> <!-- Yoruba (Benin) -->
@@ -525,10 +594,10 @@
         <item>zgh-MA</item> <!-- Standard Moroccan Tamazight (Morocco) -->
         <item>zh-Hans-CN</item> <!-- Chinese (Simplified, China) -->
         <item>zh-Hans-HK</item> <!-- Chinese (Simplified, Hong Kong) -->
-        <item>zh-Hans-MO</item> <!-- Chinese (Simplified, Macau) -->
+        <item>zh-Hans-MO</item> <!-- Chinese (Simplified, Macao) -->
         <item>zh-Hans-SG</item> <!-- Chinese (Simplified, Singapore) -->
         <item>zh-Hant-HK</item> <!-- Chinese (Traditional, Hong Kong) -->
-        <item>zh-Hant-MO</item> <!-- Chinese (Traditional, Macau) -->
+        <item>zh-Hant-MO</item> <!-- Chinese (Traditional, Macao) -->
         <item>zh-Hant-TW</item> <!-- Chinese (Traditional, Taiwan) -->
         <item>zu-ZA</item> <!-- Zulu (South Africa) -->
     </string-array>
