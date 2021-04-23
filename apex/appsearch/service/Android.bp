@@ -28,6 +28,7 @@ java_library {
         "framework",
         "framework-appsearch",
         "services.core",
+        "services.usage",
     ],
     static_libs: [
         "icing-java-proto-lite",
