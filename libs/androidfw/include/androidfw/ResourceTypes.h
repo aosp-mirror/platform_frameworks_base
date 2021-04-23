@@ -39,6 +39,7 @@
 #include <android/configuration.h>
 
 #include <array>
+#include <map>
 #include <memory>
 
 namespace android {
@@ -229,30 +230,31 @@ struct ResChunk_header
 };
 
 enum {
-    RES_NULL_TYPE               = 0x0000,
-    RES_STRING_POOL_TYPE        = 0x0001,
-    RES_TABLE_TYPE              = 0x0002,
-    RES_XML_TYPE                = 0x0003,
+    RES_NULL_TYPE                     = 0x0000,
+    RES_STRING_POOL_TYPE              = 0x0001,
+    RES_TABLE_TYPE                    = 0x0002,
+    RES_XML_TYPE                      = 0x0003,
 
     // Chunk types in RES_XML_TYPE
-    RES_XML_FIRST_CHUNK_TYPE    = 0x0100,
-    RES_XML_START_NAMESPACE_TYPE= 0x0100,
-    RES_XML_END_NAMESPACE_TYPE  = 0x0101,
-    RES_XML_START_ELEMENT_TYPE  = 0x0102,
-    RES_XML_END_ELEMENT_TYPE    = 0x0103,
-    RES_XML_CDATA_TYPE          = 0x0104,
-    RES_XML_LAST_CHUNK_TYPE     = 0x017f,
+    RES_XML_FIRST_CHUNK_TYPE          = 0x0100,
+    RES_XML_START_NAMESPACE_TYPE      = 0x0100,
+    RES_XML_END_NAMESPACE_TYPE        = 0x0101,
+    RES_XML_START_ELEMENT_TYPE        = 0x0102,
+    RES_XML_END_ELEMENT_TYPE          = 0x0103,
+    RES_XML_CDATA_TYPE                = 0x0104,
+    RES_XML_LAST_CHUNK_TYPE           = 0x017f,
     // This contains a uint32_t array mapping strings in the string
     // pool back to resource identifiers.  It is optional.
-    RES_XML_RESOURCE_MAP_TYPE   = 0x0180,
+    RES_XML_RESOURCE_MAP_TYPE         = 0x0180,
 
     // Chunk types in RES_TABLE_TYPE
-    RES_TABLE_PACKAGE_TYPE      = 0x0200,
-    RES_TABLE_TYPE_TYPE         = 0x0201,
-    RES_TABLE_TYPE_SPEC_TYPE    = 0x0202,
-    RES_TABLE_LIBRARY_TYPE      = 0x0203,
-    RES_TABLE_OVERLAYABLE_TYPE  = 0x0204,
+    RES_TABLE_PACKAGE_TYPE            = 0x0200,
+    RES_TABLE_TYPE_TYPE               = 0x0201,
+    RES_TABLE_TYPE_SPEC_TYPE          = 0x0202,
+    RES_TABLE_LIBRARY_TYPE            = 0x0203,
+    RES_TABLE_OVERLAYABLE_TYPE        = 0x0204,
     RES_TABLE_OVERLAYABLE_POLICY_TYPE = 0x0205,
+    RES_TABLE_STAGED_ALIAS_TYPE       = 0x0206,
 };
 
 /**
@@ -1639,6 +1641,29 @@ struct ResTable_lib_entry
 };
 
 /**
+ * A map that allows rewriting staged (non-finalized) resource ids to their finalized counterparts.
+ */
+struct ResTable_staged_alias_header
+{
+    struct ResChunk_header header;
+
+    // The number of ResTable_staged_alias_entry that follow this header.
+    uint32_t count;
+};
+
+/**
+ * Maps the staged (non-finalized) resource id to its finalized resource id.
+ */
+struct ResTable_staged_alias_entry
+{
+  // The compile-time staged resource id to rewrite.
+  uint32_t stagedResId;
+
+  // The compile-time finalized resource id to which the staged resource id should be rewritten.
+  uint32_t finalizedResId;
+};
+
+/**
  * Specifies the set of resources that are explicitly allowed to be overlaid by RROs.
  */
 struct ResTable_overlayable_header
@@ -1751,6 +1776,8 @@ public:
 
     void addMapping(uint8_t buildPackageId, uint8_t runtimePackageId);
 
+    void addAlias(uint32_t stagedId, uint32_t finalizedId);
+
     // Returns whether or not the value must be looked up.
     bool requiresLookup(const Res_value* value) const;
 
@@ -1768,6 +1795,7 @@ private:
     uint8_t                         mLookupTable[256];
     KeyedVector<String16, uint8_t>  mEntries;
     bool                            mAppAsLib;
+    std::map<uint32_t, uint32_t>    mAliasId;
 };
 
 bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);

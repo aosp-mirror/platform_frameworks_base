@@ -151,6 +151,18 @@ static bool MergeEntry(IAaptContext* context, const Source& src,
     dst_entry->overlayable_item = std::move(src_entry->overlayable_item);
   }
 
+  if (src_entry->staged_id) {
+    if (dst_entry->staged_id &&
+        dst_entry->staged_id.value().id != src_entry->staged_id.value().id) {
+      context->GetDiagnostics()->Error(DiagMessage(src_entry->staged_id.value().source)
+                                       << "conflicting staged id declaration for resource '"
+                                       << src_entry->name << "'");
+      context->GetDiagnostics()->Error(DiagMessage(dst_entry->staged_id.value().source)
+                                       << "previous declaration here");
+    }
+    dst_entry->staged_id = std::move(src_entry->staged_id);
+  }
+
   return true;
 }
 
