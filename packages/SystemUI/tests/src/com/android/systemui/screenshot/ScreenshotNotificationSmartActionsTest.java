@@ -16,6 +16,8 @@
 
 package com.android.systemui.screenshot;
 
+import static com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider.ScreenshotSmartActionType.REGULAR_SMART_ACTIONS;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -87,6 +89,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
                 mScreenshotSmartActions.getSmartActionsFuture(
                         "", Uri.parse("content://authority/data"), bitmap, smartActionsProvider,
+                        REGULAR_SMART_ACTIONS,
                         true, UserHandle.of(UserHandle.myUserId()));
         assertNotNull(smartActionsFuture);
         List<Notification.Action> smartActions = smartActionsFuture.get(5, TimeUnit.MILLISECONDS);
@@ -104,7 +107,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         when(smartActionsFuture.get(timeoutMs, TimeUnit.MILLISECONDS)).thenThrow(
                 RuntimeException.class);
         List<Notification.Action> actions = mScreenshotSmartActions.getSmartActions(
-                "", smartActionsFuture, timeoutMs, mSmartActionsProvider);
+                "", smartActionsFuture, timeoutMs, mSmartActionsProvider, REGULAR_SMART_ACTIONS);
         assertEquals(Collections.emptyList(), actions);
     }
 
@@ -127,6 +130,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
                 mScreenshotSmartActions.getSmartActionsFuture(
                         "", Uri.parse("content://autority/data"), bitmap, mSmartActionsProvider,
+                        REGULAR_SMART_ACTIONS,
                         true, UserHandle.of(UserHandle.myUserId()));
         verify(mSmartActionsProvider, never()).getActions(any(), any(), any(), any(), any(), any());
         assertNotNull(smartActionsFuture);
@@ -140,7 +144,8 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         Bitmap bitmap = mock(Bitmap.class);
         when(bitmap.getConfig()).thenReturn(Bitmap.Config.HARDWARE);
         mScreenshotSmartActions.getSmartActionsFuture(
-                "", Uri.parse("content://autority/data"), bitmap, mSmartActionsProvider, true,
+                "", Uri.parse("content://autority/data"), bitmap, mSmartActionsProvider,
+                REGULAR_SMART_ACTIONS, true,
                 UserHandle.of(UserHandle.myUserId()));
         verify(mSmartActionsProvider, times(1)).getActions(
                 any(), any(), any(), any(), any(), any());
@@ -157,7 +162,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
                         mContext, null, mHandler);
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
                 mScreenshotSmartActions.getSmartActionsFuture("", null, bitmap,
-                        actionsProvider,
+                        actionsProvider, REGULAR_SMART_ACTIONS,
                         true, UserHandle.of(UserHandle.myUserId()));
         assertNotNull(smartActionsFuture);
         List<Notification.Action> smartActions = smartActionsFuture.get(5, TimeUnit.MILLISECONDS);

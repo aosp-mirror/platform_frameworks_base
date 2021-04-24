@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.phone;
 import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_CLOCK;
 import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
+import static android.app.StatusBarManager.DISABLE_ONGOING_CALL_CHIP;
 import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
@@ -92,6 +93,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final PrivacyDotViewController mDotViewController;
+    private NotificationIconAreaController mNotificationIconAreaController;
 
     private List<String> mBlockedIcons = new ArrayList<>();
 
@@ -106,13 +108,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         @Override
         public void onOngoingCallStarted(boolean animate) {
             disable(getContext().getDisplayId(), mDisabled1, mDisabled2, animate);
-            animateShow(mOngoingCallChip, animate);
         }
 
         @Override
         public void onOngoingCallEnded(boolean animate) {
             disable(getContext().getDisplayId(), mDisabled1, mDisabled2, animate);
-            animateHiddenState(mOngoingCallChip, View.GONE, animate);
         }
     };
 
@@ -120,11 +120,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public CollapsedStatusBarFragment(
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
-            PrivacyDotViewController dotViewController
+            PrivacyDotViewController dotViewController,
+            NotificationIconAreaController notificationIconAreaController
     ) {
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mDotViewController = dotViewController;
+        mNotificationIconAreaController = notificationIconAreaController;
     }
 
     @Override
@@ -168,6 +170,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         showClock(false);
         initEmergencyCryptkeeperText();
         initOperatorName();
+        initNotificationIconArea();
         mAnimationScheduler.addCallback(this);
     }
 
@@ -204,11 +207,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
     }
 
-    public void initNotificationIconArea(NotificationIconAreaController
-            notificationIconAreaController) {
+    /** Initializes views related to the notification icon area. */
+    public void initNotificationIconArea() {
         ViewGroup notificationIconArea = mStatusBar.findViewById(R.id.notification_icon_area);
         mNotificationIconAreaInner =
-                notificationIconAreaController.getNotificationInnerAreaView();
+                mNotificationIconAreaController.getNotificationInnerAreaView();
         if (mNotificationIconAreaInner.getParent() != null) {
             ((ViewGroup) mNotificationIconAreaInner.getParent())
                     .removeView(mNotificationIconAreaInner);
@@ -216,15 +219,15 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         notificationIconArea.addView(mNotificationIconAreaInner);
 
         ViewGroup statusBarCenteredIconArea = mStatusBar.findViewById(R.id.centered_icon_area);
-        mCenteredIconArea = notificationIconAreaController.getCenteredNotificationAreaView();
+        mCenteredIconArea = mNotificationIconAreaController.getCenteredNotificationAreaView();
         if (mCenteredIconArea.getParent() != null) {
             ((ViewGroup) mCenteredIconArea.getParent())
                     .removeView(mCenteredIconArea);
         }
         statusBarCenteredIconArea.addView(mCenteredIconArea);
 
-        // Default to showing until we know otherwise.
-        showNotificationIconArea(false);
+        // #disable should have already been called, so use the disable values to set visibility.
+        updateNotificationIconAreaAndCallChip(mDisabled1, false);
     }
 
     @Override
@@ -249,13 +252,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 showOperatorName(animate);
             }
         }
-        if ((diff1 & DISABLE_NOTIFICATION_ICONS) != 0) {
-            if ((state1 & DISABLE_NOTIFICATION_ICONS) != 0) {
-                hideNotificationIconArea(animate);
-            } else {
-                showNotificationIconArea(animate);
-            }
+
+        // The ongoing call chip and notification icon visibilities are intertwined, so update both
+        // if either change.
+        if (((diff1 & DISABLE_ONGOING_CALL_CHIP) != 0)
+                || ((diff1 & DISABLE_NOTIFICATION_ICONS) != 0)) {
+            updateNotificationIconAreaAndCallChip(state1, animate);
         }
+
         // The clock may have already been hidden, but we might want to shift its
         // visibility to GONE from INVISIBLE or vice versa
         if ((diff1 & DISABLE_CLOCK) != 0 || mClockView.getVisibility() != clockHiddenMode()) {
@@ -271,10 +275,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         boolean headsUpVisible = mStatusBarComponent.headsUpShouldBeVisible();
         if (headsUpVisible) {
             state |= DISABLE_CLOCK;
-        }
-
-        if (mOngoingCallController.hasOngoingCall()) {
-            state |= DISABLE_NOTIFICATION_ICONS;
         }
 
         if (!mKeyguardStateController.isLaunchTransitionFadingAway()
@@ -304,7 +304,38 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             state |= DISABLE_CLOCK | DISABLE_SYSTEM_INFO;
         }
 
+        if (mOngoingCallController.hasOngoingCall()) {
+            state &= ~DISABLE_ONGOING_CALL_CHIP;
+        } else {
+            state |= DISABLE_ONGOING_CALL_CHIP;
+        }
+
         return state;
+    }
+
+    /**
+     * Updates the visibility of the notification icon area and ongoing call chip based on disabled1
+     * state.
+     */
+    private void updateNotificationIconAreaAndCallChip(int state1, boolean animate) {
+        boolean disableNotifications = (state1 & DISABLE_NOTIFICATION_ICONS) != 0;
+        boolean hasOngoingCall = (state1 & DISABLE_ONGOING_CALL_CHIP) == 0;
+
+        // Hide notifications if the disable flag is set or we have an ongoing call.
+        if (disableNotifications || hasOngoingCall) {
+            hideNotificationIconArea(animate);
+        } else {
+            showNotificationIconArea(animate);
+        }
+
+        // Show the ongoing call chip only if there is an ongoing call *and* notification icons
+        // are allowed. (The ongoing call chip occupies the same area as the notification icons,
+        // so if the icons are disabled then the call chip should be, too.)
+        if (hasOngoingCall && !disableNotifications) {
+            showOngoingCallChip(animate);
+        } else {
+            hideOngoingCallChip(animate);
+        }
     }
 
     private boolean shouldHideNotificationIcons() {
@@ -334,6 +365,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private void showClock(boolean animate) {
         animateShow(mClockView, animate);
+    }
+
+    /** Hides the ongoing call chip. */
+    public void hideOngoingCallChip(boolean animate) {
+        animateHiddenState(mOngoingCallChip, View.GONE, animate);
+    }
+
+    /** Displays the ongoing call chip. */
+    public void showOngoingCallChip(boolean animate) {
+        animateShow(mOngoingCallChip, animate);
     }
 
     /**
@@ -457,7 +498,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     @Override
     public void onDozingChanged(boolean isDozing) {
-        disable(getContext().getDisplayId(), mDisabled1, mDisabled1, false /* animate */);
+        disable(getContext().getDisplayId(), mDisabled1, mDisabled2, false /* animate */);
     }
 
     @Override

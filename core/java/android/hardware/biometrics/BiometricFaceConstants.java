@@ -16,9 +16,13 @@
 
 package android.hardware.biometrics;
 
+import android.annotation.IntDef;
 import android.app.KeyguardManager;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.face.FaceManager;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface containing all of the face-specific constants.
@@ -48,6 +52,31 @@ public interface BiometricFaceConstants {
     // Error messages from face authentication hardware during initialization, enrollment,
     // authentication or removal. Must agree with the list in HAL h file
     //
+
+    /**
+     * @hide
+     */
+    @IntDef({FACE_ERROR_HW_UNAVAILABLE,
+            FACE_ERROR_UNABLE_TO_PROCESS,
+            FACE_ERROR_TIMEOUT,
+            FACE_ERROR_NO_SPACE,
+            FACE_ERROR_CANCELED,
+            FACE_ERROR_UNABLE_TO_REMOVE,
+            FACE_ERROR_LOCKOUT,
+            FACE_ERROR_VENDOR,
+            FACE_ERROR_LOCKOUT_PERMANENT,
+            FACE_ERROR_USER_CANCELED,
+            FACE_ERROR_NOT_ENROLLED,
+            FACE_ERROR_HW_NOT_PRESENT,
+            FACE_ERROR_NEGATIVE_BUTTON,
+            BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
+            BIOMETRIC_ERROR_RE_ENROLL,
+            FACE_ERROR_UNKNOWN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FaceError {}
+
     /**
      * The hardware is unavailable. Try again later.
      */
@@ -159,6 +188,12 @@ public interface BiometricFaceConstants {
     int BIOMETRIC_ERROR_RE_ENROLL = 16;
 
     /**
+     * Unknown error received from the HAL.
+     * @hide
+     */
+    int FACE_ERROR_UNKNOWN = 17;
+
+    /**
      * @hide
      */
     int FACE_ERROR_VENDOR_BASE = 1000;
@@ -167,6 +202,36 @@ public interface BiometricFaceConstants {
     // Image acquisition messages. These will not be sent to the user, since they conflict with
     // existing constants. These must agree with face@1.0/types.hal.
     //
+
+    /**
+     * @hide
+     */
+    @IntDef({FACE_ACQUIRED_GOOD,
+            FACE_ACQUIRED_INSUFFICIENT,
+            FACE_ACQUIRED_TOO_BRIGHT,
+            FACE_ACQUIRED_TOO_DARK,
+            FACE_ACQUIRED_TOO_CLOSE,
+            FACE_ACQUIRED_TOO_FAR,
+            FACE_ACQUIRED_TOO_HIGH,
+            FACE_ACQUIRED_TOO_LOW,
+            FACE_ACQUIRED_TOO_RIGHT,
+            FACE_ACQUIRED_TOO_LEFT,
+            FACE_ACQUIRED_POOR_GAZE,
+            FACE_ACQUIRED_NOT_DETECTED,
+            FACE_ACQUIRED_TOO_MUCH_MOTION,
+            FACE_ACQUIRED_RECALIBRATE,
+            FACE_ACQUIRED_TOO_DIFFERENT,
+            FACE_ACQUIRED_TOO_SIMILAR,
+            FACE_ACQUIRED_PAN_TOO_EXTREME,
+            FACE_ACQUIRED_TILT_TOO_EXTREME,
+            FACE_ACQUIRED_ROLL_TOO_EXTREME,
+            FACE_ACQUIRED_FACE_OBSCURED,
+            FACE_ACQUIRED_START,
+            FACE_ACQUIRED_SENSOR_DIRTY,
+            FACE_ACQUIRED_VENDOR,
+            FACE_ACQUIRED_UNKNOWN})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FaceAcquired {}
 
     /**
      * The image acquired was good.
@@ -341,6 +406,12 @@ public interface BiometricFaceConstants {
      * @hide
      */
     int FACE_ACQUIRED_VENDOR = 22;
+
+    /**
+     * Unknown acquired code received from the HAL.
+     * @hide
+     */
+    int FACE_ACQUIRED_UNKNOWN = 23;
 
     /**
      * @hide

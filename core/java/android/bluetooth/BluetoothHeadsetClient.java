@@ -23,6 +23,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
@@ -424,7 +425,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     public static final int CALL_ACCEPT_HOLD = 1;
     public static final int CALL_ACCEPT_TERMINATE = 2;
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothHeadsetClient> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.HEADSET_CLIENT,
                     "BluetoothHeadsetClient", IBluetoothHeadsetClient.class.getName()) {
@@ -437,8 +439,10 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     /**
      * Create a BluetoothHeadsetClient proxy object.
      */
-    /*package*/ BluetoothHeadsetClient(Context context, ServiceListener listener) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    /* package */ BluetoothHeadsetClient(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
     }
 
@@ -531,7 +535,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
                 getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -557,7 +562,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
                 getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();

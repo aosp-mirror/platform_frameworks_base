@@ -8765,7 +8765,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (vpn == null) return VpnManager.TYPE_VPN_NONE;
         final TransportInfo ti = vpn.networkCapabilities.getTransportInfo();
         if (!(ti instanceof VpnTransportInfo)) return VpnManager.TYPE_VPN_NONE;
-        return ((VpnTransportInfo) ti).type;
+        return ((VpnTransportInfo) ti).getType();
     }
 
     /**
@@ -9694,7 +9694,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // request.
             final ArrayList<NetworkRequest> nrs = new ArrayList<>();
             nrs.add(createNetworkRequest(NetworkRequest.Type.REQUEST, pref.capabilities));
-            nrs.add(createDefaultRequest());
+            nrs.add(createDefaultInternetRequestForTransport(
+                    TYPE_NONE, NetworkRequest.Type.TRACK_DEFAULT));
             setNetworkRequestUids(nrs, UidRange.fromIntRanges(pref.capabilities.getUids()));
             final NetworkRequestInfo nri = new NetworkRequestInfo(Process.myUid(), nrs);
             result.add(nri);
@@ -9999,7 +10000,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID:
                     requests.add(createUnmeteredNetworkRequest());
                     requests.add(createOemPaidNetworkRequest());
-                    requests.add(createDefaultRequest());
+                    requests.add(createDefaultInternetRequestForTransport(
+                            TYPE_NONE, NetworkRequest.Type.TRACK_DEFAULT));
                     break;
                 case OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK:
                     requests.add(createUnmeteredNetworkRequest());

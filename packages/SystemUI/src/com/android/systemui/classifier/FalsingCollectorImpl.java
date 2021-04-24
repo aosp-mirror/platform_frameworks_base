@@ -257,7 +257,7 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onTouchEvent(MotionEvent ev) {
-        if (!mKeyguardStateController.isShowing()) {
+        if (!mKeyguardStateController.isShowing() || mStatusBarStateController.isDozing()) {
             avoidGesture();
             return;
         }

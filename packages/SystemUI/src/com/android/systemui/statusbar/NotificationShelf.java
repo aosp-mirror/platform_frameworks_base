@@ -692,7 +692,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private void setHideBackground(boolean hideBackground) {
         if (mHideBackground != hideBackground) {
             mHideBackground = hideBackground;
-            updateBackground();
             updateOutline();
         }
     }
@@ -702,10 +701,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         return !mHideBackground && super.needsOutline();
     }
 
-    @Override
-    protected boolean shouldHideBackground() {
-        return super.shouldHideBackground() || mHideBackground;
-    }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {

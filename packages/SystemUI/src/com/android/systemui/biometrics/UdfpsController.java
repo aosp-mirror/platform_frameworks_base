@@ -143,6 +143,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     private final VibrationEffect mEffectClick = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
     private final VibrationEffect mEffectHeavy =
             VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
+    private final VibrationEffect mDoubleClick =
+            VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
     private final Runnable mAcquiredVibration = new Runnable() {
         @Override
         public void run() {
@@ -750,6 +752,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 return mEffectTextureTick;
             case "tick":
                 return mEffectTick;
+            case "double_tap":
+                return mDoubleClick;
             default:
                 return defaultEffect;
         }

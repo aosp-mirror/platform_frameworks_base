@@ -18,12 +18,12 @@ package android.bluetooth.le;
 
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
 import android.bluetooth.annotations.RequiresBluetoothAdvertisePermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
+import android.content.AttributionSource;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -40,11 +40,12 @@ public final class AdvertisingSet {
 
     private final IBluetoothGatt mGatt;
     private int mAdvertiserId;
+    private AttributionSource mAttributionSource;
 
-    /* package */ AdvertisingSet(int advertiserId,
-            IBluetoothManager bluetoothManager) {
+    /* package */ AdvertisingSet(int advertiserId, IBluetoothManager bluetoothManager,
+            AttributionSource attributionSource) {
         mAdvertiserId = advertiserId;
-
+        mAttributionSource = attributionSource;
         try {
             mGatt = bluetoothManager.getBluetoothGatt();
         } catch (RemoteException e) {
@@ -75,7 +76,7 @@ public final class AdvertisingSet {
             int maxExtendedAdvertisingEvents) {
         try {
             mGatt.enableAdvertisingSet(mAdvertiserId, enable, duration,
-                    maxExtendedAdvertisingEvents);
+                    maxExtendedAdvertisingEvents, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -98,7 +99,7 @@ public final class AdvertisingSet {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setAdvertisingData(AdvertiseData advertiseData) {
         try {
-            mGatt.setAdvertisingData(mAdvertiserId, advertiseData);
+            mGatt.setAdvertisingData(mAdvertiserId, advertiseData, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -118,7 +119,7 @@ public final class AdvertisingSet {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setScanResponseData(AdvertiseData scanResponse) {
         try {
-            mGatt.setScanResponseData(mAdvertiserId, scanResponse);
+            mGatt.setScanResponseData(mAdvertiserId, scanResponse, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -136,7 +137,7 @@ public final class AdvertisingSet {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setAdvertisingParameters(AdvertisingSetParameters parameters) {
         try {
-            mGatt.setAdvertisingParameters(mAdvertiserId, parameters);
+            mGatt.setAdvertisingParameters(mAdvertiserId, parameters, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -152,7 +153,7 @@ public final class AdvertisingSet {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setPeriodicAdvertisingParameters(PeriodicAdvertisingParameters parameters) {
         try {
-            mGatt.setPeriodicAdvertisingParameters(mAdvertiserId, parameters);
+            mGatt.setPeriodicAdvertisingParameters(mAdvertiserId, parameters, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -173,7 +174,7 @@ public final class AdvertisingSet {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setPeriodicAdvertisingData(AdvertiseData periodicData) {
         try {
-            mGatt.setPeriodicAdvertisingData(mAdvertiserId, periodicData);
+            mGatt.setPeriodicAdvertisingData(mAdvertiserId, periodicData, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
@@ -191,7 +192,7 @@ public final class AdvertisingSet {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public void setPeriodicAdvertisingEnabled(boolean enable) {
         try {
-            mGatt.setPeriodicAdvertisingEnable(mAdvertiserId, enable);
+            mGatt.setPeriodicAdvertisingEnable(mAdvertiserId, enable, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }

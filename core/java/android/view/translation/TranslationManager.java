@@ -22,7 +22,10 @@ import android.annotation.SystemService;
 import android.annotation.WorkerThread;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -41,6 +44,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -308,8 +312,6 @@ public final class TranslationManager {
                 sourceFormat, targetFormat, pendingIntent);
     }
 
-    //TODO: Add method to propagate updates to mTCapabilityUpdateListeners
-
     /**
      * Returns an immutable PendingIntent which can be used to launch an activity to view/edit
      * on-device translation settings.
@@ -358,6 +360,27 @@ public final class TranslationManager {
     AtomicInteger getAvailableRequestId() {
         synchronized (mLock) {
             return sAvailableRequestId;
+        }
+    }
+
+    private static class TranslationCapabilityRemoteCallback extends
+            IRemoteCallback.Stub {
+        private final Executor mExecutor;
+
+        TranslationCapabilityRemoteCallback(Executor executor) {
+            mExecutor = executor;
+        }
+
+        @Override
+        public void sendResult(Bundle bundle) {
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> onTranslationCapabilityUpdate(bundle)));
+        }
+
+        private void onTranslationCapabilityUpdate(Bundle bundle) {
+            TranslationCapability capability = (TranslationCapability) bundle.getParcelable(
+                    EXTRA_CAPABILITIES);
+            //TODO: Implement after deciding how capability listeners are implemented.
         }
     }
 }

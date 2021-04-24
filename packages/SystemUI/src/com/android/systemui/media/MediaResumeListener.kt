@@ -173,7 +173,7 @@ class MediaResumeListener @Inject constructor(
             mediaBrowser?.disconnect()
             // If we don't have a resume action, check if we haven't already
             if (data.resumeAction == null && !data.hasCheckedForResume &&
-                    !blockedApps.contains(data.packageName)) {
+                    !blockedApps.contains(data.packageName) && data.isLocalSession) {
                 // TODO also check for a media button receiver intended for restarting (b/154127084)
                 Log.d(TAG, "Checking for service component for " + data.packageName)
                 val pm = context.packageManager

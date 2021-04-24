@@ -8633,7 +8633,7 @@ package android.bluetooth {
     method public android.bluetooth.le.BluetoothLeAdvertiser getBluetoothLeAdvertiser();
     method public android.bluetooth.le.BluetoothLeScanner getBluetoothLeScanner();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public java.util.Set<android.bluetooth.BluetoothDevice> getBondedDevices();
-    method public static android.bluetooth.BluetoothAdapter getDefaultAdapter();
+    method @Deprecated public static android.bluetooth.BluetoothAdapter getDefaultAdapter();
     method public int getLeMaximumAdvertisingDataLength();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public String getName();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getProfileConnectionState(int);
@@ -18046,7 +18046,7 @@ package android.hardware.camera2 {
   }
 
   public final class CameraExtensionCharacteristics {
-    method @Nullable public android.util.Range<java.lang.Long> getEstimatedCaptureLatencyRange(int, @NonNull android.util.Size, int);
+    method @Nullable public android.util.Range<java.lang.Long> getEstimatedCaptureLatencyRangeMillis(int, @NonNull android.util.Size, int);
     method @NonNull public <T> java.util.List<android.util.Size> getExtensionSupportedSizes(int, @NonNull Class<T>);
     method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
     method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();
@@ -52812,6 +52812,7 @@ package android.view.translation {
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationCapability> CREATOR;
     field public static final int STATE_AVAILABLE_TO_DOWNLOAD = 1; // 0x1
     field public static final int STATE_DOWNLOADING = 2; // 0x2
+    field public static final int STATE_NOT_AVAILABLE = 4; // 0x4
     field public static final int STATE_ON_DEVICE = 3; // 0x3
   }
 

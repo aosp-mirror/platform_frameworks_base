@@ -102,6 +102,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     private boolean mMetricsFinalized;
     private boolean mCancelled = false;
     private FrameTrackerListener mListener;
+    private boolean mTracingStarted = false;
 
     private static class JankInfo {
         long frameVsyncId;
@@ -207,7 +208,15 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     public synchronized void begin() {
         mBeginVsyncId = mChoreographer.getVsyncId() + 1;
         mSession.setTimeStamp(System.nanoTime());
-        Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
+        mChoreographer.mChoreographer.postCallback(Choreographer.CALLBACK_INPUT, () -> {
+            synchronized (FrameTracker.this) {
+                if (mCancelled || mEndVsyncId != INVALID_ID) {
+                    return;
+                }
+                mTracingStarted = true;
+                Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
+            }
+        }, null);
         mRendererWrapper.addObserver(mObserver);
         if (DEBUG) {
             Log.d(TAG, "begin: " + mSession.getName() + ", begin=" + mBeginVsyncId);
@@ -255,7 +264,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
      */
     public synchronized void cancel(@Reasons int reason) {
         // We don't need to end the trace section if it never begun.
-        if (mBeginVsyncId != INVALID_ID) {
+        if (mTracingStarted) {
             Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
         }
         mCancelled = true;

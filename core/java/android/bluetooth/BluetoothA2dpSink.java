@@ -27,6 +27,7 @@ import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
@@ -78,7 +79,8 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED";
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothA2dpSink> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.A2DP_SINK,
                     "BluetoothA2dpSink", IBluetoothA2dpSink.class.getName()) {
@@ -92,8 +94,10 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      * Create a BluetoothA2dp proxy object for interacting with the local
      * Bluetooth A2DP service.
      */
-    /*package*/ BluetoothA2dpSink(Context context, ServiceListener listener) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    /* package */ BluetoothA2dpSink(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
     }
 
@@ -198,7 +202,8 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
         final IBluetoothA2dpSink service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -221,7 +226,8 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
         final IBluetoothA2dpSink service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();

@@ -95,6 +95,8 @@ public class RecoverySystemServiceTest {
         mUncryptUpdateFileWriter = mock(FileWriter.class);
         mLockSettingsInternal = mock(LockSettingsInternal.class);
 
+        doReturn(true).when(mLockSettingsInternal).prepareRebootEscrow();
+        doReturn(true).when(mLockSettingsInternal).clearRebootEscrow();
         doReturn(LockSettingsInternal.ARM_REBOOT_ERROR_NONE).when(mLockSettingsInternal)
                 .armRebootEscrow();
 
@@ -254,7 +256,6 @@ public class RecoverySystemServiceTest {
                 + RecoverySystemService.REQUEST_LSKF_TIMESTAMP_PREF_SUFFIX), eq(100_000L));
     }
 
-
     @Test
     public void requestLskf_success() throws Exception {
         IntentSender intentSender = mock(IntentSender.class);
@@ -296,6 +297,14 @@ public class RecoverySystemServiceTest {
         verify(intentSender, never()).sendIntent(any(), anyInt(), any(), any(), any());
         verify(mMetricsReporter, never()).reportRebootEscrowLskfCapturedMetrics(
                 anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void requestLskf_lockSettingsError() throws Exception {
+        IntentSender intentSender = mock(IntentSender.class);
+
+        doReturn(false).when(mLockSettingsInternal).prepareRebootEscrow();
+        assertFalse(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, intentSender));
     }
 
     @Test

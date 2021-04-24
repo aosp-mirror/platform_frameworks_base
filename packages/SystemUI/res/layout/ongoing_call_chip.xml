@@ -23,7 +23,6 @@
     android:background="@drawable/ongoing_call_chip_bg"
     android:paddingStart="@dimen/ongoing_call_chip_side_padding"
     android:paddingEnd="@dimen/ongoing_call_chip_side_padding"
-    android:visibility="gone"
 >
 
     <ImageView

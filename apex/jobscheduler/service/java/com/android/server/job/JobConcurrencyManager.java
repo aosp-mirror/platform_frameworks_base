@@ -695,7 +695,7 @@ class JobConcurrencyManager {
                     // preferredUid will be set to uid of currently running job.
                     activeServices.get(i).cancelExecutingJobLocked(
                             preemptReasonCodeForContext[i],
-                            JobParameters.REASON_PREEMPT, preemptReasonForContext[i]);
+                            JobParameters.INTERNAL_STOP_REASON_PREEMPT, preemptReasonForContext[i]);
                     // Only preserve the UID if we're preempting for the same UID. If we're stopping
                     // the job because something is pending (eg. EJs), then we shouldn't preserve
                     // the UID.
@@ -727,7 +727,7 @@ class JobConcurrencyManager {
 
             if (jobStatus != null && !jsc.isWithinExecutionGuaranteeTime()) {
                 jsc.cancelExecutingJobLocked(JobParameters.STOP_REASON_DEVICE_STATE,
-                        JobParameters.REASON_TIMEOUT, debugReason);
+                        JobParameters.INTERNAL_STOP_REASON_TIMEOUT, debugReason);
             }
         }
     }

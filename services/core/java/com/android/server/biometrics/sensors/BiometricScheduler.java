@@ -471,7 +471,7 @@ public class BiometricScheduler {
      * Adds a {@link BaseClientMonitor} to the pending queue
      *
      * @param clientMonitor        operation to be scheduled
-     * @param clientCallback optional callback, invoked when the client state changes
+     * @param clientCallback optional callback, invoked when the client state changes.
      */
     public void scheduleClientMonitor(@NonNull BaseClientMonitor clientMonitor,
             @Nullable BaseClientMonitor.Callback clientCallback) {
