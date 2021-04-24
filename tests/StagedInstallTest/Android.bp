@@ -24,7 +24,7 @@ java_test_host {
     name: "StagedInstallInternalTest",
     srcs: ["src/**/*.java"],
     libs: ["tradefed"],
-    static_libs: ["testng", "compatibility-tradefed"],
+    static_libs: ["testng", "compatibility-tradefed", "frameworks-base-hostutils"],
     test_suites: ["general-tests"],
     test_config: "StagedInstallInternalTest.xml",
 }

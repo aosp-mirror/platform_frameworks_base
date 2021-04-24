@@ -170,7 +170,7 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"間違えた回数が上限を超えました。このユーザーが削除されます。"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"間違えた回数が上限を超えました。この仕事用プロファイルと関連データが削除されます。"</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"閉じる"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"指紋認証センサーをタップ"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"指紋認証センサーをタッチ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"指紋アイコン"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"顔を認証しています…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"顔アイコン"</string>
@@ -598,15 +598,15 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"固定を解除するまで常に表示されます。上にスワイプして長押しすると固定が解除されます。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"固定を解除するまで画面が常に表示されるようになります。[最近] を押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"固定を解除するまで画面が常に表示されるようになります。[ホーム] を押し続けると固定が解除されます。"</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人データ（連絡先やメールの内容など）にアクセスできる可能性があります。"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人データ（連絡先やメールの内容など）にアクセスされる可能性があります。"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"固定したアプリが他のアプリを開く可能性があります。"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"このアプリの固定を解除するには [戻る] ボタンと [最近] ボタンを長押しします"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"このアプリの固定を解除するには [戻る] ボタンと [ホーム] ボタンを長押しします"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"このアプリの固定を解除するには、上にスワイプして長押しします"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"いいえ"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"固定したアプリ"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"固定を解除したアプリ"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"アプリを固定しました"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"アプリの固定を解除しました"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>を非表示にしますか？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"次回、設定でONにすると再表示されます。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"非表示"</string>
@@ -719,7 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"会話セクションの一番上にバブルとして表示され、プロフィール写真がロック画面に表示されます"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> は会話機能に対応していません"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>は会話機能に対応していません"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近閉じたバブルはありません"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"最近表示されたバブルや閉じたバブルが、ここに表示されます"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
@@ -1026,7 +1026,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"拡大ウィンドウ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"拡大ウィンドウ コントロール"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"デバイス コントロール"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"接続済みデバイスのコントロールを追加します"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"コネクテッド デバイスのコントロールを追加します"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"デバイス コントロールの設定"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"コントロールにアクセスするには、電源ボタンを長押しします"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"コントロールを追加するアプリの選択"</string>
@@ -1042,7 +1042,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"お気に入りから削除"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ポジション <xliff:g id="NUMBER">%d</xliff:g> に移動"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタン メニューからアクセスするコントロールを選択する"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタンメニューからアクセスするコントロールを選択"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"変更が保存されていません"</string>

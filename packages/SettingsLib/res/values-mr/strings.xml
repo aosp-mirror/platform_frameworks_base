@@ -345,7 +345,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ओव्हरड्रॉ डीबग करा"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW ओव्हरले बंद करा"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"स्क्रीन तयार करण्यासाठी नेहमी GPU वापरा"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"रंग स्थानाची बतावणी करा"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"रंग स्थान सिम्युलेट करा"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ट्रेस सुरू करा"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ऑडिओ राउटिंग बंद करा"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ऑडिओ परिधीय वरील स्वयंचलित राउटिंग बंद करा"</string>

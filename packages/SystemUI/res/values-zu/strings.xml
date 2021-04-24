@@ -954,7 +954,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> esebenzayo"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Uhlelo lokusebenza luvulwe ngaphndle kokufakwa."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Uhlelo lokusebenza luvulwe ngaphandle kokufakwa. Thepha ukuze ufunde kabanzi."</string>
-    <string name="app_info" msgid="5153758994129963243">"Ulwazi lohlelo lokusebenza"</string>
+    <string name="app_info" msgid="5153758994129963243">"Ulwazi nge-app"</string>
     <string name="go_to_web" msgid="636673528981366511">"Iya kusiphequluli"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Idatha yeselula"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>

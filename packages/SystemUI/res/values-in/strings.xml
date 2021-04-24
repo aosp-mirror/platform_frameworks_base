@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Aktifkan Penghemat Baterai"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Setelan"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotasi layar otomatis"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Putar layar otomatis"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"BUNGKAM"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"Notifikasi"</string>
@@ -357,7 +357,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Alat Bantu Dengar"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Mengaktifkan…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Kecerahan"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotasi Otomatis"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Putar Otomatis"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Putar layar otomatis"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Mode <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Rotasi terkunci"</string>
@@ -550,7 +550,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organisasi Anda menginstal otoritas sertifikat di perangkat ini. Traffic jaringan aman Anda mungkin dipantau atau diubah."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisasi Anda menginstal otoritas sertifikat di profil kerja. Traffic jaringan aman Anda mungkin dipantau atau diubah."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Otoritas sertifikat diinstal di perangkat. Traffic jaringan aman Anda mungkin dipantau atau diubah."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Admin telah mengaktifkan pencatatan jaringan, yang memantau traffic di perangkat."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Admin telah mengaktifkan pencatatan log jaringan, yang memantau traffic di perangkat."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Anda tersambung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Anda tersambung ke <xliff:g id="VPN_APP_0">%1$s</xliff:g> dan <xliff:g id="VPN_APP_1">%2$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Profil kerja Anda tersambung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs."</string>
@@ -592,21 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktifkan"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"nonaktifkan"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Ganti perangkat keluaran"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikasi dipasangi pin"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Kembali dan Ringkasan untuk melepas pin."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Kembali dan Beranda untuk melepas pin."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Aplikasi akan terus ditampilkan sampai pin dilepas. Geser ke atas dan tahan untuk lepas pin."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Ringkasan untuk melepas pin."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Beranda untuk melepas pin."</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikasi disematkan"</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Kembali dan Ringkasan untuk melepas sematan."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Kembali dan Beranda untuk melepas sematan."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Aplikasi akan terus ditampilkan sampai sematan dilepaskan. Geser ke atas dan tahan agar sematan lepas."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Ringkasan untuk melepas sematan."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Beranda untuk melepas sematan."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Data pribadi dapat diakses (seperti kontak dan konten email)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Aplikasi yang disematkan dapat membuka aplikasi lain."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Untuk melepas pin aplikasi ini, sentuh &amp; lama tombol Kembali dan Ringkasan"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Untuk melepas pin aplikasi ini, sentuh &amp; lama tombol Kembali dan Layar utama"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Untuk melepas pin aplikasi ini, geser ke atas &amp; tahan"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Untuk melepas sematan aplikasi ini, sentuh lama tombol Kembali dan Ringkasan"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Untuk melepas sematan aplikasi ini, sentuh lama tombol Kembali dan Layar utama"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Untuk melepas sematan aplikasi ini, geser ke atas &amp; tahan"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Mengerti"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Lain kali"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikasi dipasangi pin"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikasi dilepas pinnya"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikasi disematkan"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikasi dilepaskan"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Sembunyikan <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Ini akan muncul kembali saat Anda mengaktifkannya dalam setelan."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Sembunyikan"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Dapat berdering atau bergetar berdasarkan setelan ponsel"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Dapat berdering atau bergetar berdasarkan setelan ponsel. Percakapan dari balon <xliff:g id="APP_NAME">%1$s</xliff:g> secara default."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Menjaga perhatian dengan pintasan floating ke konten ini."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Muncul di atas bagian percakapan, ditampilkan sebagai balon yang mengambang, menampilkan gambar profil di layar kunci"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Muncul di atas bagian percakapan, ditampilkan sebagai balon yang mengambang, menampilkan foto profil di layar kunci"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Setelan"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung fitur percakapan"</string>
@@ -951,7 +951,7 @@
     <string name="notification_channel_storage" msgid="2720725707628094977">"Penyimpanan"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Petunjuk"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Aplikasi Instan"</string>
-    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> berjalan"</string>
+    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> sedang berjalan"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Aplikasi dapat dibuka tanpa perlu diinstal."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Aplikasi dapat dibuka tanpa perlu diinstal. Ketuk untuk mempelajari lebih lanjut."</string>
     <string name="app_info" msgid="5153758994129963243">"Info aplikasi"</string>
@@ -1017,7 +1017,7 @@
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Percakapan ditetapkan jadi prioritas"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Percakapan prioritas akan:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Muncul di atas bagian percakapan"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Menampilkan gambar profil di layar kunci"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Menampilkan foto profil di layar kunci"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Muncul sebagai balon mengambang di atas aplikasi"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Mengganggu fitur Jangan Ganggu"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Oke"</string>
