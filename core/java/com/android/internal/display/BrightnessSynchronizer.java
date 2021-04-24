@@ -16,11 +16,11 @@
 
 package com.android.internal.display;
 
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManager.DisplayListener;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -95,7 +95,7 @@ public class BrightnessSynchronizer {
         }
 
         final BrightnessSyncObserver brightnessSyncObserver;
-        brightnessSyncObserver = new BrightnessSyncObserver(mHandler);
+        brightnessSyncObserver = new BrightnessSyncObserver();
         brightnessSyncObserver.startObserving();
 
         final float currentFloatBrightness = getScreenBrightnessFloat();
@@ -232,47 +232,52 @@ public class BrightnessSynchronizer {
         }
     }
 
-    private class BrightnessSyncObserver extends ContentObserver {
-        /**
-         * Creates a content observer.
-         * @param handler The handler to run {@link #onChange} on, or null if none.
-         */
-        BrightnessSyncObserver(Handler handler) {
-            super(handler);
-        }
+    private class BrightnessSyncObserver {
+        private final DisplayListener mListener = new DisplayListener() {
+            @Override
+            public void onDisplayAdded(int displayId) {}
 
-        @Override
-        public void onChange(boolean selfChange) {
-            onChange(selfChange, null);
-        }
+            @Override
+            public void onDisplayRemoved(int displayId) {}
 
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            if (selfChange) {
-                return;
-            }
-            if (BRIGHTNESS_URI.equals(uri)) {
-                int currentBrightness = getScreenBrightnessInt(mContext);
-                mHandler.removeMessages(MSG_UPDATE_FLOAT);
-                mHandler.obtainMessage(MSG_UPDATE_FLOAT, currentBrightness, 0).sendToTarget();
-            } else if (BRIGHTNESS_FLOAT_URI.equals(uri)) {
+            @Override
+            public void onDisplayChanged(int displayId) {
                 float currentFloat = getScreenBrightnessFloat();
                 int toSend = Float.floatToIntBits(currentFloat);
                 mHandler.removeMessages(MSG_UPDATE_INT);
                 mHandler.obtainMessage(MSG_UPDATE_INT, toSend, 0).sendToTarget();
             }
-        }
+        };
+
+        private final ContentObserver mContentObserver = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                if (selfChange) {
+                    return;
+                }
+                if (BRIGHTNESS_URI.equals(uri)) {
+                    int currentBrightness = getScreenBrightnessInt(mContext);
+                    mHandler.removeMessages(MSG_UPDATE_FLOAT);
+                    mHandler.obtainMessage(MSG_UPDATE_FLOAT, currentBrightness, 0).sendToTarget();
+                }
+            }
+        };
 
         public void startObserving() {
             final ContentResolver cr = mContext.getContentResolver();
-            cr.unregisterContentObserver(this);
-            cr.registerContentObserver(BRIGHTNESS_URI, false, this, UserHandle.USER_ALL);
-            cr.registerContentObserver(BRIGHTNESS_FLOAT_URI, false, this, UserHandle.USER_ALL);
+            cr.unregisterContentObserver(mContentObserver);
+            cr.registerContentObserver(BRIGHTNESS_URI, false, mContentObserver,
+                    UserHandle.USER_ALL);
+
+            mDisplayManager.registerDisplayListener(mListener, mHandler,
+                    DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                        | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS);
         }
 
         public void stopObserving() {
             final ContentResolver cr = mContext.getContentResolver();
-            cr.unregisterContentObserver(this);
+            cr.unregisterContentObserver(mContentObserver);
+            mDisplayManager.unregisterDisplayListener(mListener);
         }
     }
 }
