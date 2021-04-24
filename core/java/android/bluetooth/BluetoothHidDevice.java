@@ -450,7 +450,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         if (service != null) {
             try {
                 return BluetoothDevice.setAttributionSource(
-                        service.getConnectedDevices(), mAttributionSource);
+                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -470,7 +470,8 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         if (service != null) {
             try {
                 return BluetoothDevice.setAttributionSource(
-                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
+                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -489,7 +490,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = getService();
         if (service != null) {
             try {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -549,7 +550,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         if (service != null) {
             try {
                 CallbackWrapper cbw = new CallbackWrapper(executor, callback);
-                result = service.registerApp(sdp, inQos, outQos, cbw);
+                result = service.registerApp(sdp, inQos, outQos, cbw, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -578,7 +579,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = getService();
         if (service != null) {
             try {
-                result = service.unregisterApp();
+                result = service.unregisterApp(mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -605,7 +606,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = getService();
         if (service != null) {
             try {
-                result = service.sendReport(device, id, data);
+                result = service.sendReport(device, id, data, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -633,7 +634,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = getService();
         if (service != null) {
             try {
-                result = service.replyReport(device, type, id, data);
+                result = service.replyReport(device, type, id, data, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -659,7 +660,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = getService();
         if (service != null) {
             try {
-                result = service.reportError(device, error);
+                result = service.reportError(device, error, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -683,7 +684,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
 
         if (service != null) {
             try {
-                return service.getUserAppName();
+                return service.getUserAppName(mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -710,7 +711,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = getService();
         if (service != null) {
             try {
-                result = service.connect(device);
+                result = service.connect(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -736,7 +737,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = getService();
         if (service != null) {
             try {
-                result = service.disconnect(device);
+                result = service.disconnect(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -781,7 +782,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
                         && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
                     return false;
                 }
-                return service.setConnectionPolicy(device, connectionPolicy);
+                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;

@@ -1900,10 +1900,10 @@ package android.apphibernation {
 package android.bluetooth {
 
   public final class BluetoothA2dp implements android.bluetooth.BluetoothProfile {
-    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public android.bluetooth.BufferConstraints getBufferConstraints();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getDynamicBufferSupport();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setBufferLengthMillis(int, int);
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public android.bluetooth.BufferConstraints getBufferConstraints();
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getDynamicBufferSupport();
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setBufferLengthMillis(int, int);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_OFFLOAD = 1; // 0x1
     field public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_SOFTWARE_ENCODING = 2; // 0x2
@@ -1918,8 +1918,8 @@ package android.bluetooth {
 
   public final class BluetoothA2dpSink implements android.bluetooth.BluetoothProfile {
     method public void finalize();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isAudioPlaying(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean isAudioPlaying(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED";
   }
@@ -2007,13 +2007,13 @@ package android.bluetooth {
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean connect(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean disconnect(android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
   }
 
   public final class BluetoothHearingAid implements android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public long getHiSyncId(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public long getHiSyncId(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
   }
 
@@ -2023,9 +2023,9 @@ package android.bluetooth {
 
   public final class BluetoothHidHost implements android.bluetooth.BluetoothProfile {
     method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
   }
 
@@ -2044,7 +2044,7 @@ package android.bluetooth {
 
   public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
     method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean isTetheringOn();
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.TETHER_PRIVILEGED}) public void setBluetoothTethering(boolean);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
@@ -2062,7 +2062,7 @@ package android.bluetooth {
   }
 
   public class BluetoothPbap implements android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
   }
