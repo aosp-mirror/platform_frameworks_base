@@ -87,20 +87,20 @@ public interface ServiceProvider {
     void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
             @FingerprintManager.EnrollReason int enrollReason,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback);
+            @NonNull FingerprintStateCallback fingerprintStateCallback);
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);
 
     void scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
             int statsClient,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback);
+            @NonNull FingerprintStateCallback fingerprintStateCallback);
 
     void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback);
+            @NonNull FingerprintStateCallback fingerprintStateCallback);
 
     void startPreparedClient(int sensorId, int cookie);
 
@@ -151,6 +151,6 @@ public interface ServiceProvider {
 
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback,
+            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull String opPackageName);
 }

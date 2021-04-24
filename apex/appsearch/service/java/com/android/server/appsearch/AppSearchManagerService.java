@@ -40,7 +40,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -60,6 +62,8 @@ import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.stats.LoggerInstanceManager;
 import com.android.server.appsearch.stats.PlatformLogger;
+import com.android.server.usage.StorageStatsManagerInternal;
+import com.android.server.usage.StorageStatsManagerInternal.StorageStatsAugmenter;
 
 import com.google.android.icing.proto.PersistType;
 
@@ -82,6 +86,7 @@ import java.util.concurrent.TimeUnit;
 public class AppSearchManagerService extends SystemService {
     private static final String TAG = "AppSearchManagerService";
     private final Context mContext;
+    private PackageManager mPackageManager;
     private PackageManagerInternal mPackageManagerInternal;
     private ImplInstanceManager mImplInstanceManager;
     private UserManager mUserManager;
@@ -109,11 +114,14 @@ public class AppSearchManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.APP_SEARCH_SERVICE, new Stub());
+        mPackageManager = getContext().getPackageManager();
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mImplInstanceManager = ImplInstanceManager.getInstance(mContext);
         mUserManager = mContext.getSystemService(UserManager.class);
         mLoggerInstanceManager = LoggerInstanceManager.getInstance();
         registerReceivers();
+        LocalServices.getService(StorageStatsManagerInternal.class)
+                .registerStorageStatsAugmenter(new AppSearchStorageStatsAugmenter(), TAG);
     }
 
     private void registerReceivers() {
@@ -165,6 +173,21 @@ public class AppSearchManagerService extends SystemService {
     public void onUserUnlocking(@NonNull TargetUser user) {
         synchronized (mUnlockedUserIdsLocked) {
             mUnlockedUserIdsLocked.add(user.getUserIdentifier());
+        }
+    }
+
+    private void verifyUserUnlocked(int callingUserId) {
+        synchronized (mUnlockedUserIdsLocked) {
+            // First, check the local copy.
+            if (mUnlockedUserIdsLocked.contains(callingUserId)) {
+                return;
+            }
+            // If the local copy says the user is locked, check with UM for the actual state,
+            // since the user might just have been unlocked.
+            if (!mUserManager.isUserUnlockingOrUnlocked(UserHandle.of(callingUserId))) {
+                throw new IllegalStateException(
+                        "User " + callingUserId + " is locked or not running.");
+            }
         }
     }
 
@@ -769,25 +792,10 @@ public class AppSearchManagerService extends SystemService {
             });
         }
 
-        private void verifyUserUnlocked(int callingUserId) {
-            synchronized (mUnlockedUserIdsLocked) {
-                // First, check the local copy.
-                if (mUnlockedUserIdsLocked.contains(callingUserId)) {
-                    return;
-                }
-                // If the local copy says the user is locked, check with UM for the actual state,
-                // since the user might just have been unlocked.
-                if (!mUserManager.isUserUnlockingOrUnlocked(UserHandle.of(callingUserId))) {
-                    throw new IllegalStateException(
-                            "User " + callingUserId + " is locked or not running.");
-                }
-            }
-        }
-
         private void verifyCallingPackage(int callingUid, @NonNull String callingPackage) {
             Objects.requireNonNull(callingPackage);
             if (mPackageManagerInternal.getPackageUid(
-                            callingPackage, /*flags=*/ 0, UserHandle.getUserId(callingUid))
+                    callingPackage, /*flags=*/ 0, UserHandle.getUserId(callingUid))
                     != callingUid) {
                 throw new SecurityException(
                         "Specified calling package ["
@@ -858,5 +866,53 @@ public class AppSearchManagerService extends SystemService {
                 /*requireFull=*/ false,
                 /*name=*/ null,
                 /*callerPackage=*/ null);
+    }
+
+    // TODO(b/179160886): Cache the previous storage stats.
+    private class AppSearchStorageStatsAugmenter implements StorageStatsAugmenter {
+        @Override
+        public void augmentStatsForPackage(
+                @NonNull PackageStats stats,
+                @NonNull String packageName,
+                @UserIdInt int userId,
+                boolean callerHasStatsPermission) {
+            Objects.requireNonNull(stats);
+            Objects.requireNonNull(packageName);
+            try {
+                verifyUserUnlocked(userId);
+                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
+                        userId);
+                stats.dataSize += impl.getStorageInfoForPackage(packageName).getSizeBytes();
+            } catch (Throwable t) {
+                Log.e(
+                        TAG,
+                        "Unable to augment storage stats for userId "
+                                + userId
+                                + " packageName "
+                                + packageName,
+                        t);
+            }
+        }
+
+        @Override
+        public void augmentStatsForUid(
+                @NonNull PackageStats stats, int uid, boolean callerHasStatsPermission) {
+            Objects.requireNonNull(stats);
+            int userId = UserHandle.getUserId(uid);
+            try {
+                verifyUserUnlocked(userId);
+                String[] packagesForUid = mPackageManager.getPackagesForUid(uid);
+                if (packagesForUid == null) {
+                    return;
+                }
+                AppSearchImpl impl = mImplInstanceManager.getOrCreateAppSearchImpl(mContext,
+                        userId);
+                for (String packageName : packagesForUid) {
+                    stats.dataSize += impl.getStorageInfoForPackage(packageName).getSizeBytes();
+                }
+            } catch (Throwable t) {
+                Log.e(TAG, "Unable to augment storage stats for uid " + uid, t);
+            }
+        }
     }
 }

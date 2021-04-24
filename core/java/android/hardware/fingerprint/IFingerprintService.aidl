@@ -156,6 +156,6 @@ interface IFingerprintService {
     // Sets the controller for managing the UDFPS overlay.
     void setUdfpsOverlayController(in IUdfpsOverlayController controller);
 
-    // Registers FingerprintStateListener in list stored by FingerprintService
+    // Registers FingerprintStateListener in list stored by FingerprintService.
     void registerFingerprintStateListener(IFingerprintStateListener listener);
 }

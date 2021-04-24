@@ -27,6 +27,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Binder;
@@ -173,7 +174,8 @@ public final class BluetoothMapClient implements BluetoothProfile {
     /** @hide */
     public static final int DELETED = 3;
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothMapClient> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.MAP_CLIENT,
                     "BluetoothMapClient", IBluetoothMapClient.class.getName()) {
@@ -186,9 +188,11 @@ public final class BluetoothMapClient implements BluetoothProfile {
     /**
      * Create a BluetoothMapClient proxy object.
      */
-    /*package*/ BluetoothMapClient(Context context, ServiceListener listener) {
+    /* package */ BluetoothMapClient(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
         if (DBG) Log.d(TAG, "Create BluetoothMapClient proxy object");
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
     }
 
@@ -299,7 +303,8 @@ public final class BluetoothMapClient implements BluetoothProfile {
         final IBluetoothMapClient service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<>();
@@ -323,7 +328,8 @@ public final class BluetoothMapClient implements BluetoothProfile {
         final IBluetoothMapClient service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<>();
@@ -620,14 +626,10 @@ public final class BluetoothMapClient implements BluetoothProfile {
     }
 
     private boolean isEnabled() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null && adapter.getState() == BluetoothAdapter.STATE_ON) return true;
-        if (DBG) Log.d(TAG, "Bluetooth is Not enabled");
-        return false;
+        return mAdapter.isEnabled();
     }
 
     private static boolean isValidDevice(BluetoothDevice device) {
         return device != null && BluetoothAdapter.checkBluetoothAddress(device.getAddress());
     }
-
 }

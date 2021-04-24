@@ -248,6 +248,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_CREATE_SESSION = 1050;
     static final int MSG_REMOVE_IME_SURFACE = 1060;
     static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
+    static final int MSG_UPDATE_IME_WINDOW_STATUS = 1070;
 
     static final int MSG_START_INPUT = 2000;
 
@@ -2940,6 +2941,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private void updateImeWindowStatus() {
+        synchronized (mMethodMap) {
+            updateSystemUiLocked();
+        }
+    }
+
     void updateSystemUiLocked() {
         updateSystemUiLocked(mImeWindowVis, mBackDisposition);
     }
@@ -4537,6 +4544,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 return true;
             }
+            case MSG_UPDATE_IME_WINDOW_STATUS: {
+                synchronized (mMethodMap) {
+                    updateSystemUiLocked();
+                }
+                return true;
+            }
             // ---------------------------------------------------------
 
             case MSG_START_INPUT: {
@@ -5201,6 +5214,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void removeImeSurface() {
             mService.mHandler.sendMessage(mService.mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE));
+        }
+
+        @Override
+        public void updateImeWindowStatus() {
+            mService.mHandler.sendMessage(
+                    mService.mHandler.obtainMessage(MSG_UPDATE_IME_WINDOW_STATUS));
         }
     }
 

@@ -1566,7 +1566,7 @@
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Повеќе опции"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="8490227947584914460">"Внатрешно заедничко место за складирање"</string>
+    <string name="storage_internal" msgid="8490227947584914460">"Внатрешен споделен капацитет"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"СД картичка"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> СД-картичка"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB-меморија"</string>
@@ -1621,7 +1621,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Безжичен приказ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Емитувај"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Поврзи се со уред"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Префрли екран на уред"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Емитување екран на уред"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Се бараат уреди..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Поставки"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Прекини врска"</string>
@@ -1773,6 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Монарх"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Кварто"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1809,6 +1820,8 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
+    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
+    <skip />
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Непознат портрет"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Непознат пејзаж"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Откажано"</string>
@@ -1852,8 +1865,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="7963058670863485450">"„Штедачот на батерија“ вклучува темна тема и исклучува или ограничува активност во заднина, некои визуелни ефекти и функции како „Ok Google“\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
-    <string name="battery_saver_description" msgid="7695751399533397741">"„Штедачот на батерија“ вклучува темна тема и исклучува или ограничува активност во заднина, некои визуелни ефекти и функции како „Ok Google“."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (5693741424234005958) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>

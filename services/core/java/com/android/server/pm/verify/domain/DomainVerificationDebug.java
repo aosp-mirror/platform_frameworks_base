@@ -120,7 +120,7 @@ public class DomainVerificationDebug {
                 Signature[] signatures = pkg.getSigningDetails().signatures;
                 String signaturesDigest = signatures == null ? null : Arrays.toString(
                         PackageUtils.computeSignaturesSha256Digests(
-                                pkg.getSigningDetails().signatures));
+                                pkg.getSigningDetails().signatures, ":"));
 
                 writer.println(pkgState.getPackageName() + ":");
                 writer.increaseIndent();

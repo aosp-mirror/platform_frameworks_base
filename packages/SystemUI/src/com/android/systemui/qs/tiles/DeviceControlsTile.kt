@@ -20,7 +20,6 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.service.quicksettings.Tile
 import android.view.View
 import com.android.internal.logging.MetricsLogger
@@ -66,7 +65,6 @@ class DeviceControlsTile @Inject constructor(
 ) {
 
     private var hasControlsApps = AtomicBoolean(false)
-    private val intent = Intent(Settings.ACTION_DEVICE_CONTROLS_SETTINGS)
 
     private val icon = ResourceIcon.get(R.drawable.ic_device_light)
 
@@ -91,11 +89,8 @@ class DeviceControlsTile @Inject constructor(
     override fun newTileState(): QSTile.State {
         return QSTile.State().also {
             it.state = Tile.STATE_UNAVAILABLE // Start unavailable matching `hasControlsApps`
+            it.handlesLongClick = false
         }
-    }
-
-    override fun handleDestroy() {
-        super.handleDestroy()
     }
 
     override fun handleClick(view: View?) {
@@ -138,9 +133,11 @@ class DeviceControlsTile @Inject constructor(
         return 0
     }
 
-    override fun getLongClickIntent(): Intent {
-        return intent
+    override fun getLongClickIntent(): Intent? {
+        return null
     }
+
+    override fun handleLongClick(view: View?) {}
 
     override fun getTileLabel(): CharSequence {
         return mContext.getText(R.string.quick_controls_title)

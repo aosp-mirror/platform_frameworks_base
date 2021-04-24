@@ -55,7 +55,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.InvalidationRequesterClient;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.PerformanceTracker;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.ServiceProvider;
@@ -320,7 +320,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken,
             int userId, @NonNull IFingerprintServiceReceiver receiver,
             @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback) {
+            @NonNull FingerprintStateCallback fingerprintStateCallback) {
         mHandler.post(() -> {
             final int maxTemplatesPerUser = mSensors.get(sensorId).getSensorProperties()
                     .maxEnrollmentsPerUser;
@@ -358,7 +358,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
             int statsClient,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback) {
+            @NonNull FingerprintStateCallback fingerprintStateCallback) {
         mHandler.post(() -> {
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FingerprintDetectClient client = new FingerprintDetectClient(mContext,
@@ -374,7 +374,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback) {
+            @NonNull FingerprintStateCallback fingerprintStateCallback) {
         mHandler.post(() -> {
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FingerprintAuthenticationClient client = new FingerprintAuthenticationClient(
@@ -572,7 +572,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @NonNull
     @Override
     public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback,
+            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull String opPackageName) {
         return mSensors.get(sensorId).createTestSession(callback, fingerprintStateCallback);
     }

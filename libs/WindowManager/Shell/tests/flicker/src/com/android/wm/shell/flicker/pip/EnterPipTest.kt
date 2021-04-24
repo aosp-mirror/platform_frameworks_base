@@ -47,6 +47,12 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
             }
         }
 
+    @FlakyTest
+    @Test
+    override fun noUncoveredRegions() {
+        super.noUncoveredRegions()
+    }
+
     @Presubmit
     @Test
     fun pipAppWindowAlwaysVisible() {

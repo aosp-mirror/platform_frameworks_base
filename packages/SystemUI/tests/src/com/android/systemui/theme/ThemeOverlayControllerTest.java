@@ -228,6 +228,18 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
 
         verify(mThemeOverlayApplier).applyCurrentUserOverlays(any(), any(), anyInt(), any());
+
+        // Regression test: null events should not reset the internal state and allow colors to be
+        // applied again.
+        clearInvocations(mThemeOverlayApplier);
+        mBroadcastReceiver.getValue().onReceive(null, new Intent(Intent.ACTION_WALLPAPER_CHANGED));
+        mColorsListener.getValue().onColorsChanged(null, WallpaperManager.FLAG_SYSTEM);
+        verify(mThemeOverlayApplier, never()).applyCurrentUserOverlays(any(), any(), anyInt(),
+                any());
+        mColorsListener.getValue().onColorsChanged(new WallpaperColors(Color.valueOf(Color.GREEN),
+                null, null), WallpaperManager.FLAG_SYSTEM);
+        verify(mThemeOverlayApplier, never()).applyCurrentUserOverlays(any(), any(), anyInt(),
+                any());
     }
 
     @Test
