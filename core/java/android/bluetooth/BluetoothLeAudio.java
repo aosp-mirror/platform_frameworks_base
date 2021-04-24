@@ -166,7 +166,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled() && isValidDevice(device)) {
-                return service.connect(device);
+                return service.connect(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -206,7 +206,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled() && isValidDevice(device)) {
-                return service.disconnect(device);
+                return service.disconnect(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -228,7 +228,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()) {
                 return BluetoothDevice.setAttributionSource(
-                        service.getConnectedDevices(), mAttributionSource);
+                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -251,7 +251,8 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()) {
                 return BluetoothDevice.setAttributionSource(
-                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
+                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -274,7 +275,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()
                     && isValidDevice(device)) {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -312,7 +313,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()
                     && ((device == null) || isValidDevice(device))) {
-                service.setActiveDevice(device);
+                service.setActiveDevice(device, mAttributionSource);
                 return true;
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
@@ -338,7 +339,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()) {
-                return service.getActiveDevices();
+                return service.getActiveDevices(mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<>();
@@ -363,7 +364,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()) {
-                return service.getGroupId(device);
+                return service.getGroupId(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return GROUP_ID_INVALID;
@@ -401,7 +402,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
                         && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
                     return false;
                 }
-                return service.setConnectionPolicy(device, connectionPolicy);
+                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -430,7 +431,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()
                     && isValidDevice(device)) {
-                return service.getConnectionPolicy(device);
+                return service.getConnectionPolicy(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
