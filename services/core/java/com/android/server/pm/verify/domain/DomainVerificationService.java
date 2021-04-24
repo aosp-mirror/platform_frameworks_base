@@ -741,62 +741,21 @@ public class DomainVerificationService extends SystemService
         });
     }
 
+    @NonNull
     public List<DomainOwner> getOwnersForDomain(@NonNull String domain, @UserIdInt int userId) {
         Objects.requireNonNull(domain);
         mEnforcer.assertOwnerQuerent(mConnection.getCallingUid(), mConnection.getCallingUserId(),
                 userId);
 
-        SparseArray<List<String>> levelToPackages = new SparseArray<>();
         return mConnection.withPackageSettingsReturningThrowing(pkgSettings -> {
-            // First, collect the raw approval level values
-            synchronized (mLock) {
-                final int size = mAttachedPkgStates.size();
-                for (int index = 0; index < size; index++) {
-                    DomainVerificationPkgState pkgState = mAttachedPkgStates.valueAt(index);
-                    String packageName = pkgState.getPackageName();
-                    PackageSetting pkgSetting = pkgSettings.apply(packageName);
-                    if (pkgSetting == null) {
-                        continue;
-                    }
-
-                    int level = approvalLevelForDomain(pkgSetting, domain, userId, domain);
-                    if (level <= APPROVAL_LEVEL_NONE) {
-                        continue;
-                    }
-                    List<String> list = levelToPackages.get(level);
-                    if (list == null) {
-                        list = new ArrayList<>();
-                        levelToPackages.put(level, list);
-                    }
-                    list.add(packageName);
-                }
-            }
-
-            final int size = levelToPackages.size();
-            if (size == 0) {
+            SparseArray<List<String>> levelToPackages = getOwnersForDomainInternal(domain, false,
+                    userId, pkgSettings);
+            if (levelToPackages.size() == 0) {
                 return emptyList();
             }
 
-            // Then sort them ascending by first installed time, with package name as tie breaker
-            for (int index = 0; index < size; index++) {
-                levelToPackages.valueAt(index).sort((first, second) -> {
-                    PackageSetting firstPkgSetting = pkgSettings.apply(first);
-                    PackageSetting secondPkgSetting = pkgSettings.apply(second);
-
-                    long firstInstallTime =
-                            firstPkgSetting == null ? -1L : firstPkgSetting.getFirstInstallTime();
-                    long secondInstallTime =
-                            secondPkgSetting == null ? -1L : secondPkgSetting.getFirstInstallTime();
-
-                    if (firstInstallTime != secondInstallTime) {
-                        return (int) (firstInstallTime - secondInstallTime);
-                    }
-
-                    return first.compareToIgnoreCase(second);
-                });
-            }
-
             List<DomainOwner> owners = new ArrayList<>();
+            int size = levelToPackages.size();
             for (int index = 0; index < size; index++) {
                 int level = levelToPackages.keyAt(index);
                 boolean overrideable = level <= APPROVAL_LEVEL_SELECTION;
@@ -809,6 +768,69 @@ public class DomainVerificationService extends SystemService
 
             return owners;
         });
+    }
+
+    /**
+     * @param includeNegative See {@link #approvalLevelForDomain(PackageSetting, String, boolean,
+     *                        int, Object)}.
+     * @return Mapping of approval level to packages; packages are sorted by firstInstallTime. Null
+     * if no owners were found.
+     */
+    @NonNull
+    private SparseArray<List<String>> getOwnersForDomainInternal(@NonNull String domain,
+            boolean includeNegative, @UserIdInt int userId,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
+        SparseArray<List<String>> levelToPackages = new SparseArray<>();
+        // First, collect the raw approval level values
+        synchronized (mLock) {
+            final int size = mAttachedPkgStates.size();
+            for (int index = 0; index < size; index++) {
+                DomainVerificationPkgState pkgState = mAttachedPkgStates.valueAt(index);
+                String packageName = pkgState.getPackageName();
+                PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
+                if (pkgSetting == null) {
+                    continue;
+                }
+
+                int level = approvalLevelForDomain(pkgSetting, domain, includeNegative, userId,
+                        domain);
+                if (!includeNegative && level <= APPROVAL_LEVEL_NONE) {
+                    continue;
+                }
+                List<String> list = levelToPackages.get(level);
+                if (list == null) {
+                    list = new ArrayList<>();
+                    levelToPackages.put(level, list);
+                }
+                list.add(packageName);
+            }
+        }
+
+        final int size = levelToPackages.size();
+        if (size == 0) {
+            return levelToPackages;
+        }
+
+        // Then sort them ascending by first installed time, with package name as tie breaker
+        for (int index = 0; index < size; index++) {
+            levelToPackages.valueAt(index).sort((first, second) -> {
+                PackageSetting firstPkgSetting = pkgSettingFunction.apply(first);
+                PackageSetting secondPkgSetting = pkgSettingFunction.apply(second);
+
+                long firstInstallTime =
+                        firstPkgSetting == null ? -1L : firstPkgSetting.getFirstInstallTime();
+                long secondInstallTime =
+                        secondPkgSetting == null ? -1L : secondPkgSetting.getFirstInstallTime();
+
+                if (firstInstallTime != secondInstallTime) {
+                    return (int) (firstInstallTime - secondInstallTime);
+                }
+
+                return first.compareToIgnoreCase(second);
+            });
+        }
+
+        return levelToPackages;
     }
 
     @NonNull
@@ -1153,6 +1175,88 @@ public class DomainVerificationService extends SystemService
         }
     }
 
+    @Override
+    public void printOwnersForPackage(@NonNull IndentingPrintWriter writer,
+            @Nullable String packageName, @Nullable @UserIdInt Integer userId)
+            throws NameNotFoundException {
+        mConnection.withPackageSettingsThrowing(pkgSettings -> {
+            synchronized (mLock) {
+                if (packageName == null) {
+                    int size = mAttachedPkgStates.size();
+                    for (int index = 0; index < size; index++) {
+                        try {
+                            printOwnersForPackage(writer,
+                                    mAttachedPkgStates.valueAt(index).getPackageName(), userId,
+                                    pkgSettings);
+                        } catch (NameNotFoundException ignored) {
+                            // When iterating packages, if one doesn't exist somehow, ignore
+                        }
+                    }
+                } else {
+                    printOwnersForPackage(writer, packageName, userId, pkgSettings);
+                }
+            }
+        });
+    }
+
+    private void printOwnersForPackage(@NonNull IndentingPrintWriter writer,
+            @NonNull String packageName, @Nullable @UserIdInt Integer userId,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction)
+            throws NameNotFoundException {
+        PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
+        AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
+        if (pkg == null) {
+            throw DomainVerificationUtils.throwPackageUnavailable(packageName);
+        }
+
+        ArraySet<String> domains = mCollector.collectAllWebDomains(pkg);
+        int size = domains.size();
+        if (size == 0) {
+            return;
+        }
+
+        writer.println(packageName + ":");
+        writer.increaseIndent();
+
+        for (int index = 0; index < size; index++) {
+            printOwnersForDomain(writer, domains.valueAt(index), userId, pkgSettingFunction);
+        }
+
+        writer.decreaseIndent();
+    }
+
+    @Override
+    public void printOwnersForDomains(@NonNull IndentingPrintWriter writer,
+            @NonNull List<String> domains, @Nullable @UserIdInt Integer userId) {
+        mConnection.withPackageSettings(pkgSettings -> {
+            synchronized (mLock) {
+                int size = domains.size();
+                for (int index = 0; index < size; index++) {
+                    printOwnersForDomain(writer, domains.get(index), userId, pkgSettings);
+                }
+            }
+        });
+    }
+
+    private void printOwnersForDomain(@NonNull IndentingPrintWriter writer, @NonNull String domain,
+            @Nullable @UserIdInt Integer userId,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
+        SparseArray<SparseArray<List<String>>> userIdToApprovalLevelToOwners =
+                new SparseArray<>();
+
+        if (userId == null || userId == UserHandle.USER_ALL) {
+            for (int aUserId : mConnection.getAllUserIds()) {
+                userIdToApprovalLevelToOwners.put(aUserId,
+                        getOwnersForDomainInternal(domain, true, aUserId, pkgSettingFunction));
+            }
+        } else {
+            userIdToApprovalLevelToOwners.put(userId,
+                    getOwnersForDomainInternal(domain, true, userId, pkgSettingFunction));
+        }
+
+        mDebug.printOwners(writer, domain, userIdToApprovalLevelToOwners);
+    }
+
     @NonNull
     @Override
     public DomainVerificationShell getShell() {
@@ -1427,7 +1531,7 @@ public class DomainVerificationService extends SystemService
         // Find all approval levels
         int highestApproval = fillMapWithApprovalLevels(infoApprovals, domain, userId,
                 pkgSettingFunction);
-        if (highestApproval == APPROVAL_LEVEL_NONE) {
+        if (highestApproval <= APPROVAL_LEVEL_NONE) {
             return Pair.create(emptyList(), highestApproval);
         }
 
@@ -1484,7 +1588,7 @@ public class DomainVerificationService extends SystemService
                 fillInfoMapForSamePackage(inputMap, packageName, APPROVAL_LEVEL_NONE);
                 continue;
             }
-            int approval = approvalLevelForDomain(pkgSetting, domain, userId, domain);
+            int approval = approvalLevelForDomain(pkgSetting, domain, false, userId, domain);
             highestApproval = Math.max(highestApproval, approval);
             fillInfoMapForSamePackage(inputMap, packageName, approval);
         }
@@ -1600,17 +1704,52 @@ public class DomainVerificationService extends SystemService
             return APPROVAL_LEVEL_NONE;
         }
 
-        return approvalLevelForDomain(pkgSetting, intent.getData().getHost(), userId, intent);
+        return approvalLevelForDomain(pkgSetting, intent.getData().getHost(), false, userId,
+                intent);
     }
 
     /**
-     * @param debugObject Should be an {@link Intent} if checking for resolution or a {@link String}
-     *                    otherwise.
+     * @param includeNegative Whether to include negative values, which requires an expensive
+     *                          domain comparison operation.
+     * @param debugObject       Should be an {@link Intent} if checking for resolution or a
+     *                          {@link String} otherwise.
      */
     private int approvalLevelForDomain(@NonNull PackageSetting pkgSetting, @NonNull String host,
-            @UserIdInt int userId, @NonNull Object debugObject) {
+            boolean includeNegative, @UserIdInt int userId, @NonNull Object debugObject) {
+        int approvalLevel = approvalLevelForDomainInternal(pkgSetting, host, includeNegative,
+                userId, debugObject);
+        if (includeNegative && approvalLevel == APPROVAL_LEVEL_NONE) {
+            PackageUserState pkgUserState = pkgSetting.readUserState(userId);
+            if (!pkgUserState.installed) {
+                return APPROVAL_LEVEL_NOT_INSTALLED;
+            }
+
+            AndroidPackage pkg = pkgSetting.getPkg();
+            if (pkg != null) {
+                if (!pkgUserState.isPackageEnabled(pkg)) {
+                    return APPROVAL_LEVEL_DISABLED;
+                } else if (mCollector.containsAutoVerifyDomain(pkgSetting.getPkg(), host)) {
+                    return APPROVAL_LEVEL_UNVERIFIED;
+                }
+            }
+        }
+
+        return approvalLevel;
+    }
+
+    private int approvalLevelForDomainInternal(@NonNull PackageSetting pkgSetting,
+            @NonNull String host, boolean includeNegative, @UserIdInt int userId,
+            @NonNull Object debugObject) {
         String packageName = pkgSetting.getName();
         final AndroidPackage pkg = pkgSetting.getPkg();
+
+        if (pkg != null && includeNegative && !mCollector.containsWebDomain(pkg, host)) {
+            if (DEBUG_APPROVAL) {
+                debugApproval(packageName, debugObject, userId, false,
+                        "domain not declared");
+            }
+            return APPROVAL_LEVEL_UNDECLARED;
+        }
 
         final PackageUserState pkgUserState = pkgSetting.readUserState(userId);
         if (pkgUserState == null) {
@@ -1749,6 +1888,7 @@ public class DomainVerificationService extends SystemService
     private Pair<List<String>, Integer> getApprovedPackagesLocked(@NonNull String domain,
             @UserIdInt int userId, int minimumApproval,
             @NonNull Function<String, PackageSetting> pkgSettingFunction) {
+        boolean includeNegative = minimumApproval < APPROVAL_LEVEL_NONE;
         int highestApproval = minimumApproval;
         List<String> approvedPackages = emptyList();
 
@@ -1762,7 +1902,8 @@ public class DomainVerificationService extends SystemService
                     continue;
                 }
 
-                int level = approvalLevelForDomain(pkgSetting, domain, userId, domain);
+                int level = approvalLevelForDomain(pkgSetting, domain, includeNegative, userId,
+                        domain);
                 if (level < minimumApproval) {
                     continue;
                 }
