@@ -2072,7 +2072,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void notifyCellLocationForSubscriber(int subId, CellIdentity cellIdentity,
             boolean hasUserSwitched) {
-        log("notifyCellLocationForSubscriber: subId=" + subId + " cellIdentity=" + cellIdentity);
+        log("notifyCellLocationForSubscriber: subId=" + subId + " cellIdentity="
+                + Rlog.pii(DBG || VDBG || DBG_LOC, cellIdentity));
         if (!checkNotifyPermission("notifyCellLocation()")) {
             return;
         }
