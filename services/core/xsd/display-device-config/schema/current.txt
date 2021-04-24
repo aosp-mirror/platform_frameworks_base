@@ -4,6 +4,7 @@ package com.android.server.display.config {
   public class DisplayConfiguration {
     ctor public DisplayConfiguration();
     method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
+    method public final com.android.server.display.config.SensorDetails getLightSensor();
     method public com.android.server.display.config.DisplayQuirks getQuirks();
     method @NonNull public final java.math.BigDecimal getScreenBrightnessDefault();
     method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
@@ -12,6 +13,7 @@ package com.android.server.display.config {
     method public final java.math.BigDecimal getScreenBrightnessRampSlowDecrease();
     method public final java.math.BigDecimal getScreenBrightnessRampSlowIncrease();
     method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
+    method public final void setLightSensor(com.android.server.display.config.SensorDetails);
     method public void setQuirks(com.android.server.display.config.DisplayQuirks);
     method public final void setScreenBrightnessDefault(@NonNull java.math.BigDecimal);
     method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
@@ -59,6 +61,14 @@ package com.android.server.display.config {
     method @NonNull public final java.math.BigDecimal getValue();
     method public final void setNits(@NonNull java.math.BigDecimal);
     method public final void setValue(@NonNull java.math.BigDecimal);
+  }
+
+  public class SensorDetails {
+    ctor public SensorDetails();
+    method @Nullable public final String getName();
+    method @Nullable public final String getType();
+    method public final void setName(@Nullable String);
+    method public final void setType(@Nullable String);
   }
 
   public class XmlParser {

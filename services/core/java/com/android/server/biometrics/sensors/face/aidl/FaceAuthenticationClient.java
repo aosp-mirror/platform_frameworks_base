@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.face.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.NotificationManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -32,6 +33,8 @@ import android.hardware.face.FaceAuthenticationFrame;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.VibrationEffect;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -56,6 +59,9 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     @NonNull private final LockoutCache mLockoutCache;
     @Nullable private final NotificationManager mNotificationManager;
     @Nullable private ICancellationSignal mCancellationSignal;
+
+    @NonNull private final ContentResolver mContentResolver;
+    private final boolean mCustomHaptics;
 
     private final int[] mBiometricPromptIgnoreList;
     private final int[] mBiometricPromptIgnoreListVendor;
@@ -87,6 +93,10 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
                 R.array.config_face_acquire_keyguard_ignorelist);
         mKeyguardIgnoreListVendor = resources.getIntArray(
                 R.array.config_face_acquire_vendor_keyguard_ignorelist);
+
+        mContentResolver = context.getContentResolver();
+        mCustomHaptics = Settings.Global.getInt(mContentResolver,
+                "face_custom_success_error", 0) == 1;
     }
 
     @Override
@@ -242,5 +252,25 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
+    }
+
+    @Override
+    protected @NonNull VibrationEffect getSuccessVibrationEffect() {
+        if (!mCustomHaptics) {
+            return super.getSuccessVibrationEffect();
+        }
+
+        return getVibration(Settings.Global.getString(mContentResolver,
+                "face_success_type"), super.getSuccessVibrationEffect());
+    }
+
+    @Override
+    protected @NonNull VibrationEffect getErrorVibrationEffect() {
+        if (!mCustomHaptics) {
+            return super.getErrorVibrationEffect();
+        }
+
+        return getVibration(Settings.Global.getString(mContentResolver,
+                "face_error_type"), super.getErrorVibrationEffect());
     }
 }

@@ -579,7 +579,11 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     protected final byte[] engineDoFinal(byte[] input, int inputOffset, int inputLen)
             throws IllegalBlockSizeException, BadPaddingException {
         if (mCipher != null) {
-            return mCipher.doFinal(input, inputOffset, inputLen);
+            if (input == null && inputLen == 0) {
+                return mCipher.doFinal();
+            } else {
+                return mCipher.doFinal(input, inputOffset, inputLen);
+            }
         }
 
         if (mCachedException != null) {

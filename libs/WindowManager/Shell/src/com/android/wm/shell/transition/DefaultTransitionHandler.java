@@ -18,9 +18,14 @@ package com.android.wm.shell.transition;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
+import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
@@ -64,6 +69,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     /** Keeps track of the currently-running animations associated with each transition. */
     private final ArrayMap<IBinder, ArrayList<Animator>> mAnimations = new ArrayMap<>();
 
+    private final Rect mInsets = new Rect(0, 0, 0, 0);
     private float mTransitionAnimationScaleSetting = 1.0f;
 
     DefaultTransitionHandler(@NonNull TransactionPool transactionPool, Context context,
@@ -111,7 +117,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // Don't animate anything that isn't independent.
             if (!TransitionInfo.isIndependent(change, info)) continue;
 
-            Animation a = loadAnimation(info.getType(), change);
+            Animation a = loadAnimation(info.getType(), info.getFlags(), change);
             if (a != null) {
                 startAnimInternal(animations, a, change.getLeash(), onAnimFinish);
             }
@@ -135,47 +141,69 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     @Nullable
-    private Animation loadAnimation(int type, TransitionInfo.Change change) {
+    private Animation loadAnimation(int type, int flags, TransitionInfo.Change change) {
         // TODO(b/178678389): It should handle more type animation here
         Animation a = null;
 
         final boolean isOpening = Transitions.isOpeningType(type);
-        final int mode = change.getMode();
-        final int flags = change.getFlags();
+        final int changeMode = change.getMode();
+        final int changeFlags = change.getFlags();
 
-        if (mode == TRANSIT_OPEN && isOpening) {
-            if ((flags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
+        if (type == TRANSIT_RELAUNCH) {
+            a = mTransitionAnimation.createRelaunchAnimation(
+                    change.getStartAbsBounds(), mInsets, change.getEndAbsBounds());
+        } else if (type == TRANSIT_KEYGUARD_GOING_AWAY) {
+            a = mTransitionAnimation.loadKeyguardExitAnimation(flags,
+                    (changeFlags & FLAG_SHOW_WALLPAPER) != 0);
+        } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {
+            a = mTransitionAnimation.loadKeyguardUnoccludeAnimation();
+        } else if (changeMode == TRANSIT_OPEN && isOpening) {
+            if ((changeFlags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
                 // This received a transferred starting window, so don't animate
                 return null;
             }
 
-            if (change.getTaskInfo() != null) {
+            if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
+                a = mTransitionAnimation.loadVoiceActivityOpenAnimation(true /** enter */);
+            } else if (change.getTaskInfo() != null) {
                 a = mTransitionAnimation.loadDefaultAnimationAttr(
                         R.styleable.WindowAnimation_taskOpenEnterAnimation);
             } else {
-                a = mTransitionAnimation.loadDefaultAnimationRes((flags & FLAG_TRANSLUCENT) == 0
+                a = mTransitionAnimation.loadDefaultAnimationRes(
+                        (changeFlags & FLAG_TRANSLUCENT) == 0
                         ? R.anim.activity_open_enter : R.anim.activity_translucent_open_enter);
             }
-        } else if (mode == TRANSIT_TO_FRONT && isOpening) {
-            if ((flags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
+        } else if (changeMode == TRANSIT_TO_FRONT && isOpening) {
+            if ((changeFlags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
                 // This received a transferred starting window, so don't animate
                 return null;
             }
 
-            a = mTransitionAnimation.loadDefaultAnimationAttr(
-                    R.styleable.WindowAnimation_taskToFrontEnterAnimation);
-        } else if (mode == TRANSIT_CLOSE && !isOpening) {
-            if (change.getTaskInfo() != null) {
+            if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
+                a = mTransitionAnimation.loadVoiceActivityOpenAnimation(true /** enter */);
+            } else {
+                a = mTransitionAnimation.loadDefaultAnimationAttr(
+                        R.styleable.WindowAnimation_taskToFrontEnterAnimation);
+            }
+        } else if (changeMode == TRANSIT_CLOSE && !isOpening) {
+            if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
+                a = mTransitionAnimation.loadVoiceActivityExitAnimation(false /** enter */);
+            } else if (change.getTaskInfo() != null) {
                 a = mTransitionAnimation.loadDefaultAnimationAttr(
                         R.styleable.WindowAnimation_taskCloseExitAnimation);
             } else {
-                a = mTransitionAnimation.loadDefaultAnimationRes((flags & FLAG_TRANSLUCENT) == 0
+                a = mTransitionAnimation.loadDefaultAnimationRes(
+                        (changeFlags & FLAG_TRANSLUCENT) == 0
                         ? R.anim.activity_close_exit : R.anim.activity_translucent_close_exit);
             }
-        } else if (mode == TRANSIT_TO_BACK && !isOpening) {
-            a = mTransitionAnimation.loadDefaultAnimationAttr(
-                    R.styleable.WindowAnimation_taskToBackExitAnimation);
-        } else if (mode == TRANSIT_CHANGE) {
+        } else if (changeMode == TRANSIT_TO_BACK && !isOpening) {
+            if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
+                a = mTransitionAnimation.loadVoiceActivityExitAnimation(false /** enter */);
+            } else {
+                a = mTransitionAnimation.loadDefaultAnimationAttr(
+                        R.styleable.WindowAnimation_taskToBackExitAnimation);
+            }
+        } else if (changeMode == TRANSIT_CHANGE) {
             // In the absence of a specific adapter, we just want to keep everything stationary.
             a = new AlphaAnimation(1.f, 1.f);
             a.setDuration(TransitionAnimation.DEFAULT_APP_TRANSITION_DURATION);

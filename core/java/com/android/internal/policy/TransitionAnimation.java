@@ -21,7 +21,6 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
@@ -75,6 +74,8 @@ public class TransitionAnimation {
 
     /** Fraction of animation at which the recents thumbnail becomes completely transparent */
     private static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.5f;
+
+    private static final String DEFAULT_PACKAGE = "android";
 
     private final Context mContext;
     private final String mTag;
@@ -132,7 +133,8 @@ public class TransitionAnimation {
         windowStyle.recycle();
     }
 
-    public Animation loadKeyguardExitAnimation(int transit, int transitionFlags) {
+    /** Loads keyguard animation by transition flags and check it is on wallpaper or not. */
+    public Animation loadKeyguardExitAnimation(int transitionFlags, boolean onWallpaper) {
         if ((transitionFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) != 0) {
             return null;
         }
@@ -140,25 +142,24 @@ public class TransitionAnimation {
                 (transitionFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0;
         final boolean subtle =
                 (transitionFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0;
-        return createHiddenByKeyguardExit(mContext, mInterpolator,
-                transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER, toShade, subtle);
+        return createHiddenByKeyguardExit(mContext, mInterpolator, onWallpaper, toShade, subtle);
     }
 
     @Nullable
-    public Animation loadKeyguardUnoccludeAnimation(LayoutParams lp) {
-        return loadAnimationRes(lp, com.android.internal.R.anim.wallpaper_open_exit);
+    public Animation loadKeyguardUnoccludeAnimation() {
+        return loadDefaultAnimationRes(com.android.internal.R.anim.wallpaper_open_exit);
     }
 
     @Nullable
-    public Animation loadVoiceActivityOpenAnimation(LayoutParams lp, boolean enter) {
-        return loadAnimationRes(lp, enter
+    public Animation loadVoiceActivityOpenAnimation(boolean enter) {
+        return loadDefaultAnimationRes(enter
                 ? com.android.internal.R.anim.voice_activity_open_enter
                 : com.android.internal.R.anim.voice_activity_open_exit);
     }
 
     @Nullable
-    public Animation loadVoiceActivityExitAnimation(LayoutParams lp, boolean enter) {
-        return loadAnimationRes(lp, enter
+    public Animation loadVoiceActivityExitAnimation(boolean enter) {
+        return loadDefaultAnimationRes(enter
                 ? com.android.internal.R.anim.voice_activity_close_enter
                 : com.android.internal.R.anim.voice_activity_close_exit);
     }
@@ -170,33 +171,19 @@ public class TransitionAnimation {
 
     @Nullable
     public Animation loadCrossProfileAppEnterAnimation() {
-        return loadAnimationRes("android",
+        return loadAnimationRes(DEFAULT_PACKAGE,
                 com.android.internal.R.anim.task_open_enter_cross_profile_apps);
     }
 
     @Nullable
     public Animation loadCrossProfileAppThumbnailEnterAnimation() {
         return loadAnimationRes(
-                "android", com.android.internal.R.anim.cross_profile_apps_thumbnail_enter);
-    }
-
-    /** Load animation by resource Id from specific LayoutParams. */
-    @Nullable
-    private Animation loadAnimationRes(LayoutParams lp, int resId) {
-        Context context = mContext;
-        if (ResourceId.isValid(resId)) {
-            AttributeCache.Entry ent = getCachedAnimations(lp);
-            if (ent != null) {
-                context = ent.context;
-            }
-            return loadAnimationSafely(context, resId, mTag);
-        }
-        return null;
+                DEFAULT_PACKAGE, com.android.internal.R.anim.cross_profile_apps_thumbnail_enter);
     }
 
     /** Load animation by resource Id from specific package. */
     @Nullable
-    private Animation loadAnimationRes(String packageName, int resId) {
+    public Animation loadAnimationRes(String packageName, int resId) {
         if (ResourceId.isValid(resId)) {
             AttributeCache.Entry ent = getCachedAnimations(packageName, resId);
             if (ent != null) {
@@ -209,7 +196,7 @@ public class TransitionAnimation {
     /** Load animation by resource Id from android package. */
     @Nullable
     public Animation loadDefaultAnimationRes(int resId) {
-        return loadAnimationRes("android", resId);
+        return loadAnimationRes(DEFAULT_PACKAGE, resId);
     }
 
     /** Load animation by attribute Id from specific LayoutParams */
@@ -237,7 +224,7 @@ public class TransitionAnimation {
         int resId = Resources.ID_NULL;
         Context context = mContext;
         if (animAttr >= 0) {
-            AttributeCache.Entry ent = getCachedAnimations("android",
+            AttributeCache.Entry ent = getCachedAnimations(DEFAULT_PACKAGE,
                     mDefaultWindowAnimationStyleResId);
             if (ent != null) {
                 context = ent.context;
@@ -261,10 +248,10 @@ public class TransitionAnimation {
             // If this is a system resource, don't try to load it from the
             // application resources.  It is nice to avoid loading application
             // resources if we can.
-            String packageName = lp.packageName != null ? lp.packageName : "android";
+            String packageName = lp.packageName != null ? lp.packageName : DEFAULT_PACKAGE;
             int resId = getAnimationStyleResId(lp);
             if ((resId & 0xFF000000) == 0x01000000) {
-                packageName = "android";
+                packageName = DEFAULT_PACKAGE;
             }
             if (mDebug) {
                 Slog.v(mTag, "Loading animations: picked package=" + packageName);
@@ -283,7 +270,7 @@ public class TransitionAnimation {
         }
         if (packageName != null) {
             if ((resId & 0xFF000000) == 0x01000000) {
-                packageName = "android";
+                packageName = DEFAULT_PACKAGE;
             }
             if (mDebug) {
                 Slog.v(mTag, "Loading animations: picked package="

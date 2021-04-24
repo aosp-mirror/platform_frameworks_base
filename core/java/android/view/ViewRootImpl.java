@@ -2787,8 +2787,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (!mPendingMergedConfiguration.equals(mLastReportedMergedConfiguration)) {
                     if (DEBUG_CONFIGURATION) Log.v(mTag, "Visible with new config: "
                             + mPendingMergedConfiguration.getMergedConfiguration());
-                    performConfigurationChange(mPendingMergedConfiguration, !mFirst,
-                            INVALID_DISPLAY /* same display */);
+                    performConfigurationChange(new MergedConfiguration(mPendingMergedConfiguration),
+                            !mFirst, INVALID_DISPLAY /* same display */);
                     updatedConfiguration = true;
                 }
 
@@ -2854,7 +2854,6 @@ public final class ViewRootImpl implements ViewParent,
                             return;
                         }
                     }
-                    notifySurfaceCreated();
                 } else if (surfaceDestroyed) {
                     // If the surface has been removed, then reset the scroll
                     // positions.
@@ -2892,10 +2891,6 @@ public final class ViewRootImpl implements ViewParent,
                         handleOutOfResourcesException(e);
                         return;
                     }
-                }
-
-                if (!surfaceCreated && surfaceReplaced) {
-                    notifySurfaceReplaced();
                 }
 
                 if (mDragResizing != dragResizing) {
@@ -3110,7 +3105,14 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (surfaceDestroyed) {
+        // These callbacks will trigger SurfaceView SurfaceHolder.Callbacks and must be invoked
+        // after the measure pass. If its invoked before the measure pass and the app modifies
+        // the view hierarchy in the callbacks, we could leave the views in a broken state.
+        if (surfaceCreated) {
+            notifySurfaceCreated();
+        } else if (surfaceReplaced) {
+            notifySurfaceReplaced();
+        } else if (surfaceDestroyed)  {
             notifySurfaceDestroyed();
         }
 
@@ -5330,8 +5332,8 @@ public final class ViewRootImpl implements ViewParent,
                     mPendingMergedConfiguration.setConfiguration(config,
                             mLastReportedMergedConfiguration.getOverrideConfiguration());
 
-                    performConfigurationChange(mPendingMergedConfiguration, false /* force */,
-                            INVALID_DISPLAY /* same display */);
+                    performConfigurationChange(new MergedConfiguration(mPendingMergedConfiguration),
+                            false /* force */, INVALID_DISPLAY /* same display */);
                 } break;
                 case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
                     setAccessibilityFocus(null, null);

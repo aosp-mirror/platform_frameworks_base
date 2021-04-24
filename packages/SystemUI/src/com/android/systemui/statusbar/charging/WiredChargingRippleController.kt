@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.charging
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.graphics.PointF
 import android.os.SystemProperties
@@ -32,6 +33,7 @@ import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.leak.RotationUtils
+import com.android.systemui.R
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -50,6 +52,10 @@ class WiredChargingRippleController @Inject constructor(
     private var charging: Boolean? = null
     private val rippleEnabled: Boolean = featureFlags.isChargingRippleEnabled &&
             !SystemProperties.getBoolean("persist.debug.suppress-charging-ripple", false)
+    private var normalizedPortPosX: Float = context.resources.getFloat(
+            R.dimen.physical_charger_port_location_normalized_x)
+    private var normalizedPortPosY: Float = context.resources.getFloat(
+            R.dimen.physical_charger_port_location_normalized_y)
     private val windowLayoutParams = WindowManager.LayoutParams().apply {
         width = WindowManager.LayoutParams.MATCH_PARENT
         height = WindowManager.LayoutParams.MATCH_PARENT
@@ -98,6 +104,13 @@ class WiredChargingRippleController @Inject constructor(
             override fun onOverlayChanged() {
                 updateRippleColor()
             }
+
+            override fun onConfigChanged(newConfig: Configuration?) {
+                normalizedPortPosX = context.resources.getFloat(
+                        R.dimen.physical_charger_port_location_normalized_x)
+                normalizedPortPosY = context.resources.getFloat(
+                        R.dimen.physical_charger_port_location_normalized_y)
+            }
         }
         configurationController.addCallback(configurationChangedListener)
 
@@ -134,23 +147,19 @@ class WiredChargingRippleController @Inject constructor(
         val width = displayMetrics.widthPixels
         val height = displayMetrics.heightPixels
         rippleView.radius = Integer.max(width, height).toFloat()
-
-        // Always show the ripple from the charging cable location.
-        // Currently assuming the charging cable is at the bottom of the screen.
-        // TODO(shanh): Pull charging port location into configurations.
         rippleView.origin = when (RotationUtils.getRotation(context)) {
             RotationUtils.ROTATION_LANDSCAPE -> {
-                PointF(width.toFloat(), height / 2f)
+                PointF(width * normalizedPortPosY, height * (1 - normalizedPortPosX))
             }
             RotationUtils.ROTATION_UPSIDE_DOWN -> {
-                PointF(width / 2f, 0f)
+                PointF(width * (1 - normalizedPortPosX), height * (1 - normalizedPortPosY))
             }
             RotationUtils.ROTATION_SEASCAPE -> {
-                PointF(0f, height / 2f)
+                PointF(width * (1 - normalizedPortPosY), height * normalizedPortPosX)
             }
             else -> {
                 // ROTATION_NONE
-                PointF(width / 2f, height.toFloat())
+                PointF(width * normalizedPortPosX, height * normalizedPortPosY)
             }
         }
     }

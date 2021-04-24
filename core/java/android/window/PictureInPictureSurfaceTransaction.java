@@ -16,10 +16,13 @@
 
 package android.window;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.SurfaceControl;
 
 import java.util.Objects;
 
@@ -125,6 +128,22 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
                 + " cornerRadius=" + mCornerRadius
                 + " crop=" + mWindowCrop
                 + ")";
+    }
+
+    /** Applies {@link PictureInPictureSurfaceTransaction} to a given leash. */
+    public static void apply(@NonNull PictureInPictureSurfaceTransaction surfaceTransaction,
+            @NonNull SurfaceControl surfaceControl,
+            @NonNull SurfaceControl.Transaction tx) {
+        final Matrix matrix = new Matrix();
+        matrix.setScale(surfaceTransaction.mScaleX, surfaceTransaction.mScaleY);
+        if (surfaceTransaction.mRotation != 0) {
+            matrix.postRotate(surfaceTransaction.mRotation);
+        }
+        tx.setMatrix(surfaceControl, matrix, new float[9])
+                .setPosition(surfaceControl,
+                        surfaceTransaction.mPositionX, surfaceTransaction.mPositionY)
+                .setWindowCrop(surfaceControl, surfaceTransaction.getWindowCrop())
+                .setCornerRadius(surfaceControl, surfaceTransaction.mCornerRadius);
     }
 
     public static final @android.annotation.NonNull Creator<PictureInPictureSurfaceTransaction>

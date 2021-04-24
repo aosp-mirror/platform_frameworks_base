@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.media.AudioAttributes;
@@ -26,6 +27,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.text.TextUtils;
 import android.util.Slog;
 
 /**
@@ -42,6 +44,15 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                     .build();
+
+    private final VibrationEffect mEffectTick = VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+    private final VibrationEffect mEffectTextureTick =
+            VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK);
+    private final VibrationEffect mEffectClick = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+    private final VibrationEffect mEffectHeavy =
+            VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
+    private final VibrationEffect mDoubleClick =
+            VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
 
     private final PowerManager mPowerManager;
     private final VibrationEffect mSuccessVibrationEffect;
@@ -61,8 +72,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         super(context, lazyDaemon, token, listener, userId, owner, cookie, sensorId, statsModality,
                 statsAction, statsClient);
         mPowerManager = context.getSystemService(PowerManager.class);
-        mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-        mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+        mSuccessVibrationEffect = mEffectClick;
+        mErrorVibrationEffect = mDoubleClick;
     }
 
     @Override
@@ -181,18 +192,47 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
     }
 
+    protected @NonNull VibrationEffect getSuccessVibrationEffect() {
+        return mSuccessVibrationEffect;
+    }
+
+    protected @NonNull VibrationEffect getErrorVibrationEffect() {
+        return mErrorVibrationEffect;
+    }
 
     protected final void vibrateSuccess() {
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
         if (vibrator != null) {
-            vibrator.vibrate(mSuccessVibrationEffect, VIBRATION_SONFICATION_ATTRIBUTES);
+            vibrator.vibrate(getSuccessVibrationEffect(), VIBRATION_SONFICATION_ATTRIBUTES);
         }
     }
 
     protected final void vibrateError() {
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
         if (vibrator != null) {
-            vibrator.vibrate(mErrorVibrationEffect, VIBRATION_SONFICATION_ATTRIBUTES);
+            vibrator.vibrate(getErrorVibrationEffect(), VIBRATION_SONFICATION_ATTRIBUTES);
+        }
+    }
+
+    protected final @NonNull VibrationEffect getVibration(@Nullable String effect,
+            @NonNull VibrationEffect defaultEffect) {
+        if (TextUtils.isEmpty(effect)) {
+            return defaultEffect;
+        }
+
+        switch (effect.toLowerCase()) {
+            case "click":
+                return mEffectClick;
+            case "heavy":
+                return mEffectHeavy;
+            case "texture_tick":
+                return mEffectTextureTick;
+            case "tick":
+                return mEffectTick;
+            case "double_click":
+                return mDoubleClick;
+            default:
+                return defaultEffect;
         }
     }
 }

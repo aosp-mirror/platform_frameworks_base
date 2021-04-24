@@ -179,7 +179,23 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
         mFalsingCollector.onTouchEvent(down);
         verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
 
-        // Up event would normally flush the up event.
+        // Up event would normally flush the up event, but doesn't.
+        mFalsingCollector.onTouchEvent(up);
+        verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
+    }
+
+    @Test
+    public void testAvoidDozing() {
+        MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
+        MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
+
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
+
+        // Nothing passed initially
+        mFalsingCollector.onTouchEvent(down);
+        verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
+
+        // Up event would normally flush the up event, but doesn't.
         mFalsingCollector.onTouchEvent(up);
         verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
     }

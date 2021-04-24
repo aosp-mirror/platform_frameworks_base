@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -57,7 +55,6 @@ public class NotificationContentViewTest extends SysuiTestCase {
         mView = new NotificationContentView(mContext, null);
         ExpandableNotificationRow row = new ExpandableNotificationRow(mContext, null);
         ExpandableNotificationRow mockRow = spy(row);
-        doNothing().when(mockRow).updateBackgroundAlpha(anyFloat());
         doReturn(10).when(mockRow).getIntrinsicHeight();
 
         mView.setContainingNotification(mockRow);

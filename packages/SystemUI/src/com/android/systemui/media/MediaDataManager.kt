@@ -394,9 +394,9 @@ class MediaDataManager(
      * This will make the player not active anymore, hiding it from QQS and Keyguard.
      * @see MediaData.active
      */
-    internal fun setTimedOut(token: String, timedOut: Boolean) {
+    internal fun setTimedOut(token: String, timedOut: Boolean, forceUpdate: Boolean = false) {
         mediaEntries[token]?.let {
-            if (it.active == !timedOut) {
+            if (it.active == !timedOut && !forceUpdate) {
                 return
             }
             it.active = !timedOut
@@ -470,12 +470,13 @@ class MediaDataManager(
         }
 
         val mediaAction = getResumeMediaAction(resumeAction)
+        val lastActive = System.currentTimeMillis()
         foregroundExecutor.execute {
             onMediaDataLoaded(packageName, null, MediaData(userId, true, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
                     packageName, token, appIntent, device = null, active = false,
                     resumeAction = resumeAction, resumption = true, notificationKey = packageName,
-                    hasCheckedForResume = true))
+                    hasCheckedForResume = true, lastActive = lastActive))
         }
     }
 
@@ -586,9 +587,9 @@ class MediaDataManager(
         }
 
         val isLocalSession = mediaController.playbackInfo?.playbackType ==
-            MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL ?: true
+            MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL
         val isPlaying = mediaController.playbackState?.let { isPlayingState(it.state) } ?: null
-
+        val lastActive = System.currentTimeMillis()
         foregroundExecutor.execute {
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
@@ -598,7 +599,8 @@ class MediaDataManager(
                     actionsToShowCollapsed, sbn.packageName, token, notif.contentIntent, null,
                     active, resumeAction = resumeAction, isLocalSession = isLocalSession,
                     notificationKey = key, hasCheckedForResume = hasCheckedForResume,
-                    isPlaying = isPlaying, isClearable = sbn.isClearable()))
+                    isPlaying = isPlaying, isClearable = sbn.isClearable(),
+                    lastActive = lastActive))
         }
     }
 
@@ -724,7 +726,7 @@ class MediaDataManager(
         Assert.isMainThread()
         val removed = mediaEntries.remove(key)
         if (useMediaResumption && removed?.resumeAction != null &&
-                !isBlockedFromResume(removed.packageName)) {
+                !isBlockedFromResume(removed.packageName) && removed?.isLocalSession == true) {
             Log.d(TAG, "Not removing $key because resumable")
             // Move to resume key (aka package name) if that key doesn't already exist.
             val resumeAction = getResumeMediaAction(removed.resumeAction!!)

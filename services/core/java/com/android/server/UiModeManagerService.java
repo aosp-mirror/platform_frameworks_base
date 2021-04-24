@@ -1779,7 +1779,7 @@ final class UiModeManagerService extends SystemService {
                                 // TODO(b/173744200) Please replace FLAG_MUTABLE_UNAUDITED below
                                 // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
                                 PendingIntent.getActivityAsUser(context, 0,
-                                        carModeOffIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED,
+                                        carModeOffIntent, PendingIntent.FLAG_MUTABLE,
                                         null, UserHandle.CURRENT));
                 mNotificationManager.notifyAsUser(null,
                         SystemMessage.NOTE_CAR_MODE_DISABLE, n.build(), UserHandle.ALL);

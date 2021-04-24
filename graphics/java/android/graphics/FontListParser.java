@@ -225,7 +225,14 @@ public class FontListParser {
             }
         }
         String sanitizedName = FILENAME_WHITESPACE_PATTERN.matcher(filename).replaceAll("");
-        String updatedName = findUpdatedFontFile(sanitizedName, updatableFontMap);
+
+        if (postScriptName == null) {
+            // If post script name was not provided, assume the file name is same to PostScript
+            // name.
+            postScriptName = sanitizedName.substring(0, sanitizedName.length() - 4);
+        }
+
+        String updatedName = findUpdatedFontFile(postScriptName, updatableFontMap);
         String filePath;
         String originalPath;
         if (updatedName != null) {
@@ -246,12 +253,7 @@ public class FontListParser {
 
         File file = new File(filePath);
 
-        if (postScriptName == null) {
-            // If post script name was not provided, assume the file name is same to PostScript
-            // name.
-            String name = file.getName();
-            postScriptName = name.substring(0, name.length() - 4);
-        }
+
 
         return new FontConfig.Font(file,
                 originalPath == null ? null : new File(originalPath),
@@ -265,10 +267,10 @@ public class FontListParser {
                 fallbackFor);
     }
 
-    private static String findUpdatedFontFile(String name,
+    private static String findUpdatedFontFile(String psName,
             @Nullable Map<String, File> updatableFontMap) {
         if (updatableFontMap != null) {
-            File updatedFile = updatableFontMap.get(name);
+            File updatedFile = updatableFontMap.get(psName);
             if (updatedFile != null) {
                 return updatedFile.getAbsolutePath();
             }

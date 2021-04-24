@@ -75,20 +75,41 @@ public class UsageProgressBarPreferenceTest {
 
         final TextView usageSummary = (TextView) mViewHolder.findViewById(R.id.usage_summary);
         final SpannedString summary = new SpannedString(usageSummary.getText());
-        assertThat(summary.getSpans(0, summary.length(), AbsoluteSizeSpan.class).length)
-                .isEqualTo(1);
+        final AbsoluteSizeSpan[] spans = summary
+                .getSpans(0, summary.length(), AbsoluteSizeSpan.class);
+        assertThat(spans.length).isEqualTo(1);
+        assertThat(summary.getSpanStart(spans[0])).isEqualTo(0);
+        assertThat(summary.getSpanEnd(spans[0])).isEqualTo(2);
     }
 
     @Test
-    public void setUsageSummary_floatNumber_findAbsoluteSizeSpan() {
+    public void setUsageSummary_floatingPointNumber_findAbsoluteSizeSpan() {
         mUsageProgressBarPreference.setUsageSummary("3.14Test");
 
         mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
 
         final TextView usageSummary = (TextView) mViewHolder.findViewById(R.id.usage_summary);
         final SpannedString summary = new SpannedString(usageSummary.getText());
-        assertThat(summary.getSpans(0, summary.length(), AbsoluteSizeSpan.class).length)
-                .isEqualTo(1);
+        final AbsoluteSizeSpan[] spans = summary
+                .getSpans(0, summary.length(), AbsoluteSizeSpan.class);
+        assertThat(spans.length).isEqualTo(1);
+        assertThat(summary.getSpanStart(spans[0])).isEqualTo(0);
+        assertThat(summary.getSpanEnd(spans[0])).isEqualTo(4);
+    }
+
+    @Test
+    public void setUsageSummary_commaFloatingPointNumber_findAbsoluteSizeSpan() {
+        mUsageProgressBarPreference.setUsageSummary("3,14Test");
+
+        mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
+
+        final TextView usageSummary = (TextView) mViewHolder.findViewById(R.id.usage_summary);
+        final SpannedString summary = new SpannedString(usageSummary.getText());
+        final AbsoluteSizeSpan[] spans = summary
+                .getSpans(0, summary.length(), AbsoluteSizeSpan.class);
+        assertThat(spans.length).isEqualTo(1);
+        assertThat(summary.getSpanStart(spans[0])).isEqualTo(0);
+        assertThat(summary.getSpanEnd(spans[0])).isEqualTo(4);
     }
 
     @Test

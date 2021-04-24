@@ -34,7 +34,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -66,7 +65,12 @@ public abstract class RecognitionService extends Service {
     private static final String TAG = "RecognitionService";
 
     /** Debugging flag */
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
+
+    private static final String RECORD_AUDIO_APP_OP =
+            AppOpsManager.permissionToOp(Manifest.permission.RECORD_AUDIO);
+    private static final int RECORD_AUDIO_APP_OP_CODE =
+            AppOpsManager.permissionToOpCode(Manifest.permission.RECORD_AUDIO);
 
     /** Binder of the recognition service */
     private RecognitionServiceBinder mBinder = new RecognitionServiceBinder(this);
@@ -97,7 +101,7 @@ public abstract class RecognitionService extends Service {
                     dispatchStopListening((IRecognitionListener) msg.obj);
                     break;
                 case MSG_CANCEL:
-                    dispatchCancel((IRecognitionListener) msg.obj, msg.arg1 == 1);
+                    dispatchCancel((IRecognitionListener) msg.obj);
                     break;
                 case MSG_RESET:
                     dispatchClearCallback();
@@ -108,18 +112,20 @@ public abstract class RecognitionService extends Service {
 
     private void dispatchStartListening(Intent intent, final IRecognitionListener listener,
             @NonNull AttributionSource attributionSource) {
-        if (mCurrentCallback == null) {
-            if (DBG) Log.d(TAG, "created new mCurrentCallback, listener = " + listener.asBinder());
-            mCurrentCallback = new Callback(listener, attributionSource);
+        try {
+            if (mCurrentCallback == null) {
+                if (DBG) {
+                    Log.d(TAG, "created new mCurrentCallback, listener = " + listener.asBinder());
+                }
+                mCurrentCallback = new Callback(listener, attributionSource);
 
-            RecognitionService.this.onStartListening(intent, mCurrentCallback);
-        } else {
-            try {
+                RecognitionService.this.onStartListening(intent, mCurrentCallback);
+            } else {
                 listener.onError(SpeechRecognizer.ERROR_RECOGNIZER_BUSY);
-            } catch (RemoteException e) {
-                Log.d(TAG, "onError call from startListening failed");
+                Log.i(TAG, "concurrent startListening received - ignoring this call");
             }
-            Log.i(TAG, "concurrent startListening received - ignoring this call");
+        } catch (RemoteException e) {
+            Log.d(TAG, "onError call from startListening failed");
         }
     }
 
@@ -139,16 +145,13 @@ public abstract class RecognitionService extends Service {
         }
     }
 
-    private void dispatchCancel(IRecognitionListener listener, boolean shutDown) {
+    private void dispatchCancel(IRecognitionListener listener) {
         if (mCurrentCallback == null) {
             if (DBG) Log.d(TAG, "cancel called with no preceding startListening - ignoring");
         } else if (mCurrentCallback.mListener.asBinder() != listener.asBinder()) {
             Log.w(TAG, "cancel called by client who did not call startListening - ignoring");
         } else { // the correct state
             RecognitionService.this.onCancel(mCurrentCallback);
-            if (shutDown) {
-                mCurrentCallback.finishRecordAudioOpAttributionToCallerIfNeeded();
-            }
             mCurrentCallback = null;
             if (DBG) Log.d(TAG, "canceling - setting mCurrentCallback to null");
         }
@@ -170,47 +173,6 @@ public abstract class RecognitionService extends Service {
             this.mListener = listener;
             this.mAttributionSource = attributionSource;
         }
-    }
-
-    /**
-     * Checks whether the caller has sufficient permissions
-     * 
-     * @param listener to send the error message to in case of error
-     * @param forDataDelivery If the permission check is for delivering the sensitive data.
-     * @param packageName the package name of the caller
-     * @param featureId The feature in the package
-     * @return {@code true} if the caller has enough permissions, {@code false} otherwise
-     */
-    private boolean checkPermissions(IRecognitionListener listener, boolean forDataDelivery,
-            @NonNull String packageName, @Nullable String featureId) {
-        if (DBG) Log.d(TAG, "checkPermissions");
-
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid == Process.SYSTEM_UID) {
-            // Assuming system has verified permissions of the caller.
-            return true;
-        }
-
-        if (forDataDelivery) {
-            if (PermissionChecker.checkCallingOrSelfPermissionForDataDelivery(this,
-                    android.Manifest.permission.RECORD_AUDIO, packageName, featureId,
-                    null /*message*/) == PermissionChecker.PERMISSION_GRANTED) {
-                return true;
-            }
-        } else {
-            if (PermissionChecker.checkCallingOrSelfPermissionForPreflight(this,
-                    android.Manifest.permission.RECORD_AUDIO)
-                            == PermissionChecker.PERMISSION_GRANTED) {
-                return true;
-            }
-        }
-        try {
-            Log.e(TAG, "call for recognition service without RECORD_AUDIO permissions");
-            listener.onError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
-        } catch (RemoteException re) {
-            Log.e(TAG, "sending ERROR_INSUFFICIENT_PERMISSIONS message failed", re);
-        }
-        return false;
     }
 
     /**
@@ -281,7 +243,6 @@ public abstract class RecognitionService extends Service {
          *        single channel audio stream. The sample rate is implementation dependent.
          */
         public void bufferReceived(byte[] buffer) throws RemoteException {
-            startRecordAudioOpAttributionToCallerIfNeeded();
             mListener.onBufferReceived(buffer);
         }
 
@@ -314,7 +275,6 @@ public abstract class RecognitionService extends Service {
          *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
          */
         public void partialResults(Bundle partialResults) throws RemoteException {
-            startRecordAudioOpAttributionToCallerIfNeeded();
             mListener.onPartialResults(partialResults);
         }
 
@@ -336,7 +296,6 @@ public abstract class RecognitionService extends Service {
          *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
          */
         public void results(Bundle results) throws RemoteException {
-            startRecordAudioOpAttributionToCallerIfNeeded();
             Message.obtain(mHandler, MSG_RESET).sendToTarget();
             mListener.onResults(results);
         }
@@ -366,9 +325,6 @@ public abstract class RecognitionService extends Service {
          * and passing this identity to {@link
          * android.content.ContextParams.Builder#setNextAttributionSource(AttributionSource)}.
          *
-         *
-         *
-         *
          * @return The permission identity of the calling app.
          *
          * @see android.content.ContextParams.Builder#setNextAttributionSource(
@@ -379,40 +335,55 @@ public abstract class RecognitionService extends Service {
             return mCallingAttributionSource;
         }
 
-        private void startRecordAudioOpAttributionToCallerIfNeeded() throws RemoteException {
-            if (!isProxyingRecordAudioToCaller()) {
-                final int result = PermissionChecker.checkPermissionAndStartDataDelivery(
-                        RecognitionService.this, Manifest.permission.RECORD_AUDIO,
-                        getAttributionContextForCaller().getAttributionSource(),
-                        /*message*/ null);
-                if (result == PermissionChecker.PERMISSION_GRANTED) {
-                    return;
-                }
-                error(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
+        boolean maybeStartAttribution() {
+            if (DBG) {
+                Log.i(TAG, "Starting attribution");
             }
-        }
 
-        private @NonNull Context getAttributionContextForCaller() {
-            if (mAttributionContext == null) {
+            if (DBG && isProxyingRecordAudioToCaller()) {
+                Log.i(TAG, "Proxying already in progress, not starting the attribution");
+            }
+
+            if (!isProxyingRecordAudioToCaller()) {
                 mAttributionContext = createContext(new ContextParams.Builder()
                         .setNextAttributionSource(mCallingAttributionSource)
                         .build());
+
+                final int result = PermissionChecker.checkPermissionAndStartDataDelivery(
+                        RecognitionService.this,
+                        Manifest.permission.RECORD_AUDIO,
+                        mAttributionContext.getAttributionSource(),
+                        /*message*/ null);
+
+                return result == PermissionChecker.PERMISSION_GRANTED;
             }
-            return mAttributionContext;
+            return false;
         }
 
-        void finishRecordAudioOpAttributionToCallerIfNeeded() {
+        void maybeFinishAttribution() {
+            if (DBG) {
+                Log.i(TAG, "Finishing attribution");
+            }
+
+            if (DBG && !isProxyingRecordAudioToCaller()) {
+                Log.i(TAG, "Not proxying currently, not finishing the attribution");
+            }
+
             if (isProxyingRecordAudioToCaller()) {
-                final String op = AppOpsManager.permissionToOp(Manifest.permission.RECORD_AUDIO);
-                PermissionChecker.finishDataDelivery(RecognitionService.this,
-                        op, getAttributionContextForCaller().getAttributionSource());
+                PermissionChecker.finishDataDelivery(
+                        RecognitionService.this,
+                        RECORD_AUDIO_APP_OP,
+                        mAttributionContext.getAttributionSource());
+
+                mAttributionContext = null;
             }
         }
 
         private boolean isProxyingRecordAudioToCaller() {
-            final int op = AppOpsManager.permissionToOpCode(Manifest.permission.RECORD_AUDIO);
             final AppOpsManager appOpsManager = getSystemService(AppOpsManager.class);
-            return appOpsManager.isProxying(op, getAttributionTag(),
+            return appOpsManager.isProxying(
+                    RECORD_AUDIO_APP_OP_CODE,
+                    getAttributionTag(),
                     mCallingAttributionSource.getUid(),
                     mCallingAttributionSource.getPackageName());
         }
@@ -423,7 +394,7 @@ public abstract class RecognitionService extends Service {
         private final WeakReference<RecognitionService> mServiceRef;
 
         public RecognitionServiceBinder(RecognitionService service) {
-            mServiceRef = new WeakReference<RecognitionService>(service);
+            mServiceRef = new WeakReference<>(service);
         }
 
         @Override
@@ -445,8 +416,8 @@ public abstract class RecognitionService extends Service {
             if (DBG) Log.d(TAG, "stopListening called by:" + listener.asBinder());
             final RecognitionService service = mServiceRef.get();
             if (service != null) {
-                service.mHandler.sendMessage(Message.obtain(service.mHandler,
-                        MSG_STOP_LISTENING, listener));
+                service.mHandler.sendMessage(
+                        Message.obtain(service.mHandler, MSG_STOP_LISTENING, listener));
             }
         }
 
@@ -455,8 +426,8 @@ public abstract class RecognitionService extends Service {
             if (DBG) Log.d(TAG, "cancel called by:" + listener.asBinder());
             final RecognitionService service = mServiceRef.get();
             if (service != null) {
-                service.mHandler.sendMessage(Message.obtain(service.mHandler,
-                        MSG_CANCEL, isShutdown ? 1 : 0, 0, listener));
+                service.mHandler.sendMessage(
+                        Message.obtain(service.mHandler, MSG_CANCEL, listener));
             }
         }
 
