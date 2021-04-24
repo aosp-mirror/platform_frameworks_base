@@ -155,7 +155,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"କିଛି ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ ମାନ ସେଟ୍‌ ହୋଇଛି"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"କୌଣସି ଡିଫଲ୍ଟ ସେଟ୍‍ ହୋଇନାହିଁ"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ଟେକ୍ସଟ-ରୁ-ସ୍ପିଚ୍ ସେଟିଂସ୍"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"ଟେକ୍ସଟ-ରୁ-ସ୍ପିଚ୍ ଆଉଟପୁଟ୍‌"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"ଟେକ୍ସଟ୍‍-ଟୁ-ସ୍ପିଚ୍‍ ଆଉଟ୍‍ପୁଟ୍‌"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"ସ୍ପିଚ୍‌ ରେଟ୍"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ଲେଖା ପଢ଼ିବାର ବେଗ"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"ପିଚ୍‌"</string>
@@ -236,7 +236,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ଡିବଗ୍, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ବଗ୍ ରିପୋର୍ଟ ସର୍ଟକଟ୍‌"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ବଗ୍ ରିପୋର୍ଟ ଦେବା ପାଇଁ ପାୱାର୍‌ ମେନୁରେ ଏକ ବଟନ୍‌ ଦେଖାନ୍ତୁ"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"ଜାଗ୍ରତ ରଖନ୍ତୁ"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"ସତର୍କ ରୁହନ୍ତୁ"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"ଚାର୍ଜ ହେବାବେଳେ ସ୍କ୍ରୀନ୍‌ ଆଦୌ ବନ୍ଦ ହେବନାହିଁ"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ବ୍ଲୁଟୂଥ୍‍‌ HCI ସ୍ନୁପ୍‌ ଲଗ୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ବ୍ଲୁଟୁଥ୍‌ ପ୍ୟାକେଟ୍ କ୍ୟାପଚର୍ କରନ୍ତୁ (ଏହି ସେଟିଂ ବଦଳାଇବା ପରେ ବ୍ଲୁଟୁଥ୍‍‌କୁ ଟୋଗଲ୍ କରନ୍ତୁ)"</string>

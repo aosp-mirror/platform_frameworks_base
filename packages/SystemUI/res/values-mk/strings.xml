@@ -64,7 +64,7 @@
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Отстранувањето грешки на USB не е дозволено"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Корисникот што моментално е најавен на уредов не може да вклучи отстранување грешки на USB. За да ја користите функцијава, префрлете се на примарниот корисник."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Да се дозволи безжично отстранување грешки на мрежава?"</string>
-    <string name="wifi_debugging_message" msgid="5461204211731802995">"Име на мрежа (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi-адреса (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Име на мрежата (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi адреса (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Секогаш дозволувај на оваа мрежа"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Дозволи"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Безжичното отстранување грешки не е дозволено"</string>
@@ -317,7 +317,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1490779000057752281">"Податоците 4G се паузирани"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Мобилниот интернет е паузиран"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Податоците се паузирани"</string>
-    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Го достигнавте ограничувањето за мобилен сообраќај што сте го поставиле. Веќе не користите мобилен интернет.\n\nДоколку продолжите, ќе ви биде наплатено за потрошениот сообраќај."</string>
+    <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Го достигнавте ограничувањето за мобилен интернет што сте го поставиле. Веќе не користите мобилен интернет.\n\nДоколку продолжите, ќе ви биде наплатено за потрошениот интернет."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Продолжи"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"Се пребарува за GPS"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Локацијата е поставена со GPS"</string>
@@ -413,7 +413,7 @@
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Над лимитот"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Искористено: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Лимит: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Предупредување за <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Предупредување: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Работен профил"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Ноќно светло"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Вклуч. на зајдисонце"</string>
@@ -503,7 +503,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Ја намалува изведбата и податоците во заднина"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Исклучете го штедачот на батерија"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува информации како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Да почне снимање или емитување?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Да почне снимање или емитување со <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Не покажувај повторно"</string>
@@ -540,7 +540,7 @@
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Следење профил"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Следење на мрежата"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Евиденција на мрежата"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Мрежна евиденција"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Сертификати ЦА"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Оневозможи ВПН"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Исклучи ВПН"</string>
@@ -602,7 +602,7 @@
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Закачената апликација може да отвора други апликации."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"За откачување на апликацијава, допрете и држете на копчињата „Назад“ и „Преглед“"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"За откачување на апликацијава, допрете и држете на копчињата „Назад“ и „Почетен екран“"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"За откачување на апликацијава, повлечете нагоре и држете"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"За откачување на апликацијава, повлечете нагоре и задржете"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Сфатив"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Не, фала"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Апликацијата е закачена"</string>
@@ -725,7 +725,7 @@
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Овие известувања не може да се изменат"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Оваа група известувања не може да се конфигурира тука"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Известување преку прокси"</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Сите известувања за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Сите известувања од <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Прикажи повеќе"</string>
     <string name="appops_camera" msgid="5215967620896725715">"Апликацијава ја користи камерата."</string>
     <string name="appops_microphone" msgid="8805468338613070149">"Апликацијава го користи микрофонот."</string>
@@ -969,12 +969,12 @@
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Задржи"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Замени"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Апликациите се извршуваат во заднина"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Допрете за детали за батеријата и потрошениот сообраќај"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Допрете за детали за батеријата и потрошениот интернет"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Да се исклучи мобилниот интернет?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Нема да имате пристап до податоците или интернетот преку <xliff:g id="CARRIER">%s</xliff:g>. Интернетот ќе биде достапен само преку Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"вашиот оператор"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Бидејќи апликацијата го прикрива барањето за дозвола, „Поставките“ не може да го потврдат вашиот одговор."</string>
-    <string name="slice_permission_title" msgid="3262615140094151017">"Дали да се дозволи <xliff:g id="APP_0">%1$s</xliff:g> да прикажува делови од <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
+    <string name="slice_permission_title" msgid="3262615140094151017">"Да се дозволи <xliff:g id="APP_0">%1$s</xliff:g> да прикажува делови од <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Може да чита информации од <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- Може да презема дејства во <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Дозволете <xliff:g id="APP">%1$s</xliff:g> да прикажува делови од која било апликација"</string>
@@ -1029,7 +1029,7 @@
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Додајте контроли за поврзаните уреди"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Поставете ги контролите за уредите"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Задржете го копчето за вклучување за да пристапите до контролите"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"Изберете апликација во која ќе додадате контроли"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"Изберете апликација за да додадете контроли"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one">Додадена е <xliff:g id="NUMBER_1">%s</xliff:g> контрола.</item>
       <item quantity="other">Додадени се <xliff:g id="NUMBER_1">%s</xliff:g> контроли.</item>

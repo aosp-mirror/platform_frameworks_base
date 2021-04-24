@@ -64,16 +64,16 @@
     <string name="notification_channel_progress" msgid="872788690775721436">"Actieve afdruktaken"</string>
     <string name="notification_channel_failure" msgid="9042250774797916414">"Mislukte afdruktaken"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"Kan bestand niet maken"</string>
-    <string name="print_services_disabled_toast" msgid="9089060734685174685">"Sommige afdrukservices zijn uitgeschakeld"</string>
+    <string name="print_services_disabled_toast" msgid="9089060734685174685">"Sommige afdrukservices zijn uitgezet"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"Printers zoeken"</string>
-    <string name="print_no_print_services" msgid="8561247706423327966">"Geen afdrukservices ingeschakeld"</string>
+    <string name="print_no_print_services" msgid="8561247706423327966">"Geen afdrukservices aangezet"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Geen printers gevonden"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Kan geen printers toevoegen"</string>
     <string name="select_to_add_printers" msgid="3800709038689830974">"Selecteer om printer toe te voegen"</string>
-    <string name="enable_print_service" msgid="3482815747043533842">"Selecteer om in te schakelen"</string>
-    <string name="enabled_services_title" msgid="7036986099096582296">"Ingeschakelde services"</string>
+    <string name="enable_print_service" msgid="3482815747043533842">"Selecteer om aan te zetten"</string>
+    <string name="enabled_services_title" msgid="7036986099096582296">"Aangezette services"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"Aanbevolen services"</string>
-    <string name="disabled_services_title" msgid="7313253167968363211">"Uitgeschakelde services"</string>
+    <string name="disabled_services_title" msgid="7313253167968363211">"Uitgezette services"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Alle services"</string>
     <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
       <item quantity="other">Installeren om <xliff:g id="COUNT_1">%1$s</xliff:g> printers te vinden</item>
