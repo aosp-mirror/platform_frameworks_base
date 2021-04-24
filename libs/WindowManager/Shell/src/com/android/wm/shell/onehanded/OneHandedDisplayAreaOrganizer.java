@@ -65,7 +65,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private final Rect mDefaultDisplayBounds = new Rect();
     private final OneHandedSettingsUtil mOneHandedSettingsUtil;
 
-    private boolean mIsInOneHanded;
     private int mEnterExitAnimationDurationMs;
 
     private ArrayMap<WindowContainerToken, SurfaceControl> mDisplayAreaTokenMap = new ArrayMap();
@@ -268,9 +267,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     @VisibleForTesting
     void finishOffset(int offset,
             @OneHandedAnimationController.TransitionDirection int direction) {
-        // Only finishOffset() can update mIsInOneHanded to ensure the state is handle in sequence,
-        // the flag *MUST* be updated before dispatch mTransitionCallbacks
-        mIsInOneHanded = (offset > 0 || direction == TRANSITION_DIRECTION_TRIGGER);
         mLastVisualDisplayBounds.offsetTo(0,
                 direction == TRANSITION_DIRECTION_TRIGGER ? offset : 0);
         for (int i = mTransitionCallbacks.size() - 1; i >= 0; i--) {
@@ -282,15 +278,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 cb.onStopFinished(getLastVisualDisplayBounds());
             }
         }
-    }
-
-    /**
-     * The latest state of one handed mode
-     *
-     * @return true Currently is in one handed mode, otherwise is not in one handed mode
-     */
-    public boolean isInOneHanded() {
-        return mIsInOneHanded;
     }
 
     /**
@@ -337,8 +324,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
-        pw.print(innerPrefix + "mIsInOneHanded=");
-        pw.println(mIsInOneHanded);
         pw.print(innerPrefix + "mDisplayLayout.rotation()=");
         pw.println(mDisplayLayout.rotation());
         pw.print(innerPrefix + "mDisplayAreaTokenMap=");

@@ -25,6 +25,7 @@ import android.annotation.SystemApi;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -98,7 +99,8 @@ public class BluetoothPbap implements BluetoothProfile {
     private volatile IBluetoothPbap mService;
     private final Context mContext;
     private ServiceListener mServiceListener;
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
 
     /** @hide */
     public static final int RESULT_FAILURE = 0;
@@ -129,10 +131,11 @@ public class BluetoothPbap implements BluetoothProfile {
      *
      * @hide
      */
-    public BluetoothPbap(Context context, ServiceListener l) {
+    public BluetoothPbap(Context context, ServiceListener l, BluetoothAdapter adapter) {
         mContext = context;
         mServiceListener = l;
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         IBluetoothManager mgr = mAdapter.getBluetoothManager();
         if (mgr != null) {
             try {
@@ -229,7 +232,8 @@ public class BluetoothPbap implements BluetoothProfile {
             return new ArrayList<BluetoothDevice>();
         }
         try {
-            return service.getConnectedDevices();
+            return BluetoothDevice.setAttributionSource(
+                    service.getConnectedDevices(), mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, e.toString());
         }
@@ -277,7 +281,8 @@ public class BluetoothPbap implements BluetoothProfile {
             return new ArrayList<BluetoothDevice>();
         }
         try {
-            return service.getDevicesMatchingConnectionStates(states);
+            return BluetoothDevice.setAttributionSource(
+                    service.getDevicesMatchingConnectionStates(states), mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, e.toString());
         }

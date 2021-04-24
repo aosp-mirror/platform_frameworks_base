@@ -58,7 +58,6 @@ oneway interface IRecognitionService {
      * Cancels the speech recognition.
      *
      * @param listener to receive callbacks, note that this must be non-null
-     * @param packageName the package name calling this API
      */
     void cancel(in IRecognitionListener listener, boolean isShutdown);
 }

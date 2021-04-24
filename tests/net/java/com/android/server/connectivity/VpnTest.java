@@ -1023,7 +1023,7 @@ public class VpnTest {
         assertNotNull(nc);
         VpnTransportInfo ti = (VpnTransportInfo) nc.getTransportInfo();
         assertNotNull(ti);
-        assertEquals(type, ti.type);
+        assertEquals(type, ti.getType());
     }
 
     public void startRacoon(final String serverAddr, final String expectedAddr)

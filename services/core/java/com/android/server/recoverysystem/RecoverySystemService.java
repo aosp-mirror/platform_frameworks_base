@@ -554,11 +554,15 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             case ROR_NEED_PREPARATION:
                 final long origId = Binder.clearCallingIdentity();
                 try {
-                    mInjector.getLockSettingsService().prepareRebootEscrow();
+                    boolean result = mInjector.getLockSettingsService().prepareRebootEscrow();
+                    // Clear the RoR preparation state if lock settings reports an failure.
+                    if (!result) {
+                        clearRoRPreparationState();
+                    }
+                    return result;
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
-                return true;
             default:
                 throw new IllegalStateException("Unsupported action type on new request " + action);
         }
@@ -670,11 +674,10 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             case ROR_REQUESTED_NEED_CLEAR:
                 final long origId = Binder.clearCallingIdentity();
                 try {
-                    mInjector.getLockSettingsService().clearRebootEscrow();
+                    return mInjector.getLockSettingsService().clearRebootEscrow();
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
-                return true;
             default:
                 throw new IllegalStateException("Unsupported action type on clear " + action);
         }
@@ -820,6 +823,11 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
                 lskfCapturedCount);
     }
 
+    private synchronized void clearRoRPreparationState() {
+        mCallerPendingRequest.clear();
+        mCallerPreparedForReboot.clear();
+    }
+
     private void clearRoRPreparationStateOnRebootFailure(RebootPreparationError escrowError) {
         if (!FATAL_ARM_ESCROW_ERRORS.contains(escrowError.mProviderErrorCode)) {
             return;
@@ -827,10 +835,7 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
 
         Slog.w(TAG, "Clearing resume on reboot states for all clients on arm escrow error: "
                 + escrowError.mProviderErrorCode);
-        synchronized (this) {
-            mCallerPendingRequest.clear();
-            mCallerPreparedForReboot.clear();
-        }
+        clearRoRPreparationState();
     }
 
     private @ResumeOnRebootRebootErrorCode int rebootWithLskfImpl(String packageName, String reason,

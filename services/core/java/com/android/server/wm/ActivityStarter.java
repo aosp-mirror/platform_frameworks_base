@@ -1275,7 +1275,11 @@ class ActivityStarter {
                 || callingUidProcState == ActivityManager.PROCESS_STATE_BOUND_TOP;
         final boolean isCallingUidPersistentSystemProcess =
                 callingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
-        if ((appSwitchAllowed && callingUidHasAnyVisibleWindow)
+
+        // Normal apps with visible app window will be allowed to start activity if app switching
+        // is allowed, or apps like live wallpaper with non app visible window will be allowed.
+        if (((appSwitchAllowed || mService.mActiveUids.hasNonAppVisibleWindow(callingUid))
+                && callingUidHasAnyVisibleWindow)
                 || isCallingUidPersistentSystemProcess) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "Activity start allowed: callingUidHasAnyVisibleWindow = " + callingUid
@@ -2637,6 +2641,11 @@ class ActivityStarter {
         if (mPreferredWindowingMode != WINDOWING_MODE_UNDEFINED
                 && intentTask.getWindowingMode() != mPreferredWindowingMode) {
             intentTask.setWindowingMode(mPreferredWindowingMode);
+        }
+
+        // Update the target's launch cookie to those specified in the options if set
+        if (mStartActivity.mLaunchCookie != null) {
+            intentActivity.mLaunchCookie = mStartActivity.mLaunchCookie;
         }
 
         // Need to update mTargetRootTask because if task was moved out of it, the original root

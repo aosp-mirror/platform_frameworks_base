@@ -112,6 +112,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private final TextView.OnEditorActionListener mEditorActionHandler;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final List<OnFocusChangeListener> mEditTextFocusChangeListeners = new ArrayList<>();
+    private final List<OnSendRemoteInputListener> mOnSendListeners = new ArrayList<>();
     private RemoteEditText mEditText;
     private ImageButton mSendButton;
     private GradientDrawable mContentBackground;
@@ -357,6 +358,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private void sendRemoteInput(Intent intent) {
         if (mBouncerChecker != null && mBouncerChecker.showBouncerIfNecessary()) {
             mEditText.hideIme();
+            for (OnSendRemoteInputListener listener : mOnSendListeners) {
+                listener.onSendRequestBounced();
+            }
             return;
         }
 
@@ -369,6 +373,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.mShowImeOnInputConnection = false;
         mController.remoteInputSent(mEntry);
         mEntry.setHasSentReply();
+
+        for (OnSendRemoteInputListener listener : mOnSendListeners) {
+            listener.onSendRemoteInput();
+        }
 
         // Tell ShortcutManager that this package has been "activated".  ShortcutManager
         // will reset the throttling for this package.
@@ -752,6 +760,27 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         for (View.OnFocusChangeListener listener : mEditTextFocusChangeListeners) {
             listener.onFocusChange(remoteEditText, focused);
         }
+    }
+
+    /** Registers a listener for send events on this RemoteInputView */
+    public void addOnSendRemoteInputListener(OnSendRemoteInputListener listener) {
+        mOnSendListeners.add(listener);
+    }
+
+    /** Removes a previously-added listener for send events on this RemoteInputView */
+    public void removeOnSendRemoteInputListener(OnSendRemoteInputListener listener) {
+        mOnSendListeners.remove(listener);
+    }
+
+    /** Listener for send events */
+    public interface OnSendRemoteInputListener {
+        /** Invoked when the remote input has been sent successfully. */
+        void onSendRemoteInput();
+        /**
+         * Invoked when the user had requested to send the remote input, but authentication was
+         * required and the bouncer was shown instead.
+         */
+        void onSendRequestBounced();
     }
 
     /** Handler for button click on send action in IME. */

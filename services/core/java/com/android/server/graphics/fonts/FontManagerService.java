@@ -52,7 +52,6 @@ import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.NioUtils;
 import java.nio.channels.FileChannel;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -249,8 +248,6 @@ public final class FontManagerService extends IFontManager.Stub {
         // If apk verity is supported, fs-verity should be available.
         if (!VerityUtils.isFsVeritySupported()) return null;
         return new UpdatableFontDir(new File(FONT_FILES_DIR),
-                Arrays.asList(new File(SystemFonts.SYSTEM_FONT_DIR),
-                        new File(SystemFonts.OEM_FONT_DIR)),
                 new OtfFontFileParser(), new FsverityUtilImpl());
     }
 
@@ -323,7 +320,7 @@ public final class FontManagerService extends IFontManager.Stub {
             return Collections.emptyMap();
         }
         synchronized (mUpdatableFontDirLock) {
-            return mUpdatableFontDir.getFontFileMap();
+            return mUpdatableFontDir.getPostScriptMap();
         }
     }
 

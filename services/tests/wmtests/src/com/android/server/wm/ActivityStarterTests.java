@@ -1142,4 +1142,38 @@ public class ActivityStarterTests extends WindowTestsBase {
         verify(targetRecord).makeVisibleIfNeeded(null, true);
         assertTrue(targetRecord.mVisibleRequested);
     }
+
+    @Test
+    public void testLaunchCookie_newAndExistingTask() {
+        final ActivityStarter starter = prepareStarter(0, false);
+
+        // Put an activity on default display as the top focused activity.
+        ActivityRecord r = new ActivityBuilder(mAtm).setCreateTask(true).build();
+
+        // Start an activity with a launch cookie
+        final Binder cookie = new Binder();
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchCookie(cookie);
+        final Intent intent = new Intent();
+        intent.setComponent(ActivityBuilder.getDefaultComponent());
+        starter.setReason("testLaunchCookie_newTask")
+                .setIntent(intent)
+                .setActivityOptions(options.toBundle())
+                .execute();
+
+        // Verify the cookie is set
+        assertTrue(mRootWindowContainer.topRunningActivity().mLaunchCookie == cookie);
+
+        // Relaunch the activity to bring the task forward
+        final Binder newCookie = new Binder();
+        final ActivityOptions newOptions = ActivityOptions.makeBasic();
+        newOptions.setLaunchCookie(newCookie);
+        starter.setReason("testLaunchCookie_existingTask")
+                .setIntent(intent)
+                .setActivityOptions(newOptions.toBundle())
+                .execute();
+
+        // Verify the cookie is updated
+        assertTrue(mRootWindowContainer.topRunningActivity().mLaunchCookie == newCookie);
+    }
 }

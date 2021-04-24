@@ -28,7 +28,7 @@ import com.android.server.job.controllers.JobStatus;
  * Used by {@link JobSchedulerService} to impose additional restrictions regarding whether jobs
  * should be scheduled or not based on the state of the system/device.
  * Every restriction is associated with exactly one stop reason, which could be retrieved using
- * {@link #getReason()} (and the legacy reason via {@link #getLegacyReason()}).
+ * {@link #getReason()} (and the internal reason via {@link #getInternalReason()}).
  * Note, that this is not taken into account for the jobs that have priority
  * {@link JobInfo#PRIORITY_FOREGROUND_APP} or higher.
  */
@@ -36,13 +36,13 @@ public abstract class JobRestriction {
 
     final JobSchedulerService mService;
     private final int mReason;
-    private final int mLegacyReason;
+    private final int mInternalReason;
 
     JobRestriction(JobSchedulerService service, @JobParameters.StopReason int reason,
-            int legacyReason) {
+            int internalReason) {
         mService = service;
         mReason = reason;
-        mLegacyReason = legacyReason;
+        mInternalReason = internalReason;
     }
 
     /**
@@ -74,7 +74,7 @@ public abstract class JobRestriction {
         return mReason;
     }
 
-    public final int getLegacyReason() {
-        return mLegacyReason;
+    public final int getInternalReason() {
+        return mInternalReason;
     }
 }

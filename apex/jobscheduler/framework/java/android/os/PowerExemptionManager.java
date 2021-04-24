@@ -231,6 +231,11 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_LOCKED_BOOT_COMPLETED = 202;
+    /**
+     * All Bluetooth broadcasts.
+     * @hide
+     */
+    public static final int REASON_BLUETOOTH_BROADCAST = 203;
 
     /* Reason code range 300-399 are reserved for other internal reasons */
     /**
@@ -363,6 +368,7 @@ public class PowerExemptionManager {
             REASON_BOOT_COMPLETED,
             REASON_PRE_BOOT_COMPLETED,
             REASON_LOCKED_BOOT_COMPLETED,
+            REASON_BLUETOOTH_BROADCAST,
             REASON_SYSTEM_ALLOW_LISTED,
             REASON_ALARM_MANAGER_ALARM_CLOCK,
             REASON_ALARM_MANAGER_WHILE_IDLE,
@@ -633,6 +639,8 @@ public class PowerExemptionManager {
                 return "PRE_BOOT_COMPLETED";
             case REASON_LOCKED_BOOT_COMPLETED:
                 return "LOCKED_BOOT_COMPLETED";
+            case REASON_BLUETOOTH_BROADCAST:
+                return "BLUETOOTH_BROADCAST";
             case REASON_SYSTEM_ALLOW_LISTED:
                 return "SYSTEM_ALLOW_LISTED";
             case REASON_ALARM_MANAGER_ALARM_CLOCK:
