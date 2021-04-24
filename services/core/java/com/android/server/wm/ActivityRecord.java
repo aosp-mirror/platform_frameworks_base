@@ -6405,8 +6405,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         clearThumbnail();
         final Transaction transaction = getAnimatingContainer().getPendingTransaction();
-        mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory,
-                transaction, getAnimatingContainer(), thumbnailHeader);
+        mThumbnail = new WindowContainerThumbnail(transaction, getAnimatingContainer(),
+                thumbnailHeader);
         mThumbnail.startAnimation(transaction, loadThumbnailAnimation(thumbnailHeader));
     }
 
@@ -6435,8 +6435,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final Transaction transaction = getPendingTransaction();
-        mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory,
-                transaction, getTask(), thumbnail);
+        mThumbnail = new WindowContainerThumbnail(transaction, getTask(), thumbnail);
         final Animation animation =
                 getDisplayContent().mAppTransition.createCrossProfileAppsThumbnailAnimationLocked(
                         frame);
