@@ -17,8 +17,8 @@ package com.android.server.wm;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 
+import android.graphics.GraphicBuffer;
 import android.hardware.HardwareBuffer;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
@@ -51,14 +51,14 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
                         task, mWidth, mHeight);
         mSurfaceControl = surfaceControlFactory.apply(new SurfaceSession())
                 .setName("RecentTaskScreenshotSurface")
-                .setBufferSize(mWidth, mHeight)
+                .setBLASTLayer()
                 .setCallsite("TaskScreenshotAnimatable")
                 .build();
         if (buffer != null) {
-            final Surface surface = new Surface();
-            surface.copyFrom(mSurfaceControl);
-            surface.attachAndQueueBufferWithColorSpace(buffer, screenshotBuffer.getColorSpace());
-            surface.release();
+            GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(buffer);
+            getPendingTransaction().setBuffer(mSurfaceControl, graphicBuffer);
+            getPendingTransaction().setColorSpace(mSurfaceControl,
+                    screenshotBuffer.getColorSpace());
             final float scale = 1.0f * mTask.getBounds().width() / mWidth;
             getPendingTransaction().setMatrix(mSurfaceControl, scale, 0, 0, scale);
         }
