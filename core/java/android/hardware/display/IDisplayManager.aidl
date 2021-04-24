@@ -19,6 +19,7 @@ package android.hardware.display;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
+import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -142,6 +143,9 @@ interface IDisplayManager {
 
     // Get the minimum brightness curve.
     Curve getMinimumBrightnessCurve();
+
+    // Get Brightness Information for the specified display.
+    BrightnessInfo getBrightnessInfo(int displayId);
 
     // Gets the id of the preferred wide gamut color space for all displays.
     // The wide gamut color space is returned from composition pipeline
