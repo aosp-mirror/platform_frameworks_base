@@ -311,6 +311,11 @@ public class UwbServiceImpl extends IUwbAdapter.Stub implements IBinder.DeathRec
     }
 
     @Override
+    public synchronized int getAdapterState() throws RemoteException {
+        return getVendorUwbAdapter().getAdapterState();
+    }
+
+    @Override
     public synchronized void setEnabled(boolean enabled) throws RemoteException {
         getVendorUwbAdapter().setEnabled(enabled);
     }
