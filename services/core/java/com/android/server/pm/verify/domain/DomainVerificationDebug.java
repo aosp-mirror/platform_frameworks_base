@@ -37,6 +37,7 @@ import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 @SuppressWarnings("PointlessBooleanExpression")
@@ -98,6 +99,70 @@ public class DomainVerificationDebug {
             printState(writer, pkgState, pkg, reusedMap, false);
             printState(writer, pkgState, pkg, userId, reusedSet, true);
         }
+    }
+
+    /**
+     * @param userIdToApprovalLevelToOwners Mapping of user ID to approval level to domain owners.
+     */
+    public void printOwners(@NonNull IndentingPrintWriter writer, @NonNull String domain,
+            SparseArray<SparseArray<List<String>>> userIdToApprovalLevelToOwners) {
+        writer.println(domain + ":");
+        writer.increaseIndent();
+
+        if (userIdToApprovalLevelToOwners.size() == 0) {
+            writer.println("none");
+            writer.decreaseIndent();
+            return;
+        }
+
+        int usersSize = userIdToApprovalLevelToOwners.size();
+        for (int userIndex = 0; userIndex < usersSize; userIndex++) {
+            int userId = userIdToApprovalLevelToOwners.keyAt(userIndex);
+            SparseArray<List<String>> approvalLevelToOwners =
+                    userIdToApprovalLevelToOwners.valueAt(userIndex);
+
+            if (approvalLevelToOwners.size() == 0) {
+                continue;
+            }
+
+            boolean printedUserHeader = false;
+            int approvalsSize = approvalLevelToOwners.size();
+            for (int approvalIndex = 0; approvalIndex < approvalsSize; approvalIndex++) {
+                int approvalLevel = approvalLevelToOwners.keyAt(approvalIndex);
+                if (approvalLevel < DomainVerificationManagerInternal.APPROVAL_LEVEL_UNVERIFIED) {
+                    continue;
+                }
+
+                if (!printedUserHeader) {
+                    writer.println("User " + userId + ":");
+                    writer.increaseIndent();
+                    printedUserHeader = true;
+                }
+
+                String approvalString =
+                        DomainVerificationManagerInternal.approvalLevelToDebugString(approvalLevel);
+                List<String> owners = approvalLevelToOwners.valueAt(approvalIndex);
+                writer.println(approvalString + "[" + approvalLevel + "]" + ":");
+                writer.increaseIndent();
+
+                if (owners.size() == 0) {
+                    writer.println("none");
+                    writer.decreaseIndent();
+                    continue;
+                }
+
+                int ownersSize = owners.size();
+                for (int ownersIndex = 0; ownersIndex < ownersSize; ownersIndex++) {
+                    writer.println(owners.get(ownersIndex));
+                }
+                writer.decreaseIndent();
+            }
+
+            if (printedUserHeader) {
+                writer.decreaseIndent();
+            }
+        }
+        writer.decreaseIndent();
     }
 
     boolean printState(@NonNull IndentingPrintWriter writer,

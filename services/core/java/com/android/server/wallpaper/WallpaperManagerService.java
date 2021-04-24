@@ -2384,17 +2384,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public void notifyWakingUp(int x, int y, @NonNull Bundle extras) {
         synchronized (mLock) {
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
-            data.connection.forEachDisplayConnector(
-                    displayConnector -> {
-                        if (displayConnector.mEngine != null) {
-                            try {
-                                displayConnector.mEngine.dispatchWallpaperCommand(
-                                        WallpaperManager.COMMAND_WAKING_UP, x, y, -1, extras);
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
+            if (data != null && data.connection != null) {
+                data.connection.forEachDisplayConnector(
+                        displayConnector -> {
+                            if (displayConnector.mEngine != null) {
+                                try {
+                                    displayConnector.mEngine.dispatchWallpaperCommand(
+                                            WallpaperManager.COMMAND_WAKING_UP, x, y, -1, extras);
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
-                    });
+                        });
+            }
         }
     }
 
@@ -2404,17 +2406,20 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public void notifyGoingToSleep(int x, int y, @NonNull Bundle extras) {
         synchronized (mLock) {
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
-            data.connection.forEachDisplayConnector(
-                    displayConnector -> {
-                        if (displayConnector.mEngine != null) {
-                            try {
-                                displayConnector.mEngine.dispatchWallpaperCommand(
-                                        WallpaperManager.COMMAND_GOING_TO_SLEEP, x, y, -1, extras);
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
+            if (data != null && data.connection != null) {
+                data.connection.forEachDisplayConnector(
+                        displayConnector -> {
+                            if (displayConnector.mEngine != null) {
+                                try {
+                                    displayConnector.mEngine.dispatchWallpaperCommand(
+                                            WallpaperManager.COMMAND_GOING_TO_SLEEP, x, y, -1,
+                                            extras);
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
-                    });
+                        });
+            }
         }
     }
 
