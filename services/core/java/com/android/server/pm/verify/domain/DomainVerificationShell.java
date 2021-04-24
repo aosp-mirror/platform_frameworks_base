@@ -110,6 +110,13 @@ public class DomainVerificationShell {
         pw.println("        packages will be reset if no one package is specified.");
         pw.println("      <ALLOWED>: true to allow the package to open auto verified links, false");
         pw.println("        to disable");
+        pw.println("  get-app-link-owners [--user <USER_ID>] [--package <PACKAGE>] [<DOMAINS>]");
+        pw.println("    Print the owners for a specific domain for a given user in low to high");
+        pw.println("    priority order.");
+        pw.println("      --user <USER_ID>: the user to query for");
+        pw.println("      --package <PACKAGE>: optionally also print for all web domains declared");
+        pw.println("        by a package, or \"all\" to print all packages");
+        pw.println("      --<DOMAINS>: space separated list of domains to query for");
     }
 
     /**
@@ -132,6 +139,8 @@ public class DomainVerificationShell {
                 return runSetAppLinksUserState(commandHandler);
             case "set-app-links-allowed":
                 return runSetAppLinksAllowed(commandHandler);
+            case "get-app-link-owners":
+                return runGetAppLinkOwners(commandHandler);
         }
 
         return null;
@@ -420,6 +429,67 @@ public class DomainVerificationShell {
         return true;
     }
 
+    // pm get-app-link-owners [--user <USER_ID>] [--package <PACKAGE>] [<DOMAINS>]
+    private boolean runGetAppLinkOwners(@NonNull BasicShellCommandHandler commandHandler) {
+        String packageName = null;
+        Integer userId = null;
+        String option;
+        while ((option = commandHandler.getNextOption()) != null) {
+            switch (option) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(commandHandler.getNextArgRequired());
+                    break;
+                case "--package":
+                    packageName = commandHandler.getNextArgRequired();
+                    if (TextUtils.isEmpty(packageName)) {
+                        commandHandler.getErrPrintWriter().println("Error: no package specified");
+                        return false;
+                    }
+                    break;
+                default:
+                    commandHandler.getErrPrintWriter().println(
+                            "Error: unexpected option: " + option);
+                    return false;
+            }
+        }
+
+        ArrayList<String> domains = getRemainingArgs(commandHandler);
+        if (domains.isEmpty() && TextUtils.isEmpty(packageName)) {
+            commandHandler.getErrPrintWriter()
+                    .println("Error: no package name or domain specified");
+            return false;
+        }
+
+        if (userId != null) {
+            userId = translateUserId(userId, "runSetAppLinksAllowed");
+        }
+
+        try (IndentingPrintWriter writer = new IndentingPrintWriter(
+                commandHandler.getOutPrintWriter(), /* singleIndent */ "  ", /* wrapLength */
+                120)) {
+            writer.increaseIndent();
+            if (packageName != null) {
+                if (packageName.equals("all")) {
+                    packageName = null;
+                }
+
+                try {
+                    mCallback.printOwnersForPackage(writer, packageName, userId);
+                } catch (NameNotFoundException e) {
+                    commandHandler.getErrPrintWriter()
+                            .println("Error: package not found: " + packageName);
+                    return false;
+                }
+            }
+            if (!domains.isEmpty()) {
+                mCallback.printOwnersForDomains(writer, domains, userId);
+            }
+            writer.decreaseIndent();
+            return true;
+        }
+    }
+
+    @NonNull
     private ArrayList<String> getRemainingArgs(@NonNull BasicShellCommandHandler commandHandler) {
         ArrayList<String> args = new ArrayList<>();
         String arg;
@@ -534,5 +604,18 @@ public class DomainVerificationShell {
          */
         void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
                 @Nullable @UserIdInt Integer userId) throws NameNotFoundException;
+
+        /**
+         * Print the owners for all domains in a given package.
+         */
+        void printOwnersForPackage(@NonNull IndentingPrintWriter writer,
+                @Nullable String packageName, @Nullable @UserIdInt Integer userId)
+                throws NameNotFoundException;
+
+        /**
+         * Print the owners for the given domains.
+         */
+        void printOwnersForDomains(@NonNull IndentingPrintWriter writer,
+                @NonNull List<String> domains, @Nullable @UserIdInt Integer userId);
     }
 }
