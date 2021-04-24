@@ -695,6 +695,17 @@ public class DisplayDeviceConfig {
         /** Minimum time that HBM can be on before being enabled. */
         public long timeMinMillis;
 
+        HighBrightnessModeData() {}
+
+        HighBrightnessModeData(float minimumLux, float transitionPoint,
+                long timeWindowMillis, long timeMaxMillis, long timeMinMillis) {
+            this.minimumLux = minimumLux;
+            this.transitionPoint = transitionPoint;
+            this.timeWindowMillis = timeWindowMillis;
+            this.timeMaxMillis = timeMaxMillis;
+            this.timeMinMillis = timeMinMillis;
+        }
+
         /**
          * Copies the HBM data to the specified parameter instance.
          * @param other the instance to copy data to.

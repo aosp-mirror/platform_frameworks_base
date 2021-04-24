@@ -18,14 +18,13 @@ package com.android.server.wm;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static org.mockito.ArgumentMatchers.any;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 
 import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
-import android.view.Surface;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
@@ -51,8 +50,8 @@ public class WindowContainerThumbnailTest extends WindowTestsBase {
         when(mockAr.getPendingTransaction()).thenReturn(new StubTransaction());
         when(mockAr.makeChildSurface(any())).thenReturn(new MockSurfaceControlBuilder());
         when(mockAr.makeSurface()).thenReturn(new MockSurfaceControlBuilder());
-        return new WindowContainerThumbnail(new StubTransaction(), mockAr,
-                buffer, false, mock(Surface.class), mock(SurfaceAnimator.class));
+        return new WindowContainerThumbnail(new StubTransaction(), mockAr, buffer,
+                mock(SurfaceAnimator.class));
     }
 
     @Test

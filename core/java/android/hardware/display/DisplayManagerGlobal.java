@@ -79,6 +79,7 @@ public final class DisplayManagerGlobal {
             EVENT_DISPLAY_ADDED,
             EVENT_DISPLAY_CHANGED,
             EVENT_DISPLAY_REMOVED,
+            EVENT_DISPLAY_BRIGHTNESS_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DisplayEvent {}
@@ -86,6 +87,7 @@ public final class DisplayManagerGlobal {
     public static final int EVENT_DISPLAY_ADDED = 1;
     public static final int EVENT_DISPLAY_CHANGED = 2;
     public static final int EVENT_DISPLAY_REMOVED = 3;
+    public static final int EVENT_DISPLAY_BRIGHTNESS_CHANGED = 4;
 
     @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
@@ -665,6 +667,17 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Retrieves Brightness Info for the specified display.
+     */
+    public BrightnessInfo getBrightnessInfo(int displayId) {
+        try {
+            return mDm.getBrightnessInfo(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the preferred wide gamut color space for all displays.
      * The wide gamut color space is returned from composition pipeline
      * based on hardware capability.
@@ -932,6 +945,11 @@ public final class DisplayManagerGlobal {
                             mDisplayInfo.copyFrom(newInfo);
                             mListener.onDisplayChanged(msg.arg1);
                         }
+                    }
+                    break;
+                case EVENT_DISPLAY_BRIGHTNESS_CHANGED:
+                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS) != 0) {
+                        mListener.onDisplayChanged(msg.arg1);
                     }
                     break;
                 case EVENT_DISPLAY_REMOVED:
