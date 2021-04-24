@@ -18046,7 +18046,7 @@ package android.hardware.camera2 {
   }
 
   public final class CameraExtensionCharacteristics {
-    method @Nullable public android.util.Range<java.lang.Long> getEstimatedCaptureLatencyRange(int, @NonNull android.util.Size, int);
+    method @Nullable public android.util.Range<java.lang.Long> getEstimatedCaptureLatencyRangeMillis(int, @NonNull android.util.Size, int);
     method @NonNull public <T> java.util.List<android.util.Size> getExtensionSupportedSizes(int, @NonNull Class<T>);
     method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
     method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();

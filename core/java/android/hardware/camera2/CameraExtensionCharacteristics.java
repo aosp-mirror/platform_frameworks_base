@@ -73,6 +73,9 @@ import java.util.Objects;
  * {@link CameraExtensionCharacteristics#getExtensionSupportedSizes(int, Class)} for supported
  * repeating request output sizes.</p>
  *
+ * <p>The extension characteristics for a given device are expected to remain static under
+ * normal operating conditions.</p>
+ *
  * @see CameraManager#getCameraExtensionCharacteristics(String)
  */
 public final class CameraExtensionCharacteristics {
@@ -585,7 +588,7 @@ public final class CameraExtensionCharacteristics {
      * @throws IllegalArgumentException in case of format different from {@link ImageFormat#JPEG} /
      *                                  {@link ImageFormat#YUV_420_888}; or unsupported extension.
      */
-    public @Nullable Range<Long> getEstimatedCaptureLatencyRange(@Extension int extension,
+    public @Nullable Range<Long> getEstimatedCaptureLatencyRangeMillis(@Extension int extension,
             @NonNull Size captureOutputSize, @ImageFormat.Format int format) {
         switch (format) {
             case ImageFormat.YUV_420_888:
