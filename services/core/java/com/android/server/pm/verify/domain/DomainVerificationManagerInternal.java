@@ -57,6 +57,28 @@ public interface DomainVerificationManagerInternal {
     UUID DISABLED_ID = new UUID(0, 0);
 
     /**
+     * The app was not installed for the user.
+     */
+    int APPROVAL_LEVEL_NOT_INSTALLED = -4;
+
+    /**
+     * The app was not enabled for the user.
+     */
+    int APPROVAL_LEVEL_DISABLED = -3;
+
+    /**
+     * The app has not declared this domain in a valid web intent-filter in their manifest, and so
+     * would never be able to be approved for this domain.
+     */
+    int APPROVAL_LEVEL_UNDECLARED = -2;
+
+    /**
+     * The app has declared this domain as a valid autoVerify domain, but it failed or has not
+     * succeeded verification.
+     */
+    int APPROVAL_LEVEL_UNVERIFIED = -1;
+
+    /**
      * The app has not been approved for this domain and should never be able to open it through
      * an implicit web intent.
      */
@@ -117,10 +139,14 @@ public interface DomainVerificationManagerInternal {
      * by approval priority. A higher numerical value means the package should override all lower
      * values. This means that comparison using less/greater than IS valid.
      *
-     * Negative values are possible, although not implemented, reserved if explicit disable of a
-     * package for a domain needs to be tracked.
+     * Negative values are possible, used for tracking specific reasons for why an app doesn't have
+     * approval.
      */
     @IntDef({
+            APPROVAL_LEVEL_NOT_INSTALLED,
+            APPROVAL_LEVEL_DISABLED,
+            APPROVAL_LEVEL_UNDECLARED,
+            APPROVAL_LEVEL_UNVERIFIED,
             APPROVAL_LEVEL_NONE,
             APPROVAL_LEVEL_LEGACY_ASK,
             APPROVAL_LEVEL_LEGACY_ALWAYS,
@@ -129,6 +155,33 @@ public interface DomainVerificationManagerInternal {
             APPROVAL_LEVEL_INSTANT_APP
     })
     @interface ApprovalLevel {
+    }
+
+    static String approvalLevelToDebugString(@ApprovalLevel int level) {
+        switch (level) {
+            case APPROVAL_LEVEL_NOT_INSTALLED:
+                return "NOT_INSTALLED";
+            case APPROVAL_LEVEL_DISABLED:
+                return "DISABLED";
+            case APPROVAL_LEVEL_UNDECLARED:
+                return "UNDECLARED";
+            case APPROVAL_LEVEL_UNVERIFIED:
+                return "UNVERIFIED";
+            case APPROVAL_LEVEL_NONE:
+                return "NONE";
+            case APPROVAL_LEVEL_LEGACY_ASK:
+                return "LEGACY_ASK";
+            case APPROVAL_LEVEL_LEGACY_ALWAYS:
+                return "LEGACY_ALWAYS";
+            case APPROVAL_LEVEL_SELECTION:
+                return "USER_SELECTION";
+            case APPROVAL_LEVEL_VERIFIED:
+                return "VERIFIED";
+            case APPROVAL_LEVEL_INSTANT_APP:
+                return "INSTANT_APP";
+            default:
+                return "UNKNOWN";
+        }
     }
 
     /** @see DomainVerificationManager#getDomainVerificationInfo(String) */

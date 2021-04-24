@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
+import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -36,6 +37,7 @@ import android.graphics.ColorSpace;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
@@ -727,6 +729,15 @@ public final class Display {
             updateDisplayInfoLocked();
             return mDisplayInfo.brightnessDefault;
         }
+    }
+
+    /**
+     * @return Brightness information about the display.
+     * @hide
+     */
+    @RequiresPermission(CONTROL_DISPLAY_BRIGHTNESS)
+    public @Nullable BrightnessInfo getBrightnessInfo() {
+        return mGlobal.getBrightnessInfo(mDisplayId);
     }
 
     /**

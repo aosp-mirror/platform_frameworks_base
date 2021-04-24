@@ -68,8 +68,7 @@ public class AdapterStateListener extends IUwbAdapterStateCallbacks.Stub {
                     mIsRegistered = true;
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to register adapter state callback");
-                    executor.execute(() -> callback.onStateChanged(mAdapterState,
-                            AdapterStateCallback.STATE_CHANGED_REASON_ERROR_UNKNOWN));
+                    throw e.rethrowFromSystemServer();
                 }
             } else {
                 sendCurrentState(callback);
@@ -95,6 +94,7 @@ public class AdapterStateListener extends IUwbAdapterStateCallbacks.Stub {
                     mAdapter.unregisterAdapterStateCallbacks(this);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to unregister AdapterStateCallback with service");
+                    throw e.rethrowFromSystemServer();
                 }
                 mIsRegistered = false;
             }
@@ -115,24 +115,24 @@ public class AdapterStateListener extends IUwbAdapterStateCallbacks.Stub {
                     mAdapter.setEnabled(isEnabled);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to set adapter state");
-                    sendErrorState();
+                    throw e.rethrowFromSystemServer();
                 }
             }
         }
     }
 
-    private void sendErrorState() {
+    /**
+     * Gets the adapter enabled state
+     *
+     * @return integer representing adapter enabled state
+     */
+    public int getAdapterState() {
         synchronized (this) {
-            for (AdapterStateCallback callback: mCallbackMap.keySet()) {
-                Executor executor = mCallbackMap.get(callback);
-
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    executor.execute(() -> callback.onStateChanged(
-                            mAdapterState, mAdapterStateChangeReason));
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
+            try {
+                return mAdapter.getAdapterState();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to get adapter state");
+                throw e.rethrowFromSystemServer();
             }
         }
     }

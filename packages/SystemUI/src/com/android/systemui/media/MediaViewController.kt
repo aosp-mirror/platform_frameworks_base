@@ -70,11 +70,10 @@ class MediaViewController @Inject constructor(
      * finished
      */
     @MediaLocation
-    private var currentEndLocation: Int = -1
+    var currentEndLocation: Int = -1
 
     /**
-     * The ending location of the view where it ends when all animations and transitions have
-     * finished
+     * The starting location of the view where it starts for all animations and transitions
      */
     @MediaLocation
     private var currentStartLocation: Int = -1
