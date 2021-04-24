@@ -43,8 +43,12 @@ import java.nio.ByteBuffer;
 public class LmkdConnection {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "LmkdConnection" : TAG_AM;
 
-    // lmkd reply max size in bytes
-    private static final int LMKD_REPLY_MAX_SIZE = 12;
+    /**
+     * Max LMKD reply packet length in bytes
+     * Used to hold the data for the statsd atoms logging
+     * Must be in sync with statslog.h
+     */
+    private static final int LMKD_REPLY_MAX_SIZE = 214;
 
     // connection listener interface
     interface LmkdConnectionListener {

@@ -334,18 +334,25 @@ public final class ProcessList {
     // LMK_GETKILLCNT
     // LMK_SUBSCRIBE
     // LMK_PROCKILL
+    // LMK_UPDATE_PROPS
+    // LMK_KILL_OCCURRED
+    // LMK_STATE_CHANGED
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;
     static final byte LMK_PROCREMOVE = 2;
     static final byte LMK_PROCPURGE = 3;
     static final byte LMK_GETKILLCNT = 4;
     static final byte LMK_SUBSCRIBE = 5;
-    static final byte LMK_PROCKILL = 6; // Note: this is an unsolicated command
+    static final byte LMK_PROCKILL = 6; // Note: this is an unsolicited command
+    static final byte LMK_UPDATE_PROPS = 7;
+    static final byte LMK_KILL_OCCURRED = 8; // Msg to subscribed clients on kill occurred event
+    static final byte LMK_STATE_CHANGED = 9; // Msg to subscribed clients on state changed
 
     // Low Memory Killer Daemon command codes.
     // These must be kept in sync with async_event_type definitions in lmkd.h
     //
     static final int LMK_ASYNC_EVENT_KILL = 0;
+    static final int LMK_ASYNC_EVENT_STAT = 1;
 
     // lmkd reconnect delay in msecs
     private static final long LMKD_RECONNECT_DELAY_MS = 1000;
@@ -833,6 +840,7 @@ public final class ProcessList {
                             if (receivedLen < 4) {
                                 return false;
                             }
+
                             switch (dataReceived.getInt(0)) {
                                 case LMK_PROCKILL:
                                     if (receivedLen != 12) {
@@ -840,6 +848,20 @@ public final class ProcessList {
                                     }
                                     mAppExitInfoTracker.scheduleNoteLmkdProcKilled(
                                             dataReceived.getInt(4), dataReceived.getInt(8));
+                                    return true;
+                                case LMK_KILL_OCCURRED:
+                                    if (receivedLen < LmkdStatsReporter.KILL_OCCURRED_MSG_SIZE) {
+                                        return false;
+                                    }
+                                    dataReceived.position(4);
+                                    LmkdStatsReporter.logKillOccurred(dataReceived);
+                                    return true;
+                                case LMK_STATE_CHANGED:
+                                    if (receivedLen != LmkdStatsReporter.STATE_CHANGED_MSG_SIZE) {
+                                        return false;
+                                    }
+                                    LmkdStatsReporter.logStateChanged(
+                                            dataReceived.getInt(4));
                                     return true;
                                 default:
                                     return false;
@@ -1474,6 +1496,12 @@ public final class ProcessList {
             buf = ByteBuffer.allocate(4 * 2);
             buf.putInt(LMK_SUBSCRIBE);
             buf.putInt(LMK_ASYNC_EVENT_KILL);
+            ostream.write(buf.array(), 0, buf.position());
+
+            // Subscribe for stats event notifications
+            buf = ByteBuffer.allocate(4 * 2);
+            buf.putInt(LMK_SUBSCRIBE);
+            buf.putInt(LMK_ASYNC_EVENT_STAT);
             ostream.write(buf.array(), 0, buf.position());
         } catch (IOException ex) {
             return false;
