@@ -58,7 +58,7 @@ import com.android.server.biometrics.sensors.RemovalConsumer;
 import com.android.server.biometrics.sensors.StartUserClient;
 import com.android.server.biometrics.sensors.StopUserClient;
 import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
@@ -179,7 +179,8 @@ class Sensor {
                 }
 
                 final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
-                acquisitionClient.onAcquired(info, vendorCode);
+                acquisitionClient.onAcquired(AidlConversionUtils.toFrameworkAcquiredInfo(info),
+                        vendorCode);
             });
         }
 
@@ -198,7 +199,7 @@ class Sensor {
                 }
 
                 final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-                errorConsumer.onError(error, vendorCode);
+                errorConsumer.onError(AidlConversionUtils.toFrameworkError(error), vendorCode);
 
                 if (error == Error.HW_UNAVAILABLE) {
                     mCallback.onHardwareUnavailable();
@@ -487,7 +488,7 @@ class Sensor {
     }
 
     @NonNull ITestSession createTestSession(@NonNull ITestSessionCallback callback,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback) {
+            @NonNull FingerprintStateCallback fingerprintStateCallback) {
         return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, callback,
                 fingerprintStateCallback, mProvider, this);
     }

@@ -697,7 +697,7 @@ public final class ConnectivityController extends RestrictingController implemen
             }
             callback.setUid(uidStats.uid);
             mCurrentDefaultNetworkCallbacks.append(uidStats.uid, callback);
-            mConnManager.registerDefaultNetworkCallbackAsUid(uidStats.uid, callback, mHandler);
+            mConnManager.registerDefaultNetworkCallbackForUid(uidStats.uid, callback, mHandler);
         }
     }
 
@@ -794,7 +794,7 @@ public final class ConnectivityController extends RestrictingController implemen
                     }
                     defaultNetworkCallback.setUid(us.uid);
                     mCurrentDefaultNetworkCallbacks.append(us.uid, defaultNetworkCallback);
-                    mConnManager.registerDefaultNetworkCallbackAsUid(
+                    mConnManager.registerDefaultNetworkCallbackForUid(
                             us.uid, defaultNetworkCallback, mHandler);
                 }
             }

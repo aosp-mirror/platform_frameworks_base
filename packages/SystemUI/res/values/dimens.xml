@@ -1456,6 +1456,12 @@
      screen directly in front of the sensor. -->
     <dimen name="physical_fingerprint_sensor_center_screen_location_y">610px</dimen>
 
+    <!-- Normalized location on the screen of the center of the physical usb charger port in
+         portrait mode. This is a reasonable default that should be overridden by device-specific
+         overlays. -->
+    <item name="physical_charger_port_location_normalized_x" type="dimen" format="float">0.5</item>
+    <item name="physical_charger_port_location_normalized_y" type="dimen" format="float">1</item>
+
     <!-- Wallet activity screen specs -->
     <dimen name="wallet_icon_size">36sp</dimen>
     <dimen name="card_margin">16dp</dimen>

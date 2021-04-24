@@ -1815,6 +1815,7 @@ public final class ActiveServices {
                     notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
                     r.foregroundNoti = notification;
                     r.foregroundServiceType = foregroundServiceType;
+                    boolean enterForeground = false;
                     if (!r.isForeground) {
                         final ServiceMap smap = getServiceMapLocked(r.userId);
                         if (smap != null) {
@@ -1840,6 +1841,7 @@ public final class ActiveServices {
                             active.mNumActive++;
                         }
                         r.isForeground = true;
+                        enterForeground = true;
                         r.mStartForegroundCount++;
                         r.mFgsEnterTime = SystemClock.uptimeMillis();
                         if (!stopProcStatsOp) {
@@ -1851,16 +1853,23 @@ public final class ActiveServices {
                         } else {
                             stopProcStatsOp = false;
                         }
-                        postFgsNotificationLocked(r);
+
                         mAm.mAppOpsService.startOperation(
                                 AppOpsManager.getToken(mAm.mAppOpsService),
                                 AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName,
                                 null, true, false, "", false);
+                        registerAppOpCallbackLocked(r);
+                        mAm.updateForegroundServiceUsageStats(r.name, r.userId, true);
+                    }
+                    // Even if the service is already a FGS, we need to update the notification,
+                    // so we need to call it again.
+                    postFgsNotificationLocked(r);
+                    if (enterForeground) {
+                        // Because we want to log what's updated in postFgsNotificationLocked(),
+                        // this must be called after postFgsNotificationLocked().
                         logForegroundServiceStateChanged(r,
                                 FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
                                 0);
-                        registerAppOpCallbackLocked(r);
-                        mAm.updateForegroundServiceUsageStats(r.name, r.userId, true);
                     }
                     if (r.app != null) {
                         updateServiceForegroundLocked(psr, true);

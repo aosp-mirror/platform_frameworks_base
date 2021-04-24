@@ -52,6 +52,18 @@ class OngoingCallController @Inject constructor(
     private val mListeners: MutableList<OngoingCallListener> = mutableListOf()
 
     private val notifListener = object : NotifCollectionListener {
+        // Temporary workaround for b/178406514 for testing purposes.
+        //
+        // b/178406514 means that posting an incoming call notif then updating it to an ongoing call
+        // notif does not work (SysUI never receives the update). This workaround allows us to
+        // trigger the ongoing call chip when an ongoing call notif is *added* rather than
+        // *updated*, allowing us to test the chip.
+        //
+        // TODO(b/183229367): Remove this function override when b/178406514 is fixed.
+        override fun onEntryAdded(entry: NotificationEntry) {
+            onEntryUpdated(entry)
+        }
+
         override fun onEntryUpdated(entry: NotificationEntry) {
             if (isOngoingCallNotification(entry)) {
                 ongoingCallInfo = OngoingCallInfo(

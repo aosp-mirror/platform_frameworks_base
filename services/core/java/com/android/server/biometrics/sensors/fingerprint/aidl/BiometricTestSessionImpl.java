@@ -32,7 +32,7 @@ import android.util.Slog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.HashSet;
@@ -51,7 +51,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     @NonNull private final Context mContext;
     private final int mSensorId;
     @NonNull private final ITestSessionCallback mCallback;
-    @NonNull private final FingerprintService.FingerprintStateCallback mFingerprintStateCallback;
+    @NonNull private final FingerprintStateCallback mFingerprintStateCallback;
     @NonNull private final FingerprintProvider mProvider;
     @NonNull private final Sensor mSensor;
     @NonNull private final Set<Integer> mEnrollmentIds;
@@ -117,7 +117,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
 
     BiometricTestSessionImpl(@NonNull Context context, int sensorId,
             @NonNull ITestSessionCallback callback,
-            @NonNull FingerprintService.FingerprintStateCallback fingerprintStateCallback,
+            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull FingerprintProvider provider,
             @NonNull Sensor sensor) {
         mContext = context;

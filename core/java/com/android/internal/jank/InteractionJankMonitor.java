@@ -79,6 +79,12 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This class let users to begin and end the always on tracing mechanism.
+ *
+ * Enabling for local development:
+ *
+ * adb shell device_config put interaction_jank_monitor enabled true
+ * adb shell device_config put interaction_jank_monitor sampling_interval 1
+ *
  * @hide
  */
 public class InteractionJankMonitor {

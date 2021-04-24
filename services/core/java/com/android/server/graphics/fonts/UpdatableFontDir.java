@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -117,12 +118,12 @@ final class UpdatableFontDir {
      * randomized dir. The font file path would be {@code mFilesDir/~~{randomStr}/{fontFileName}}.
      */
     private final File mFilesDir;
-    private final List<File> mPreinstalledFontDirs;
     private final FontFileParser mParser;
     private final FsverityUtil mFsverityUtil;
     private final File mConfigFile;
     private final File mTmpConfigFile;
     private final Supplier<Long> mCurrentTimeSupplier;
+    private final Function<Map<String, File>, FontConfig> mConfigSupplier;
 
     private long mLastModifiedMillis;
     private int mConfigVersion;
@@ -134,22 +135,24 @@ final class UpdatableFontDir {
      */
     private final ArrayMap<String, FontFileInfo> mFontFileInfoMap = new ArrayMap<>();
 
-    UpdatableFontDir(File filesDir, List<File> preinstalledFontDirs, FontFileParser parser,
-            FsverityUtil fsverityUtil) {
-        this(filesDir, preinstalledFontDirs, parser, fsverityUtil, new File(CONFIG_XML_FILE),
-                () -> System.currentTimeMillis());
+    UpdatableFontDir(File filesDir, FontFileParser parser, FsverityUtil fsverityUtil) {
+        this(filesDir, parser, fsverityUtil, new File(CONFIG_XML_FILE),
+                () -> System.currentTimeMillis(),
+                (map) -> SystemFonts.getSystemFontConfig(map, 0, 0)
+        );
     }
 
     // For unit testing
-    UpdatableFontDir(File filesDir, List<File> preinstalledFontDirs, FontFileParser parser,
-            FsverityUtil fsverityUtil, File configFile, Supplier<Long> currentTimeSupplier) {
+    UpdatableFontDir(File filesDir, FontFileParser parser, FsverityUtil fsverityUtil,
+            File configFile, Supplier<Long> currentTimeSupplier,
+            Function<Map<String, File>, FontConfig> configSupplier) {
         mFilesDir = filesDir;
-        mPreinstalledFontDirs = preinstalledFontDirs;
         mParser = parser;
         mFsverityUtil = fsverityUtil;
         mConfigFile = configFile;
         mTmpConfigFile = new File(configFile.getAbsoluteFile() + ".tmp");
         mCurrentTimeSupplier = currentTimeSupplier;
+        mConfigSupplier = configSupplier;
     }
 
     /**
@@ -174,6 +177,7 @@ final class UpdatableFontDir {
 
             File[] dirs = mFilesDir.listFiles();
             if (dirs == null) return;
+            FontConfig fontConfig = getSystemFontConfig();
             for (File dir : dirs) {
                 if (!dir.getName().startsWith(RANDOM_DIR_PREFIX)) {
                     Slog.e(TAG, "Unexpected dir found: " + dir);
@@ -190,7 +194,7 @@ final class UpdatableFontDir {
                     return;
                 }
                 FontFileInfo fontFileInfo = validateFontFile(files[0]);
-                addFileToMapIfSameOrNewer(fontFileInfo, true /* deleteOldFile */);
+                addFileToMapIfSameOrNewer(fontFileInfo, fontConfig, true /* deleteOldFile */);
             }
             success = true;
         } catch (Throwable t) {
@@ -302,7 +306,7 @@ final class UpdatableFontDir {
      * Installs a new font file, or updates an existing font file.
      *
      * <p>The new font will be immediately available for new Zygote-forked processes through
-     * {@link #getFontFileMap()}. Old font files will be kept until next system server reboot,
+     * {@link #getPostScriptMap()}. Old font files will be kept until next system server reboot,
      * because existing Zygote-forked processes have paths to old font files.
      *
      * @param fd             A file descriptor to the font file.
@@ -373,7 +377,8 @@ final class UpdatableFontDir {
                         "Failed to change mode to 711", e);
             }
             FontFileInfo fontFileInfo = validateFontFile(newFontFile);
-            if (!addFileToMapIfSameOrNewer(fontFileInfo, false)) {
+            FontConfig fontConfig = getSystemFontConfig();
+            if (!addFileToMapIfSameOrNewer(fontFileInfo, fontConfig, false)) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_DOWNGRADING,
                         "Downgrading font file is forbidden.");
@@ -417,14 +422,15 @@ final class UpdatableFontDir {
      * equal to or higher than the revision of currently used font file (either in
      * {@link #mFontFileInfoMap} or {@link #mPreinstalledFontDirs}).
      */
-    private boolean addFileToMapIfSameOrNewer(FontFileInfo fontFileInfo, boolean deleteOldFile) {
+    private boolean addFileToMapIfSameOrNewer(FontFileInfo fontFileInfo, FontConfig fontConfig,
+            boolean deleteOldFile) {
         FontFileInfo existingInfo = lookupFontFileInfo(fontFileInfo.getPostScriptName());
         final boolean shouldAddToMap;
         if (existingInfo == null) {
             // We got a new updatable font. We need to check if it's newer than preinstalled fonts.
             // Note that getPreinstalledFontRevision() returns -1 if there is no preinstalled font
             // with 'name'.
-            long preInstalledRev = getPreinstalledFontRevision(fontFileInfo.getFile().getName());
+            long preInstalledRev = getPreinstalledFontRevision(fontFileInfo, fontConfig);
             shouldAddToMap = preInstalledRev <= fontFileInfo.getRevision();
         } else {
             shouldAddToMap = existingInfo.getRevision() <= fontFileInfo.getRevision();
@@ -442,21 +448,33 @@ final class UpdatableFontDir {
         return shouldAddToMap;
     }
 
-    private long getPreinstalledFontRevision(String name) {
-        long maxRevision = -1;
-        for (File dir : mPreinstalledFontDirs) {
-            File preinstalledFontFile = new File(dir, name);
-            if (!preinstalledFontFile.exists()) continue;
-            long revision = getFontRevision(preinstalledFontFile);
-            if (revision == -1) {
-                Slog.w(TAG, "Invalid preinstalled font file");
-                continue;
-            }
-            if (revision > maxRevision) {
-                maxRevision = revision;
+    private long getPreinstalledFontRevision(FontFileInfo info, FontConfig fontConfig) {
+        String psName = info.getPostScriptName();
+        FontConfig.Font targetFont = null;
+        for (int i = 0; i < fontConfig.getFontFamilies().size(); i++) {
+            FontConfig.FontFamily family = fontConfig.getFontFamilies().get(i);
+            for (int j = 0; j < family.getFontList().size(); ++j) {
+                FontConfig.Font font = family.getFontList().get(j);
+                if (font.getPostScriptName().equals(psName)) {
+                    targetFont = font;
+                    break;
+                }
             }
         }
-        return maxRevision;
+        if (targetFont == null) {
+            return -1;
+        }
+
+        File preinstalledFontFile = targetFont.getOriginalFile() != null
+                ? targetFont.getOriginalFile() : targetFont.getFile();
+        if (!preinstalledFontFile.exists()) {
+            return -1;
+        }
+        long revision = getFontRevision(preinstalledFontFile);
+        if (revision == -1) {
+            Slog.w(TAG, "Invalid preinstalled font file");
+        }
+        return revision;
     }
 
     /**
@@ -515,17 +533,17 @@ final class UpdatableFontDir {
                 null, FontConfig.FontFamily.VARIANT_DEFAULT);
     }
 
-    Map<String, File> getFontFileMap() {
+    Map<String, File> getPostScriptMap() {
         Map<String, File> map = new ArrayMap<>();
         for (int i = 0; i < mFontFileInfoMap.size(); ++i) {
-            File file = mFontFileInfoMap.valueAt(i).getFile();
-            map.put(file.getName(), file);
+            FontFileInfo info = mFontFileInfoMap.valueAt(i);
+            map.put(info.getPostScriptName(), info.getFile());
         }
         return map;
     }
 
     /* package */ FontConfig getSystemFontConfig() {
-        FontConfig config = SystemFonts.getSystemFontConfig(getFontFileMap(), 0, 0);
+        FontConfig config = mConfigSupplier.apply(getPostScriptMap());
         PersistentSystemFontConfig.Config persistentConfig = readPersistentConfig();
         List<FontUpdateRequest.Family> families = persistentConfig.fontFamilies;
 

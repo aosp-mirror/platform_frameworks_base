@@ -125,6 +125,11 @@ public abstract class InputMethodManagerInternal {
     public abstract void removeImeSurface();
 
     /**
+     * Updates the IME visibility, back disposition and show IME picker status for SystemUI.
+     */
+    public abstract void updateImeWindowStatus();
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -174,6 +179,10 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void removeImeSurface() {
+                }
+
+                @Override
+                public void updateImeWindowStatus() {
                 }
             };
 

@@ -23,13 +23,13 @@ import android.annotation.Nullable;
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
-import android.annotation.SuppressLint;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
-import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
@@ -265,7 +265,8 @@ public final class BluetoothA2dp implements BluetoothProfile {
     @SystemApi
     public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_SOFTWARE_ENCODING = 2;
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothA2dp> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.A2DP, "BluetoothA2dp",
                     IBluetoothA2dp.class.getName()) {
@@ -279,8 +280,10 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * Create a BluetoothA2dp proxy object for interacting with the local
      * Bluetooth A2DP service.
      */
-    /*package*/ BluetoothA2dp(Context context, ServiceListener listener) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    /* package */ BluetoothA2dp(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
     }
 
@@ -386,7 +389,8 @@ public final class BluetoothA2dp implements BluetoothProfile {
         try {
             final IBluetoothA2dp service = getService();
             if (service != null && isEnabled()) {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(), mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -407,7 +411,8 @@ public final class BluetoothA2dp implements BluetoothProfile {
         try {
             final IBluetoothA2dp service = getService();
             if (service != null && isEnabled()) {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();

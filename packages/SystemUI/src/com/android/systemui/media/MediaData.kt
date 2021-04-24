@@ -104,7 +104,12 @@ data class MediaData(
     /**
      * Set from the notification and used as fallback when PlaybackState cannot be determined
      */
-    val isClearable: Boolean = true
+    val isClearable: Boolean = true,
+
+    /**
+     * Timestamp when this player was last active.
+     */
+    var lastActive: Long = 0L
 )
 
 /** State of a media action. */

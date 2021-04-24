@@ -39,6 +39,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 185400889)
 class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {

@@ -41,8 +41,11 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
+import com.android.systemui.plugins.BcSmartspaceDataPlugin.IntentStarter;
 import com.android.systemui.plugins.ClockPlugin;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
@@ -107,6 +110,10 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     SmartspaceView mSmartspaceView;
     @Mock
     SystemUIFactory mSystemUIFactory;
+    @Mock
+    ActivityStarter mActivityStarter;
+    @Mock
+    FalsingManager mFalsingManager;
 
     private KeyguardClockSwitchController mController;
     private View mStatusArea;
@@ -143,7 +150,9 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mExecutor,
                 mBatteryController,
                 mConfigurationController,
-                mSystemUIFactory
+                mSystemUIFactory,
+                mActivityStarter,
+                mFalsingManager
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
@@ -152,7 +161,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         mStatusArea = new View(getContext());
         when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(mStatusArea);
         when(mSmartspaceDataProvider.getView(any())).thenReturn(mSmartspaceView);
-
     }
 
     @Test
@@ -264,5 +272,9 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         public void setPrimaryTextColor(int color) { }
 
         public void setDozeAmount(float amount) { }
+
+        public void setIntentStarter(IntentStarter intentStarter) { }
+
+        public void setFalsingManager(FalsingManager falsingManager) { }
     }
 }
