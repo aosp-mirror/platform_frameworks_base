@@ -51,8 +51,6 @@ public class WindowOrientationListenerTest {
     private InputSensorInfo mMockInputSensorInfo;
     @Mock
     private SensorManager mMockSensorManager;
-    @Mock
-    private WindowManagerService mMockWindowManagerService;
 
     private TestableRotationResolver mFakeRotationResolverInternal;
     private com.android.server.wm.WindowOrientationListener mWindowOrientationListener;
@@ -69,7 +67,7 @@ public class WindowOrientationListenerTest {
         mFakeRotationResolverInternal = new TestableRotationResolver();
         doReturn(mMockSensorManager).when(mMockContext).getSystemService(Context.SENSOR_SERVICE);
         mWindowOrientationListener = new TestableWindowOrientationListener(mMockContext,
-                mMockHandler, mMockWindowManagerService);
+                mMockHandler);
         mWindowOrientationListener.mRotationResolverService = mFakeRotationResolverInternal;
 
         mFakeSensor = new Sensor(mMockInputSensorInfo);
@@ -115,9 +113,8 @@ public class WindowOrientationListenerTest {
 
     final class TestableWindowOrientationListener extends WindowOrientationListener {
 
-        TestableWindowOrientationListener(Context context, Handler handler,
-                WindowManagerService service) {
-            super(context, handler, service);
+        TestableWindowOrientationListener(Context context, Handler handler) {
+            super(context, handler);
             this.mOrientationJudge = new OrientationSensorJudge();
         }
 
