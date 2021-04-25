@@ -35,6 +35,7 @@ import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
+import android.os.Binder;
 import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -51,6 +52,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.function.QuadFunction;
 import com.android.server.FgThread;
 import com.android.server.compat.CompatChange;
 import com.android.server.om.OverlayReferenceMapper;
@@ -69,7 +71,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.Executor;
-import java.util.function.Function;
 
 /**
  * The entity responsible for filtering visibility between apps based on declarations in their
@@ -1447,14 +1448,20 @@ public class AppsFilter implements Watchable, Snappable {
 
     public void dumpQueries(
             PrintWriter pw, @Nullable Integer filteringAppId, DumpState dumpState, int[] users,
-            Function<Integer, String[]> getPackagesForUid) {
+            QuadFunction<Integer, Integer, Integer, Boolean, String[]> getPackagesForUid) {
         final SparseArray<String> cache = new SparseArray<>();
         ToString<Integer> expandPackages = input -> {
             String cachedValue = cache.get(input);
             if (cachedValue == null) {
-                final String[] packagesForUid = getPackagesForUid.apply(input);
+                final int callingUid = Binder.getCallingUid();
+                final int appId = UserHandle.getAppId(input);
+                String[] packagesForUid = null;
+                for (int i = 0, size = users.length; packagesForUid == null && i < size; i++) {
+                    packagesForUid = getPackagesForUid.apply(callingUid, users[i], appId,
+                            false /*isCallerInstantApp*/);
+                }
                 if (packagesForUid == null) {
-                    cachedValue = "[unknown app id " + input + "]";
+                    cachedValue = "[app id " + input + " not installed]";
                 } else {
                     cachedValue = packagesForUid.length == 1 ? packagesForUid[0]
                             : "[" + TextUtils.join(",", packagesForUid) + "]";
