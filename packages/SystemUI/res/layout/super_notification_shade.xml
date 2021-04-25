@@ -43,7 +43,7 @@
                    android:visibility="invisible" />
     </com.android.systemui.statusbar.BackDropView>
 
-    <com.android.systemui.statusbar.ScrimView
+    <com.android.systemui.scrim.ScrimView
         android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -51,7 +51,7 @@
         sysui:ignoreRightInset="true"
         />
 
-    <com.android.systemui.statusbar.ScrimView
+    <com.android.systemui.scrim.ScrimView
         android:id="@+id/scrim_notifications"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -72,7 +72,7 @@
 
     <include layout="@layout/brightness_mirror_container" />
 
-    <com.android.systemui.statusbar.ScrimView
+    <com.android.systemui.scrim.ScrimView
         android:id="@+id/scrim_in_front"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -1376,9 +1376,7 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return service.setRemoteAlias(this, alias,
-                    mAttributionSource.getPackageName(),
-                    mAttributionSource);
+            return service.setRemoteAlias(this, alias, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }

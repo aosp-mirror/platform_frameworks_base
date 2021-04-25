@@ -136,7 +136,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
         if (service != null && isEnabled()) {
             try {
                 return BluetoothDevice.setAttributionSource(
-                        service.getConnectedDevices(), mAttributionSource);
+                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -159,7 +159,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
         if (service != null && isEnabled()) {
             try {
                 return BluetoothDevice.setAttributionSource(
-                        service.getDevicesMatchingConnectionStates(states), mAttributionSource);
+                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -181,7 +182,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
                 getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.STATE_DISCONNECTED;
@@ -205,7 +206,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
                 getService();
         if (service != null && isEnabled()) {
             try {
-                settings = service.getPlayerSettings(device);
+                settings = service.getPlayerSettings(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error talking to BT service in getMetadata() " + e);
                 return null;
@@ -226,7 +227,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
                 getService();
         if (service != null && isEnabled()) {
             try {
-                return service.setPlayerApplicationSetting(plAppSetting);
+                return service.setPlayerApplicationSetting(plAppSetting, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error talking to BT service in setPlayerApplicationSetting() " + e);
                 return false;
@@ -249,7 +250,7 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
                 getService();
         if (service != null && isEnabled()) {
             try {
-                service.sendGroupNavigationCmd(device, keyCode, keyState);
+                service.sendGroupNavigationCmd(device, keyCode, keyState, mAttributionSource);
                 return;
             } catch (RemoteException e) {
                 Log.e(TAG, "Error talking to BT service in sendGroupNavigationCmd()", e);

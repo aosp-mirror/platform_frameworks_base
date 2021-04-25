@@ -85,7 +85,6 @@ public abstract class WindowOrientationListener {
 
     private int mCurrentRotation = -1;
     private final Context mContext;
-    private final WindowManagerConstants mConstants;
 
     private final Object mLock = new Object();
 
@@ -94,11 +93,9 @@ public abstract class WindowOrientationListener {
      *
      * @param context for the WindowOrientationListener.
      * @param handler Provides the Looper for receiving sensor updates.
-     * @param wmService WindowManagerService to read the device config from.
      */
-    public WindowOrientationListener(
-            Context context, Handler handler, WindowManagerService wmService) {
-        this(context, handler, wmService, SensorManager.SENSOR_DELAY_UI);
+    public WindowOrientationListener(Context context, Handler handler) {
+        this(context, handler, SensorManager.SENSOR_DELAY_UI);
     }
 
     /**
@@ -115,10 +112,9 @@ public abstract class WindowOrientationListener {
      * This constructor is private since no one uses it.
      */
     private WindowOrientationListener(
-            Context context, Handler handler, WindowManagerService wmService, int rate) {
+            Context context, Handler handler, int rate) {
         mContext = context;
         mHandler = handler;
-        mConstants = wmService.mConstants;
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mRate = rate;
         List<Sensor> l = mSensorManager.getSensorList(Sensor.TYPE_DEVICE_ORIENTATION);
@@ -1134,16 +1130,11 @@ public abstract class WindowOrientationListener {
                 return;
             }
 
-            // Log raw sensor rotation.
-            if (evaluateRotationChangeLocked() >= 0) {
-                if (mConstants.mRawSensorLoggingEnabled) {
-                    FrameworkStatsLog.write(
-                            FrameworkStatsLog.DEVICE_ROTATED,
-                            event.timestamp,
-                            rotationToLogEnum(reportedRotation),
-                            FrameworkStatsLog.DEVICE_ROTATED__ROTATION_EVENT_TYPE__ACTUAL_EVENT);
-                }
-            }
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.DEVICE_ROTATED,
+                    event.timestamp,
+                    rotationToLogEnum(reportedRotation),
+                    FrameworkStatsLog.DEVICE_ROTATED__ROTATION_EVENT_TYPE__ACTUAL_EVENT);
 
             if (isRotationResolverEnabled()) {
                 if (mRotationResolverService == null) {

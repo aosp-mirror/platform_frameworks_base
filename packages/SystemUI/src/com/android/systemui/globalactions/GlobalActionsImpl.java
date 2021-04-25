@@ -30,11 +30,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.internal.colorextraction.drawable.ScrimDrawable;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.GlobalActions;
+import com.android.systemui.scrim.ScrimDrawable;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.ScrimController;
