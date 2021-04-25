@@ -123,6 +123,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         verify(mStatusBarKeyguardViewManager).showBouncer(eq(false));
         verify(mShadeController).animateCollapsePanels(anyInt(), anyBoolean(), anyBoolean(),
                 anyFloat());
+        verify(mStatusBarKeyguardViewManager, never()).notifyKeyguardAuthenticated(anyBoolean());
         assertThat(mBiometricUnlockController.getMode())
                 .isEqualTo(BiometricUnlockController.MODE_SHOW_BOUNCER);
     }
@@ -170,6 +171,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         verify(mStatusBarKeyguardViewManager, never()).showBouncer(anyBoolean());
         verify(mShadeController).animateCollapsePanels(anyInt(), anyBoolean(), anyBoolean(),
                 anyFloat());
+        verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(eq(false));
         assertThat(mBiometricUnlockController.getMode())
                 .isEqualTo(BiometricUnlockController.MODE_UNLOCK_COLLAPSING);
     }

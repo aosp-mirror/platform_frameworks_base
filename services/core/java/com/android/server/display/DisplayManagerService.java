@@ -55,6 +55,7 @@ import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
+import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
@@ -841,8 +842,6 @@ public final class DisplayManagerService extends SystemService {
             }
             return overriddenInfo;
         }
-
-
 
         return info;
     }
@@ -2062,8 +2061,14 @@ public final class DisplayManagerService extends SystemService {
                 display, mContext);
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
-                mDisplayBlanker, display, mBrightnessTracker, brightnessSetting);
+                mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
+                () -> handleBrightnessChange(display));
         mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
+    }
+
+    private void handleBrightnessChange(LogicalDisplay display) {
+        sendDisplayEventLocked(display.getDisplayIdLocked(),
+                DisplayManagerGlobal.EVENT_DISPLAY_BRIGHTNESS_CHANGED);
     }
 
     private final class DisplayManagerHandler extends Handler {
@@ -2219,6 +2224,8 @@ public final class DisplayManagerService extends SystemService {
                     return (mask & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_CHANGED:
                     return (mask & DisplayManager.EVENT_FLAG_DISPLAY_CHANGED) != 0;
+                case DisplayManagerGlobal.EVENT_DISPLAY_BRIGHTNESS_CHANGED:
+                    return (mask & DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS) != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_REMOVED:
                     return (mask & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0;
                 default:
@@ -2781,6 +2788,25 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        @Override
+        public BrightnessInfo getBrightnessInfo(int displayId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                    "Permission required to read the display's brightness info.");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
+                    if (dpc != null) {
+                        return dpc.getBrightnessInfo();
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            return null;
+        }
+
         @Override // Binder call
         public boolean isMinimalPostProcessingRequested(int displayId) {
             synchronized (mSyncRoot) {
@@ -3232,4 +3258,17 @@ public final class DisplayManagerService extends SystemService {
             }
         }
     };
+
+    /**
+     * Functional interface for providing time.
+     * TODO(b/184781936): merge with PowerManagerService.Clock
+     */
+    @VisibleForTesting
+    public interface Clock {
+        /**
+         * Returns current time in milliseconds since boot, not counting time spent in deep sleep.
+         */
+        long uptimeMillis();
+    }
+
 }
