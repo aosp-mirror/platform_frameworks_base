@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.graphics.Rect;
 import android.os.UserHandle;
 import android.util.Slog;
 
@@ -48,6 +49,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final ConfigurationController mConfigurationController;
     private final DozeParameters mDozeParameters;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
+    private final Rect mClipBounds = new Rect();
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
@@ -299,4 +301,17 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             mView.updateLogoutView(shouldShowLogout());
         }
     };
+
+    /**
+     * Rect that specifies how KSV should be clipped, on its parent's coordinates.
+     */
+    public void setClipBounds(Rect clipBounds) {
+        if (clipBounds != null) {
+            mClipBounds.set(clipBounds.left, (int) (clipBounds.top - mView.getY()),
+                    clipBounds.right, (int) (clipBounds.bottom - mView.getY()));
+            mView.setClipBounds(mClipBounds);
+        } else {
+            mView.setClipBounds(null);
+        }
+    }
 }

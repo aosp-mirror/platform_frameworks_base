@@ -451,8 +451,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
 
-    @VisibleForTesting
-    WindowManagerConstants mConstants;
+    final WindowManagerConstants mConstants;
 
     final WindowTracing mWindowTracing;
 
