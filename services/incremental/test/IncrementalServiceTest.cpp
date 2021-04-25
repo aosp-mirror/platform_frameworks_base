@@ -126,7 +126,7 @@ private:
 class MockDataLoader : public IDataLoader {
 public:
     MockDataLoader() {
-        ON_CALL(*this, create(_, _, _, _)).WillByDefault(Invoke(this, &MockDataLoader::createOk));
+        initializeCreateOk();
         ON_CALL(*this, start(_)).WillByDefault(Invoke(this, &MockDataLoader::startOk));
         ON_CALL(*this, stop(_)).WillByDefault(Invoke(this, &MockDataLoader::stopOk));
         ON_CALL(*this, destroy(_)).WillByDefault(Invoke(this, &MockDataLoader::destroyOk));
@@ -144,6 +144,10 @@ public:
     MOCK_METHOD3(prepareImage,
                  binder::Status(int32_t id, const std::vector<InstallationFileParcel>& addedFiles,
                                 const std::vector<std::string>& removedFiles));
+
+    void initializeCreateOk() {
+        ON_CALL(*this, create(_, _, _, _)).WillByDefault(Invoke(this, &MockDataLoader::createOk));
+    }
 
     void initializeCreateOkNoStatus() {
         ON_CALL(*this, create(_, _, _, _))
@@ -275,6 +279,14 @@ public:
         }
         return binder::Status::ok();
     }
+    binder::Status bindToDataLoaderOkWithNoDelay(int32_t mountId,
+                                                 const DataLoaderParamsParcel& params,
+                                                 int bindDelayMs,
+                                                 const sp<IDataLoaderStatusListener>& listener,
+                                                 bool* _aidl_return) {
+        CHECK(bindDelayMs == 0) << bindDelayMs;
+        return bindToDataLoaderOk(mountId, params, bindDelayMs, listener, _aidl_return);
+    }
     binder::Status bindToDataLoaderOkWith1sDelay(int32_t mountId,
                                                  const DataLoaderParamsParcel& params,
                                                  int bindDelayMs,
@@ -338,14 +350,13 @@ public:
         mListener->onStatusChanged(mId, IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE);
     }
     binder::Status unbindFromDataLoaderOk(int32_t id) {
+        mBindDelayMs = -1;
         if (mDataLoader) {
             if (auto status = mDataLoader->destroy(id); !status.isOk()) {
                 return status;
             }
             mDataLoader = nullptr;
-        }
-        mBindDelayMs = -1;
-        if (mListener) {
+        } else if (mListener) {
             mListener->onStatusChanged(id, IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
         }
         return binder::Status::ok();
@@ -1156,10 +1167,79 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderRecreateOnPendingReads) {
     ASSERT_GE(storageId, 0);
     ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
                                                   {}, {}));
-    mDataLoaderManager->setDataLoaderStatusUnavailable();
+    mDataLoaderManager->setDataLoaderStatusUnrecoverable();
+
+    // Timed callback present.
+    ASSERT_EQ(storageId, mTimedQueue->mId);
+    ASSERT_GE(mTimedQueue->mAfter, 10ms);
+    auto timedCallback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    // First callback call to propagate unrecoverable.
+    timedCallback();
+
+    // And second call to trigger recreation.
     ASSERT_NE(nullptr, mLooper->mCallback);
     ASSERT_NE(nullptr, mLooper->mCallbackData);
     mLooper->mCallback(-1, -1, mLooper->mCallbackData);
+}
+
+TEST_F(IncrementalServiceTest, testStartDataLoaderUnavailable) {
+    mIncFs->openMountSuccess();
+    mDataLoader->initializeCreateOkNoStatus();
+
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(3);
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(3);
+    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(3);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(1);
+    EXPECT_CALL(*mDataLoader, destroy(_)).Times(2);
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    EXPECT_CALL(*mLooper, addFd(MockIncFs::kPendingReadsFd, _, _, _, _)).Times(1);
+    EXPECT_CALL(*mLooper, removeFd(MockIncFs::kPendingReadsFd)).Times(1);
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWithNoDelay));
+
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
+
+    // Unavailable.
+    mDataLoaderManager->setDataLoaderStatusUnavailable();
+
+    // Timed callback present.
+    ASSERT_EQ(storageId, mTimedQueue->mId);
+    ASSERT_GE(mTimedQueue->mAfter, 10ms);
+    auto timedCallback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    // Propagating unavailable and expecting it to trigger rebind with 1s retry delay.
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith1sDelay));
+    timedCallback();
+
+    // Unavailable #2.
+    mDataLoaderManager->setDataLoaderStatusUnavailable();
+
+    // Timed callback present.
+    ASSERT_EQ(storageId, mTimedQueue->mId);
+    ASSERT_GE(mTimedQueue->mAfter, 10ms);
+    timedCallback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
+
+    // Propagating unavailable and expecting it to trigger rebind with 10s retry delay.
+    // This time succeed.
+    mDataLoader->initializeCreateOk();
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith10sDelay));
+    timedCallback();
 }
 
 TEST_F(IncrementalServiceTest, testStartDataLoaderUnhealthyStorage) {
