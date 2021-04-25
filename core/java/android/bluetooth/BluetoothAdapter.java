@@ -981,7 +981,7 @@ public final class BluetoothAdapter {
         }
         String packageName = ActivityThread.currentPackageName();
         try {
-            return mManagerService.disableBle(packageName, mToken);
+            return mManagerService.disableBle(mAttributionSource, mToken);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1028,7 +1028,7 @@ public final class BluetoothAdapter {
         }
         String packageName = ActivityThread.currentPackageName();
         try {
-            return mManagerService.enableBle(packageName, mToken);
+            return mManagerService.enableBle(mAttributionSource, mToken);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1193,7 +1193,7 @@ public final class BluetoothAdapter {
             return true;
         }
         try {
-            return mManagerService.enable(ActivityThread.currentPackageName());
+            return mManagerService.enable(mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1226,7 +1226,7 @@ public final class BluetoothAdapter {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disable() {
         try {
-            return mManagerService.disable(ActivityThread.currentPackageName(), true);
+            return mManagerService.disable(mAttributionSource, true);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1246,7 +1246,7 @@ public final class BluetoothAdapter {
     public boolean disable(boolean persist) {
 
         try {
-            return mManagerService.disable(ActivityThread.currentPackageName(), persist);
+            return mManagerService.disable(mAttributionSource, persist);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1267,7 +1267,7 @@ public final class BluetoothAdapter {
     })
     public String getAddress() {
         try {
-            return mManagerService.getAddress();
+            return mManagerService.getAddress(mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1285,7 +1285,7 @@ public final class BluetoothAdapter {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public String getName() {
         try {
-            return mManagerService.getName();
+            return mManagerService.getName(mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1297,7 +1297,7 @@ public final class BluetoothAdapter {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     public int getNameLengthForAdvertise() {
         try {
-            return mService.getNameLengthForAdvertise();
+            return mService.getNameLengthForAdvertise(mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1316,7 +1316,8 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null && mService.factoryReset()
-                    && mManagerService != null && mManagerService.onFactoryReset()) {
+                    && mManagerService != null
+                    && mManagerService.onFactoryReset(mAttributionSource)) {
                 return true;
             }
             Log.e(TAG, "factoryReset(): Setting persist.bluetooth.factoryreset to retry later");
@@ -1910,7 +1911,7 @@ public final class BluetoothAdapter {
             mServiceLock.readLock().lock();
             if (mService != null) {
                 if (DBG) Log.d(TAG, "removeActiveDevice, profiles: " + profiles);
-                return mService.removeActiveDevice(profiles);
+                return mService.removeActiveDevice(profiles, mAttributionSource);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1962,7 +1963,7 @@ public final class BluetoothAdapter {
                 if (DBG) {
                     Log.d(TAG, "setActiveDevice, device: " + device + ", profiles: " + profiles);
                 }
-                return mService.setActiveDevice(device, profiles);
+                return mService.setActiveDevice(device, profiles, mAttributionSource);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1995,7 +1996,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.connectAllEnabledProfiles(device);
+                return mService.connectAllEnabledProfiles(device, mAttributionSource);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -2027,7 +2028,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.disconnectAllEnabledProfiles(device);
+                return mService.disconnectAllEnabledProfiles(device, mAttributionSource);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -3219,7 +3220,7 @@ public final class BluetoothAdapter {
             return true;
         }
         try {
-            return mManagerService.enableNoAutoConnect(ActivityThread.currentPackageName());
+            return mManagerService.enableNoAutoConnect(mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
