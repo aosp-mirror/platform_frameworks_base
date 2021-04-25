@@ -20,6 +20,8 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.View;
@@ -54,6 +56,10 @@ public class QSContainerImpl extends FrameLayout {
     private static final PhysicsAnimator.SpringConfig BACKGROUND_SPRING
             = new PhysicsAnimator.SpringConfig(SpringForce.STIFFNESS_MEDIUM,
             SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+    private int mFancyClippingTop;
+    private int mFancyClippingBottom;
+    private final float[] mFancyClippingRadii = new float[] {0, 0, 0, 0, 0, 0, 0, 0};
+    private  final Path mFancyClippingPath = new Path();
     private int mBackgroundBottom = -1;
     private int mHeightOverride = -1;
     private View mQSDetail;
@@ -70,6 +76,7 @@ public class QSContainerImpl extends FrameLayout {
     private int mContentPadding = -1;
     private boolean mAnimateBottomOnNextLayout;
     private int mNavBarInset = 0;
+    private boolean mClippingEnabled;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -169,6 +176,15 @@ public class QSContainerImpl extends FrameLayout {
                 MeasureSpec.makeMeasureSpec(getDisplayHeight(), MeasureSpec.EXACTLY));
     }
 
+    @Override
+    public void dispatchDraw(Canvas canvas) {
+        if (!mFancyClippingPath.isEmpty()) {
+            canvas.translate(0, -getTranslationY());
+            canvas.clipOutPath(mFancyClippingPath);
+            canvas.translate(0, getTranslationY());
+        }
+        super.dispatchDraw(canvas);
+    }
 
     @Override
     protected void measureChildWithMargins(View child, int parentWidthMeasureSpec, int widthUsed,
@@ -187,6 +203,7 @@ public class QSContainerImpl extends FrameLayout {
         super.onLayout(changed, left, top, right, bottom);
         updateExpansion(mAnimateBottomOnNextLayout /* animate */);
         mAnimateBottomOnNextLayout = false;
+        updateClippingPath();
     }
 
     public void disable(int state1, int state2, boolean animate) {
@@ -281,6 +298,7 @@ public class QSContainerImpl extends FrameLayout {
 
     public void setExpansion(float expansion) {
         mQsExpansion = expansion;
+        mQSPanelContainer.setScrollingEnabled(expansion > 0.0f);
         updateExpansion();
     }
 
@@ -317,5 +335,47 @@ public class QSContainerImpl extends FrameLayout {
             getDisplay().getRealSize(mSizePoint);
         }
         return mSizePoint.y;
+    }
+
+    /**
+     * Clip QS bottom using a concave shape.
+     */
+    public void setFancyClipping(int top, int bottom, int radius, boolean enabled) {
+        boolean updatePath = false;
+        if (mFancyClippingRadii[0] != radius) {
+            mFancyClippingRadii[0] = radius;
+            mFancyClippingRadii[1] = radius;
+            mFancyClippingRadii[2] = radius;
+            mFancyClippingRadii[3] = radius;
+            updatePath = true;
+        }
+        if (mFancyClippingTop != top) {
+            mFancyClippingTop = top;
+            updatePath = true;
+        }
+        if (mFancyClippingBottom != bottom) {
+            mFancyClippingBottom = bottom;
+            updatePath = true;
+        }
+        if (mClippingEnabled != enabled) {
+            mClippingEnabled = enabled;
+            updatePath = true;
+        }
+
+        if (updatePath) {
+            updateClippingPath();
+        }
+    }
+
+    private void updateClippingPath() {
+        mFancyClippingPath.reset();
+        if (!mClippingEnabled) {
+            invalidate();
+            return;
+        }
+
+        mFancyClippingPath.addRoundRect(0, mFancyClippingTop, getWidth(),
+                mFancyClippingBottom, mFancyClippingRadii, Path.Direction.CW);
+        invalidate();
     }
 }

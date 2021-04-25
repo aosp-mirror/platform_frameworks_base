@@ -107,6 +107,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QuickQSPanelController mQuickQSPanelController;
     private QSCustomizerController mQSCustomizerController;
     private FeatureFlags mFeatureFlags;
+    /**
+     * When true, QS will translate from outside the screen. It will be clipped with parallax
+     * otherwise.
+     */
+    private boolean mTranslateWhileExpanding;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -254,6 +259,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
     }
 
+    @Override
+    public void setFancyClipping(int top, int bottom, int cornerRadius, boolean visible) {
+        if (getView() instanceof QSContainerImpl) {
+            ((QSContainerImpl) getView()).setFancyClipping(top, bottom, cornerRadius, visible);
+        }
+    }
+
     private void setEditLocation(View view) {
         View edit = view.findViewById(android.R.id.edit);
         int[] loc = edit.getLocationOnScreen();
@@ -394,16 +406,23 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
+    public void setTranslateWhileExpanding(boolean shouldTranslate) {
+        mTranslateWhileExpanding = shouldTranslate;
+        mQSAnimator.setTranslateWhileExpanding(shouldTranslate);
+    }
+
+    @Override
     public void setQsExpansion(float expansion, float headerTranslation) {
         if (DEBUG) Log.d(TAG, "setQSExpansion " + expansion + " " + headerTranslation);
 
         if (mQSAnimator != null) {
             final boolean showQSOnLockscreen = expansion > 0;
-            final boolean showQSUnlocked = headerTranslation == 0;
+            final boolean showQSUnlocked = headerTranslation == 0 || !mTranslateWhileExpanding;
             mQSAnimator.startAlphaAnimation(showQSOnLockscreen || showQSUnlocked);
         }
         mContainer.setExpansion(expansion);
-        final float translationScaleY = expansion - 1;
+        final float translationScaleY = (mTranslateWhileExpanding
+                ? 1 : QSAnimator.SHORT_PARALLAX_AMOUNT) * (expansion - 1);
         boolean onKeyguardAndExpanded = isKeyguardShowing() && !mShowCollapsedOnKeyguard;
         if (!mHeaderAnimating && !headerWillBeAnimating()) {
             getView().setTranslationY(
