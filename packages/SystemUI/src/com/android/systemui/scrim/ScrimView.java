@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.statusbar;
+package com.android.systemui.scrim;
 
 import static java.lang.Float.isNaN;
 
@@ -38,7 +38,6 @@ import androidx.core.graphics.ColorUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.colorextraction.drawable.ScrimDrawable;
 import com.android.systemui.R;
 
 import java.util.concurrent.Executor;
@@ -96,6 +95,9 @@ public class ScrimView extends View {
         });
     }
 
+    /**
+     * Needed for WM Shell, which has its own thread structure.
+     */
     public void setExecutor(Executor executor, Looper looper) {
         mExecutor = executor;
         mExecutorLooper = looper;
@@ -108,7 +110,8 @@ public class ScrimView extends View {
         }
     }
 
-    public void setDrawable(Drawable drawable) {
+    @VisibleForTesting
+    void setDrawable(Drawable drawable) {
         executeOnExecutor(() -> {
             mDrawable = drawable;
             mDrawable.setCallback(this);
@@ -144,16 +147,24 @@ public class ScrimView extends View {
         });
     }
 
+    /**
+     * Sets the color of the scrim, without animating them.
+     */
     public void setColors(@NonNull ColorExtractor.GradientColors colors) {
         setColors(colors, false);
     }
 
+    /**
+     * Sets the scrim colors, optionally animating them.
+     * @param colors The colors.
+     * @param animated If we should animate the transition.
+     */
     public void setColors(@NonNull ColorExtractor.GradientColors colors, boolean animated) {
         if (colors == null) {
             throw new IllegalArgumentException("Colors cannot be null");
         }
         executeOnExecutor(() -> {
-            synchronized(mColorLock) {
+            synchronized (mColorLock) {
                 if (mColors.equals(colors)) {
                     return;
                 }
@@ -168,17 +179,28 @@ public class ScrimView extends View {
         return mDrawable;
     }
 
+    /**
+     * Returns current scrim colors.
+     */
     public ColorExtractor.GradientColors getColors() {
-        synchronized(mColorLock) {
+        synchronized (mColorLock) {
             mTmpColors.set(mColors);
         }
         return mTmpColors;
     }
 
+    /**
+     * Applies tint to this view, without animations.
+     */
     public void setTint(int color) {
         setTint(color, false);
     }
 
+    /**
+     * Tints this view, optionally animating it.
+     * @param color The color.
+     * @param animated If we should animate.
+     */
     public void setTint(int color, boolean animated) {
         executeOnExecutor(() -> {
             if (mTintColor == color) {
@@ -200,8 +222,8 @@ public class ScrimView extends View {
         } else {
             boolean hasAlpha = Color.alpha(mTintColor) != 0;
             if (hasAlpha) {
-                PorterDuff.Mode targetMode = mColorFilter == null ? Mode.SRC_OVER :
-                    mColorFilter.getMode();
+                PorterDuff.Mode targetMode = mColorFilter == null
+                        ? Mode.SRC_OVER : mColorFilter.getMode();
                 if (mColorFilter == null || mColorFilter.getColor() != mTintColor) {
                     mColorFilter = new PorterDuffColorFilter(mTintColor, targetMode);
                 }
@@ -254,6 +276,9 @@ public class ScrimView extends View {
         return mViewAlpha;
     }
 
+    /**
+     * Sets a callback that is invoked whenever the alpha, color, or tint change.
+     */
     public void setChangeRunnable(Runnable changeRunnable, Executor changeRunnableExecutor) {
         mChangeRunnable = changeRunnable;
         mChangeRunnableExecutor = changeRunnableExecutor;
@@ -276,13 +301,23 @@ public class ScrimView extends View {
      * Make bottom edge concave so overlap between layers is not visible for alphas between 0 and 1
      * @return height of concavity
      */
-    public float enableBottomEdgeConcave() {
+    public float enableBottomEdgeConcave(boolean clipScrim) {
         if (mDrawable instanceof ScrimDrawable) {
-            float radius = getResources().getDimensionPixelSize(CORNER_RADIUS);
+            float radius = clipScrim ? getResources().getDimensionPixelSize(CORNER_RADIUS) : 0;
             ((ScrimDrawable) mDrawable).setBottomEdgeConcave(radius);
             return radius;
         }
         return 0;
+    }
+
+    /**
+     * The position of the bottom of the scrim, used for clipping.
+     * @see #enableBottomEdgeConcave(boolean)
+     */
+    public void setBottomEdgePosition(int y) {
+        if (mDrawable instanceof ScrimDrawable) {
+            ((ScrimDrawable) mDrawable).setBottomEdgePosition(y);
+        }
     }
 
     /**

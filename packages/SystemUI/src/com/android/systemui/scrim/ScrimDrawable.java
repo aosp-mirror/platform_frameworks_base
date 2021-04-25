@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.colorextraction.drawable;
+package com.android.systemui.scrim;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -49,6 +49,7 @@ public class ScrimDrawable extends Drawable {
     private float mCornerRadius;
     private Rect mBounds;
     private ConcaveInfo mConcaveInfo;
+    private int mBottomEdgePosition;
 
     public ScrimDrawable() {
         mPaint = new Paint();
@@ -143,9 +144,30 @@ public class ScrimDrawable extends Drawable {
      * Make bottom edge concave with provided corner radius
      */
     public void setBottomEdgeConcave(float radius) {
+        if (radius == 0) {
+            // Disable clipping completely when there's no radius.
+            mConcaveInfo = null;
+            return;
+        }
         // only rounding top corners for clip out path
         float[] cornerRadii = new float[]{radius, radius, radius, radius, 0, 0, 0, 0};
         mConcaveInfo = new ConcaveInfo(radius, cornerRadii);
+    }
+
+    /**
+     * Location of concave edge.
+     * @see #setBottomEdgeConcave(float)
+     */
+    public void setBottomEdgePosition(int y) {
+        if (mBottomEdgePosition == y) {
+            return;
+        }
+        mBottomEdgePosition = y;
+        if (mConcaveInfo == null) {
+            return;
+        }
+        updatePath();
+        invalidateSelf();
     }
 
     @Override
@@ -154,10 +176,11 @@ public class ScrimDrawable extends Drawable {
         mPaint.setAlpha(mAlpha);
         if (mConcaveInfo != null) {
             drawConcave(canvas);
+        } else {
+            canvas.drawRoundRect(getBounds().left, getBounds().top, getBounds().right,
+                    getBounds().bottom + mCornerRadius,
+                    /* x radius*/ mCornerRadius, /* y radius*/ mCornerRadius, mPaint);
         }
-        canvas.drawRoundRect(getBounds().left, getBounds().top, getBounds().right,
-                getBounds().bottom + mCornerRadius,
-                /* x radius*/ mCornerRadius, /* y radius*/ mCornerRadius, mPaint);
     }
 
     private void drawConcave(Canvas canvas) {
@@ -165,19 +188,23 @@ public class ScrimDrawable extends Drawable {
         if (mBounds == null
                 || getBounds().right != mBounds.right
                 || getBounds().left != mBounds.left) {
-            mConcaveInfo.mPath.reset();
-            float left = getBounds().left;
-            float right = getBounds().right;
-            float top = 0f;
-            float bottom = mConcaveInfo.mPathOverlap;
-            mConcaveInfo.mPath.addRoundRect(left, top, right, bottom,
-                    mConcaveInfo.mCornerRadii, Path.Direction.CW);
+            mBounds = getBounds();
+            updatePath();
         }
-        mBounds = getBounds();
-        int translation = (int) (mBounds.bottom - mConcaveInfo.mPathOverlap);
-        canvas.translate(0, translation);
         canvas.clipOutPath(mConcaveInfo.mPath);
-        canvas.translate(0, -translation);
+        canvas.drawRect(getBounds().left, getBounds().top, getBounds().right,
+                mBottomEdgePosition + mConcaveInfo.mPathOverlap, mPaint);
+    }
+
+    private void updatePath() {
+        mConcaveInfo.mPath.reset();
+        if (mBounds == null) {
+            mBounds = getBounds();
+        }
+        float top = mBottomEdgePosition;
+        float bottom = mBottomEdgePosition + mConcaveInfo.mPathOverlap;
+        mConcaveInfo.mPath.addRoundRect(mBounds.left, top, mBounds.right, bottom,
+                mConcaveInfo.mCornerRadii, Path.Direction.CW);
     }
 
     @VisibleForTesting

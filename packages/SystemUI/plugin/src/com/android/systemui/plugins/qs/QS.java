@@ -14,7 +14,6 @@
 
 package com.android.systemui.plugins.qs;
 
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -57,7 +56,6 @@ public interface QS extends FragmentBase {
     void setQsExpansion(float qsExpansionFraction, float headerTranslation);
     void setHeaderListening(boolean listening);
     void notifyCustomizeChanged();
-
     void setContainer(ViewGroup container);
     void setExpandClickListener(OnClickListener onClickListener);
 
@@ -74,6 +72,16 @@ public interface QS extends FragmentBase {
     default boolean disallowPanelTouches() {
         return isShowingDetail();
     }
+
+    /**
+     * If QS should translate as we pull it down, or if it should be static.
+     */
+    void setTranslateWhileExpanding(boolean shouldTranslate);
+
+    /**
+     * A rounded corner clipping that makes QS feel as if it were behind everything.
+     */
+    void setFancyClipping(int top, int bottom, int cornerRadius, boolean visible);
 
     @ProvidesInterface(version = HeightListener.VERSION)
     interface HeightListener {
