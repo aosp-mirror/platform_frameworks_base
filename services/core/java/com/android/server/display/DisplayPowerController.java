@@ -780,13 +780,21 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * when displays get swapped on foldable devices.  For example, different brightness properties
      * of each display need to be properly reflected in AutomaticBrightnessController.
      */
-    public void onDisplayChangedLocked() {
+    public void onDisplayChanged() {
         // TODO: b/175821789 - Support high brightness on multiple (folding) displays
-
         mUniqueDisplayId = mLogicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId();
         mDisplayDeviceConfig = mLogicalDisplay.getPrimaryDisplayDeviceLocked()
                 .getDisplayDeviceConfig();
         loadAmbientLightSensor();
+    }
+
+    /**
+     * Called when the displays are preparing to transition from one device state to another.
+     * This process involves turning off some displays so we need updatePowerState() to run and
+     * calculate the new state.
+     */
+    public void onDeviceStateTransition() {
+        sendUpdatePowerState();
     }
 
     /**
@@ -1024,7 +1032,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mIgnoreProximityUntilChanged = false;
         }
 
-        if (!mLogicalDisplay.isEnabled() || mScreenOffBecauseOfProximity) {
+        if (!mLogicalDisplay.isEnabled()
+                || mLogicalDisplay.getPhase() == LogicalDisplay.DISPLAY_PHASE_LAYOUT_TRANSITION
+                || mScreenOffBecauseOfProximity) {
             state = Display.STATE_OFF;
         }
 
