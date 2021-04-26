@@ -28,7 +28,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RectF;
@@ -55,6 +54,7 @@ import android.view.Surface;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -108,6 +108,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     @NonNull private final Handler mMainHandler;
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final PowerManager mPowerManager;
+    @NonNull private final AccessibilityManager mAccessibilityManager;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -276,6 +277,13 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     private final UdfpsView.OnTouchListener mOnTouchListener = (view, event) ->
             onTouch(view, event, true);
 
+    @SuppressLint("ClickableViewAccessibility")
+    private final UdfpsView.OnHoverListener mOnHoverListener = (view, event) ->
+            onTouch(view, event, true);
+
+    private final AccessibilityManager.TouchExplorationStateChangeListener
+            mTouchExplorationStateChangeListener = enabled -> updateTouchListener();
+
     /**
      * @param x coordinate
      * @param y coordinate
@@ -300,6 +308,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 udfpsView.onTouchOutsideView();
                 break;
             case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_HOVER_ENTER:
                 // To simplify the lifecycle of the velocity tracker, make sure it's never null
                 // after ACTION_DOWN, and always null after ACTION_CANCEL or ACTION_UP.
                 if (mVelocityTracker == null) {
@@ -322,6 +331,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 break;
 
             case MotionEvent.ACTION_MOVE:
+            case MotionEvent.ACTION_HOVER_MOVE:
                 final int idx = mActivePointerId == -1
                         ? event.getPointerId(0)
                         : event.findPointerIndex(mActivePointerId);
@@ -388,6 +398,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_HOVER_EXIT:
                 mActivePointerId = -1;
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle();
@@ -409,10 +420,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
     @Inject
     public UdfpsController(@NonNull Context context,
-            @Main Resources resources,
             @NonNull LayoutInflater inflater,
             @Nullable FingerprintManager fingerprintManager,
-            WindowManager windowManager,
+            @NonNull WindowManager windowManager,
             @NonNull StatusBarStateController statusBarStateController,
             @Main DelayableExecutor fgExecutor,
             @NonNull StatusBar statusBar,
@@ -421,7 +431,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull KeyguardViewMediator keyguardViewMediator,
             @NonNull FalsingManager falsingManager,
-            @NonNull PowerManager powerManager) {
+            @NonNull PowerManager powerManager,
+            @NonNull AccessibilityManager accessibilityManager) {
         mContext = context;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
         mMainHandler = new Handler(Looper.getMainLooper());
@@ -440,6 +451,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mKeyguardViewMediator = keyguardViewMediator;
         mFalsingManager = falsingManager;
         mPowerManager = powerManager;
+        mAccessibilityManager = accessibilityManager;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -577,7 +589,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                     mView.setAnimationViewController(animation);
 
                     mWindowManager.addView(mView, computeLayoutParams(animation));
-                    mView.setOnTouchListener(mOnTouchListener);
+                    mAccessibilityManager.addTouchExplorationStateChangeListener(
+                            mTouchExplorationStateChangeListener);
+                    updateTouchListener();
                 } catch (RuntimeException e) {
                     Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
                 }
@@ -650,7 +664,10 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 onFingerUp();
                 mWindowManager.removeView(mView);
                 mView.setOnTouchListener(null);
+                mView.setOnHoverListener(null);
                 mView.setAnimationViewController(null);
+                mAccessibilityManager.removeTouchExplorationStateChangeListener(
+                        mTouchExplorationStateChangeListener);
                 mView = null;
             } else {
                 Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");
@@ -756,6 +773,20 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 return mDoubleClick;
             default:
                 return defaultEffect;
+        }
+    }
+
+    private void updateTouchListener() {
+        if (mView == null) {
+            return;
+        }
+
+        if (mAccessibilityManager.isTouchExplorationEnabled()) {
+            mView.setOnHoverListener(mOnHoverListener);
+            mView.setOnTouchListener(null);
+        } else {
+            mView.setOnHoverListener(null);
+            mView.setOnTouchListener(mOnTouchListener);
         }
     }
 }
