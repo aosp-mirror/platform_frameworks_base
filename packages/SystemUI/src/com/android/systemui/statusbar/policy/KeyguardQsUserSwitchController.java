@@ -36,6 +36,7 @@ import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
@@ -67,6 +68,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
     private final ScreenLifecycle mScreenLifecycle;
     private UserSwitcherController.BaseUserAdapter mAdapter;
     private final KeyguardStateController mKeyguardStateController;
+    private final FalsingManager mFalsingManager;
     protected final SysuiStatusBarStateController mStatusBarStateController;
     private final ConfigurationController mConfigurationController;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
@@ -115,6 +117,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             ScreenLifecycle screenLifecycle,
             UserSwitcherController userSwitcherController,
             KeyguardStateController keyguardStateController,
+            FalsingManager falsingManager,
             ConfigurationController configurationController,
             SysuiStatusBarStateController statusBarStateController,
             DozeParameters dozeParameters,
@@ -127,6 +130,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         mScreenLifecycle = screenLifecycle;
         mUserSwitcherController = userSwitcherController;
         mKeyguardStateController = keyguardStateController;
+        mFalsingManager = falsingManager;
         mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
@@ -147,6 +151,10 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         };
 
         mView.setOnClickListener(v -> {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                return;
+            }
+
             if (isListAnimating()) {
                 return;
             }
