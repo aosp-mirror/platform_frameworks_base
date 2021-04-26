@@ -553,6 +553,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
                 GlobalSettingsProto.Development.ENABLE_NON_RESIZABLE_MULTI_WINDOW);
+        dumpSetting(s, p,
+                Settings.Global.DISABLE_WINDOW_BLURS,
+                GlobalSettingsProto.Development.DISABLE_WINDOW_BLURS);
         p.end(developmentToken);
 
         final long deviceToken = p.start(GlobalSettingsProto.DEVICE);
