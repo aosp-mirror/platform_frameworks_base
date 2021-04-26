@@ -83,6 +83,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
 import android.view.Display;
+import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.GuardedBy;
@@ -13373,6 +13374,19 @@ public final class Settings {
          */
         @Readable
         public static final String WINDOW_ANIMATION_SCALE = "window_animation_scale";
+
+        /**
+         * Setting to disable cross-window blurs. This includes window blur behind, (see
+         *  {@link LayoutParams#setBlurBehindRadius}) and window background blur (see
+         *  {@link Window#setBackgroundBlurRadius}).
+         *
+         * The value is a boolean (1 or 0).
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String DISABLE_WINDOW_BLURS = "disable_window_blurs";
 
         /**
          * Scaling factor for activity transition animations.
