@@ -79,6 +79,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     private final Collection<FalsingClassifier> mClassifiers;
     private final List<FalsingBeliefListener> mFalsingBeliefListeners = new ArrayList<>();
+    private List<FalsingTapListener> mFalsingTapListeners = new ArrayList<>();
 
     private final SessionListener mSessionListener = new SessionListener() {
         @Override
@@ -277,6 +278,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                         FalsingClassifier.Result.falsed(
                                 0, getClass().getSimpleName(), "bad history"));
                 logDebug("False Single Tap: true (bad history)");
+                mFalsingTapListeners.forEach(FalsingTapListener::onDoubleTapRequired);
                 return true;
             } else {
                 mPriorResults = Collections.singleton(FalsingClassifier.Result.passed(0.1));
@@ -353,6 +355,16 @@ public class BrightLineFalsingManager implements FalsingManager {
     @Override
     public void removeFalsingBeliefListener(FalsingBeliefListener listener) {
         mFalsingBeliefListeners.remove(listener);
+    }
+
+    @Override
+    public void addTapListener(FalsingTapListener listener) {
+        mFalsingTapListeners.add(listener);
+    }
+
+    @Override
+    public void removeTapListener(FalsingTapListener listener) {
+        mFalsingTapListeners.remove(listener);
     }
 
     @Override

@@ -176,6 +176,16 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
+    public void addTapListener(FalsingTapListener listener) {
+        mInternalFalsingManager.addTapListener(listener);
+    }
+
+    @Override
+    public void removeTapListener(FalsingTapListener listener) {
+        mInternalFalsingManager.removeTapListener(listener);
+    }
+
+    @Override
     public void onProximityEvent(ThresholdSensor.ThresholdSensorEvent proximityEvent) {
         mInternalFalsingManager.onProximityEvent(proximityEvent);
     }
