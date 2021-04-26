@@ -340,6 +340,7 @@ public final class Settings implements Watchable, Snappable {
     private static final String ATTR_INSTANT_APP = "instant-app";
     private static final String ATTR_VIRTUAL_PRELOAD = "virtual-preload";
     private static final String ATTR_HARMFUL_APP_WARNING = "harmful-app-warning";
+    private static final String ATTR_SPLASH_SCREEN_THEME = "splash-screen-theme";
 
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_FINGERPRINT = "fingerprint";
@@ -939,7 +940,9 @@ public final class Settings implements Watchable, Snappable {
                                 null /*disabledComponents*/,
                                 PackageManager.INSTALL_REASON_UNKNOWN,
                                 PackageManager.UNINSTALL_REASON_UNKNOWN,
-                                null /*harmfulAppWarning*/);
+                                null, /*harmfulAppWarning*/
+                                null /*splashscreenTheme*/
+                        );
                     }
                 }
             }
@@ -1578,7 +1581,8 @@ public final class Settings implements Watchable, Snappable {
                                 null /*disabledComponents*/,
                                 PackageManager.INSTALL_REASON_UNKNOWN,
                                 PackageManager.UNINSTALL_REASON_UNKNOWN,
-                                null /*harmfulAppWarning*/);
+                                null /*harmfulAppWarning*/,
+                                null /* splashScreenTheme*/);
                     }
                     return;
                 }
@@ -1666,6 +1670,8 @@ public final class Settings implements Watchable, Snappable {
                             PackageManager.INSTALL_REASON_UNKNOWN);
                     final int uninstallReason = parser.getAttributeInt(null, ATTR_UNINSTALL_REASON,
                             PackageManager.UNINSTALL_REASON_UNKNOWN);
+                    final String splashScreenTheme = parser.getAttributeValue(null,
+                            ATTR_SPLASH_SCREEN_THEME);
 
                     ArraySet<String> enabledComponents = null;
                     ArraySet<String> disabledComponents = null;
@@ -1738,7 +1744,8 @@ public final class Settings implements Watchable, Snappable {
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
                             hidden, distractionFlags, suspended, suspendParamsMap,
                             instantApp, virtualPreload, enabledCaller, enabledComponents,
-                            disabledComponents, installReason, uninstallReason, harmfulAppWarning);
+                            disabledComponents, installReason, uninstallReason, harmfulAppWarning,
+                            splashScreenTheme);
 
                     mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
                 } else if (tagName.equals("preferred-activities")) {
@@ -1994,6 +2001,10 @@ public final class Settings implements Watchable, Snappable {
                 if (ustate.harmfulAppWarning != null) {
                     serializer.attribute(null, ATTR_HARMFUL_APP_WARNING,
                             ustate.harmfulAppWarning);
+                }
+                if (ustate.splashScreenTheme != null) {
+                    serializer.attribute(null, ATTR_SPLASH_SCREEN_THEME,
+                            ustate.splashScreenTheme);
                 }
                 if (ustate.suspended) {
                     for (int i = 0; i < ustate.suspendParams.size(); i++) {
