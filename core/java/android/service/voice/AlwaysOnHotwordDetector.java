@@ -349,7 +349,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         private final HotwordDetectedResult mHotwordDetectedResult;
         private final ParcelFileDescriptor mAudioStream;
 
-        private EventPayload(boolean triggerAvailable, boolean captureAvailable,
+        EventPayload(boolean triggerAvailable, boolean captureAvailable,
                 AudioFormat audioFormat, int captureSession, byte[] data) {
             this(triggerAvailable, captureAvailable, audioFormat, captureSession, data, null,
                     null);

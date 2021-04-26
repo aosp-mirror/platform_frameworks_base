@@ -65,7 +65,6 @@ import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -235,19 +234,32 @@ final class HotwordDetectionConnection {
             Slog.d(TAG, "startListeningFromMic");
         }
 
-        AudioRecord audioRecord = createMicAudioRecord(audioFormat);
-        if (audioRecord == null) {
-            // TODO: Callback.onError();
-            return;
-        }
+        // TODO: consider making this a non-anonymous class.
+        IDspHotwordDetectionCallback internalCallback = new IDspHotwordDetectionCallback.Stub() {
+            @Override
+            public void onDetected(HotwordDetectedResult result) throws RemoteException {
+                if (DEBUG) {
+                    Slog.d(TAG, "onDetected");
+                }
+                callback.onDetected(result, null, null);
+            }
 
-        handleSoftwareHotwordDetection(
-                audioFormat,
-                AudioReader.createFromAudioRecord(audioRecord),
-                AUDIO_SOURCE_MICROPHONE,
-                // TODO: handle bundles better.
-                new PersistableBundle(),
-                callback);
+            @Override
+            public void onRejected(HotwordRejectedResult result) throws RemoteException {
+                if (DEBUG) {
+                    Slog.d(TAG, "onRejected");
+                }
+                // onRejected isn't allowed here
+            }
+        };
+
+        mRemoteHotwordDetectionService.run(
+                service -> service.detectFromMicrophoneSource(
+                        null,
+                        AUDIO_SOURCE_MICROPHONE,
+                        null,
+                        null,
+                        internalCallback));
     }
 
     public void startListeningFromExternalSource(
@@ -298,74 +310,12 @@ final class HotwordDetectionConnection {
         if (DEBUG) {
             Slog.d(TAG, "detectFromDspSourceForTest");
         }
-
-        AudioRecord record = createFakeAudioRecord();
-        if (record == null) {
-            Slog.d(TAG, "Failed to create fake audio record");
-            return;
-        }
-
-        Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
-        if (clientPipe == null) {
-            Slog.d(TAG, "Failed to create pipe");
-            return;
-        }
-        ParcelFileDescriptor audioSink = clientPipe.second;
-        ParcelFileDescriptor clientRead = clientPipe.first;
-
-        record.startRecording();
-
-        mAudioCopyExecutor.execute(() -> {
-            try (OutputStream fos =
-                         new ParcelFileDescriptor.AutoCloseOutputStream(audioSink)) {
-
-                int remainToRead = 10240;
-                byte[] buffer = new byte[1024];
-                while (remainToRead > 0) {
-                    int bytesRead = record.read(buffer, 0, 1024);
-                    if (DEBUG) {
-                        Slog.d(TAG, "bytesRead = " + bytesRead);
-                    }
-                    if (bytesRead <= 0) {
-                        break;
-                    }
-                    if (bytesRead > 8) {
-                        System.arraycopy(new byte[] {'h', 'o', 't', 'w', 'o', 'r', 'd', '!'}, 0,
-                                buffer, 0, 8);
-                    }
-
-                    fos.write(buffer, 0, bytesRead);
-                    remainToRead -= bytesRead;
-                }
-            } catch (IOException e) {
-                Slog.w(TAG, "Failed supplying audio data to validator", e);
-            }
-        });
-
-        Runnable cancellingJob = () -> {
-            Slog.d(TAG, "Timeout for getting callback from HotwordDetectionService");
-            record.stop();
-            record.release();
-            bestEffortClose(audioSink);
-            bestEffortClose(clientRead);
-        };
-
-        ScheduledFuture<?> cancelingFuture =
-                mScheduledExecutorService.schedule(
-                        cancellingJob, VALIDATION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-
         IDspHotwordDetectionCallback internalCallback = new IDspHotwordDetectionCallback.Stub() {
             @Override
             public void onDetected(HotwordDetectedResult result) throws RemoteException {
                 if (DEBUG) {
                     Slog.d(TAG, "onDetected");
                 }
-                cancelingFuture.cancel(true);
-                record.stop();
-                record.release();
-                bestEffortClose(audioSink);
-                bestEffortClose(clientRead);
-
                 externalCallback.onKeyphraseDetected(recognitionEvent);
             }
 
@@ -374,19 +324,13 @@ final class HotwordDetectionConnection {
                 if (DEBUG) {
                     Slog.d(TAG, "onRejected");
                 }
-                cancelingFuture.cancel(true);
-                record.stop();
-                record.release();
-                bestEffortClose(audioSink);
-                bestEffortClose(clientRead);
-
                 externalCallback.onRejected(result);
             }
         };
 
         mRemoteHotwordDetectionService.run(
                 service -> service.detectFromDspSource(
-                        clientRead,
+                        recognitionEvent,
                         recognitionEvent.getCaptureFormat(),
                         VALIDATION_TIMEOUT_MILLIS,
                         internalCallback));
@@ -398,49 +342,6 @@ final class HotwordDetectionConnection {
             Slog.d(TAG, "detectFromDspSource");
         }
 
-        AudioRecord record = createAudioRecord(recognitionEvent);
-
-        Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
-
-        if (clientPipe == null) {
-            // Error.
-            // Need to propagate as unknown error or something?
-            return;
-        }
-        ParcelFileDescriptor audioSink = clientPipe.second;
-        ParcelFileDescriptor clientRead = clientPipe.first;
-
-        record.startRecording();
-
-        mAudioCopyExecutor.execute(() -> {
-            try (OutputStream fos =
-                         new ParcelFileDescriptor.AutoCloseOutputStream(audioSink)) {
-                byte[] buffer = new byte[1024];
-
-                while (true) {
-                    int bytesRead = record.read(buffer, 0, 1024);
-
-                    if (bytesRead < 0) {
-                        break;
-                    }
-
-                    fos.write(buffer, 0, bytesRead);
-                }
-            } catch (IOException e) {
-                Slog.w(TAG, "Failed supplying audio data to validator", e);
-            }
-        });
-
-        Runnable cancellingJob = () -> {
-            record.stop();
-            bestEffortClose(audioSink);
-            // TODO: consider calling externalCallback.onRejected(ERROR_TIMEOUT).
-        };
-
-        ScheduledFuture<?> cancelingFuture =
-                mScheduledExecutorService.schedule(
-                        cancellingJob, VALIDATION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-
         // TODO: consider making this a non-anonymous class.
         IDspHotwordDetectionCallback internalCallback = new IDspHotwordDetectionCallback.Stub() {
             @Override
@@ -448,18 +349,6 @@ final class HotwordDetectionConnection {
                 if (DEBUG) {
                     Slog.d(TAG, "onDetected");
                 }
-                bestEffortClose(audioSink);
-                cancelingFuture.cancel(true);
-
-                // Give 2 more seconds for the interactor to start consuming the mic. If it fails to
-                // do so under the given time, we'll force-close the mic to make sure resources are
-                // freed up.
-                // TODO: consider modelling these 2 seconds in the API.
-                mScheduledExecutorService.schedule(
-                        cancellingJob,
-                        VOICE_INTERACTION_TIMEOUT_TO_OPEN_MIC_MILLIS,
-                        TimeUnit.MILLISECONDS);
-
                 // TODO: Propagate the HotwordDetectedResult.
                 externalCallback.onKeyphraseDetected(recognitionEvent);
             }
@@ -469,18 +358,16 @@ final class HotwordDetectionConnection {
                 if (DEBUG) {
                     Slog.d(TAG, "onRejected");
                 }
-                cancelingFuture.cancel(true);
                 externalCallback.onRejected(result);
             }
         };
 
         mRemoteHotwordDetectionService.run(
                 service -> service.detectFromDspSource(
-                        clientRead,
+                        recognitionEvent,
                         recognitionEvent.getCaptureFormat(),
                         VALIDATION_TIMEOUT_MILLIS,
                         internalCallback));
-        bestEffortClose(clientRead);
     }
 
     static final class SoundTriggerCallback extends IRecognitionStatusCallback.Stub {
