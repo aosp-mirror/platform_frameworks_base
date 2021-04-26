@@ -577,11 +577,13 @@ public class UserSwitcherController implements Dumpable {
         pw.println("mSimpleUserSwitcher=" + mSimpleUserSwitcher);
     }
 
-    public String getCurrentUserName(Context context) {
+    /** Returns the name of the current user of the phone. */
+    public String getCurrentUserName() {
         if (mUsers.isEmpty()) return null;
         UserRecord item = mUsers.get(0);
         if (item == null || item.info == null) return null;
-        if (item.isGuest) return context.getString(com.android.settingslib.R.string.guest_nickname);
+        if (item.isGuest) return mContext.getString(
+                com.android.settingslib.R.string.guest_nickname);
         return item.info.name;
     }
 
