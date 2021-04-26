@@ -479,13 +479,14 @@ public class PermissionMonitorTest {
     public void testUidFilteringDuringVpnConnectDisconnectAndUidUpdates() throws Exception {
         when(mPackageManager.getInstalledPackages(eq(GET_PERMISSIONS | MATCH_ANY_USER))).thenReturn(
                 Arrays.asList(new PackageInfo[] {
-                        buildPackageInfo(/* SYSTEM */ true, SYSTEM_UID1, MOCK_USER1),
-                        buildPackageInfo(/* SYSTEM */ false, MOCK_UID1, MOCK_USER1),
-                        buildPackageInfo(/* SYSTEM */ false, MOCK_UID2, MOCK_USER1),
-                        buildPackageInfo(/* SYSTEM */ false, VPN_UID, MOCK_USER1)
+                        buildPackageInfo(true /* hasSystemPermission */, SYSTEM_UID1, MOCK_USER1),
+                        buildPackageInfo(false /* hasSystemPermission */, MOCK_UID1, MOCK_USER1),
+                        buildPackageInfo(false /* hasSystemPermission */, MOCK_UID2, MOCK_USER1),
+                        buildPackageInfo(false /* hasSystemPermission */, VPN_UID, MOCK_USER1)
                 }));
-        when(mPackageManager.getPackageInfo(eq(MOCK_PACKAGE1), eq(GET_PERMISSIONS))).thenReturn(
-                buildPackageInfo(false, MOCK_UID1, MOCK_USER1));
+        when(mPackageManager.getPackageInfo(eq(MOCK_PACKAGE1),
+                eq(GET_PERMISSIONS | MATCH_ANY_USER))).thenReturn(
+                buildPackageInfo(false /* hasSystemPermission */, MOCK_UID1, MOCK_USER1));
         mPermissionMonitor.startMonitoring();
         // Every app on user 0 except MOCK_UID2 are under VPN.
         final Set<UidRange> vpnRange1 = new HashSet<>(Arrays.asList(new UidRange[] {
@@ -530,11 +531,12 @@ public class PermissionMonitorTest {
     public void testUidFilteringDuringPackageInstallAndUninstall() throws Exception {
         when(mPackageManager.getInstalledPackages(eq(GET_PERMISSIONS | MATCH_ANY_USER))).thenReturn(
                 Arrays.asList(new PackageInfo[] {
-                        buildPackageInfo(true, SYSTEM_UID1, MOCK_USER1),
-                        buildPackageInfo(false, VPN_UID, MOCK_USER1)
+                        buildPackageInfo(true /* hasSystemPermission */, SYSTEM_UID1, MOCK_USER1),
+                        buildPackageInfo(false /* hasSystemPermission */, VPN_UID, MOCK_USER1)
                 }));
-        when(mPackageManager.getPackageInfo(eq(MOCK_PACKAGE1), eq(GET_PERMISSIONS))).thenReturn(
-                        buildPackageInfo(false, MOCK_UID1, MOCK_USER1));
+        when(mPackageManager.getPackageInfo(eq(MOCK_PACKAGE1),
+                eq(GET_PERMISSIONS | MATCH_ANY_USER))).thenReturn(
+                buildPackageInfo(false /* hasSystemPermission */, MOCK_UID1, MOCK_USER1));
 
         mPermissionMonitor.startMonitoring();
         final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(MOCK_USER1));
