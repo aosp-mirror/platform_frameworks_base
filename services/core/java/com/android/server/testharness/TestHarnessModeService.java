@@ -286,6 +286,9 @@ public class TestHarnessModeService extends SystemService {
     private class TestHarnessModeShellCommand extends ShellCommand {
         @Override
         public int onCommand(String cmd) {
+            if (cmd == null) {
+                return handleDefaultCommands(cmd);
+            }
             switch (cmd) {
                 case "enable":
                 case "restore":
