@@ -531,7 +531,7 @@ public final class PasswordMetrics implements Parcelable {
         }
 
         final PasswordMetrics enteredMetrics = computeForPasswordOrPin(password, isPin);
-        return validatePasswordMetrics(adminMetrics, minComplexity, isPin, enteredMetrics);
+        return validatePasswordMetrics(adminMetrics, minComplexity, enteredMetrics);
     }
 
     /**
@@ -539,15 +539,13 @@ public final class PasswordMetrics implements Parcelable {
      *
      * @param adminMetrics - minimum metrics to satisfy admin requirements.
      * @param minComplexity - minimum complexity imposed by the requester.
-     * @param isPin - whether it is PIN that should be only digits
      * @param actualMetrics - metrics for password to validate.
      * @return a list of password validation errors. An empty list means the password is OK.
      *
      * TODO: move to PasswordPolicy
      */
     public static List<PasswordValidationError> validatePasswordMetrics(
-            PasswordMetrics adminMetrics, int minComplexity, boolean isPin,
-            PasswordMetrics actualMetrics) {
+            PasswordMetrics adminMetrics, int minComplexity, PasswordMetrics actualMetrics) {
         final ComplexityBucket bucket = ComplexityBucket.forComplexity(minComplexity);
 
         // Make sure credential type is satisfactory.
@@ -561,7 +559,7 @@ public final class PasswordMetrics implements Parcelable {
             return Collections.emptyList(); // Nothing to check for pattern or none.
         }
 
-        if (isPin && actualMetrics.nonNumeric > 0) {
+        if (actualMetrics.credType == CREDENTIAL_TYPE_PIN && actualMetrics.nonNumeric > 0) {
             return Collections.singletonList(
                     new PasswordValidationError(CONTAINS_INVALID_CHARACTERS, 0));
         }

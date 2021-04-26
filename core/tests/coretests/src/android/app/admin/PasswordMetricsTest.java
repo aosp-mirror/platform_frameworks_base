@@ -30,6 +30,7 @@ import static android.app.admin.PasswordMetrics.validatePasswordMetrics;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -284,33 +285,42 @@ public class PasswordMetricsTest {
         PasswordMetrics none = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
         PasswordMetrics pattern = new PasswordMetrics(CREDENTIAL_TYPE_PATTERN);
         PasswordMetrics password = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
+        PasswordMetrics pin = new PasswordMetrics(CREDENTIAL_TYPE_PIN);
 
         // To pass minimal length check.
         password.length = 4;
+        pin.length = 4;
 
         // No errors expected, credential is of stronger or equal type.
         assertValidationErrors(
-                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, false, none));
+                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, none));
         assertValidationErrors(
-                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, false, pattern));
+                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, pattern));
         assertValidationErrors(
-                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, false, password));
+                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, password));
         assertValidationErrors(
-                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, false, pattern));
+                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, pin));
         assertValidationErrors(
-                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, false, password));
+                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, pattern));
         assertValidationErrors(
-                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, false, password));
+                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, password));
+        assertValidationErrors(
+                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, password));
+        assertValidationErrors(
+                validatePasswordMetrics(pin, PASSWORD_COMPLEXITY_NONE, pin));
 
         // Now actual credential type is weaker than required:
         assertValidationErrors(
-                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, false, none),
+                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, none),
                 PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
         assertValidationErrors(
-                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, false, none),
+                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, none),
                 PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
         assertValidationErrors(
-                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, false, pattern),
+                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, pattern),
+                PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
+        assertValidationErrors(
+                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, pin),
                 PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
     }
 
