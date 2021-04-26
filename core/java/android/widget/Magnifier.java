@@ -939,6 +939,7 @@ public final class Magnifier {
         // The surface we allocate for the magnifier content + shadow.
         private final SurfaceSession mSurfaceSession;
         private final SurfaceControl mSurfaceControl;
+        private final SurfaceControl mBbqSurfaceControl;
         private final BLASTBufferQueue mBBQ;
         private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
         private final Surface mSurface;
@@ -1008,11 +1009,19 @@ public final class Magnifier {
             mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
                     .setName("magnifier surface")
                     .setFlags(SurfaceControl.HIDDEN)
-                    .setBLASTLayer()
+                    .setContainerLayer()
                     .setParent(parentSurfaceControl)
                     .setCallsite("InternalPopupWindow")
                     .build();
-            mBBQ = new BLASTBufferQueue("magnifier surface", mSurfaceControl,
+            mBbqSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
+                    .setName("magnifier surface bbq wrapper")
+                    .setHidden(false)
+                    .setBLASTLayer()
+                    .setParent(mSurfaceControl)
+                    .setCallsite("InternalPopupWindow")
+                    .build();
+
+            mBBQ = new BLASTBufferQueue("magnifier surface", mBbqSurfaceControl,
                 surfaceWidth, surfaceHeight, PixelFormat.TRANSLUCENT);
             mSurface = mBBQ.createSurface();
 
@@ -1073,7 +1082,7 @@ public final class Magnifier {
             }
             if (mContentHeight < contentHeight) {
                 // Grows the surface height as necessary.
-                mBBQ.update(mSurfaceControl, mContentWidth, contentHeight,
+                mBBQ.update(mBbqSurfaceControl, mContentWidth, contentHeight,
                     PixelFormat.TRANSLUCENT);
                 mRenderer.setSurface(mSurface);
 
@@ -1270,7 +1279,10 @@ public final class Magnifier {
             mRenderer.destroy();
             mSurface.destroy();
             mBBQ.destroy();
-            new SurfaceControl.Transaction().remove(mSurfaceControl).apply();
+            new SurfaceControl.Transaction()
+                    .remove(mSurfaceControl)
+                    .remove(mBbqSurfaceControl)
+                    .apply();
             mSurfaceSession.kill();
             mHandler.removeCallbacks(mMagnifierUpdater);
             if (mBitmap != null) {
