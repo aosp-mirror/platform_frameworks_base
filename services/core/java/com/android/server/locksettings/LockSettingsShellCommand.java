@@ -311,7 +311,7 @@ class LockSettingsShellCommand extends ShellCommand {
             PasswordMetrics metrics = new PasswordMetrics(
                     credential.isPattern() ? CREDENTIAL_TYPE_PATTERN : CREDENTIAL_TYPE_NONE);
             errors = PasswordMetrics.validatePasswordMetrics(
-                    requiredMetrics, requiredComplexity, false /* isPin */, metrics);
+                    requiredMetrics, requiredComplexity, metrics);
         }
         if (!errors.isEmpty()) {
             getOutPrintWriter().println(
