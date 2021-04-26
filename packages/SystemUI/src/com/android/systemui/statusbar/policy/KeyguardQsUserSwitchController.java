@@ -28,7 +28,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
@@ -37,6 +36,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.qs.tiles.UserDetailView;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.phone.UserAvatarView;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Manages the user switch on the Keyguard that is used for opening the QS user panel.
@@ -108,7 +109,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             KeyguardStateController keyguardStateController,
             SysuiStatusBarStateController statusBarStateController,
             DozeParameters dozeParameters,
-            UiEventLogger uiEventLogger) {
+            Provider<UserDetailView.Adapter> userDetailViewAdapterProvider) {
         super(view);
         if (DEBUG) Log.d(TAG, "New KeyguardQsUserSwitchController");
         mContext = context;
@@ -120,8 +121,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters);
-        mUserDetailAdapter = new KeyguardUserDetailAdapter(mUserSwitcherController, mContext,
-                uiEventLogger);
+        mUserDetailAdapter = new KeyguardUserDetailAdapter(context, userDetailViewAdapterProvider);
     }
 
     @Override
@@ -304,9 +304,9 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
     }
 
     class KeyguardUserDetailAdapter extends UserSwitcherController.UserDetailAdapter {
-        KeyguardUserDetailAdapter(UserSwitcherController userSwitcherController, Context context,
-                UiEventLogger uiEventLogger) {
-            super(userSwitcherController, context, uiEventLogger);
+        KeyguardUserDetailAdapter(Context context,
+                Provider<UserDetailView.Adapter> userDetailViewAdapterProvider) {
+            super(context, userDetailViewAdapterProvider);
         }
 
         @Override
