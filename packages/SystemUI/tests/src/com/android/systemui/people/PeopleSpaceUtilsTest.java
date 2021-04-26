@@ -239,6 +239,46 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 .augmentTileFromNotification(mContext, tile, key, mNotificationEntry1, 0);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
+        assertThat(actual.getNotificationSender()).isEqualTo(null);
+    }
+
+    @Test
+    public void testAugmentTileFromNotificationGroupWithSender() {
+        Bundle extras = new Bundle();
+        extras.putBoolean(Notification.EXTRA_IS_GROUP_CONVERSATION, true);
+        Notification notification = new Notification.Builder(mContext, "test")
+                .setContentTitle("TEST_TITLE")
+                .setContentText("TEST_TEXT")
+                .setShortcutId(SHORTCUT_ID_1)
+                .setStyle(new Notification.MessagingStyle(PERSON)
+                        .setGroupConversation(true)
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                NOTIFICATION_TEXT_1, 0, PERSON))
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                NOTIFICATION_TEXT_2, 20, PERSON))
+                        .addMessage(new Notification.MessagingStyle.Message(
+                                NOTIFICATION_TEXT_3, 10, PERSON))
+                )
+                .setExtras(extras)
+                .build();
+        NotificationEntry notificationEntry = new NotificationEntryBuilder()
+                .setNotification(notification)
+                .setShortcutInfo(new ShortcutInfo.Builder(mContext, SHORTCUT_ID_1).build())
+                .setUser(UserHandle.of(0))
+                .setPkg(PACKAGE_NAME)
+                .build();
+        PeopleSpaceTile tile =
+                new PeopleSpaceTile
+                        .Builder(SHORTCUT_ID_1, "userName", ICON, new Intent())
+                        .setPackageName(PACKAGE_NAME)
+                        .setUserHandle(new UserHandle(0))
+                        .build();
+        PeopleTileKey key = new PeopleTileKey(tile);
+        PeopleSpaceTile actual = PeopleSpaceUtils
+                .augmentTileFromNotification(mContext, tile, key, notificationEntry, 0);
+
+        assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
+        assertThat(actual.getNotificationSender().toString()).isEqualTo("name");
     }
 
     @Test
