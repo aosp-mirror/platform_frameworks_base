@@ -266,6 +266,14 @@ public final class InputMethodManager {
     private static final int NOT_A_SUBTYPE_ID = -1;
 
     /**
+     * {@code true} to try to avoid blocking apps' UI thread by sending
+     * {@link StartInputReason#WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION} and
+     * {@link StartInputReason#WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION} in a truly asynchronous
+     * way. {@code false} to go back to the previous synchronous semantics.
+     */
+    private static final boolean USE_REPORT_WINDOW_GAINED_FOCUS_ASYNC = false;
+
+    /**
      * A constant that represents Voice IME.
      *
      * @see InputMethodSubtype#getMode()
@@ -689,20 +697,29 @@ public final class InputMethodManager {
                         Log.v(TAG, "Reporting focus gain, without startInput"
                                 + ", nextFocusIsServedView=" + nextFocusHasConnection);
                     }
-                    final int startInputReason =
-                            nextFocusHasConnection ? WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION
-                                    : WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
-                    final Completable.InputBindResult value = Completable.createInputBindResult();
-                    mService.startInputOrWindowGainedFocus(
-                            startInputReason, mClient,
-                            focusedView.getWindowToken(), startInputFlags, softInputMode,
-                            windowFlags,
-                            null,
-                            null,
-                            0 /* missingMethodFlags */,
-                            mCurRootView.mContext.getApplicationInfo().targetSdkVersion,
-                            ResultCallbacks.of(value));
-                    Completable.getResult(value); // ignore the result
+
+                    if (USE_REPORT_WINDOW_GAINED_FOCUS_ASYNC) {
+                        mService.reportWindowGainedFocusAsync(
+                                nextFocusHasConnection, mClient, focusedView.getWindowToken(),
+                                startInputFlags, softInputMode, windowFlags,
+                                mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
+                    } else {
+                        final int startInputReason = nextFocusHasConnection
+                                ? WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION
+                                : WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
+                        final Completable.InputBindResult value =
+                                Completable.createInputBindResult();
+                        mService.startInputOrWindowGainedFocus(
+                                startInputReason, mClient,
+                                focusedView.getWindowToken(), startInputFlags, softInputMode,
+                                windowFlags,
+                                null,
+                                null,
+                                0 /* missingMethodFlags */,
+                                mCurRootView.mContext.getApplicationInfo().targetSdkVersion,
+                                ResultCallbacks.of(value));
+                        Completable.getResult(value); // ignore the result
+                    }
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -1086,6 +1103,11 @@ public final class InputMethodManager {
         @Override
         public void setImeTraceEnabled(boolean enabled) {
             ImeTracing.getInstance().setEnabled(enabled);
+        }
+
+        @Override
+        public void throwExceptionFromSystem(String message) {
+            throw new RuntimeException(message);
         }
     };
 
