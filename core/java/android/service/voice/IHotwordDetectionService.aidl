@@ -16,6 +16,8 @@
 
 package android.service.voice;
 
+import android.content.ContentCaptureOptions;
+import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
@@ -23,7 +25,6 @@ import android.os.PersistableBundle;
 import android.os.SharedMemory;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.view.contentcapture.IContentCaptureManager;
-import android.content.ContentCaptureOptions;
 
 /**
  * Provide the interface to communicate with hotword detection service.
@@ -32,7 +33,7 @@ import android.content.ContentCaptureOptions;
  */
 oneway interface IHotwordDetectionService {
     void detectFromDspSource(
-        in ParcelFileDescriptor audioStream,
+        in SoundTrigger.KeyphraseRecognitionEvent event,
         in AudioFormat audioFormat,
         long timeoutMillis,
         in IDspHotwordDetectionCallback callback);
