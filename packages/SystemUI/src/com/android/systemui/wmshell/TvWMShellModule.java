@@ -32,8 +32,9 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
+import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
+import com.android.wm.shell.startingsurface.tv.TvStartingWindowTypeAlgorithm;
 import com.android.wm.shell.transition.Transitions;
 
 import dagger.Module;
@@ -80,4 +81,14 @@ public class TvWMShellModule {
                 displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
                 taskStackListener, transitions, mainExecutor, sfVsyncAnimationHandler);
     }
+
+    //
+    // Starting Windows (Splash Screen)
+    //
+
+    @WMSingleton
+    @Provides
+    static StartingWindowTypeAlgorithm provideStartingWindowTypeAlgorithm() {
+        return new TvStartingWindowTypeAlgorithm();
+    };
 }
