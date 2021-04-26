@@ -217,7 +217,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         String arg = getNextArg();
         if (arg == null) {
             pw.println("Blur supported on device: " + CROSS_WINDOW_BLUR_SUPPORTED);
-            pw.println("Blur enabled: " + mInternal.mBlurController.mBlurEnabled);
+            pw.println("Blur enabled: " + mInternal.mBlurController.getBlurEnabled());
             return 0;
         }
 
