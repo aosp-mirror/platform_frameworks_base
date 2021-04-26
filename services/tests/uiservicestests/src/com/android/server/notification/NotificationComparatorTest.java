@@ -22,12 +22,15 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Person;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -72,6 +75,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     private NotificationRecord mRecordMinCallNonInterruptive;
     private NotificationRecord mRecordMinCall;
     private NotificationRecord mRecordHighCall;
+    private NotificationRecord mRecordHighCallStyle;
     private NotificationRecord mRecordEmail;
     private NotificationRecord mRecordInlineReply;
     private NotificationRecord mRecordSms;
@@ -90,9 +94,12 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         int userId = UserHandle.myUserId();
 
         when(mContext.getResources()).thenReturn(getContext().getResources());
+        when(mContext.getTheme()).thenReturn(getContext().getTheme());
         when(mContext.getContentResolver()).thenReturn(getContext().getContentResolver());
         when(mContext.getPackageManager()).thenReturn(mPm);
         when(mContext.getSystemService(eq(Context.TELECOM_SERVICE))).thenReturn(mTm);
+        when(mContext.getString(anyInt())).thenCallRealMethod();
+        when(mContext.getColor(anyInt())).thenCallRealMethod();
         when(mTm.getDefaultDialerPackage()).thenReturn(callPkg);
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
@@ -136,6 +143,19 @@ public class NotificationComparatorTest extends UiServiceTestCase {
                 callPkg, 1, "highcall", callUid, callUid, n2,
                 new UserHandle(userId), "", 1999), getDefaultChannel());
         mRecordHighCall.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
+
+        Notification nHighCallStyle = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setStyle(Notification.CallStyle.forOngoingCall(
+                        new Person.Builder().setName("caller").build(),
+                        mock(PendingIntent.class)
+                ))
+                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .build();
+        mRecordHighCallStyle = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
+                callPkg, 1, "highCallStyle", callUid, callUid, nHighCallStyle,
+                new UserHandle(userId), "", 2000), getDefaultChannel());
+        mRecordHighCallStyle.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
+        mRecordHighCallStyle.setInterruptive(true);
 
         Notification n4 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.MessagingStyle("sender!")).build();
@@ -236,6 +256,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         final List<NotificationRecord> expected = new ArrayList<>();
         expected.add(mRecordColorizedCall);
         expected.add(mRecordColorized);
+        expected.add(mRecordHighCallStyle);
         expected.add(mRecordHighCall);
         expected.add(mRecordInlineReply);
         if (mRecordSms != null) {
