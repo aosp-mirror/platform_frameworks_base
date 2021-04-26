@@ -81,7 +81,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
                     final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
                     calculateAppUsingMeasuredEnergy(appPowerAndDuration, app.getBatteryStatsUid(),
                             rawRealtimeUs);
-                    app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN,
+                    app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN,
                                     appPowerAndDuration.durationMs)
                             .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
                                     appPowerAndDuration.powerMah, powerModel);
@@ -96,7 +96,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
         }
 
         builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_SCREEN)
-                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN,
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN,
                         totalPowerAndDuration.durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
                         Math.max(totalPowerAndDuration.powerMah, totalAppPower), powerModel)
@@ -251,7 +251,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
                 final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
                 final long durationMs = activityTimeArray.get(app.getUid(), 0);
                 final double powerMah = totalScreenPowerMah * durationMs / totalActivityTimeMs;
-                app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN, durationMs)
+                app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN, durationMs)
                         .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, powerMah,
                                 BatteryConsumer.POWER_MODEL_POWER_PROFILE);
             }

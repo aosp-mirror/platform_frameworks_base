@@ -46,7 +46,7 @@ public class PhonePowerCalculator extends PowerCalculator {
         if (phoneOnPower != 0) {
             builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_PHONE)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnPower)
-                    .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_PHONE, phoneOnTimeMs);
+                    .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnTimeMs);
         }
     }
 
