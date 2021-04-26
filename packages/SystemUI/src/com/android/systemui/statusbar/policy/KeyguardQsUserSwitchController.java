@@ -68,6 +68,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
     private UserSwitcherController.BaseUserAdapter mAdapter;
     private final KeyguardStateController mKeyguardStateController;
     protected final SysuiStatusBarStateController mStatusBarStateController;
+    private final ConfigurationController mConfigurationController;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
     private final KeyguardUserDetailAdapter mUserDetailAdapter;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -76,7 +77,6 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
 
     // State info for the user switch and keyguard
     private int mBarState;
-    private float mDarkAmount;
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
@@ -97,6 +97,15 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
                 }
             };
 
+    private ConfigurationController.ConfigurationListener
+            mConfigurationListener = new ConfigurationController.ConfigurationListener() {
+
+                @Override
+                public void onUiModeChanged() {
+                    updateView(true);
+                }
+            };
+
     @Inject
     public KeyguardQsUserSwitchController(
             UserAvatarView view,
@@ -106,6 +115,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             ScreenLifecycle screenLifecycle,
             UserSwitcherController userSwitcherController,
             KeyguardStateController keyguardStateController,
+            ConfigurationController configurationController,
             SysuiStatusBarStateController statusBarStateController,
             DozeParameters dozeParameters,
             UiEventLogger uiEventLogger) {
@@ -117,6 +127,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         mScreenLifecycle = screenLifecycle;
         mUserSwitcherController = userSwitcherController;
         mKeyguardStateController = keyguardStateController;
+        mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters);
@@ -153,8 +164,6 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
                                 R.string.accessibility_quick_settings_choose_user_action)));
             }
         });
-
-        updateView(true /* forceUpdate */);
     }
 
     @Override
@@ -163,6 +172,8 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         mAdapter.registerDataSetObserver(mDataSetObserver);
         mDataSetObserver.onChanged();
         mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mConfigurationController.addCallback(mConfigurationListener);
+        updateView(true /* forceUpdate */);
     }
 
     @Override
@@ -171,6 +182,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
 
         mAdapter.unregisterDataSetObserver(mDataSetObserver);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
+        mConfigurationController.removeCallback(mConfigurationListener);
     }
 
     public final DataSetObserver mDataSetObserver = new DataSetObserver() {
