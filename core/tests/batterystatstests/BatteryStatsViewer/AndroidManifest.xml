@@ -27,6 +27,7 @@
         android:label="Battery Stats Viewer">
         <activity android:name=".BatteryConsumerPickerActivity"
                   android:label="Battery Stats"
+                  android:icon="@mipmap/ic_launcher"
                   android:launchMode="singleTop"
                   android:exported="true">
             <intent-filter>
@@ -36,7 +37,6 @@
         </activity>
 
         <activity android:name=".BatteryStatsViewerActivity"
-                  android:icon="@mipmap/ic_launcher"
                   android:label="Battery Stats"
                   android:parentActivityName=".BatteryConsumerPickerActivity"/>
     </application>

@@ -70,7 +70,7 @@ public class SensorPowerCalculatorTest {
         mStatsRule.apply(calculator);
 
         UidBatteryConsumer consumer = mStatsRule.getUidBatteryConsumer(APP_UID);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SENSORS))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SENSORS))
                 .isEqualTo(3000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS))
                 .isWithin(PRECISION).of(0.5);

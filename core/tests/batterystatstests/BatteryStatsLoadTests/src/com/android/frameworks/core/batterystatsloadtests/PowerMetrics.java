@@ -58,11 +58,8 @@ public class PowerMetrics {
 
             for (int component = 0; component < BatteryConsumer.POWER_COMPONENT_COUNT;
                     component++) {
-                totalPowerPerComponentMah[component] += uidBatteryConsumer.getConsumedPower(
-                        component);
-            }
-
-            for (int component = 0; component < BatteryConsumer.TIME_COMPONENT_COUNT; component++) {
+                totalPowerPerComponentMah[component] +=
+                        uidBatteryConsumer.getConsumedPower(component);
                 totalDurationPerComponentMs[component] +=
                         uidBatteryConsumer.getUsageDurationMillis(component);
             }
@@ -76,18 +73,15 @@ public class PowerMetrics {
             addMetric(getPowerMetricName(component), MetricKind.POWER,
                     selectedBatteryConsumer.getConsumedPower(component),
                     totalPowerPerComponentMah[component]);
-        }
-
-        for (int component = 0; component < BatteryConsumer.TIME_COMPONENT_COUNT; component++) {
-            addMetric(getTimeMetricName(component), MetricKind.DURATION,
+            addMetric(getDurationMetricName(component), MetricKind.DURATION,
                     selectedBatteryConsumer.getUsageDurationMillis(component),
                     totalDurationPerComponentMs[component]);
         }
     }
 
-    static String getTimeMetricName(int componentId) {
-        return "TIME_" + DebugUtils.constantToString(BatteryConsumer.class,
-                "TIME_COMPONENT_", componentId);
+    static String getDurationMetricName(int componentId) {
+        return "DURATION_" + DebugUtils.constantToString(BatteryConsumer.class,
+                "POWER_COMPONENT_", componentId);
     }
 
     static String getPowerMetricName(int componentId) {

@@ -292,7 +292,6 @@ public final class BatteryUsageStats implements Parcelable {
     public static final class Builder {
         @NonNull
         private final String[] mCustomPowerComponentNames;
-        private final int mCustomTimeComponentCount;
         private final boolean mIncludePowerModels;
         private long mStatsStartTimestampMs;
         private int mDischargePercentage;
@@ -309,14 +308,12 @@ public final class BatteryUsageStats implements Parcelable {
         private Parcel mHistoryBuffer;
         private List<BatteryStats.HistoryTag> mHistoryTagPool;
 
-        public Builder(@NonNull String[] customPowerComponentNames, int customTimeComponentCount) {
-            this(customPowerComponentNames, customTimeComponentCount, false);
+        public Builder(@NonNull String[] customPowerComponentNames) {
+            this(customPowerComponentNames, false);
         }
 
-        public Builder(@NonNull String[] customPowerComponentNames, int customTimeComponentCount,
-                boolean includePowerModels) {
+        public Builder(@NonNull String[] customPowerComponentNames,  boolean includePowerModels) {
             mCustomPowerComponentNames = customPowerComponentNames;
-            mCustomTimeComponentCount = customTimeComponentCount;
             mIncludePowerModels = includePowerModels;
         }
 
@@ -399,7 +396,7 @@ public final class BatteryUsageStats implements Parcelable {
             UidBatteryConsumer.Builder builder = mUidBatteryConsumerBuilders.get(uid);
             if (builder == null) {
                 builder = new UidBatteryConsumer.Builder(mCustomPowerComponentNames,
-                        mCustomTimeComponentCount, mIncludePowerModels, batteryStatsUid);
+                        mIncludePowerModels, batteryStatsUid);
                 mUidBatteryConsumerBuilders.put(uid, builder);
             }
             return builder;
@@ -415,7 +412,7 @@ public final class BatteryUsageStats implements Parcelable {
             SystemBatteryConsumer.Builder builder = mSystemBatteryConsumerBuilders.get(drainType);
             if (builder == null) {
                 builder = new SystemBatteryConsumer.Builder(mCustomPowerComponentNames,
-                        mCustomTimeComponentCount, mIncludePowerModels, drainType);
+                        mIncludePowerModels, drainType);
                 mSystemBatteryConsumerBuilders.put(drainType, builder);
             }
             return builder;
@@ -430,7 +427,7 @@ public final class BatteryUsageStats implements Parcelable {
             UserBatteryConsumer.Builder builder = mUserBatteryConsumerBuilders.get(userId);
             if (builder == null) {
                 builder = new UserBatteryConsumer.Builder(mCustomPowerComponentNames,
-                        mCustomTimeComponentCount, mIncludePowerModels, userId);
+                        mIncludePowerModels, userId);
                 mUserBatteryConsumerBuilders.put(userId, builder);
             }
             return builder;

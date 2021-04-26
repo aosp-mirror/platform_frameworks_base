@@ -65,7 +65,7 @@ public class AmbientDisplayPowerCalculatorTest {
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(
                         SystemBatteryConsumer.DRAIN_TYPE_AMBIENT_DISPLAY);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isEqualTo(90 * MINUTE_IN_MS);
         // 100,000,00 uC / 1000 (micro-/milli-) / 360 (seconds/hour) = 27.777778 mAh
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
@@ -91,7 +91,7 @@ public class AmbientDisplayPowerCalculatorTest {
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(
                         SystemBatteryConsumer.DRAIN_TYPE_AMBIENT_DISPLAY);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isEqualTo(90 * MINUTE_IN_MS);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isWithin(PRECISION).of(15.0);

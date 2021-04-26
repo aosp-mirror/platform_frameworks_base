@@ -42,7 +42,7 @@ public class CameraPowerCalculator extends PowerCalculator {
                 mPowerEstimator.calculateDuration(u.getCameraTurnedOnTimer(), rawRealtimeUs,
                         BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah = mPowerEstimator.calculatePower(durationMs);
-        app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CAMERA, durationMs)
+        app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah);
     }
 

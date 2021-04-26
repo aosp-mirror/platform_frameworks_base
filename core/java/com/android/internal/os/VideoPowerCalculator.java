@@ -39,7 +39,7 @@ public class VideoPowerCalculator extends PowerCalculator {
         final long durationMs = mPowerEstimator.calculateDuration(u.getVideoTurnedOnTimer(),
                 rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah = mPowerEstimator.calculatePower(durationMs);
-        app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_VIDEO, durationMs)
+        app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_VIDEO, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_VIDEO, powerMah);
     }
 }
