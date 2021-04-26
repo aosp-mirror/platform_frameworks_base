@@ -21,6 +21,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_LOW
+import android.app.PendingIntent
+import android.app.Person
 import android.os.SystemClock
 import android.service.notification.NotificationListenerService.RankingMap
 import android.testing.AndroidTestingRunner
@@ -406,6 +408,74 @@ class NotificationRankingManagerTest : SysuiTestCase() {
         assertThat(rankingManager.updateRanking(null, listOf(a, b, c), "test"))
                 .containsExactly(b, c, a)
         assertThat(b.bucket).isEqualTo(BUCKET_FOREGROUND_SERVICE)
+    }
+
+    @Test
+    fun testSort_importantCall() {
+        whenever(sectionsManager.isFilteringEnabled()).thenReturn(true)
+
+        val a = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(
+                        Notification.Builder(mContext, "test")
+                                .build())
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build()
+
+        val b = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_DEFAULT) // high priority
+                .setPkg("pkg2")
+                .setOpPkg("pkg2")
+                .setTag("tag")
+                .setNotification(mock(Notification::class.java).also { notif ->
+                    whenever(notif.isForegroundService).thenReturn(true)
+                    whenever(notif.isColorized).thenReturn(true)
+                })
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build()
+
+        val cN = Notification.Builder(mContext, "test")
+                .setStyle(Notification.MessagingStyle(""))
+                .build()
+        val c = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(cN)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.user)
+                .setOverrideGroupKey("")
+                .build()
+
+        val dN = Notification.Builder(mContext, "test")
+                .setStyle(Notification.CallStyle.forOngoingCall(
+                        Person.Builder().setName("caller").build(),
+                        mock(PendingIntent::class.java)))
+                .build()
+        val d = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_DEFAULT) // high priority
+                .setPkg("pkg2")
+                .setOpPkg("pkg2")
+                .setTag("tag")
+                .setNotification(dN)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.user)
+                .setOverrideGroupKey("")
+                .build()
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a))
+                .thenReturn(TYPE_IMPORTANT_PERSON)
+
+        assertThat(rankingManager.updateRanking(null, listOf(a, b, c, d), "test"))
+                .containsExactly(b, d, c, a)
+        assertThat(d.bucket).isEqualTo(BUCKET_FOREGROUND_SERVICE)
     }
 
     internal class TestableNotificationRankingManager(
