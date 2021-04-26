@@ -191,7 +191,7 @@ class MediaDataFilter @Inject constructor(
             mediaDataManager.setTimedOut(it, timedOut = true, forceUpdate = true)
         }
         if (hasSmartspace) {
-            mediaDataManager.dismissSmartspaceRecommendation()
+            mediaDataManager.dismissSmartspaceRecommendation(0L /* delay */)
         }
     }
 

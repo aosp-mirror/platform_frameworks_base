@@ -429,12 +429,13 @@ class MediaDataManager(
      * This will make the recommendation view to not be shown anymore during this headphone
      * connection session.
      */
-    fun dismissSmartspaceRecommendation() {
+    fun dismissSmartspaceRecommendation(delay: Long) {
         Log.d(TAG, "Dismissing Smartspace media target")
         // Do not set smartspaceMediaTarget to null. So the instance is preserved during the entire
         // headphone connection, and will ONLY be set to null when headphones are disconnected.
         smartspaceMediaTarget?.let {
-            notifySmartspaceMediaDataRemoved(it.smartspaceTargetId)
+            foregroundExecutor.executeDelayed(
+                { notifySmartspaceMediaDataRemoved(it.smartspaceTargetId) }, delay)
         }
     }
 
