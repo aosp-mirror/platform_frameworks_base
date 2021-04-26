@@ -1759,8 +1759,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (userHandle == UserHandle.USER_SYSTEM) {
                     mStateCache.setDeviceProvisioned(policy.mUserSetupComplete);
                 }
+
+                migrateDeviceOwnerProtectedPackagesToOwners(userHandle, policy);
             }
             return policy;
+        }
+    }
+
+    /**
+     * Only used by {@link #getUserData(int)} to migrate <b>existing</b> device owner protected
+     * packages that were stored in {@link DevicePolicyData#mUserControlDisabledPackages} to
+     * {@link Owners} because the device owner protected packages are now stored on a per device
+     * owner basis instead of on a per user basis.
+     *
+     * Any calls to {@link #setUserControlDisabledPackages(ComponentName, List)} would now store
+     * the device owner protected packages in {@link Owners} instead of {@link DevicePolicyData}.
+     * @param userHandle The device owner user
+     * @param policy The policy data of the device owner user
+     */
+    private void migrateDeviceOwnerProtectedPackagesToOwners(
+            int userHandle, DevicePolicyData policy) {
+        ComponentName deviceOwnerComponent = getOwnerComponent(userHandle);
+        if (isDeviceOwner(deviceOwnerComponent, userHandle)
+                && !policy.mUserControlDisabledPackages.isEmpty()) {
+            mOwners.setDeviceOwnerProtectedPackages(
+                    deviceOwnerComponent.getPackageName(),
+                    policy.mUserControlDisabledPackages);
+
+            policy.mUserControlDisabledPackages = new ArrayList<>();
+            saveSettingsLocked(userHandle);
         }
     }
 
@@ -2856,7 +2883,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updateMaximumTimeToLockLocked(userHandle);
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userHandle);
         updateLockTaskFeaturesLocked(policy.mLockTaskFeatures, userHandle);
-        updateUserControlDisabledPackagesLocked(policy.mUserControlDisabledPackages);
         if (policy.mStatusBarDisabled) {
             setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
         }
@@ -2898,10 +2924,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
-    }
-
-    private void updateUserControlDisabledPackagesLocked(List<String> packages) {
-        mInjector.getPackageManagerInternal().setDeviceOwnerProtectedPackages(packages);
     }
 
     private void updateLockTaskFeaturesLocked(int flags, int userId) {
@@ -8697,7 +8719,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userId);
         policy.mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
         policy.mUserControlDisabledPackages.clear();
-        updateUserControlDisabledPackagesLocked(policy.mUserControlDisabledPackages);
         saveSettingsLocked(userId);
 
         try {
@@ -16142,29 +16163,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setUserControlDisabledPackages(ComponentName who, List<String> packages) {
         Objects.requireNonNull(who, "ComponentName is null");
-        Preconditions.checkNotNull(packages, "packages is null");
+        Objects.requireNonNull(packages, "packages is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
         checkCanExecuteOrThrowUnsafe(
                 DevicePolicyManager.OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES);
 
         synchronized (getLockObject()) {
-            setUserControlDisabledPackagesLocked(caller.getUserId(), packages);
+            mOwners.setDeviceOwnerProtectedPackages(who.getPackageName(), packages);
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_USER_CONTROL_DISABLED_PACKAGES)
                     .setAdmin(who)
                     .setStrings(packages.toArray(new String[packages.size()]))
                     .write();
         }
-    }
-
-    private void setUserControlDisabledPackagesLocked(int userHandle, List<String> packages) {
-        final DevicePolicyData policy = getUserData(userHandle);
-        policy.mUserControlDisabledPackages = packages;
-
-        // Store the settings persistently.
-        saveSettingsLocked(userHandle);
-        updateUserControlDisabledPackagesLocked(packages);
     }
 
     @Override
@@ -16175,9 +16187,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
         synchronized (getLockObject()) {
-            final List<String> packages =
-                    getUserData(caller.getUserId()).mUserControlDisabledPackages;
-            return packages == null ? Collections.EMPTY_LIST : packages;
+            return mOwners.getDeviceOwnerProtectedPackages(who.getPackageName());
         }
     }
 
