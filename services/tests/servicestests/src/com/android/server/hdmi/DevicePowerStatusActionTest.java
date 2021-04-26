@@ -138,6 +138,7 @@ public class DevicePowerStatusActionTest {
         mDevicePowerStatusAction = DevicePowerStatusAction.create(mPlaybackDevice, ADDR_TV,
                 mCallbackMock);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
     }
 
     @Test
