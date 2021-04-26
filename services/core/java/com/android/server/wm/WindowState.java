@@ -5354,7 +5354,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private boolean shouldDrawBlurBehind() {
-        return (mAttrs.flags & FLAG_BLUR_BEHIND) != 0 && mWmService.mBlurController.mBlurEnabled;
+        return (mAttrs.flags & FLAG_BLUR_BEHIND) != 0
+            && mWmService.mBlurController.getBlurEnabled();
     }
 
     /**
