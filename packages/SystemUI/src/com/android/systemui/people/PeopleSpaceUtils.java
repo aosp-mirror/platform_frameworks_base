@@ -18,6 +18,7 @@ package com.android.systemui.people;
 
 import static com.android.systemui.people.NotificationHelper.getContactUri;
 import static com.android.systemui.people.NotificationHelper.getMessagingStyleMessages;
+import static com.android.systemui.people.NotificationHelper.getSenderIfGroupConversation;
 import static com.android.systemui.people.NotificationHelper.hasReadContactsPermission;
 import static com.android.systemui.people.NotificationHelper.isMissedCall;
 import static com.android.systemui.people.NotificationHelper.shouldMatchNotificationByUri;
@@ -233,6 +234,7 @@ public class PeopleSpaceUtils {
                 // Reset notification content.
                 .setNotificationKey(null)
                 .setNotificationContent(null)
+                .setNotificationSender(null)
                 .setNotificationDataUri(null)
                 .setMessagesCount(0)
                 // Reset missed calls category.
@@ -272,12 +274,14 @@ public class PeopleSpaceUtils {
             Log.d(TAG, "Tile key: " + key.toString() + ". Notification message has text: "
                     + hasMessageText);
         }
+        CharSequence sender = getSenderIfGroupConversation(notification, message);
 
         return tile
                 .toBuilder()
                 .setNotificationKey(notificationEntry.getSbn().getKey())
                 .setNotificationCategory(notification.category)
                 .setNotificationContent(content)
+                .setNotificationSender(sender)
                 .setNotificationDataUri(dataUri)
                 .setMessagesCount(messagesCount)
                 .build();
