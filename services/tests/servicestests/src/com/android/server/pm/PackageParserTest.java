@@ -15,6 +15,10 @@
  */
 package com.android.server.pm;
 
+import static android.content.pm.permission.CompatibilityPermissionInfo.COMPAT_PERMS;
+
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -25,6 +29,7 @@ import static org.junit.Assert.fail;
 
 import static java.lang.Boolean.TRUE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.stream.Collectors.toList;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -83,6 +88,7 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -106,6 +112,7 @@ public class PackageParserTest {
     private static final String TEST_APP2_APK = "PackageParserTestApp2.apk";
     private static final String TEST_APP3_APK = "PackageParserTestApp3.apk";
     private static final String TEST_APP4_APK = "PackageParserTestApp4.apk";
+    private static final String TEST_APP5_APK = "PackageParserTestApp5.apk";
     private static final String PACKAGE_NAME = "com.android.servicestests.apps.packageparserapp";
 
     @Before
@@ -501,6 +508,56 @@ public class PackageParserTest {
                     fail("Found unknown service; name = " + service.getName());
                 }
             }
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    public void testParseModernPackageHasNoCompatPermissions() throws Exception {
+        final File testFile = extractFile(TEST_APP1_APK);
+        try {
+            final ParsedPackage pkg = new TestPackageParser2()
+                    .parsePackage(testFile, 0 /*flags*/, false /*useCaches*/);
+            final List<String> compatPermissions =
+                    Arrays.stream(COMPAT_PERMS).map(p -> p.name).collect(toList());
+            assertWithMessage(
+                    "Compatibility permissions shouldn't be added into uses permissions.")
+                    .that(pkg.getUsesPermissions().stream().map(p -> p.name).collect(toList()))
+                    .containsNoneIn(compatPermissions);
+            assertWithMessage(
+                    "Compatibility permissions shouldn't be added into requested permissions.")
+                    .that(pkg.getRequestedPermissions()).containsNoneIn(compatPermissions);
+            assertWithMessage(
+                    "Compatibility permissions shouldn't be added into implicit permissions.")
+                    .that(pkg.getImplicitPermissions()).containsNoneIn(compatPermissions);
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    public void testParseLegacyPackageHasCompatPermissions() throws Exception {
+        final File testFile = extractFile(TEST_APP5_APK);
+        try {
+            final ParsedPackage pkg = new TestPackageParser2()
+                    .parsePackage(testFile, 0 /*flags*/, false /*useCaches*/);
+            assertWithMessage(
+                    "Compatibility permissions should be added into uses permissions.")
+                    .that(Arrays.stream(COMPAT_PERMS).map(p -> p.name)
+                            .allMatch(pkg.getUsesPermissions().stream().map(p -> p.name)
+                            .collect(toList())::contains))
+                    .isTrue();
+            assertWithMessage(
+                    "Compatibility permissions should be added into requested permissions.")
+                    .that(Arrays.stream(COMPAT_PERMS).map(p -> p.name)
+                            .allMatch(pkg.getRequestedPermissions()::contains))
+                    .isTrue();
+            assertWithMessage(
+                    "Compatibility permissions should be added into implicit permissions.")
+                    .that(Arrays.stream(COMPAT_PERMS).map(p -> p.name)
+                            .allMatch(pkg.getImplicitPermissions()::contains))
+                    .isTrue();
         } finally {
             testFile.delete();
         }

@@ -117,6 +117,7 @@ android_test {
         ":PackageParserTestApp2",
         ":PackageParserTestApp3",
         ":PackageParserTestApp4",
+        ":PackageParserTestApp5",
         ":apex.test",
     ],
     resource_zips: [":FrameworksServicesTests_apks_as_resources"],
