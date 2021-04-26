@@ -16,19 +16,26 @@
 
 package com.android.wm.shell.onehanded;
 
+import static com.android.wm.shell.onehanded.OneHandedState.STATE_ENTERING;
+import static com.android.wm.shell.onehanded.OneHandedState.STATE_NONE;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.om.IOverlayManager;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
-import android.util.ArrayMap;
+import android.view.Display;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,62 +46,94 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
+    Display mDisplay;
+    DisplayLayout mDisplayLayout;
     OneHandedTimeoutHandler mTimeoutHandler;
-    OneHandedController mOneHandedController;
     OneHandedState mSpiedTransitionState;
+    OneHandedTutorialHandler mSpiedTutorialHandler;
 
-    @Mock
-    OneHandedTouchHandler mMockTouchHandler;
-    @Mock
-    OneHandedTutorialHandler mMockTutorialHandler;
-    @Mock
-    DisplayController mMockDisplayController;
-    @Mock
-    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
-    @Mock
-    OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
-    @Mock
-    IOverlayManager mMockOverlayManager;
-    @Mock
-    TaskStackListenerImpl mMockTaskStackListener;
     @Mock
     ShellExecutor mMockShellMainExecutor;
     @Mock
-    Handler mMockShellMainHandler;
-    @Mock
-    OneHandedUiEventLogger mMockUiEventLogger;
-    @Mock
     OneHandedSettingsUtil mMockSettingsUtil;
     @Mock
-    OneHandedAccessibilityUtil mMockAccessibilityUtil;
+    WindowManager mMockWindowManager;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTimeoutHandler = new OneHandedTimeoutHandler(mMockShellMainExecutor);
-        mSpiedTransitionState = new OneHandedState();
+        when(mMockSettingsUtil.getTutorialShownCounts(any(), anyInt())).thenReturn(0);
 
-        when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
-        mOneHandedController = new OneHandedController(
-                mContext,
-                mMockDisplayController,
-                mMockBackgroundOrganizer,
-                mMockDisplayAreaOrganizer,
-                mMockTouchHandler,
-                mMockTutorialHandler,
-                mMockSettingsUtil,
-                mMockAccessibilityUtil,
-                mTimeoutHandler,
-                mSpiedTransitionState,
-                mMockUiEventLogger,
-                mMockOverlayManager,
-                mMockTaskStackListener,
-                mMockShellMainExecutor,
-                mMockShellMainHandler);
+        mDisplay = mContext.getDisplay();
+        mDisplayLayout = new DisplayLayout(mContext, mDisplay);
+        mSpiedTransitionState = spy(new OneHandedState());
+        mSpiedTutorialHandler = spy(
+                new OneHandedTutorialHandler(mContext, mDisplayLayout, mMockWindowManager,
+                        mMockSettingsUtil, mMockShellMainExecutor));
+        mTimeoutHandler = new OneHandedTimeoutHandler(mMockShellMainExecutor);
     }
 
     @Test
-    public void testRegisterForDisplayAreaOrganizer() {
-        verify(mMockDisplayAreaOrganizer).registerTransitionCallback(mMockTutorialHandler);
+    public void testDefaultZeroShownCounts_canShowTutorial() {
+        assertThat(mSpiedTutorialHandler.canShowTutorial()).isTrue();
+        verify(mMockShellMainExecutor, never()).execute(any());
+    }
+
+    @Test
+    public void testDefaultZeroShownCounts_doNotAttachWindow() {
+        verify(mMockShellMainExecutor, never()).execute(any());
+    }
+
+    @Test
+    public void testOnStateChangedEntering_createViewAndAttachToWindow() {
+        when(mSpiedTutorialHandler.canShowTutorial()).thenReturn(true);
+        try {
+            mSpiedTutorialHandler.onStateChanged(STATE_ENTERING);
+        } catch (ClassCastException e) {
+            // no-op, just assert createViewAndAttachToWindow() to be called
+        }
+
+        verify(mSpiedTutorialHandler).createViewAndAttachToWindow(any());
+    }
+
+    @Test
+    public void testOnStateChangedNone_removeViewAndAttachToWindow() {
+        when(mSpiedTutorialHandler.canShowTutorial()).thenReturn(true);
+        try {
+            mSpiedTutorialHandler.onStateChanged(STATE_NONE);
+        } catch (ClassCastException e) {
+            // no-op, just assert removeTutorialFromWindowManager() to be called
+        }
+
+        verify(mSpiedTutorialHandler).removeTutorialFromWindowManager(true);
+    }
+
+    @Test
+    public void testOnStateChangedNone_shouldNotAttachWindow() {
+        when(mSpiedTutorialHandler.canShowTutorial()).thenReturn(true);
+        try {
+            mSpiedTutorialHandler.onStateChanged(STATE_NONE);
+        } catch (ClassCastException e) {
+            // no-op, just assert setTutorialShownCountIncrement() never be called
+        }
+
+        verify(mSpiedTutorialHandler, never()).setTutorialShownCountIncrement();
+    }
+
+    @Test
+    public void testOnConfigurationChanged_shouldUpdateViewContent() {
+        when(mSpiedTutorialHandler.canShowTutorial()).thenReturn(true);
+        try {
+            mSpiedTutorialHandler.onStateChanged(STATE_ENTERING);
+        } catch (ClassCastException e) {
+            // no-op, set current state for test onConfigurationChanged()
+        }
+        try {
+            mSpiedTutorialHandler.onConfigurationChanged();
+        } catch (ClassCastException e) {
+            // no-op, just assert removeTutorialFromWindowManager() be called
+        }
+
+        verify(mSpiedTutorialHandler).removeTutorialFromWindowManager(false);
     }
 }

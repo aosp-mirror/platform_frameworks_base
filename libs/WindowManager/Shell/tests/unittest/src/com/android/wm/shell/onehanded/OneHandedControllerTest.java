@@ -398,4 +398,14 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         verify(mSpiedOneHandedController, never()).startOneHanded();
         verify(mSpiedOneHandedController, never()).stopOneHanded();
     }
+
+    @Test
+    public void testControllerInit_tutorialAddStateChangeListener() {
+        when(mSpiedOneHandedController.isOneHandedEnabled()).thenReturn(true);
+        when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
+        when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
+        when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(false);
+
+        verify(mSpiedTransitionState).addSListeners(mMockTutorialHandler);
+    }
 }
