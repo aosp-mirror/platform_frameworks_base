@@ -27,17 +27,20 @@ import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
 import android.content.Context;
+import android.content.res.Resources;
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Process;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -61,9 +64,12 @@ public class LogicalDisplayMapperTest {
 
     private DisplayDeviceRepository mDisplayDeviceRepo;
     private LogicalDisplayMapper mLogicalDisplayMapper;
-    private Context mContext;
+    private TestLooper mLooper;
+    private Handler mHandler;
 
     @Mock LogicalDisplayMapper.Listener mListenerMock;
+    @Mock Context mContextMock;
+    @Mock Resources mResourcesMock;
 
     @Captor ArgumentCaptor<LogicalDisplay> mDisplayCaptor;
 
@@ -73,7 +79,6 @@ public class LogicalDisplayMapperTest {
         System.setProperty("dexmaker.share_classloader", "true");
         MockitoAnnotations.initMocks(this);
 
-        mContext = InstrumentationRegistry.getContext();
         mDisplayDeviceRepo = new DisplayDeviceRepository(
                 new DisplayManagerService.SyncRoot(),
                 new PersistentDataStore(new PersistentDataStore.Injector() {
@@ -94,7 +99,15 @@ public class LogicalDisplayMapperTest {
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
 
-        mLogicalDisplayMapper = new LogicalDisplayMapper(mDisplayDeviceRepo, mListenerMock);
+        when(mContextMock.getResources()).thenReturn(mResourcesMock);
+        when(mResourcesMock.getBoolean(
+                com.android.internal.R.bool.config_supportsConcurrentInternalDisplays))
+                .thenReturn(true);
+
+        mLooper = new TestLooper();
+        mHandler = new Handler(mLooper.getLooper());
+        mLogicalDisplayMapper = new LogicalDisplayMapper(mContextMock, mDisplayDeviceRepo,
+                mListenerMock, new DisplayManagerService.SyncRoot(), mHandler);
     }
 
 
@@ -299,7 +312,7 @@ public class LogicalDisplayMapperTest {
         private DisplayDeviceInfo mSentInfo;
 
         TestDisplayDevice() {
-            super(null, null, "test_display_" + sUniqueTestDisplayId++, mContext);
+            super(null, null, "test_display_" + sUniqueTestDisplayId++, mContextMock);
             mInfo = new DisplayDeviceInfo();
         }
 

@@ -657,6 +657,12 @@
     <!-- Indicate the display area rect for foldable devices in folded state. -->
     <string name="config_foldedArea"></string>
 
+    <!-- Indicates that the device supports having more than one internal display on at the same
+         time. Only applicable to devices with more than one internal display. If this option is
+         set to false, DisplayManager will make additional effort to ensure no more than 1 internal
+         display is powered on at the same time. -->
+    <bool name="config_supportsConcurrentInternalDisplays">true</bool>
+
     <!-- Desk dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a desk dock.
