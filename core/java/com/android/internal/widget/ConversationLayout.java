@@ -1082,15 +1082,18 @@ public class ConversationLayout extends FrameLayout
 
     private void updateExpandButton() {
         int buttonGravity;
-        int containerHeight;
         ViewGroup newContainer;
         if (mIsCollapsed) {
             buttonGravity = Gravity.CENTER;
-            containerHeight = ViewGroup.LayoutParams.WRAP_CONTENT;
+            // NOTE(b/182474419): In order for the touch target of the expand button to be the full
+            // height of the notification, we would want the mExpandButtonContainer's height to be
+            // set to WRAP_CONTENT (or 88dp) when in the collapsed state.  Unfortunately, that
+            // causes an unstable remeasuring infinite loop when the unread count is visible,
+            // causing the layout to occasionally hide the messages.  As an aside, that naive
+            // solution also causes an undesirably large gap between content and smart replies.
             newContainer = mExpandButtonAndContentContainer;
         } else {
             buttonGravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
-            containerHeight = ViewGroup.LayoutParams.MATCH_PARENT;
             newContainer = this;
         }
         mExpandButton.setExpanded(!mIsCollapsed);
@@ -1099,7 +1102,6 @@ public class ConversationLayout extends FrameLayout
         // content when collapsed, but allows the content to flow under it when expanded.
         if (newContainer != mExpandButtonContainer.getParent()) {
             ((ViewGroup) mExpandButtonContainer.getParent()).removeView(mExpandButtonContainer);
-            mExpandButtonContainer.getLayoutParams().height = containerHeight;
             newContainer.addView(mExpandButtonContainer);
         }
 
