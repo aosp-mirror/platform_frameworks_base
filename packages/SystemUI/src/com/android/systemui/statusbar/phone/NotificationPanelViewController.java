@@ -2698,6 +2698,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mConversationNotificationManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());
         mIsExpanding = false;
         mMediaHierarchyManager.setCollapsingShadeFromQS(false);
+        mMediaHierarchyManager.setQsExpanded(mQsExpanded);
         if (isFullyCollapsed()) {
             DejankUtils.postAfterTraversal(new Runnable() {
                 @Override
