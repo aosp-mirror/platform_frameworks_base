@@ -906,6 +906,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // The transform of its surface is handled by fixed rotation.
             return;
         }
+        final Task task = getTask();
+        if (task != null && task.inPinnedWindowingMode()) {
+            // It is handled by PinnedTaskController. Note that the windowing mode of activity
+            // and windows may still be fullscreen.
+            return;
+        }
 
         if (mPendingSeamlessRotate != null) {
             oldRotation = mPendingSeamlessRotate.getOldRotation();
