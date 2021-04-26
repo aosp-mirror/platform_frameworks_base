@@ -19,6 +19,7 @@ package com.android.server.display.layout;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Slog;
 import android.view.DisplayAddress;
 
@@ -100,11 +101,28 @@ public class Layout {
      *
      * @return The display corresponding to the specified display ID.
      */
+    @Nullable
     public Display getById(int id) {
         for (int i = 0; i < mDisplays.size(); i++) {
-            Display layout = mDisplays.get(i);
-            if (id == layout.getLogicalDisplayId()) {
-                return layout;
+            Display display = mDisplays.get(i);
+            if (id == display.getLogicalDisplayId()) {
+                return display;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param address The display address to check.
+     *
+     * @return The display corresponding to the specified address.
+     */
+    @Nullable
+    public Display getByAddress(@NonNull DisplayAddress address) {
+        for (int i = 0; i < mDisplays.size(); i++) {
+            Display display = mDisplays.get(i);
+            if (address.equals(display.getAddress())) {
+                return display;
             }
         }
         return null;
