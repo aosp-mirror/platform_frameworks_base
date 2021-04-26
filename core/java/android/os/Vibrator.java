@@ -554,9 +554,12 @@ public abstract class Vibrator {
     /**
      * Query the estimated durations of the given primitives.
      *
-     * The returned array will be the same length as the query array and the value at a given index
-     * will contain the duration in milliseconds of the effect at the same index in the querying
-     * array.
+     * <p>The returned array will be the same length as the query array and the value at a given
+     * index will contain the duration in milliseconds of the effect at the same index in the
+     * querying array.
+     *
+     * <p>The duration will be positive for primitives that are supported and zero for the
+     * unsupported ones, in correspondence with {@link #arePrimitivesSupported(int...)}.
      *
      * @param primitiveIds Which primitives to query for.
      * @return The duration of each primitive, with zeroes for primitives that are not supported.
