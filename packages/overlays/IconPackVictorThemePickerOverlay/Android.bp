@@ -26,6 +26,5 @@ package {
 runtime_resource_overlay {
     name: "IconPackVictorThemePickerOverlay",
     theme: "IconPackVictorThemePicker",
-    certificate: "platform",
     product_specific: true,
 }
