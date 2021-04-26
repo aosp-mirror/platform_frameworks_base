@@ -55,5 +55,7 @@ interface IAuthService {
     // Get a list of AuthenticatorIDs for authenticators which have enrolled templates and meet
     // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore
     // land as SIDs, and are used during key generation.
-    long[] getAuthenticatorIds();
+    // If userId is not equal to the calling user ID, the caller must have the
+    // USE_BIOMETRIC_INTERNAL permission.
+    long[] getAuthenticatorIds(in int userId);
 }
