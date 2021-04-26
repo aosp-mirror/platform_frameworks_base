@@ -34,6 +34,8 @@ import java.util.List;
 oneway interface ITranslationManager {
     void onTranslationCapabilitiesRequest(int sourceFormat, int destFormat,
          in ResultReceiver receiver, int userId);
+    void registerTranslationCapabilityCallback(in IRemoteCallback callback, int userId);
+    void unregisterTranslationCapabilityCallback(in IRemoteCallback callback, int userId);
     void onSessionCreated(in TranslationContext translationContext,
          int sessionId, in IResultReceiver receiver, int userId);
 
