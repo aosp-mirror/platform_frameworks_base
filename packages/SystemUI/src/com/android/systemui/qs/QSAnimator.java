@@ -305,6 +305,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                         }
 
                         mQQSTileHeightAnimator.addView(quickTileView);
+
+                        // Label containers
                         View qqsLabelContainer = quickTileView.getLabelContainer();
                         View qsLabelContainer = tileView.getLabelContainer();
 
@@ -316,6 +318,19 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                         translationYBuilder.addFloat(qsLabelContainer, "translationY", -yDiff, 0);
                         mAllViews.add(qqsLabelContainer);
                         mAllViews.add(qsLabelContainer);
+
+                        // Secondary icon
+                        View qqsSecondaryIcon = quickTileView.getSecondaryIcon();
+                        View qsSecondaryIcon = tileView.getSecondaryIcon();
+
+                        getRelativePosition(loc1, qqsSecondaryIcon, view);
+                        getRelativePosition(loc2, qsSecondaryIcon, view);
+                        yDiff = loc2[1] - loc1[1] - yOffset;
+
+                        translationYBuilder.addFloat(qqsSecondaryIcon, "translationY", 0, yDiff);
+                        translationYBuilder.addFloat(qsSecondaryIcon, "translationY", -yDiff, 0);
+                        mAllViews.add(qqsSecondaryIcon);
+                        mAllViews.add(qsSecondaryIcon);
                     } else { // These tiles disappear when expanding
                         firstPageBuilder.addFloat(quickTileView, "alpha", 1, 0);
                         translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
