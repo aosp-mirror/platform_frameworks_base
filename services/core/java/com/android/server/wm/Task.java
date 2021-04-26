@@ -176,12 +176,14 @@ import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -6677,8 +6679,30 @@ class Task extends WindowContainer<WindowContainer> {
                         prev = null;
                     }
                 }
-                final int splashScreenThemeResId = options != null
+
+                // TODO(185200798): Persist theme name instead of theme if
+                int splashScreenThemeResId = options != null
                         ? options.getSplashScreenThemeResId() : 0;
+
+                // User can override the splashscreen theme. The theme name is used to persist
+                // the setting, so if no theme is set in the ActivityOptions, we check if has
+                // been persisted here.
+                if (splashScreenThemeResId == 0) {
+                    try {
+                        String themeName = mAtmService.getPackageManager()
+                                .getSplashScreenTheme(r.packageName, r.mUserId);
+                        if (themeName != null) {
+                            Context packageContext = mAtmService.mContext
+                                    .createPackageContext(r.packageName, 0);
+                            splashScreenThemeResId = packageContext.getResources()
+                                    .getIdentifier(themeName, null, null);
+                        }
+                    } catch (RemoteException | PackageManager.NameNotFoundException
+                            | Resources.NotFoundException ignore) {
+                        // Just use the default theme
+                    }
+                }
+
                 r.showStartingWindow(prev, newTask, isTaskSwitch(r, focusedTopActivity),
                         splashScreenThemeResId, samePackage);
             }

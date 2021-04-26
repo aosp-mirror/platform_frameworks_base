@@ -21629,7 +21629,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     null /*disabledComponents*/,
                     PackageManager.INSTALL_REASON_UNKNOWN,
                     PackageManager.UNINSTALL_REASON_UNKNOWN,
-                    null /*harmfulAppWarning*/);
+                    null /*harmfulAppWarning*/,
+                    null /*splashScreenTheme*/);
         }
         mSettings.writeKernelMappingLPr(ps);
     }
@@ -27740,6 +27741,23 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public List<String> getMimeGroup(String packageName, String mimeGroup) {
         return mSettings.getPackageLPr(packageName).getMimeGroup(mimeGroup);
+    }
+
+    @Override
+    public void setSplashScreenTheme(@NonNull String packageName, @Nullable String themeId,
+            int userId) {
+        int callingUid = Binder.getCallingUid();
+        PackageSetting packageSetting = getPackageSettingForUser(packageName, callingUid, userId);
+        if (packageSetting != null) {
+            packageSetting.setSplashScreenTheme(userId, themeId);
+        }
+    }
+
+    @Override
+    public String getSplashScreenTheme(@NonNull String packageName, int userId) {
+        int callingUid = Binder.getCallingUid();
+        PackageSetting packageSetting = getPackageSettingForUser(packageName, callingUid, userId);
+        return packageSetting != null ? packageSetting.getSplashScreenTheme(userId) : null;
     }
 
     /**
