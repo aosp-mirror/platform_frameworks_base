@@ -349,7 +349,9 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
         spyOn(imeContainer);
 
-        mDisplayContent.updateImeParent();
+        mDisplayContent.setImeInputTarget(startingWin);
+        mDisplayContent.onConfigurationChanged(new Configuration());
+        verify(mDisplayContent).updateImeParent();
 
         // Force reassign the relative layer when the IME surface parent is changed.
         verify(imeContainer).assignRelativeLayer(any(), eq(imeSurfaceParent), anyInt(), eq(true));
