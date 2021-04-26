@@ -776,8 +776,8 @@
     <dimen name="conversation_expand_button_height">88dp</dimen>
     <!-- this is the margin between the Conversation image and the content -->
     <dimen name="conversation_image_start_margin">12dp</dimen>
-    <!-- Side margins of the conversation badge in relation to the conversation icon -->
-    <dimen name="conversation_badge_side_margin">32dp</dimen>
+    <!-- amount the badge sticks out from the conversation avatar -->
+    <dimen name="conversation_badge_protrusion">4dp</dimen>
     <!-- size of the notification badge when applied to the conversation icon -->
     <dimen name="conversation_icon_size_badged">20dp</dimen>
     <!-- size of the conversation avatar in an expanded group -->
@@ -786,10 +786,10 @@
     <dimen name="conversation_face_pile_avatar_size">32dp</dimen>
     <!-- size of the face pile icons when the group is expanded -->
     <dimen name="conversation_face_pile_avatar_size_group_expanded">@dimen/conversation_face_pile_avatar_size</dimen>
-    <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
-    <dimen name="conversation_badge_side_margin_group_expanded">@dimen/conversation_badge_side_margin</dimen>
-    <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
-    <dimen name="conversation_badge_side_margin_group_expanded_face_pile">@dimen/conversation_badge_side_margin</dimen>
+    <!-- amount the badge sticks out from the conversation avatar when the group is expanded -->
+    <dimen name="conversation_badge_protrusion_group_expanded">@dimen/conversation_badge_protrusion</dimen>
+    <!-- amount the badge sticks out from the conversation face pile when the group is expanded -->
+    <dimen name="conversation_badge_protrusion_group_expanded_face_pile">@dimen/conversation_badge_protrusion</dimen>
     <!-- The width of the protection of the face pile layout-->
     <dimen name="conversation_face_pile_protection_width">2dp</dimen>
     <!-- The width of the protection of the face pile layout when expanded-->

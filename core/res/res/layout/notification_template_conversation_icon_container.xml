@@ -36,11 +36,14 @@
         android:layout_gravity="top|center_horizontal"
         >
 
-        <!-- Big icon: 52x52, 12dp padding left + top, 16dp padding right -->
+        <!-- Big icon: 48x48, 12dp padding top, 16dp padding sides -->
         <com.android.internal.widget.CachingIconView
             android:id="@+id/conversation_icon"
             android:layout_width="@dimen/conversation_avatar_size"
             android:layout_height="@dimen/conversation_avatar_size"
+            android:layout_marginLeft="@dimen/conversation_badge_protrusion"
+            android:layout_marginRight="@dimen/conversation_badge_protrusion"
+            android:layout_marginBottom="@dimen/conversation_badge_protrusion"
             android:scaleType="centerCrop"
             android:importantForAccessibility="no"
             />
@@ -49,6 +52,9 @@
             android:layout="@layout/conversation_face_pile_layout"
             android:layout_width="@dimen/conversation_avatar_size"
             android:layout_height="@dimen/conversation_avatar_size"
+            android:layout_marginLeft="@dimen/conversation_badge_protrusion"
+            android:layout_marginRight="@dimen/conversation_badge_protrusion"
+            android:layout_marginBottom="@dimen/conversation_badge_protrusion"
             android:id="@+id/conversation_face_pile"
             />
 
@@ -56,8 +62,7 @@
             android:id="@+id/conversation_icon_badge"
             android:layout_width="@dimen/conversation_icon_size_badged"
             android:layout_height="@dimen/conversation_icon_size_badged"
-            android:layout_marginLeft="@dimen/conversation_badge_side_margin"
-            android:layout_marginTop="@dimen/conversation_badge_side_margin"
+            android:layout_gravity="end|bottom"
             android:clipChildren="false"
             android:clipToPadding="false"
             >
