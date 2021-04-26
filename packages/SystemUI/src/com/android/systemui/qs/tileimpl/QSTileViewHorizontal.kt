@@ -100,7 +100,8 @@ open class QSTileViewHorizontal(
         mSecondLine.textDirection = TEXT_DIRECTION_LOCALE
 
         if (mCollapsedView) {
-            mSecondLine.visibility = GONE
+            mSecondLine.alpha = 0f
+            mLabelContainer.setIgnoredView(mSecondLine)
         }
     }
 
@@ -185,9 +186,7 @@ open class QSTileViewHorizontal(
 
     private fun setLabelsColor(color: ColorStateList) {
         mLabel.setTextColor(color)
-        if (!mCollapsedView) {
-            mSecondLine.setTextColor(color)
-        }
+        mSecondLine.setTextColor(color)
     }
 
     private fun clearBackgroundAnimator() {
