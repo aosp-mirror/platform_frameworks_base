@@ -21,7 +21,6 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.containsType;
@@ -2016,9 +2015,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     /** A launch animation was cancelled. */
     //TODO: These can / should probably be moved to NotificationPresenter or ShadeController
-    public void onLaunchAnimationCancelled() {
-        if (!mPresenter.isCollapsing()) {
+    public void onLaunchAnimationCancelled(boolean isLaunchForActivity) {
+        if (mPresenter.isPresenterFullyCollapsed() && !mPresenter.isCollapsing()
+                && isLaunchForActivity) {
             onClosingFinished();
+        } else {
+            mShadeController.collapsePanel(true /* animate */);
         }
     }
 
@@ -2029,16 +2031,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         if (launchIsFullScreen) {
             instantCollapseNotificationPanel();
-        }
-    }
-
-    /** A launch animation timed out. */
-    public void onLaunchAnimationTimedOut(boolean isLaunchForActivity) {
-        if (mPresenter.isPresenterFullyCollapsed() && !mPresenter.isCollapsing()
-                && isLaunchForActivity) {
-            onClosingFinished();
-        } else {
-            mShadeController.collapsePanel(true /* animate */);
         }
     }
 
