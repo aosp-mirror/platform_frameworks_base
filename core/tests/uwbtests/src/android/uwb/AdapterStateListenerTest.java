@@ -19,7 +19,6 @@ package android.uwb;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -114,30 +113,6 @@ public class AdapterStateListenerTest {
     }
 
     @Test
-    public void testRegister_FirstRegisterFails() throws RemoteException {
-        AdapterStateListener adapterStateListener = new AdapterStateListener(mUwbAdapter);
-        AdapterStateCallback callback1 = mock(AdapterStateCallback.class);
-        AdapterStateCallback callback2 = mock(AdapterStateCallback.class);
-
-        // Throw a remote exception whenever first registering
-        doThrow(mThrowRemoteException).when(mUwbAdapter).registerAdapterStateCallbacks(any());
-
-        adapterStateListener.register(getExecutor(), callback1);
-        verify(mUwbAdapter, times(1)).registerAdapterStateCallbacks(any());
-
-        // No longer throw an exception, instead succeed
-        doAnswer(mRegisterSuccessAnswer).when(mUwbAdapter).registerAdapterStateCallbacks(any());
-
-        // Register a different callback
-        adapterStateListener.register(getExecutor(), callback2);
-        verify(mUwbAdapter, times(2)).registerAdapterStateCallbacks(any());
-
-        // Ensure first callback was invoked again
-        verifyCallbackStateChangedInvoked(callback1, 2);
-        verifyCallbackStateChangedInvoked(callback2, 1);
-    }
-
-    @Test
     public void testRegister_RegisterSameCallbackTwice() throws RemoteException {
         AdapterStateListener adapterStateListener = new AdapterStateListener(mUwbAdapter);
         AdapterStateCallback callback = mock(AdapterStateCallback.class);
@@ -159,13 +134,6 @@ public class AdapterStateListenerTest {
     public void testCallback_RunViaExecutor_Success() throws RemoteException {
         // Verify that the callbacks are invoked on the executor when successful
         doAnswer(mRegisterSuccessAnswer).when(mUwbAdapter).registerAdapterStateCallbacks(any());
-        runViaExecutor();
-    }
-
-    @Test
-    public void testCallback_RunViaExecutor_Failure() throws RemoteException {
-        // Verify that the callbacks are invoked on the executor when there is a remote exception
-        doThrow(mThrowRemoteException).when(mUwbAdapter).registerAdapterStateCallbacks(any());
         runViaExecutor();
     }
 
