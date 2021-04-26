@@ -2267,7 +2267,6 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (pipChanging) {
-            mDisplayContent.getPinnedTaskController().setPipWindowingModeChanging(true);
             // If the top activity is using fixed rotation, it should be changing from PiP to
             // fullscreen with display orientation change. Do not notify fullscreen task organizer
             // because the restoration of task surface and the transformation of activity surface
@@ -2276,29 +2275,15 @@ class Task extends WindowContainer<WindowContainer> {
             if (r != null && mDisplayContent.isFixedRotationLaunchingApp(r)) {
                 mForceNotOrganized = true;
             }
-        } else if (mForceNotOrganized) {
+        } else {
             // If the display orientation change is done, let the corresponding task organizer take
             // back the control of this task.
-            final ActivityRecord r = topRunningActivity();
-            if (r == null || !mDisplayContent.isFixedRotationLaunchingApp(r)) {
-                mForceNotOrganized = false;
-            }
+            mForceNotOrganized = false;
         }
-        try {
-            // We have 2 reasons why we need to report orientation change here.
-            // 1. In some cases (e.g. freeform -> fullscreen) we don't have other ways of reporting.
-            // 2. Report orientation as soon as possible so that the display can freeze earlier if
-            // the display orientation will be changed. Because the surface bounds of activity
-            // may have been set to fullscreen but the activity hasn't redrawn its content yet,
-            // the rotation animation needs to capture snapshot earlier to avoid animating from
-            // an intermediate state.
-            if (oldOrientation != getOrientation()) {
-                onDescendantOrientationChanged(this);
-            }
-        } finally {
-            if (pipChanging) {
-                mDisplayContent.getPinnedTaskController().setPipWindowingModeChanging(false);
-            }
+
+        // Report orientation change such as changing from freeform to fullscreen.
+        if (oldOrientation != getOrientation()) {
+            onDescendantOrientationChanged(this);
         }
 
         saveLaunchingStateIfNeeded();
@@ -2321,6 +2306,15 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
+        if (mDisplayContent != null
+                && mDisplayContent.mPinnedTaskController.isFreezingTaskConfig(this)) {
+            // It happens when animating from fullscreen to PiP with orientation change. Because
+            // the activity in this pinned task is in fullscreen windowing mode (see
+            // RootWindowContainer#moveActivityToPinnedRootTask) and the activity will be set to
+            // pinned mode after the animation is done, the configuration change by orientation
+            // change is just an intermediate state that should be ignored to avoid flickering.
+            return;
+        }
         // Calling Task#onConfigurationChanged() for leaf task since the ops in this method are
         // particularly for root tasks, like preventing bounds changes when inheriting certain
         // windowing mode.
@@ -4471,10 +4465,10 @@ class Task extends WindowContainer<WindowContainer> {
         pw.print(" mSupportsPictureInPicture="); pw.print(mSupportsPictureInPicture);
         pw.print(" isResizeable="); pw.println(isResizeable());
         pw.print(prefix); pw.print("lastActiveTime="); pw.print(lastActiveTime);
+        pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
         if (mForceNotOrganized) {
             pw.print(prefix); pw.println("mForceNotOrganized=true");
         }
-        pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
     }
 
     @Override
@@ -5436,6 +5430,13 @@ class Task extends WindowContainer<WindowContainer> {
             if (creating) {
                 // Nothing else to do if we don't have a window container yet. E.g. call from ctor.
                 return;
+            }
+
+            // From fullscreen to PiP.
+            if (topActivity != null && currentMode == WINDOWING_MODE_FULLSCREEN
+                    && windowingMode == WINDOWING_MODE_PINNED) {
+                mDisplayContent.mPinnedTaskController
+                        .deferOrientationChangeForEnteringPipFromFullScreenIfNeeded();
             }
         } finally {
             mAtmService.continueWindowLayout();
