@@ -43,6 +43,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.tests.net.R;
+import com.android.internal.util.test.FsUtil;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
@@ -71,7 +72,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     public void setUp() throws Exception {
         mTestProc = new File(InstrumentationRegistry.getContext().getFilesDir(), "proc");
         if (mTestProc.exists()) {
-            IoUtils.deleteContents(mTestProc);
+            FsUtil.deleteContents(mTestProc);
         }
 
         // The libandroid_servers which have the native method is not available to
@@ -87,7 +88,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
         mFactory = null;
 
         if (mTestProc.exists()) {
-            IoUtils.deleteContents(mTestProc);
+            FsUtil.deleteContents(mTestProc);
         }
     }
 
