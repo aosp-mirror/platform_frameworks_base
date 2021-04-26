@@ -1265,7 +1265,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mHaveFrame = true;
 
         final Task task = getTask();
-        final boolean isFullscreenAndFillsDisplay = !inMultiWindowMode() && matchesDisplayBounds();
+        final boolean isFullscreenAndFillsArea = !inMultiWindowMode() && matchesDisplayAreaBounds();
         final boolean windowsAreFloating = task != null && task.isFloating();
         final DisplayContent dc = getDisplayContent();
         final DisplayInfo displayInfo = getDisplayInfo();
@@ -1290,7 +1290,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 : isImeLayeringTarget();
         final boolean isImeTarget =
                 imeWin != null && imeWin.isVisibleNow() && isInputMethodAdjustTarget;
-        if (isFullscreenAndFillsDisplay || layoutInParentFrame()) {
+        if (isFullscreenAndFillsArea || layoutInParentFrame()) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             windowFrames.mContainingFrame.set(windowFrames.mParentFrame);
             layoutDisplayFrame = windowFrames.mDisplayFrame;
@@ -2272,19 +2272,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && mWindowFrames.mFrame.bottom >= displayInfo.appHeight;
     }
 
-    private boolean matchesDisplayBounds() {
-        final Rect displayBounds = mToken.getFixedRotationTransformDisplayBounds();
-        if (displayBounds != null) {
-            // If the rotated display bounds are available, the window bounds are also rotated.
-            return displayBounds.equals(getBounds());
-        }
-        return getDisplayContent().getBounds().equals(getBounds());
-    }
-
     boolean matchesDisplayAreaBounds() {
+        final Rect rotatedDisplayBounds = mToken.getFixedRotationTransformDisplayBounds();
+        if (rotatedDisplayBounds != null) {
+            // If the rotated display bounds are available, the window bounds are also rotated.
+            return rotatedDisplayBounds.equals(getBounds());
+        }
         final DisplayArea displayArea = getDisplayArea();
         if (displayArea == null) {
-            return matchesDisplayBounds();
+            return getDisplayContent().getBounds().equals(getBounds());
         }
         return displayArea.getBounds().equals(getBounds());
     }
