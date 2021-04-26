@@ -115,7 +115,7 @@ final class RippleShader extends RuntimeShader {
             + "    float fade = min(fadeIn, 1. - fadeOutRipple);\n"
             + "    vec4 circle = in_color * (softCircle(p, center, in_maxRadius "
             + "      * scaleIn, 0.2) * fade);\n"
-            + "    float mask = in_hasMask == 1. ? sample(in_shader).a > 0. ? 1. : 0. : 1.;\n"
+            + "    float mask = in_hasMask == 1. ? sample(in_shader, p).a > 0. ? 1. : 0. : 1.;\n"
             + "    return mix(circle, in_sparkleColor, sparkle) * mask;\n"
             + "}";
     private static final String SHADER = SHADER_UNIFORMS + SHADER_LIB + SHADER_MAIN;
