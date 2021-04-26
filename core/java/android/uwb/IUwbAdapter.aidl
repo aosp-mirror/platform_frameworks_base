@@ -158,6 +158,18 @@ interface IUwbAdapter {
      */
     void setEnabled(boolean enabled);
 
+   /**
+    * Returns the current enabled/disabled UWB state.
+    *
+    * Possible values are:
+    * IUwbAdapterState#STATE_DISABLED
+    * IUwbAdapterState#STATE_ENABLED_ACTIVE
+    * IUwbAdapterState#STATE_ENABLED_INACTIVE
+    *
+    * @return value representing enabled/disabled UWB state.
+    */
+   int getAdapterState();
+
   /**
    * The maximum allowed time to open a ranging session.
    */
