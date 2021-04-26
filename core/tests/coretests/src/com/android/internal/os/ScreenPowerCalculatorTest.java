@@ -84,7 +84,7 @@ public class ScreenPowerCalculatorTest {
 
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_SCREEN);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isEqualTo(80 * MINUTE_IN_MS);
 
         // 600000000 uAs * (1 mA / 1000 uA) * (1 h / 3600 s)  = 166.66666 mAh
@@ -98,7 +98,7 @@ public class ScreenPowerCalculatorTest {
                 .isWithin(PRECISION).of(166.66666);
 
         UidBatteryConsumer uid1 = mStatsRule.getUidBatteryConsumer(APP_UID1);
-        assertThat(uid1.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
+        assertThat(uid1.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isEqualTo(20 * MINUTE_IN_MS);
 
         // Uid1 took all of the foreground time during the first Display update.
@@ -110,7 +110,7 @@ public class ScreenPowerCalculatorTest {
                 .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
 
         UidBatteryConsumer uid2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
-        assertThat(uid2.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
+        assertThat(uid2.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isEqualTo(60 * MINUTE_IN_MS);
 
         // Uid2 ran for 40 minutes out of the total 45 min of foreground time during the second
@@ -153,7 +153,7 @@ public class ScreenPowerCalculatorTest {
 
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_SCREEN);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isEqualTo(80 * MINUTE_IN_MS);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isWithin(PRECISION).of(92.0);
@@ -165,7 +165,7 @@ public class ScreenPowerCalculatorTest {
                 .isWithin(PRECISION).of(92.0);
 
         UidBatteryConsumer uid1 = mStatsRule.getUidBatteryConsumer(APP_UID1);
-        assertThat(uid1.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
+        assertThat(uid1.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isEqualTo(20 * MINUTE_IN_MS);
 
         // Uid1 took 20 out of the total of 80 min of foreground activity
@@ -176,7 +176,7 @@ public class ScreenPowerCalculatorTest {
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
 
         UidBatteryConsumer uid2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
-        assertThat(uid2.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
+        assertThat(uid2.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isEqualTo(60 * MINUTE_IN_MS);
 
         // Uid2 took 60 out of the total of 80 min of foreground activity

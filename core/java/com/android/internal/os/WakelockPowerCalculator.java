@@ -57,7 +57,7 @@ public class WakelockPowerCalculator extends PowerCalculator {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
             calculateApp(result, app.getBatteryStatsUid(), rawRealtimeUs,
                     BatteryStats.STATS_SINCE_CHARGED);
-            app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WAKELOCK, result.durationMs)
+            app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WAKELOCK, result.durationMs)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK, result.powerMah);
             totalAppDurationMs += result.durationMs;
 
@@ -74,7 +74,7 @@ public class WakelockPowerCalculator extends PowerCalculator {
         if (osBatteryConsumer != null) {
             calculateRemaining(result, batteryStats, rawRealtimeUs, rawUptimeUs,
                     BatteryStats.STATS_SINCE_CHARGED, osPowerMah, osDurationMs, totalAppDurationMs);
-            osBatteryConsumer.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WAKELOCK,
+            osBatteryConsumer.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WAKELOCK,
                     result.durationMs)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK, result.powerMah);
         }

@@ -100,7 +100,7 @@ public class WifiPowerCalculator extends PowerCalculator {
             totalAppDurationMs += powerDurationAndTraffic.durationMs;
             totalAppPowerMah += powerDurationAndTraffic.powerMah;
 
-            app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI,
+            app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI,
                     powerDurationAndTraffic.durationMs);
             app.setConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI,
                     powerDurationAndTraffic.powerMah, powerModel);
@@ -118,7 +118,7 @@ public class WifiPowerCalculator extends PowerCalculator {
                 totalAppDurationMs, totalAppPowerMah, consumptionUC);
 
         systemBatteryConsumerBuilder
-                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI,
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI,
                         powerDurationAndTraffic.durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI,
                         totalAppPowerMah + powerDurationAndTraffic.powerMah, powerModel)
