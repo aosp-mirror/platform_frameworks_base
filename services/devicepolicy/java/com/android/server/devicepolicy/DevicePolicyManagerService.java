@@ -8883,17 +8883,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public ComponentName getProfileOwnerAsUser(int userHandle) {
+    public ComponentName getProfileOwnerAsUser(int userId) {
         if (!mHasFeature) {
             return null;
         }
-        Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
+        Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userHandle));
+        CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
-            return mOwners.getProfileOwnerComponent(userHandle);
+            return mOwners.getProfileOwnerComponent(userId);
         }
     }
 
@@ -9345,19 +9345,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public List<UserHandle> listForegroundAffiliatedUsers() {
         checkIsDeviceOwner(getCallerIdentity());
 
-        int userId = mInjector.binderWithCleanCallingIdentity(() -> getCurrentForegroundUserId());
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            int userId = getCurrentForegroundUserId();
+            boolean isAffiliated;
+            synchronized (getLockObject()) {
+                isAffiliated = isUserAffiliatedWithDeviceLocked(userId);
+            }
 
-        boolean isAffiliated;
-        synchronized (getLockObject()) {
-            isAffiliated = isUserAffiliatedWithDeviceLocked(userId);
-        }
+            if (!isAffiliated) return Collections.emptyList();
 
-        if (!isAffiliated) return Collections.emptyList();
+            List<UserHandle> users = new ArrayList<>(1);
+            users.add(UserHandle.of(userId));
 
-        List<UserHandle> users = new ArrayList<>(1);
-        users.add(UserHandle.of(userId));
-
-        return users;
+            return users;
+        });
     }
 
     protected int getProfileParentId(int userHandle) {
@@ -14111,7 +14112,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean isUserAffiliatedWithDeviceLocked(int userId) {
+    private boolean isUserAffiliatedWithDeviceLocked(@UserIdInt int userId) {
         if (!mOwners.hasDeviceOwner()) {
             return false;
         }
