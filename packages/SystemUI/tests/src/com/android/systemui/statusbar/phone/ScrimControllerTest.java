@@ -553,7 +553,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
                 mScrimBehind, false,
-                mScrimForBubble, false
+                mScrimForBubble, true
         ));
 
         // Front scrim should be transparent
