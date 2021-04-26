@@ -42,6 +42,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -73,10 +74,12 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
     private static final String GAME_DESCRIPTION = "Playing a game!";
     private static final CharSequence MISSED_CALL = "Custom missed call message";
     private static final String NAME = "username";
+    private static final UserHandle USER = new UserHandle(0);
     private static final PeopleSpaceTile PERSON_TILE_WITHOUT_NOTIFICATION =
             new PeopleSpaceTile
                     .Builder(SHORTCUT_ID_1, NAME, ICON, new Intent())
                     .setLastInteractionTimestamp(0L)
+                    .setUserHandle(USER)
                     .build();
     private static final PeopleSpaceTile PERSON_TILE =
             new PeopleSpaceTile
@@ -85,6 +88,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                     .setNotificationKey(NOTIFICATION_KEY)
                     .setNotificationContent(NOTIFICATION_CONTENT)
                     .setNotificationDataUri(URI)
+                    .setUserHandle(USER)
                     .build();
     private static final ConversationStatus GAME_STATUS =
             new ConversationStatus
