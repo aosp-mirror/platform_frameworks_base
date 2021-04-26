@@ -146,4 +146,14 @@ public class FalsingManagerFake implements FalsingManager {
     public void removeFalsingBeliefListener(FalsingBeliefListener listener) {
         mFalsingBeliefListeners.remove(listener);
     }
+
+    @Override
+    public void addTapListener(FalsingTapListener falsingTapListener) {
+
+    }
+
+    @Override
+    public void removeTapListener(FalsingTapListener falsingTapListener) {
+
+    }
 }
