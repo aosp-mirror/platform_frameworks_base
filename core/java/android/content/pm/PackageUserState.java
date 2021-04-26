@@ -81,6 +81,7 @@ public class PackageUserState {
     public int installReason;
     public @PackageManager.UninstallReason int uninstallReason;
     public String harmfulAppWarning;
+    public String splashScreenTheme;
 
     public ArraySet<String> disabledComponents;
     public ArraySet<String> enabledComponents;
@@ -130,6 +131,7 @@ public class PackageUserState {
         if (o.componentLabelIconOverrideMap != null) {
             this.componentLabelIconOverrideMap = new ArrayMap<>(o.componentLabelIconOverrideMap);
         }
+        splashScreenTheme = o.splashScreenTheme;
     }
 
     @Nullable
@@ -241,6 +243,7 @@ public class PackageUserState {
 
         return componentLabelIconOverrideMap.get(componentName);
     }
+
 
     /**
      * Test if this package is installed.
@@ -479,7 +482,11 @@ public class PackageUserState {
         }
         if (harmfulAppWarning == null && oldState.harmfulAppWarning != null
                 || (harmfulAppWarning != null
-                        && !harmfulAppWarning.equals(oldState.harmfulAppWarning))) {
+                && !harmfulAppWarning.equals(oldState.harmfulAppWarning))) {
+            return false;
+        }
+
+        if (!Objects.equals(splashScreenTheme, oldState.splashScreenTheme)) {
             return false;
         }
         return true;
@@ -505,6 +512,7 @@ public class PackageUserState {
         hashCode = 31 * hashCode + Objects.hashCode(disabledComponents);
         hashCode = 31 * hashCode + Objects.hashCode(enabledComponents);
         hashCode = 31 * hashCode + Objects.hashCode(harmfulAppWarning);
+        hashCode = 31 * hashCode + Objects.hashCode(splashScreenTheme);
         return hashCode;
     }
 
