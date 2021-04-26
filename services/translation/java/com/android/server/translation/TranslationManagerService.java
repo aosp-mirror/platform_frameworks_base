@@ -170,6 +170,28 @@ public final class TranslationManagerService
         }
 
         @Override
+        public void registerTranslationCapabilityCallback(IRemoteCallback callback, int userId) {
+            TranslationManagerServiceImpl service;
+            synchronized (mLock) {
+                service = getServiceForUserLocked(userId);
+            }
+            if (service != null) {
+                service.registerTranslationCapabilityCallback(callback, Binder.getCallingUid());
+            }
+        }
+
+        @Override
+        public void unregisterTranslationCapabilityCallback(IRemoteCallback callback, int userId) {
+            TranslationManagerServiceImpl service;
+            synchronized (mLock) {
+                service = getServiceForUserLocked(userId);
+            }
+            if (service != null) {
+                service.unregisterTranslationCapabilityCallback(callback);
+            }
+        }
+
+        @Override
         public void onSessionCreated(TranslationContext translationContext,
                 int sessionId, IResultReceiver receiver, int userId) throws RemoteException {
             synchronized (mLock) {

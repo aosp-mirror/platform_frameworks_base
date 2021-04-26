@@ -142,6 +142,15 @@ final class TranslationManagerServiceImpl extends
         }
     }
 
+    public void registerTranslationCapabilityCallback(IRemoteCallback callback, int sourceUid) {
+        mTranslationCapabilityCallbacks.register(callback, sourceUid);
+        ensureRemoteServiceLocked();
+    }
+
+    public void unregisterTranslationCapabilityCallback(IRemoteCallback callback) {
+        mTranslationCapabilityCallbacks.unregister(callback);
+    }
+
     @GuardedBy("mLock")
     void onSessionCreatedLocked(@NonNull TranslationContext translationContext, int sessionId,
             IResultReceiver resultReceiver) {
