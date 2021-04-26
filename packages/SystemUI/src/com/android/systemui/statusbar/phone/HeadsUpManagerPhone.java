@@ -301,7 +301,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    //  HeadsUpManager public methods overrides:
+    //  HeadsUpManager public methods overrides and overloads:
 
     @Override
     public boolean isTrackingHeadsUp() {
@@ -316,6 +316,18 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
     public void addSwipedOutNotification(@NonNull String key) {
         mSwipedOutKeys.add(key);
+    }
+
+    public boolean removeNotification(@NonNull String key, boolean releaseImmediately,
+            boolean animate) {
+        if (animate) {
+            return removeNotification(key, releaseImmediately);
+        } else {
+            mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
+            boolean removed = removeNotification(key, releaseImmediately);
+            mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(true);
+            return removed;
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

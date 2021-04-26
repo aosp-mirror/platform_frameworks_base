@@ -8,6 +8,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
+import android.os.Looper
 import android.os.RemoteException
 import android.util.MathUtils
 import android.view.IRemoteAnimationFinishedCallback
@@ -73,16 +74,20 @@ class ActivityLaunchAnimator(context: Context) {
      * in [Controller.onLaunchAnimationProgress]. No animation will start if there is no window
      * opening.
      *
-     * If [controller] is null, then the intent will be started and no animation will run.
+     * If [controller] is null or [animate] is false, then the intent will be started and no
+     * animation will run.
      *
      * This method will throw any exception thrown by [intentStarter].
      */
+    @JvmOverloads
     inline fun startIntentWithAnimation(
         controller: Controller?,
+        animate: Boolean = true,
         intentStarter: (RemoteAnimationAdapter?) -> Int
     ) {
-        if (controller == null) {
+        if (controller == null || !animate) {
             intentStarter(null)
+            controller?.callOnIntentStartedOnMainThread(willAnimate = false)
             return
         }
 
@@ -95,12 +100,23 @@ class ActivityLaunchAnimator(context: Context) {
         val launchResult = intentStarter(animationAdapter)
         val willAnimate = launchResult == ActivityManager.START_TASK_TO_FRONT ||
             launchResult == ActivityManager.START_SUCCESS
-        runner.context.mainExecutor.execute { controller.onIntentStarted(willAnimate) }
+        controller.callOnIntentStartedOnMainThread(willAnimate)
 
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
             runner.postTimeout()
+        }
+    }
+
+    @PublishedApi
+    internal fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            this.getRootView().context.mainExecutor.execute {
+                this.onIntentStarted(willAnimate)
+            }
+        } else {
+            this.onIntentStarted(willAnimate)
         }
     }
 
@@ -110,11 +126,13 @@ class ActivityLaunchAnimator(context: Context) {
      * for Java caller starting a [PendingIntent].
      */
     @Throws(PendingIntent.CanceledException::class)
+    @JvmOverloads
     fun startPendingIntentWithAnimation(
         controller: Controller?,
+        animate: Boolean = true,
         intentStarter: PendingIntentStarter
     ) {
-        startIntentWithAnimation(controller) { intentStarter.startPendingIntent(it) }
+        startIntentWithAnimation(controller, animate) { intentStarter.startPendingIntent(it) }
     }
 
     /** Create a new animation [Runner] controlled by [controller]. */
