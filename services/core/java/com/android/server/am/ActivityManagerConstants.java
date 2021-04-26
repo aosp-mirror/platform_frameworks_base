@@ -97,6 +97,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_BOOT_TIME_TEMP_ALLOWLIST_DURATION = "boot_time_temp_allowlist_duration";
     static final String KEY_FG_TO_BG_FGS_GRACE_DURATION = "fg_to_bg_fgs_grace_duration";
     static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
+    static final String KEY_FGS_ATOM_SAMPLE_RATE = "fgs_atom_sample_rate";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -137,6 +138,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final int DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION = 10 * 1000;
     private static final long DEFAULT_FG_TO_BG_FGS_GRACE_DURATION = 5 * 1000;
     private static final int DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS = 10 * 1000;
+    private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
 
     // Flag stored in the DeviceConfig API.
     /**
@@ -430,6 +432,13 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile long mFgsStartForegroundTimeoutMs = DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS;
 
+    /**
+     * Sample rate for the FGS westworld atom.
+     *
+     * If the value is 0.1, 10% of the installed packages would be sampled.
+     */
+    volatile float mDefaultFgsAtomSampleRate = DEFAULT_FGS_ATOM_SAMPLE_RATE;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -628,6 +637,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_FGS_START_FOREGROUND_TIMEOUT:
                                 updateFgsStartForegroundTimeout();
+                                break;
+                            case KEY_FGS_ATOM_SAMPLE_RATE:
+                                updateFgsAtomSamplePercent();
                                 break;
                             default:
                                 break;
@@ -933,6 +945,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS);
     }
 
+    private void updateFgsAtomSamplePercent() {
+        mDefaultFgsAtomSampleRate = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_ATOM_SAMPLE_RATE,
+                DEFAULT_FGS_ATOM_SAMPLE_RATE);
+    }
+
     private void updateImperceptibleKillExemptions() {
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.clear();
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(mDefaultImperceptibleKillExemptPackages);
@@ -1145,6 +1164,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(mFlagFgsStartRestrictionEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_CHECK_CALLER_TARGET_SDK);
         pw.print("="); pw.println(mFgsStartRestrictionCheckCallerTargetSdk);
+        pw.print("  "); pw.print(KEY_FGS_ATOM_SAMPLE_RATE);
+        pw.print("="); pw.println(mDefaultFgsAtomSampleRate);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
