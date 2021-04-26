@@ -349,7 +349,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         private final HotwordDetectedResult mHotwordDetectedResult;
         private final ParcelFileDescriptor mAudioStream;
 
-        private EventPayload(boolean triggerAvailable, boolean captureAvailable,
+        EventPayload(boolean triggerAvailable, boolean captureAvailable,
                 AudioFormat audioFormat, int captureSession, byte[] data) {
             this(triggerAvailable, captureAvailable, audioFormat, captureSession, data, null,
                     null);
@@ -534,6 +534,15 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
          * @param status Info about initialization state of {@link HotwordDetectionService}.
          */
         public void onHotwordDetectionServiceInitialized(@InitializationStatus int status) {
+        }
+
+        /**
+         * Called with the {@link HotwordDetectionService} is restarted.
+         *
+         * Clients are expected to call {@link HotwordDetector#updateState} to share the state with
+         * the newly created service.
+         */
+        public void onHotwordDetectionServiceRestarted() {
         }
     }
 

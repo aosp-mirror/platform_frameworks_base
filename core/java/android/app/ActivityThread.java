@@ -52,6 +52,7 @@ import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.TransactionExecutor;
 import android.app.servertransaction.TransactionExecutorHelper;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -2296,6 +2297,12 @@ public final class ActivityThread extends ClientTransactionHandler
         ActivityThread am = currentActivityThread();
         return (am != null && am.getApplication() != null)
                 ? am.getApplication().getOpPackageName() : null;
+    }
+
+    public static AttributionSource currentAttributionSource() {
+        ActivityThread am = currentActivityThread();
+        return (am != null && am.getApplication() != null)
+                ? am.getApplication().getAttributionSource() : null;
     }
 
     @UnsupportedAppUsage
@@ -5961,20 +5968,6 @@ public final class ActivityThread extends ClientTransactionHandler
             // Update all affected Resources objects to use new ResourcesImpl
             mResourcesManager.applyNewResourceDirsLocked(ai, oldResDirs);
         }
-
-        ApplicationPackageManager.configurationChanged();
-
-        // Trigger a regular Configuration change event, only with a different assetsSeq number
-        // so that we actually call through to all components.
-        // TODO(adamlesinski): Change this to make use of ActivityManager's upcoming ability to
-        // store configurations per-process.
-        final Configuration config = mConfigurationController.getConfiguration();
-        Configuration newConfig = new Configuration();
-        newConfig.assetsSeq = (config != null ? config.assetsSeq : 0) + 1;
-        mConfigurationController.handleConfigurationChanged(newConfig, null /* compat */);
-
-        // Preserve windows to avoid black flickers when overlays change.
-        relaunchAllActivities(true /* preserveWindows */, "handleApplicationInfoChanged");
     }
 
     /**

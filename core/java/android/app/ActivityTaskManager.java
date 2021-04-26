@@ -400,8 +400,18 @@ public class ActivityTaskManager {
      */
     public List<ActivityManager.RunningTaskInfo> getTasks(
             int maxNum, boolean filterOnlyVisibleRecents) {
+        return getTasks(maxNum, filterOnlyVisibleRecents, false /* keepIntentExtra */);
+    }
+
+    /**
+     * @return List of running tasks that can be filtered by visibility in recents and keep intent
+     * extra.
+     * @hide
+     */
+    public List<ActivityManager.RunningTaskInfo> getTasks(
+            int maxNum, boolean filterOnlyVisibleRecents, boolean keepIntentExtra) {
         try {
-            return getService().getTasks(maxNum, filterOnlyVisibleRecents);
+            return getService().getTasks(maxNum, filterOnlyVisibleRecents, keepIntentExtra);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

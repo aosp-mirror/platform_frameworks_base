@@ -40,7 +40,23 @@ oneway interface IRemoteTransition {
     /**
      * Starts a transition animation. Once complete, the implementation should call
      * `finishCallback`.
+     *
+     * @param token An identifier for the transition that should be animated.
      */
-    void startAnimation(in TransitionInfo info, in SurfaceControl.Transaction t,
+    void startAnimation(in IBinder token, in TransitionInfo info, in SurfaceControl.Transaction t,
+            in IRemoteTransitionFinishedCallback finishCallback);
+
+    /**
+     * Attempts to merge a transition animation into the animation that is currently
+     * being played by this remote. If merge is not possible/supported, this should be a no-op.
+     * If it *is* merged, the implementation should call `finishCallback` immediately.
+     *
+     * @param transition An identifier for the transition that wants to be merged.
+     * @param mergeTarget The transition that is currently being animated by this remote.
+     *                    If it can be merged, call `finishCallback`; otherwise, do
+     *                    nothing.
+     */
+    void mergeAnimation(in IBinder transition, in TransitionInfo info,
+            in SurfaceControl.Transaction t, in IBinder mergeTarget,
             in IRemoteTransitionFinishedCallback finishCallback);
 }

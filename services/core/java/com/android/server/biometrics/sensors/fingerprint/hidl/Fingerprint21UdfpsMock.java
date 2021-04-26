@@ -402,7 +402,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             // internal preemption logic is not run.
             mFingerprint21.scheduleAuthenticate(mFingerprint21.mSensorProperties.sensorId, token,
                     operationId, user, cookie, listener, opPackageName, restricted, statsClient,
-                    isKeyguard);
+                    isKeyguard, null /* fingerprintStateCallback */);
         }
     }
 

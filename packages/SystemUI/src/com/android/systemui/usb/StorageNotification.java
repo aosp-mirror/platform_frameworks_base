@@ -299,7 +299,7 @@ public class StorageNotification extends SystemUI {
         // but cause crash when call notifyAsUser(). Here we return directly for USER_NULL, and
         // leave all notifications belong to removed user to NotificationManagerService, the latter
         // will remove all notifications of the removed user when handles user stopped broadcast.
-        if (isAutomotive() && vol.getMountUserId() == UserHandle.USER_NULL) {
+        if (vol.getMountUserId() == UserHandle.USER_NULL) {
             Log.d(TAG, "Ignore public volume state change event of removed user");
             return;
         }

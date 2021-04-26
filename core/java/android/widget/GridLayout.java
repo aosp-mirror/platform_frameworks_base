@@ -46,6 +46,7 @@ import android.util.LogPrinter;
 import android.util.Pair;
 import android.util.Printer;
 import android.view.Gravity;
+import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inspector.InspectableProperty;
@@ -412,6 +413,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_rowCount
      */
+    @RemotableViewMethod
     public void setRowCount(int rowCount) {
         mVerticalAxis.setCount(rowCount);
         invalidateStructure();
@@ -446,6 +448,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_columnCount
      */
+    @RemotableViewMethod
     public void setColumnCount(int columnCount) {
         mHorizontalAxis.setCount(columnCount);
         invalidateStructure();
@@ -534,6 +537,7 @@ public class GridLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#GridLayout_alignmentMode
      */
+    @RemotableViewMethod
     public void setAlignmentMode(@AlignmentMode int alignmentMode) {
         this.mAlignmentMode = alignmentMode;
         requestLayout();

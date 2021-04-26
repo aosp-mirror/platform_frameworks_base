@@ -57,7 +57,8 @@ public class ImsRegistrationImplBase {
                     REGISTRATION_TECH_NONE,
                     REGISTRATION_TECH_LTE,
                     REGISTRATION_TECH_IWLAN,
-                    REGISTRATION_TECH_CROSS_SIM
+                    REGISTRATION_TECH_CROSS_SIM,
+                    REGISTRATION_TECH_NR
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsRegistrationTech {}
@@ -66,18 +67,23 @@ public class ImsRegistrationImplBase {
      */
     public static final int REGISTRATION_TECH_NONE = -1;
     /**
-     * IMS is registered to IMS via LTE.
+     * This ImsService is registered to IMS via LTE.
      */
     public static final int REGISTRATION_TECH_LTE = 0;
     /**
-     * IMS is registered to IMS via IWLAN.
+     * This ImsService is registered to IMS via IWLAN.
      */
     public static final int REGISTRATION_TECH_IWLAN = 1;
 
     /**
-     * IMS is registered to IMS via internet over second subscription.
+     * This ImsService is registered to IMS via internet over second subscription.
      */
     public static final int REGISTRATION_TECH_CROSS_SIM = 2;
+
+    /**
+     * This ImsService is registered to IMS via NR.
+     */
+    public static final int REGISTRATION_TECH_NR = 3;
 
     // Registration states, used to notify new ImsRegistrationImplBase#Callbacks of the current
     // state.

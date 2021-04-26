@@ -53,7 +53,7 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
         builder.getOrCreateSystemBatteryConsumerBuilder(
                         SystemBatteryConsumer.DRAIN_TYPE_AMBIENT_DISPLAY)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, powerMah, powerModel)
-                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN, durationMs);
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN, durationMs);
     }
 
     /**

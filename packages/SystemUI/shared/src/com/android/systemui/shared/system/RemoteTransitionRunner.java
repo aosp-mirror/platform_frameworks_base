@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.system;
 
+import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 
@@ -25,6 +26,17 @@ public interface RemoteTransitionRunner {
      * Starts a transition animation. Once complete, the implementation should call
      * `finishCallback`.
      */
-    void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+    void startAnimation(IBinder transition, TransitionInfo info, SurfaceControl.Transaction t,
             Runnable finishCallback);
+
+    /**
+     * Attempts to merge a transition into the currently-running animation. If merge is not
+     * possible/supported, this should do nothing. Otherwise, the implementation should call
+     * `finishCallback` immediately to indicate that it merged the transition.
+     *
+     * @param transition The transition that wants to be merged into the running animation.
+     * @param mergeTarget The transition to merge into (that this runner is currently animating).
+     */
+    default void mergeAnimation(IBinder transition, TransitionInfo info,
+            SurfaceControl.Transaction t, IBinder mergeTarget, Runnable finishCallback) { }
 }

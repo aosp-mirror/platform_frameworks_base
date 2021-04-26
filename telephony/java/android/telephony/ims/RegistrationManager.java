@@ -83,6 +83,8 @@ public interface RegistrationManager {
                         AccessNetworkConstants.TRANSPORT_TYPE_INVALID);
                 put(ImsRegistrationImplBase.REGISTRATION_TECH_LTE,
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+                put(ImsRegistrationImplBase.REGISTRATION_TECH_NR,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
                 put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
                         AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
                 /* As the cross sim will be using ePDG tunnel over internet, it behaves

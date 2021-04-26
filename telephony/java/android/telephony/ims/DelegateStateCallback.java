@@ -79,8 +79,28 @@ public interface DelegateStateCallback {
      * messages routing should be delayed until the {@link SipDelegate} sends the IMS configuration
      * change event to reduce conditions where the remote application is using a stale IMS
      * configuration.
+     * @deprecated This is being removed from API surface, Use
+     * {@link #onConfigurationChanged(SipDelegateConfiguration)} instead.
      */
+    @Deprecated
     void onImsConfigurationChanged(@NonNull SipDelegateImsConfiguration config);
+
+    /**
+     * Call to notify the remote application of a configuration change associated with this
+     * {@link SipDelegate}.
+     * <p>
+     * The remote application will not be able to proceed sending SIP messages until after this
+     * configuration is sent the first time, so this configuration should be sent as soon as the
+     * {@link SipDelegate} has access to these configuration parameters.
+     * <p>
+     * Incoming SIP messages should not be routed to the remote application until AFTER this
+     * configuration change is sent to ensure that the remote application can respond correctly.
+     * Similarly, if there is an event that triggers the IMS configuration to change, incoming SIP
+     * messages routing should be delayed until the {@link SipDelegate} sends the IMS configuration
+     * change event to reduce conditions where the remote application is using a stale IMS
+     * configuration.
+     */
+    void onConfigurationChanged(@NonNull SipDelegateConfiguration config);
 
     /**
      * Call to notify the remote application that the {@link SipDelegate} has modified the IMS

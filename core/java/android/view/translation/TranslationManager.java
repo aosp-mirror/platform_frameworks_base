@@ -16,13 +16,17 @@
 
 package android.view.translation;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.WorkerThread;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -38,11 +42,14 @@ import com.android.internal.util.SyncResultReceiver;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * The {@link TranslationManager} class provides ways for apps to integrate and use the
@@ -77,10 +84,13 @@ public final class TranslationManager {
      */
     public static final String EXTRA_CAPABILITIES = "translation_capabilities";
 
-    // TODO: implement update listeners and propagate updates.
     @GuardedBy("mLock")
     private final ArrayMap<Pair<Integer, Integer>, ArrayList<PendingIntent>>
             mTranslationCapabilityUpdateListeners = new ArrayMap<>();
+
+    @GuardedBy("mLock")
+    private final Map<Consumer<TranslationCapability>, IRemoteCallback> mCapabilityCallbacks =
+            new ArrayMap<>();
 
     private static final Random ID_GENERATOR = new Random();
     private final Object mLock = new Object();
@@ -228,16 +238,42 @@ public final class TranslationManager {
     }
 
     /**
-     * Registers a {@link PendingIntent} to listen for updates on states of on-device
+     * Adds a {@link TranslationCapability} Consumer to listen for updates on states of on-device
      * {@link TranslationCapability}s.
      *
-     * <p>IMPORTANT: the pending intent must be called to start a service, or a broadcast if it is
-     * an explicit intent.</p>
-     *
-     * @param sourceFormat data format for the input data to be translated.
-     * @param targetFormat data format for the expected translated output data.
-     * @param pendingIntent the pending intent to invoke when updates are received.
+     * @param capabilityListener a {@link TranslationCapability} Consumer to receive the updated
+     * {@link TranslationCapability} from the on-device translation service.
      */
+    public void addOnDeviceTranslationCapabilityUpdateListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<TranslationCapability> capabilityListener) {
+        Objects.requireNonNull(executor, "executor should not be null");
+        Objects.requireNonNull(capabilityListener, "capability listener should not be null");
+
+        synchronized (mLock) {
+            if (mCapabilityCallbacks.containsKey(capabilityListener)) {
+                Log.w(TAG, "addOnDeviceTranslationCapabilityUpdateListener: the listener for "
+                        + capabilityListener + " already registered; ignoring.");
+                return;
+            }
+            final IRemoteCallback remoteCallback = new TranslationCapabilityRemoteCallback(executor,
+                    capabilityListener);
+            try {
+                mService.registerTranslationCapabilityCallback(remoteCallback,
+                        mContext.getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mCapabilityCallbacks.put(capabilityListener, remoteCallback);
+        }
+    }
+
+
+    /**
+     * @deprecated Use {@link TranslationManager#addOnDeviceTranslationCapabilityUpdateListener(
+     * java.util.concurrent.Executor, java.util.function.Consumer)}
+     */
+    @Deprecated
     public void addOnDeviceTranslationCapabilityUpdateListener(
             @TranslationSpec.DataFormat int sourceFormat,
             @TranslationSpec.DataFormat int targetFormat,
@@ -252,8 +288,8 @@ public final class TranslationManager {
     }
 
     /**
-     * @deprecated Use {@link #addOnDeviceTranslationCapabilityUpdateListener(int, int,
-     *  PendingIntent)}
+     * @deprecated Use {@link TranslationManager#addOnDeviceTranslationCapabilityUpdateListener(
+     * java.util.concurrent.Executor, java.util.function.Consumer)}
      */
     @Deprecated
     public void addTranslationCapabilityUpdateListener(
@@ -264,13 +300,37 @@ public final class TranslationManager {
     }
 
     /**
-     * Unregisters a {@link PendingIntent} to listen for updates on states of on-device
-     * {@link TranslationCapability}s.
+     * Removes a {@link TranslationCapability} Consumer to listen for updates on states of
+     * on-device {@link TranslationCapability}s.
      *
-     * @param sourceFormat data format for the input data to be translated.
-     * @param targetFormat data format for the expected translated output data.
-     * @param pendingIntent the pending intent to unregister
+     * @param capabilityListener the {@link TranslationCapability} Consumer to unregister
      */
+    public void removeOnDeviceTranslationCapabilityUpdateListener(
+            @NonNull Consumer<TranslationCapability> capabilityListener) {
+        Objects.requireNonNull(capabilityListener, "capability callback should not be null");
+
+        synchronized (mLock) {
+            final IRemoteCallback remoteCallback = mCapabilityCallbacks.get(capabilityListener);
+            if (remoteCallback == null) {
+                Log.w(TAG, "removeOnDeviceTranslationCapabilityUpdateListener: the capability "
+                        + "listener not found; ignoring.");
+                return;
+            }
+            try {
+                mService.unregisterTranslationCapabilityCallback(remoteCallback,
+                        mContext.getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mCapabilityCallbacks.remove(capabilityListener);
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #removeOnDeviceTranslationCapabilityUpdateListener(
+     * java.util.function.Consumer)}.
+     */
+    @Deprecated
     public void removeOnDeviceTranslationCapabilityUpdateListener(
             @TranslationSpec.DataFormat int sourceFormat,
             @TranslationSpec.DataFormat int targetFormat,
@@ -296,8 +356,8 @@ public final class TranslationManager {
     }
 
     /**
-     * @deprecated Use {@link #removeOnDeviceTranslationCapabilityUpdateListener(int, int,
-     *  PendingIntent)}
+     * @deprecated Use {@link #removeOnDeviceTranslationCapabilityUpdateListener(
+     * java.util.function.Consumer)}.
      */
     @Deprecated
     public void removeTranslationCapabilityUpdateListener(
@@ -307,8 +367,6 @@ public final class TranslationManager {
         removeOnDeviceTranslationCapabilityUpdateListener(
                 sourceFormat, targetFormat, pendingIntent);
     }
-
-    //TODO: Add method to propagate updates to mTCapabilityUpdateListeners
 
     /**
      * Returns an immutable PendingIntent which can be used to launch an activity to view/edit
@@ -358,6 +416,30 @@ public final class TranslationManager {
     AtomicInteger getAvailableRequestId() {
         synchronized (mLock) {
             return sAvailableRequestId;
+        }
+    }
+
+    private static class TranslationCapabilityRemoteCallback extends
+            IRemoteCallback.Stub {
+        private final Executor mExecutor;
+        private final Consumer<TranslationCapability> mListener;
+
+        TranslationCapabilityRemoteCallback(Executor executor,
+                Consumer<TranslationCapability> listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void sendResult(Bundle bundle) {
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> onTranslationCapabilityUpdate(bundle)));
+        }
+
+        private void onTranslationCapabilityUpdate(Bundle bundle) {
+            TranslationCapability capability =
+                    (TranslationCapability) bundle.getParcelable(EXTRA_CAPABILITIES);
+            mListener.accept(capability);
         }
     }
 }

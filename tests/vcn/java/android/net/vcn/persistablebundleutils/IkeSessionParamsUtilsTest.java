@@ -52,7 +52,8 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class IkeSessionParamsUtilsTest {
-    private static IkeSessionParams.Builder createBuilderMinimum() {
+    // Package private for use in EncryptedTunnelParamsUtilsTest
+    static IkeSessionParams.Builder createBuilderMinimum() {
         final InetAddress serverAddress = InetAddresses.parseNumericAddress("192.0.2.100");
 
         // TODO: b/185941731 Make sure all valid IKE_OPTIONS are added and validated.

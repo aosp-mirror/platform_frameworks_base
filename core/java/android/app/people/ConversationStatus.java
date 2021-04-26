@@ -142,32 +142,52 @@ public final class ConversationStatus implements Parcelable {
         dest.writeLong(mEndTimeMs);
     }
 
+    /**
+     * Returns the unique identifier for the status.
+     */
     public @NonNull String getId() {
         return mId;
     }
 
+    /**
+     * Returns the type of activity represented by this status
+     */
     public @ActivityType int getActivity() {
         return mActivity;
     }
 
-    public @Availability
-    int getAvailability() {
+    /**
+     * Returns the availability of the people behind this conversation while this activity is
+     * happening.
+     */
+    public @Availability int getAvailability() {
         return mAvailability;
     }
 
-    public @Nullable
-    CharSequence getDescription() {
+    /**
+     * Returns the description for this activity.
+     */
+    public @Nullable CharSequence getDescription() {
         return mDescription;
     }
 
+    /**
+     * Returns the image for this activity.
+     */
     public @Nullable Icon getIcon() {
         return mIcon;
     }
 
+    /**
+     * Returns the time at which this status started
+     */
     public long getStartTimeMillis() {
         return mStartTimeMs;
     }
 
+    /**
+     * Returns the time at which this status should be expired.
+     */
     public long getEndTimeMillis() {
         return mEndTimeMs;
     }
@@ -242,26 +262,51 @@ public final class ConversationStatus implements Parcelable {
         }
 
 
+        /**
+         * Sets the availability of the conversation to provide a hint about how likely
+         * it is that the user would receive a timely response if they sent a message.
+         */
         public @NonNull Builder setAvailability(@Availability int availability) {
             mAvailability = availability;
             return this;
         }
 
+        /**
+         * Sets a user visible description expanding on the conversation user(s)'s activity.
+         *
+         * <p>Examples include: what media someone is watching or listening to, their approximate
+         * location, or what type of anniversary they are celebrating.</p>
+         */
         public @NonNull Builder setDescription(@Nullable CharSequence description) {
             mDescription = description;
             return this;
         }
 
+        /**
+         * Sets an image representing the conversation user(s)'s activity.
+         *
+         * <p>Examples include: A still from a new story update, album art, or a map showing
+         * approximate location.</p>
+         */
         public @NonNull Builder setIcon(@Nullable Icon icon) {
             mIcon = icon;
             return this;
         }
 
+        /**
+         * Sets the time at which this status became valid.
+         */
         public @NonNull Builder setStartTimeMillis(long startTimeMs) {
             mStartTimeMs = startTimeMs;
             return this;
         }
 
+        /**
+         * Sets an expiration time for this status.
+         *
+         * <p>The system will remove the status at this time if it hasn't already been withdrawn.
+         * </p>
+         */
         public @NonNull Builder setEndTimeMillis(long endTimeMs) {
             mEndTimeMs = endTimeMs;
             return this;

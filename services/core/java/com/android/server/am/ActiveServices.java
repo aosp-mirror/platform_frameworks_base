@@ -70,6 +70,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE_E
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
@@ -1815,6 +1816,7 @@ public final class ActiveServices {
                     notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
                     r.foregroundNoti = notification;
                     r.foregroundServiceType = foregroundServiceType;
+                    boolean enterForeground = false;
                     if (!r.isForeground) {
                         final ServiceMap smap = getServiceMapLocked(r.userId);
                         if (smap != null) {
@@ -1840,6 +1842,7 @@ public final class ActiveServices {
                             active.mNumActive++;
                         }
                         r.isForeground = true;
+                        enterForeground = true;
                         r.mStartForegroundCount++;
                         r.mFgsEnterTime = SystemClock.uptimeMillis();
                         if (!stopProcStatsOp) {
@@ -1851,16 +1854,23 @@ public final class ActiveServices {
                         } else {
                             stopProcStatsOp = false;
                         }
-                        postFgsNotificationLocked(r);
+
                         mAm.mAppOpsService.startOperation(
                                 AppOpsManager.getToken(mAm.mAppOpsService),
                                 AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName,
                                 null, true, false, "", false);
+                        registerAppOpCallbackLocked(r);
+                        mAm.updateForegroundServiceUsageStats(r.name, r.userId, true);
+                    }
+                    // Even if the service is already a FGS, we need to update the notification,
+                    // so we need to call it again.
+                    postFgsNotificationLocked(r);
+                    if (enterForeground) {
+                        // Because we want to log what's updated in postFgsNotificationLocked(),
+                        // this must be called after postFgsNotificationLocked().
                         logForegroundServiceStateChanged(r,
                                 FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
                                 0);
-                        registerAppOpCallbackLocked(r);
-                        mAm.updateForegroundServiceUsageStats(r.name, r.userId, true);
                     }
                     if (r.app != null) {
                         updateServiceForegroundLocked(psr, true);
@@ -3069,6 +3079,18 @@ public final class ActiveServices {
                         + ", uid=" + callingUid
                         + " requires " + r.permission);
                 return new ServiceLookupResult(null, r.permission);
+            } else if (Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE.equals(r.permission)
+                    && callingUid != Process.SYSTEM_UID) {
+                // Hotword detection must run in its own sandbox, and we don't even trust
+                // its enclosing application to bind to it - only the system.
+                // TODO(b/185746653) remove this special case and generalize
+                Slog.w(TAG, "Permission Denial: Accessing service " + r.shortInstanceName
+                        + " from pid=" + callingPid
+                        + ", uid=" + callingUid
+                        + " requiring permission " + r.permission
+                        + " can only be bound to from the system.");
+                return new ServiceLookupResult(null, "can only be bound to "
+                        + "by the system.");
             } else if (r.permission != null && callingPackage != null) {
                 final int opCode = AppOpsManager.permissionToOpCode(r.permission);
                 if (opCode != AppOpsManager.OP_NONE && mAm.getAppOpsManager().checkOpNoThrow(
@@ -5911,6 +5933,10 @@ public final class ActiveServices {
      * @param durationMs Only meaningful for EXIT event, the duration from ENTER and EXIT state.
      */
     private void logForegroundServiceStateChanged(ServiceRecord r, int state, int durationMs) {
+        if (!ActivityManagerUtils.shouldSamplePackageForAtom(
+                r.packageName, mAm.mConstants.mDefaultFgsAtomSampleRate)) {
+            return;
+        }
         FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                 r.appInfo.uid,
                 r.shortInstanceName,

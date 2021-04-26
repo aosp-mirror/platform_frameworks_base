@@ -1063,17 +1063,21 @@ interface ITelephony {
 
     /**
      * Similar to above, but check for the package whose name is pkgName.
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
      */
     int checkCarrierPrivilegesForPackage(int subId, String pkgName);
 
     /**
      * Similar to above, but check across all phones.
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
      */
     int checkCarrierPrivilegesForPackageAnyPhone(String pkgName);
 
     /**
      * Returns list of the package names of the carrier apps that should handle the input intent
      * and have carrier privileges for the given phoneId.
+     *
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
      *
      * @param intent Intent that will be sent.
      * @param phoneId The phoneId on which the carrier app has carrier privileges.
@@ -1443,11 +1447,13 @@ interface ITelephony {
 
     /**
      * Returns a list of packages that have carrier privileges for the specific phone.
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
      */
     List<String> getPackagesWithCarrierPrivileges(int phoneId);
 
      /**
       * Returns a list of packages that have carrier privileges.
+      * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
       */
     List<String> getPackagesWithCarrierPrivilegesForAllPhones();
 

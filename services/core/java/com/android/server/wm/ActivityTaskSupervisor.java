@@ -2118,8 +2118,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     void scheduleProcessStoppingAndFinishingActivitiesIfNeeded() {
-        if ((!mStoppingActivities.isEmpty() || !mFinishingActivities.isEmpty())
-                && !mHandler.hasMessages(PROCESS_STOPPING_AND_FINISHING_MSG)
+        if (mStoppingActivities.isEmpty() && mFinishingActivities.isEmpty()) {
+            return;
+        }
+        if (mRootWindowContainer.allResumedActivitiesIdle()) {
+            scheduleIdle();
+            return;
+        }
+        if (!mHandler.hasMessages(PROCESS_STOPPING_AND_FINISHING_MSG)
                 && mRootWindowContainer.allResumedActivitiesVisible()) {
             mHandler.sendEmptyMessage(PROCESS_STOPPING_AND_FINISHING_MSG);
         }
@@ -2248,7 +2254,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         scheduleUpdatePictureInPictureModeIfNeeded(task, rootTask.getRequestedOverrideBounds());
     }
 
-    private void scheduleUpdatePictureInPictureModeIfNeeded(Task task, Rect targetRootTaskBounds) {
+    void scheduleUpdatePictureInPictureModeIfNeeded(Task task, Rect targetRootTaskBounds) {
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 ActivityTaskSupervisor::addToPipModeChangedList, this,
                 PooledLambda.__(ActivityRecord.class));
@@ -2270,16 +2276,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // change list as the processing of pip change will make sure multi-window changed
         // message is processed in the right order relative to pip changed.
         mMultiWindowModeChangedActivities.remove(r);
-    }
-
-    void updatePictureInPictureMode(Task task, Rect targetRootTaskBounds, boolean forceUpdate) {
-        mHandler.removeMessages(REPORT_PIP_MODE_CHANGED_MSG);
-        final PooledConsumer c = PooledLambda.obtainConsumer(
-                ActivityRecord::updatePictureInPictureMode,
-                PooledLambda.__(ActivityRecord.class), targetRootTaskBounds, forceUpdate);
-        task.getRootTask().setBounds(targetRootTaskBounds);
-        task.forAllActivities(c);
-        c.recycle();
     }
 
     void wakeUp(String reason) {

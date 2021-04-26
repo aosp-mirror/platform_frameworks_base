@@ -451,8 +451,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
 
-    @VisibleForTesting
-    WindowManagerConstants mConstants;
+    final WindowManagerConstants mConstants;
 
     final WindowTracing mWindowTracing;
 
@@ -3659,7 +3658,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM, ">>> showEmulatorDisplayOverlay");
             if (mEmulatorDisplayOverlay == null) {
-                mEmulatorDisplayOverlay = new EmulatorDisplayOverlay(mSurfaceFactory, mContext,
+                mEmulatorDisplayOverlay = new EmulatorDisplayOverlay(mContext,
                         getDefaultDisplayContentLocked(),
                         mPolicy.getWindowLayerFromTypeLw(WindowManager.LayoutParams.TYPE_POINTER)
                                 * TYPE_LAYER_MULTIPLIER + 10, mTransaction);
@@ -3699,8 +3698,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // b/31532461
             // TODO(multi-display): support multiple displays
             if (mStrictModeFlash == null) {
-                mStrictModeFlash = new StrictModeFlash(mSurfaceFactory,
-                        getDefaultDisplayContentLocked(), mTransaction);
+                mStrictModeFlash = new StrictModeFlash(getDefaultDisplayContentLocked(),
+                        mTransaction);
             }
             mStrictModeFlash.setVisibility(on, mTransaction);
             mTransaction.apply();
@@ -5554,11 +5553,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mBlurController.unregisterCrossWindowBlurEnabledListener(listener);
     }
 
-    @Override
-    public void setForceCrossWindowBlurDisabled(boolean disable) {
-        mBlurController.setForceCrossWindowBlurDisabled(disable);
-    }
-
     // -------------------------------------------------------------
     // Internals
     // -------------------------------------------------------------
@@ -5895,8 +5889,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (toks != null && toks.length > 0) {
                     // TODO(multi-display): Show watermarks on secondary displays.
                     final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                    mWatermark = new Watermark(mSurfaceFactory, displayContent,
-                            displayContent.mRealDisplayMetrics, toks, mTransaction);
+                    mWatermark = new Watermark(displayContent, displayContent.mRealDisplayMetrics,
+                            toks, mTransaction);
                     mTransaction.apply();
                 }
             }
@@ -6298,7 +6292,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
-        pw.print("  mBlurEnabled="); pw.println(mBlurController.mBlurEnabled);
+        pw.print("  mBlurEnabled="); pw.println(mBlurController.getBlurEnabled());
         pw.print("  mLastDisplayFreezeDuration=");
                 TimeUtils.formatDuration(mLastDisplayFreezeDuration, pw);
                 if ( mLastFinishedFreezeSource != null) {

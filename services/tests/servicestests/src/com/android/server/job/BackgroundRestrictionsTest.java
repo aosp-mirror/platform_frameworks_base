@@ -91,12 +91,12 @@ public class BackgroundRestrictionsTest {
                     case ACTION_JOB_STARTED:
                         mTestJobStatus.running = true;
                         mTestJobStatus.jobId = params.getJobId();
-                        mTestJobStatus.stopReason = JobParameters.REASON_CANCELED;
+                        mTestJobStatus.stopReason = JobParameters.STOP_REASON_UNDEFINED;
                         break;
                     case ACTION_JOB_STOPPED:
                         mTestJobStatus.running = false;
                         mTestJobStatus.jobId = params.getJobId();
-                        mTestJobStatus.stopReason = params.getLegacyStopReason();
+                        mTestJobStatus.stopReason = params.getStopReason();
                         break;
                 }
             }
@@ -142,7 +142,8 @@ public class BackgroundRestrictionsTest {
         setAppOpsModeAllowed(false);
         mIActivityManager.makePackageIdle(TEST_APP_PACKAGE, UserHandle.USER_CURRENT);
         assertTrue("Job did not stop after putting app under bg-restriction",
-                awaitJobStop(DEFAULT_WAIT_TIMEOUT));
+                awaitJobStop(DEFAULT_WAIT_TIMEOUT,
+                        JobParameters.STOP_REASON_BACKGROUND_RESTRICTION));
 
         setPowerExemption(true);
         scheduleTestJob();
@@ -152,7 +153,8 @@ public class BackgroundRestrictionsTest {
 
         setPowerExemption(false);
         assertTrue("Job did not stop after removing from the power exemption list",
-                awaitJobStop(DEFAULT_WAIT_TIMEOUT));
+                awaitJobStop(DEFAULT_WAIT_TIMEOUT,
+                        JobParameters.STOP_REASON_BACKGROUND_RESTRICTION));
 
         scheduleTestJob();
         Thread.sleep(TestJobActivity.JOB_MINIMUM_LATENCY);
@@ -170,7 +172,7 @@ public class BackgroundRestrictionsTest {
         setAppOpsModeAllowed(false);
         mIActivityManager.makePackageIdle(TEST_APP_PACKAGE, UserHandle.USER_CURRENT);
         assertFalse("Job stopped even when feature flag was disabled",
-                awaitJobStop(DEFAULT_WAIT_TIMEOUT));
+                awaitJobStop(DEFAULT_WAIT_TIMEOUT, JobParameters.STOP_REASON_UNDEFINED));
     }
 
     @After
@@ -208,11 +210,13 @@ public class BackgroundRestrictionsTest {
         });
     }
 
-    private boolean awaitJobStop(long timeout) throws InterruptedException {
+    private boolean awaitJobStop(long timeout, @JobParameters.StopReason int expectedStopReason)
+            throws InterruptedException {
         return waitUntilTrue(timeout, () -> {
             synchronized (mTestJobStatus) {
-                return (mTestJobStatus.jobId == mTestJobId) && !mTestJobStatus.running &&
-                        mTestJobStatus.stopReason == JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED;
+                return (mTestJobStatus.jobId == mTestJobId) && !mTestJobStatus.running
+                        && (expectedStopReason == JobParameters.STOP_REASON_UNDEFINED
+                        || mTestJobStatus.stopReason == expectedStopReason);
             }
         });
     }

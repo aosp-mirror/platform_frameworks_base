@@ -26,6 +26,7 @@ import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -80,6 +81,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     /**
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PROTOCOL_MODE_CHANGED =
             "android.bluetooth.input.profile.action.PROTOCOL_MODE_CHANGED";
@@ -87,6 +90,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     /**
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_HANDSHAKE =
             "android.bluetooth.input.profile.action.HANDSHAKE";
@@ -94,6 +99,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     /**
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_REPORT =
             "android.bluetooth.input.profile.action.REPORT";
@@ -101,6 +108,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     /**
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_VIRTUAL_UNPLUG_STATUS =
             "android.bluetooth.input.profile.action.VIRTUAL_UNPLUG_STATUS";
@@ -108,6 +117,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     /**
      * @hide
      */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_IDLE_TIME_CHANGED =
             "android.bluetooth.input.profile.action.IDLE_TIME_CHANGED";
@@ -226,7 +237,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
     public static final String EXTRA_IDLE_TIME =
             "android.bluetooth.BluetoothHidHost.extra.IDLE_TIME";
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothHidHost> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.HID_HOST,
                     "BluetoothHidHost", IBluetoothHidHost.class.getName()) {
@@ -240,8 +252,10 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * Create a BluetoothHidHost proxy object for interacting with the local
      * Bluetooth Service which handles the InputDevice profile
      */
-    /*package*/ BluetoothHidHost(Context context, ServiceListener listener) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    /* package */ BluetoothHidHost(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
     }
 
@@ -270,13 +284,17 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.connect(device);
+                return service.connect(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -308,13 +326,17 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.disconnect(device);
+                return service.disconnect(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -338,7 +360,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -361,7 +384,9 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -388,7 +413,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.STATE_DISCONNECTED;
@@ -409,7 +434,11 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
         return setConnectionPolicy(device, BluetoothAdapter.priorityToConnectionPolicy(priority));
@@ -428,7 +457,11 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
@@ -442,7 +475,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
                 return false;
             }
             try {
-                return service.setConnectionPolicy(device, connectionPolicy);
+                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -462,7 +495,11 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
         return BluetoothAdapter.connectionPolicyToPriority(getConnectionPolicy(device));
@@ -480,7 +517,11 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         if (device == null) {
@@ -489,7 +530,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionPolicy(device);
+                return service.getConnectionPolicy(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
@@ -522,7 +563,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.virtualUnplug(device);
+                return service.virtualUnplug(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -549,7 +590,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getProtocolMode(device);
+                return service.getProtocolMode(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -574,7 +615,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.setProtocolMode(device, protocolMode);
+                return service.setProtocolMode(device, protocolMode, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -606,7 +647,8 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getReport(device, reportType, reportId, bufferSize);
+                return service.getReport(device, reportType, reportId, bufferSize,
+                        mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -633,7 +675,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.setReport(device, reportType, report);
+                return service.setReport(device, reportType, report, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -659,7 +701,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.sendData(device, report);
+                return service.sendData(device, report, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -684,7 +726,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getIdleTime(device);
+                return service.getIdleTime(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;
@@ -710,7 +752,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.setIdleTime(device, idleTime);
+                return service.setIdleTime(device, idleTime, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return false;

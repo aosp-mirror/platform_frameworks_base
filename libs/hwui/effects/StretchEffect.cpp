@@ -237,7 +237,7 @@ sk_sp<SkShader> StretchEffect::getShader(const sk_sp<SkImage>& snapshotImage) co
 }
 
 sk_sp<SkRuntimeEffect> StretchEffect::getStretchEffect() {
-    const static SkRuntimeEffect::Result instance = SkRuntimeEffect::Make(stretchShader);
+    const static SkRuntimeEffect::Result instance = SkRuntimeEffect::MakeForShader(stretchShader);
     return instance.effect;
 }
 

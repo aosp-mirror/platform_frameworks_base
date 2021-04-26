@@ -418,6 +418,7 @@ public final class DisplayManager {
             EVENT_FLAG_DISPLAY_ADDED,
             EVENT_FLAG_DISPLAY_CHANGED,
             EVENT_FLAG_DISPLAY_REMOVED,
+            EVENT_FLAG_DISPLAY_BRIGHTNESS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventsMask {}
@@ -448,6 +449,17 @@ public final class DisplayManager {
      * @hide
      */
     public static final long EVENT_FLAG_DISPLAY_CHANGED = 1L << 2;
+
+    /**
+     * Event flag to register for a display's brightness changes. This notification is sent
+     * through the {@link DisplayListener#onDisplayChanged} callback method. New brightness
+     * values can be retrieved via {@link android.view.Display#getBrightnessInfo()}.
+     *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_DISPLAY_BRIGHTNESS = 1L << 3;
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -583,6 +595,7 @@ public final class DisplayManager {
      * @see #EVENT_FLAG_DISPLAY_ADDED
      * @see #EVENT_FLAG_DISPLAY_CHANGED
      * @see #EVENT_FLAG_DISPLAY_REMOVED
+     * @see #EVENT_FLAG_DISPLAY_BRIGHTNESS
      * @see #registerDisplayListener(DisplayListener, Handler)
      * @see #unregisterDisplayListener
      *

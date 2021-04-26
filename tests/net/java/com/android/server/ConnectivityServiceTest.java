@@ -1387,7 +1387,7 @@ public class ConnectivityServiceTest {
         final TransportInfo ti = nc.getTransportInfo();
         assertTrue("VPN TransportInfo is not a VpnTransportInfo: " + ti,
                 ti instanceof VpnTransportInfo);
-        assertEquals(type, ((VpnTransportInfo) ti).type);
+        assertEquals(type, ((VpnTransportInfo) ti).getType());
 
     }
 
@@ -2896,7 +2896,7 @@ public class ConnectivityServiceTest {
         callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
 
         // Set teardown delay and make sure CS has processed it.
-        mWiFiNetworkAgent.getNetworkAgent().setTeardownDelayMs(300);
+        mWiFiNetworkAgent.getNetworkAgent().setTeardownDelayMillis(300);
         waitForIdle();
 
         // Post the duringTeardown lambda to the handler so it fires while teardown is in progress.
@@ -2974,15 +2974,9 @@ public class ConnectivityServiceTest {
 
         mEthernetNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_ETHERNET);
         mEthernetNetworkAgent.connect(true);
-        // BUG: with the legacy int-based scoring code, the network will no longer linger, even
-        // though it's validated and outscored.
-        // The new policy-based scoring code fixes this.
-        // TODO: remove the line below and replace with the three commented lines when
-        // the policy-based scoring code is turned on.
-        callback.expectAvailableThenValidatedCallbacks(mEthernetNetworkAgent);
-        // callback.expectAvailableCallbacksUnvalidated(mEthernetNetworkAgent);
-        // callback.expectCallback(CallbackEntry.LOSING, mWiFiNetworkAgent);
-        // callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mEthernetNetworkAgent);
+        callback.expectAvailableCallbacksUnvalidated(mEthernetNetworkAgent);
+        callback.expectCallback(CallbackEntry.LOSING, mWiFiNetworkAgent);
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mEthernetNetworkAgent);
         assertEquals(mEthernetNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         callback.assertNoCallback();
 
@@ -4253,7 +4247,7 @@ public class ConnectivityServiceTest {
                 () -> mCm.registerSystemDefaultNetworkCallback(callback, handler));
         callback.assertNoCallback();
         assertThrows(SecurityException.class,
-                () -> mCm.registerDefaultNetworkCallbackAsUid(APP1_UID, callback, handler));
+                () -> mCm.registerDefaultNetworkCallbackForUid(APP1_UID, callback, handler));
         callback.assertNoCallback();
 
         mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
@@ -4261,7 +4255,7 @@ public class ConnectivityServiceTest {
         callback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
         mCm.unregisterNetworkCallback(callback);
 
-        mCm.registerDefaultNetworkCallbackAsUid(APP1_UID, callback, handler);
+        mCm.registerDefaultNetworkCallbackForUid(APP1_UID, callback, handler);
         callback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
         mCm.unregisterNetworkCallback(callback);
     }
@@ -5685,7 +5679,7 @@ public class ConnectivityServiceTest {
             for (int i = 0; i < SYSTEM_ONLY_MAX_REQUESTS - 1; i++) {
                 NetworkCallback cb = new NetworkCallback();
                 if (i % 2 == 0) {
-                    mCm.registerDefaultNetworkCallbackAsUid(1000000 + i, cb, handler);
+                    mCm.registerDefaultNetworkCallbackForUid(1000000 + i, cb, handler);
                 } else {
                     mCm.registerNetworkCallback(networkRequest, cb);
                 }
@@ -5694,7 +5688,7 @@ public class ConnectivityServiceTest {
             waitForIdle();
 
             assertThrows(TooManyRequestsException.class, () ->
-                    mCm.registerDefaultNetworkCallbackAsUid(1001042, new NetworkCallback(),
+                    mCm.registerDefaultNetworkCallbackForUid(1001042, new NetworkCallback(),
                             handler));
             assertThrows(TooManyRequestsException.class, () ->
                     mCm.registerNetworkCallback(networkRequest, new NetworkCallback()));
@@ -5747,7 +5741,7 @@ public class ConnectivityServiceTest {
         withPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, () -> {
             for (int i = 0; i < MAX_REQUESTS; i++) {
                 NetworkCallback networkCallback = new NetworkCallback();
-                mCm.registerDefaultNetworkCallbackAsUid(1000000 + i, networkCallback,
+                mCm.registerDefaultNetworkCallbackForUid(1000000 + i, networkCallback,
                         new Handler(ConnectivityThread.getInstanceLooper()));
                 mCm.unregisterNetworkCallback(networkCallback);
             }
@@ -5904,10 +5898,10 @@ public class ConnectivityServiceTest {
         if (vpnUid != null) {
             assertEquals("Should have exactly one VPN:", 1, infos.length);
             UnderlyingNetworkInfo info = infos[0];
-            assertEquals("Unexpected VPN owner:", (int) vpnUid, info.ownerUid);
-            assertEquals("Unexpected VPN interface:", vpnIfname, info.iface);
+            assertEquals("Unexpected VPN owner:", (int) vpnUid, info.getOwnerUid());
+            assertEquals("Unexpected VPN interface:", vpnIfname, info.getIface());
             assertSameElementsNoDuplicates(underlyingIfaces,
-                    info.underlyingIfaces.toArray(new String[0]));
+                    info.getUnderlyingIfaces().toArray(new String[0]));
         } else {
             assertEquals(0, infos.length);
             return;
@@ -6051,8 +6045,8 @@ public class ConnectivityServiceTest {
         // network for the VPN...
         verify(mStatsManager, never()).notifyNetworkStatus(any(List.class),
                 any(List.class), any() /* anyString() doesn't match null */,
-                argThat(infos -> infos.get(0).underlyingIfaces.size() == 1
-                        && WIFI_IFNAME.equals(infos.get(0).underlyingIfaces.get(0))));
+                argThat(infos -> infos.get(0).getUnderlyingIfaces().size() == 1
+                        && WIFI_IFNAME.equals(infos.get(0).getUnderlyingIfaces().get(0))));
         verifyNoMoreInteractions(mStatsManager);
         reset(mStatsManager);
 
@@ -6066,8 +6060,8 @@ public class ConnectivityServiceTest {
         waitForIdle();
         verify(mStatsManager).notifyNetworkStatus(any(List.class),
                 any(List.class), any() /* anyString() doesn't match null */,
-                argThat(vpnInfos -> vpnInfos.get(0).underlyingIfaces.size() == 1
-                        && WIFI_IFNAME.equals(vpnInfos.get(0).underlyingIfaces.get(0))));
+                argThat(vpnInfos -> vpnInfos.get(0).getUnderlyingIfaces().size() == 1
+                        && WIFI_IFNAME.equals(vpnInfos.get(0).getUnderlyingIfaces().get(0))));
         mEthernetNetworkAgent.disconnect();
         waitForIdle();
         reset(mStatsManager);
@@ -7831,7 +7825,7 @@ public class ConnectivityServiceTest {
         registerDefaultNetworkCallbackAsUid(vpnUidDefaultCallback, VPN_UID);
 
         final TestNetworkCallback vpnDefaultCallbackAsUid = new TestNetworkCallback();
-        mCm.registerDefaultNetworkCallbackAsUid(VPN_UID, vpnDefaultCallbackAsUid,
+        mCm.registerDefaultNetworkCallbackForUid(VPN_UID, vpnDefaultCallbackAsUid,
                 new Handler(ConnectivityThread.getInstanceLooper()));
 
         final int uid = Process.myUid();
@@ -10485,7 +10479,7 @@ public class ConnectivityServiceTest {
         assertTrue(mRequests.get(0).hasCapability(NET_CAPABILITY_VALIDATED));
         assertTrue(mRequests.get(1).isRequest());
         assertTrue(mRequests.get(1).hasCapability(NET_CAPABILITY_OEM_PAID));
-        assertTrue(mRequests.get(2).isRequest());
+        assertEquals(NetworkRequest.Type.TRACK_DEFAULT, mRequests.get(2).type);
         assertTrue(mService.getDefaultRequest().networkCapabilities.equalsNetCapabilities(
                 mRequests.get(2).networkCapabilities));
     }
@@ -10997,7 +10991,7 @@ public class ConnectivityServiceTest {
 
         final TestNetworkCallback otherUidDefaultCallback = new TestNetworkCallback();
         withPermission(NETWORK_SETTINGS, () ->
-                mCm.registerDefaultNetworkCallbackAsUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
+                mCm.registerDefaultNetworkCallbackForUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
                         new Handler(ConnectivityThread.getInstanceLooper())));
 
         // Setup the test process to use networkPref for their default network.
@@ -11045,7 +11039,7 @@ public class ConnectivityServiceTest {
 
         final TestNetworkCallback otherUidDefaultCallback = new TestNetworkCallback();
         withPermission(NETWORK_SETTINGS, () ->
-                mCm.registerDefaultNetworkCallbackAsUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
+                mCm.registerDefaultNetworkCallbackForUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
                         new Handler(ConnectivityThread.getInstanceLooper())));
 
         // Bring up ethernet with OEM_PAID. This will satisfy NET_CAPABILITY_OEM_PAID.
@@ -11087,7 +11081,7 @@ public class ConnectivityServiceTest {
 
         final TestNetworkCallback otherUidDefaultCallback = new TestNetworkCallback();
         withPermission(NETWORK_SETTINGS, () ->
-                mCm.registerDefaultNetworkCallbackAsUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
+                mCm.registerDefaultNetworkCallbackForUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
                         new Handler(ConnectivityThread.getInstanceLooper())));
 
         // Setup a process different than the test process to use the default network. This means
@@ -11699,10 +11693,12 @@ public class ConnectivityServiceTest {
                 mServiceContext, "internetFactory", internetFilter, mCsHandlerThread);
         internetFactory.setScoreFilter(40);
         internetFactory.register();
-        // Default internet request & 3rd (fallback) request in OEM_PAID NRI. The unmetered request
-        // is never sent to factories (it's a LISTEN, not requestable) and the OEM_PAID request
-        // doesn't match the internetFactory filter.
-        internetFactory.expectRequestAdds(2);
+        // Default internet request only. The unmetered request is never sent to factories (it's a
+        // LISTEN, not requestable). The 3rd (fallback) request in OEM_PAID NRI is TRACK_DEFAULT
+        // which is also not sent to factories. Finally, the OEM_PAID request doesn't match the
+        // internetFactory filter.
+        internetFactory.expectRequestAdds(1);
+        internetFactory.assertRequestCountEquals(1);
 
         NetworkCapabilities oemPaidFilter = new NetworkCapabilities()
                 .addCapability(NET_CAPABILITY_INTERNET)
@@ -11725,7 +11721,7 @@ public class ConnectivityServiceTest {
         expectNoRequestChanged(oemPaidFactory);
         oemPaidFactory.assertRequestCountEquals(1);
         // The internet factory however is outscored, and should lose its requests.
-        internetFactory.expectRequestRemoves(2);
+        internetFactory.expectRequestRemove();
         internetFactory.assertRequestCountEquals(0);
 
         final NetworkCapabilities oemPaidNc = new NetworkCapabilities();

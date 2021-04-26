@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CO
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
 import static com.android.server.accessibility.AccessibilityTraceFileProto.ENTRY;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER;
@@ -47,6 +48,7 @@ import android.annotation.NonNull;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -59,6 +61,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -188,22 +191,28 @@ final class AccessibilityController {
         }
 
         if (callback != null) {
+            WindowsForAccessibilityObserver observer =
+                    mWindowsForAccessibilityObserver.get(displayId);
             if (isEmbeddedDisplay(dc)) {
                 // If this display is an embedded one, its window observer should have been set from
                 // window manager after setting its parent window. But if its window observer is
                 // empty, that means this mapping didn't be set, and needs to do this again.
                 // This happened when accessibility window observer is disabled and enabled again.
-                if (mWindowsForAccessibilityObserver.get(displayId) == null) {
+                if (observer == null) {
                     handleWindowObserverOfEmbeddedDisplay(displayId, dc.getParentWindow());
                 }
                 return false;
-            } else if (mWindowsForAccessibilityObserver.get(displayId) != null) {
-                throw new IllegalStateException(
-                        "Windows for accessibility callback of display "
-                                + displayId + " already set!");
+            } else if (observer != null) {
+                final String errorMessage = "Windows for accessibility callback of display "
+                        + displayId + " already set!";
+                Slog.e(TAG, errorMessage);
+                if (Build.IS_DEBUGGABLE) {
+                    throw new IllegalStateException(errorMessage);
+                }
+                removeObserverOfEmbeddedDisplay(observer);
+                mWindowsForAccessibilityObserver.remove(displayId);
             }
-            final WindowsForAccessibilityObserver observer =
-                    new WindowsForAccessibilityObserver(mService, displayId, callback);
+            observer = new WindowsForAccessibilityObserver(mService, displayId, callback);
             mWindowsForAccessibilityObserver.put(displayId, observer);
             mAllObserversInitialized &= observer.mInitialized;
         } else {
@@ -218,9 +227,12 @@ final class AccessibilityController {
             final WindowsForAccessibilityObserver windowsForA11yObserver =
                     mWindowsForAccessibilityObserver.get(displayId);
             if (windowsForA11yObserver == null) {
-                throw new IllegalStateException(
-                        "Windows for accessibility callback of display " + displayId
-                                + " already cleared!");
+                final String errorMessage = "Windows for accessibility callback of display "
+                        + displayId + " already cleared!";
+                Slog.e(TAG, errorMessage);
+                if (Build.IS_DEBUGGABLE) {
+                    throw new IllegalStateException(errorMessage);
+                }
             }
             removeObserverOfEmbeddedDisplay(windowsForA11yObserver);
             mWindowsForAccessibilityObserver.remove(displayId);
@@ -928,8 +940,7 @@ final class AccessibilityController {
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     WindowState windowState = visibleWindows.valueAt(i);
                     final int windowType = windowState.mAttrs.type;
-                    if ((windowType == TYPE_MAGNIFICATION_OVERLAY
-                            || windowType == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                    if (isExcludedWindowType(windowType)
                             || ((windowState.mAttrs.privateFlags
                             & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0)) {
                         continue;
@@ -974,7 +985,7 @@ final class AccessibilityController {
                     }
 
                     // Count letterbox into nonMagnifiedBounds
-                    if (windowState.isLetterboxedForDisplayCutout()) {
+                    if (windowState.isLetterboxedAppWindow()) {
                         Region letterboxBounds = getLetterboxBounds(windowState);
                         nonMagnifiedBounds.op(letterboxBounds, Region.Op.UNION);
                         availableBounds.op(letterboxBounds, Region.Op.DIFFERENCE);
@@ -1030,23 +1041,15 @@ final class AccessibilityController {
                 }
             }
 
-            private Region getLetterboxBounds(WindowState windowState) {
-                final ActivityRecord appToken = windowState.mActivityRecord;
-                if (appToken == null) {
-                    return new Region();
-                }
-
-                mDisplay.getRealSize(mTempPoint);
-                final Rect letterboxInsets = appToken.getLetterboxInsets();
-                final int screenWidth = mTempPoint.x;
-                final int screenHeight = mTempPoint.y;
-                final Rect nonLetterboxRect = mTempRect1;
-                final Region letterboxBounds = mTempRegion3;
-                nonLetterboxRect.set(0, 0, screenWidth, screenHeight);
-                nonLetterboxRect.inset(letterboxInsets);
-                letterboxBounds.set(0, 0, screenWidth, screenHeight);
-                letterboxBounds.op(nonLetterboxRect, Region.Op.DIFFERENCE);
-                return letterboxBounds;
+            private boolean isExcludedWindowType(int windowType) {
+                return windowType == TYPE_MAGNIFICATION_OVERLAY
+                        // Omit the touch region to avoid the cut out of the magnification
+                        // bounds because nav bar panel is unmagnifiable.
+                        || windowType == TYPE_NAVIGATION_BAR_PANEL
+                        // Omit the touch region of window magnification to avoid the cut out of the
+                        // magnification and the magnified center of window magnification could be
+                        // in the bounds
+                        || windowType == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
             }
 
             void onRotationChanged(SurfaceControl.Transaction t) {
@@ -1121,7 +1124,8 @@ final class AccessibilityController {
                 private final Paint mPaint = new Paint();
 
                 private final SurfaceControl mSurfaceControl;
-                private final Surface mSurface = mService.mSurfaceFactory.get();
+                private final BLASTBufferQueue mBlastBufferQueue;
+                private final Surface mSurface;
 
                 private final AnimationController mAnimationController;
 
@@ -1133,11 +1137,10 @@ final class AccessibilityController {
                 ViewportWindow(Context context) {
                     SurfaceControl surfaceControl = null;
                     try {
-                        mDisplay.getRealSize(mTempPoint);
                         surfaceControl = mDisplayContent
                                 .makeOverlay()
                                 .setName(SURFACE_TITLE)
-                                .setBufferSize(mTempPoint.x, mTempPoint.y) // not a typo
+                                .setBLASTLayer()
                                 .setFormat(PixelFormat.TRANSLUCENT)
                                 .setCallsite("ViewportWindow")
                                 .build();
@@ -1145,6 +1148,9 @@ final class AccessibilityController {
                         /* ignore */
                     }
                     mSurfaceControl = surfaceControl;
+                    mDisplay.getRealSize(mTempPoint);
+                    mBlastBufferQueue = new BLASTBufferQueue(SURFACE_TITLE, mSurfaceControl,
+                            mTempPoint.x, mTempPoint.y, PixelFormat.RGBA_8888);
 
                     final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
                     final int layer =
@@ -1154,8 +1160,7 @@ final class AccessibilityController {
                     InputMonitor.setTrustedOverlayInputInfo(mSurfaceControl, t,
                             mDisplayContent.getDisplayId(), "Magnification Overlay");
                     t.apply();
-
-                    mSurface.copyFrom(mSurfaceControl);
+                    mSurface = mBlastBufferQueue.createSurface();
 
                     mAnimationController = new AnimationController(context,
                             mService.mH.getLooper());
@@ -1280,6 +1285,9 @@ final class AccessibilityController {
                 }
 
                 void releaseSurface() {
+                    if (mBlastBufferQueue != null) {
+                        mBlastBufferQueue.destroy();
+                    }
                     mService.mTransactionFactory.get().remove(mSurfaceControl).apply();
                     mSurface.release();
                 }
@@ -1428,6 +1436,20 @@ final class AccessibilityController {
         final InsetsSource source = displayContent.getInsetsStateController().getRawInsetsState()
                 .peekSource(ITYPE_NAVIGATION_BAR);
         return source != null ? source.getFrame() : EMPTY_RECT;
+    }
+
+    static Region getLetterboxBounds(WindowState windowState) {
+        final ActivityRecord appToken = windowState.mActivityRecord;
+        if (appToken == null) {
+            return new Region();
+        }
+        final Rect letterboxInsets = appToken.getLetterboxInsets();
+        final Rect nonLetterboxRect = windowState.getBounds();
+        nonLetterboxRect.inset(letterboxInsets);
+        final Region letterboxBounds = new Region();
+        letterboxBounds.set(windowState.getBounds());
+        letterboxBounds.op(nonLetterboxRect, Region.Op.DIFFERENCE);
+        return letterboxBounds;
     }
 
     /**
@@ -1733,6 +1755,12 @@ final class AccessibilityController {
                         // it doesn't has tap exclude region.
                         unaccountedSpace.setEmpty();
                     }
+                }
+
+                // Account for the space of letterbox.
+                if (windowState.isLetterboxedAppWindow()) {
+                    unaccountedSpace.op(getLetterboxBounds(windowState), unaccountedSpace,
+                            Region.Op.REVERSE_DIFFERENCE);
                 }
             }
         }

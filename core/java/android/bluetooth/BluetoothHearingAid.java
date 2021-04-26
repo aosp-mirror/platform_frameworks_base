@@ -28,6 +28,7 @@ import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
@@ -130,7 +131,8 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      */
     public static final long HI_SYNC_ID_INVALID = IBluetoothHearingAid.HI_SYNC_ID_INVALID;
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothHearingAid> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.HEARING_AID,
                     "BluetoothHearingAid", IBluetoothHearingAid.class.getName()) {
@@ -144,8 +146,10 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * Create a BluetoothHearingAid proxy object for interacting with the local
      * Bluetooth Hearing Aid service.
      */
-    /*package*/ BluetoothHearingAid(Context context, ServiceListener listener) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    /* package */ BluetoothHearingAid(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
     }
 
@@ -181,7 +185,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         final IBluetoothHearingAid service = getService();
         try {
             if (service != null && isEnabled() && isValidDevice(device)) {
-                return service.connect(device);
+                return service.connect(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -213,13 +217,17 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothHearingAid service = getService();
         try {
             if (service != null && isEnabled() && isValidDevice(device)) {
-                return service.disconnect(device);
+                return service.disconnect(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -240,7 +248,8 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         final IBluetoothHearingAid service = getService();
         try {
             if (service != null && isEnabled()) {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -262,7 +271,9 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         final IBluetoothHearingAid service = getService();
         try {
             if (service != null && isEnabled()) {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -285,7 +296,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         try {
             if (service != null && isEnabled()
                     && isValidDevice(device)) {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -324,7 +335,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         try {
             if (service != null && isEnabled()
                     && ((device == null) || isValidDevice(device))) {
-                service.setActiveDevice(device);
+                service.setActiveDevice(device, mAttributionSource);
                 return true;
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
@@ -352,7 +363,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         final IBluetoothHearingAid service = getService();
         try {
             if (service != null && isEnabled()) {
-                return service.getActiveDevices();
+                return service.getActiveDevices(mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<>();
@@ -413,7 +424,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
                         && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
                     return false;
                 }
-                return service.setConnectionPolicy(device, connectionPolicy);
+                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -433,7 +444,11 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
         return BluetoothAdapter.connectionPolicyToPriority(getConnectionPolicy(device));
@@ -451,7 +466,11 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         verifyDeviceNotNull(device, "getConnectionPolicy");
@@ -459,7 +478,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         try {
             if (service != null && isEnabled()
                     && isValidDevice(device)) {
-                return service.getConnectionPolicy(device);
+                return service.getConnectionPolicy(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
@@ -511,7 +530,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
 
             if (!isEnabled()) return;
 
-            service.setVolume(volume);
+            service.setVolume(volume, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
         }
@@ -528,7 +547,11 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public long getHiSyncId(@NonNull BluetoothDevice device) {
         if (VDBG) {
             log("getHiSyncId(" + device + ")");
@@ -543,7 +566,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
 
             if (!isEnabled() || !isValidDevice(device)) return HI_SYNC_ID_INVALID;
 
-            return service.getHiSyncId(device);
+            return service.getHiSyncId(device, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             return HI_SYNC_ID_INVALID;
@@ -568,7 +591,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         try {
             if (service != null && isEnabled()
                     && isValidDevice(device)) {
-                return service.getDeviceSide(device);
+                return service.getDeviceSide(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return SIDE_LEFT;
@@ -596,7 +619,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         try {
             if (service != null && isEnabled()
                     && isValidDevice(device)) {
-                return service.getDeviceMode(device);
+                return service.getDeviceMode(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return MODE_MONAURAL;

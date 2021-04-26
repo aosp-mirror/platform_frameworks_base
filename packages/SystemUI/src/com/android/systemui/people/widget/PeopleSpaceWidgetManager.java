@@ -236,7 +236,7 @@ public class PeopleSpaceWidgetManager {
     @Nullable
     public PeopleSpaceTile getTileFromPersistentStorage(PeopleTileKey key) {
         if (!key.isValid()) {
-            Log.e(TAG, "PeopleTileKey invalid: " + key);
+            Log.e(TAG, "PeopleTileKey invalid: " + key.toString());
             return null;
         }
 
@@ -267,7 +267,14 @@ public class PeopleSpaceWidgetManager {
      */
     public void updateWidgetsWithNotificationChanged(StatusBarNotification sbn,
             PeopleSpaceUtils.NotificationAction notificationAction) {
-        if (DEBUG) Log.d(TAG, "updateWidgetsWithNotificationChanged called");
+        if (DEBUG) {
+            Log.d(TAG, "updateWidgetsWithNotificationChanged called");
+            if (notificationAction == PeopleSpaceUtils.NotificationAction.POSTED) {
+                Log.d(TAG, "Notification posted, key: " + sbn.getKey());
+            } else {
+                Log.d(TAG, "Notification removed, key: " + sbn.getKey());
+            }
+        }
         if (mIsForTesting) {
             updateWidgetsWithNotificationChangedInBackground(sbn, notificationAction);
             return;
@@ -282,7 +289,7 @@ public class PeopleSpaceWidgetManager {
             PeopleTileKey key = new PeopleTileKey(
                     sbn.getShortcutId(), sbn.getUser().getIdentifier(), sbn.getPackageName());
             if (!key.isValid()) {
-                Log.d(TAG, "Invalid key from sbn");
+                Log.d(TAG, "Sbn doesn't contain valid PeopleTileKey: " + key.toString());
                 return;
             }
             int[] widgetIds = mAppWidgetManager.getAppWidgetIds(
@@ -309,8 +316,12 @@ public class PeopleSpaceWidgetManager {
 
     /** Updates {@code widgetIdsToUpdate} with {@code action}. */
     private void updateWidgetIdsBasedOnNotifications(Set<String> widgetIdsToUpdate) {
-        Log.d(TAG, "Fetching grouped notifications");
+        if (widgetIdsToUpdate.isEmpty()) {
+            if (DEBUG) Log.d(TAG, "No widgets to update, returning.");
+            return;
+        }
         try {
+            if (DEBUG) Log.d(TAG, "Fetching grouped notifications");
             Map<PeopleTileKey, Set<NotificationEntry>> groupedNotifications =
                     getGroupedConversationNotifications();
 
@@ -331,14 +342,15 @@ public class PeopleSpaceWidgetManager {
      * Augments {@code tile} based on notifications returned from {@code notificationEntryManager}.
      */
     public PeopleSpaceTile augmentTileFromNotificationEntryManager(PeopleSpaceTile tile) {
-        Log.d(TAG, "Augmenting tile from NotificationEntryManager widget: " + tile.getId());
+        PeopleTileKey key = new PeopleTileKey(tile);
+        Log.d(TAG, "Augmenting tile from NotificationEntryManager widget: " + key.toString());
         Map<PeopleTileKey, Set<NotificationEntry>> notifications =
                 getGroupedConversationNotifications();
         String contactUri = null;
         if (tile.getContactUri() != null) {
             contactUri = tile.getContactUri().toString();
         }
-        return augmentTileFromNotifications(tile, contactUri, notifications);
+        return augmentTileFromNotifications(tile, key, contactUri, notifications);
     }
 
     /** Returns active and pending notifications grouped by {@link PeopleTileKey}. */
@@ -367,9 +379,9 @@ public class PeopleSpaceWidgetManager {
     }
 
     /** Augments {@code tile} based on {@code notifications}, matching {@code contactUri}. */
-    public PeopleSpaceTile augmentTileFromNotifications(PeopleSpaceTile tile, String contactUri,
-            Map<PeopleTileKey, Set<NotificationEntry>> notifications) {
-        if (DEBUG) Log.d(TAG, "Augmenting tile from notifications. Tile id: " + tile.getId());
+    public PeopleSpaceTile augmentTileFromNotifications(PeopleSpaceTile tile, PeopleTileKey key,
+            String contactUri, Map<PeopleTileKey, Set<NotificationEntry>> notifications) {
+        if (DEBUG) Log.d(TAG, "Augmenting tile from notifications. Tile key: " + key.toString());
         boolean hasReadContactsPermission =  mPackageManager.checkPermission(READ_CONTACTS,
                 tile.getPackageName()) == PackageManager.PERMISSION_GRANTED;
 
@@ -384,13 +396,12 @@ public class PeopleSpaceWidgetManager {
             }
         }
 
-        PeopleTileKey key = new PeopleTileKey(tile);
         Set<NotificationEntry> allNotifications = notifications.get(key);
         if (allNotifications == null) {
             allNotifications = new HashSet<>();
         }
         if (allNotifications.isEmpty() && notificationsByUri.isEmpty()) {
-            if (DEBUG) Log.d(TAG, "No existing notifications for tile: " + key);
+            if (DEBUG) Log.d(TAG, "No existing notifications for tile: " + key.toString());
             return removeNotificationFields(tile);
         }
 
@@ -402,22 +413,28 @@ public class PeopleSpaceWidgetManager {
         NotificationEntry highestPriority = getHighestPriorityNotification(allNotifications);
 
         if (DEBUG) Log.d(TAG, "Augmenting tile from notification, key: " + key.toString());
-        return augmentTileFromNotification(mContext, tile, highestPriority, messagesCount);
+        return augmentTileFromNotification(mContext, tile, key, highestPriority, messagesCount);
     }
 
     /** Returns an augmented tile for an existing widget. */
     @Nullable
     public Optional<PeopleSpaceTile> getAugmentedTileForExistingWidget(int widgetId,
             Map<PeopleTileKey, Set<NotificationEntry>> notifications) {
-        Log.d(TAG, "Augmenting tile for widget: " + widgetId);
+        Log.d(TAG, "Augmenting tile for existing widget: " + widgetId);
         PeopleSpaceTile tile = getTileForExistingWidget(widgetId);
         if (tile == null) {
+            if (DEBUG) {
+                Log.w(TAG, "Widget: " + widgetId
+                        + ". Null tile for existing widget, skipping update.");
+            }
             return Optional.empty();
         }
         String contactUriString = mSharedPrefs.getString(String.valueOf(widgetId), null);
         // Should never be null, but using ofNullable for extra safety.
+        PeopleTileKey key = new PeopleTileKey(tile);
+        if (DEBUG) Log.d(TAG, "Existing widget: " + widgetId + ". Tile key: " + key.toString());
         return Optional.ofNullable(
-                augmentTileFromNotifications(tile, contactUriString, notifications));
+                augmentTileFromNotifications(tile, key, contactUriString, notifications));
     }
 
     /** Returns stored widgets for the conversation specified. */
@@ -644,12 +661,12 @@ public class PeopleSpaceWidgetManager {
         }
 
         synchronized (mLock) {
-            if (DEBUG) Log.d(TAG, "Add storage for : " + tile.getId());
+            if (DEBUG) Log.d(TAG, "Add storage for : " + key.toString());
             PeopleSpaceUtils.setSharedPreferencesStorageForTile(mContext, key, appWidgetId,
                     tile.getContactUri());
         }
         try {
-            if (DEBUG) Log.d(TAG, "Caching shortcut for PeopleTile: " + tile.getId());
+            if (DEBUG) Log.d(TAG, "Caching shortcut for PeopleTile: " + key.toString());
             mLauncherApps.cacheShortcuts(tile.getPackageName(),
                     Collections.singletonList(tile.getId()),
                     tile.getUserHandle(), LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
@@ -679,7 +696,7 @@ public class PeopleSpaceWidgetManager {
                 if (DEBUG) Log.d(TAG, "Already registered listener");
                 return;
             }
-            if (DEBUG) Log.d(TAG, "Register listener for " + widgetId + " with " + key);
+            if (DEBUG) Log.d(TAG, "Register listener for " + widgetId + " with " + key.toString());
             mListeners.put(key, newListener);
         }
         mPeopleManager.registerConversationListener(key.getPackageName(),
@@ -750,7 +767,9 @@ public class PeopleSpaceWidgetManager {
                 if (DEBUG) Log.d(TAG, "Cannot find listener to unregister");
                 return;
             }
-            if (DEBUG) Log.d(TAG, "Unregister listener for " + appWidgetId + " with " + key);
+            if (DEBUG) {
+                Log.d(TAG, "Unregister listener for " + appWidgetId + " with " + key.toString());
+            }
             mListeners.remove(key);
         }
         mPeopleManager.unregisterConversationListener(registeredListener);

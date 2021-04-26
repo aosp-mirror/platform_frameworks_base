@@ -142,6 +142,7 @@ public class OneTouchPlayActionTest {
         mPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
     }
 
     private OneTouchPlayAction createOneTouchPlayAction(HdmiCecLocalDevicePlayback device,
@@ -161,6 +162,7 @@ public class OneTouchPlayActionTest {
         mLocalDevices.add(playbackDevice);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
 
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
@@ -203,6 +205,7 @@ public class OneTouchPlayActionTest {
         mLocalDevices.add(playbackDevice);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
 
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
@@ -245,6 +248,7 @@ public class OneTouchPlayActionTest {
         mLocalDevices.add(playbackDevice);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
 
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
@@ -297,6 +301,7 @@ public class OneTouchPlayActionTest {
         mLocalDevices.add(playbackDevice);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
 
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
@@ -342,6 +347,7 @@ public class OneTouchPlayActionTest {
         mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(ADDR_TV,
                 HdmiControlManager.POWER_STATUS_ON);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
 
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
@@ -376,6 +382,7 @@ public class OneTouchPlayActionTest {
         mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(ADDR_TV,
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
 
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
@@ -420,6 +427,7 @@ public class OneTouchPlayActionTest {
         mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(ADDR_TV,
                 HdmiControlManager.POWER_STATUS_STANDBY);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
 
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();

@@ -147,9 +147,6 @@ public abstract class PanelViewController {
     private float mInitialTouchX;
     private boolean mTouchDisabled;
 
-    // AmbientState will never be null since it provides an @Inject constructor for Dagger to call.
-    private AmbientState mAmbientState;
-
     /**
      * Whether or not the PanelView can be expanded or collapsed with a drag.
      */
@@ -172,6 +169,7 @@ public abstract class PanelViewController {
     protected final Resources mResources;
     protected final KeyguardStateController mKeyguardStateController;
     protected final SysuiStatusBarStateController mStatusBarStateController;
+    protected final AmbientState mAmbientState;
 
     protected void onExpandingFinished() {
         mBar.onExpandingFinished();

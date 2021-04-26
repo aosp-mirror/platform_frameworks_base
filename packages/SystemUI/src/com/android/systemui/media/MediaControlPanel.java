@@ -54,6 +54,7 @@ import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.util.animation.TransitionLayout;
 
@@ -241,6 +242,21 @@ public class MediaControlPanel {
         TransitionLayout recommendations = vh.getRecommendations();
 
         mMediaViewController.attach(recommendations, MediaViewController.TYPE.RECOMMENDATION);
+
+        mRecommendationViewHolder.getRecommendations().setOnLongClickListener(v -> {
+            if (!mMediaViewController.isGutsVisible()) {
+                mMediaViewController.openGuts();
+                return true;
+            } else {
+                return false;
+            }
+        });
+        mRecommendationViewHolder.getCancel().setOnClickListener(v -> {
+            closeGuts();
+        });
+        mRecommendationViewHolder.getSettings().setOnClickListener(v -> {
+            mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
+        });
     }
 
     /** Bind this player view based on the data given. */
@@ -460,10 +476,7 @@ public class MediaControlPanel {
     }
 
     /** Bind this recommendation view based on the data given. */
-    public void bindRecommendation(
-            @NonNull SmartspaceTarget target,
-            @NonNull int backgroundColor,
-            @Nullable View.OnClickListener callback) {
+    public void bindRecommendation(@NonNull SmartspaceTarget target, @NonNull int backgroundColor) {
         if (mRecommendationViewHolder == null) {
             return;
         }
@@ -519,13 +532,26 @@ public class MediaControlPanel {
             mediaCoverImageView.setImageIcon(recommendation.getIcon());
 
             // Set up the click listener if applicable.
-            setSmartspaceOnClickListener(mediaCoverImageView, recommendation, callback);
+            setSmartspaceRecItemOnClickListener(mediaCoverImageView, recommendation,
+                    view -> mMediaDataManagerLazy
+                            .get()
+                            .dismissSmartspaceRecommendation(0L /* delay */));
 
             setVisibleAndAlpha(expandedSet, mediaCoverItemsResIds.get(i), true);
             setVisibleAndAlpha(expandedSet, mediaLogoItemsResIds.get(i), true);
             setVisibleAndAlpha(collapsedSet, mediaCoverItemsResIds.get(i), true);
             setVisibleAndAlpha(collapsedSet, mediaLogoItemsResIds.get(i), true);
         }
+
+        // Set up long press to show guts setting panel.
+        mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
+            closeGuts();
+            mKeyguardDismissUtil.executeWhenUnlocked(() -> {
+                mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
+                        MediaViewController.GUTS_ANIMATION_DURATION + 100L);
+                return true;
+            }, true /* requiresShadeOpen */);
+        });
 
         mController = null;
         mMediaViewController.refreshState();
@@ -611,7 +637,7 @@ public class MediaControlPanel {
         set.setAlpha(actionId, visible ? 1.0f : 0.0f);
     }
 
-    private void setSmartspaceOnClickListener(
+    private void setSmartspaceRecItemOnClickListener(
             @NonNull View view,
             @NonNull SmartspaceAction action,
             @Nullable View.OnClickListener callback) {
@@ -629,5 +655,15 @@ public class MediaControlPanel {
                 callback.onClick(v);
             }
         });
+    }
+
+    private int getSurfaceForSmartspaceLogging(int currentEndLocation) {
+        if (currentEndLocation == MediaHierarchyManager.LOCATION_QQS
+                || currentEndLocation == MediaHierarchyManager.LOCATION_QS) {
+            return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE;
+        } else if (currentEndLocation == MediaHierarchyManager.LOCATION_LOCKSCREEN) {
+            return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN;
+        }
+        return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DEFAULT_SURFACE;
     }
 }

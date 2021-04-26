@@ -53,6 +53,7 @@ import android.hardware.fingerprint.FingerprintServiceReceiver;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.hardware.fingerprint.IFingerprintStateListener;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
@@ -105,6 +106,15 @@ public class FingerprintService extends SystemService implements BiometricServic
     private final LockPatternUtils mLockPatternUtils;
     private final FingerprintServiceWrapper mServiceWrapper;
     @NonNull private List<ServiceProvider> mServiceProviders;
+    @NonNull private final FingerprintStateCallback mFingerprintStateCallback;
+
+    /**
+     * Registers FingerprintStateListener in list stored by FingerprintService
+     * @param listener new FingerprintStateListener being added
+     */
+    public void registerFingerprintStateListener(@NonNull IFingerprintStateListener listener) {
+        mFingerprintStateCallback.registerFingerprintStateListener(listener);
+    }
 
     /**
      * Receives the incoming binder calls from FingerprintManager.
@@ -122,7 +132,8 @@ public class FingerprintService extends SystemService implements BiometricServic
                 return null;
             }
 
-            return provider.createTestSession(sensorId, callback, opPackageName);
+            return provider.createTestSession(sensorId, callback, mFingerprintStateCallback,
+                    opPackageName);
         }
 
         @Override
@@ -205,7 +216,7 @@ public class FingerprintService extends SystemService implements BiometricServic
             }
 
             provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
-                    receiver, opPackageName, enrollReason);
+                    receiver, opPackageName, enrollReason, mFingerprintStateCallback);
         }
 
         @Override // Binder call
@@ -284,7 +295,7 @@ public class FingerprintService extends SystemService implements BiometricServic
             } else {
                 provider.second.scheduleAuthenticate(provider.first, token, operationId, userId,
                         0 /* cookie */, new ClientMonitorCallbackConverter(receiver), opPackageName,
-                        restricted, statsClient, isKeyguard);
+                        restricted, statsClient, isKeyguard, mFingerprintStateCallback);
             }
         }
 
@@ -393,7 +404,7 @@ public class FingerprintService extends SystemService implements BiometricServic
 
             provider.second.scheduleFingerDetect(provider.first, token, userId,
                     new ClientMonitorCallbackConverter(receiver), opPackageName,
-                    BiometricsProtoEnums.CLIENT_KEYGUARD);
+                    BiometricsProtoEnums.CLIENT_KEYGUARD, mFingerprintStateCallback);
         }
 
         @Override // Binder call
@@ -411,7 +422,8 @@ public class FingerprintService extends SystemService implements BiometricServic
             final boolean restricted = true; // BiometricPrompt is always restricted
             provider.scheduleAuthenticate(sensorId, token, operationId, userId, cookie,
                     new ClientMonitorCallbackConverter(sensorReceiver), opPackageName, restricted,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, allowBackgroundAuthentication);
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, allowBackgroundAuthentication,
+                    mFingerprintStateCallback);
         }
 
         @Override // Binder call
@@ -568,6 +580,8 @@ public class FingerprintService extends SystemService implements BiometricServic
                                 : provider.getSensorProperties()) {
                             pw.println("Dumping for sensorId: " + props.sensorId
                                     + ", provider: " + provider.getClass().getSimpleName());
+                            pw.println("Fps state: "
+                                    + mFingerprintStateCallback.getFingerprintState());
                             provider.dumpInternal(props.sensorId, pw);
                             pw.println();
                         }
@@ -813,6 +827,11 @@ public class FingerprintService extends SystemService implements BiometricServic
                 provider.setUdfpsOverlayController(controller);
             }
         }
+
+        @Override
+        public void registerFingerprintStateListener(@NonNull IFingerprintStateListener listener) {
+            FingerprintService.this.registerFingerprintStateListener(listener);
+        }
     }
 
     public FingerprintService(Context context) {
@@ -823,6 +842,7 @@ public class FingerprintService extends SystemService implements BiometricServic
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mServiceProviders = new ArrayList<>();
+        mFingerprintStateCallback = new FingerprintStateCallback();
     }
 
     @Override

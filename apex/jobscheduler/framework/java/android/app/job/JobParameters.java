@@ -44,36 +44,53 @@ import java.lang.annotation.RetentionPolicy;
 public class JobParameters implements Parcelable {
 
     /** @hide */
-    public static final int REASON_CANCELED = JobProtoEnums.STOP_REASON_CANCELLED; // 0.
+    public static final int INTERNAL_STOP_REASON_CANCELED =
+            JobProtoEnums.STOP_REASON_CANCELLED; // 0.
     /** @hide */
-    public static final int REASON_CONSTRAINTS_NOT_SATISFIED =
-            JobProtoEnums.STOP_REASON_CONSTRAINTS_NOT_SATISFIED; //1.
+    public static final int INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED =
+            JobProtoEnums.STOP_REASON_CONSTRAINTS_NOT_SATISFIED; // 1.
     /** @hide */
-    public static final int REASON_PREEMPT = JobProtoEnums.STOP_REASON_PREEMPT; // 2.
+    public static final int INTERNAL_STOP_REASON_PREEMPT =
+            JobProtoEnums.STOP_REASON_PREEMPT; // 2.
+    /**
+     * The job ran for at least its minimum execution limit.
+     * @hide
+     */
+    public static final int INTERNAL_STOP_REASON_TIMEOUT =
+            JobProtoEnums.STOP_REASON_TIMEOUT; // 3.
     /** @hide */
-    public static final int REASON_TIMEOUT = JobProtoEnums.STOP_REASON_TIMEOUT; // 3.
+    public static final int INTERNAL_STOP_REASON_DEVICE_IDLE =
+            JobProtoEnums.STOP_REASON_DEVICE_IDLE; // 4.
     /** @hide */
-    public static final int REASON_DEVICE_IDLE = JobProtoEnums.STOP_REASON_DEVICE_IDLE; // 4.
-    /** @hide */
-    public static final int REASON_DEVICE_THERMAL = JobProtoEnums.STOP_REASON_DEVICE_THERMAL; // 5.
+    public static final int INTERNAL_STOP_REASON_DEVICE_THERMAL =
+            JobProtoEnums.STOP_REASON_DEVICE_THERMAL; // 5.
     /**
      * The job is in the {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
      * bucket.
      *
      * @hide
      */
-    public static final int REASON_RESTRICTED_BUCKET =
+    public static final int INTERNAL_STOP_REASON_RESTRICTED_BUCKET =
             JobProtoEnums.STOP_REASON_RESTRICTED_BUCKET; // 6.
     /**
      * The app was uninstalled.
      * @hide
      */
-    public static  final int DEBUG_REASON_UNINSTALL = 7;
+    public static final int INTERNAL_STOP_REASON_UNINSTALL = 7;
     /**
      * The app's data was cleared.
      * @hide
      */
-    public static  final int DEBUG_REASON_DATA_CLEARED = 8;
+    public static final int INTERNAL_STOP_REASON_DATA_CLEARED = 8;
+    /**
+     * @hide
+     */
+    public static final int INTERNAL_STOP_REASON_RTC_UPDATED = 9;
+    /**
+     * The app called jobFinished() on its own.
+     * @hide
+     */
+    public static final int INTERNAL_STOP_REASON_SUCCESSFUL_FINISH = 10;
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
@@ -85,13 +102,13 @@ public class JobParameters implements Parcelable {
      * @hide
      */
     public static final int[] JOB_STOP_REASON_CODES = {
-            REASON_CANCELED,
-            REASON_CONSTRAINTS_NOT_SATISFIED,
-            REASON_PREEMPT,
-            REASON_TIMEOUT,
-            REASON_DEVICE_IDLE,
-            REASON_DEVICE_THERMAL,
-            REASON_RESTRICTED_BUCKET,
+            INTERNAL_STOP_REASON_CANCELED,
+            INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED,
+            INTERNAL_STOP_REASON_PREEMPT,
+            INTERNAL_STOP_REASON_TIMEOUT,
+            INTERNAL_STOP_REASON_DEVICE_IDLE,
+            INTERNAL_STOP_REASON_DEVICE_THERMAL,
+            INTERNAL_STOP_REASON_RESTRICTED_BUCKET,
     };
 
     /**
@@ -99,21 +116,24 @@ public class JobParameters implements Parcelable {
      */
     // TODO(142420609): make it @SystemApi for mainline
     @NonNull
-    public static String getLegacyReasonCodeDescription(int reasonCode) {
+    public static String getInternalReasonCodeDescription(int reasonCode) {
         switch (reasonCode) {
-            case REASON_CANCELED: return "canceled";
-            case REASON_CONSTRAINTS_NOT_SATISFIED: return "constraints";
-            case REASON_PREEMPT: return "preempt";
-            case REASON_TIMEOUT: return "timeout";
-            case REASON_DEVICE_IDLE: return "device_idle";
-            case REASON_DEVICE_THERMAL: return "thermal";
-            case REASON_RESTRICTED_BUCKET: return "restricted_bucket";
+            case INTERNAL_STOP_REASON_CANCELED: return "canceled";
+            case INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED: return "constraints";
+            case INTERNAL_STOP_REASON_PREEMPT: return "preempt";
+            case INTERNAL_STOP_REASON_TIMEOUT: return "timeout";
+            case INTERNAL_STOP_REASON_DEVICE_IDLE: return "device_idle";
+            case INTERNAL_STOP_REASON_DEVICE_THERMAL: return "thermal";
+            case INTERNAL_STOP_REASON_RESTRICTED_BUCKET: return "restricted_bucket";
+            case INTERNAL_STOP_REASON_UNINSTALL: return "uninstall";
+            case INTERNAL_STOP_REASON_DATA_CLEARED: return "data_cleared";
+            case INTERNAL_STOP_REASON_RTC_UPDATED: return "rtc_updated";
+            case INTERNAL_STOP_REASON_SUCCESSFUL_FINISH: return "successful_finish";
             default: return "unknown:" + reasonCode;
         }
     }
 
     /** @hide */
-    // TODO: move current users of legacy reasons to new public reasons
     @NonNull
     public static int[] getJobStopReasonCodes() {
         return JOB_STOP_REASON_CODES;
@@ -241,7 +261,7 @@ public class JobParameters implements Parcelable {
     private final Network network;
 
     private int mStopReason = STOP_REASON_UNDEFINED;
-    private int mLegacyStopReason; // Default value of stopReason is REASON_CANCELED
+    private int mInternalStopReason; // Default value is REASON_CANCELED
     private String debugStopReason; // Human readable stop reason for debugging.
 
     /** @hide */
@@ -280,8 +300,8 @@ public class JobParameters implements Parcelable {
     }
 
     /** @hide */
-    public int getLegacyStopReason() {
-        return mLegacyStopReason;
+    public int getInternalStopReasonCode() {
+        return mInternalStopReason;
     }
 
     /**
@@ -502,15 +522,15 @@ public class JobParameters implements Parcelable {
             network = null;
         }
         mStopReason = in.readInt();
-        mLegacyStopReason = in.readInt();
+        mInternalStopReason = in.readInt();
         debugStopReason = in.readString();
     }
 
     /** @hide */
-    public void setStopReason(@StopReason int reason, int legacyStopReason,
+    public void setStopReason(@StopReason int reason, int internalStopReason,
             String debugStopReason) {
         mStopReason = reason;
-        mLegacyStopReason = legacyStopReason;
+        mInternalStopReason = internalStopReason;
         this.debugStopReason = debugStopReason;
     }
 
@@ -543,7 +563,7 @@ public class JobParameters implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeInt(mStopReason);
-        dest.writeInt(mLegacyStopReason);
+        dest.writeInt(mInternalStopReason);
         dest.writeString(debugStopReason);
     }
 

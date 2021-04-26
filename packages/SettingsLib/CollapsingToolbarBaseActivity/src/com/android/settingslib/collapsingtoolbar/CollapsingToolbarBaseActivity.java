@@ -78,16 +78,18 @@ public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
     public void setTitle(CharSequence title) {
         if (mCollapsingToolbarLayout != null) {
             mCollapsingToolbarLayout.setTitle(title);
+        } else {
+            super.setTitle(title);
         }
-        super.setTitle(title);
     }
 
     @Override
     public void setTitle(int titleId) {
         if (mCollapsingToolbarLayout != null) {
             mCollapsingToolbarLayout.setTitle(getText(titleId));
+        } else {
+            super.setTitle(titleId);
         }
-        super.setTitle(titleId);
     }
 
     @Override

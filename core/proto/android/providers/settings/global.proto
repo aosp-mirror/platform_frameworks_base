@@ -89,14 +89,6 @@ message GlobalSettingsProto {
     optional SettingProto assisted_gps_enabled = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto audio_safe_volume_state = 15 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    message Auto {
-        option (android.msg_privacy).dest = DEST_EXPLICIT;
-
-        optional SettingProto time = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto time_zone = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    }
-    optional Auto auto = 16;
-
     reserved 17; // Used to be autofill_compat_mode_allowed_packages
 
     message Autofill {
@@ -253,6 +245,14 @@ message GlobalSettingsProto {
     }
     optional Database database = 36;
 
+    message DateTime {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto auto_time = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto auto_time_zone = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional DateTime date_time = 16;
+
     message Debug {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -285,6 +285,7 @@ message GlobalSettingsProto {
         // Deprecated, use enable_non_resizable_multi_window
         optional SettingProto enable_sizecompat_freeform = 7 [ (android.privacy).dest = DEST_AUTOMATIC, deprecated = true ];
         optional SettingProto enable_non_resizable_multi_window = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto disable_window_blurs = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Development development = 39;
 

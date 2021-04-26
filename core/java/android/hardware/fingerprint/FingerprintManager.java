@@ -23,6 +23,11 @@ import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
+import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
+
+import static com.android.internal.util.FrameworkStatsLog.AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_AUTHENTICATE;
+import static com.android.internal.util.FrameworkStatsLog.AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_HAS_ENROLLED_FINGERPRINTS;
+import static com.android.internal.util.FrameworkStatsLog.AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_IS_HARDWARE_DETECTED;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -55,6 +60,8 @@ import android.os.UserHandle;
 import android.security.identity.IdentityCredential;
 import android.util.Slog;
 import android.view.Surface;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -534,6 +541,11 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             @NonNull AuthenticationCallback callback, Handler handler, int sensorId, int userId) {
 
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_DEPRECATED_API_USED,
+                AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_AUTHENTICATE,
+                mContext.getApplicationInfo().uid,
+                mContext.getApplicationInfo().targetSdkVersion);
+
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
@@ -867,6 +879,19 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
+     * Forwards FingerprintStateListener to FingerprintService
+     * @param listener new FingerprintStateListener being added
+     * @hide
+     */
+    public void registerFingerprintStateListener(@NonNull FingerprintStateListener listener) {
+        try {
+            mService.registerFingerprintStateListener(listener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
@@ -910,6 +935,11 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @Deprecated
     @RequiresPermission(USE_FINGERPRINT)
     public boolean hasEnrolledFingerprints() {
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_DEPRECATED_API_USED,
+                AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_HAS_ENROLLED_FINGERPRINTS,
+                mContext.getApplicationInfo().uid,
+                mContext.getApplicationInfo().targetSdkVersion);
+
         return hasEnrolledFingerprints(UserHandle.myUserId());
     }
 
@@ -938,6 +968,11 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @Deprecated
     @RequiresPermission(USE_FINGERPRINT)
     public boolean isHardwareDetected() {
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_DEPRECATED_API_USED,
+                AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_IS_HARDWARE_DETECTED,
+                mContext.getApplicationInfo().uid,
+                mContext.getApplicationInfo().targetSdkVersion);
+
         if (mService != null) {
             try {
                 return mService.isHardwareDetectedDeprecated(mContext.getOpPackageName());
@@ -965,6 +1000,16 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns whether the device has a power button fingerprint sensor.
+     * @return boolean indicating whether power button is fingerprint sensor
+     * @hide
+     */
+    public boolean isPowerbuttonFps() {
+        final FingerprintSensorPropertiesInternal sensorProps = getFirstFingerprintSensor();
+        return sensorProps.sensorType == TYPE_POWER_BUTTON;
     }
 
     /**

@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -84,11 +85,24 @@ public abstract class LightsManager {
     public abstract @NonNull LightsSession openSession();
 
     /**
+     *
+     * Creates a new {@link LightsSession}
+     *
+     * @param priority the larger this number, the higher the priority of this session when multiple
+     *                 light state requests arrive simultaneously.
+     *
+     * @hide
+     */
+    @TestApi
+    public abstract @NonNull LightsSession openSession(int priority);
+
+    /**
      * Encapsulates a session that can be used to control device lights and represents the lifetime
      * of the requests.
      */
     public abstract static class LightsSession implements AutoCloseable {
         private final IBinder mToken = new Binder();
+
         /**
          * Sends a request to modify the states of multiple lights.
          *

@@ -77,6 +77,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.LocalSocket;
@@ -4643,6 +4644,12 @@ public final class ProcessList {
                 }
             });
         }
+
+        // Update the global configuration and increase the assets sequence number.
+        Configuration currentConfig = mService.mActivityTaskManager.getConfiguration();
+        Configuration newConfig = new Configuration();
+        newConfig.assetsSeq = (currentConfig != null ? currentConfig.assetsSeq : 0) + 1;
+        mService.mActivityTaskManager.updateConfiguration(newConfig);
     }
 
     @GuardedBy("mService")

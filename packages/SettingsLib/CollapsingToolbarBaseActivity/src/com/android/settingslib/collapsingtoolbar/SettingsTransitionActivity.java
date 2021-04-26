@@ -27,6 +27,7 @@ import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.os.BuildCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.settingslib.transition.SettingsTransitionHelper;
@@ -41,7 +42,7 @@ public abstract class SettingsTransitionActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (BuildCompat.isAtLeastS()) {
             getWindow().requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS);
             SettingsTransitionHelper.applyForwardTransition(this);
             SettingsTransitionHelper.applyBackwardTransition(this);
@@ -51,7 +52,7 @@ public abstract class SettingsTransitionActivity extends FragmentActivity {
 
     @Override
     public void startActivity(Intent intent) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        if (!BuildCompat.isAtLeastS()) {
             super.startActivity(intent);
             return;
         }
@@ -67,7 +68,7 @@ public abstract class SettingsTransitionActivity extends FragmentActivity {
 
     @Override
     public void startActivity(Intent intent, @Nullable Bundle options) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        if (!BuildCompat.isAtLeastS()) {
             super.startActivity(intent, options);
             return;
         }
@@ -82,7 +83,7 @@ public abstract class SettingsTransitionActivity extends FragmentActivity {
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || requestCode == DEFAULT_REQUEST) {
+        if (!BuildCompat.isAtLeastS() || requestCode == DEFAULT_REQUEST) {
             super.startActivityForResult(intent, requestCode);
             return;
         }
@@ -98,7 +99,7 @@ public abstract class SettingsTransitionActivity extends FragmentActivity {
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || requestCode == DEFAULT_REQUEST) {
+        if (!BuildCompat.isAtLeastS() || requestCode == DEFAULT_REQUEST) {
             super.startActivityForResult(intent, requestCode, options);
             return;
         }

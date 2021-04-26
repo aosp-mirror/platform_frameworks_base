@@ -25,6 +25,8 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.TransitionOldType;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
+import android.annotation.SuppressLint;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -153,7 +155,8 @@ public class RemoteAnimationAdapterCompat {
             final RemoteAnimationRunnerCompat remoteAnimationAdapter) {
         return new IRemoteTransition.Stub() {
             @Override
-            public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+            public void startAnimation(IBinder token, TransitionInfo info,
+                    SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishCallback) {
                 final RemoteAnimationTargetCompat[] appsCompat =
                         RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */);
@@ -239,10 +242,16 @@ public class RemoteAnimationAdapterCompat {
 
                 final Runnable animationFinishedCallback = new Runnable() {
                     @Override
+                    @SuppressLint("NewApi")
                     public void run() {
                         try {
                             counterLauncher.cleanUp(info.getRootLeash());
                             counterWallpaper.cleanUp(info.getRootLeash());
+                            // Release surface references now. This is apparently to free GPU
+                            // memory while doing quick operations (eg. during CTS).
+                            for (int i = 0; i < info.getChanges().size(); ++i) {
+                                info.getChanges().get(i).getLeash().release();
+                            }
                             finishCallback.onTransitionFinished(null /* wct */);
                         } catch (RemoteException e) {
                             Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"
@@ -255,6 +264,14 @@ public class RemoteAnimationAdapterCompat {
                         TRANSIT_OLD_NONE,
                         appsCompat, wallpapersCompat, nonAppsCompat,
                         animationFinishedCallback);
+            }
+
+            @Override
+            public void mergeAnimation(IBinder token, TransitionInfo info,
+                    SurfaceControl.Transaction t, IBinder mergeTarget,
+                    IRemoteTransitionFinishedCallback finishCallback) {
+                // TODO: hook up merge to recents onTaskAppeared if applicable. Until then, ignore
+                //       any incoming merges.
             }
         };
     }

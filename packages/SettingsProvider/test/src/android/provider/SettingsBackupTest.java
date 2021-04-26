@@ -231,6 +231,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_USE_BLAST_ADAPTER_VR,
                     Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH,
                     Settings.Global.DEVICE_DEMO_MODE,
+                    Settings.Global.DISABLE_WINDOW_BLURS,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
                     Settings.Global.BATTERY_TIP_CONSTANTS,
                     Settings.Global.DEFAULT_SM_DP_PLUS,

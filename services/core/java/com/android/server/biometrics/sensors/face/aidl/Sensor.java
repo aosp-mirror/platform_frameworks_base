@@ -186,7 +186,7 @@ public class Sensor {
                     return;
                 }
                 ((FaceAuthenticationClient) client).onAuthenticationFrame(
-                        AidlConversionUtils.convert(frame));
+                        AidlConversionUtils.toFrameworkAuthenticationFrame(frame));
             });
         }
 
@@ -204,7 +204,8 @@ public class Sensor {
                             + Utils.getClientName(client));
                     return;
                 }
-                ((FaceEnrollClient) client).onEnrollmentFrame(AidlConversionUtils.convert(frame));
+                ((FaceEnrollClient) client).onEnrollmentFrame(
+                        AidlConversionUtils.toFrameworkEnrollmentFrame(frame));
             });
         }
 
@@ -223,7 +224,7 @@ public class Sensor {
                 }
 
                 final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-                errorConsumer.onError(error, vendorCode);
+                errorConsumer.onError(AidlConversionUtils.toFrameworkError(error), vendorCode);
 
                 if (error == Error.HW_UNAVAILABLE) {
                     mCallback.onHardwareUnavailable();
@@ -376,12 +377,32 @@ public class Sensor {
 
         @Override
         public void onFeaturesRetrieved(byte[] features) {
+            mHandler.post(() -> {
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
+                if (!(client instanceof FaceGetFeatureClient)) {
+                    Slog.e(mTag, "onFeaturesRetrieved for non-get feature consumer: "
+                            + Utils.getClientName(client));
+                    return;
+                }
+                final FaceGetFeatureClient faceGetFeatureClient = (FaceGetFeatureClient) client;
+                faceGetFeatureClient.onFeatureGet(true /* success */, features);
+            });
 
         }
 
         @Override
         public void onFeatureSet(byte feature) {
+            mHandler.post(() -> {
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
+                if (!(client instanceof FaceSetFeatureClient)) {
+                    Slog.e(mTag, "onFeatureSet for non-set consumer: "
+                            + Utils.getClientName(client));
+                    return;
+                }
 
+                final FaceSetFeatureClient faceSetFeatureClient = (FaceSetFeatureClient) client;
+                faceSetFeatureClient.onFeatureSet(true /* success */);
+            });
         }
 
         @Override

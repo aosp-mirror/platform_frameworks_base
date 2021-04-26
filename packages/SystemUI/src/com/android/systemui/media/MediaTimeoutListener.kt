@@ -51,36 +51,53 @@ class MediaTimeoutListener @Inject constructor(
     lateinit var timeoutCallback: (String, Boolean) -> Unit
 
     override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
-        if (mediaListeners.containsKey(key)) {
-            return
+        var reusedListener: PlaybackStateListener? = null
+
+        // First check if we already have a listener
+        mediaListeners.get(key)?.let {
+            if (!it.destroyed) {
+                return
+            }
+
+            // If listener was destroyed previously, we'll need to re-register it
+            if (DEBUG) {
+                Log.d(TAG, "Reusing destroyed listener $key")
+            }
+            reusedListener = it
         }
+
         // Having an old key means that we're migrating from/to resumption. We should update
         // the old listener to make sure that events will be dispatched to the new location.
         val migrating = oldKey != null && key != oldKey
         if (migrating) {
-            val reusedListener = mediaListeners.remove(oldKey)
+            reusedListener = mediaListeners.remove(oldKey)
             if (reusedListener != null) {
-                val wasPlaying = reusedListener.playing ?: false
                 if (DEBUG) Log.d(TAG, "migrating key $oldKey to $key, for resumption")
-                reusedListener.mediaData = data
-                reusedListener.key = key
-                mediaListeners[key] = reusedListener
-                if (wasPlaying != reusedListener.playing) {
-                    // If a player becomes active because of a migration, we'll need to broadcast
-                    // its state. Doing it now would lead to reentrant callbacks, so let's wait
-                    // until we're done.
-                    mainExecutor.execute {
-                        if (mediaListeners[key]?.playing == true) {
-                            if (DEBUG) Log.d(TAG, "deliver delayed playback state for $key")
-                            timeoutCallback.invoke(key, false /* timedOut */)
-                        }
-                    }
-                }
-                return
             } else {
                 Log.w(TAG, "Old key $oldKey for player $key doesn't exist. Continuing...")
             }
         }
+
+        reusedListener?.let {
+            val wasPlaying = it.playing ?: false
+            if (DEBUG) Log.d(TAG, "updating listener for $key, was playing? $wasPlaying")
+            it.mediaData = data
+            it.key = key
+            mediaListeners[key] = it
+            if (wasPlaying != it.playing) {
+                // If a player becomes active because of a migration, we'll need to broadcast
+                // its state. Doing it now would lead to reentrant callbacks, so let's wait
+                // until we're done.
+                mainExecutor.execute {
+                    if (mediaListeners[key]?.playing == true) {
+                        if (DEBUG) Log.d(TAG, "deliver delayed playback state for $key")
+                        timeoutCallback.invoke(key, false /* timedOut */)
+                    }
+                }
+            }
+            return
+        }
+
         mediaListeners[key] = PlaybackStateListener(key, data)
     }
 
@@ -99,9 +116,11 @@ class MediaTimeoutListener @Inject constructor(
 
         var timedOut = false
         var playing: Boolean? = null
+        var destroyed = false
 
         var mediaData: MediaData = data
             set(value) {
+                destroyed = false
                 mediaController?.unregisterCallback(this)
                 field = value
                 mediaController = if (field.token != null) {
@@ -126,15 +145,25 @@ class MediaTimeoutListener @Inject constructor(
         fun destroy() {
             mediaController?.unregisterCallback(this)
             cancellation?.run()
+            destroyed = true
         }
 
         override fun onPlaybackStateChanged(state: PlaybackState?) {
             processState(state, dispatchEvents = true)
         }
 
+        override fun onSessionDestroyed() {
+            // If the session is destroyed, the controller is no longer valid, and we will need to
+            // recreate it if this key is updated later
+            if (DEBUG) {
+                Log.d(TAG, "Session destroyed for $key")
+            }
+            destroy()
+        }
+
         private fun processState(state: PlaybackState?, dispatchEvents: Boolean) {
             if (DEBUG) {
-                Log.v(TAG, "processState: $state")
+                Log.v(TAG, "processState $key: $state")
             }
 
             val isPlaying = state != null && isPlayingState(state.state)
@@ -173,8 +202,7 @@ class MediaTimeoutListener @Inject constructor(
         private fun expireMediaTimeout(mediaKey: String, reason: String) {
             cancellation?.apply {
                 if (DEBUG) {
-                    Log.v(TAG,
-                            "media timeout cancelled for  $mediaKey, reason: $reason")
+                    Log.v(TAG, "media timeout cancelled for  $mediaKey, reason: $reason")
                 }
                 run()
             }

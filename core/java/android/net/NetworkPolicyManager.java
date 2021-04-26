@@ -767,7 +767,6 @@ public class NetworkPolicyManager {
      *                       blocked.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @NonNull
     public static String blockedReasonsToString(int blockedReasons) {
         return DebugUtils.flagsToString(ConnectivityManager.class, "BLOCKED_", blockedReasons);

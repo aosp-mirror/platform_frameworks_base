@@ -203,6 +203,22 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onProfileAdded_setsTheme() {
+        mBroadcastReceiver.getValue().onReceive(null,
+                new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED));
+        verify(mThemeOverlayApplier).applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
+    @Test
+    public void onProfileAdded_ignoresUntilSetupComplete() {
+        reset(mDeviceProvisionedController);
+        mBroadcastReceiver.getValue().onReceive(null,
+                new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED));
+        verify(mThemeOverlayApplier, never())
+                .applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
+    @Test
     public void onWallpaperColorsChanged_firstEventBeforeUserSetup_shouldBeAccepted() {
         // By default, on setup() we make this controller return that the user finished setup
         // wizard. This test on the other hand, is testing the setup flow.
@@ -212,6 +228,18 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
 
         verify(mThemeOverlayApplier).applyCurrentUserOverlays(any(), any(), anyInt(), any());
+
+        // Regression test: null events should not reset the internal state and allow colors to be
+        // applied again.
+        clearInvocations(mThemeOverlayApplier);
+        mBroadcastReceiver.getValue().onReceive(null, new Intent(Intent.ACTION_WALLPAPER_CHANGED));
+        mColorsListener.getValue().onColorsChanged(null, WallpaperManager.FLAG_SYSTEM);
+        verify(mThemeOverlayApplier, never()).applyCurrentUserOverlays(any(), any(), anyInt(),
+                any());
+        mColorsListener.getValue().onColorsChanged(new WallpaperColors(Color.valueOf(Color.GREEN),
+                null, null), WallpaperManager.FLAG_SYSTEM);
+        verify(mThemeOverlayApplier, never()).applyCurrentUserOverlays(any(), any(), anyInt(),
+                any());
     }
 
     @Test

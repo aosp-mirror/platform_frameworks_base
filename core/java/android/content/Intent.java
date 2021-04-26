@@ -2189,6 +2189,8 @@ public class Intent implements Parcelable, Cloneable {
      * Type: String
      * </p>
      *
+     * E.g. {@link android.Manifest.permission_group.CONTACTS}
+     *
      * @hide
      */
     @SystemApi
@@ -2568,6 +2570,32 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_REMOVED = "android.intent.action.PACKAGE_REMOVED";
+    /**
+     * Broadcast Action: An existing application package has been removed from
+     * the device. The data contains the name of the package and the visibility
+     * allow list. The package that is being removed does <em>not</em> receive
+     * this Intent.
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid previously assigned
+     * to the package.
+     * <li> {@link #EXTRA_DATA_REMOVED} is set to true if the entire
+     * application -- data and code -- is being removed.
+     * <li> {@link #EXTRA_REPLACING} is set to true if this will be followed
+     * by an {@link #ACTION_PACKAGE_ADDED} broadcast for the same package.
+     * <li> {@link #EXTRA_USER_INITIATED} containing boolean field to signal
+     * that the application was removed with the user-initiated action.
+     * <li> {@link #EXTRA_VISIBILITY_ALLOW_LIST} containing an int array to
+     * indicate the visibility allow list.
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @hide This broadcast is used internally by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_REMOVED_INTERNAL =
+            "android.intent.action.PACKAGE_REMOVED_INTERNAL";
     /**
      * Broadcast Action: An existing application package has been completely
      * removed from the device.  The data contains the name of the package.
@@ -5313,6 +5341,8 @@ public class Intent implements Parcelable, Cloneable {
      * A String[] holding attribution tags when used with
      * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
      *
+     * E.g. an attribution tag could be location_provider, com.google.android.gms.*, etc.
+     *
      * @hide
      */
     @SystemApi
@@ -6121,6 +6151,16 @@ public class Intent implements Parcelable, Cloneable {
      * </p>
      */
     public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
+
+    /**
+     * Used as an int array extra field in
+     * {@link android.content.Intent#ACTION_PACKAGE_REMOVED_INTERNAL}
+     * intents to indicate that visibility allow list of this removed package.
+     *
+     * @hide
+     */
+    public static final String EXTRA_VISIBILITY_ALLOW_LIST =
+            "android.intent.extra.VISIBILITY_ALLOW_LIST";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

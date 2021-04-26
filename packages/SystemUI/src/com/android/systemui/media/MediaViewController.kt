@@ -70,11 +70,10 @@ class MediaViewController @Inject constructor(
      * finished
      */
     @MediaLocation
-    private var currentEndLocation: Int = -1
+    var currentEndLocation: Int = -1
 
     /**
-     * The ending location of the view where it ends when all animations and transitions have
-     * finished
+     * The starting location of the view where it starts for all animations and transitions
      */
     @MediaLocation
     private var currentStartLocation: Int = -1
@@ -253,16 +252,30 @@ class MediaViewController @Inject constructor(
      * [TransitionViewState].
      */
     private fun setGutsViewState(viewState: TransitionViewState) {
-        PlayerViewHolder.controlsIds.forEach { id ->
-            viewState.widgetStates.get(id)?.let { state ->
-                // Make sure to use the unmodified state if guts are not visible
-                state.alpha = if (isGutsVisible) 0f else state.alpha
-                state.gone = if (isGutsVisible) true else state.gone
+        if (type == TYPE.PLAYER) {
+            PlayerViewHolder.controlsIds.forEach { id ->
+                viewState.widgetStates.get(id)?.let { state ->
+                    // Make sure to use the unmodified state if guts are not visible.
+                    state.alpha = if (isGutsVisible) 0f else state.alpha
+                    state.gone = if (isGutsVisible) true else state.gone
+                }
             }
-        }
-        PlayerViewHolder.gutsIds.forEach { id ->
-            viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
-            viewState.widgetStates.get(id)?.gone = !isGutsVisible
+            PlayerViewHolder.gutsIds.forEach { id ->
+                viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
+                viewState.widgetStates.get(id)?.gone = !isGutsVisible
+            }
+        } else {
+            RecommendationViewHolder.controlsIds.forEach { id ->
+                viewState.widgetStates.get(id)?.let { state ->
+                    // Make sure to use the unmodified state if guts are not visible.
+                    state.alpha = if (isGutsVisible) 0f else state.alpha
+                    state.gone = if (isGutsVisible) true else state.gone
+                }
+            }
+            RecommendationViewHolder.gutsIds.forEach { id ->
+                viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
+                viewState.widgetStates.get(id)?.gone = !isGutsVisible
+            }
         }
     }
 

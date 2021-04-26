@@ -22,7 +22,7 @@ import android.os.Trace;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.statusbar.ScrimView;
+import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 /**
@@ -80,11 +80,16 @@ public enum ScrimState {
             }
             mFrontTint = Color.BLACK;
             mBehindTint = Color.BLACK;
+            mNotifTint = mClipQsScrim ? Color.BLACK : Color.TRANSPARENT;
             mBubbleTint = Color.TRANSPARENT;
 
             mFrontAlpha = 0;
-            mBehindAlpha = mScrimBehindAlphaKeyguard;
+            mBehindAlpha = mClipQsScrim ? 1 : mScrimBehindAlphaKeyguard;
+            mNotifAlpha = mClipQsScrim ? mScrimBehindAlphaKeyguard : 0;
             mBubbleAlpha = 0;
+            if (mClipQsScrim) {
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+            }
         }
     },
 
@@ -105,7 +110,10 @@ public enum ScrimState {
     BOUNCER {
         @Override
         public void prepare(ScrimState previousState) {
-            mBehindAlpha = mDefaultScrimAlpha;
+            mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
+            mBehindTint = mClipQsScrim ? Color.BLACK : Color.TRANSPARENT;
+            mNotifAlpha = mClipQsScrim ? mDefaultScrimAlpha : 0;
+            mNotifTint = Color.TRANSPARENT;
             mFrontAlpha = 0f;
             mBubbleAlpha = 0f;
         }
@@ -126,10 +134,15 @@ public enum ScrimState {
     SHADE_LOCKED {
         @Override
         public void prepare(ScrimState previousState) {
-            mBehindAlpha = mDefaultScrimAlpha;
+            mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
+            mNotifAlpha = 1f;
             mBubbleAlpha = 0f;
             mFrontAlpha = 0f;
             mBehindTint = Color.BLACK;
+
+            if (mClipQsScrim) {
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+            }
         }
 
         // to make sure correct color is returned before "prepare" is called
@@ -224,7 +237,8 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             // State that UI will sync to.
-            mBehindAlpha = 0;
+            mBehindAlpha = mClipQsScrim ? 1 : 0;
+            mNotifAlpha = 0;
             mFrontAlpha = 0;
             mBubbleAlpha = 0;
 
@@ -253,6 +267,10 @@ public enum ScrimState {
                 mBubbleTint = Color.BLACK;
                 mBlankScreen = true;
             }
+
+            if (mClipQsScrim) {
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+            }
         }
     },
 
@@ -279,12 +297,14 @@ public enum ScrimState {
     int mFrontTint = Color.TRANSPARENT;
     int mBehindTint = Color.TRANSPARENT;
     int mBubbleTint = Color.TRANSPARENT;
+    int mNotifTint = Color.TRANSPARENT;
 
     boolean mAnimateChange = true;
     float mAodFrontScrimAlpha;
     float mFrontAlpha;
     float mBehindAlpha;
     float mBubbleAlpha;
+    float mNotifAlpha;
 
     float mScrimBehindAlphaKeyguard;
     float mDefaultScrimAlpha;
@@ -301,6 +321,7 @@ public enum ScrimState {
     boolean mWakeLockScreenSensorActive;
     boolean mKeyguardFadingAway;
     long mKeyguardFadingAwayDuration;
+    boolean mClipQsScrim;
 
     public void init(ScrimView scrimInFront, ScrimView scrimBehind, ScrimView scrimForBubble,
             DozeParameters dozeParameters, DockManager dockManager) {
@@ -325,6 +346,10 @@ public enum ScrimState {
         return mBehindAlpha;
     }
 
+    public float getNotifAlpha() {
+        return mNotifAlpha;
+    }
+
     public float getBubbleAlpha() {
         return mBubbleAlpha;
     }
@@ -335,6 +360,10 @@ public enum ScrimState {
 
     public int getBehindTint() {
         return mBehindTint;
+    }
+
+    public int getNotifTint() {
+        return mNotifTint;
     }
 
     public int getBubbleTint() {
@@ -405,5 +434,9 @@ public enum ScrimState {
     public void setKeyguardFadingAway(boolean fadingAway, long duration) {
         mKeyguardFadingAway = fadingAway;
         mKeyguardFadingAwayDuration = duration;
+    }
+
+    public void setClipQsScrim(boolean clipsQsScrim) {
+        mClipQsScrim = clipsQsScrim;
     }
 }

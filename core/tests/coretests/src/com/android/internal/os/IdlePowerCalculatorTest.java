@@ -48,7 +48,7 @@ public class IdlePowerCalculatorTest {
 
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_IDLE);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_IDLE))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_IDLE))
                 .isEqualTo(3000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_IDLE))
                 .isWithin(PRECISION).of(0.7);

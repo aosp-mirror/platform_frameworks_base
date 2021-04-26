@@ -66,7 +66,8 @@ interface IKeyChainService {
     boolean isCredentialManagementApp(String packageName);
 
     // APIs used by KeyChainActivity
-    void setGrant(int uid, String alias, boolean value);
+    // setGrant may fail with value=false when ungrant operation fails in KeyStore.
+    boolean setGrant(int uid, String alias, boolean value);
     boolean hasGrant(int uid, String alias);
 
     // API used by Wifi

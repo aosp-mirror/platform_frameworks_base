@@ -74,6 +74,9 @@ public class StatusBarManager {
     public static final int DISABLE_SEARCH = View.STATUS_BAR_DISABLE_SEARCH;
 
     /** @hide */
+    public static final int DISABLE_ONGOING_CALL_CHIP = View.STATUS_BAR_DISABLE_ONGOING_CALL_CHIP;
+
+    /** @hide */
     @Deprecated
     public static final int DISABLE_NAVIGATION =
             View.STATUS_BAR_DISABLE_HOME | View.STATUS_BAR_DISABLE_RECENT;
@@ -85,7 +88,7 @@ public class StatusBarManager {
     public static final int DISABLE_MASK = DISABLE_EXPAND | DISABLE_NOTIFICATION_ICONS
             | DISABLE_NOTIFICATION_ALERTS | DISABLE_NOTIFICATION_TICKER
             | DISABLE_SYSTEM_INFO | DISABLE_RECENT | DISABLE_HOME | DISABLE_BACK | DISABLE_CLOCK
-            | DISABLE_SEARCH;
+            | DISABLE_SEARCH | DISABLE_ONGOING_CALL_CHIP;
 
     /** @hide */
     @IntDef(flag = true, prefix = {"DISABLE_"}, value = {
@@ -99,7 +102,8 @@ public class StatusBarManager {
             DISABLE_RECENT,
             DISABLE_BACK,
             DISABLE_CLOCK,
-            DISABLE_SEARCH
+            DISABLE_SEARCH,
+            DISABLE_ONGOING_CALL_CHIP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DisableFlags {}

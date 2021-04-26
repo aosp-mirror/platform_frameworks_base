@@ -20,10 +20,13 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
@@ -53,6 +56,9 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
     /** @hide */
     @SuppressLint("ActionValue")
     @SystemApi
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
 
@@ -74,7 +80,8 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
      */
     public static final int RESULT_CANCELED = 2;
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothMap> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.MAP,
                     "BluetoothMap", IBluetoothMap.class.getName()) {
@@ -87,9 +94,11 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
     /**
      * Create a BluetoothMap proxy object.
      */
-    /*package*/ BluetoothMap(Context context, ServiceListener listener) {
+    /* package */ BluetoothMap(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
         if (DBG) Log.d(TAG, "Create BluetoothMap proxy object");
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
         mCloseGuard = new CloseGuard();
         mCloseGuard.open("close");
@@ -135,7 +144,7 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
         final IBluetoothMap service = getService();
         if (service != null) {
             try {
-                return service.getState();
+                return service.getState(mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -161,7 +170,7 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
         final IBluetoothMap service = getService();
         if (service != null) {
             try {
-                return service.getClient();
+                return service.getClient(mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -186,7 +195,7 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
         final IBluetoothMap service = getService();
         if (service != null) {
             try {
-                return service.isConnected(device);
+                return service.isConnected(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -225,7 +234,7 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
         final IBluetoothMap service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.disconnect(device);
+                return service.disconnect(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return false;
@@ -276,7 +285,8 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
         final IBluetoothMap service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getConnectedDevices();
+                return BluetoothDevice.setAttributionSource(
+                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -300,7 +310,9 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
         final IBluetoothMap service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getDevicesMatchingConnectionStates(states);
+                return BluetoothDevice.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -324,7 +336,7 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
         final IBluetoothMap service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.STATE_DISCONNECTED;
@@ -383,7 +395,7 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
                 return false;
             }
             try {
-                return service.setConnectionPolicy(device, connectionPolicy);
+                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return false;
@@ -435,7 +447,7 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
         final IBluetoothMap service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionPolicy(device);
+                return service.getConnectionPolicy(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
@@ -450,13 +462,10 @@ public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
     }
 
     private boolean isEnabled() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null && adapter.getState() == BluetoothAdapter.STATE_ON) return true;
-        log("Bluetooth is Not enabled");
-        return false;
+        return mAdapter.isEnabled();
     }
+
     private static boolean isValidDevice(BluetoothDevice device) {
         return device != null && BluetoothAdapter.checkBluetoothAddress(device.getAddress());
     }
-
 }

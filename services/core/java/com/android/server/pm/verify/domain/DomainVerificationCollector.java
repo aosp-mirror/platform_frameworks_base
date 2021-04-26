@@ -17,6 +17,7 @@
 package com.android.server.pm.verify.domain;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Intent;
@@ -33,6 +34,8 @@ import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +46,12 @@ public class DomainVerificationCollector {
             Pattern.compile("(\\*\\.)?" + Patterns.DOMAIN_NAME.pattern());
 
     private static final int MAX_DOMAINS_BYTE_SIZE = 1024 * 1024;
+
+    private static final BiFunction<ArraySet<String>, String, Boolean> ARRAY_SET_COLLECTOR =
+            (set, domain) -> {
+                set.add(domain);
+                return null;
+            };
 
     @NonNull
     private final PlatformCompat mPlatformCompat;
@@ -105,27 +114,62 @@ public class DomainVerificationCollector {
         return collectDomains(pkg, true /* checkAutoVerify */, false /* valid */);
     }
 
+    public boolean containsWebDomain(@NonNull AndroidPackage pkg, @NonNull String targetDomain) {
+        return collectDomains(pkg, false /* checkAutoVerify */, true /* valid */, null,
+                (BiFunction<Void, String, Boolean>) (unused, domain) -> {
+                    if (Objects.equals(targetDomain, domain)) {
+                        return true;
+                    }
+                    return null;
+                }) != null;
+    }
+
+    public boolean containsAutoVerifyDomain(@NonNull AndroidPackage pkg,
+            @NonNull String targetDomain) {
+        return collectDomains(pkg, true /* checkAutoVerify */, true /* valid */, null,
+                (BiFunction<Void, String, Boolean>) (unused, domain) -> {
+                    if (Objects.equals(targetDomain, domain)) {
+                        return true;
+                    }
+                    return null;
+                }) != null;
+    }
+
     @NonNull
     private ArraySet<String> collectDomains(@NonNull AndroidPackage pkg,
             boolean checkAutoVerify, boolean valid) {
+        ArraySet<String> domains = new ArraySet<>();
+        collectDomains(pkg, checkAutoVerify, valid, domains, ARRAY_SET_COLLECTOR);
+        return domains;
+    }
+
+    @NonNull
+    private <InitialValue, ReturnValue> ReturnValue collectDomains(@NonNull AndroidPackage pkg,
+            boolean checkAutoVerify, boolean valid, @Nullable InitialValue initialValue,
+            @NonNull BiFunction<InitialValue, String, ReturnValue> domainCollector) {
         boolean restrictDomains =
                 DomainVerificationUtils.isChangeEnabled(mPlatformCompat, pkg, RESTRICT_DOMAINS);
 
         if (restrictDomains) {
-            return collectDomainsInternal(pkg, checkAutoVerify, valid);
+            return collectDomainsInternal(pkg, checkAutoVerify, valid, initialValue,
+                    domainCollector);
         } else {
-            return collectDomainsLegacy(pkg, checkAutoVerify, valid);
+            return collectDomainsLegacy(pkg, checkAutoVerify, valid, initialValue, domainCollector);
         }
     }
 
     /**
      * @see #RESTRICT_DOMAINS
      */
-    private ArraySet<String> collectDomainsLegacy(@NonNull AndroidPackage pkg,
-            boolean checkAutoVerify, boolean valid) {
+    @Nullable
+    private <InitialValue, ReturnValue> ReturnValue collectDomainsLegacy(
+            @NonNull AndroidPackage pkg, boolean checkAutoVerify, boolean valid,
+            @Nullable InitialValue initialValue,
+            @NonNull BiFunction<InitialValue, String, ReturnValue> domainCollector) {
         if (!checkAutoVerify) {
             // Per-domain user selection state doesn't have a V1 equivalent on S, so just use V2
-            return collectDomainsInternal(pkg, false /* checkAutoVerify */, true /* valid */);
+            return collectDomainsInternal(pkg, false /* checkAutoVerify */, true /* valid */,
+                    initialValue, domainCollector);
         }
 
         List<ParsedActivity> activities = pkg.getActivities();
@@ -148,11 +192,10 @@ public class DomainVerificationCollector {
             }
 
             if (!needsAutoVerify) {
-                return new ArraySet<>();
+                return null;
             }
         }
 
-        ArraySet<String> domains = new ArraySet<>();
         int totalSize = 0;
         boolean underMaxSize = true;
         for (int activityIndex = 0; activityIndex < activitiesSize && underMaxSize;
@@ -169,22 +212,30 @@ public class DomainVerificationCollector {
                         if (isValidHost(host) == valid) {
                             totalSize += byteSizeOf(host);
                             underMaxSize = totalSize < MAX_DOMAINS_BYTE_SIZE;
-                            domains.add(host);
+                            ReturnValue returnValue = domainCollector.apply(initialValue, host);
+                            if (returnValue != null) {
+                                return returnValue;
+                            }
                         }
                     }
                 }
             }
         }
 
-        return domains;
+        return null;
     }
 
     /**
      * @see #RESTRICT_DOMAINS
+     * @param domainCollector Function to call with initialValue and a valid host. Should return
+     *                        a non-null value if the function should return immediately
+     *                        after the currently processed host.
      */
-    private ArraySet<String> collectDomainsInternal(@NonNull AndroidPackage pkg,
-            boolean checkAutoVerify, boolean valid) {
-        ArraySet<String> domains = new ArraySet<>();
+    @Nullable
+    private <InitialValue, ReturnValue> ReturnValue collectDomainsInternal(
+            @NonNull AndroidPackage pkg, boolean checkAutoVerify, boolean valid,
+            @Nullable InitialValue initialValue,
+            @NonNull BiFunction<InitialValue, String, ReturnValue> domainCollector) {
         int totalSize = 0;
         boolean underMaxSize = true;
 
@@ -226,13 +277,16 @@ public class DomainVerificationCollector {
                     if (isValidHost(host) == valid) {
                         totalSize += byteSizeOf(host);
                         underMaxSize = totalSize < MAX_DOMAINS_BYTE_SIZE;
-                        domains.add(host);
+                        ReturnValue returnValue = domainCollector.apply(initialValue, host);
+                        if (returnValue != null) {
+                            return returnValue;
+                        }
                     }
                 }
             }
         }
 
-        return domains;
+        return null;
     }
 
     /**

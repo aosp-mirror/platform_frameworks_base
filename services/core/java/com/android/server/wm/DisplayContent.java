@@ -154,6 +154,8 @@ import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.ColorSpace;
+import android.graphics.GraphicBuffer;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -464,7 +466,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private boolean mDeferredRemoval;
 
     final DockedTaskDividerController mDividerControllerLocked;
-    final PinnedTaskController mPinnedTaskControllerLocked;
+    final PinnedTaskController mPinnedTaskController;
 
     final ArrayList<WindowState> mTapExcludedWindows = new ArrayList<>();
     /** A collection of windows that provide tap exclude regions inside of them. */
@@ -1017,7 +1019,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         mWindowCornerRadius = mDisplayPolicy.getWindowCornerRadius();
         mDividerControllerLocked = new DockedTaskDividerController(this);
-        mPinnedTaskControllerLocked = new PinnedTaskController(mWmService, this);
+        mPinnedTaskController = new PinnedTaskController(mWmService, this);
 
         final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession)
                 .setOpaque(true)
@@ -1578,10 +1580,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // has it own policy for bounds, the activity bounds based on parent is unknown.
             return false;
         }
-        if (mPinnedTaskControllerLocked.isPipActiveOrWindowingModeChanging()) {
-            // Use normal rotation animation because seamless PiP rotation is not supported yet.
-            return false;
-        }
 
         setFixedRotationLaunchingApp(r, rotation);
         return true;
@@ -1665,6 +1663,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void continueUpdateOrientationForDiffOrienLaunchingApp() {
         if (mFixedRotationLaunchingApp == null) {
+            return;
+        }
+        if (mPinnedTaskController.shouldDeferOrientationChange()) {
+            // Wait for the PiP animation to finish.
             return;
         }
         // Update directly because the app which will change the orientation of display is ready.
@@ -1837,6 +1839,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             forAllWindows(w -> {
                 w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
             }, true /* traverseTopToBottom */);
+            mPinnedTaskController.startSeamlessRotationIfNeeded(transaction);
         }
 
         mWmService.mDisplayManagerInternal.performTraversal(transaction);
@@ -2333,7 +2336,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     PinnedTaskController getPinnedTaskController() {
-        return mPinnedTaskControllerLocked;
+        return mPinnedTaskController;
     }
 
     /**
@@ -2392,12 +2395,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
-        // update resources before cascade so that root docked/pinned tasks use the correct info
-        preOnConfigurationChanged();
         final int lastOrientation = getConfiguration().orientation;
         super.onConfigurationChanged(newParentConfig);
         if (mDisplayPolicy != null) {
             mDisplayPolicy.onConfigurationChanged();
+            mPinnedTaskController.onPostDisplayConfigurationChanged();
         }
 
         if (lastOrientation != getConfiguration().orientation) {
@@ -2405,19 +2407,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     new LogMaker(MetricsEvent.ACTION_PHONE_ORIENTATION_CHANGED)
                             .setSubtype(getConfiguration().orientation)
                             .addTaggedData(MetricsEvent.FIELD_DISPLAY_ID, getDisplayId()));
-        }
-    }
-
-    /**
-     * Updates the resources used by docked/pinned controllers. This needs to be called at the
-     * beginning of a configuration update cascade since the metrics from these resources are used
-     * for bounds calculations.
-     */
-    void preOnConfigurationChanged() {
-        final PinnedTaskController pinnedTaskController = getPinnedTaskController();
-
-        if (pinnedTaskController != null) {
-            getPinnedTaskController().onConfigurationChanged();
         }
     }
 
@@ -2962,7 +2951,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final boolean imeVisible = imeWin != null && imeWin.isVisible()
                 && imeWin.isDisplayed();
         final int imeHeight = getInputMethodWindowVisibleHeight();
-        mPinnedTaskControllerLocked.setAdjustedForIme(imeVisible, imeHeight);
+        mPinnedTaskController.setAdjustedForIme(imeVisible, imeHeight);
     }
 
     int getInputMethodWindowVisibleHeight() {
@@ -3190,7 +3179,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         pw.println();
-        mPinnedTaskControllerLocked.dump(prefix, pw);
+        mPinnedTaskController.dump(prefix, pw);
 
         pw.println();
         mDisplayFrames.dump(prefix, pw);
@@ -3821,7 +3810,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final ActivityRecord activity = mImeLayeringTarget.mActivityRecord;
         final SurfaceControl imeSurface = mWmService.mSurfaceControlFactory.apply(null)
                 .setName("IME-snapshot-surface")
-                .setBufferSize(buffer.getWidth(), buffer.getHeight())
+                .setBLASTLayer()
                 .setFormat(buffer.getFormat())
                 .setParent(activity.getSurfaceControl())
                 .setCallsite("DisplayContent.attachAndShowImeScreenshotOnTarget")
@@ -3829,10 +3818,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Make IME snapshot as trusted overlay
         InputMonitor.setTrustedOverlayInputInfo(imeSurface, t, getDisplayId(),
                 "IME-snapshot-surface");
-        Surface surface = mWmService.mSurfaceFactory.get();
-        surface.copyFrom(imeSurface);
-        surface.attachAndQueueBufferWithColorSpace(buffer, null);
-        surface.release();
+        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(buffer);
+        t.setBuffer(imeSurface, graphicBuffer);
+        t.setColorSpace(mSurfaceControl, ColorSpace.get(ColorSpace.Named.SRGB));
         t.setRelativeLayer(imeSurface, activity.getSurfaceControl(), 1);
         t.setPosition(imeSurface, mInputMethodWindow.getDisplayFrame().left,
                 mInputMethodWindow.getDisplayFrame().top);

@@ -16,7 +16,9 @@
 
 package com.android.server.connectivity
 
+import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.net.NetworkScore.KEEP_CONNECTED_NONE
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import org.junit.Test
@@ -32,10 +34,14 @@ import kotlin.test.assertNull
 class NetworkRankerTest {
     private val ranker = NetworkRanker()
 
-    private fun makeNai(satisfy: Boolean, score: Int) = mock(NetworkAgentInfo::class.java).also {
-        doReturn(satisfy).`when`(it).satisfies(any())
-        doReturn(score).`when`(it).currentScore
-    }
+    private fun makeNai(satisfy: Boolean, legacyScore: Int) =
+            mock(NetworkAgentInfo::class.java).also {
+                doReturn(satisfy).`when`(it).satisfies(any())
+                val fs = FullScore(legacyScore, 0 /* policies */, KEEP_CONNECTED_NONE)
+                doReturn(fs).`when`(it).getScore()
+                val nc = NetworkCapabilities.Builder().build()
+                doReturn(nc).`when`(it).getCapsNoCopy()
+            }
 
     @Test
     fun testGetBestNetwork() {
