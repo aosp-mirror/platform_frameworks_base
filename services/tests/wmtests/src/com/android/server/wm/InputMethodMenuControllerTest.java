@@ -47,6 +47,7 @@ import com.android.server.inputmethod.InputMethodMenuController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 // TODO(b/157888351): Move the test to inputmethod package once we find the way to test the
 //  scenario there.
@@ -59,10 +60,15 @@ import org.junit.runner.RunWith;
 public class InputMethodMenuControllerTest extends WindowTestsBase {
 
     private InputMethodMenuController mController;
-    private TestDisplayContent mSecondaryDisplay;
+    private DualDisplayAreaGroupPolicyTest.DualDisplayContent mSecondaryDisplay;
 
     @Before
     public void setUp() throws Exception {
+        // Let the Display to be created with the DualDisplay policy.
+        final DisplayAreaPolicy.Provider policyProvider =
+                new DualDisplayAreaGroupPolicyTest.DualDisplayTestPolicyProvider();
+        Mockito.doReturn(policyProvider).when(mWm).getDisplayAreaPolicyProvider();
+
         mController = new InputMethodMenuController(mock(InputMethodManagerService.class));
 
         // Mock addWindowTokenWithOptions to create a test window token.
@@ -80,7 +86,8 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
         }).when(wms).attachWindowContextToDisplayArea(any(), eq(TYPE_INPUT_METHOD_DIALOG),
                 anyInt(), any());
 
-        mSecondaryDisplay = new TestDisplayContent.Builder(mAtm, 1000, 1000).build();
+        mSecondaryDisplay = new DualDisplayAreaGroupPolicyTest.DualDisplayContent
+                .Builder(mAtm, 1000, 1000).build();
 
         // Mock DisplayManagerGlobal to return test display when obtaining Display instance.
         final int displayId = mSecondaryDisplay.getDisplayId();
@@ -103,6 +110,22 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
                 mSecondaryDisplay.getDisplayId());
 
         assertImeSwitchContextMetricsValidity(contextOnSecondaryDisplay, mSecondaryDisplay);
+    }
+
+    @Test
+    public void testGetSettingsContextOnDualDisplayContent() {
+        final Context context = mController.getSettingsContext(mSecondaryDisplay.getDisplayId());
+
+        final DisplayArea.Tokens imeContainer = mSecondaryDisplay.getImeContainer();
+        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay);
+
+        mSecondaryDisplay.mFirstRoot.placeImeContainer(imeContainer);
+        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay.mFirstRoot);
+        assertImeSwitchContextMetricsValidity(context, mSecondaryDisplay);
+
+        mSecondaryDisplay.mSecondRoot.placeImeContainer(imeContainer);
+        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay.mSecondRoot);
+        assertImeSwitchContextMetricsValidity(context, mSecondaryDisplay);
     }
 
     private void assertImeSwitchContextMetricsValidity(Context context, DisplayContent dc) {
