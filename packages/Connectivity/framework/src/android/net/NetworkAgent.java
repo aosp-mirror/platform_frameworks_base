@@ -879,11 +879,11 @@ public abstract class NetworkAgent {
      * This method may be called at any time while the network is connected. It has no effect if
      * the network is already disconnected and the teardown delay timer is running.
      *
-     * @param teardownDelayMs the teardown delay to set, or 0 to disable teardown delay.
+     * @param teardownDelayMillis the teardown delay to set, or 0 to disable teardown delay.
      */
-    public void setTeardownDelayMs(
-            @IntRange(from = 0, to = MAX_TEARDOWN_DELAY_MS) int teardownDelayMs) {
-        queueOrSendMessage(reg -> reg.sendTeardownDelayMs(teardownDelayMs));
+    public void setTeardownDelayMillis(
+            @IntRange(from = 0, to = MAX_TEARDOWN_DELAY_MS) int teardownDelayMillis) {
+        queueOrSendMessage(reg -> reg.sendTeardownDelayMs(teardownDelayMillis));
     }
 
     /**

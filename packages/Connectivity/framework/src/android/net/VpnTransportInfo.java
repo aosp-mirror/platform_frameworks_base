@@ -40,10 +40,10 @@ import java.util.Objects;
 @SystemApi(client = MODULE_LIBRARIES)
 public final class VpnTransportInfo implements TransportInfo, Parcelable {
     /** Type of this VPN. */
-    public final int type;
+    private final int mType;
 
     @Nullable
-    public final String sessionId;
+    private final String mSessionId;
 
     @Override
     public @RedactionType long getApplicableRedactions() {
@@ -55,13 +55,28 @@ public final class VpnTransportInfo implements TransportInfo, Parcelable {
      */
     @NonNull
     public VpnTransportInfo makeCopy(@RedactionType long redactions) {
-        return new VpnTransportInfo(type,
-            ((redactions & REDACT_FOR_NETWORK_SETTINGS) != 0) ? null : sessionId);
+        return new VpnTransportInfo(mType,
+            ((redactions & REDACT_FOR_NETWORK_SETTINGS) != 0) ? null : mSessionId);
     }
 
     public VpnTransportInfo(int type, @Nullable String sessionId) {
-        this.type = type;
-        this.sessionId = sessionId;
+        this.mType = type;
+        this.mSessionId = sessionId;
+    }
+
+    /**
+     * Returns the session Id of this VpnTransportInfo.
+     */
+    @Nullable
+    public String getSessionId() {
+        return mSessionId;
+    }
+
+    /**
+     * Returns the type of this VPN.
+     */
+    public int getType() {
+        return mType;
     }
 
     @Override
@@ -69,17 +84,17 @@ public final class VpnTransportInfo implements TransportInfo, Parcelable {
         if (!(o instanceof VpnTransportInfo)) return false;
 
         VpnTransportInfo that = (VpnTransportInfo) o;
-        return (this.type == that.type) && TextUtils.equals(this.sessionId, that.sessionId);
+        return (this.mType == that.mType) && TextUtils.equals(this.mSessionId, that.mSessionId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, sessionId);
+        return Objects.hash(mType, mSessionId);
     }
 
     @Override
     public String toString() {
-        return String.format("VpnTransportInfo{type=%d, sessionId=%s}", type, sessionId);
+        return String.format("VpnTransportInfo{type=%d, sessionId=%s}", mType, mSessionId);
     }
 
     @Override
@@ -89,8 +104,8 @@ public final class VpnTransportInfo implements TransportInfo, Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(type);
-        dest.writeString(sessionId);
+        dest.writeInt(mType);
+        dest.writeString(mSessionId);
     }
 
     public static final @NonNull Creator<VpnTransportInfo> CREATOR =
