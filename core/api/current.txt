@@ -56795,6 +56795,7 @@ package android.window {
   public interface SplashScreen {
     method public void clearOnExitAnimationListener();
     method public void setOnExitAnimationListener(@NonNull android.window.SplashScreen.OnExitAnimationListener);
+    method public void setSplashScreenTheme(@StyleRes int);
   }
 
   public static interface SplashScreen.OnExitAnimationListener {
