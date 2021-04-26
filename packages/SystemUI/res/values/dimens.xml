@@ -139,7 +139,7 @@
     <dimen name="notification_min_height_before_s">106dp</dimen>
 
     <!-- Height of a large notification in the status bar -->
-    <dimen name="notification_max_height">294dp</dimen>
+    <dimen name="notification_max_height">358dp</dimen>
 
     <!-- Height of a heads up notification in the status bar for legacy custom views -->
     <dimen name="notification_max_heads_up_height_legacy">128dp</dimen>
