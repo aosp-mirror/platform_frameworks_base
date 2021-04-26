@@ -59,6 +59,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
+import com.android.systemui.people.widget.PeopleTileKey;
 
 import java.text.NumberFormat;
 import java.time.Duration;
@@ -148,6 +149,8 @@ public class PeopleTileViewHelper {
      * content, then birthdays, then the most recent status, and finally last interaction.
      */
     private RemoteViews getViewForTile() {
+        PeopleTileKey key = new PeopleTileKey(mTile);
+        if (DEBUG) Log.d(TAG, "Creating view for tile key: " + key.toString());
         if (Objects.equals(mTile.getNotificationCategory(), CATEGORY_MISSED_CALL)) {
             if (DEBUG) Log.d(TAG, "Create missed call view");
             return createMissedCallRemoteViews();
