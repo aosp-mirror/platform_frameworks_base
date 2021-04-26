@@ -5933,6 +5933,10 @@ public final class ActiveServices {
      * @param durationMs Only meaningful for EXIT event, the duration from ENTER and EXIT state.
      */
     private void logForegroundServiceStateChanged(ServiceRecord r, int state, int durationMs) {
+        if (!ActivityManagerUtils.shouldSamplePackageForAtom(
+                r.packageName, mAm.mConstants.mDefaultFgsAtomSampleRate)) {
+            return;
+        }
         FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                 r.appInfo.uid,
                 r.shortInstanceName,
