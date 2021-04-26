@@ -49,8 +49,8 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -69,6 +69,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -91,7 +92,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock
     private AlarmManager mAlarmManager;
     @Mock
-    private DozeParameters mDozeParamenters;
+    private DozeParameters mDozeParameters;
     @Mock
     LightBarController mLightBarController;
     @Mock
@@ -200,8 +201,8 @@ public class ScrimControllerTest extends SysuiTestCase {
             return null;
         }).when(mScrimBehind).postOnAnimationDelayed(any(Runnable.class), anyLong());
 
-        when(mDozeParamenters.getAlwaysOn()).thenAnswer(invocation -> mAlwaysOnEnabled);
-        when(mDozeParamenters.getDisplayNeedsBlanking()).thenReturn(true);
+        when(mDozeParameters.getAlwaysOn()).thenAnswer(invocation -> mAlwaysOnEnabled);
+        when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(true);
 
         doAnswer((Answer<Void>) invocation -> {
             mScrimState = invocation.getArgument(0);
@@ -220,7 +221,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mDockManager.isDocked()).thenReturn(false);
 
         mScrimController = new ScrimController(mLightBarController,
-                mDozeParamenters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
+                mDozeParameters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
                 mDockManager, mConfigurationController, mFeatureFlags,
                 new FakeExecutor(new FakeSystemClock()));
@@ -238,6 +239,10 @@ public class ScrimControllerTest extends SysuiTestCase {
     @After
     public void tearDown() {
         finishAnimationsImmediately();
+        Arrays.stream(ScrimState.values()).forEach((scrim) -> {
+            scrim.setAodFrontScrimAlpha(0f);
+            scrim.setClipQsScrim(false);
+        });
         DejankUtils.setImmediate(false);
     }
 
@@ -259,9 +264,30 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void transitionToShadeLocked() {
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.setQsPosition(1f, 0);
         finishAnimationsImmediately();
 
         assertScrimAlpha(Map.of(
+                mNotificationsScrim, OPAQUE,
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, OPAQUE));
+
+        assertScrimTinted(Map.of(
+                mScrimInFront, false,
+                mScrimBehind, true,
+                mScrimForBubble, false
+        ));
+    }
+
+    @Test
+    public void transitionToShadeLocked_clippingQs() {
+        mScrimController.setClipsQsScrim(true);
+        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.setQsPosition(1f, 0);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(Map.of(
+                mNotificationsScrim, OPAQUE,
                 mScrimInFront, TRANSPARENT,
                 mScrimBehind, OPAQUE));
 
@@ -403,9 +429,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setAodFrontScrimAlpha(0.3f);
         Assert.assertEquals(ScrimState.AOD.getFrontAlpha(), mScrimInFront.getViewAlpha(), 0.001f);
         Assert.assertNotEquals(0.3f, mScrimInFront.getViewAlpha(), 0.001f);
-
-        // Reset value since enums are static.
-        mScrimController.setAodFrontScrimAlpha(0f);
     }
 
     @Test
@@ -500,11 +523,34 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Back scrim should be visible without tint
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
                 mScrimBehind, OPAQUE));
 
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
                 mScrimBehind, false,
+                mNotificationsScrim, false,
+                mScrimForBubble, false
+        ));
+    }
+
+    @Test
+    public void transitionToKeyguardBouncer_clippingQs() {
+        mScrimController.setClipsQsScrim(true);
+        mScrimController.transitionTo(ScrimState.BOUNCER);
+        finishAnimationsImmediately();
+        // Front scrim should be transparent
+        // Back scrim should be clipping QS
+        // Notif scrim should be visible without tint
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, OPAQUE,
+                mScrimBehind, OPAQUE));
+
+        assertScrimTinted(Map.of(
+                mScrimInFront, false,
+                mScrimBehind, true,
+                mNotificationsScrim, false,
                 mScrimForBubble, false
         ));
     }
@@ -530,9 +576,11 @@ public class ScrimControllerTest extends SysuiTestCase {
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
                 mScrimBehind, TRANSPARENT));
 
         assertScrimTinted(Map.of(
+                mNotificationsScrim, false,
                 mScrimInFront, false,
                 mScrimBehind, true,
                 mScrimForBubble, false
@@ -542,6 +590,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setPanelExpansion(0.5f);
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, SEMI_TRANSPARENT,
                 mScrimBehind, SEMI_TRANSPARENT));
     }
 
@@ -614,6 +663,32 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront, TRANSPARENT,
                 mScrimBehind, OPAQUE,
                 mNotificationsScrim, OPAQUE));
+    }
+
+    @Test
+    public void qsExpansion_clippingQs() {
+        reset(mScrimBehind);
+        mScrimController.setClipsQsScrim(true);
+        mScrimController.setQsPosition(1f, 999 /* value doesn't matter */);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, OPAQUE,
+                mNotificationsScrim, OPAQUE));
+    }
+
+    @Test
+    public void qsExpansion_half_clippingQs() {
+        reset(mScrimBehind);
+        mScrimController.setClipsQsScrim(true);
+        mScrimController.setQsPosition(0.5f, 999 /* value doesn't matter */);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, OPAQUE,
+                mNotificationsScrim, SEMI_TRANSPARENT));
     }
 
     @Test
@@ -919,13 +994,13 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testAnimatesTransitionToAod() {
-        when(mDozeParamenters.shouldControlScreenOff()).thenReturn(false);
+        when(mDozeParameters.shouldControlScreenOff()).thenReturn(false);
         ScrimState.AOD.prepare(ScrimState.KEYGUARD);
         Assert.assertFalse("No animation when ColorFade kicks in",
                 ScrimState.AOD.getAnimateChange());
 
-        reset(mDozeParamenters);
-        when(mDozeParamenters.shouldControlScreenOff()).thenReturn(true);
+        reset(mDozeParameters);
+        when(mDozeParameters.shouldControlScreenOff()).thenReturn(true);
         ScrimState.AOD.prepare(ScrimState.KEYGUARD);
         Assert.assertTrue("Animate scrims when ColorFade won't be triggered",
                 ScrimState.AOD.getAnimateChange());
@@ -977,9 +1052,25 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setPanelExpansion(0.5f);
         // notifications scrim alpha change require calling setQsPosition
         mScrimController.setQsPosition(0, 300);
+        finishAnimationsImmediately();
 
         assertScrimAlpha(Map.of(
                 mScrimBehind, SEMI_TRANSPARENT,
+                mNotificationsScrim, SEMI_TRANSPARENT,
+                mScrimInFront, TRANSPARENT));
+    }
+
+    @Test
+    public void testScrimsVisible_whenShadeVisible_clippingQs() {
+        mScrimController.setClipsQsScrim(true);
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.setPanelExpansion(0.5f);
+        // notifications scrim alpha change require calling setQsPosition
+        mScrimController.setQsPosition(0.5f, 300);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(Map.of(
+                mScrimBehind, OPAQUE,
                 mNotificationsScrim, SEMI_TRANSPARENT,
                 mScrimInFront, TRANSPARENT));
     }
@@ -1008,8 +1099,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     private void assertScrimTinted(Map<ScrimView, Boolean> scrimToTint) {
-        // notifications scrim should have always transparent tint
-        assertScrimTint(mNotificationsScrim, false);
         scrimToTint.forEach((scrim, hasTint) -> assertScrimTint(scrim, hasTint));
     }
 
@@ -1046,6 +1135,12 @@ public class ScrimControllerTest extends SysuiTestCase {
             assertScrimAlpha(mNotificationsScrim, TRANSPARENT);
         }
         scrimToAlpha.forEach((scrimView, alpha) -> assertScrimAlpha(scrimView, alpha));
+
+        // When clipping, QS scrim should not affect combined visibility.
+        if (mScrimController.getClipQsScrim() && scrimToAlpha.get(mScrimBehind) == OPAQUE) {
+            scrimToAlpha = new HashMap<>(scrimToAlpha);
+            scrimToAlpha.remove(mScrimBehind);
+        }
 
         // Check combined scrim visibility.
         final int visibility;

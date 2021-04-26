@@ -233,7 +233,7 @@ public class BluetoothPbap implements BluetoothProfile {
         }
         try {
             return BluetoothDevice.setAttributionSource(
-                    service.getConnectedDevices(), mAttributionSource);
+                    service.getConnectedDevices(mAttributionSource), mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, e.toString());
         }
@@ -247,13 +247,17 @@ public class BluetoothPbap implements BluetoothProfile {
      */
     @SystemApi
     @Override
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public @BtProfileState int getConnectionState(@NonNull BluetoothDevice device) {
         log("getConnectionState: device=" + device);
         try {
             final IBluetoothPbap service = mService;
             if (service != null && isEnabled() && isValidDevice(device)) {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             }
             if (service == null) {
                 Log.w(TAG, "Proxy not attached to service");
@@ -282,7 +286,8 @@ public class BluetoothPbap implements BluetoothProfile {
         }
         try {
             return BluetoothDevice.setAttributionSource(
-                    service.getDevicesMatchingConnectionStates(states), mAttributionSource);
+                    service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                    mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, e.toString());
         }
@@ -322,7 +327,7 @@ public class BluetoothPbap implements BluetoothProfile {
                         && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
                     return false;
                 }
-                return service.setConnectionPolicy(device, connectionPolicy);
+                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -350,7 +355,7 @@ public class BluetoothPbap implements BluetoothProfile {
             return false;
         }
         try {
-            service.disconnect(device);
+            service.disconnect(device, mAttributionSource);
             return true;
         } catch (RemoteException e) {
             Log.e(TAG, e.toString());
