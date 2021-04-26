@@ -41,7 +41,7 @@ public class AppWidgetOptionsHelper {
             PeopleSpaceTile tile) {
         Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
         if (tile == null) {
-            if (DEBUG) Log.d(TAG, "Requested to store null tile");
+            if (DEBUG) Log.w(TAG, "Requested to store null tile");
             return options;
         }
         options.putParcelable(OPTIONS_PEOPLE_TILE, tile);

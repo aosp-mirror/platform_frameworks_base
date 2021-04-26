@@ -1201,7 +1201,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                         .setPackageName(TEST_PACKAGE_A)
                         .setUserHandle(new UserHandle(0))
                         .build();
-        PeopleSpaceTile actual = mManager.augmentTileFromNotifications(tile, EMPTY_STRING,
+        PeopleTileKey key = new PeopleTileKey(tile);
+        PeopleSpaceTile actual = mManager.augmentTileFromNotifications(tile, key, EMPTY_STRING,
                         Map.of(new PeopleTileKey(mNotificationEntry),
                                 new HashSet<>(Collections.singleton(mNotificationEntry))));
 
@@ -1216,8 +1217,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                         .setPackageName(TEST_PACKAGE_A)
                         .setUserHandle(new UserHandle(0))
                         .build();
+        PeopleTileKey key = new PeopleTileKey(tile);
         PeopleSpaceTile actual = mManager
-                .augmentTileFromNotifications(tile, EMPTY_STRING,
+                .augmentTileFromNotifications(tile, key, EMPTY_STRING,
                         Map.of(new PeopleTileKey(mNotificationEntry),
                                 new HashSet<>(Collections.singleton(mNotificationEntry))));
 
