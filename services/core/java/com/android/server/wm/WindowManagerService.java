@@ -5553,11 +5553,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mBlurController.unregisterCrossWindowBlurEnabledListener(listener);
     }
 
-    @Override
-    public void setForceCrossWindowBlurDisabled(boolean disable) {
-        mBlurController.setForceCrossWindowBlurDisabled(disable);
-    }
-
     // -------------------------------------------------------------
     // Internals
     // -------------------------------------------------------------
