@@ -25,6 +25,7 @@ import android.view.animation.Interpolator;
 
 import androidx.core.os.BuildCompat;
 
+import com.google.android.material.transition.platform.FadeThroughProvider;
 import com.google.android.material.transition.platform.MaterialSharedAxis;
 import com.google.android.material.transition.platform.SlideDistanceProvider;
 
@@ -35,6 +36,7 @@ public class SettingsTransitionHelper {
 
     private static final String TAG = "SettingsTransitionHelper";
     private static final long DURATION = 450L;
+    private static final float FADE_THROUGH_THRESHOLD = 0.22F;
 
     private static MaterialSharedAxis createSettingsSharedAxis(Context context, boolean forward) {
         final MaterialSharedAxis transition = new MaterialSharedAxis(MaterialSharedAxis.X, forward);
@@ -48,11 +50,13 @@ public class SettingsTransitionHelper {
         forwardDistanceProvider.setSlideDistance(distance);
         transition.setDuration(DURATION);
 
+        final FadeThroughProvider fadeThroughProvider =
+                (FadeThroughProvider) transition.getSecondaryAnimatorProvider();
+        fadeThroughProvider.setProgressThreshold(FADE_THROUGH_THRESHOLD);
+
         final Interpolator interpolator =
                 AnimationUtils.loadInterpolator(context, R.interpolator.fast_out_extra_slow_in);
         transition.setInterpolator(interpolator);
-
-        // TODO(b/177480673): Update fade through threshold once (cl/362065364) is released
 
         return transition;
     }
