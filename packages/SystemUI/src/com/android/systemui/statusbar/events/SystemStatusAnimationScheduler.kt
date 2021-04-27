@@ -68,7 +68,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
     }
     private fun isImmersiveIndicatorEnabled(): Boolean {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_ENABLE_IMMERSIVE_INDICATOR, false)
+                PROPERTY_ENABLE_IMMERSIVE_INDICATOR, true)
     }
 
     /** True from the time a scheduled event starts until it's animation finishes */
