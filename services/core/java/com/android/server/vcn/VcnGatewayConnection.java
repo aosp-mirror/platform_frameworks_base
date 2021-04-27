@@ -52,7 +52,6 @@ import android.net.NetworkProvider;
 import android.net.NetworkScore;
 import android.net.RouteInfo;
 import android.net.TelephonyNetworkSpecifier;
-import android.net.TunnelConnectionParams;
 import android.net.Uri;
 import android.net.annotations.PolicyDirection;
 import android.net.ipsec.ike.ChildSessionCallback;
@@ -1924,14 +1923,8 @@ public class VcnGatewayConnection extends StateMachine {
             @NonNull IpSecTunnelInterface tunnelIface,
             @NonNull VcnChildSessionConfiguration childConfig,
             @Nullable UnderlyingNetworkRecord underlying) {
-        final TunnelConnectionParams tunnelParams =
+        final IkeTunnelConnectionParams ikeTunnelParams =
                 gatewayConnectionConfig.getTunnelConnectionParams();
-        if (!(tunnelParams instanceof IkeTunnelConnectionParams)) {
-            throw new IllegalStateException(
-                    "TunnelConnectionParams is not IkeTunnelConnectionParams");
-        }
-
-        final IkeTunnelConnectionParams ikeTunnelParams = (IkeTunnelConnectionParams) tunnelParams;
         final LinkProperties lp = new LinkProperties();
 
         lp.setInterfaceName(tunnelIface.getInterfaceName());
@@ -2138,32 +2131,16 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     private IkeSessionParams buildIkeParams(@NonNull Network network) {
-        final TunnelConnectionParams tunnelConnectionParams =
+        final IkeTunnelConnectionParams ikeTunnelConnectionParams =
                 mConnectionConfig.getTunnelConnectionParams();
-
-        if (tunnelConnectionParams instanceof IkeTunnelConnectionParams) {
-            final IkeTunnelConnectionParams ikeTunnelConnectionParams =
-                    (IkeTunnelConnectionParams) tunnelConnectionParams;
-            final IkeSessionParams.Builder builder =
-                    new IkeSessionParams.Builder(ikeTunnelConnectionParams.getIkeSessionParams());
-            builder.setNetwork(network);
-
-            return builder.build();
-        }
-
-        throw new IllegalStateException("TunnelConnectionParams is not IkeTunnelConnectionParams");
+        final IkeSessionParams.Builder builder =
+                new IkeSessionParams.Builder(ikeTunnelConnectionParams.getIkeSessionParams());
+        builder.setNetwork(network);
+        return builder.build();
     }
 
     private ChildSessionParams buildChildParams() {
-        final TunnelConnectionParams tunnelConnectionParams =
-                mConnectionConfig.getTunnelConnectionParams();
-
-        if (tunnelConnectionParams instanceof IkeTunnelConnectionParams) {
-            return ((IkeTunnelConnectionParams) tunnelConnectionParams)
-                    .getTunnelModeChildSessionParams();
-        }
-
-        throw new IllegalStateException("TunnelConnectionParams is not IkeTunnelConnectionParams");
+        return mConnectionConfig.getTunnelConnectionParams().getTunnelModeChildSessionParams();
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
