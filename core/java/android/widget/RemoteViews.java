@@ -1226,6 +1226,7 @@ public class RemoteViews implements Parcelable, Filter {
         return rect;
     }
 
+    @Nullable
     private static Class<?> getParameterType(int type) {
         switch (type) {
             case BaseReflectionAction.BOOLEAN:
@@ -1267,6 +1268,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    @Nullable
     private MethodHandle getMethod(View view, String methodName, Class<?> paramType,
             boolean async) {
         MethodArgs result;
@@ -1517,6 +1519,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
+        @Nullable
         public Bitmap getBitmapForId(int id) {
             if (id == -1 || id >= mBitmaps.size()) {
                 return null;
@@ -1864,8 +1867,9 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
+        @Nullable
         @Override
-        protected Object getParameterValue(View view) throws ActionException {
+        protected Object getParameterValue(@Nullable View view) throws ActionException {
             return this.value;
         }
 
@@ -1904,8 +1908,11 @@ public class RemoteViews implements Parcelable, Filter {
             dest.writeInt(this.mResId);
         }
 
+        @Nullable
         @Override
-        protected Object getParameterValue(View view) throws ActionException {
+        protected Object getParameterValue(@Nullable View view) throws ActionException {
+            if (view == null) return null;
+
             Resources resources = view.getContext().getResources();
             try {
                 switch (this.mResourceType) {
@@ -2079,8 +2086,11 @@ public class RemoteViews implements Parcelable, Filter {
             dest.writeInt(this.mUnit);
         }
 
+        @Nullable
         @Override
-        protected Object getParameterValue(View view) throws ActionException {
+        protected Object getParameterValue(@Nullable View view) throws ActionException {
+            if (view == null) return null;
+
             DisplayMetrics dm = view.getContext().getResources().getDisplayMetrics();
             try {
                 int data = TypedValue.createComplexDimension(this.mValue, this.mUnit);
@@ -3592,6 +3602,9 @@ public class RemoteViews implements Parcelable, Filter {
         while (remoteViews.hasNext()) {
             RemoteViews view = remoteViews.next();
             SizeF size = view.getIdealSize();
+            if (size == null) {
+                throw new IllegalStateException("Expected RemoteViews to have ideal size");
+            }
             float newViewArea = size.getWidth() * size.getHeight();
             if (smallestView != null && !view.hasSameAppInfo(smallestView.mApplication)) {
                 throw new IllegalArgumentException(
@@ -5309,6 +5322,10 @@ public class RemoteViews implements Parcelable, Filter {
         float bestSqDist = Float.MAX_VALUE;
         for (RemoteViews layout : mSizedRemoteViews) {
             SizeF layoutSize = layout.getIdealSize();
+            if (layoutSize == null) {
+                throw new IllegalStateException("Expected RemoteViews to have ideal size");
+            }
+
             if (fitsIn(layoutSize, widgetSize)) {
                 if (bestFit == null) {
                     bestFit = layout;
@@ -5342,7 +5359,7 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public RemoteViews getRemoteViewsToApply(@NonNull Context context,
             @Nullable SizeF widgetSize) {
-        if (!hasSizedRemoteViews()) {
+        if (!hasSizedRemoteViews() || widgetSize == null) {
             // If there isn't multiple remote views, fall back on the previous methods.
             return getRemoteViewsToApply(context);
         }
@@ -5419,7 +5436,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /** @hide */
     public View apply(Context context, ViewGroup parent, InteractionHandler handler,
-            @NonNull SizeF size, @Nullable ColorResources colorResources) {
+            @Nullable SizeF size, @Nullable ColorResources colorResources) {
         RemoteViews rvToApply = getRemoteViewsToApply(context, size);
 
         View result = inflateView(context, rvToApply, parent, 0, colorResources);
@@ -5431,7 +5448,7 @@ public class RemoteViews implements Parcelable, Filter {
         return inflateView(context, rv, parent, 0, null);
     }
 
-    private View inflateView(Context context, RemoteViews rv, ViewGroup parent,
+    private View inflateView(Context context, RemoteViews rv, @Nullable ViewGroup parent,
             @StyleRes int applyThemeResId, @Nullable ColorResources colorResources) {
         // RemoteViews may be built by an application installed in another
         // user. So build a context that loads resources from that user but
@@ -5447,8 +5464,7 @@ public class RemoteViews implements Parcelable, Filter {
         if (applyThemeResId != 0) {
             inflationContext = new ContextThemeWrapper(inflationContext, applyThemeResId);
         }
-        LayoutInflater inflater = (LayoutInflater)
-                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(context);
 
         // Clone inflater so we load resources from correct context and
         // we don't add a filter to the static version returned by getSystemService.
@@ -5576,6 +5592,7 @@ public class RemoteViews implements Parcelable, Filter {
             mResult = result;
         }
 
+        @Nullable
         @Override
         protected ViewTree doInBackground(Void... params) {
             try {
@@ -5860,6 +5877,7 @@ public class RemoteViews implements Parcelable, Filter {
          * are in an array, the array's entries are 16 bytes each. We use this to work out the
          * location of all the positions of the various resources.
          */
+        @Nullable
         private static byte[] createCompiledResourcesContent(Context context,
                 SparseIntArray colorResources) throws IOException {
             byte[] content;
@@ -5897,6 +5915,7 @@ public class RemoteViews implements Parcelable, Filter {
          *
          * @hide
          */
+        @Nullable
         public static ColorResources create(Context context, SparseIntArray colorMapping) {
             try {
                 byte[] contentBytes = createCompiledResourcesContent(context, colorMapping);
@@ -6020,7 +6039,8 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private static ApplicationInfo getApplicationInfo(String packageName, int userId) {
+    @Nullable
+    private static ApplicationInfo getApplicationInfo(@Nullable String packageName, int userId) {
         if (packageName == null) {
             return null;
         }
@@ -6096,6 +6116,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
+        @Nullable
         public ViewTree findViewTreeById(@IdRes int id) {
             if (mRoot.getId() == id) {
                 return this;
@@ -6112,6 +6133,7 @@ public class RemoteViews implements Parcelable, Filter {
             return null;
         }
 
+        @Nullable
         public ViewTree findViewTreeParentOf(ViewTree child) {
             if (mChildren == null) {
                 return null;
@@ -6134,6 +6156,7 @@ public class RemoteViews implements Parcelable, Filter {
             createTree();
         }
 
+        @Nullable
         public <T extends View> T findViewById(@IdRes int id) {
             if (mChildren == null) {
                 return mRoot.findViewById(id);
@@ -6391,6 +6414,8 @@ public class RemoteViews implements Parcelable, Filter {
          */
         @Nullable
         private static AdapterView<?> getAdapterViewAncestor(@Nullable View view) {
+            if (view == null) return null;
+
             View parent = (View) view.getParent();
             // Break the for loop on the first encounter of:
             //    1) an AdapterView,
