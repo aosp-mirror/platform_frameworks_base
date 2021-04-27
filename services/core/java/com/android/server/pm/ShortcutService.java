@@ -1992,10 +1992,11 @@ public class ShortcutService extends IShortcutService.Stub {
                 packageShortcutsChanged(packageName, userId, changedShortcuts, removedShortcuts);
 
                 verifyStates();
+
+                ret.complete(true);
             } catch (Exception e) {
                 ret.completeExceptionally(e);
             }
-            ret.complete(true);
         });
         return ret;
     }
