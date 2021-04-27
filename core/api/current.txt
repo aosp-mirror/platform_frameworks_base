@@ -18965,20 +18965,25 @@ package android.hardware.lights {
     method public int getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
-    field public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10; // 0xa
-    field public static final int LIGHT_TYPE_INPUT_RGB = 11; // 0xb
-    field public static final int LIGHT_TYPE_INPUT_SINGLE = 9; // 0x9
+    field public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10002; // 0x2712
+    field public static final int LIGHT_TYPE_INPUT_RGB = 10003; // 0x2713
+    field public static final int LIGHT_TYPE_INPUT_SINGLE = 10001; // 0x2711
     field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
   }
 
   public final class LightState implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public static android.hardware.lights.LightState forColor(@ColorInt int);
-    method @NonNull public static android.hardware.lights.LightState forPlayerId(int);
     method @ColorInt public int getColor();
     method public int getPlayerId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.LightState> CREATOR;
+  }
+
+  public static final class LightState.Builder {
+    ctor public LightState.Builder();
+    method @NonNull public android.hardware.lights.LightState build();
+    method @NonNull public android.hardware.lights.LightState.Builder setColor(@ColorInt int);
+    method @NonNull public android.hardware.lights.LightState.Builder setPlayerId(int);
   }
 
   public abstract class LightsManager {
@@ -18996,6 +19001,7 @@ package android.hardware.lights {
   public final class LightsRequest {
     method @NonNull public java.util.List<android.hardware.lights.LightState> getLightStates();
     method @NonNull public java.util.List<java.lang.Integer> getLights();
+    method @NonNull public java.util.Map<java.lang.Integer,android.hardware.lights.LightState> getLightsAndStates();
   }
 
   public static final class LightsRequest.Builder {
