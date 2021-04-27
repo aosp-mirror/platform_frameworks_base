@@ -313,6 +313,7 @@ import android.window.IRemoteTransition;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
+import android.window.TransitionInfo.AnimationOptions;
 import android.window.WindowContainerToken;
 
 import com.android.internal.R;
@@ -4122,6 +4123,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void applyOptionsAnimation(ActivityOptions pendingOptions, Intent intent) {
         final int animationType = pendingOptions.getAnimationType();
         final DisplayContent displayContent = getDisplayContent();
+        AnimationOptions options = null;
         switch (animationType) {
             case ANIM_CUSTOM:
                 displayContent.mAppTransition.overridePendingAppTransition(
@@ -4131,9 +4133,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pendingOptions.getAnimationStartedListener(),
                         pendingOptions.getAnimationFinishedListener(),
                         pendingOptions.getOverrideTaskTransition());
+                options = AnimationOptions.makeCustomAnimOptions(pendingOptions.getPackageName(),
+                        pendingOptions.getCustomEnterResId(), pendingOptions.getCustomExitResId(),
+                        pendingOptions.getOverrideTaskTransition());
                 break;
             case ANIM_CLIP_REVEAL:
                 displayContent.mAppTransition.overridePendingAppTransitionClipReveal(
+                        pendingOptions.getStartX(), pendingOptions.getStartY(),
+                        pendingOptions.getWidth(), pendingOptions.getHeight());
+                options = AnimationOptions.makeClipRevealAnimOptions(
                         pendingOptions.getStartX(), pendingOptions.getStartY(),
                         pendingOptions.getWidth(), pendingOptions.getHeight());
                 if (intent.getSourceBounds() == null) {
@@ -4145,6 +4153,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 break;
             case ANIM_SCALE_UP:
                 displayContent.mAppTransition.overridePendingAppTransitionScaleUp(
+                        pendingOptions.getStartX(), pendingOptions.getStartY(),
+                        pendingOptions.getWidth(), pendingOptions.getHeight());
+                options = AnimationOptions.makeScaleUpAnimOptions(
                         pendingOptions.getStartX(), pendingOptions.getStartY(),
                         pendingOptions.getWidth(), pendingOptions.getHeight());
                 if (intent.getSourceBounds() == null) {
@@ -4162,6 +4173,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pendingOptions.getStartX(), pendingOptions.getStartY(),
                         pendingOptions.getAnimationStartedListener(),
                         scaleUp);
+                options = AnimationOptions.makeThumnbnailAnimOptions(buffer,
+                        pendingOptions.getStartX(), pendingOptions.getStartY(), scaleUp);
                 if (intent.getSourceBounds() == null && buffer != null) {
                     intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
                             pendingOptions.getStartY(),
@@ -4201,6 +4214,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             case ANIM_OPEN_CROSS_PROFILE_APPS:
                 displayContent.mAppTransition
                         .overridePendingAppTransitionStartCrossProfileApps();
+                options = AnimationOptions.makeCrossProfileAnimOptions();
                 break;
             case ANIM_NONE:
             case ANIM_UNDEFINED:
@@ -4208,6 +4222,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             default:
                 Slog.e(TAG_WM, "applyOptionsLocked: Unknown animationType=" + animationType);
                 break;
+        }
+
+        if (options != null) {
+            mAtmService.getTransitionController().setOverrideAnimation(options);
         }
     }
 

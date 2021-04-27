@@ -78,10 +78,6 @@ import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpe
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
-import static com.android.internal.policy.TransitionAnimation.THUMBNAIL_TRANSITION_ENTER_SCALE_DOWN;
-import static com.android.internal.policy.TransitionAnimation.THUMBNAIL_TRANSITION_ENTER_SCALE_UP;
-import static com.android.internal.policy.TransitionAnimation.THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN;
-import static com.android.internal.policy.TransitionAnimation.THUMBNAIL_TRANSITION_EXIT_SCALE_UP;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.server.wm.AppTransitionProto.APP_TRANSITION_STATE;
@@ -678,25 +674,6 @@ public class AppTransition implements Dump {
     }
 
     /**
-     * Return the current thumbnail transition state.
-     */
-    int getThumbnailTransitionState(boolean enter) {
-        if (enter) {
-            if (mNextAppTransitionScaleUp) {
-                return THUMBNAIL_TRANSITION_ENTER_SCALE_UP;
-            } else {
-                return THUMBNAIL_TRANSITION_ENTER_SCALE_DOWN;
-            }
-        } else {
-            if (mNextAppTransitionScaleUp) {
-                return THUMBNAIL_TRANSITION_EXIT_SCALE_UP;
-            } else {
-                return THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN;
-            }
-        }
-    }
-
-    /**
      * Creates an overlay with a background color and a thumbnail for the cross profile apps
      * animation.
      */
@@ -1064,8 +1041,8 @@ public class AppTransition implements Dump {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP);
             final HardwareBuffer thumbnailHeader = getAppTransitionThumbnailHeader(container);
-            a = mTransitionAnimation.createThumbnailEnterExitAnimationLocked(
-                    getThumbnailTransitionState(enter), frame, transit, thumbnailHeader,
+            a = mTransitionAnimation.createThumbnailEnterExitAnimationLocked(enter,
+                    mNextAppTransitionScaleUp, frame, transit, thumbnailHeader,
                     mDefaultNextAppTransitionAnimationSpec != null
                             ? mDefaultNextAppTransitionAnimationSpec.rect : null);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
@@ -1080,9 +1057,9 @@ public class AppTransition implements Dump {
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP);
             AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(
                     container.hashCode());
-            a = mTransitionAnimation.createAspectScaledThumbnailEnterExitAnimationLocked(
-                    getThumbnailTransitionState(enter), orientation, transit, frame,
-                    insets, surfaceInsets, stableInsets, freeform, spec != null ? spec.rect : null,
+            a = mTransitionAnimation.createAspectScaledThumbnailEnterExitAnimationLocked(enter,
+                    mNextAppTransitionScaleUp, orientation, transit, frame, insets, surfaceInsets,
+                    stableInsets, freeform, spec != null ? spec.rect : null,
                     mDefaultNextAppTransitionAnimationSpec != null
                             ? mDefaultNextAppTransitionAnimationSpec.rect : null);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,

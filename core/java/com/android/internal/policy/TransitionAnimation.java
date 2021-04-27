@@ -518,7 +518,7 @@ public class TransitionAnimation {
      * This animation is created when we are doing a thumbnail transition, for the activity that is
      * leaving, and the activity that is entering.
      */
-    public Animation createThumbnailEnterExitAnimationLocked(int thumbTransitState,
+    public Animation createThumbnailEnterExitAnimationLocked(boolean enter, boolean scaleUp,
             Rect containingFrame, int transit, HardwareBuffer thumbnailHeader,
             Rect startRect) {
         final int appWidth = containingFrame.width();
@@ -529,6 +529,7 @@ public class TransitionAnimation {
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
         final int thumbHeightI = thumbnailHeader != null ? thumbnailHeader.getHeight() : appHeight;
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
+        final int thumbTransitState = getThumbnailTransitionState(enter, scaleUp);
 
         switch (thumbTransitState) {
             case THUMBNAIL_TRANSITION_ENTER_SCALE_UP: {
@@ -587,8 +588,8 @@ public class TransitionAnimation {
      * This alternate animation is created when we are doing a thumbnail transition, for the
      * activity that is leaving, and the activity that is entering.
      */
-    public Animation createAspectScaledThumbnailEnterExitAnimationLocked(int thumbTransitState,
-            int orientation, int transit, Rect containingFrame, Rect contentInsets,
+    public Animation createAspectScaledThumbnailEnterExitAnimationLocked(boolean enter,
+            boolean scaleUp, int orientation, int transit, Rect containingFrame, Rect contentInsets,
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean freeform,
             Rect startRect, Rect defaultStartRect) {
         Animation a;
@@ -601,11 +602,11 @@ public class TransitionAnimation {
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
         final int thumbStartX = mTmpRect.left - containingFrame.left - contentInsets.left;
         final int thumbStartY = mTmpRect.top - containingFrame.top;
+        final int thumbTransitState = getThumbnailTransitionState(enter, scaleUp);
 
         switch (thumbTransitState) {
             case THUMBNAIL_TRANSITION_ENTER_SCALE_UP:
             case THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN: {
-                final boolean scaleUp = thumbTransitState == THUMBNAIL_TRANSITION_ENTER_SCALE_UP;
                 if (freeform && scaleUp) {
                     a = createAspectScaledThumbnailEnterFreeformAnimationLocked(
                             containingFrame, surfaceInsets, startRect, defaultStartRect);
@@ -840,6 +841,25 @@ public class TransitionAnimation {
                 Math.abs(translationY) / displayFrame.height());
         return (long) (DEFAULT_APP_TRANSITION_DURATION + fraction
                 * (MAX_CLIP_REVEAL_TRANSITION_DURATION - DEFAULT_APP_TRANSITION_DURATION));
+    }
+
+    /**
+     * Return the current thumbnail transition state.
+     */
+    private int getThumbnailTransitionState(boolean enter, boolean scaleUp) {
+        if (enter) {
+            if (scaleUp) {
+                return THUMBNAIL_TRANSITION_ENTER_SCALE_UP;
+            } else {
+                return THUMBNAIL_TRANSITION_ENTER_SCALE_DOWN;
+            }
+        } else {
+            if (scaleUp) {
+                return THUMBNAIL_TRANSITION_EXIT_SCALE_UP;
+            } else {
+                return THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN;
+            }
+        }
     }
 
     /**

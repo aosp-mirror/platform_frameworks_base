@@ -16,6 +16,13 @@
 
 package com.android.wm.shell.transition;
 
+import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
+import static android.app.ActivityOptions.ANIM_CUSTOM;
+import static android.app.ActivityOptions.ANIM_NONE;
+import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
+import static android.app.ActivityOptions.ANIM_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
@@ -37,6 +44,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
@@ -60,6 +68,21 @@ import java.util.ArrayList;
 /** The default handler that handles anything not already handled. */
 public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private static final int MAX_ANIMATION_DURATION = 3000;
+
+    /**
+     * Restrict ability of activities overriding transition animation in a way such that
+     * an activity can do it only when the transition happens within a same task.
+     *
+     * @see android.app.Activity#overridePendingTransition(int, int)
+     */
+    private static final String DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY =
+            "persist.wm.disable_custom_task_animation";
+
+    /**
+     * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
+     */
+    static boolean sDisableCustomTaskAnimationProperty =
+            SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
 
     private final TransactionPool mTransactionPool;
     private final ShellExecutor mMainExecutor;
@@ -117,7 +140,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // Don't animate anything that isn't independent.
             if (!TransitionInfo.isIndependent(change, info)) continue;
 
-            Animation a = loadAnimation(info.getType(), info.getFlags(), change);
+            Animation a = loadAnimation(info, change);
             if (a != null) {
                 startAnimInternal(animations, a, change.getLeash(), onAnimFinish);
             }
@@ -141,13 +164,20 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     @Nullable
-    private Animation loadAnimation(int type, int flags, TransitionInfo.Change change) {
+    private Animation loadAnimation(TransitionInfo info, TransitionInfo.Change change) {
         // TODO(b/178678389): It should handle more type animation here
         Animation a = null;
 
+        final int type = info.getType();
+        final int flags = info.getFlags();
         final boolean isOpening = Transitions.isOpeningType(type);
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
+        final boolean enter = Transitions.isOpeningType(changeMode);
+        final boolean isTask = change.getTaskInfo() != null;
+        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
+        final int overrideType = options != null ? options.getType() : ANIM_NONE;
+        final boolean canCustomContainer = isTask ? !sDisableCustomTaskAnimationProperty : true;
 
         if (type == TRANSIT_RELAUNCH) {
             a = mTransitionAnimation.createRelaunchAnimation(
@@ -157,6 +187,25 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     (changeFlags & FLAG_SHOW_WALLPAPER) != 0);
         } else if (type == TRANSIT_KEYGUARD_UNOCCLUDE) {
             a = mTransitionAnimation.loadKeyguardUnoccludeAnimation();
+        } else if (overrideType == ANIM_CUSTOM
+                && (canCustomContainer || options.getOverrideTaskTransition())) {
+            a = mTransitionAnimation.loadAnimationRes(options.getPackageName(), enter
+                    ? options.getEnterResId() : options.getExitResId());
+        } else if (overrideType == ANIM_OPEN_CROSS_PROFILE_APPS && enter) {
+            a = mTransitionAnimation.loadCrossProfileAppEnterAnimation();
+        } else if (overrideType == ANIM_CLIP_REVEAL) {
+            a = mTransitionAnimation.createClipRevealAnimationLocked(changeMode, enter,
+                    change.getEndAbsBounds(), change.getEndAbsBounds(),
+                    options.getTransitionBounds());
+        } else if (overrideType == ANIM_SCALE_UP) {
+            a = mTransitionAnimation.createScaleUpAnimationLocked(changeMode, enter,
+                    change.getEndAbsBounds(), options.getTransitionBounds());
+        } else if (overrideType == ANIM_THUMBNAIL_SCALE_UP
+                || overrideType == ANIM_THUMBNAIL_SCALE_DOWN) {
+            final boolean scaleUp = overrideType == ANIM_THUMBNAIL_SCALE_UP;
+            a = mTransitionAnimation.createThumbnailEnterExitAnimationLocked(enter, scaleUp,
+                    change.getEndAbsBounds(), changeMode, options.getThumbnail(),
+                    options.getTransitionBounds());
         } else if (changeMode == TRANSIT_OPEN && isOpening) {
             if ((changeFlags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
                 // This received a transferred starting window, so don't animate
@@ -165,7 +214,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
             if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
                 a = mTransitionAnimation.loadVoiceActivityOpenAnimation(true /** enter */);
-            } else if (change.getTaskInfo() != null) {
+            } else if (isTask) {
                 a = mTransitionAnimation.loadDefaultAnimationAttr(
                         R.styleable.WindowAnimation_taskOpenEnterAnimation);
             } else {
@@ -188,7 +237,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         } else if (changeMode == TRANSIT_CLOSE && !isOpening) {
             if ((changeFlags & FLAG_IS_VOICE_INTERACTION) != 0) {
                 a = mTransitionAnimation.loadVoiceActivityExitAnimation(false /** enter */);
-            } else if (change.getTaskInfo() != null) {
+            } else if (isTask) {
                 a = mTransitionAnimation.loadDefaultAnimationAttr(
                         R.styleable.WindowAnimation_taskCloseExitAnimation);
             } else {
