@@ -1051,8 +1051,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minuut geleden</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> uur geleden, </item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> uur geleden, </item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> uur geleden</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> uur geleden</item>
     </plurals>
     <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> dagen geleden</item>
