@@ -256,7 +256,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 state.mScrimsVisibility == ScrimController.OPAQUE;
         final boolean keyguardOrAod = state.mKeyguardShowing
                 || (state.mDozing && mDozeParameters.getAlwaysOn());
-        if (keyguardOrAod && !state.mBackdropShowing && !scrimsOccludingWallpaper) {
+        if ((keyguardOrAod && !state.mBackdropShowing && !scrimsOccludingWallpaper)
+                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe()) {
+            // Show the wallpaper if we're on keyguard/AOD and the wallpaper is not occluded by a
+            // solid backdrop or scrim. Also, show it if we are currently animating between the
+            // keyguard and the surface behind the keyguard - we want to use the wallpaper as a
+            // backdrop for this animation.
             mLpChanged.flags |= LayoutParams.FLAG_SHOW_WALLPAPER;
         } else {
             mLpChanged.flags &= ~LayoutParams.FLAG_SHOW_WALLPAPER;
