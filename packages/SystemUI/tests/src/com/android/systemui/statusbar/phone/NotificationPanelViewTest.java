@@ -75,6 +75,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.qs.QSDetailDisplayer;
@@ -240,6 +241,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private LockIconViewController mLockIconViewController;
     @Mock
     private QuickAccessWalletClient mQuickAccessWalletClient;
+    @Mock
+    private KeyguardMediaController mKeyguardMediaController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -282,6 +285,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mNotificationContainerParent = new NotificationsQuickSettingsContainer(getContext(), null);
         mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
         mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
+        mNotificationContainerParent.addView(newViewWithId(R.id.keyguard_status_view));
         when(mView.findViewById(R.id.notification_container_parent))
                 .thenReturn(mNotificationContainerParent);
         FlingAnimationUtils.Builder flingAnimationUtilsBuilder = new FlingAnimationUtils.Builder(
@@ -346,6 +350,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mLockIconViewController,
                 mFeatureFlags,
                 mQuickAccessWalletClient,
+                mKeyguardMediaController,
                 new FakeExecutor(new FakeSystemClock()));
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
@@ -473,6 +478,20 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .isEqualTo(ConstraintSet.PARENT_ID);
         assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startToStart)
                 .isEqualTo(ConstraintSet.PARENT_ID);
+    }
+
+    @Test
+    public void testKeyguardStatusView_isAlignedToGuidelineInSplitShadeMode() {
+        mNotificationPanelViewController.updateResources();
+
+        assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
+                .isEqualTo(ConstraintSet.PARENT_ID);
+
+        enableSplitShade();
+        mNotificationPanelViewController.updateResources();
+
+        assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
+                .isEqualTo(R.id.qs_edge_guideline);
     }
 
     @Test

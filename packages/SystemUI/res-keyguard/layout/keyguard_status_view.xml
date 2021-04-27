@@ -20,12 +20,14 @@
 <!-- This is a view that shows general status information in Keyguard. -->
 <com.android.keyguard.KeyguardStatusView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_status_view"
     android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_horizontal|top">
+    systemui:layout_constraintStart_toStartOf="parent"
+    systemui:layout_constraintEnd_toEndOf="parent"
+    systemui:layout_constraintTop_toTopOf="parent"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content">
     <LinearLayout
         android:id="@+id/status_view_container"
         android:layout_width="match_parent"
@@ -70,5 +72,11 @@
             android:letterSpacing="0.05"
             android:ellipsize="marquee"
             android:singleLine="true" />
+        <FrameLayout
+            android:id="@+id/status_view_media_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/qs_media_padding"
+            />
     </LinearLayout>
 </com.android.keyguard.KeyguardStatusView>
