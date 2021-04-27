@@ -354,6 +354,7 @@ public class BstatsCpuTimesValidationTest {
         batteryOffScreenOn();
     }
 
+    @SkipPresubmit("b/185960974 flaky")
     @Test
     public void testCpuFreqTimes_stateTopSleeping() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
