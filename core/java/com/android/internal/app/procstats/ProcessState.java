@@ -63,6 +63,8 @@ import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 
 import com.android.internal.app.ProcessMap;
+import com.android.internal.app.procstats.AssociationState.SourceKey;
+import com.android.internal.app.procstats.AssociationState.SourceState;
 import com.android.internal.app.procstats.ProcessStats.PackageState;
 import com.android.internal.app.procstats.ProcessStats.ProcessStateHolder;
 import com.android.internal.app.procstats.ProcessStats.TotalMemoryUseCollection;
@@ -161,6 +163,11 @@ public final class ProcessState {
 
     // Set in computeProcessTimeLocked and used by COMPARATOR to sort. Be careful.
     private long mTmpTotalTime;
+
+    /**
+     * The combined source states which has or had an association with this process.
+     */
+    ArrayMap<SourceKey, SourceState> mCommonSources;
 
     /**
      * Create a new top-level process state, for the initial case where there is only
@@ -267,6 +274,21 @@ public final class ProcessState {
             addCachedKill(other.mNumCachedKill, other.mMinCachedKillPss,
                     other.mAvgCachedKillPss, other.mMaxCachedKillPss);
         }
+        if (other.mCommonSources != null) {
+            if (mCommonSources == null) {
+                mCommonSources = new ArrayMap<>();
+            }
+            int size = other.mCommonSources.size();
+            for (int i = 0; i < size; i++) {
+                final SourceKey key = other.mCommonSources.keyAt(i);
+                SourceState state = mCommonSources.get(key);
+                if (state == null) {
+                    state = new SourceState(mStats, null, this, key);
+                    mCommonSources.put(key, state);
+                }
+                state.add(other.mCommonSources.valueAt(i));
+            }
+        }
     }
 
     public void resetSafely(long now) {
@@ -278,6 +300,17 @@ public final class ProcessState {
         mNumExcessiveCpu = 0;
         mNumCachedKill = 0;
         mMinCachedKillPss = mAvgCachedKillPss = mMaxCachedKillPss = 0;
+        // Reset the combine source state.
+        if (mCommonSources != null) {
+            for (int ip = mCommonSources.size() - 1; ip >= 0; ip--) {
+                final SourceState state = mCommonSources.valueAt(ip);
+                if (state.isInUse()) {
+                    state.resetSafely(now);
+                } else {
+                    mCommonSources.removeAt(ip);
+                }
+            }
+        }
     }
 
     public void makeDead() {
@@ -308,9 +341,18 @@ public final class ProcessState {
             out.writeLong(mAvgCachedKillPss);
             out.writeLong(mMaxCachedKillPss);
         }
+        // The combined source state of all associations.
+        final int numOfSources = mCommonSources != null ? mCommonSources.size() : 0;
+        out.writeInt(numOfSources);
+        for (int i = 0; i < numOfSources; i++) {
+            final SourceKey key = mCommonSources.keyAt(i);
+            final SourceState src = mCommonSources.valueAt(i);
+            key.writeToParcel(mStats, out);
+            src.writeToParcel(out, 0);
+        }
     }
 
-    public boolean readFromParcel(Parcel in, boolean fully) {
+    boolean readFromParcel(Parcel in, int version, boolean fully) {
         boolean multiPackage = in.readInt() != 0;
         if (fully) {
             mMultiPackage = multiPackage;
@@ -337,6 +379,19 @@ public final class ProcessState {
         } else {
             mMinCachedKillPss = mAvgCachedKillPss = mMaxCachedKillPss = 0;
         }
+
+        // The combined source state of all associations.
+        final int numOfSources = in.readInt();
+        if (numOfSources > 0) {
+            mCommonSources = new ArrayMap<>(numOfSources);
+            for (int i = 0; i < numOfSources; i++) {
+                final SourceKey key = new SourceKey(mStats, in, version);
+                final SourceState src = new SourceState(mStats, null, this, key);
+                src.readFromParcel(in);
+                mCommonSources.put(key, src);
+            }
+        }
+
         return true;
     }
 
@@ -433,6 +488,12 @@ public final class ProcessState {
             mTotalRunningStartTime = now;
         }
         mStartTime = now;
+        if (mCommonSources != null) {
+            for (int ip = mCommonSources.size() - 1; ip >= 0; ip--) {
+                final SourceState src = mCommonSources.valueAt(ip);
+                src.commitStateTime(now);
+            }
+        }
     }
 
     public void incActiveServices(String serviceName) {
@@ -720,6 +781,18 @@ public final class ProcessState {
 
     public long getPssRssMaximum(int state) {
         return mPssTable.getValueForId((byte)state, PSS_RSS_MAXIMUM);
+    }
+
+    SourceState getOrCreateSourceState(SourceKey key) {
+        if (mCommonSources == null) {
+            mCommonSources = new ArrayMap<>();
+        }
+        SourceState state = mCommonSources.get(key);
+        if (state == null) {
+            state = new SourceState(mStats, null, this, key);
+            mCommonSources.put(key, state);
+        }
+        return state;
     }
 
     /**
@@ -1038,7 +1111,8 @@ public final class ProcessState {
         }
     }
 
-    public void dumpInternalLocked(PrintWriter pw, String prefix, boolean dumpAll) {
+    void dumpInternalLocked(PrintWriter pw, String prefix, String reqPackage,
+            long totalTime, long now, boolean dumpAll) {
         if (dumpAll) {
             pw.print(prefix); pw.print("myID=");
                     pw.print(Integer.toHexString(System.identityHashCode(this)));
@@ -1052,6 +1126,13 @@ public final class ProcessState {
                 pw.print(prefix); pw.print("Common Proc: "); pw.print(mCommonProcess.mName);
                         pw.print("/"); pw.print(mCommonProcess.mUid);
                         pw.print(" pkg="); pw.println(mCommonProcess.mPackage);
+            }
+            if (mCommonSources != null) {
+                pw.print(prefix); pw.println("Aggregated Association Sources:");
+                AssociationState.dumpSources(
+                        pw, prefix + "  ", prefix + "    ", prefix + "        ",
+                        AssociationState.createSortedAssociations(now, totalTime, mCommonSources),
+                        now, totalTime, reqPackage, true, dumpAll);
             }
         }
         if (mActive) {
@@ -1559,7 +1640,7 @@ public final class ProcessState {
         }
 
         mStats.dumpFilteredAssociationStatesProtoForProc(proto, ProcessStatsProto.ASSOCS,
-                now, this, procToPkgMap, uidToPkgMap);
+                now, this, uidToPkgMap);
         proto.end(token);
     }
 }
