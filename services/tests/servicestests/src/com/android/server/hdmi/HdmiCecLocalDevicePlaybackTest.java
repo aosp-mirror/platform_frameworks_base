@@ -60,6 +60,7 @@ import java.util.concurrent.TimeUnit;
 @RunWith(JUnit4.class)
 /** Tests for {@link HdmiCecLocalDevicePlayback} class. */
 public class HdmiCecLocalDevicePlaybackTest {
+    private static final int TIMEOUT_MS = HdmiConfig.TIMEOUT_MS + 1;
 
     private static final int PORT_1 = 1;
     private static final HdmiDeviceInfo INFO_TV = new HdmiDeviceInfo(
@@ -1135,6 +1136,10 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isTrue();
         // 4. DUT turned off.
         mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        // TODO(b/184939731): remove waiting times once pending actions no longer block <Standby>
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
         HdmiCecMessage standbyMessageBroadcast = HdmiCecMessageBuilder.buildStandby(
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_BROADCAST);
@@ -1615,6 +1620,7 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void queryDisplayStatus() {
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
         mHdmiControlService.queryDisplayStatus(new IHdmiControlCallback.Stub() {
             @Override
             public void onComplete(int result) {
@@ -1731,6 +1737,12 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void shouldHandleTvPowerKey_CecDisabled() {
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        HdmiCecMessage reportPowerStatusMessage = HdmiCecMessageBuilder.buildReportPowerStatus(
+                Constants.ADDR_TV, mPlaybackLogicalAddress, HdmiControlManager.POWER_STATUS_ON);
+        mNativeWrapper.onCecMessage(reportPowerStatusMessage);
+        mTestLooper.dispatchAll();
+
         mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                 HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
@@ -1739,6 +1751,12 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void shouldHandleTvPowerKey_PowerControlModeNone() {
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        HdmiCecMessage reportPowerStatusMessage = HdmiCecMessageBuilder.buildReportPowerStatus(
+                Constants.ADDR_TV, mPlaybackLogicalAddress, HdmiControlManager.POWER_STATUS_ON);
+        mNativeWrapper.onCecMessage(reportPowerStatusMessage);
+        mTestLooper.dispatchAll();
+
         mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                 HdmiControlManager.POWER_CONTROL_MODE_NONE);
@@ -1746,7 +1764,22 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
+    public void shouldHandleTvPowerKey_CecNotAvailable() {
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        // TV doesn't report its power status
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlService.shouldHandleTvPowerKey()).isFalse();
+    }
+
+    @Test
     public void shouldHandleTvPowerKey_CecEnabled_PowerControlModeTv() {
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        HdmiCecMessage reportPowerStatusMessage = HdmiCecMessageBuilder.buildReportPowerStatus(
+                Constants.ADDR_TV, mPlaybackLogicalAddress, HdmiControlManager.POWER_STATUS_ON);
+        mNativeWrapper.onCecMessage(reportPowerStatusMessage);
+        mTestLooper.dispatchAll();
+
         mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                 HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);

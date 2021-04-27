@@ -364,7 +364,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 MetricsEvent.ACTION_LS_NOTE,
                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
         mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_NOTIFICATION_FALSE_TOUCH);
-        mNotificationPanel.showTransientIndication(R.string.notification_tap_again);
         ActivatableNotificationView previousView = mNotificationPanel.getActivatedChild();
         if (previousView != null) {
             previousView.makeInactive(true /* animate */);

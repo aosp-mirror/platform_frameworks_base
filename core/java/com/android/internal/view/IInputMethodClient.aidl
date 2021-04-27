@@ -30,4 +30,5 @@ oneway interface IInputMethodClient {
     void reportFullscreenMode(boolean fullscreen);
     void updateActivityViewToScreenMatrix(int bindSequence, in float[] matrixValues);
     void setImeTraceEnabled(boolean enabled);
+    void throwExceptionFromSystem(String message);
 }

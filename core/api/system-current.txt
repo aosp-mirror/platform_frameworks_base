@@ -10515,6 +10515,7 @@ package android.service.voice {
     method public static int getMaxBundleSize();
     method public static int getMaxHotwordPhraseId();
     method public static int getMaxScore();
+    method @Nullable public android.media.MediaSyncEvent getMediaSyncEvent();
     method public int getPersonalizedScore();
     method public int getScore();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -10529,6 +10530,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordPhraseId(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setMediaSyncEvent(@NonNull android.media.MediaSyncEvent);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedScore(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
   }
@@ -10536,8 +10538,10 @@ package android.service.voice {
   public abstract class HotwordDetectionService extends android.app.Service {
     ctor public HotwordDetectionService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
-    method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @NonNull android.service.voice.HotwordDetectionService.Callback);
+    method @Deprecated public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
+    method public void onDetect(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
+    method @Deprecated public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @NonNull android.service.voice.HotwordDetectionService.Callback);
+    method public void onDetect(@NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
     field public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_1 = 1; // 0x1
@@ -10583,7 +10587,8 @@ package android.service.voice {
   public class VoiceInteractionService extends android.app.Service {
     method @NonNull public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, android.service.voice.AlwaysOnHotwordDetector.Callback);
-    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.service.voice.HotwordDetector.Callback);
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.service.voice.HotwordDetector.Callback);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.service.voice.HotwordDetector.Callback);
     method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
   }
 
@@ -14521,7 +14526,21 @@ package android.view.translation {
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void pauseTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void resumeTranslation(@NonNull android.app.assist.ActivityId);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, @NonNull android.app.assist.ActivityId);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, @NonNull android.app.assist.ActivityId);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, @NonNull android.app.assist.ActivityId, @NonNull android.view.translation.UiTranslationSpec);
+  }
+
+  public final class UiTranslationSpec implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean shouldPadContentForCompat();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.UiTranslationSpec> CREATOR;
+  }
+
+  public static final class UiTranslationSpec.Builder {
+    ctor public UiTranslationSpec.Builder();
+    method @NonNull public android.view.translation.UiTranslationSpec build();
+    method @NonNull public android.view.translation.UiTranslationSpec.Builder setShouldPadContentForCompat(boolean);
   }
 
 }

@@ -2113,6 +2113,7 @@ package android.provider {
     field public static final String AUTOMATIC_POWER_SAVE_MODE = "automatic_power_save_mode";
     field public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
     field public static final String DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW = "enable_non_resizable_multi_window";
+    field public static final String DISABLE_WINDOW_BLURS = "disable_window_blurs";
     field public static final String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
     field public static final String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
@@ -2790,7 +2791,6 @@ package android.view {
     method public default void holdLock(android.os.IBinder, int);
     method public default boolean isTaskSnapshotSupported();
     method public default void setDisplayImePolicy(int, int);
-    method public default void setForceCrossWindowBlurDisabled(boolean);
     method public default void setShouldShowSystemDecors(int, boolean);
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);
     method public default boolean shouldShowSystemDecors(int);

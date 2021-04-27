@@ -6572,6 +6572,17 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        if ("android.app.Notification$CallStyle".equals(
+                n.extras.getString(Notification.EXTRA_TEMPLATE))) {
+            boolean isForegroundService = (n.flags & FLAG_FOREGROUND_SERVICE) != 0;
+            boolean hasFullScreenIntent = n.fullScreenIntent != null;
+            if (!isForegroundService && !hasFullScreenIntent) {
+                throw new IllegalArgumentException(r.getKey() + " Not posted."
+                        + " CallStyle notifications must either be for a foreground Service or"
+                        + " use a fullScreenIntent.");
+            }
+        }
+
         // snoozed apps
         if (mSnoozeHelper.isSnoozed(userId, pkg, r.getKey())) {
             MetricsLogger.action(r.getLogMaker()

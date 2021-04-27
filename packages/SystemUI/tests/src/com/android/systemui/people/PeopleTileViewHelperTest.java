@@ -42,6 +42,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -73,10 +74,13 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
     private static final String GAME_DESCRIPTION = "Playing a game!";
     private static final CharSequence MISSED_CALL = "Custom missed call message";
     private static final String NAME = "username";
+    private static final UserHandle USER = new UserHandle(0);
+    private static final String SENDER = "sender";
     private static final PeopleSpaceTile PERSON_TILE_WITHOUT_NOTIFICATION =
             new PeopleSpaceTile
                     .Builder(SHORTCUT_ID_1, NAME, ICON, new Intent())
                     .setLastInteractionTimestamp(0L)
+                    .setUserHandle(USER)
                     .build();
     private static final PeopleSpaceTile PERSON_TILE =
             new PeopleSpaceTile
@@ -85,6 +89,16 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                     .setNotificationKey(NOTIFICATION_KEY)
                     .setNotificationContent(NOTIFICATION_CONTENT)
                     .setNotificationDataUri(URI)
+                    .setUserHandle(USER)
+                    .build();
+    private static final PeopleSpaceTile PERSON_TILE_WITH_SENDER =
+            new PeopleSpaceTile
+                    .Builder(SHORTCUT_ID_1, NAME, ICON, new Intent())
+                    .setLastInteractionTimestamp(123L)
+                    .setNotificationKey(NOTIFICATION_KEY)
+                    .setNotificationContent(NOTIFICATION_CONTENT)
+                    .setNotificationSender(SENDER)
+                    .setUserHandle(USER)
                     .build();
     private static final ConversationStatus GAME_STATUS =
             new ConversationStatus
@@ -527,6 +541,86 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
         assertThat(statusContent.getMaxLines()).isEqualTo(3);
+
+        // Has a single message, no count shown.
+        assertEquals(View.GONE, largeResult.findViewById(R.id.messages_count).getVisibility());
+
+    }
+
+    @Test
+    public void testCreateRemoteViewsWithNotificationWithSenderTemplate() {
+        PeopleSpaceTile tileWithStatusAndNotification = PERSON_TILE_WITH_SENDER.toBuilder()
+                .setNotificationDataUri(null)
+                .setStatuses(Arrays.asList(GAME_STATUS,
+                        NEW_STORY_WITH_AVAILABILITY)).build();
+        RemoteViews views = new PeopleTileViewHelper(mContext,
+                tileWithStatusAndNotification, 0, mOptions).getViews();
+        View result = views.apply(mContext, null);
+
+        TextView name = (TextView) result.findViewById(R.id.name);
+        assertEquals(name.getText(), NAME);
+        TextView subtext = (TextView) result.findViewById(R.id.subtext);
+        assertEquals(View.VISIBLE, result.findViewById(R.id.subtext).getVisibility());
+        assertEquals(subtext.getText(), SENDER);
+        assertEquals(View.GONE, result.findViewById(R.id.predefined_icon).getVisibility());
+        // Has availability.
+        assertEquals(View.VISIBLE, result.findViewById(R.id.availability).getVisibility());
+        // Has person icon.
+        assertEquals(View.VISIBLE, result.findViewById(R.id.person_icon).getVisibility());
+        // Has notification content.
+        TextView statusContent = (TextView) result.findViewById(R.id.text_content);
+        assertEquals(View.VISIBLE, statusContent.getVisibility());
+        assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
+
+        // Subtract one from lines because sender is included.
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
+
+        // Has a single message, no count shown.
+        assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
+
+        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
+                getSizeInDp(R.dimen.required_width_for_medium) - 1);
+        RemoteViews smallView = new PeopleTileViewHelper(mContext,
+                tileWithStatusAndNotification, 0, mOptions).getViews();
+        View smallResult = smallView.apply(mContext, null);
+
+        // Show icon instead of name.
+        assertEquals(View.GONE, smallResult.findViewById(R.id.name).getVisibility());
+        assertEquals(View.VISIBLE,
+                smallResult.findViewById(R.id.predefined_icon).getVisibility());
+        // Has person icon.
+        assertEquals(View.VISIBLE,
+                smallResult.findViewById(R.id.person_icon).getVisibility());
+
+        // Has a single message, no count shown.
+        assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
+
+        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
+                getSizeInDp(R.dimen.required_width_for_large));
+        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
+                getSizeInDp(R.dimen.required_height_for_large));
+        RemoteViews largeView = new PeopleTileViewHelper(mContext,
+                tileWithStatusAndNotification, 0, mOptions).getViews();
+        View largeResult = largeView.apply(mContext, null);
+
+        name = (TextView) largeResult.findViewById(R.id.name);
+        assertEquals(name.getText(), NAME);
+        subtext = (TextView) largeResult.findViewById(R.id.subtext);
+        assertEquals(View.VISIBLE, largeResult.findViewById(R.id.subtext).getVisibility());
+        assertEquals(subtext.getText(), SENDER);
+        assertEquals(View.GONE, largeResult.findViewById(R.id.predefined_icon).getVisibility());
+        // Has availability.
+        assertEquals(View.VISIBLE, largeResult.findViewById(R.id.availability).getVisibility());
+        // Has person icon.
+        View personIcon = largeResult.findViewById(R.id.person_icon);
+        assertEquals(View.VISIBLE, personIcon.getVisibility());
+        // Has notification content.
+        statusContent = (TextView) largeResult.findViewById(R.id.text_content);
+        assertEquals(View.VISIBLE, statusContent.getVisibility());
+        assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
+
+        // Subtract one from lines because sender is included.
+        assertThat(statusContent.getMaxLines()).isEqualTo(2);
 
         // Has a single message, no count shown.
         assertEquals(View.GONE, largeResult.findViewById(R.id.messages_count).getVisibility());

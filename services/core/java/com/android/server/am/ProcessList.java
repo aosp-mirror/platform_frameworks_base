@@ -54,6 +54,7 @@ import static com.android.server.am.ActivityManagerService.TAG_NETWORK;
 import static com.android.server.am.ActivityManagerService.TAG_PROCESSES;
 import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessCapability;
@@ -76,7 +77,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.LocalSocket;
@@ -1774,8 +1777,8 @@ public final class ProcessList {
         checkSlow(startTime, "startProcess: done updating cpu stats");
 
         try {
+            final int userId = UserHandle.getUserId(app.uid);
             try {
-                final int userId = UserHandle.getUserId(app.uid);
                 AppGlobals.getPackageManager().checkPackageStartable(app.info.packageName, userId);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
@@ -1798,6 +1801,12 @@ public final class ProcessList {
                             app.info.packageName);
                     externalStorageAccess = storageManagerInternal.hasExternalStorageAccess(uid,
                             app.info.packageName);
+                    if (pm.checkPermission(Manifest.permission.INSTALL_PACKAGES,
+                            app.info.packageName, userId)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        Slog.i(TAG, app.info.packageName + " is exempt from freezer");
+                        app.mOptRecord.setFreezeExempt(true);
+                    }
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }
@@ -4643,6 +4652,12 @@ public final class ProcessList {
                 }
             });
         }
+
+        // Update the global configuration and increase the assets sequence number.
+        Configuration currentConfig = mService.mActivityTaskManager.getConfiguration();
+        Configuration newConfig = new Configuration();
+        newConfig.assetsSeq = (currentConfig != null ? currentConfig.assetsSeq : 0) + 1;
+        mService.mActivityTaskManager.updateConfiguration(newConfig);
     }
 
     @GuardedBy("mService")

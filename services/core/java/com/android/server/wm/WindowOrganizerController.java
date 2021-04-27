@@ -491,7 +491,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         Rect enterPipBounds = c.getEnterPipBounds();
         if (enterPipBounds != null) {
-            mService.mTaskSupervisor.updatePictureInPictureMode(tr, enterPipBounds, true);
+            tr.mDisplayContent.mPinnedTaskController.setEnterPipBounds(enterPipBounds);
         }
 
         return effects;

@@ -54,6 +54,7 @@ public class PeopleSpaceTile implements Parcelable {
     private boolean mIsImportantConversation;
     private String mNotificationKey;
     private CharSequence mNotificationContent;
+    private CharSequence mNotificationSender;
     private String mNotificationCategory;
     private Uri mNotificationDataUri;
     private int mMessagesCount;
@@ -73,6 +74,7 @@ public class PeopleSpaceTile implements Parcelable {
         mIsImportantConversation = b.mIsImportantConversation;
         mNotificationKey = b.mNotificationKey;
         mNotificationContent = b.mNotificationContent;
+        mNotificationSender = b.mNotificationSender;
         mNotificationCategory = b.mNotificationCategory;
         mNotificationDataUri = b.mNotificationDataUri;
         mMessagesCount = b.mMessagesCount;
@@ -134,6 +136,10 @@ public class PeopleSpaceTile implements Parcelable {
         return mNotificationContent;
     }
 
+    public CharSequence getNotificationSender() {
+        return mNotificationSender;
+    }
+
     public String getNotificationCategory() {
         return mNotificationCategory;
     }
@@ -179,6 +185,7 @@ public class PeopleSpaceTile implements Parcelable {
         builder.setIsImportantConversation(mIsImportantConversation);
         builder.setNotificationKey(mNotificationKey);
         builder.setNotificationContent(mNotificationContent);
+        builder.setNotificationSender(mNotificationSender);
         builder.setNotificationCategory(mNotificationCategory);
         builder.setNotificationDataUri(mNotificationDataUri);
         builder.setMessagesCount(mMessagesCount);
@@ -201,6 +208,7 @@ public class PeopleSpaceTile implements Parcelable {
         private boolean mIsImportantConversation;
         private String mNotificationKey;
         private CharSequence mNotificationContent;
+        private CharSequence mNotificationSender;
         private String mNotificationCategory;
         private Uri mNotificationDataUri;
         private int mMessagesCount;
@@ -316,6 +324,12 @@ public class PeopleSpaceTile implements Parcelable {
             return this;
         }
 
+        /** Sets the associated notification's sender. */
+        public Builder setNotificationSender(CharSequence notificationSender) {
+            mNotificationSender = notificationSender;
+            return this;
+        }
+
         /** Sets the associated notification's category. */
         public Builder setNotificationCategory(String notificationCategory) {
             mNotificationCategory = notificationCategory;
@@ -371,6 +385,7 @@ public class PeopleSpaceTile implements Parcelable {
         mIsImportantConversation = in.readBoolean();
         mNotificationKey = in.readString();
         mNotificationContent = in.readCharSequence();
+        mNotificationSender = in.readCharSequence();
         mNotificationCategory = in.readString();
         mNotificationDataUri = in.readParcelable(Uri.class.getClassLoader());
         mMessagesCount = in.readInt();
@@ -398,6 +413,7 @@ public class PeopleSpaceTile implements Parcelable {
         dest.writeBoolean(mIsImportantConversation);
         dest.writeString(mNotificationKey);
         dest.writeCharSequence(mNotificationContent);
+        dest.writeCharSequence(mNotificationSender);
         dest.writeString(mNotificationCategory);
         dest.writeParcelable(mNotificationDataUri, flags);
         dest.writeInt(mMessagesCount);
