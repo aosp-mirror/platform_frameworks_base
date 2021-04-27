@@ -60,6 +60,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 import android.view.DisplayInfo;
@@ -816,6 +817,25 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         assertEquals(infoFake1.activityInfo.applicationInfo.packageName,
                 resolvedInfo.first.applicationInfo.packageName);
         assertEquals(infoFake1.activityInfo.name, resolvedInfo.first.name);
+    }
+
+    @Test
+    public void testLockAllProfileTasks() {
+        // Make an activity visible with the user id set to 1
+        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(mFullscreenStack).build();
+        final ActivityRecord activity = new ActivityBuilder(mService).setTask(task)
+                .setUid(UserHandle.PER_USER_RANGE + 1).build();
+
+        // Create another activity on top and the user id is 2
+        final ActivityRecord topActivity = new ActivityBuilder(mService)
+                .setTask(task).setUid(UserHandle.PER_USER_RANGE + 2).build();
+
+        // Make sure the listeners will be notified for putting the task to locked state
+        TaskChangeNotificationController controller =
+                mService.getTaskChangeNotificationController();
+        spyOn(controller);
+        mService.mRootActivityContainer.lockAllProfileTasks(1);
+        verify(controller).notifyTaskProfileLocked(eq(task.taskId), eq(1));
     }
 
     /**
