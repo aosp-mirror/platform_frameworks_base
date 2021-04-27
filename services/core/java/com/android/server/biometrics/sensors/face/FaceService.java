@@ -57,7 +57,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
-import com.android.server.biometrics.sensors.BiometricServiceCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -76,7 +75,7 @@ import java.util.List;
  * The service is responsible for maintaining a list of clients and dispatching all
  * face-related events.
  */
-public class FaceService extends SystemService implements BiometricServiceCallback {
+public class FaceService extends SystemService {
 
     protected static final String TAG = "FaceService";
 
@@ -618,12 +617,76 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                     new ClientMonitorCallbackConverter(receiver), opPackageName);
         }
 
+        private void addHidlProviders(@NonNull List<FaceSensorPropertiesInternal> hidlSensors) {
+            for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {
+                mServiceProviders.add(
+                        new Face10(getContext(), hidlSensor, mLockoutResetDispatcher));
+            }
+        }
+
+        private void addAidlProviders() {
+            final String[] instances = ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR);
+            if (instances == null || instances.length == 0) {
+                return;
+            }
+            for (String instance : instances) {
+                final String fqName = IFace.DESCRIPTOR + "/" + instance;
+                final IFace face = IFace.Stub.asInterface(
+                        ServiceManager.waitForDeclaredService(fqName));
+                if (face == null) {
+                    Slog.e(TAG, "Unable to get declared service: " + fqName);
+                    continue;
+                }
+                try {
+                    final SensorProps[] props = face.getSensorProps();
+                    final FaceProvider provider = new FaceProvider(getContext(), props, instance,
+                            mLockoutResetDispatcher);
+                    mServiceProviders.add(provider);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);
+                }
+            }
+        }
+
         @Override // Binder call
-        public void initializeConfiguration(int sensorId,
-                @BiometricManager.Authenticators.Types int strength) {
+        public void registerAuthenticators(
+                @NonNull List<FaceSensorPropertiesInternal> hidlSensors) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-            mServiceProviders.add(
-                    new Face10(getContext(), sensorId, strength, mLockoutResetDispatcher));
+
+            // Some HAL might not be started before the system service and will cause the code below
+            // to wait, and some of the operations below might take a significant amount of time to
+            // complete (calls to the HALs). To avoid blocking the rest of system server we put
+            // this on a background thread.
+            final ServiceThread thread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
+                    true /* allowIo */);
+            thread.start();
+            final Handler handler = new Handler(thread.getLooper());
+
+            handler.post(() -> {
+                addHidlProviders(hidlSensors);
+                addAidlProviders();
+
+                final IBiometricService biometricService = IBiometricService.Stub.asInterface(
+                        ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+
+                // Register each sensor individually with BiometricService
+                for (ServiceProvider provider : mServiceProviders) {
+                    final List<FaceSensorPropertiesInternal> props = provider.getSensorProperties();
+                    for (FaceSensorPropertiesInternal prop : props) {
+                        final int sensorId = prop.sensorId;
+                        final @BiometricManager.Authenticators.Types int strength =
+                                Utils.propertyStrengthToAuthenticatorStrength(prop.sensorStrength);
+                        final FaceAuthenticator authenticator = new FaceAuthenticator(
+                                mServiceWrapper, sensorId);
+                        try {
+                            biometricService.registerAuthenticator(sensorId, TYPE_FACE, strength,
+                                    authenticator);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Remote exception when registering sensorId: " + sensorId);
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -633,57 +696,6 @@ public class FaceService extends SystemService implements BiometricServiceCallba
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mServiceProviders = new ArrayList<>();
-    }
-
-    @Override
-    public void onBiometricServiceReady() {
-        final IBiometricService biometricService = IBiometricService.Stub.asInterface(
-                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
-
-        final String[] instances = ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR);
-        if (instances == null || instances.length == 0) {
-            return;
-        }
-
-        // If for some reason the HAL is not started before the system service, do not block
-        // the rest of system server. Put this on a background thread.
-        final ServiceThread thread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
-                true /* allowIo */);
-        thread.start();
-        final Handler handler = new Handler(thread.getLooper());
-
-        handler.post(() -> {
-            for (String instance : instances) {
-                final String fqName = IFace.DESCRIPTOR + "/" + instance;
-                final IFace face = IFace.Stub.asInterface(
-                        ServiceManager.waitForDeclaredService(fqName));
-                try {
-                    final SensorProps[] props = face.getSensorProps();
-                    final FaceProvider provider = new FaceProvider(getContext(), props, instance,
-                            mLockoutResetDispatcher);
-                    mServiceProviders.add(provider);
-
-                    // Register each sensor individually with BiometricService
-                    for (SensorProps prop : props) {
-                        final int sensorId = prop.commonProps.sensorId;
-                        @BiometricManager.Authenticators.Types int strength =
-                                Utils.propertyStrengthToAuthenticatorStrength(
-                                        prop.commonProps.sensorStrength);
-                        final FaceAuthenticator authenticator =
-                                new FaceAuthenticator(mServiceWrapper, sensorId);
-                        try {
-                            biometricService.registerAuthenticator(sensorId, TYPE_FACE, strength,
-                                    authenticator);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Remote exception when registering sensorId: "
-                                    + sensorId);
-                        }
-                    }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote exception when initializing instance: " + fqName);
-                }
-            }
-        });
     }
 
     @Override
