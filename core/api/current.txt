@@ -11921,6 +11921,7 @@ package android.content.pm {
     method public int getGwpAsanMode();
     method public int getMemtagMode();
     method public int getNativeHeapZeroInitialized();
+    method public int getRequestRawExternalStorageAccess();
     method public boolean isProfileable();
     method public boolean isProfileableByShell();
     method public boolean isResourceOverlay();
@@ -11976,6 +11977,9 @@ package android.content.pm {
     field public static final int MEMTAG_DEFAULT = -1; // 0xffffffff
     field public static final int MEMTAG_OFF = 0; // 0x0
     field public static final int MEMTAG_SYNC = 2; // 0x2
+    field public static final int RAW_EXTERNAL_STORAGE_ACCESS_DEFAULT = 0; // 0x0
+    field public static final int RAW_EXTERNAL_STORAGE_ACCESS_NOT_REQUESTED = 2; // 0x2
+    field public static final int RAW_EXTERNAL_STORAGE_ACCESS_REQUESTED = 1; // 0x1
     field public static final int ZEROINIT_DEFAULT = -1; // 0xffffffff
     field public static final int ZEROINIT_DISABLED = 0; // 0x0
     field public static final int ZEROINIT_ENABLED = 1; // 0x1
