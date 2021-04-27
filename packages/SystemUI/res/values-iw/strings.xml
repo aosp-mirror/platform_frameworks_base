@@ -318,7 +318,7 @@
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"השימוש בנתונים מושהה"</string>
     <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"הגעת למגבלת הנתונים שהגדרת. כבר לא נעשה שימוש בחבילת הגלישה.\n\nהמשך הפעולה עשוי לגרום לחיובים על שימוש בנתונים."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"המשך"</string>
-    <string name="gps_notification_searching_text" msgid="231304732649348313">"‏מחפש GPS"</string>
+    <string name="gps_notification_searching_text" msgid="231304732649348313">"‏מתבצע חיפוש GPS"</string>
     <string name="gps_notification_found_text" msgid="3145873880174658526">"‏המיקום מוגדר על ידי GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"בקשות מיקום פעילות"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"ההגדרה \'חיישנים כבויים\' פעילה"</string>
