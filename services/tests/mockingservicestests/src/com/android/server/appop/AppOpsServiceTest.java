@@ -62,7 +62,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.quality.Strictness;
@@ -223,7 +222,6 @@ public class AppOpsServiceTest {
 
     // Tests that ops are persisted during shutdown.
     @Test
-    @Ignore("b/183523911")
     public void testShutdown() {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
         mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
