@@ -24,7 +24,6 @@
     android:clipChildren="true"
     android:clipToPadding="true"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground"
     android:paddingStart="12dp">
 
     <!-- Package Info -->

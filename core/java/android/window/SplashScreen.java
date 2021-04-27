@@ -17,12 +17,17 @@
 package android.window;
 
 import android.annotation.NonNull;
+import android.annotation.StyleRes;
 import android.annotation.SuppressLint;
 import android.annotation.UiThread;
 import android.app.Activity;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
 import android.util.Singleton;
 import android.util.Slog;
 
@@ -60,6 +65,17 @@ public interface SplashScreen {
      */
     void clearOnExitAnimationListener();
 
+
+    /**
+     * Overrides the theme used for the {@link SplashScreen}s of this application.
+     * <p>
+     * By default, the {@link SplashScreen} uses the theme set in the manifest. This method
+     * overrides and persists the theme used for the {@link SplashScreen} of this application.
+     * <p>
+     * To reset to the default theme, set this the themeId to {@link Resources#ID_NULL}.
+     */
+    void setSplashScreenTheme(@StyleRes int themeId);
+
     /**
      * Listens for the splash screen exit event.
      */
@@ -84,6 +100,8 @@ public interface SplashScreen {
      * @hide
      */
     class SplashScreenImpl implements SplashScreen {
+        private static final String TAG = "SplashScreenImpl";
+
         private OnExitAnimationListener mExitAnimationListener;
         private final IBinder mActivityToken;
         private final SplashScreenManagerGlobal mGlobal;
@@ -117,6 +135,29 @@ public interface SplashScreen {
             synchronized (mGlobal.mGlobalLock) {
                 mExitAnimationListener = null;
                 mGlobal.removeImpl(this);
+            }
+        }
+
+        public void setSplashScreenTheme(@StyleRes int themeId) {
+            if (mActivityToken == null) {
+                Log.w(TAG, "Couldn't persist the starting theme. This instance is not an Activity");
+                return;
+            }
+
+            Activity activity = ActivityThread.currentActivityThread().getActivity(
+                    mActivityToken);
+            if (activity == null) {
+                return;
+            }
+            String themeName = themeId != Resources.ID_NULL
+                    ? activity.getResources().getResourceName(themeId) : null;
+
+            try {
+                AppGlobals.getPackageManager().setSplashScreenTheme(
+                        activity.getComponentName().getPackageName(),
+                        themeName, activity.getUserId());
+            } catch (RemoteException e) {
+                Log.w(TAG, "Couldn't persist the starting theme", e);
             }
         }
     }

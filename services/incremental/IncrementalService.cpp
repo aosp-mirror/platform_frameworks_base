@@ -2660,9 +2660,6 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
     }
 
     switch (targetStatus) {
-        case IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE:
-            // Do nothing, this is a reset state.
-            break;
         case IDataLoaderStatusListener::DATA_LOADER_DESTROYED: {
             switch (currentStatus) {
                 case IDataLoaderStatusListener::DATA_LOADER_BINDING:
@@ -2683,8 +2680,12 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
         }
         case IDataLoaderStatusListener::DATA_LOADER_CREATED:
             switch (currentStatus) {
-                case IDataLoaderStatusListener::DATA_LOADER_DESTROYED:
                 case IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE:
+                case IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE:
+                    // Before binding need to make sure we are unbound.
+                    // Otherwise we'll get stuck binding.
+                    return destroy();
+                case IDataLoaderStatusListener::DATA_LOADER_DESTROYED:
                 case IDataLoaderStatusListener::DATA_LOADER_BINDING:
                     return bind();
                 case IDataLoaderStatusListener::DATA_LOADER_BOUND:
@@ -2709,7 +2710,8 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
                    << ", but got: " << mountId;
         return binder::Status::fromServiceSpecificError(-EPERM, "Mount ID mismatch.");
     }
-    if (newStatus == IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE) {
+    if (newStatus == IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE ||
+        newStatus == IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE) {
         // User-provided status, let's postpone the handling to avoid possible deadlocks.
         mService.addTimedJob(*mService.mTimedQueue, id(), Constants::userStatusDelay,
                              [this, newStatus]() { setCurrentStatus(newStatus); });
@@ -2721,7 +2723,7 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
 }
 
 void IncrementalService::DataLoaderStub::setCurrentStatus(int newStatus) {
-    int targetStatus, oldStatus;
+    int oldStatus, oldTargetStatus, newTargetStatus;
     DataLoaderStatusListener listener;
     {
         std::unique_lock lock(mMutex);
@@ -2730,22 +2732,31 @@ void IncrementalService::DataLoaderStub::setCurrentStatus(int newStatus) {
         }
 
         oldStatus = mCurrentStatus;
-        targetStatus = mTargetStatus;
+        oldTargetStatus = mTargetStatus;
         listener = mStatusListener;
 
         // Change the status.
         mCurrentStatus = newStatus;
         mCurrentStatusTs = mService.mClock->now();
 
-        if (mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE ||
-            mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE) {
-            // For unavailable, unbind from DataLoader to ensure proper re-commit.
-            setTargetStatusLocked(IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
+        switch (mCurrentStatus) {
+            case IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE:
+                // Unavailable, retry.
+                setTargetStatusLocked(IDataLoaderStatusListener::DATA_LOADER_STARTED);
+                break;
+            case IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE:
+                // Unrecoverable, just unbind.
+                setTargetStatusLocked(IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
+                break;
+            default:
+                break;
         }
+
+        newTargetStatus = mTargetStatus;
     }
 
     LOG(DEBUG) << "Current status update for DataLoader " << id() << ": " << oldStatus << " -> "
-               << newStatus << " (target " << targetStatus << ")";
+               << newStatus << " (target " << oldTargetStatus << " -> " << newTargetStatus << ")";
 
     if (listener) {
         listener->onStatusChanged(id(), newStatus);

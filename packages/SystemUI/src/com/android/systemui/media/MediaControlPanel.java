@@ -242,6 +242,21 @@ public class MediaControlPanel {
         TransitionLayout recommendations = vh.getRecommendations();
 
         mMediaViewController.attach(recommendations, MediaViewController.TYPE.RECOMMENDATION);
+
+        mRecommendationViewHolder.getRecommendations().setOnLongClickListener(v -> {
+            if (!mMediaViewController.isGutsVisible()) {
+                mMediaViewController.openGuts();
+                return true;
+            } else {
+                return false;
+            }
+        });
+        mRecommendationViewHolder.getCancel().setOnClickListener(v -> {
+            closeGuts();
+        });
+        mRecommendationViewHolder.getSettings().setOnClickListener(v -> {
+            mActivityStarter.startActivity(SETTINGS_INTENT, true /* dismissShade */);
+        });
     }
 
     /** Bind this player view based on the data given. */
@@ -461,10 +476,7 @@ public class MediaControlPanel {
     }
 
     /** Bind this recommendation view based on the data given. */
-    public void bindRecommendation(
-            @NonNull SmartspaceTarget target,
-            @NonNull int backgroundColor,
-            @Nullable View.OnClickListener callback) {
+    public void bindRecommendation(@NonNull SmartspaceTarget target, @NonNull int backgroundColor) {
         if (mRecommendationViewHolder == null) {
             return;
         }
@@ -520,14 +532,26 @@ public class MediaControlPanel {
             mediaCoverImageView.setImageIcon(recommendation.getIcon());
 
             // Set up the click listener if applicable.
-            setSmartspaceOnClickListener(mediaCoverImageView, recommendation,
-                    target.getSmartspaceTargetId(), callback);
+            setSmartspaceRecItemOnClickListener(mediaCoverImageView, recommendation,
+                    view -> mMediaDataManagerLazy
+                            .get()
+                            .dismissSmartspaceRecommendation(0L /* delay */));
 
             setVisibleAndAlpha(expandedSet, mediaCoverItemsResIds.get(i), true);
             setVisibleAndAlpha(expandedSet, mediaLogoItemsResIds.get(i), true);
             setVisibleAndAlpha(collapsedSet, mediaCoverItemsResIds.get(i), true);
             setVisibleAndAlpha(collapsedSet, mediaLogoItemsResIds.get(i), true);
         }
+
+        // Set up long press to show guts setting panel.
+        mRecommendationViewHolder.getDismiss().setOnClickListener(v -> {
+            closeGuts();
+            mKeyguardDismissUtil.executeWhenUnlocked(() -> {
+                mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
+                        MediaViewController.GUTS_ANIMATION_DURATION + 100L);
+                return true;
+            }, true /* requiresShadeOpen */);
+        });
 
         mController = null;
         mMediaViewController.refreshState();
@@ -613,10 +637,9 @@ public class MediaControlPanel {
         set.setAlpha(actionId, visible ? 1.0f : 0.0f);
     }
 
-    private void setSmartspaceOnClickListener(
+    private void setSmartspaceRecItemOnClickListener(
             @NonNull View view,
             @NonNull SmartspaceAction action,
-            @NonNull String targetId,
             @Nullable View.OnClickListener callback) {
         if (view == null || action == null || action.getIntent() == null) {
             Log.e(TAG, "No tap action can be set up");
@@ -624,16 +647,6 @@ public class MediaControlPanel {
         }
 
         view.setOnClickListener(v -> {
-            // When media recommendation card is shown, there could be only one card.
-            SysUiStatsLog.write(SysUiStatsLog.SMARTSPACE_CARD_REPORTED,
-                    760, // SMARTSPACE_CARD_CLICK
-                    targetId.hashCode(),
-                    SysUiStatsLog
-                            .SMART_SPACE_CARD_REPORTED__CARD_TYPE__HEADPHONE_MEDIA_RECOMMENDATIONS,
-                    getSurfaceForSmartspaceLogging(mMediaViewController.getCurrentEndLocation()),
-                    /* rank */ 1,
-                    /* cardinality */ 1);
-
             mActivityStarter.postStartActivityDismissingKeyguard(
                     action.getIntent(),
                     0 /* delay */,

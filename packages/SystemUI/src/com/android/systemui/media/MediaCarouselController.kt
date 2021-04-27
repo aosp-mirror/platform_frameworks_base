@@ -319,7 +319,7 @@ class MediaCarouselController @Inject constructor(
         val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
-        newRecs.bindRecommendation(data, bgColor, { v -> removePlayer(key) })
+        newRecs.bindRecommendation(data, bgColor)
         MediaPlayerData.addMediaPlayer(key, newRecs)
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers()
@@ -348,11 +348,11 @@ class MediaCarouselController @Inject constructor(
 
             if (dismissMediaData) {
                 // Inform the media manager of a potentially late dismissal
-                mediaManager.dismissMediaData(key, 0L)
+                mediaManager.dismissMediaData(key, 0L /* delaye */)
             }
             if (dismissRecommendation) {
                 // Inform the media manager of a potentially late dismissal
-                mediaManager.dismissSmartspaceRecommendation()
+                mediaManager.dismissSmartspaceRecommendation(0L /* delay */)
             }
         }
     }

@@ -4507,8 +4507,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(parentUser);
             final List<PasswordValidationError> passwordValidationErrors =
-                    PasswordMetrics.validatePasswordMetrics(
-                            minMetrics, complexity, false, metrics);
+                    PasswordMetrics.validatePasswordMetrics(minMetrics, complexity, metrics);
             isSufficient = passwordValidationErrors.isEmpty();
         }
         DevicePolicyEventLogger
@@ -4585,7 +4584,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 maxRequiredComplexity = Math.max(maxRequiredComplexity, admin.mPasswordComplexity);
             }
             return PasswordMetrics.validatePasswordMetrics(PasswordMetrics.merge(adminMetrics),
-                    maxRequiredComplexity, false, metrics).isEmpty();
+                    maxRequiredComplexity, metrics).isEmpty();
         }
     }
 
@@ -4621,8 +4620,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int complexity = getAggregatedPasswordComplexityLocked(userId);
         PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(userId);
         final List<PasswordValidationError> passwordValidationErrors =
-                PasswordMetrics.validatePasswordMetrics(
-                        minMetrics, complexity, false, metrics);
+                PasswordMetrics.validatePasswordMetrics(minMetrics, complexity, metrics);
         return passwordValidationErrors.isEmpty();
     }
 
@@ -4969,8 +4967,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // TODO: Consider changing validation API to take LockscreenCredential.
             if (password.isEmpty()) {
                 validationErrors = PasswordMetrics.validatePasswordMetrics(
-                        minMetrics, complexity, isPin,
-                        new PasswordMetrics(CREDENTIAL_TYPE_NONE));
+                        minMetrics, complexity, new PasswordMetrics(CREDENTIAL_TYPE_NONE));
             } else {
                 // TODO(b/120484642): remove getBytes() below
                 validationErrors = PasswordMetrics.validatePassword(
@@ -16774,7 +16771,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     provisioningParams.isKeepAccountMigrated(), callerPackage);
 
             if (provisioningParams.isOrganizationOwnedProvisioning()) {
-                setProfileOwnerOnOrgOwnedDeviceState(admin, userInfo.id, caller.getUserId());
+                synchronized (getLockObject()) {
+                    markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(admin, userInfo.id);
+                }
             }
 
             return userInfo.getUserHandle();
@@ -17004,22 +17003,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } catch (OperationCanceledException | AuthenticatorException | IOException e) {
             Slogf.e(LOG_TAG, "Exception removing account from the primary user.", e);
         }
-    }
-
-    private void setProfileOwnerOnOrgOwnedDeviceState(
-            ComponentName admin, @UserIdInt int profileId, @UserIdInt int parentUserId) {
-        synchronized (getLockObject()) {
-            markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(admin, profileId);
-        }
-        restrictRemovalOfManagedProfile(parentUserId);
-    }
-
-    private void restrictRemovalOfManagedProfile(@UserIdInt int parentUserId) {
-        final UserHandle parentUserHandle = UserHandle.of(parentUserId);
-        mUserManager.setUserRestriction(
-                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
-                /* value= */ true,
-                parentUserHandle);
     }
 
     @Override

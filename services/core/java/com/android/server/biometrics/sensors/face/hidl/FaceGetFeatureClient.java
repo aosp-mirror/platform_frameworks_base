@@ -58,7 +58,7 @@ public class FaceGetFeatureClient extends HalClientMonitor<IBiometricsFace> {
     public void unableToStart() {
         try {
             if (getListener() != null) {
-                getListener().onFeatureGet(false /* success */, mFeature, false /* value */);
+                getListener().onFeatureGet(false /* success */, new int[0], new boolean[0]);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send error", e);
@@ -75,9 +75,14 @@ public class FaceGetFeatureClient extends HalClientMonitor<IBiometricsFace> {
     protected void startHalOperation() {
         try {
             final OptionalBool result = getFreshDaemon().getFeature(mFeature, mFaceId);
+            int[] features = new int[1];
+            boolean[] featureState = new boolean[1];
+            features[0] = mFeature;
+            featureState[0] = result.value;
             mValue = result.value;
+
             if (getListener() != null) {
-                getListener().onFeatureGet(result.status == Status.OK, mFeature, mValue);
+                getListener().onFeatureGet(result.status == Status.OK, features, featureState);
             }
             mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
