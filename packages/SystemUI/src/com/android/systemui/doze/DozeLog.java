@@ -376,8 +376,8 @@ public class DozeLog implements Dumpable {
             case REASON_SENSOR_DOUBLE_TAP: return "doubletap";
             case PULSE_REASON_SENSOR_LONG_PRESS: return "longpress";
             case PULSE_REASON_DOCKING: return "docking";
-            case PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN: return "wakelockscreen";
-            case REASON_SENSOR_WAKE_UP: return "wakeup";
+            case PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN: return "reach-wakelockscreen";
+            case REASON_SENSOR_WAKE_UP: return "presence-wakeup";
             case REASON_SENSOR_TAP: return "tap";
             case REASON_SENSOR_UDFPS_LONG_PRESS: return "udfps";
             case REASON_SENSOR_QUICK_PICKUP: return "quickPickup";

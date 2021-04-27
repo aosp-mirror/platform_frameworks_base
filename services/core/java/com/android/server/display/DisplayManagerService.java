@@ -431,8 +431,8 @@ public final class DisplayManagerService extends SystemService {
         mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
-        mLogicalDisplayMapper = new LogicalDisplayMapper(mDisplayDeviceRepo,
-                new LogicalDisplayListener());
+        mLogicalDisplayMapper = new LogicalDisplayMapper(mContext, mDisplayDeviceRepo,
+                new LogicalDisplayListener(), mSyncRoot, mHandler);
         mDisplayModeDirector = new DisplayModeDirector(context, mHandler);
         mBrightnessSynchronizer = new BrightnessSynchronizer(mContext);
         Resources resources = mContext.getResources();
@@ -1268,7 +1268,7 @@ public final class DisplayManagerService extends SystemService {
 
         DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
         if (dpc != null) {
-            dpc.onDisplayChangedLocked();
+            dpc.onDisplayChanged();
         }
     }
 
@@ -1304,12 +1304,23 @@ public final class DisplayManagerService extends SystemService {
         handleLogicalDisplayChangedLocked(display);
     }
 
+    private void handleLogicalDisplayDeviceStateTransitionLocked(@NonNull LogicalDisplay display) {
+        final int displayId = display.getDisplayIdLocked();
+        final DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
+        if (dpc != null) {
+            dpc.onDeviceStateTransition();
+        }
+    }
+
     private Runnable updateDisplayStateLocked(DisplayDevice device) {
         // Blank or unblank the display immediately to match the state requested
         // by the display power controller (if known).
         DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if ((info.flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
             final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(device);
+            if (display == null) {
+                return null;
+            }
             final int displayId = display.getDisplayIdLocked();
             final int state = mDisplayStates.get(displayId);
 
@@ -1453,9 +1464,12 @@ public final class DisplayManagerService extends SystemService {
         clearViewportsLocked();
 
         // Configure each display device.
-        mDisplayDeviceRepo.forEachLocked((DisplayDevice device) -> {
-            configureDisplayLocked(t, device);
-            device.performTraversalLocked(t);
+        mLogicalDisplayMapper.forEachLocked((LogicalDisplay display) -> {
+            final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
+            if (device != null) {
+                configureDisplayLocked(t, device);
+                device.performTraversalLocked(t);
+            }
         });
 
         // Tell the input system about these new viewports.
@@ -2158,6 +2172,10 @@ public final class DisplayManagerService extends SystemService {
 
                 case LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED:
                     handleLogicalDisplayFrameRateOverridesChangedLocked(display);
+                    break;
+
+                case LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_DEVICE_STATE_TRANSITION:
+                    handleLogicalDisplayDeviceStateTransitionLocked(display);
                     break;
             }
         }

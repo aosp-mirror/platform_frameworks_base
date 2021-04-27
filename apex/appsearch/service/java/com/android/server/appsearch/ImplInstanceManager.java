@@ -73,6 +73,15 @@ public final class ImplInstanceManager {
     }
 
     /**
+     * Returns AppSearch directory in the credential encrypted system directory for the given user.
+     *
+     * <p>This folder should only be accessed after unlock.
+     */
+    public static File getAppSearchDir(@UserIdInt int userId) {
+        return new File(Environment.getDataSystemCeDirectory(userId), APP_SEARCH_DIR);
+    }
+
+    /**
      * Gets an instance of AppSearchImpl for the given user, or creates one if none exists.
      *
      * <p>If no AppSearchImpl instance exists for the unlocked user, Icing will be initialized and
@@ -139,13 +148,8 @@ public final class ImplInstanceManager {
 
     private AppSearchImpl createImpl(@NonNull Context context, @UserIdInt int userId)
             throws AppSearchException {
-        File appSearchDir = getAppSearchDir(context, userId);
+        File appSearchDir = getAppSearchDir(userId);
         return AppSearchImpl.create(appSearchDir, context, userId, mGlobalQuerierPackage);
-    }
-
-    private static File getAppSearchDir(@NonNull Context context, @UserIdInt int userId) {
-        // See com.android.internal.app.ChooserActivity::getPinnedSharedPrefs
-        return new File(Environment.getDataSystemCeDirectory(userId), APP_SEARCH_DIR);
     }
 
     /**

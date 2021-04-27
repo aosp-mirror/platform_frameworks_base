@@ -42,6 +42,7 @@ public class DozeConfigurationUtil {
         when(params.getSelectivelyRegisterSensorsUsingProx()).thenReturn(false);
         when(params.singleTapUsesProx()).thenReturn(true);
         when(params.longPressUsesProx()).thenReturn(true);
+        when(params.getQuickPickupAodDuration()).thenReturn(500);
 
         doneHolder[0] = true;
         return params;

@@ -59,6 +59,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
+import com.android.systemui.people.widget.PeopleTileKey;
 
 import java.text.NumberFormat;
 import java.time.Duration;
@@ -148,6 +149,8 @@ public class PeopleTileViewHelper {
      * content, then birthdays, then the most recent status, and finally last interaction.
      */
     private RemoteViews getViewForTile() {
+        PeopleTileKey key = new PeopleTileKey(mTile);
+        if (DEBUG) Log.d(TAG, "Creating view for tile key: " + key.toString());
         if (Objects.equals(mTile.getNotificationCategory(), CATEGORY_MISSED_CALL)) {
             if (DEBUG) Log.d(TAG, "Create missed call view");
             return createMissedCallRemoteViews();
@@ -179,7 +182,7 @@ public class PeopleTileViewHelper {
         return createLastInteractionRemoteViews();
     }
 
-    private void setMaxLines(RemoteViews views) {
+    private void setMaxLines(RemoteViews views, boolean showSender) {
         int textSize = mLayoutSize == LAYOUT_LARGE ? getSizeInDp(
                 R.dimen.content_text_size_for_medium)
                 : getSizeInDp(R.dimen.content_text_size_for_medium);
@@ -187,6 +190,9 @@ public class PeopleTileViewHelper {
         int notificationContentHeight = getContentHeightForLayout(lineHeight);
         int maxAdaptiveLines = Math.floorDiv(notificationContentHeight, lineHeight);
         int maxLines = Math.max(MIN_CONTENT_MAX_LINES, maxAdaptiveLines);
+
+        // Save a line for sender's name, if present.
+        if (showSender) maxLines--;
         views.setInt(R.id.text_content, "setMaxLines", maxLines);
     }
 
@@ -350,7 +356,7 @@ public class PeopleTileViewHelper {
         RemoteViews views = getViewForContentLayout();
         views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
         views.setViewVisibility(R.id.messages_count, View.GONE);
-        setMaxLines(views);
+        setMaxLines(views, false);
         views.setTextViewText(R.id.text_content, mTile.getNotificationContent());
         views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_phone_missed);
         return views;
@@ -358,6 +364,7 @@ public class PeopleTileViewHelper {
 
     private RemoteViews createNotificationRemoteViews() {
         RemoteViews views = getViewForContentLayout();
+        CharSequence sender = mTile.getNotificationSender();
         Uri image = mTile.getNotificationDataUri();
         if (image != null) {
             // TODO: Use NotificationInlineImageCache
@@ -366,7 +373,7 @@ public class PeopleTileViewHelper {
             views.setViewVisibility(R.id.text_content, View.GONE);
             views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_photo_camera);
         } else {
-            setMaxLines(views);
+            setMaxLines(views, !TextUtils.isEmpty(sender));
             CharSequence content = mTile.getNotificationContent();
             views = setPunctuationRemoteViewsFields(views, content);
             views.setColorAttr(R.id.text_content, "setTextColor", android.R.attr.textColorPrimary);
@@ -382,9 +389,12 @@ public class PeopleTileViewHelper {
                 views.setViewVisibility(R.id.predefined_icon, View.GONE);
             }
         }
-        // TODO: Set subtext as Group Sender name once storing the name in PeopleSpaceTile and
-        //  subtract 1 from maxLines when present.
-        views.setViewVisibility(R.id.subtext, View.GONE);
+        if (!TextUtils.isEmpty(sender)) {
+            views.setViewVisibility(R.id.subtext, View.VISIBLE);
+            views.setTextViewText(R.id.subtext, sender);
+        } else {
+            views.setViewVisibility(R.id.subtext, View.GONE);
+        }
         return views;
     }
 
@@ -414,7 +424,7 @@ public class PeopleTileViewHelper {
         }
         views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
         views.setViewVisibility(R.id.messages_count, View.GONE);
-        setMaxLines(views);
+        setMaxLines(views, false);
         // Secondary text color for statuses.
         views.setColorAttr(R.id.text_content, "setTextColor", android.R.attr.textColorSecondary);
         views.setTextViewText(R.id.text_content, statusText);

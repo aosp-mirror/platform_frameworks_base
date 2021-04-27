@@ -66,7 +66,8 @@ public class FaceServiceReceiver extends IFaceServiceReceiver.Stub {
     }
 
     @Override
-    public void onFeatureGet(boolean success, int feature, boolean value) throws RemoteException {
+    public void onFeatureGet(boolean success, int[] features, boolean[] featureState)
+                throws RemoteException {
 
     }
 

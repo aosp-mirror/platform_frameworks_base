@@ -15,18 +15,10 @@
  */
 package com.android.wm.shell.startingsurface;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
-import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_NONE;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SNAPSHOT;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_SAME_PACKAGE;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 
@@ -68,27 +60,24 @@ import java.util.function.BiConsumer;
  */
 public class StartingWindowController implements RemoteCallable<StartingWindowController> {
     private static final String TAG = StartingWindowController.class.getSimpleName();
+
     // TODO b/183150443 Keep this flag open for a while, several things might need to adjust.
-    static final boolean DEBUG_SPLASH_SCREEN = true;
-    static final boolean DEBUG_TASK_SNAPSHOT = false;
+    public static final boolean DEBUG_SPLASH_SCREEN = true;
+    public static final boolean DEBUG_TASK_SNAPSHOT = false;
 
     private final StartingSurfaceDrawer mStartingSurfaceDrawer;
-    private final StartingTypeChecker mStartingTypeChecker = new StartingTypeChecker();
+    private final StartingWindowTypeAlgorithm mStartingWindowTypeAlgorithm;
 
     private BiConsumer<Integer, Integer> mTaskLaunchingCallback;
     private final StartingSurfaceImpl mImpl = new StartingSurfaceImpl();
     private final Context mContext;
     private final ShellExecutor mSplashScreenExecutor;
 
-    // For Car Launcher
-    public StartingWindowController(Context context, ShellExecutor splashScreenExecutor) {
-        this(context, splashScreenExecutor, new TransactionPool());
-    }
-
     public StartingWindowController(Context context, ShellExecutor splashScreenExecutor,
-            TransactionPool pool) {
+            StartingWindowTypeAlgorithm startingWindowTypeAlgorithm, TransactionPool pool) {
         mContext = context;
         mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, splashScreenExecutor, pool);
+        mStartingWindowTypeAlgorithm = startingWindowTypeAlgorithm;
         mSplashScreenExecutor = splashScreenExecutor;
     }
 
@@ -107,90 +96,6 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     @Override
     public ShellExecutor getRemoteCallExecutor() {
         return mSplashScreenExecutor;
-    }
-
-    private static class StartingTypeChecker {
-
-        private @StartingWindowInfo.StartingWindowType int
-                estimateStartingWindowType(StartingWindowInfo windowInfo) {
-            final int parameter = windowInfo.startingWindowTypeParameter;
-            final boolean newTask = (parameter & TYPE_PARAMETER_NEW_TASK) != 0;
-            final boolean taskSwitch = (parameter & TYPE_PARAMETER_TASK_SWITCH) != 0;
-            final boolean processRunning = (parameter & TYPE_PARAMETER_PROCESS_RUNNING) != 0;
-            final boolean allowTaskSnapshot = (parameter & TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT) != 0;
-            final boolean activityCreated = (parameter & TYPE_PARAMETER_ACTIVITY_CREATED) != 0;
-            final boolean samePackage = (parameter & TYPE_PARAMETER_SAME_PACKAGE) != 0;
-            return estimateStartingWindowType(windowInfo, newTask, taskSwitch,
-                    processRunning, allowTaskSnapshot, activityCreated, samePackage);
-        }
-
-        // reference from ActivityRecord#getStartingWindowType
-        private int estimateStartingWindowType(StartingWindowInfo windowInfo,
-                boolean newTask, boolean taskSwitch, boolean processRunning,
-                boolean allowTaskSnapshot, boolean activityCreated, boolean samePackage) {
-            if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-                Slog.d(TAG, "preferredStartingWindowType newTask " + newTask
-                        + " taskSwitch " + taskSwitch
-                        + " processRunning " + processRunning
-                        + " allowTaskSnapshot " + allowTaskSnapshot
-                        + " activityCreated " + activityCreated
-                        + " samePackage " + samePackage);
-            }
-            if (windowInfo.taskInfo.topActivityType != ACTIVITY_TYPE_HOME) {
-                if (!processRunning) {
-                    return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-                }
-                if (newTask) {
-                    if (samePackage) {
-                        return STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
-                    } else {
-                        return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-                    }
-                }
-                if (taskSwitch && !activityCreated) {
-                    return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-                }
-            }
-            if (taskSwitch && allowTaskSnapshot) {
-                final TaskSnapshot snapshot = windowInfo.mTaskSnapshot;
-                if (isSnapshotCompatible(windowInfo, snapshot)) {
-                    return STARTING_WINDOW_TYPE_SNAPSHOT;
-                }
-                if (windowInfo.taskInfo.topActivityType != ACTIVITY_TYPE_HOME) {
-                    return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-                }
-            }
-            return STARTING_WINDOW_TYPE_NONE;
-        }
-
-        /**
-         * Returns {@code true} if the task snapshot is compatible with this activity (at least the
-         * rotation must be the same).
-         */
-        private boolean isSnapshotCompatible(StartingWindowInfo windowInfo, TaskSnapshot snapshot) {
-            if (snapshot == null) {
-                if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-                    Slog.d(TAG, "isSnapshotCompatible no snapshot " + windowInfo.taskInfo.taskId);
-                }
-                return false;
-            }
-            if (!snapshot.getTopActivityComponent().equals(windowInfo.taskInfo.topActivity)) {
-                if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-                    Slog.d(TAG, "isSnapshotCompatible obsoleted snapshot "
-                            + windowInfo.taskInfo.topActivity);
-                }
-                return false;
-            }
-
-            final int taskRotation = windowInfo.taskInfo.configuration
-                    .windowConfiguration.getRotation();
-            final int snapshotRotation = snapshot.getRotation();
-            if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-                Slog.d(TAG, "isSnapshotCompatible rotation " + taskRotation
-                        + " snapshot " + snapshotRotation);
-            }
-            return taskRotation == snapshotRotation;
-        }
     }
 
     /*
@@ -212,7 +117,8 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     public void addStartingWindow(StartingWindowInfo windowInfo, IBinder appToken) {
         mSplashScreenExecutor.execute(() -> {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "addStartingWindow");
-            final int suggestionType = mStartingTypeChecker.estimateStartingWindowType(
+
+            final int suggestionType = mStartingWindowTypeAlgorithm.getSuggestedWindowType(
                     windowInfo);
             final RunningTaskInfo runningTaskInfo = windowInfo.taskInfo;
             if (mTaskLaunchingCallback != null && shouldSendToListener(suggestionType)) {
@@ -228,8 +134,10 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
                 final TaskSnapshot snapshot = windowInfo.mTaskSnapshot;
                 mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, appToken,
                         snapshot);
+            } else /* suggestionType == STARTING_WINDOW_TYPE_NONE */ {
+                // Don't add a staring window.
             }
-            // If prefer don't show, then don't show!
+
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         });
     }

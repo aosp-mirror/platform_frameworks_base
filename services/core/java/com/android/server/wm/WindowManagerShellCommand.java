@@ -31,6 +31,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.Display;
@@ -216,7 +217,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         String arg = getNextArg();
         if (arg == null) {
             pw.println("Blur supported on device: " + CROSS_WINDOW_BLUR_SUPPORTED);
-            pw.println("Blur enabled: " + mInternal.mBlurController.mBlurEnabled);
+            pw.println("Blur enabled: " + mInternal.mBlurController.getBlurEnabled());
             return 0;
         }
 
@@ -235,7 +236,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                 return -1;
         }
 
-        mInterface.setForceCrossWindowBlurDisabled(disableBlur);
+        Settings.Global.putInt(mInternal.mContext.getContentResolver(),
+                Settings.Global.DISABLE_WINDOW_BLURS, disableBlur ? 1 : 0);
+
         return 0;
     }
 

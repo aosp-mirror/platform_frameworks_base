@@ -18,6 +18,7 @@ package com.android.wm.shell.pip;
 
 import static android.util.RotationUtils.rotateBounds;
 import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
@@ -133,17 +134,30 @@ public class PipAnimationControllerTest extends ShellTestCase {
 
     @Test
     public void pipTransitionAnimator_rotatedEndValue() {
+        final DummySurfaceControlTx tx = new DummySurfaceControlTx();
         final Rect startBounds = new Rect(200, 700, 400, 800);
         final Rect endBounds = new Rect(0, 0, 500, 1000);
-        final PipAnimationController.PipTransitionAnimator<?> animator = mPipAnimationController
+        // Fullscreen to PiP.
+        PipAnimationController.PipTransitionAnimator<?> animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, null, startBounds, endBounds, null,
-                        TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_90);
+                        TRANSITION_DIRECTION_LEAVE_PIP, 0, ROTATION_90);
         // Apply fraction 1 to compute the end value.
-        animator.applySurfaceControlTransaction(mLeash, new DummySurfaceControlTx(), 1);
+        animator.applySurfaceControlTransaction(mLeash, tx, 1);
         final Rect rotatedEndBounds = new Rect(endBounds);
         rotateBounds(rotatedEndBounds, endBounds, ROTATION_90);
 
         assertEquals("Expect 90 degree rotated bounds", rotatedEndBounds, animator.mCurrentValue);
+
+        // PiP to fullscreen.
+        startBounds.set(0, 0, 1000, 500);
+        endBounds.set(200, 100, 400, 500);
+        animator = mPipAnimationController.getAnimator(mTaskInfo, mLeash, startBounds, startBounds,
+                endBounds, null, TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_270);
+        animator.applySurfaceControlTransaction(mLeash, tx, 1);
+        rotatedEndBounds.set(endBounds);
+        rotateBounds(rotatedEndBounds, startBounds, ROTATION_270);
+
+        assertEquals("Expect 270 degree rotated bounds", rotatedEndBounds, animator.mCurrentValue);
     }
 
     @Test
