@@ -371,6 +371,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mAdapter.notifyDataSetChanged();
 
         updateRadiusWith(mSizeType, mRadiusType, mTargets.size());
+        updateScrollModeWith(hasExceededMaxLayoutHeight());
         setSystemGestureExclusion();
 
         fadeOut();
@@ -614,6 +615,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         updateColor();
         updateStrokeWith(newConfig.uiMode, mAlignment);
         updateLocationWith(mAlignment, mPercentageY);
+        updateScrollModeWith(hasExceededMaxLayoutHeight());
     }
 
     @VisibleForTesting
@@ -679,6 +681,12 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mListView.setLayoutParams(layoutParams);
     }
 
+    private void updateScrollModeWith(boolean hasExceededMaxLayoutHeight) {
+        mListView.setOverScrollMode(hasExceededMaxLayoutHeight
+                ? OVER_SCROLL_ALWAYS
+                : OVER_SCROLL_NEVER);
+    }
+
     private void updateColor() {
         final int menuColorResId = R.color.accessibility_floating_menu_background;
         getMenuGradientDrawable().setColor(getResources().getColor(menuColorResId));
@@ -726,6 +734,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         layerDrawable.setLayerInset(INDEX_MENU_ITEM, left, 0, right, 0);
     }
 
+    @VisibleForTesting
+    boolean hasExceededMaxLayoutHeight() {
+        return calculateActualLayoutHeight() > getMaxLayoutHeight();
+    }
+
     @Alignment
     private int calculateCurrentAlignment() {
         return mCurrentLayoutParams.x >= ((MIN_WINDOW_X + getMaxWindowX()) / 2)
@@ -735,6 +748,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
     private float calculateCurrentPercentageY() {
         return mCurrentLayoutParams.y / (float) getMaxWindowY();
+    }
+
+    private int calculateActualLayoutHeight() {
+        return (mPadding + mIconHeight) * mTargets.size() + mPadding;
     }
 
     private @DimenRes int getRadiusResId(@SizeType int sizeType, int itemCount) {
@@ -760,13 +777,16 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         return new Rect(0, 0, mScreenWidth - getWindowWidth(), mScreenHeight - getWindowHeight());
     }
 
+    private int getMaxLayoutHeight() {
+        return mScreenHeight - mMargin * 2;
+    }
+
     private int getLayoutWidth() {
         return mPadding * 2 + mIconWidth;
     }
 
     private int getLayoutHeight() {
-        return Math.min(mScreenHeight - mMargin * 2,
-                (mPadding + mIconHeight) * mTargets.size() + mPadding);
+        return Math.min(getMaxLayoutHeight(), calculateActualLayoutHeight());
     }
 
     private int getWindowWidth() {
