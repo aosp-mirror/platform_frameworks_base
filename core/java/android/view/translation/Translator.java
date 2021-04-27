@@ -101,9 +101,17 @@ public class Translator {
     public static final String EXTRA_SESSION_ID = "sessionId";
 
     static class ServiceBinderReceiver extends IResultReceiver.Stub {
+        // TODO: refactor how translator is instantiated after removing deprecated createTranslator.
         private final WeakReference<Translator> mTranslator;
         private final CountDownLatch mLatch = new CountDownLatch(1);
         private int mSessionId;
+
+        private Consumer<Translator> mCallback;
+
+        ServiceBinderReceiver(Translator translator, Consumer<Translator> callback) {
+            mTranslator = new WeakReference<>(translator);
+            mCallback = callback;
+        }
 
         ServiceBinderReceiver(Translator translator) {
             mTranslator = new WeakReference<>(translator);
@@ -126,6 +134,9 @@ public class Translator {
         public void send(int resultCode, Bundle resultData) {
             if (resultCode == STATUS_SYNC_CALL_FAIL) {
                 mLatch.countDown();
+                if (mCallback != null) {
+                    mCallback.accept(null);
+                }
                 return;
             }
             mSessionId = resultData.getInt(EXTRA_SESSION_ID);
@@ -146,6 +157,9 @@ public class Translator {
             }
             translator.setServiceBinder(binder);
             mLatch.countDown();
+            if (mCallback != null) {
+                mCallback.accept(translator);
+            }
         }
 
         // TODO(b/176464808): maybe make SyncResultReceiver.TimeoutException constructor public
@@ -154,6 +168,32 @@ public class Translator {
             private TimeoutException(String msg) {
                 super(msg);
             }
+        }
+    }
+
+    /**
+     * Create the Translator.
+     *
+     * @hide
+     */
+    public Translator(@NonNull Context context,
+            @NonNull TranslationContext translationContext, int sessionId,
+            @NonNull TranslationManager translationManager, @NonNull Handler handler,
+            @Nullable ITranslationManager systemServerBinder,
+            @NonNull Consumer<Translator> callback) {
+        mContext = context;
+        mTranslationContext = translationContext;
+        mId = sessionId;
+        mManager = translationManager;
+        mHandler = handler;
+        mSystemServerBinder = systemServerBinder;
+        mServiceBinderReceiver = new ServiceBinderReceiver(this, callback);
+
+        try {
+            mSystemServerBinder.onSessionCreated(mTranslationContext, mId,
+                    mServiceBinderReceiver, mContext.getUserId());
+        } catch (RemoteException e) {
+            Log.w(TAG, "RemoteException calling startSession(): " + e);
         }
     }
 
