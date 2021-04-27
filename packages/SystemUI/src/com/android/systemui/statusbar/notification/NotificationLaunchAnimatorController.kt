@@ -84,14 +84,6 @@ class NotificationLaunchAnimatorController(
         notificationShadeWindowViewController.setExpandAnimationRunning(false)
     }
 
-    override fun onLaunchAnimationTimedOut() {
-        notificationShadeWindowViewController.setExpandAnimationRunning(false)
-    }
-
-    override fun onLaunchAnimationAborted() {
-        notificationShadeWindowViewController.setExpandAnimationRunning(false)
-    }
-
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
         notification.isExpandAnimationRunning = true
         notificationListContainer.setExpandingNotification(notification)

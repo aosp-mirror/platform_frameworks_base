@@ -106,12 +106,12 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun abortsIfNoOpeningWindowIsFound() {
+    fun cancelsIfNoOpeningWindowIsFound() {
         val runner = activityLaunchAnimator.createRunner(controller)
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
-        verify(controller).onLaunchAnimationAborted()
+        verify(controller).onLaunchAnimationCancelled()
         verify(controller, never()).onLaunchAnimationStart(anyBoolean())
     }
 
@@ -175,14 +175,6 @@ private class TestLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationCancelled() {
-        assertOnMainThread()
-    }
-
-    override fun onLaunchAnimationTimedOut() {
-        assertOnMainThread()
-    }
-
-    override fun onLaunchAnimationAborted() {
         assertOnMainThread()
     }
 }
