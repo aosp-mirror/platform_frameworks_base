@@ -16,6 +16,8 @@
 package com.android.systemui.qs;
 
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_SECURITY_FOOTER_VIEW;
 
@@ -26,6 +28,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.UserInfo;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -68,7 +72,6 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
 
     private final View mRootView;
     private final TextView mFooterText;
-    private final ImageView mFooterIcon;
     private final ImageView mPrimaryFooterIcon;
     private final Context mContext;
     private final Callback mCallback = new Callback();
@@ -83,7 +86,6 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
 
     private boolean mIsVisible;
     private CharSequence mFooterTextContent = null;
-    private int mFooterTextId;
     private int mFooterIconId;
     private Drawable mPrimaryFooterIconDrawable;
 
@@ -94,7 +96,6 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         mRootView = rootView;
         mRootView.setOnClickListener(this);
         mFooterText = mRootView.findViewById(R.id.footer_text);
-        mFooterIcon = mRootView.findViewById(R.id.footer_icon);
         mPrimaryFooterIcon = mRootView.findViewById(R.id.primary_footer_icon);
         mFooterIconId = R.drawable.ic_info_outline;
         mContext = rootView.getContext();
@@ -120,6 +121,23 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
 
     public void onConfigurationChanged() {
         FontSizeUtils.updateFontSize(mFooterText, R.dimen.qs_tile_text_size);
+
+        Resources r = mContext.getResources();
+
+        mFooterText.setMaxLines(r.getInteger(R.integer.qs_security_footer_maxLines));
+        int padding = r.getDimensionPixelSize(R.dimen.qs_footer_padding);
+        mRootView.setPaddingRelative(padding, padding, padding, padding);
+
+        int verticalMargin = r.getDimensionPixelSize(R.dimen.qs_security_footer_vertical_margin);
+        ViewGroup.MarginLayoutParams lp =
+                (ViewGroup.MarginLayoutParams) mRootView.getLayoutParams();
+        lp.topMargin = verticalMargin;
+        lp.bottomMargin = verticalMargin;
+        lp.width = r.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
+                ? MATCH_PARENT : WRAP_CONTENT;
+        mRootView.setLayoutParams(lp);
+
+        mRootView.setBackground(mContext.getDrawable(R.drawable.qs_security_footer_background));
     }
 
     public View getView() {
@@ -189,7 +207,6 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         }
         if (mFooterIconId != footerIconId) {
             mFooterIconId = footerIconId;
-            mMainHandler.post(mUpdateIcon);
         }
 
         // Update the primary icon
@@ -315,7 +332,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         mDialog.setView(createDialogView());
 
         mDialog.show();
-        mDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+        mDialog.getWindow().setLayout(MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
@@ -575,19 +592,14 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                 == DEVICE_OWNER_TYPE_FINANCED;
     }
 
-    private final Runnable mUpdateIcon = new Runnable() {
-        @Override
-        public void run() {
-            mFooterIcon.setImageResource(mFooterIconId);
-        }
-    };
-
     private final Runnable mUpdatePrimaryIcon = new Runnable() {
         @Override
         public void run() {
-            mPrimaryFooterIcon.setVisibility(mPrimaryFooterIconDrawable != null
-                    ? View.VISIBLE : View.GONE);
-            mPrimaryFooterIcon.setImageDrawable(mPrimaryFooterIconDrawable);
+            if (mPrimaryFooterIconDrawable != null) {
+                mPrimaryFooterIcon.setImageDrawable(mPrimaryFooterIconDrawable);
+            } else {
+                mPrimaryFooterIcon.setImageResource(mFooterIconId);
+            }
         }
     };
 
