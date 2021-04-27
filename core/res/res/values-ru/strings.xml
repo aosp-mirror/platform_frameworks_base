@@ -1554,7 +1554,7 @@
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"Готово"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Очистка единого хранилища…"</string>
-    <string name="share" msgid="4157615043345227321">"Отправить"</string>
+    <string name="share" msgid="4157615043345227321">"Поделиться"</string>
     <string name="find" msgid="5015737188624767706">"Найти"</string>
     <string name="websearch" msgid="5624340204512793290">"Веб-поиск"</string>
     <string name="find_next" msgid="5341217051549648153">"Cлед."</string>
@@ -1817,28 +1817,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1875,8 +1864,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kaku"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Неизвестный вертикальный формат"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Неизвестный горизонтальный формат"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Печать отменена"</string>
@@ -1922,10 +1910,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Обновлено администратором"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Удалено администратором"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"В режиме энергосбережения включается тёмная тема, ограничиваются или отключаются фоновые процессы, некоторые визуальные эффекты и определенные функции.\n\n"<annotation id="url">"Подробнее…"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"В режиме энергосбережения включается тёмная тема, ограничиваются или отключаются фоновые процессы, некоторые визуальные эффекты и определенные функции."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"В режиме экономии трафика фоновая передача данных для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Включить экономию трафика?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включить"</string>
@@ -2146,7 +2132,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ОТКРЫТЬ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Обнаружено вредоносное приложение"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Приложение \"<xliff:g id="APP_0">%1$s</xliff:g>\" запрашивает разрешение на показ фрагментов приложения \"<xliff:g id="APP_2">%2$s</xliff:g>\"."</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"Редактировать"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"Изменить"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Для звонков и уведомлений включен вибросигнал."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Для звонков и уведомлений отключен звук."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Системные изменения"</string>
@@ -2165,12 +2151,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Уровень важности этого уведомления был понижен до \"Без звука\". Нажмите, чтобы отправить отзыв."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Уровень важности этого уведомления был повышен. Нажмите, чтобы отправить отзыв."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Уровень важности этого уведомления был понижен. Нажмите, чтобы отправить отзыв."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Улучшенные уведомления"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Чтобы по-прежнему пользоваться рекомендуемыми действиями, ответами и другими подсказками, включите улучшенные уведомления. Адаптивные уведомления для Android больше не поддерживаются."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Включить"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Не сейчас"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Улучшенные уведомления"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Быстрые ответы и действия теперь включены в улучшенные уведомления. Адаптивные уведомления для Android больше не поддерживаются."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ОК"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Отключить"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Подробнее"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Улучшенным уведомлениям доступно содержимое всех уведомлений, в том числе личная информация, такая как имена контактов и сообщения. У этой функции также есть право закрывать уведомления и нажимать кнопки в них, например отвечать на звонки.\n\nКроме того, улучшенные уведомления могут включать и отключать режим \"Только важные\" и изменять связанные с ним настройки."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"В Android 12 адаптивные уведомления заменены улучшенными. Эта функция упорядочивает все ваши уведомления и подсказывает ответы и действия.\n\nЕй доступно содержимое всех уведомлений, в том числе личная информация, такая как имена контактов и сообщения. Также эта функция может закрывать уведомления и нажимать кнопки в них, например отвечать на звонки или управлять режимом \"Не беспокоить\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Уведомление о батарее"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея может разрядиться"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Чтобы увеличить время работы от батареи, был включен режим энергосбережения."</string>

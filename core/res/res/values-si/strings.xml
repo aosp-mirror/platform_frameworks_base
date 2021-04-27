@@ -1820,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"නොදන්නා සිරස් දිශානතිය"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"නොදන්නා තිරස් දිශානතිය"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"අවලංගු කරන ලදි"</string>
@@ -1865,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ඔබගේ පරිපාලක මඟින් යාවත්කාලීන කර ඇත"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ඔබගේ පරිපාලක මඟින් මකා දමා ඇත"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"හරි"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග සහ යම් විශේෂාංග ක්‍රියාවිරහිත හෝ සීමා කරයි.\n\n"<annotation id="url">"තව දැන ගන්න"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"බැටරි සුරැකුම අඳුරු තේමාව ක්‍රියාත්මක කර පසුබිම් ක්‍රියාකාරකම්, සමහර දෘශ්‍ය ප්‍රයෝග සහ යම් විශේෂාංග ක්‍රියාවිරහිත හෝ සීමා කරයි."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ක්‍රියාත්මක කරන්න"</string>
@@ -2088,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"මෙම දැනුම්දීම නිහඬ වෙත පහත දමන ලදී. ප්‍රතිපෝෂණය ලබා දීමට තට්ටු කරන්න."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"මෙම දැනුම්දීම ඉහළට ශ්‍රේණිගත කරන ලදී. ප්‍රතිපෝෂණය ලබා දීමට තට්ටු කරන්න."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"මෙම දැනුම්දීම පහළට ශ්‍රේණිගත කරන ලදී. ප්‍රතිපෝෂණය ලබා දීමට තට්ටු කරන්න."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"දියුණු කළ දැනුම්දීම් උත්සාහ ක."</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"යෝජිත ක්‍රියා, පිළිතුරු සහ තවත් දේ ලබා ගැනීම සඳහා, වැඩි දියුණු කළ දැනුම්දීම් ක්‍රියාත්මක කරන්න. Android අනුවර්තී දැනුම්දීම් තවදුරටත් සහාය නොදක්වයි."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ක්‍රියාත්මක කරන්න"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"දැන් නොවේ"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"වැඩිදියුණු කළ දැනුම්දීම්"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"යෝජිත ක්‍රියා සහ පිළිතුරු දැන් වැඩි දියුණු කරන ලද දැනුම්දීම් මගින් සපයනු ලැබේ. Android අනුවර්තී දැනුම්දීම් තවදුරටත් සහාය නොදක්වයි."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"හරි"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ක්‍රියාවිරහිත කරන්න"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"තව දැන ගන්න"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"වැඩිදියුණු කළ දැනුම්දීම්වලට සම්බන්ධතා නම් සහ පණිවිඩ වැනි පුද්ගලික තොරතුරු ඇතුළුව, සියලු දැනුම්දීම් අන්තර්ගතය කියවිය හැකිය. මෙම විශේෂාංගයට දැනුම්දීම් ඉවත දැමීමට හෝ දුරකථන ඇමතුම්වලට පිළිතුරු දීම වැනි, දැනුම්දීම්වල බොත්තම් මත ක්‍රියා සිදු කිරීමටද හැකිය.\n\nමෙම විශේෂාංගයට ප්‍රමුඛතා ප්‍රකාරය ක්‍රියාත්මක හෝ ක්‍රියාවිරහිත කිරීමට සහ අදාළ සැකසීම් වෙනස් කිරීමටද හැකිය."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"වැඩිදියුණු කළ දැනුම්දීම් Android 12 හි Android අනුවර්තී දැනුම්දීම් ප්‍රතිස්ථාපනය කරයි. මෙම විශේෂාංගය යෝජිත ක්‍රියා සහ පිළිතුරු පෙන්වන අතර, ඔබගේ දැනුම්දීම් සංවිධානය කරයි.\n\nවැඩිදියුණු කළ දැනුම්දීම්වලට සම්බන්ධතා නම් සහ පණිවිඩ වැනි පුද්ගලික තොරතුරු ඇතුළුව, සියලු දැනුම්දීම් අන්තර්ගතය වෙත ප්‍රවේශ විය හැකිය. මෙම විශේෂාංගයට දැනුම්දීම් ඉවත දැමීමට හෝ දුරකථන ඇමතුම්වලට පිළිතුරු දීම සහ බාධා නොකරන්න පාලනය කිරීම වැනි, දැනුම්දීම්වලට ප්‍රතිචාර දැක්වීමටද හැකිය."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"දිනචරියා ප්‍රකාර තතු දැනුම්දීම"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"බැටරිය සුපුරුදු ආරෝපණයට පෙර ඉවර විය හැක"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"බැටරි සුරැකුම බැටරි ආයු කාලය දීර්ඝ කිරීමට සක්‍රිය කෙරිණි"</string>
