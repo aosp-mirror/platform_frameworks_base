@@ -230,6 +230,10 @@ public final class InputMethodDebug {
                 return "HIDE_REMOVE_CLIENT";
             case SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY:
                 return "SHOW_RESTORE_IME_VISIBILITY";
+            case SoftInputShowHideReason.SHOW_TOGGLE_SOFT_INPUT:
+                return "SHOW_TOGGLE_SOFT_INPUT";
+            case SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT:
+                return "HIDE_TOGGLE_SOFT_INPUT";
             default:
                 return "Unknown=" + reason;
         }

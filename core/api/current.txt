@@ -19315,7 +19315,7 @@ package android.inputmethodservice {
     method public void appPrivateCommand(String, android.os.Bundle);
     method public void displayCompletions(android.view.inputmethod.CompletionInfo[]);
     method public void finishInput();
-    method public void toggleSoftInput(int, int);
+    method @Deprecated public void toggleSoftInput(int, int);
     method public void updateCursor(android.graphics.Rect);
     method public void updateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
     method public void updateExtractedText(int, android.view.inputmethod.ExtractedText);
@@ -52000,8 +52000,8 @@ package android.view.inputmethod {
     method @Deprecated public void showStatusIcon(android.os.IBinder, String, @DrawableRes int);
     method @Deprecated public boolean switchToLastInputMethod(android.os.IBinder);
     method @Deprecated public boolean switchToNextInputMethod(android.os.IBinder, boolean);
-    method public void toggleSoftInput(int, int);
-    method public void toggleSoftInputFromWindow(android.os.IBinder, int, int);
+    method @Deprecated public void toggleSoftInput(int, int);
+    method @Deprecated public void toggleSoftInputFromWindow(android.os.IBinder, int, int);
     method @Deprecated public void updateCursor(android.view.View, int, int, int, int);
     method public void updateCursorAnchorInfo(android.view.View, android.view.inputmethod.CursorAnchorInfo);
     method public void updateExtractedText(android.view.View, int, android.view.inputmethod.ExtractedText);
@@ -52024,7 +52024,7 @@ package android.view.inputmethod {
     method public void dispatchTrackballEvent(int, android.view.MotionEvent, android.view.inputmethod.InputMethodSession.EventCallback);
     method public void displayCompletions(android.view.inputmethod.CompletionInfo[]);
     method public void finishInput();
-    method public void toggleSoftInput(int, int);
+    method @Deprecated public void toggleSoftInput(int, int);
     method public void updateCursor(android.graphics.Rect);
     method public void updateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
     method public void updateExtractedText(int, android.view.inputmethod.ExtractedText);
