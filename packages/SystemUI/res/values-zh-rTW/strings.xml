@@ -855,10 +855,10 @@
     <string name="right_keycode" msgid="2480715509844798438">"向右按鍵碼"</string>
     <string name="left_icon" msgid="5036278531966897006">"向左圖示"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右圖示"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住並拖曳即可新增資訊方塊"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住並拖曳即可新增設定方塊"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住並拖曳即可重新排列圖塊"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖曳到這裡即可移除"</string>
-    <string name="drag_to_remove_disabled" msgid="933046987838658850">"你至少必須要有 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 個資訊方塊"</string>
+    <string name="drag_to_remove_disabled" msgid="933046987838658850">"你至少必須要有 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 個設定方塊"</string>
     <string name="qs_edit" msgid="5583565172803472437">"編輯"</string>
     <string name="tuner_time" msgid="2450785840990529997">"時間"</string>
   <string-array name="clock_options">
