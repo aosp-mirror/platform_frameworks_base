@@ -47,6 +47,9 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class LightsServiceTest {
 
+    private static final int HIGH_PRIORITY = Integer.MAX_VALUE;
+    private static final int DEFAULT_PRIORITY = 0;
+
     private final ILights mHal = new ILights.Stub() {
         @Override
         public void setLightState(int id, HwLightState state) {
@@ -187,5 +190,31 @@ public class LightsServiceTest {
 
         // Then the light should turn back off.
         assertThat(manager.getLightState(micLight).getColor()).isEqualTo(0);
+    }
+
+    @Test
+    public void testControlLights_higherPriorityCallerWinsContention() throws Exception {
+        LightsService service = new LightsService(mContext, () -> mHal, Looper.getMainLooper());
+        LightsManager manager = new SystemLightsManager(mContext, service.mManagerService);
+        Light micLight = manager.getLights().get(0);
+
+        // The light should begin by being off.
+        assertThat(manager.getLightState(micLight).getColor()).isEqualTo(TRANSPARENT);
+
+        try (LightsManager.LightsSession session1 = manager.openSession(DEFAULT_PRIORITY)) {
+            try (LightsManager.LightsSession session2 = manager.openSession(HIGH_PRIORITY)) {
+                // When session1 and session2 both request the same light:
+                session1.requestLights(
+                        new Builder().addLight(micLight, new LightState(BLUE)).build());
+                session2.requestLights(
+                        new Builder().addLight(micLight, new LightState(WHITE)).build());
+                // Then session2 should win because it has a higher priority.
+                assertThat(manager.getLightState(micLight).getColor()).isEqualTo(WHITE);
+            }
+            // Then session1 should have its request go into effect.
+            assertThat(manager.getLightState(micLight).getColor()).isEqualTo(BLUE);
+        }
+        // Then the light should turn off because there are no more sessions.
+        assertThat(manager.getLightState(micLight).getColor()).isEqualTo(TRANSPARENT);
     }
 }
