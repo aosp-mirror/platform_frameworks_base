@@ -2394,26 +2394,20 @@ void IncrementalService::removeIfsStateCallbacks(StorageId storageId) {
 }
 
 void IncrementalService::getMetrics(StorageId storageId, android::os::PersistableBundle* result) {
-    const auto duration = getMillsSinceOldestPendingRead(storageId);
-    if (duration >= 0) {
-        const auto kMetricsMillisSinceOldestPendingRead =
-                os::incremental::BnIncrementalService::METRICS_MILLIS_SINCE_OLDEST_PENDING_READ();
-        result->putLong(String16(kMetricsMillisSinceOldestPendingRead.data()), duration);
-    }
-}
-
-long IncrementalService::getMillsSinceOldestPendingRead(StorageId storageId) {
     const auto ifs = getIfs(storageId);
     if (!ifs) {
-        LOG(ERROR) << "getMillsSinceOldestPendingRead failed, invalid storageId: " << storageId;
-        return -EINVAL;
+        LOG(ERROR) << "getMetrics failed, invalid storageId: " << storageId;
+        return;
     }
+    const auto kMetricsReadLogsEnabled =
+            os::incremental::BnIncrementalService::METRICS_READ_LOGS_ENABLED();
+    result->putBoolean(String16(kMetricsReadLogsEnabled.data()), ifs->readLogsEnabled() != 0);
+
     std::unique_lock l(ifs->lock);
     if (!ifs->dataLoaderStub) {
-        LOG(ERROR) << "getMillsSinceOldestPendingRead failed, no data loader: " << storageId;
-        return -EINVAL;
+        return;
     }
-    return ifs->dataLoaderStub->elapsedMsSinceOldestPendingRead();
+    ifs->dataLoaderStub->getMetrics(result);
 }
 
 IncrementalService::DataLoaderStub::DataLoaderStub(
@@ -2778,6 +2772,7 @@ void IncrementalService::DataLoaderStub::onHealthStatus(const StorageHealthListe
     if (healthListener) {
         healthListener->onHealthStatus(id(), healthStatus);
     }
+    mHealthStatus = healthStatus;
 }
 
 void IncrementalService::DataLoaderStub::updateHealthStatus(bool baseline) {
@@ -2949,6 +2944,29 @@ BootClockTsUs IncrementalService::DataLoaderStub::getOldestTsFromLastPendingRead
     return result;
 }
 
+void IncrementalService::DataLoaderStub::getMetrics(android::os::PersistableBundle* result) {
+    const auto duration = elapsedMsSinceOldestPendingRead();
+    if (duration >= 0) {
+        const auto kMetricsMillisSinceOldestPendingRead =
+                os::incremental::BnIncrementalService::METRICS_MILLIS_SINCE_OLDEST_PENDING_READ();
+        result->putLong(String16(kMetricsMillisSinceOldestPendingRead.data()), duration);
+    }
+    const auto kMetricsStorageHealthStatusCode =
+            os::incremental::BnIncrementalService::METRICS_STORAGE_HEALTH_STATUS_CODE();
+    result->putInt(String16(kMetricsStorageHealthStatusCode.data()), mHealthStatus);
+    const auto kMetricsDataLoaderStatusCode =
+            os::incremental::BnIncrementalService::METRICS_DATA_LOADER_STATUS_CODE();
+    result->putInt(String16(kMetricsDataLoaderStatusCode.data()), mCurrentStatus);
+    const auto kMetricsMillisSinceLastDataLoaderBind =
+            os::incremental::BnIncrementalService::METRICS_MILLIS_SINCE_LAST_DATA_LOADER_BIND();
+    result->putLong(String16(kMetricsMillisSinceLastDataLoaderBind.data()),
+                    (long)(elapsedMcs(mPreviousBindTs, mService.mClock->now()) / 1000));
+    const auto kMetricsDataLoaderBindDelayMillis =
+            os::incremental::BnIncrementalService::METRICS_DATA_LOADER_BIND_DELAY_MILLIS();
+    result->putLong(String16(kMetricsDataLoaderBindDelayMillis.data()),
+                    (long)(mPreviousBindDelay.count()));
+}
+
 long IncrementalService::DataLoaderStub::elapsedMsSinceOldestPendingRead() {
     const auto oldestPendingReadKernelTs = getOldestTsFromLastPendingReads();
     if (oldestPendingReadKernelTs == kMaxBootClockTsUs) {
@@ -3018,7 +3036,7 @@ void IncrementalService::DataLoaderStub::onDump(int fd) {
         dprintf(fd, "          bootClockTsUs: %lld\n", (long long)pendingRead.bootClockTsUs);
     }
     dprintf(fd, "        bind: %llds ago (delay: %llds)\n",
-            (long long)(elapsedMcs(mPreviousBindTs, Clock::now()) / 1000000),
+            (long long)(elapsedMcs(mPreviousBindTs, mService.mClock->now()) / 1000000),
             (long long)(mPreviousBindDelay.count() / 1000));
     dprintf(fd, "      }\n");
     const auto& params = mParams;
