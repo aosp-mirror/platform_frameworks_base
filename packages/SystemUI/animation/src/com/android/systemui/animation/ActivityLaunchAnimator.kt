@@ -191,23 +191,11 @@ class ActivityLaunchAnimator(context: Context) {
         fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {}
 
         /**
-         * The animation was cancelled remotely. Note that [onLaunchAnimationEnd] will still be
-         * called after this if the animation was already started, i.e. if [onLaunchAnimationStart]
-         * was called before the cancellation.
+         * The animation was cancelled. Note that [onLaunchAnimationEnd] will still be called after
+         * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
+         * before the cancellation.
          */
         fun onLaunchAnimationCancelled() {}
-
-        /**
-         * The remote animation was not started within the expected time. It timed out and will
-         * never [start][onLaunchAnimationStart].
-         */
-        fun onLaunchAnimationTimedOut() {}
-
-        /**
-         * The animation was aborted because the opening window was not found. It will never
-         * [start][onLaunchAnimationStart].
-         */
-        fun onLaunchAnimationAborted() {}
     }
 
     /** The state of an expandable view during an [ActivityLaunchAnimator] animation. */
@@ -332,7 +320,7 @@ class ActivityLaunchAnimator(context: Context) {
             if (window == null) {
                 removeTimeout()
                 invokeCallback(iCallback)
-                controller.onLaunchAnimationAborted()
+                controller.onLaunchAnimationCancelled()
                 return
             }
 
@@ -486,7 +474,7 @@ class ActivityLaunchAnimator(context: Context) {
             }
 
             timedOut = true
-            controller.onLaunchAnimationTimedOut()
+            controller.onLaunchAnimationCancelled()
         }
 
         override fun onAnimationCancelled() {
