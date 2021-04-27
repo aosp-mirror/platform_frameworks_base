@@ -20,7 +20,6 @@ import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_UDFP
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC;
 
 import android.annotation.NonNull;
-import android.content.Context;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
@@ -90,34 +89,6 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
         this(sensorId, strength, maxEnrollmentsPerUser, componentInfo, sensorType,
                 resetLockoutRequiresHardwareAuthToken, 540 /* sensorLocationX */,
                 1636 /* sensorLocationY */, 130 /* sensorRadius */);
-    }
-
-    /**
-     * Initializes SensorProperties with specified values and values obtained from resources using
-     * context.
-     */
-    // TODO(b/179175438): Remove this constructor once all HALs move to AIDL.
-    public FingerprintSensorPropertiesInternal(@NonNull Context context, int sensorId,
-            @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
-            @NonNull List<ComponentInfoInternal> componentInfo,
-            @FingerprintSensorProperties.SensorType int sensorType,
-            boolean resetLockoutRequiresHardwareAuthToken) {
-        super(sensorId, strength, maxEnrollmentsPerUser, componentInfo,
-            resetLockoutRequiresHardwareAuthToken, false /* resetLockoutRequiresChallenge */);
-        this.sensorType = sensorType;
-
-        int[] props = context.getResources().getIntArray(
-                com.android.internal.R.array.config_udfps_sensor_props);
-        if (props != null && props.length == 3) {
-            this.sensorLocationX = props[0];
-            this.sensorLocationY = props[1];
-            this.sensorRadius = props[2];
-        } else {
-            // Fake coordinates that could be used for the fake UDFPS mode.
-            this.sensorLocationX = 540;
-            this.sensorLocationY = 1636;
-            this.sensorRadius = 130;
-        }
     }
 
     protected FingerprintSensorPropertiesInternal(Parcel in) {

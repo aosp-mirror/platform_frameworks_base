@@ -25,15 +25,12 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
-import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
-import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
@@ -51,7 +48,6 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.SensorServiceStateProto;
@@ -66,7 +62,6 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
-import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
@@ -327,19 +322,13 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         }
     }
 
-    @VisibleForTesting
-    Face10(@NonNull Context context, int sensorId,
-            @BiometricManager.Authenticators.Types int strength,
+    @VisibleForTesting Face10(@NonNull Context context,
+            @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            boolean supportsSelfIllumination, int maxTemplatesAllowed,
             @NonNull BiometricScheduler scheduler) {
-        mSensorProperties = new FaceSensorPropertiesInternal(sensorId,
-                Utils.authenticatorStrengthToPropertyStrength(strength),
-                maxTemplatesAllowed, new ArrayList<ComponentInfoInternal>() /* componentInfo */,
-                FaceSensorProperties.TYPE_UNKNOWN, false /* supportsFaceDetect */,
-                supportsSelfIllumination, true /* resetLockoutRequiresChallenge */);
+        mSensorProperties = sensorProps;
         mContext = context;
-        mSensorId = sensorId;
+        mSensorId = sensorProps.sensorId;
         mScheduler = scheduler;
         mHandler = new Handler(Looper.getMainLooper());
         mUsageStats = new UsageStats(context);
@@ -347,8 +336,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         mLazyDaemon = Face10.this::getDaemon;
         mLockoutTracker = new LockoutHalImpl();
         mLockoutResetDispatcher = lockoutResetDispatcher;
-        mHalResultController = new HalResultController(sensorId, context, mHandler, mScheduler,
-                mLockoutTracker, lockoutResetDispatcher);
+        mHalResultController = new HalResultController(sensorProps.sensorId, context, mHandler,
+                mScheduler, mLockoutTracker, lockoutResetDispatcher);
         mHalResultController.setCallback(() -> {
             mDaemon = null;
             mCurrentUserId = UserHandle.USER_NULL;
@@ -361,12 +350,9 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         }
     }
 
-    public Face10(@NonNull Context context, int sensorId,
-            @BiometricManager.Authenticators.Types int strength,
+    public Face10(@NonNull Context context, @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
-        this(context, sensorId, strength, lockoutResetDispatcher,
-                context.getResources().getBoolean(R.bool.config_faceAuthSupportsSelfIllumination),
-                context.getResources().getInteger(R.integer.config_faceMaxTemplatesPerUser),
+        this(context, sensorProps, lockoutResetDispatcher,
                 new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */));
     }
 
