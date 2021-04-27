@@ -136,9 +136,6 @@ public abstract class RotationResolverService extends Service {
     @MainThread
     private void resolveRotation(IRotationResolverCallback callback,
             RotationResolutionRequest request, ICancellationSignal transport) {
-        // TODO(b/175334753): The current behavior of preempted failures is based on the design we
-        //  had in Smart OS exploration. We should revisit it once we have implemented the whole
-        //  feature and tested on devices.
         if (mPendingCallback != null
                 && (mCancellationSignal == null || !mCancellationSignal.isCanceled())) {
             reportFailures(callback, ROTATION_RESULT_FAILURE_PREEMPTED);
