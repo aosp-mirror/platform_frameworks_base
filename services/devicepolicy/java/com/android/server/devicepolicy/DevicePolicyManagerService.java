@@ -11926,17 +11926,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
+        UserHandle userHandle = caller.getUserHandle();
+        if (mIsAutomotive) {
+            Slogf.v(LOG_TAG, "setLocationEnabled(%s, %b): ignoring for user %s on automotive build",
+                    who.flattenToShortString(), locationEnabled, userHandle);
+            return;
+        }
+
         mInjector.binderWithCleanCallingIdentity(() -> {
             boolean wasLocationEnabled = mInjector.getLocationManager().isLocationEnabledForUser(
-                    caller.getUserHandle());
-            mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled,
-                    caller.getUserHandle());
+                    userHandle);
+            Slogf.v(LOG_TAG, "calling locationManager.setLocationEnabledForUser(%b, %s)",
+                    locationEnabled, userHandle);
+            mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled, userHandle);
 
             // make a best effort to only show the notification if the admin is actually enabling
             // location. this is subject to race conditions with settings changes, but those are
             // unlikely to realistically interfere
             if (locationEnabled && !wasLocationEnabled) {
-                showLocationSettingsEnabledNotification(caller.getUserHandle());
+                showLocationSettingsEnabledNotification(userHandle);
             }
         });
 
