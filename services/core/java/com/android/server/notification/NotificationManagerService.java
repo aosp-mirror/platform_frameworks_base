@@ -695,14 +695,15 @@ public class NotificationManagerService extends SystemService {
         // Remove notifications with the specified user & channel ID.
         public void removeChannelNotifications(String pkg, @UserIdInt int userId,
                 String channelId) {
-            for (int i = 0; i < mBuffer.size(); i++) {
-                final Pair<StatusBarNotification, Integer> pair = mBuffer.get(i);
+            Iterator<Pair<StatusBarNotification, Integer>> bufferIter = mBuffer.iterator();
+            while (bufferIter.hasNext()) {
+                final Pair<StatusBarNotification, Integer> pair = bufferIter.next();
                 if (pair.first != null
                         && userId == pair.first.getNormalizedUserId()
                         && pkg != null && pkg.equals(pair.first.getPackageName())
                         && pair.first.getNotification() != null
                         && Objects.equals(channelId, pair.first.getNotification().getChannelId())) {
-                    mBuffer.remove(i);
+                    bufferIter.remove();
                 }
             }
         }
