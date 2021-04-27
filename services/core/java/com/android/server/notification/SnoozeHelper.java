@@ -36,6 +36,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.server.pm.PackageManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -333,6 +334,7 @@ public class SnoozeHelper {
         return PendingIntent.getBroadcast(mContext,
                 REQUEST_CODE_REPOST,
                 new Intent(REPOST_ACTION)
+                        .setPackage(PackageManagerService.PLATFORM_PACKAGE_NAME)
                         .setData(new Uri.Builder().scheme(REPOST_SCHEME).appendPath(key).build())
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
                         .putExtra(EXTRA_KEY, key)
