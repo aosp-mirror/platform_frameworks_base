@@ -24,12 +24,6 @@ import android.graphics.Rect;
  */
 public interface OneHandedTransitionCallback {
     /**
-     * Called when one handed mode entering or exiting transition starting
-     */
-    default void onStartTransition(boolean isEntering) {
-    }
-
-    /**
      * Called when start one handed transition finished
      */
     default void onStartFinished(Rect bounds) {
