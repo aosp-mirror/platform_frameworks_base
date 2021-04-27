@@ -2298,6 +2298,27 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        if (getDisplayContent().getImeTarget(IME_TARGET_INPUT) != this && !isImeLayeringTarget()) {
+            super.onConfigurationChanged(newParentConfig);
+            return;
+        }
+
+        mTempConfiguration.setTo(getConfiguration());
+        super.onConfigurationChanged(newParentConfig);
+        final boolean windowConfigChanged = mTempConfiguration.windowConfiguration
+                .diff(newParentConfig.windowConfiguration, false) != 0;
+
+        // When the window configuration changed, we need to update the IME control target in
+        // case the app may lose the IME inets control when exiting from split-screen mode, or the
+        // IME parent may failed to attach to the app during rotating the screen.
+        // See DisplayContent#isImeAttachedToApp, DisplayContent#isImeControlledByApp
+        if (windowConfigChanged) {
+            getDisplayContent().updateImeControlTarget();
+        }
+    }
+
+    @Override
     void onMergedOverrideConfigurationChanged() {
         super.onMergedOverrideConfigurationChanged();
         mLastConfigReportedToClient = false;
