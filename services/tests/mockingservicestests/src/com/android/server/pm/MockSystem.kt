@@ -28,6 +28,7 @@ import android.content.pm.SigningDetails
 import android.content.pm.UserInfo
 import android.content.pm.parsing.ParsingPackage
 import android.content.pm.parsing.ParsingPackageUtils
+import android.content.pm.parsing.result.ParseTypeImpl
 import android.content.res.Resources
 import android.hardware.display.DisplayManager
 import android.os.Build
@@ -390,8 +391,10 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val apkPath = File(File(parent, packageName), "base.apk")
         val pkg = PackageImpl.forTesting(packageName, apkPath.parentFile.path) as PackageImpl
         pkg.signingDetails = signingDetails
-        wheneverStatic { ParsingPackageUtils.getSigningDetails(eq(pkg), anyBoolean()) }
-                .thenReturn(signingDetails)
+        val result = ParseTypeImpl.forDefaultParsing().success(signingDetails)
+        wheneverStatic { ParsingPackageUtils.getSigningDetails(
+                any(ParseTypeImpl::class.java), eq(pkg), anyBoolean()) }
+                .thenReturn(result)
         pkg.versionCode = versionCode.toInt()
         pkg.versionCodeMajor = (versionCode shr 32).toInt()
         pkg.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT
@@ -498,8 +501,10 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val apk = File(File(rootDirectory, "framework"), "framework-res.apk")
         val frameworkPkg = PackageImpl.forTesting("android",
                 apk.parentFile.path) as PackageImpl
-        wheneverStatic { ParsingPackageUtils.getSigningDetails(frameworkPkg, true) }
-                .thenReturn(frameworkSignature)
+        val result = ParseTypeImpl.forDefaultParsing().success(frameworkSignature)
+        wheneverStatic { ParsingPackageUtils.getSigningDetails(
+                any(ParseTypeImpl::class.java), eq(frameworkPkg), eq(true)) }
+                .thenReturn(result)
         stageParse(apk, frameworkPkg)
         stageSettingInsert("android",
                 PackageSettingBuilder().setCodePath(apk.path).setName(

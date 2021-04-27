@@ -17,7 +17,6 @@
 package com.android.server.pm.parsing;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -29,12 +28,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -48,6 +49,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
@@ -335,7 +337,7 @@ public class PackageParserLegacyCoreTest {
      * Copies a specified {@code resourceId} to a file. Returns a non-null file if the copy
      * succeeded, or {@code null} otherwise.
      */
-    File copyRawResourceToFile(String baseName, int resourceId) throws Exception {
+    File copyRawResourceToFile(String baseName, int resourceId) {
         // Copy the resource to a file.
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         InputStream is = context.getResources().openRawResource(resourceId);
@@ -537,8 +539,14 @@ public class PackageParserLegacyCoreTest {
             throw new IllegalStateException(result.getErrorMessage(), result.getException());
         }
 
+        ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         ParsingPackage pkg = result.getResult();
-        pkg.setSigningDetails(ParsingPackageUtils.getSigningDetails(pkg, false));
+        ParseResult<SigningDetails> ret = ParsingPackageUtils.getSigningDetails(
+                input, pkg, false /*skipVerify*/);
+        if (ret.isError()) {
+            throw new IllegalStateException(ret.getErrorMessage(), ret.getException());
+        }
+        pkg.setSigningDetails(ret.getResult());
         PackageInfo pi = PackageInfoWithoutStateUtils.generate(pkg, apexInfo, flags);
 
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
@@ -596,7 +604,7 @@ public class PackageParserLegacyCoreTest {
             try {
                 parsePackage(filename, resId, x -> x);
                 expect.withMessage("Expected parsing error %d from %s", result, filename).fail();
-            } catch (PackageParser.PackageParserException expected) {
+            } catch (PackageManagerException expected) {
                 expect.that(expected.error).isEqualTo(result);
             }
         }
