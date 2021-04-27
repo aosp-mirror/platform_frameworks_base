@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"I-Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"I-Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"I-Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super-B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"I-ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"I-ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"I-PRC 1"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"I-Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"I-Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"I-You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Ukuma ngobude obungaziwa"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Ukwakheka kwezwe okungaziwa"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Kukhanseliwe"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Kubuyekezwe umlawuli wakho"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Kususwe umlawuli wakho"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"KULUNGILE"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Isilondolozi Sebhethri sivula Itimu emnyama futhi silinganise noma sivale umsebenzi ongemuva, imiphumela ethile yokubuka, nezakhi ezithile.\n\n"<annotation id="url">"Funda kabanzi"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"Isilondolozi Sebhethri sivula itimu emnyama futhi silinganise noma sivale umsebenzi ongemuva, imiphumela ethile yokubuka, nezakhi ezithile."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Ukusiza ukwehlisa ukusetshenziswa kwedatha, iseva yedatha igwema ezinye izinhlelo zokusebenza ukuthi zithumele noma zamukele idatha ngasemuva. Uhlelo lokusebenza olisebenzisa okwamanje lingafinyelela idatha, kodwa lingenza kanjalo kancane. Lokhu kungachaza, isibonelo, ukuthi izithombe azibonisi uze uzithephe."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vula iseva yedatha?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Vula"</string>
@@ -2099,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Lesi saziso sehliselwe esikhundleni Sokuthula. Thepha ukuze unikeze impendulo."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Lesi saziso sibekwe ezingeni eliphakeme. Thepha ukuze unikeze impendulo."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Lesi saziso sibekwe ezingeni eliphansi. Thepha ukuze unikeze impendulo."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Zama izaziso ezigqanyisiwe"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Ukuze uqhubeke nokuthola izenzo eziphakanyisiwe, izimpendulo nokuningi, vula izaziso ezigqanyisiwe. Izaziso ze-Androin Ezivumelana Nezimo azisasekelwe."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Vula"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Hhayi manje"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Izaziso ezigqanyisiwe"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Izenzo nezimpendulo eziphakanyisiwe manje sezihlinzekwa ngezaziso ezithuthukisiwe. Izaziso ze-Androin Ezivumelana Nezimo azisasekelwe."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"KULUNGILE"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Vala"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Funda kabanzi"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Izaziso ezigqanyisiwe zingafunda konke okuqukethwe yizaziso zakho, kuhlanganise nolwazi lomuntu siqu njengamagama oxhumana nabo nemilayezo. Lesi sakhi singacashisa izaziso noma sithathe izinyathelo ezinkinobheni ezisezazisweni, njengokuphendula amakholi wefoni.\n\nLesi sici singavula noma sivale nemodi Yokubalulekile futhi sishintshe amasethingi ahambisanayo."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Izaziso ezithuthukisiwe zithathe isikhundla sezaziso eziguqukayo ze-Android ku-Android 12. Lesi sici sikhombisa izenzo eziphakanyisiwe nezimpendulo, futhi sihlela izaziso zakho.\n\nIzaziso ezithuthukisiwe zingafinyelela kokuqukethwe kwesaziso, kuhlanganise nemininingwane yomuntu efana namagama woxhumana nabo nemilayezo. Lesi sakhi singacashisa noma siphendule izaziso, njengokuphendula amakholi efoni nokulawula ukuthi Ungaphazamisi."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Isaziso solwazi lwe-Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Ibhethri lingaphela ngaphambi kokushaja okuvamile"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Isilondolozi sebhethri siyasebenza ngaphandle kwempilo yebhethri"</string>
