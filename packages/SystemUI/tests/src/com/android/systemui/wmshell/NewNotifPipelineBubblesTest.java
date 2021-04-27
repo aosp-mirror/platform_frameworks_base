@@ -92,6 +92,7 @@ import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
@@ -259,6 +260,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mTaskStackListener,
                 mShellTaskOrganizer,
                 mPositioner,
+                mock(DisplayController.class),
                 syncExecutor,
                 mock(Handler.class));
         mBubbleController.setExpandListener(mBubbleExpandListener);
