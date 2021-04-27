@@ -1575,7 +1575,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             return false;
         }
-        if (!r.getParent().matchParentBounds()) {
+        if (!r.getDisplayArea().matchParentBounds()) {
             // Because the fixed rotated configuration applies to activity directly, if its parent
             // has it own policy for bounds, the activity bounds based on parent is unknown.
             return false;
