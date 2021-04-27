@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.charging
 
-import android.content.Context
 import android.testing.AndroidTestingRunner
 import android.view.View
 import android.view.WindowManager
@@ -26,7 +25,7 @@ import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,6 +36,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -50,6 +50,7 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var rippleView: ChargingRippleView
     @Mock private lateinit var windowManager: WindowManager
+    private val systemClock = FakeSystemClock()
 
     @Before
     fun setUp() {
@@ -57,9 +58,8 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
         `when`(featureFlags.isChargingRippleEnabled).thenReturn(true)
         controller = WiredChargingRippleController(
                 commandRegistry, batteryController, configurationController,
-                featureFlags, context)
+                featureFlags, context, windowManager, systemClock)
         controller.rippleView = rippleView // Replace the real ripple view with a mock instance
-        context.addMockSystemService(Context.WINDOW_SERVICE, windowManager)
     }
 
     @Test
@@ -102,5 +102,38 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
         reset(rippleView)
         captor.value.onUiModeChanged()
         verify(rippleView).setColor(ArgumentMatchers.anyInt())
+    }
+
+    @Test
+    fun testDebounceRipple() {
+        var time: Long = 0
+        systemClock.setElapsedRealtime(time)
+
+        controller.startRippleWithDebounce()
+        verify(rippleView).addOnAttachStateChangeListener(ArgumentMatchers.any())
+
+        reset(rippleView)
+        // Wait a short while and trigger.
+        time += 100
+        systemClock.setElapsedRealtime(time)
+        controller.startRippleWithDebounce()
+
+        // Verify the ripple is debounced.
+        verify(rippleView, never()).addOnAttachStateChangeListener(ArgumentMatchers.any())
+
+        // Trigger many times.
+        for (i in 0..100) {
+            time += 100
+            systemClock.setElapsedRealtime(time)
+            controller.startRippleWithDebounce()
+        }
+        // Verify all attempts are debounced.
+        verify(rippleView, never()).addOnAttachStateChangeListener(ArgumentMatchers.any())
+
+        // Wait a long while and trigger.
+        systemClock.setElapsedRealtime(time + 500000)
+        controller.startRippleWithDebounce()
+        // Verify that ripple is triggered.
+        verify(rippleView).addOnAttachStateChangeListener(ArgumentMatchers.any())
     }
 }
