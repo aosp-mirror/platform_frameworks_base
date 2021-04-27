@@ -146,6 +146,13 @@ public interface KeyguardViewController {
     void startPreHideAnimation(Runnable finishRunnable);
 
     /**
+     * Blocks the current touch gesture from affecting the expansion amount of the notification
+     * panel. This is used after a completed unlock gesture to ignore further dragging before an
+     * ACTION_UP.
+     */
+    void blockPanelExpansionFromCurrentTouch();
+
+    /**
      * @return the ViewRootImpl of the View where the Keyguard is mounted.
      */
     ViewRootImpl getViewRootImpl();

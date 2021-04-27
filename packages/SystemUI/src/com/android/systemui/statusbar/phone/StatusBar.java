@@ -162,6 +162,7 @@ import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -800,7 +801,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             SystemStatusAnimationScheduler animationScheduler,
             PrivacyDotViewController dotViewController,
             TunerService tunerService,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -1122,6 +1124,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
         mNotificationPanelViewController.addExpansionListener(mWakeUpCoordinator);
+        mNotificationPanelViewController.addExpansionListener(
+                this::dispatchPanelExpansionForKeyguardDismiss);
 
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
         mPluginDependencyProvider.allowPluginDependency(DarkIconDispatcher.class);
@@ -1346,6 +1350,38 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Private API call to make the shadows look better for Recents
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
+    }
+
+
+    /**
+     * When swiping up to dismiss the lock screen, the panel expansion goes from 1f to 0f. This
+     * results in the clock/notifications/other content disappearing off the top of the screen.
+     *
+     * We also use the expansion amount to animate in the app/launcher surface from the bottom of
+     * the screen, 'pushing' off the notifications and other content. To do this, we dispatch the
+     * expansion amount to the KeyguardViewMediator if we're in the process of dismissing the
+     * keyguard.
+     */
+    private void dispatchPanelExpansionForKeyguardDismiss(float expansion, boolean trackingTouch) {
+        // Things that mean we're not dismissing the keyguard, and should ignore this expansion:
+        // - Keyguard isn't even visible.
+        // - Keyguard is visible, but can't be dismissed (swiping up will show PIN/password prompt).
+        // - QS is expanded and we're swiping - swiping up now will hide QS, not dismiss the
+        //   keyguard.
+        if (!isKeyguardShowing()
+                || !mKeyguardStateController.canDismissLockScreen()
+                || (mNotificationPanelViewController.isQsExpanded() && trackingTouch)) {
+            return;
+        }
+
+        // Otherwise, we should let the keyguard know about this if we're tracking touch, or if we
+        // are already animating the keyguard dismiss (since we will need to either finish or cancel
+        // the animation).
+        if (trackingTouch
+                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe()) {
+            mKeyguardStateController.notifyKeyguardDismissAmountChanged(
+                    1f - expansion, trackingTouch);
+        }
     }
 
     @NonNull
