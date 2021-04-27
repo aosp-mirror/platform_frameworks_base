@@ -4893,6 +4893,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 return super.filterAppAccess(packageName, callingUid, userId);
             }
         }
+        public void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
+            synchronized (mLock) {
+                super.dump(type, fd, pw, dumpState);
+            }
+        }
     }
 
 
