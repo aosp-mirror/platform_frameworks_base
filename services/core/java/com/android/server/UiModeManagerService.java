@@ -1051,9 +1051,9 @@ final class UiModeManagerService extends SystemService {
     }
 
     private static void assertSingleProjectionType(@UiModeManager.ProjectionType int p) {
-        // To be a single projection type it must be greater than zero and an exact power of two.
+        // To be a single projection type it must be non-zero and an exact power of two.
         boolean projectionTypeIsPowerOfTwoOrZero = (p & p - 1) == 0;
-        if (p <= 0 || !projectionTypeIsPowerOfTwoOrZero) {
+        if (p == 0 || !projectionTypeIsPowerOfTwoOrZero) {
             throw new IllegalArgumentException("Must specify exactly one projection type.");
         }
     }

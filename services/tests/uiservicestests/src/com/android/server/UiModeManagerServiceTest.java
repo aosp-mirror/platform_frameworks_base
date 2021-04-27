@@ -555,12 +555,13 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     public void requestProjection() throws Exception {
         when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
         // Should work for all powers of two.
-        for (int p = 1; p < PROJECTION_TYPE_ALL; p = p * 2) {
-            assertTrue(mService.requestProjection(mBinder, p, PACKAGE_NAME));
-            assertTrue((mService.getActiveProjectionTypes() & p) != 0);
-            assertThat(mService.getProjectingPackages(p), contains(PACKAGE_NAME));
+        for (int i = 0; i < Integer.SIZE; ++i) {
+            int projectionType = 1 << i;
+            assertTrue(mService.requestProjection(mBinder, projectionType, PACKAGE_NAME));
+            assertTrue((mService.getActiveProjectionTypes() & projectionType) != 0);
+            assertThat(mService.getProjectingPackages(projectionType), contains(PACKAGE_NAME));
             // Subsequent calls should still succeed.
-            assertTrue(mService.requestProjection(mBinder, p, PACKAGE_NAME));
+            assertTrue(mService.requestProjection(mBinder, projectionType, PACKAGE_NAME));
         }
         assertEquals(PROJECTION_TYPE_ALL, mService.getActiveProjectionTypes());
     }
@@ -613,19 +614,17 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void releaseProjection() throws Exception {
         when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
-        // Should work for all powers of two.
-        for (int p = 1; p < PROJECTION_TYPE_ALL; p = p * 2) {
-            mService.requestProjection(mBinder, p, PACKAGE_NAME);
-        }
+        requestAllPossibleProjectionTypes();
         assertEquals(PROJECTION_TYPE_ALL, mService.getActiveProjectionTypes());
 
         assertTrue(mService.releaseProjection(PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
         int everythingButAutomotive = PROJECTION_TYPE_ALL & ~PROJECTION_TYPE_AUTOMOTIVE;
         assertEquals(everythingButAutomotive, mService.getActiveProjectionTypes());
 
-        for (int p = 1; p < PROJECTION_TYPE_ALL; p = p * 2) {
-            assertEquals(p != PROJECTION_TYPE_AUTOMOTIVE,
-                    (boolean) mService.releaseProjection(p, PACKAGE_NAME));
+        for (int i = 0; i < Integer.SIZE; ++i) {
+            int projectionType = 1 << i;
+            assertEquals(projectionType != PROJECTION_TYPE_AUTOMOTIVE,
+                    (boolean) mService.releaseProjection(projectionType, PACKAGE_NAME));
         }
 
         assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
@@ -634,9 +633,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void binderDeath_releasesProjection() throws Exception {
         when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
-        for (int p = 1; p < PROJECTION_TYPE_ALL; p = p * 2) {
-            mService.requestProjection(mBinder, p, PACKAGE_NAME);
-        }
+        requestAllPossibleProjectionTypes();
         assertEquals(PROJECTION_TYPE_ALL, mService.getActiveProjectionTypes());
         ArgumentCaptor<IBinder.DeathRecipient> deathRecipientCaptor = ArgumentCaptor.forClass(
                 IBinder.DeathRecipient.class);
@@ -812,6 +809,12 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         when(mPackageManager.getPackageUid(PACKAGE_NAME, 0)).thenReturn(TestInjector.CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         verify(listener, never()).onProjectionStateChanged(anyInt(), any());
+    }
+
+    private void requestAllPossibleProjectionTypes() throws RemoteException {
+        for (int i = 0; i < Integer.SIZE; ++i) {
+            mService.requestProjection(mBinder, 1 << i, PACKAGE_NAME);
+        }
     }
 
     private static class TestInjector extends UiModeManagerService.Injector {
