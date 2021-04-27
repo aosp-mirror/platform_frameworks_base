@@ -272,7 +272,7 @@ public final class InputMethodManager {
      * {@link StartInputReason#WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION} in a truly asynchronous
      * way. {@code false} to go back to the previous synchronous semantics.
      */
-    private static final boolean USE_REPORT_WINDOW_GAINED_FOCUS_ASYNC = false;
+    private static final boolean USE_REPORT_WINDOW_GAINED_FOCUS_ASYNC = true;
 
     /**
      * A constant that represents Voice IME.
