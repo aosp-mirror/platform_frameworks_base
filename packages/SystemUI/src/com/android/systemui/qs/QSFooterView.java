@@ -195,10 +195,10 @@ public class QSFooterView extends FrameLayout {
         mExpandClickListener = onClickListener;
     }
 
-    void setExpanded(boolean expanded, boolean isTunerEnabled) {
+    void setExpanded(boolean expanded, boolean isTunerEnabled, boolean multiUserEnabled) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
-        updateEverything(isTunerEnabled);
+        updateEverything(isTunerEnabled, multiUserEnabled);
     }
 
     /** */
@@ -251,16 +251,16 @@ public class QSFooterView extends FrameLayout {
         info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
     }
 
-    void disable(int state2, boolean isTunerEnabled) {
+    void disable(int state2, boolean isTunerEnabled, boolean multiUserEnabled) {
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
-        updateEverything(isTunerEnabled);
+        updateEverything(isTunerEnabled, multiUserEnabled);
     }
 
-    void updateEverything(boolean isTunerEnabled) {
+    void updateEverything(boolean isTunerEnabled, boolean multiUserEnabled) {
         post(() -> {
-            updateVisibilities(isTunerEnabled);
+            updateVisibilities(isTunerEnabled, multiUserEnabled);
             updateClickabilities();
             setClickable(false);
         });
@@ -273,18 +273,19 @@ public class QSFooterView extends FrameLayout {
         mBuildText.setLongClickable(mBuildText.getVisibility() == View.VISIBLE);
     }
 
-    private void updateVisibilities(boolean isTunerEnabled) {
+    private void updateVisibilities(boolean isTunerEnabled, boolean multiUserEnabled) {
         mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         mTunerIcon.setVisibility(isTunerEnabled ? View.VISIBLE : View.INVISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
-        mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.GONE);
+        mMultiUserSwitch.setVisibility(
+                showUserSwitcher(multiUserEnabled) ? View.VISIBLE : View.GONE);
         mSettingsButton.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
 
         mBuildText.setVisibility(mExpanded && mShouldShowBuildText ? View.VISIBLE : View.INVISIBLE);
     }
 
-    private boolean showUserSwitcher() {
-        return mExpanded && mMultiUserSwitch.isMultiUserEnabled();
+    private boolean showUserSwitcher(boolean multiUserEnabled) {
+        return mExpanded && multiUserEnabled;
     }
 
     void onUserInfoChanged(Drawable picture, boolean isGuestUser) {
