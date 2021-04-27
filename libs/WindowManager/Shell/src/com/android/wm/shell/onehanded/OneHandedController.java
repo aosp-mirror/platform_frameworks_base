@@ -218,7 +218,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
         OneHandedState transitionState = new OneHandedState();
         OneHandedTutorialHandler tutorialHandler = new OneHandedTutorialHandler(context,
-                windowManager, mainExecutor);
+                displayLayout, windowManager, mainExecutor);
         OneHandedAnimationController animationController =
                 new OneHandedAnimationController(context);
         OneHandedTouchHandler touchHandler = new OneHandedTouchHandler(timeoutHandler,
@@ -453,6 +453,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         final DisplayLayout newDisplayLayout = mDisplayController.getDisplayLayout(displayId);
         mDisplayAreaOrganizer.setDisplayLayout(newDisplayLayout);
         mGestureHandler.onDisplayChanged(newDisplayLayout);
+        mTutorialHandler.onDisplayChanged(newDisplayLayout);
     }
 
     private ContentObserver getObserver(Runnable onChangeRunnable) {
