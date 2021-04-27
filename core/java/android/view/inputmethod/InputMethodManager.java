@@ -1696,7 +1696,8 @@ public final class InputMethodManager {
             }
 
             try {
-                Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags);
+                Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags + " reason="
+                        + InputMethodDebug.softInputDisplayReasonToString(reason));
                 final Completable.Boolean value = Completable.createBoolean();
                 mService.showSoftInput(
                         mClient,
