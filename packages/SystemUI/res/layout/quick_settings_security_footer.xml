@@ -14,38 +14,39 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.systemui.util.NeverExactlyLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:minHeight="48dp"
+<com.android.systemui.util.DualHeightHorizontalLinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/qs_security_footer_height"
     android:clickable="true"
-    android:paddingBottom="@dimen/qs_tile_padding_top"
-    android:paddingTop="@dimen/qs_tile_padding_top"
-    android:paddingStart="@dimen/qs_footer_padding_start"
-    android:paddingEnd="@dimen/qs_footer_padding_end"
+    android:padding="@dimen/qs_footer_padding"
     android:gravity="center_vertical"
     android:layout_gravity="center_vertical|center_horizontal"
-    android:background="@android:color/transparent">
+    android:layout_marginVertical="@dimen/qs_security_footer_vertical_margin"
+    android:background="@drawable/qs_security_footer_background"
+    systemui:singleLineHeight="@dimen/qs_security_footer_single_line_height"
+    systemui:textViewId="@id/footer_text"
+    >
 
     <ImageView
         android:id="@+id/primary_footer_icon"
         android:layout_width="@dimen/qs_footer_icon_size"
         android:layout_height="@dimen/qs_footer_icon_size"
         android:gravity="start"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="12dp"
         android:contentDescription="@null"
-        android:tint="?android:attr/textColorPrimary" />
+        android:tint="?android:attr/textColorSecondary" />
 
-    <com.android.systemui.util.AutoMarqueeTextView
+    <TextView
         android:id="@+id/footer_text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:textAppearance="@style/TextAppearance.QS.TileLabel"
-        android:textColor="?android:attr/textColorPrimary"/>
+        android:maxLines="@integer/qs_security_footer_maxLines"
+        android:ellipsize="end"
+        android:textAppearance="@style/TextAppearance.QS.SecurityFooter"
+        android:textColor="?android:attr/textColorSecondary"/>
 
     <ImageView
         android:id="@+id/footer_icon"
@@ -53,7 +54,7 @@
         android:layout_height="@dimen/qs_footer_icon_size"
         android:layout_marginStart="8dp"
         android:contentDescription="@null"
-        android:src="@drawable/ic_info_outline"
-        android:tint="?android:attr/textColorPrimary" />
+        android:src="@*android:drawable/ic_chevron_end"
+        android:tint="?android:attr/textColorSecondary" />
 
-</com.android.systemui.util.NeverExactlyLinearLayout>
+</com.android.systemui.util.DualHeightHorizontalLinearLayout>

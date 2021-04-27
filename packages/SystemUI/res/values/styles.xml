@@ -220,6 +220,11 @@
         <item name="android:textSize">@dimen/celltile_rat_type_size</item>
     </style>
 
+    <style name="TextAppearance.QS.SecurityFooter">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textSize">@dimen/qs_tile_text_size</item>
+    </style>
+
     <style name="TextAppearance.QS.Status" parent="TextAppearance.QS.TileLabel.Secondary">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">@color/dark_mode_qs_icon_color_single_tone</item>
