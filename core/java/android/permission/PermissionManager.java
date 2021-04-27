@@ -20,7 +20,6 @@ import static android.os.Build.VERSION_CODES.S;
 
 import android.Manifest;
 import android.annotation.CheckResult;
-import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,7 +31,6 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
-import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.ChangeId;
@@ -65,8 +63,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.Immutable;
 import com.android.internal.util.CollectionUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
