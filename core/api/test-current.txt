@@ -2638,7 +2638,7 @@ package android.view {
     field public static final int CALLBACK_ANIMATION = 1; // 0x1
   }
 
-  public final class ContentInfo {
+  public final class ContentInfo implements android.os.Parcelable {
     method @NonNull public android.util.Pair<android.view.ContentInfo,android.view.ContentInfo> partition(@NonNull java.util.function.Predicate<android.content.ClipData.Item>);
     method public void releasePermissions();
   }
