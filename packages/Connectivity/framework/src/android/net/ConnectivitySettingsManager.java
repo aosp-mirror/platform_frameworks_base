@@ -19,18 +19,15 @@ package android.net;
 import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_HANDOVER;
 import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_PERFORMANCE;
 import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_RELIABILITY;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager.MultipathPreference;
-import android.net.ConnectivityManager.PrivateDnsMode;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Range;
@@ -339,6 +336,37 @@ public class ConnectivitySettingsManager {
      * @hide
      */
     public static final String MOBILE_DATA_PREFERRED_APPS = "mobile_data_preferred_apps";
+
+    /**
+     * One of the private DNS modes that indicates the private DNS mode is off.
+     */
+    public static final int PRIVATE_DNS_MODE_OFF = 1;
+
+    /**
+     * One of the private DNS modes that indicates the private DNS mode is automatic, which
+     * will try to use the current DNS as private DNS.
+     */
+    public static final int PRIVATE_DNS_MODE_OPPORTUNISTIC = 2;
+
+    /**
+     * One of the private DNS modes that indicates the private DNS mode is strict and the
+     * {@link #PRIVATE_DNS_SPECIFIER} is required, which will try to use the value of
+     * {@link #PRIVATE_DNS_SPECIFIER} as private DNS.
+     */
+    public static final int PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            PRIVATE_DNS_MODE_OFF,
+            PRIVATE_DNS_MODE_OPPORTUNISTIC,
+            PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
+    })
+    public @interface PrivateDnsMode {}
+
+    private static final String PRIVATE_DNS_MODE_OFF_STRING = "off";
+    private static final String PRIVATE_DNS_MODE_OPPORTUNISTIC_STRING = "opportunistic";
+    private static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME_STRING = "hostname";
 
     /**
      * Get mobile data activity timeout from {@link Settings}.
@@ -689,6 +717,65 @@ public class ConnectivitySettingsManager {
                 context.getContentResolver(), GLOBAL_HTTP_PROXY_PAC, "" /* value */);
     }
 
+    private static String getPrivateDnsModeAsString(@PrivateDnsMode int mode) {
+        switch (mode) {
+            case PRIVATE_DNS_MODE_OFF:
+                return PRIVATE_DNS_MODE_OFF_STRING;
+            case PRIVATE_DNS_MODE_OPPORTUNISTIC:
+                return PRIVATE_DNS_MODE_OPPORTUNISTIC_STRING;
+            case PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
+                return PRIVATE_DNS_MODE_PROVIDER_HOSTNAME_STRING;
+            default:
+                throw new IllegalArgumentException("Invalid private dns mode: " + mode);
+        }
+    }
+
+    private static int getPrivateDnsModeAsInt(String mode) {
+        switch (mode) {
+            case "off":
+                return PRIVATE_DNS_MODE_OFF;
+            case "hostname":
+                return PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
+            case "opportunistic":
+                return PRIVATE_DNS_MODE_OPPORTUNISTIC;
+            default:
+                throw new IllegalArgumentException("Invalid private dns mode: " + mode);
+        }
+    }
+
+    /**
+     * Get private DNS mode from settings.
+     *
+     * @param context The Context to query the private DNS mode from settings.
+     * @return A string of private DNS mode.
+     */
+    @PrivateDnsMode
+    public static int getPrivateDnsMode(@NonNull Context context) {
+        final ContentResolver cr = context.getContentResolver();
+        String mode = Settings.Global.getString(cr, PRIVATE_DNS_MODE);
+        if (TextUtils.isEmpty(mode)) mode = Settings.Global.getString(cr, PRIVATE_DNS_DEFAULT_MODE);
+        // If both PRIVATE_DNS_MODE and PRIVATE_DNS_DEFAULT_MODE are not set, choose
+        // PRIVATE_DNS_MODE_OPPORTUNISTIC as default mode.
+        if (TextUtils.isEmpty(mode)) return PRIVATE_DNS_MODE_OPPORTUNISTIC;
+        return getPrivateDnsModeAsInt(mode);
+    }
+
+    /**
+     * Set private DNS mode to settings.
+     *
+     * @param context The {@link Context} to set the private DNS mode.
+     * @param mode The private dns mode. This should be one of the PRIVATE_DNS_MODE_* constants.
+     */
+    public static void setPrivateDnsMode(@NonNull Context context, @PrivateDnsMode int mode) {
+        if (!(mode == PRIVATE_DNS_MODE_OFF
+                || mode == PRIVATE_DNS_MODE_OPPORTUNISTIC
+                || mode == PRIVATE_DNS_MODE_PROVIDER_HOSTNAME)) {
+            throw new IllegalArgumentException("Invalid private dns mode: " + mode);
+        }
+        Settings.Global.putString(context.getContentResolver(), PRIVATE_DNS_MODE,
+                getPrivateDnsModeAsString(mode));
+    }
+
     /**
      * Get specific private dns provider name from {@link Settings}.
      *
@@ -731,13 +818,14 @@ public class ConnectivitySettingsManager {
      *             constants.
      */
     public static void setPrivateDnsDefaultMode(@NonNull Context context,
-            @NonNull @PrivateDnsMode String mode) {
+            @NonNull @PrivateDnsMode int mode) {
         if (!(mode == PRIVATE_DNS_MODE_OFF
                 || mode == PRIVATE_DNS_MODE_OPPORTUNISTIC
                 || mode == PRIVATE_DNS_MODE_PROVIDER_HOSTNAME)) {
             throw new IllegalArgumentException("Invalid private dns mode");
         }
-        Settings.Global.putString(context.getContentResolver(), PRIVATE_DNS_DEFAULT_MODE, mode);
+        Settings.Global.putString(context.getContentResolver(), PRIVATE_DNS_DEFAULT_MODE,
+                getPrivateDnsModeAsString(mode));
     }
 
     /**
