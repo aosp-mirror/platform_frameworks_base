@@ -936,18 +936,21 @@ public class Surface implements Parcelable {
      * @param frameRate The intended frame rate of this surface, in frames per second. 0
      * is a special value that indicates the app will accept the system's choice for the
      * display frame rate, which is the default behavior if this function isn't
-     * called. The frameRate param does <em>not</em> need to be a valid refresh rate for
-     * this device's display - e.g., it's fine to pass 30fps to a device that can only run
+     * called. The <code>frameRate</code> parameter does <em>not</em> need to be a valid refresh
+     * rate for this device's display - e.g., it's fine to pass 30fps to a device that can only run
      * the display at 60fps.
      *
      * @param compatibility The frame rate compatibility of this surface. The
      * compatibility value may influence the system's choice of display frame rate.
+     * This parameter is ignored when <code>frameRate</code> is 0.
      *
-     * @param changeFrameRateStrategy Whether display refresh rate transitions should be seamless. A
-     * seamless transition is one that doesn't have any visual interruptions, such as a black
-     * screen for a second or two.
+     * @param changeFrameRateStrategy Whether display refresh rate transitions caused by this
+     * surface should be seamless. A seamless transition is one that doesn't have any visual
+     * interruptions, such as a black screen for a second or two. This parameter is ignored when
+     * <code>frameRate</code> is 0.
      *
-     * @throws IllegalArgumentException If frameRate or compatibility are invalid.
+     * @throws IllegalArgumentException If <code>frameRate</code>, <code>compatibility</code> or
+     * <code>changeFrameRateStrategy</code> are invalid.
      */
     public void setFrameRate(@FloatRange(from = 0.0) float frameRate,
             @FrameRateCompatibility int compatibility,
