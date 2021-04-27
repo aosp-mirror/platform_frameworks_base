@@ -553,6 +553,36 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         assertThat(mNotificationPanelViewController.canCollapsePanelOnTouch()).isFalse();
     }
 
+    @Test
+    public void testSwipeWhileLocked_notifiesKeyguardState() {
+        mStatusBarStateController.setState(KEYGUARD);
+
+        // Fling expanded (cancelling the keyguard exit swipe). We should notify keyguard state that
+        // the fling occurred and did not dismiss the keyguard.
+        mNotificationPanelViewController.flingToHeight(
+                0f, true /* expand */, 1000f, 1f, false);
+        verify(mKeyguardStateController).notifyPanelFlingStart(false /* dismissKeyguard */);
+
+        // Fling un-expanded, which is a keyguard exit fling when we're in KEYGUARD state.
+        mNotificationPanelViewController.flingToHeight(
+                0f, false /* expand */, 1000f, 1f, false);
+        verify(mKeyguardStateController).notifyPanelFlingStart(true /* dismissKeyguard */);
+    }
+
+    @Test
+    public void testCancelSwipeWhileLocked_notifiesKeyguardState() {
+        mStatusBarStateController.setState(KEYGUARD);
+
+        mNotificationPanelViewController.setOverExpansion(100f, true);
+
+        // Fling expanded (cancelling the keyguard exit swipe). We should notify keyguard state that
+        // the fling occurred and did not dismiss the keyguard.
+        mNotificationPanelViewController.flingToHeight(
+                0f, true /* expand */, 1000f, 1f, false);
+        mNotificationPanelViewController.cancelHeightAnimator();
+        verify(mKeyguardStateController).notifyPanelFlingEnd();
+    }
+
     private View newViewWithId(int id) {
         View view = new View(mContext);
         view.setId(id);
