@@ -25,7 +25,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.canSplitScreen
-import com.android.server.wm.flicker.helpers.openQuickstep
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
@@ -64,7 +63,6 @@ class EnterSplitScreenNotSupportNonResizable(
                 }
             }
             transitions {
-                device.openQuickstep(wmHelper)
                 if (device.canSplitScreen(wmHelper)) {
                     Assert.fail("Non-resizeable app should not enter split screen")
                 }
