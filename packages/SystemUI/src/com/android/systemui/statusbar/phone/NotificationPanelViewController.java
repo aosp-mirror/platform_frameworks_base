@@ -28,6 +28,7 @@ import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
+import static com.android.systemui.util.Utils.shouldUseSplitNotificationShade;
 
 import static java.lang.Float.isNaN;
 
@@ -99,6 +100,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
+import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -527,6 +529,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
     private int mScrimCornerRadius;
+    private KeyguardMediaController mKeyguardMediaController;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
@@ -597,6 +600,7 @@ public class NotificationPanelViewController extends PanelViewController {
             LockIconViewController lockIconViewController,
             FeatureFlags featureFlags,
             QuickAccessWalletClient quickAccessWalletClient,
+            KeyguardMediaController keyguardMediaController,
             @Main Executor uiExecutor) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
@@ -604,6 +608,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 statusBarTouchableRegionManager, ambientState);
         mView = view;
         mVibratorHelper = vibratorHelper;
+        mKeyguardMediaController = keyguardMediaController;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
         mConfigurationController = configurationController;
@@ -771,7 +776,6 @@ public class NotificationPanelViewController extends PanelViewController {
         });
 
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
-        // dynamically apply the split shade value overrides.
         if (mShouldUseSplitNotificationShade) {
             updateResources();
         }
@@ -889,13 +893,17 @@ public class NotificationPanelViewController extends PanelViewController {
             constraintSet.connect(
                     R.id.notification_stack_scroller, START,
                     R.id.qs_edge_guideline, START);
+            constraintSet.connect(R.id.keyguard_status_view, END, R.id.qs_edge_guideline, END);
         } else {
             constraintSet.connect(R.id.qs_frame, END, PARENT_ID, END);
             constraintSet.connect(R.id.notification_stack_scroller, START, PARENT_ID, START);
+            constraintSet.connect(R.id.keyguard_status_view, END, PARENT_ID, END);
         }
         constraintSet.getConstraint(R.id.notification_stack_scroller).layout.mWidth = panelWidth;
         constraintSet.getConstraint(R.id.qs_frame).layout.mWidth = qsWidth;
         constraintSet.applyTo(mNotificationContainerParent);
+
+        mKeyguardMediaController.refreshMediaPosition();
     }
 
     private static void ensureAllViewsHaveIds(ViewGroup parentView) {
@@ -929,12 +937,18 @@ public class NotificationPanelViewController extends PanelViewController {
     private void reInflateViews() {
         if (DEBUG) Log.d(TAG, "reInflateViews");
         // Re-inflate the status view group.
-        KeyguardStatusView keyguardStatusView = mView.findViewById(R.id.keyguard_status_view);
-        int index = mView.indexOfChild(keyguardStatusView);
-        mView.removeView(keyguardStatusView);
+        KeyguardStatusView keyguardStatusView =
+                mNotificationContainerParent.findViewById(R.id.keyguard_status_view);
+        int statusIndex = mNotificationContainerParent.indexOfChild(keyguardStatusView);
+        mNotificationContainerParent.removeView(keyguardStatusView);
         keyguardStatusView = (KeyguardStatusView) mLayoutInflater.inflate(
-                R.layout.keyguard_status_view, mView, false);
-        mView.addView(keyguardStatusView, index);
+                R.layout.keyguard_status_view, mNotificationContainerParent, false);
+        mNotificationContainerParent.addView(keyguardStatusView, statusIndex);
+        attachSplitShadeMediaPlayerContainer(
+                keyguardStatusView.findViewById(R.id.status_view_media_container));
+
+        // we need to update KeyguardStatusView constraints after reinflating it
+        updateResources();
 
         // Re-inflate the keyguard user switcher group.
         boolean isUserSwitcherEnabled = mUserManager.isUserSwitcherEnabled();
@@ -956,11 +970,11 @@ public class NotificationPanelViewController extends PanelViewController {
                         showKeyguardUserSwitcher /* enabled */);
 
         mBigClockContainer.removeAllViews();
-        updateViewControllers(
-                keyguardStatusView, userAvatarView, mKeyguardStatusBar, keyguardUserSwitcherView);
+        updateViewControllers(mView.findViewById(R.id.keyguard_status_view), userAvatarView,
+                mKeyguardStatusBar, keyguardUserSwitcherView);
 
         // Update keyguard bottom area
-        index = mView.indexOfChild(mKeyguardBottomArea);
+        int index = mView.indexOfChild(mKeyguardBottomArea);
         mView.removeView(mKeyguardBottomArea);
         KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
         mKeyguardBottomArea = (KeyguardBottomAreaView) mLayoutInflater.inflate(
@@ -996,6 +1010,11 @@ public class NotificationPanelViewController extends PanelViewController {
                     mBarState);
         }
         setKeyguardBottomAreaVisibility(mBarState, false);
+    }
+
+    private void attachSplitShadeMediaPlayerContainer(FrameLayout container) {
+        mKeyguardMediaController.attachSplitShadeContainer(container,
+                () -> mShouldUseSplitNotificationShade);
     }
 
     private void initBottomArea() {
@@ -1110,7 +1129,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     hasVisibleNotifications, mInterpolatedDarkAmount, mEmptyDragAmount,
                     bypassEnabled, getUnlockedStackScrollerPadding(),
                     getQsExpansionFraction(),
-                    mDisplayCutoutTopInset);
+                    mDisplayCutoutTopInset,
+                    shouldUseSplitNotificationShade(mFeatureFlags, mResources));
             mClockPositionAlgorithm.run(mClockPositionResult);
             mKeyguardStatusViewController.updatePosition(
                     mClockPositionResult.clockX, mClockPositionResult.clockY,

@@ -264,15 +264,20 @@ class MediaHost constructor(
  */
 interface MediaHostState {
 
+    companion object {
+        const val EXPANDED: Float = 1.0f
+        const val COLLAPSED: Float = 0.0f
+    }
+
     /**
-     * The last measurement input that this state was measured with. Infers with and height of
+     * The last measurement input that this state was measured with. Infers width and height of
      * the players.
      */
     var measurementInput: MeasurementInput?
 
     /**
-     * The expansion of the player, 0 for fully collapsed (up to 3 actions), 1 for fully expanded
-     * (up to 5 actions.)
+     * The expansion of the player, [COLLAPSED] for fully collapsed (up to 3 actions),
+     * [EXPANDED] for fully expanded (up to 5 actions).
      */
     var expansion: Float
 
