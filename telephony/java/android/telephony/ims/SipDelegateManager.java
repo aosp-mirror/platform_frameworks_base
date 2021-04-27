@@ -34,6 +34,7 @@ import android.telephony.ims.aidl.SipDelegateConnectionAidlWrapper;
 import android.telephony.ims.stub.DelegateConnectionMessageCallback;
 import android.telephony.ims.stub.DelegateConnectionStateCallback;
 import android.telephony.ims.stub.SipDelegate;
+import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -163,6 +164,35 @@ public class SipDelegateManager {
     })
     public @interface MessageFailureReason {}
 
+    /**@hide*/
+    public static final ArrayMap<Integer, String> MESSAGE_FAILURE_REASON_STRING_MAP =
+            new ArrayMap<>(11);
+    static {
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_UNKNOWN,
+                "MESSAGE_FAILURE_REASON_UNKNOWN");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_DELEGATE_DEAD,
+                "MESSAGE_FAILURE_REASON_DELEGATE_DEAD");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_DELEGATE_CLOSED,
+                "MESSAGE_FAILURE_REASON_DELEGATE_CLOSED");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_INVALID_HEADER_FIELDS,
+                "MESSAGE_FAILURE_REASON_INVALID_HEADER_FIELDS");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_INVALID_BODY_CONTENT,
+                "MESSAGE_FAILURE_REASON_INVALID_BODY_CONTENT");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_INVALID_FEATURE_TAG,
+                "MESSAGE_FAILURE_REASON_INVALID_FEATURE_TAG");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(
+                MESSAGE_FAILURE_REASON_TAG_NOT_ENABLED_FOR_DELEGATE,
+                "MESSAGE_FAILURE_REASON_TAG_NOT_ENABLED_FOR_DELEGATE");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_NETWORK_NOT_AVAILABLE,
+                "MESSAGE_FAILURE_REASON_NETWORK_NOT_AVAILABLE");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_NOT_REGISTERED,
+                "MESSAGE_FAILURE_REASON_NOT_REGISTERED");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(MESSAGE_FAILURE_REASON_STALE_IMS_CONFIGURATION,
+                "MESSAGE_FAILURE_REASON_STALE_IMS_CONFIGURATION");
+        MESSAGE_FAILURE_REASON_STRING_MAP.append(
+                MESSAGE_FAILURE_REASON_INTERNAL_DELEGATE_STATE_TRANSITION,
+                "MESSAGE_FAILURE_REASON_INTERNAL_DELEGATE_STATE_TRANSITION");
+    }
 
     /**
      * Access to use this feature tag has been denied for an unknown reason.
