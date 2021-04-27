@@ -41,7 +41,10 @@ java_library {
     installable: true,
 
     sdk_version: "module_current",
-    libs: ["framework-annotations-lib"],
+    libs: [
+        "androidx.annotation_annotation",
+        "framework-annotations-lib",
+    ],
     static_libs: [
         "exoplayer2-extractor",
         "mediatranscoding_aidl_interface-java",
