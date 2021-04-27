@@ -884,6 +884,7 @@ public class BubbleStackView extends FrameLayout
 
         mOrientationChangedListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    mPositioner.update();
                     onDisplaySizeChanged();
                     mExpandedAnimationController.updateResources();
                     mStackAnimationController.updateResources();
@@ -1214,11 +1215,12 @@ public class BubbleStackView extends FrameLayout
         updateExpandedViewTheme();
     }
 
-    /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
+    /**
+     * Respond to the phone being rotated by repositioning the stack and hiding any flyouts.
+     * This is called prior to the rotation occurring, any values that should be updated
+     * based on the new rotation should occur in {@link #mOrientationChangedListener}.
+     */
     public void onOrientationChanged() {
-        Resources res = getContext().getResources();
-        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-
         mRelativeStackPositionBeforeRotation = new RelativeStackPosition(
                 mPositioner.getRestingPosition(),
                 mStackAnimationController.getAllowableStackPositionRegion());
@@ -1261,6 +1263,10 @@ public class BubbleStackView extends FrameLayout
         mStackAnimationController.updateResources();
         mDismissView.updateResources();
         mMagneticTarget.setMagneticFieldRadiusPx(mBubbleSize * 2);
+        mStackAnimationController.setStackPosition(
+                new RelativeStackPosition(
+                        mPositioner.getRestingPosition(),
+                        mStackAnimationController.getAllowableStackPositionRegion()));
     }
 
     @Override

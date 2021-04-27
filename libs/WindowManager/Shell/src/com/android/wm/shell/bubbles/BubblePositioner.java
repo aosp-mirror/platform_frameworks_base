@@ -20,13 +20,13 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -65,7 +65,7 @@ public class BubblePositioner {
     private Context mContext;
     private WindowManager mWindowManager;
     private Rect mPositionRect;
-    private int mOrientation;
+    private @Surface.Rotation int mRotation = Surface.ROTATION_0;
     private Insets mInsets;
 
     private int mBubbleSize;
@@ -82,14 +82,18 @@ public class BubblePositioner {
     public BubblePositioner(Context context, WindowManager windowManager) {
         mContext = context;
         mWindowManager = windowManager;
-        update(Configuration.ORIENTATION_UNDEFINED);
+        update();
+    }
+
+    public void setRotation(int rotation) {
+        mRotation = rotation;
     }
 
     /**
-     * Updates orientation, available space, and inset information. Call this when config changes
+     * Available space and inset information. Call this when config changes
      * occur or when added to a window.
      */
-    public void update(int orientation) {
+    public void update() {
         WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
         if (windowMetrics == null) {
             return;
@@ -102,12 +106,12 @@ public class BubblePositioner {
 
         if (BubbleDebugConfig.DEBUG_POSITIONER) {
             Log.w(TAG, "update positioner:"
-                    + " landscape= " + (orientation == Configuration.ORIENTATION_LANDSCAPE)
+                    + " rotation= " + mRotation
                     + " insets: " + insets
                     + " bounds: " + windowMetrics.getBounds()
                     + " showingInTaskbar: " + mShowingInTaskbar);
         }
-        updateInternal(orientation, insets, windowMetrics.getBounds());
+        updateInternal(mRotation, insets, windowMetrics.getBounds());
     }
 
     /**
@@ -122,12 +126,12 @@ public class BubblePositioner {
         mTaskbarIconSize =  iconSize;
         mTaskbarPosition = taskbarPosition;
         mTaskbarSize = taskbarSize;
-        update(mOrientation);
+        update();
     }
 
     @VisibleForTesting
-    public void updateInternal(int orientation, Insets insets, Rect bounds) {
-        mOrientation = orientation;
+    public void updateInternal(int rotation, Insets insets, Rect bounds) {
+        mRotation = rotation;
         mInsets = insets;
 
         mPositionRect = new Rect(bounds);
@@ -189,7 +193,7 @@ public class BubblePositioner {
      * @return whether the device is in landscape orientation.
      */
     public boolean isLandscape() {
-        return mOrientation == Configuration.ORIENTATION_LANDSCAPE;
+        return mRotation == Surface.ROTATION_90 || mRotation == Surface.ROTATION_270;
     }
 
     /**
@@ -200,8 +204,7 @@ public class BubblePositioner {
      * to the left or right side.
      */
     public boolean showBubblesVertically() {
-        return mOrientation == Configuration.ORIENTATION_LANDSCAPE
-                || mShowingInTaskbar;
+        return isLandscape() || mShowingInTaskbar;
     }
 
     /** Size of the bubble account for badge & dot. */
