@@ -21,6 +21,7 @@ import static android.service.voice.HotwordDetector.CONFIDENCE_LEVEL_NONE;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.media.MediaSyncEvent;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 
@@ -53,9 +54,17 @@ public final class HotwordDetectedResult implements Parcelable {
     }
 
     /**
+     * A {@code MediaSyncEvent} that allows the {@link HotwordDetector} to recapture the audio
+     * that contains the hotword trigger. This must be obtained using
+     * {@link android.media.AudioRecord#shareAudioHistory(String, long)}.
+     * <p>
+     * This can be {@code null} if reprocessing the hotword trigger isn't required.
+     */
+    @Nullable
+    private MediaSyncEvent mMediaSyncEvent = null;
+
+    /**
      * Byte offset in the audio stream when the trigger event happened.
-     *
-     * <p>If unset, the most recent bytes in the audio stream will be used.
      */
     private final int mByteOffset;
     private static int defaultByteOffset() {
@@ -84,7 +93,7 @@ public final class HotwordDetectedResult implements Parcelable {
 
     /**
      * Returns the maximum values of {@link #getScore} and {@link #getPersonalizedScore}.
-     *
+     * <p>
      * The float value should be calculated as {@code getScore() / getMaxScore()}.
      */
     public static int getMaxScore() {
@@ -159,6 +168,7 @@ public final class HotwordDetectedResult implements Parcelable {
     @DataClass.Generated.Member
     /* package-private */ HotwordDetectedResult(
             @HotwordDetector.HotwordConfidenceLevelValue int confidenceLevel,
+            @Nullable MediaSyncEvent mediaSyncEvent,
             int byteOffset,
             int score,
             int personalizedScore,
@@ -167,6 +177,7 @@ public final class HotwordDetectedResult implements Parcelable {
         this.mConfidenceLevel = confidenceLevel;
         com.android.internal.util.AnnotationValidations.validate(
                 HotwordDetector.HotwordConfidenceLevelValue.class, null, mConfidenceLevel);
+        this.mMediaSyncEvent = mediaSyncEvent;
         this.mByteOffset = byteOffset;
         this.mScore = score;
         this.mPersonalizedScore = personalizedScore;
@@ -187,9 +198,19 @@ public final class HotwordDetectedResult implements Parcelable {
     }
 
     /**
+     * A {@code MediaSyncEvent} that allows the {@link HotwordDetector} to recapture the audio
+     * that contains the hotword trigger. This must be obtained using
+     * {@link android.media.AudioRecord#shareAudioHistory(String, long)}.
+     * <p>
+     * This can be {@code null} if reprocessing the hotword trigger isn't required.
+     */
+    @DataClass.Generated.Member
+    public @Nullable MediaSyncEvent getMediaSyncEvent() {
+        return mMediaSyncEvent;
+    }
+
+    /**
      * Byte offset in the audio stream when the trigger event happened.
-     *
-     * <p>If unset, the most recent bytes in the audio stream will be used.
      */
     @DataClass.Generated.Member
     public int getByteOffset() {
@@ -237,6 +258,9 @@ public final class HotwordDetectedResult implements Parcelable {
      *
      * <p>The use of this method is discouraged, and support for it will be removed in future
      * versions of Android.
+     *
+     * <p>This is a PersistableBundle so it doesn't allow any remotable objects or other contents
+     * that can be used to communicate with other processes.
      */
     @DataClass.Generated.Member
     public @NonNull PersistableBundle getExtras() {
@@ -251,6 +275,7 @@ public final class HotwordDetectedResult implements Parcelable {
 
         return "HotwordDetectedResult { " +
                 "confidenceLevel = " + mConfidenceLevel + ", " +
+                "mediaSyncEvent = " + mMediaSyncEvent + ", " +
                 "byteOffset = " + mByteOffset + ", " +
                 "score = " + mScore + ", " +
                 "personalizedScore = " + mPersonalizedScore + ", " +
@@ -273,6 +298,7 @@ public final class HotwordDetectedResult implements Parcelable {
         //noinspection PointlessBooleanExpression
         return true
                 && mConfidenceLevel == that.mConfidenceLevel
+                && java.util.Objects.equals(mMediaSyncEvent, that.mMediaSyncEvent)
                 && mByteOffset == that.mByteOffset
                 && mScore == that.mScore
                 && mPersonalizedScore == that.mPersonalizedScore
@@ -288,6 +314,7 @@ public final class HotwordDetectedResult implements Parcelable {
 
         int _hash = 1;
         _hash = 31 * _hash + mConfidenceLevel;
+        _hash = 31 * _hash + java.util.Objects.hashCode(mMediaSyncEvent);
         _hash = 31 * _hash + mByteOffset;
         _hash = 31 * _hash + mScore;
         _hash = 31 * _hash + mPersonalizedScore;
@@ -302,7 +329,11 @@ public final class HotwordDetectedResult implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
+        byte flg = 0;
+        if (mMediaSyncEvent != null) flg |= 0x2;
+        dest.writeByte(flg);
         dest.writeInt(mConfidenceLevel);
+        if (mMediaSyncEvent != null) dest.writeTypedObject(mMediaSyncEvent, flags);
         dest.writeInt(mByteOffset);
         dest.writeInt(mScore);
         dest.writeInt(mPersonalizedScore);
@@ -321,7 +352,9 @@ public final class HotwordDetectedResult implements Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
+        byte flg = in.readByte();
         int confidenceLevel = in.readInt();
+        MediaSyncEvent mediaSyncEvent = (flg & 0x2) == 0 ? null : (MediaSyncEvent) in.readTypedObject(MediaSyncEvent.CREATOR);
         int byteOffset = in.readInt();
         int score = in.readInt();
         int personalizedScore = in.readInt();
@@ -331,6 +364,7 @@ public final class HotwordDetectedResult implements Parcelable {
         this.mConfidenceLevel = confidenceLevel;
         com.android.internal.util.AnnotationValidations.validate(
                 HotwordDetector.HotwordConfidenceLevelValue.class, null, mConfidenceLevel);
+        this.mMediaSyncEvent = mediaSyncEvent;
         this.mByteOffset = byteOffset;
         this.mScore = score;
         this.mPersonalizedScore = personalizedScore;
@@ -364,6 +398,7 @@ public final class HotwordDetectedResult implements Parcelable {
     public static final class Builder {
 
         private @HotwordDetector.HotwordConfidenceLevelValue int mConfidenceLevel;
+        private @Nullable MediaSyncEvent mMediaSyncEvent;
         private int mByteOffset;
         private int mScore;
         private int mPersonalizedScore;
@@ -387,14 +422,27 @@ public final class HotwordDetectedResult implements Parcelable {
         }
 
         /**
+         * A {@code MediaSyncEvent} that allows the {@link HotwordDetector} to recapture the audio
+         * that contains the hotword trigger. This must be obtained using
+         * {@link android.media.AudioRecord#shareAudioHistory(String, long)}.
+         * <p>
+         * This can be {@code null} if reprocessing the hotword trigger isn't required.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setMediaSyncEvent(@NonNull MediaSyncEvent value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x2;
+            mMediaSyncEvent = value;
+            return this;
+        }
+
+        /**
          * Byte offset in the audio stream when the trigger event happened.
-         *
-         * <p>If unset, the most recent bytes in the audio stream will be used.
          */
         @DataClass.Generated.Member
         public @NonNull Builder setByteOffset(int value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x2;
+            mBuilderFieldsSet |= 0x4;
             mByteOffset = value;
             return this;
         }
@@ -407,7 +455,7 @@ public final class HotwordDetectedResult implements Parcelable {
         @DataClass.Generated.Member
         public @NonNull Builder setScore(int value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x4;
+            mBuilderFieldsSet |= 0x8;
             mScore = value;
             return this;
         }
@@ -420,7 +468,7 @@ public final class HotwordDetectedResult implements Parcelable {
         @DataClass.Generated.Member
         public @NonNull Builder setPersonalizedScore(int value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x8;
+            mBuilderFieldsSet |= 0x10;
             mPersonalizedScore = value;
             return this;
         }
@@ -433,7 +481,7 @@ public final class HotwordDetectedResult implements Parcelable {
         @DataClass.Generated.Member
         public @NonNull Builder setHotwordPhraseId(int value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x10;
+            mBuilderFieldsSet |= 0x20;
             mHotwordPhraseId = value;
             return this;
         }
@@ -449,11 +497,14 @@ public final class HotwordDetectedResult implements Parcelable {
          *
          * <p>The use of this method is discouraged, and support for it will be removed in future
          * versions of Android.
+         *
+         * <p>This is a PersistableBundle so it doesn't allow any remotable objects or other contents
+         * that can be used to communicate with other processes.
          */
         @DataClass.Generated.Member
         public @NonNull Builder setExtras(@NonNull PersistableBundle value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x20;
+            mBuilderFieldsSet |= 0x40;
             mExtras = value;
             return this;
         }
@@ -461,28 +512,32 @@ public final class HotwordDetectedResult implements Parcelable {
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull HotwordDetectedResult build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x40; // Mark builder used
+            mBuilderFieldsSet |= 0x80; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
                 mConfidenceLevel = defaultConfidenceLevel();
             }
             if ((mBuilderFieldsSet & 0x2) == 0) {
-                mByteOffset = defaultByteOffset();
+                mMediaSyncEvent = null;
             }
             if ((mBuilderFieldsSet & 0x4) == 0) {
-                mScore = defaultScore();
+                mByteOffset = defaultByteOffset();
             }
             if ((mBuilderFieldsSet & 0x8) == 0) {
-                mPersonalizedScore = defaultPersonalizedScore();
+                mScore = defaultScore();
             }
             if ((mBuilderFieldsSet & 0x10) == 0) {
-                mHotwordPhraseId = defaultHotwordPhraseId();
+                mPersonalizedScore = defaultPersonalizedScore();
             }
             if ((mBuilderFieldsSet & 0x20) == 0) {
+                mHotwordPhraseId = defaultHotwordPhraseId();
+            }
+            if ((mBuilderFieldsSet & 0x40) == 0) {
                 mExtras = defaultExtras();
             }
             HotwordDetectedResult o = new HotwordDetectedResult(
                     mConfidenceLevel,
+                    mMediaSyncEvent,
                     mByteOffset,
                     mScore,
                     mPersonalizedScore,
@@ -492,7 +547,7 @@ public final class HotwordDetectedResult implements Parcelable {
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x40) != 0) {
+            if ((mBuilderFieldsSet & 0x80) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -500,10 +555,10 @@ public final class HotwordDetectedResult implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1616965644404L,
+            time = 1619059352684L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordDetectedResult.java",
-            inputSignatures = "public static final  int BYTE_OFFSET_UNSET\nprivate final @android.service.voice.HotwordDetector.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate final  int mByteOffset\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultByteOffset()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "public static final  int BYTE_OFFSET_UNSET\nprivate final @android.service.voice.HotwordDetector.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate @android.annotation.Nullable android.media.MediaSyncEvent mMediaSyncEvent\nprivate final  int mByteOffset\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultByteOffset()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

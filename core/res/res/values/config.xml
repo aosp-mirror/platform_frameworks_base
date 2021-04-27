@@ -657,6 +657,12 @@
     <!-- Indicate the display area rect for foldable devices in folded state. -->
     <string name="config_foldedArea"></string>
 
+    <!-- Indicates that the device supports having more than one internal display on at the same
+         time. Only applicable to devices with more than one internal display. If this option is
+         set to false, DisplayManager will make additional effort to ensure no more than 1 internal
+         display is powered on at the same time. -->
+    <bool name="config_supportsConcurrentInternalDisplays">true</bool>
+
     <!-- Desk dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a desk dock.
@@ -4854,17 +4860,30 @@
     <!-- Whether app hibernation deletes OAT artifact files as part of global hibernation. -->
     <bool name="config_hibernationDeletesOatArtifactsEnabled">true</bool>
 
-    <!-- On-device intelligent processor for system UI features. -->
+    <!-- Package name of the on-device intelligent processor for system UI
+         features. Examples include the search functionality or the app
+         predictor. -->
     <string name="config_systemUiIntelligence" translatable="false"></string>
-    <!-- On-device intelligent processor for ambient audio. -->
+    <!-- Package name of the on-device intelligent processor for ambient audio.
+         Ambient audio is the sound surrounding the device captured by the DSP
+         or the microphone. In other words, the device is continuously
+         processing audio data in background. -->
     <string name="config_systemAmbientAudioIntelligence" translatable="false"></string>
-    <!-- On-device intelligent processor for audio. -->
+    <!-- Package name of the on-device intelligent processor for audio. The
+         difference of 'ambient audio' and 'audio' is that in 'audio', the
+         user intentionally and consciously aware that the device is recording
+         or using the microphone.
+         -->
     <string name="config_systemAudioIntelligence" translatable="false"></string>
-    <!-- On-device intelligent processor for notification. -->
+    <!-- Package name of the on-device intelligent processor for notification.
+         -->
     <string name="config_systemNotificationIntelligence" translatable="false"></string>
-    <!-- On-device intelligent processor for text. -->
+    <!-- Package name of the on-device intelligent processor for text. Examples
+        include providing autofill functionality based on incoming text
+        messages. -->
     <string name="config_systemTextIntelligence" translatable="false"></string>
-    <!-- On-device intelligent processor for visual features. -->
+    <!-- Package name of the on-device intelligent processor for visual
+         features. Examples include the autorotate feature. -->
     <string name="config_systemVisualIntelligence" translatable="false"></string>
     <!-- On-device package for providing companion device associations. -->
     <string name="config_systemCompanionDeviceProvider" translatable="false"></string>

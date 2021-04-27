@@ -105,7 +105,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         }
 
         @Override
-        public void onFeatureGet(boolean success, int feature, boolean value) {
+        public void onFeatureGet(boolean success, int[] features, boolean[] featureState) {
 
         }
 

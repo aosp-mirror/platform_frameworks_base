@@ -146,9 +146,10 @@ public class ClientMonitorCallbackConverter {
         }
     }
 
-    public void onFeatureGet(boolean success, int feature, boolean value) throws RemoteException {
+    public void onFeatureGet(boolean success, int[] features, boolean[] featureState)
+            throws RemoteException {
         if (mFaceServiceReceiver != null) {
-            mFaceServiceReceiver.onFeatureGet(success, feature, value);
+            mFaceServiceReceiver.onFeatureGet(success, features, featureState);
         }
     }
 

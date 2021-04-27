@@ -42,7 +42,7 @@ import java.util.Set;
 /** Helper functions to handle notifications in People Tiles. */
 public class NotificationHelper {
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
-    private static final String TAG = "PeopleNotificationHelper";
+    private static final String TAG = "PeopleNotifHelper";
 
     /** Returns the notification with highest priority to be shown in People Tiles. */
     public static NotificationEntry getHighestPriorityNotification(
@@ -208,6 +208,31 @@ public class NotificationHelper {
             }
         }
         return null;
+    }
+
+    /** Returns whether {@code notification} is a group conversation. */
+    private static boolean isGroupConversation(Notification notification) {
+        return notification.extras.getBoolean(Notification.EXTRA_IS_GROUP_CONVERSATION, false);
+    }
+
+    /**
+     * Returns {@code message}'s sender's name if {@code notification} is from a group conversation.
+     */
+    public static CharSequence getSenderIfGroupConversation(Notification notification,
+            Notification.MessagingStyle.Message message) {
+        if (!isGroupConversation(notification)) {
+            if (DEBUG) {
+                Log.d(TAG, "Notification is not from a group conversation, not checking sender.");
+            }
+            return null;
+        }
+        Person person = message.getSenderPerson();
+        if (person == null) {
+            if (DEBUG) Log.d(TAG, "Notification from group conversation doesn't include sender.");
+            return null;
+        }
+        if (DEBUG) Log.d(TAG, "Returning sender from group conversation notification.");
+        return person.getName();
     }
 }
 

@@ -7775,7 +7775,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                                       : ServerProtoEnums.ERROR_SOURCE_UNKNOWN,
                 incrementalMetrics != null /* isIncremental */, loadingProgress,
                 incrementalMetrics != null ? incrementalMetrics.getMillisSinceOldestPendingRead()
-                        : -1
+                        : -1,
+                0 /* storage_health_code */,
+                0 /* data_loader_status_code */,
+                false /* read_logs_enabled */,
+                0 /* millis_since_last_data_loader_bind */,
+                0 /* data_loader_bind_delay_millis */,
+                0 /* total_delayed_reads */,
+                0 /* total_failed_reads */,
+                0 /* last_read_error_uid */,
+                0 /* last_read_error_millis_since */,
+                0 /* last_read_error_code */
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE

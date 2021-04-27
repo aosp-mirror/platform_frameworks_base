@@ -61,6 +61,7 @@ import java.util.ArrayList;
 @RunWith(JUnit4.class)
 /** Tests for {@link HdmiCecLocalDeviceTv} class. */
 public class HdmiCecLocalDeviceTvTest {
+    private static final int TIMEOUT_MS = HdmiConfig.TIMEOUT_MS + 1;
 
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
@@ -294,6 +295,10 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
         mTestLooper.dispatchAll();
         mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        // TODO(184939731): remove waiting times once pending actions no longer block <Standby>
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
         HdmiCecMessage standby = HdmiCecMessageBuilder.buildStandby(ADDR_TV, ADDR_BROADCAST);
         assertThat(mNativeWrapper.getResultMessages()).contains(standby);

@@ -109,8 +109,8 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
-     * Notify activities within the hierarchy of a container that they have entered picture-in-picture
-     * mode with the given bounds.
+     * Notify {@link com.android.server.wm.PinnedTaskController} that the picture-in-picture task
+     * has finished the enter animation with the given bounds.
      */
     @NonNull
     public WindowContainerTransaction scheduleFinishEnterPip(

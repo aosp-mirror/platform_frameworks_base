@@ -54,6 +54,8 @@ import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
+import com.android.wm.shell.startingsurface.phone.PhoneStartingWindowTypeAlgorithm;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -228,5 +230,15 @@ public class WMShellModule {
         return new PipMotionHelper(context, pipBoundsState, pipTaskOrganizer,
                 menuController, pipSnapAlgorithm, pipTransitionController,
                 floatingContentCoordinator);
+    }
+
+    //
+    // Starting Windows (Splash Screen)
+    //
+
+    @WMSingleton
+    @Provides
+    static StartingWindowTypeAlgorithm provideStartingWindowTypeAlgorithm() {
+        return new PhoneStartingWindowTypeAlgorithm();
     }
 }

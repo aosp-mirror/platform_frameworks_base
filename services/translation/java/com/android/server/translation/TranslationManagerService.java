@@ -44,6 +44,7 @@ import android.view.translation.ITranslationManager;
 import android.view.translation.TranslationContext;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationManager.UiTranslationState;
+import android.view.translation.UiTranslationSpec;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -170,6 +171,28 @@ public final class TranslationManagerService
         }
 
         @Override
+        public void registerTranslationCapabilityCallback(IRemoteCallback callback, int userId) {
+            TranslationManagerServiceImpl service;
+            synchronized (mLock) {
+                service = getServiceForUserLocked(userId);
+            }
+            if (service != null) {
+                service.registerTranslationCapabilityCallback(callback, Binder.getCallingUid());
+            }
+        }
+
+        @Override
+        public void unregisterTranslationCapabilityCallback(IRemoteCallback callback, int userId) {
+            TranslationManagerServiceImpl service;
+            synchronized (mLock) {
+                service = getServiceForUserLocked(userId);
+            }
+            if (service != null) {
+                service.unregisterTranslationCapabilityCallback(callback);
+            }
+        }
+
+        @Override
         public void onSessionCreated(TranslationContext translationContext,
                 int sessionId, IResultReceiver receiver, int userId) throws RemoteException {
             synchronized (mLock) {
@@ -187,14 +210,14 @@ public final class TranslationManagerService
         @Override
         public void updateUiTranslationState(@UiTranslationState int state,
                 TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
-                IBinder token, int taskId, int userId) {
+                IBinder token, int taskId, UiTranslationSpec uiTranslationSpec, int userId) {
             enforceCallerHasPermission(MANAGE_UI_TRANSLATION);
             synchronized (mLock) {
                 final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
                 if (service != null && (isDefaultServiceLocked(userId)
                         || isCalledByServiceAppLocked(userId, "updateUiTranslationState"))) {
                     service.updateUiTranslationStateLocked(state, sourceSpec, targetSpec, viewIds,
-                            token, taskId);
+                            token, taskId, uiTranslationSpec);
                 }
             }
         }
