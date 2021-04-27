@@ -61,6 +61,8 @@ import android.location.ILocationListener;
 import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationManagerInternal;
+import android.location.LocationManagerInternal.LocationTagInfo;
+import android.location.LocationManagerInternal.OnProviderLocationTagsChangeListener;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
@@ -90,6 +92,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 
@@ -213,6 +216,21 @@ public class LocationProviderManagerTest {
 
         mManager.setRealProvider(null);
         assertThat(mManager.hasProvider()).isFalse();
+    }
+
+    @Test
+    public void testAttributionTags() {
+        OnProviderLocationTagsChangeListener listener = mock(
+                OnProviderLocationTagsChangeListener.class);
+        mManager.setOnProviderLocationTagsChangeListener(listener);
+
+        mProvider.setExtraAttributionTags(Collections.singleton("extra"));
+
+        ArgumentCaptor<LocationTagInfo> captor = ArgumentCaptor.forClass(LocationTagInfo.class);
+        verify(listener, times(2)).onLocationTagsChanged(captor.capture());
+
+        assertThat(captor.getAllValues().get(0).getTags()).isEmpty();
+        assertThat(captor.getAllValues().get(1).getTags()).containsExactly("extra", "attribution");
     }
 
     @Test
