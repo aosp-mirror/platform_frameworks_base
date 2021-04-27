@@ -1042,8 +1042,14 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         
         /**
-         * 
+         * Handles a request to toggle the IME visibility.
+         *
+         * @deprecated Starting in {@link Build.VERSION_CODES#S} the system no longer invokes this
+         * method, instead it explicitly shows or hides the IME. An {@code InputMethodService}
+         * wishing to toggle its own visibility should instead invoke {@link
+         * InputMethodService#requestShowSelf} or {@link InputMethodService#requestHideSelf}
          */
+        @Deprecated
         public void toggleSoftInput(int showFlags, int hideFlags) {
             InputMethodService.this.onToggleSoftInput(showFlags, hideFlags);
         }
