@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.HybridGroupManager;
 import com.android.systemui.statusbar.notification.row.HybridNotificationView;
-import com.android.systemui.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 
 import java.util.ArrayList;
@@ -336,15 +335,6 @@ public class NotificationChildrenContainer extends ViewGroup {
         }
         mNotificationHeaderWrapper.setExpanded(mChildrenExpanded);
         mNotificationHeaderWrapper.onContentUpdated(mContainingNotification);
-        if (mNotificationHeaderWrapper instanceof NotificationHeaderViewWrapper) {
-            NotificationHeaderViewWrapper headerWrapper =
-                    (NotificationHeaderViewWrapper) mNotificationHeaderWrapper;
-            if (isConversation) {
-                headerWrapper.applyConversationSkin();
-            } else {
-                headerWrapper.clearConversationSkin();
-            }
-        }
         recreateLowPriorityHeader(builder, isConversation);
         updateHeaderVisibility(false /* animate */);
         updateChildrenAppearance();
@@ -378,15 +368,6 @@ public class NotificationChildrenContainer extends ViewGroup {
                 header.reapply(getContext(), mNotificationHeaderLowPriority);
             }
             mNotificationHeaderWrapperLowPriority.onContentUpdated(mContainingNotification);
-            if (mNotificationHeaderWrapper instanceof NotificationHeaderViewWrapper) {
-                NotificationHeaderViewWrapper headerWrapper =
-                        (NotificationHeaderViewWrapper) mNotificationHeaderWrapper;
-                if (isConversation) {
-                    headerWrapper.applyConversationSkin();
-                } else {
-                    headerWrapper.clearConversationSkin();
-                }
-            }
             resetHeaderVisibilityIfNeeded(mNotificationHeaderLowPriority, calculateDesiredHeader());
         } else {
             removeView(mNotificationHeaderLowPriority);
