@@ -338,6 +338,8 @@
     <string name="accessibility_voice_assist_button">Voice Assist</string>
     <!-- Content description of the unlock button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_button">Unlock</string>
+    <!-- Content description of the lock icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_lock_icon">Device locked</string>
     <!-- Content description hint of the unlock button when fingerprint is on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_waiting_for_fingerprint">Waiting for fingerprint</string>
     <!-- Accessibility action of the unlock button when fingerpint is on (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -2958,4 +2960,15 @@
 
     <!-- Secondary label for alarm tile when there is no next alarm information [CHAR LIMIT=20] -->
     <string name="qs_alarm_tile_no_alarm">No alarm set</string>
+
+    <!-- Accessibility label for fingerprint sensor [CHAR LIMIT=NONE] -->
+    <string name="accessibility_fingerprint_label">Fingerprint sensor</string>
+    <!-- Accessibility label for disabled udfps sensor [CHAR LIMIT=NONE] -->
+    <string name="accessibility_udfps_disabled_button">Fingerprint sensor disabled</string>
+    <!-- Accessibility action for tapping on an affordance that will bring up the user's
+    pin/pattern/password bouncer (ie: "Double tap to authenticate") [CHAR LIMIT=NONE] -->
+    <string name="accessibility_authenticate_hint">authenticate</string>
+    <!-- Accessibility action for tapping on an affordance on an unlocked lock screen (ie: "Double
+     tap to enter device") [CHAR LIMIT=NONE] -->
+    <string name="accessibility_enter_hint">enter device</string>
 </resources>
