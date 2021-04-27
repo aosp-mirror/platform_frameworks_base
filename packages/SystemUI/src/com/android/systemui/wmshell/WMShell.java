@@ -236,14 +236,6 @@ public final class WMShell extends SystemUI
 
         oneHanded.registerTransitionCallback(new OneHandedTransitionCallback() {
             @Override
-            public void onStartTransition(boolean isEntering) {
-                mSysUiMainExecutor.execute(() -> {
-                    mSysUiState.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
-                            true).commitUpdate(DEFAULT_DISPLAY);
-                });
-            }
-
-            @Override
             public void onStartFinished(Rect bounds) {
                 mSysUiMainExecutor.execute(() -> {
                     mSysUiState.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
