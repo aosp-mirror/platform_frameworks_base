@@ -25146,9 +25146,6 @@ package android.net {
     field public static final int UNSUPPORTED = -1; // 0xffffffff
   }
 
-  public interface TunnelConnectionParams {
-  }
-
   public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
     method public abstract android.net.Uri.Builder buildUpon();
     method public int compareTo(android.net.Uri);
@@ -25717,7 +25714,7 @@ package android.net.vcn {
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
-    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.TunnelConnectionParams);
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.ipsec.ike.IkeTunnelConnectionParams);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
