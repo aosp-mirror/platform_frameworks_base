@@ -40391,7 +40391,6 @@ package android.telephony {
     method @IntRange(from=1, to=261) public int getBand();
     method @IntRange(from=1) public int getCellBandwidthDownlinkKhz();
     method @IntRange(from=1) public int getCellBandwidthUplinkKhz();
-    method @Deprecated public int getChannelNumber();
     method public int getConnectionStatus();
     method @IntRange(from=0) public int getDownlinkChannelNumber();
     method @IntRange(from=0) public int getDownlinkFrequencyKhz();
