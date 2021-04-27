@@ -167,13 +167,13 @@ public class ClientMonitorCallbackConverter {
 
     // Fingerprint-specific callbacks for FingerprintManager only
 
-    public void onUdfpsPointerDown(int sensorId, int cookie) throws RemoteException {
+    public void onUdfpsPointerDown(int sensorId) throws RemoteException {
         if (mFingerprintServiceReceiver != null) {
             mFingerprintServiceReceiver.onUdfpsPointerDown(sensorId);
         }
     }
 
-    public void onUdfpsPointerUp(int sensorId, int cookie) throws RemoteException {
+    public void onUdfpsPointerUp(int sensorId) throws RemoteException {
         if (mFingerprintServiceReceiver != null) {
             mFingerprintServiceReceiver.onUdfpsPointerUp(sensorId);
         }

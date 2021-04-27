@@ -140,6 +140,8 @@ public interface ServiceProvider {
 
     void onPointerUp(int sensorId);
 
+    void onUiReady(int sensorId);
+
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
     void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,

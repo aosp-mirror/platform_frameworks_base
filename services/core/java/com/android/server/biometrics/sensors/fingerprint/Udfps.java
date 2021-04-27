@@ -26,4 +26,5 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
 public interface Udfps {
     void onPointerDown(int x, int y, float minor, float major);
     void onPointerUp();
+    void onUiReady();
 }

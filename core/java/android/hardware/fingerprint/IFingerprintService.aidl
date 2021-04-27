@@ -160,6 +160,9 @@ interface IFingerprintService {
     // Notifies about a finger leaving the sensor area.
     void onPointerUp(int sensorId);
 
+    // Notifies about the fingerprint UI being ready (e.g. HBM illumination is enabled).
+    void onUiReady(int sensorId);
+
     // Sets the controller for managing the UDFPS overlay.
     void setUdfpsOverlayController(in IUdfpsOverlayController controller);
 

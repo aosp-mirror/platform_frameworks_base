@@ -120,7 +120,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         try {
             getFreshDaemon().onPointerDown(0 /* pointerId */, x, y, minor, major);
             if (getListener() != null) {
-                getListener().onUdfpsPointerDown(getSensorId(), getCookie());
+                getListener().onUdfpsPointerDown(getSensorId());
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
@@ -132,8 +132,17 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         try {
             getFreshDaemon().onPointerUp(0 /* pointerId */);
             if (getListener() != null) {
-                getListener().onUdfpsPointerUp(getSensorId(), getCookie());
+                getListener().onUdfpsPointerUp(getSensorId());
             }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
+        }
+    }
+
+    @Override
+    public void onUiReady() {
+        try {
+            getFreshDaemon().onUiReady();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }

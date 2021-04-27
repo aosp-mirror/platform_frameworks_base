@@ -146,4 +146,9 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     public void onPointerUp() {
         UdfpsHelper.onFingerUp(getFreshDaemon());
     }
+
+    @Override
+    public void onUiReady() {
+        // Unsupported in HIDL.
+    }
 }
