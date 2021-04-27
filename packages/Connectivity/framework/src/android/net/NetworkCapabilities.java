@@ -183,7 +183,7 @@ public final class NetworkCapabilities implements Parcelable {
             throw new UnsupportedOperationException(
                     "Cannot clear NetworkCapabilities when mRedactions is set");
         }
-        mNetworkCapabilities = mTransportTypes = mUnwantedNetworkCapabilities = 0;
+        mNetworkCapabilities = mTransportTypes = mForbiddenNetworkCapabilities = 0;
         mLinkUpBandwidthKbps = mLinkDownBandwidthKbps = LINK_BANDWIDTH_UNSPECIFIED;
         mNetworkSpecifier = null;
         mTransportInfo = null;
@@ -219,7 +219,7 @@ public final class NetworkCapabilities implements Parcelable {
         mUids = (nc.mUids == null) ? null : new ArraySet<>(nc.mUids);
         setAdministratorUids(nc.getAdministratorUids());
         mOwnerUid = nc.mOwnerUid;
-        mUnwantedNetworkCapabilities = nc.mUnwantedNetworkCapabilities;
+        mForbiddenNetworkCapabilities = nc.mForbiddenNetworkCapabilities;
         mSSID = nc.mSSID;
         mPrivateDnsBroken = nc.mPrivateDnsBroken;
         mRequestorUid = nc.mRequestorUid;
@@ -237,7 +237,7 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * If any capabilities specified here they must not exist in the matching Network.
      */
-    private long mUnwantedNetworkCapabilities;
+    private long mForbiddenNetworkCapabilities;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -586,21 +586,21 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public @NonNull NetworkCapabilities addCapability(@NetCapability int capability) {
-        // If the given capability was previously added to the list of unwanted capabilities
-        // then the capability will also be removed from the list of unwanted capabilities.
-        // TODO: Consider adding unwanted capabilities to the public API and mention this
+        // If the given capability was previously added to the list of forbidden capabilities
+        // then the capability will also be removed from the list of forbidden capabilities.
+        // TODO: Consider adding forbidden capabilities to the public API and mention this
         // in the documentation.
         checkValidCapability(capability);
         mNetworkCapabilities |= 1L << capability;
-        // remove from unwanted capability list
-        mUnwantedNetworkCapabilities &= ~(1L << capability);
+        // remove from forbidden capability list
+        mForbiddenNetworkCapabilities &= ~(1L << capability);
         return this;
     }
 
     /**
-     * Adds the given capability to the list of unwanted capabilities of this
+     * Adds the given capability to the list of forbidden capabilities of this
      * {@code NetworkCapability} instance. Note that when searching for a network to
-     * satisfy a request, the network must not contain any capability from unwanted capability
+     * satisfy a request, the network must not contain any capability from forbidden capability
      * list.
      * <p>
      * If the capability was previously added to the list of required capabilities (for
@@ -610,9 +610,9 @@ public final class NetworkCapabilities implements Parcelable {
      * @see #addCapability(int)
      * @hide
      */
-    public void addUnwantedCapability(@NetCapability int capability) {
+    public void addForbiddenCapability(@NetCapability int capability) {
         checkValidCapability(capability);
-        mUnwantedNetworkCapabilities |= 1L << capability;
+        mForbiddenNetworkCapabilities |= 1L << capability;
         mNetworkCapabilities &= ~(1L << capability);  // remove from requested capabilities
     }
 
@@ -632,16 +632,16 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Removes (if found) the given unwanted capability from this {@code NetworkCapability}
-     * instance that were added via addUnwantedCapability(int) or setCapabilities(int[], int[]).
+     * Removes (if found) the given forbidden capability from this {@code NetworkCapability}
+     * instance that were added via addForbiddenCapability(int) or setCapabilities(int[], int[]).
      *
      * @param capability the capability to be removed.
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
-    public @NonNull NetworkCapabilities removeUnwantedCapability(@NetCapability int capability) {
+    public @NonNull NetworkCapabilities removeForbiddenCapability(@NetCapability int capability) {
         checkValidCapability(capability);
-        mUnwantedNetworkCapabilities &= ~(1L << capability);
+        mForbiddenNetworkCapabilities &= ~(1L << capability);
         return this;
     }
 
@@ -670,13 +670,13 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Gets all the unwanted capabilities set on this {@code NetworkCapability} instance.
+     * Gets all the forbidden capabilities set on this {@code NetworkCapability} instance.
      *
-     * @return an array of unwanted capability values for this instance.
+     * @return an array of forbidden capability values for this instance.
      * @hide
      */
-    public @NetCapability int[] getUnwantedCapabilities() {
-        return NetworkCapabilitiesUtils.unpackBits(mUnwantedNetworkCapabilities);
+    public @NetCapability int[] getForbiddenCapabilities() {
+        return NetworkCapabilitiesUtils.unpackBits(mForbiddenNetworkCapabilities);
     }
 
 
@@ -687,9 +687,9 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public void setCapabilities(@NetCapability int[] capabilities,
-            @NetCapability int[] unwantedCapabilities) {
+            @NetCapability int[] forbiddenCapabilities) {
         mNetworkCapabilities = NetworkCapabilitiesUtils.packBits(capabilities);
-        mUnwantedNetworkCapabilities = NetworkCapabilitiesUtils.packBits(unwantedCapabilities);
+        mForbiddenNetworkCapabilities = NetworkCapabilitiesUtils.packBits(forbiddenCapabilities);
     }
 
     /**
@@ -714,9 +714,9 @@ public final class NetworkCapabilities implements Parcelable {
 
     /** @hide */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public boolean hasUnwantedCapability(@NetCapability int capability) {
+    public boolean hasForbiddenCapability(@NetCapability int capability) {
         return isValidCapability(capability)
-                && ((mUnwantedNetworkCapabilities & (1L << capability)) != 0);
+                && ((mForbiddenNetworkCapabilities & (1L << capability)) != 0);
     }
 
     /**
@@ -746,14 +746,14 @@ public final class NetworkCapabilities implements Parcelable {
 
     private void combineNetCapabilities(@NonNull NetworkCapabilities nc) {
         final long wantedCaps = this.mNetworkCapabilities | nc.mNetworkCapabilities;
-        final long unwantedCaps =
-                this.mUnwantedNetworkCapabilities | nc.mUnwantedNetworkCapabilities;
-        if ((wantedCaps & unwantedCaps) != 0) {
+        final long forbiddenCaps =
+                this.mForbiddenNetworkCapabilities | nc.mForbiddenNetworkCapabilities;
+        if ((wantedCaps & forbiddenCaps) != 0) {
             throw new IllegalArgumentException(
-                    "Cannot have the same capability in wanted and unwanted lists.");
+                    "Cannot have the same capability in wanted and forbidden lists.");
         }
         this.mNetworkCapabilities = wantedCaps;
-        this.mUnwantedNetworkCapabilities = unwantedCaps;
+        this.mForbiddenNetworkCapabilities = forbiddenCaps;
     }
 
     /**
@@ -764,7 +764,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public @Nullable String describeFirstNonRequestableCapability() {
-        final long nonRequestable = (mNetworkCapabilities | mUnwantedNetworkCapabilities)
+        final long nonRequestable = (mNetworkCapabilities | mForbiddenNetworkCapabilities)
                 & NON_REQUESTABLE_CAPABILITIES;
 
         if (nonRequestable != 0) {
@@ -781,28 +781,28 @@ public final class NetworkCapabilities implements Parcelable {
     private boolean satisfiedByNetCapabilities(@NonNull NetworkCapabilities nc,
             boolean onlyImmutable) {
         long requestedCapabilities = mNetworkCapabilities;
-        long requestedUnwantedCapabilities = mUnwantedNetworkCapabilities;
+        long requestedForbiddenCapabilities = mForbiddenNetworkCapabilities;
         long providedCapabilities = nc.mNetworkCapabilities;
 
         if (onlyImmutable) {
             requestedCapabilities &= ~MUTABLE_CAPABILITIES;
-            requestedUnwantedCapabilities &= ~MUTABLE_CAPABILITIES;
+            requestedForbiddenCapabilities &= ~MUTABLE_CAPABILITIES;
         }
         return ((providedCapabilities & requestedCapabilities) == requestedCapabilities)
-                && ((requestedUnwantedCapabilities & providedCapabilities) == 0);
+                && ((requestedForbiddenCapabilities & providedCapabilities) == 0);
     }
 
     /** @hide */
     public boolean equalsNetCapabilities(@NonNull NetworkCapabilities nc) {
         return (nc.mNetworkCapabilities == this.mNetworkCapabilities)
-                && (nc.mUnwantedNetworkCapabilities == this.mUnwantedNetworkCapabilities);
+                && (nc.mForbiddenNetworkCapabilities == this.mForbiddenNetworkCapabilities);
     }
 
     private boolean equalsNetCapabilitiesRequestable(@NonNull NetworkCapabilities that) {
-        return ((this.mNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES) ==
-                (that.mNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES))
-                && ((this.mUnwantedNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES) ==
-                (that.mUnwantedNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES));
+        return ((this.mNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES)
+                == (that.mNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES))
+                && ((this.mForbiddenNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES)
+                == (that.mForbiddenNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES));
     }
 
     /**
@@ -1718,7 +1718,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Combine a set of Capabilities to this one.  Useful for coming up with the complete set.
      * <p>
      * Note that this method may break an invariant of having a particular capability in either
-     * wanted or unwanted lists but never in both.  Requests that have the same capability in
+     * wanted or forbidden lists but never in both.  Requests that have the same capability in
      * both lists will never be satisfied.
      * @hide
      */
@@ -1859,8 +1859,8 @@ public final class NetworkCapabilities implements Parcelable {
     public int hashCode() {
         return (int) (mNetworkCapabilities & 0xFFFFFFFF)
                 + ((int) (mNetworkCapabilities >> 32) * 3)
-                + ((int) (mUnwantedNetworkCapabilities & 0xFFFFFFFF) * 5)
-                + ((int) (mUnwantedNetworkCapabilities >> 32) * 7)
+                + ((int) (mForbiddenNetworkCapabilities & 0xFFFFFFFF) * 5)
+                + ((int) (mForbiddenNetworkCapabilities >> 32) * 7)
                 + ((int) (mTransportTypes & 0xFFFFFFFF) * 11)
                 + ((int) (mTransportTypes >> 32) * 13)
                 + mLinkUpBandwidthKbps * 17
@@ -1895,7 +1895,7 @@ public final class NetworkCapabilities implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mNetworkCapabilities);
-        dest.writeLong(mUnwantedNetworkCapabilities);
+        dest.writeLong(mForbiddenNetworkCapabilities);
         dest.writeLong(mTransportTypes);
         dest.writeInt(mLinkUpBandwidthKbps);
         dest.writeInt(mLinkDownBandwidthKbps);
@@ -1919,7 +1919,7 @@ public final class NetworkCapabilities implements Parcelable {
                 NetworkCapabilities netCap = new NetworkCapabilities();
 
                 netCap.mNetworkCapabilities = in.readLong();
-                netCap.mUnwantedNetworkCapabilities = in.readLong();
+                netCap.mForbiddenNetworkCapabilities = in.readLong();
                 netCap.mTransportTypes = in.readLong();
                 netCap.mLinkUpBandwidthKbps = in.readInt();
                 netCap.mLinkDownBandwidthKbps = in.readInt();
@@ -1973,9 +1973,9 @@ public final class NetworkCapabilities implements Parcelable {
             appendStringRepresentationOfBitMaskToStringBuilder(sb, mNetworkCapabilities,
                     NetworkCapabilities::capabilityNameOf, "&");
         }
-        if (0 != mUnwantedNetworkCapabilities) {
-            sb.append(" Unwanted: ");
-            appendStringRepresentationOfBitMaskToStringBuilder(sb, mUnwantedNetworkCapabilities,
+        if (0 != mForbiddenNetworkCapabilities) {
+            sb.append(" Forbidden: ");
+            appendStringRepresentationOfBitMaskToStringBuilder(sb, mForbiddenNetworkCapabilities,
                     NetworkCapabilities::capabilityNameOf, "&");
         }
         if (mLinkUpBandwidthKbps > 0) {

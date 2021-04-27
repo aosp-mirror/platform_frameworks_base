@@ -311,7 +311,7 @@ public class NetworkRequest implements Parcelable {
          *
          * @see #addCapability(int)
          *
-         * @param capability The capability to add to unwanted capability list.
+         * @param capability The capability to add to forbidden capability list.
          * @return The builder to facilitate chaining.
          *
          * @hide
@@ -319,15 +319,15 @@ public class NetworkRequest implements Parcelable {
         @NonNull
         @SuppressLint("MissingGetterMatchingBuilder")
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-        public Builder addUnwantedCapability(@NetworkCapabilities.NetCapability int capability) {
-            mNetworkCapabilities.addUnwantedCapability(capability);
+        public Builder addForbiddenCapability(@NetworkCapabilities.NetCapability int capability) {
+            mNetworkCapabilities.addForbiddenCapability(capability);
             return this;
         }
 
         /**
-         * Removes (if found) the given unwanted capability from this builder instance.
+         * Removes (if found) the given forbidden capability from this builder instance.
          *
-         * @param capability The unwanted capability to remove.
+         * @param capability The forbidden capability to remove.
          * @return The builder to facilitate chaining.
          *
          * @hide
@@ -335,8 +335,9 @@ public class NetworkRequest implements Parcelable {
         @NonNull
         @SuppressLint("BuilderSetStyle")
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-        public Builder removeUnwantedCapability(@NetworkCapabilities.NetCapability int capability) {
-            mNetworkCapabilities.removeUnwantedCapability(capability);
+        public Builder removeForbiddenCapability(
+                @NetworkCapabilities.NetCapability int capability) {
+            mNetworkCapabilities.removeForbiddenCapability(capability);
             return this;
         }
 
@@ -598,13 +599,13 @@ public class NetworkRequest implements Parcelable {
     }
 
     /**
-     * @see Builder#addUnwantedCapability(int)
+     * @see Builder#addForbiddenCapability(int)
      *
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public boolean hasUnwantedCapability(@NetCapability int capability) {
-        return networkCapabilities.hasUnwantedCapability(capability);
+    public boolean hasForbiddenCapability(@NetCapability int capability) {
+        return networkCapabilities.hasForbiddenCapability(capability);
     }
 
     /**
@@ -709,18 +710,18 @@ public class NetworkRequest implements Parcelable {
     }
 
     /**
-     * Gets all the unwanted capabilities set on this {@code NetworkRequest} instance.
+     * Gets all the forbidden capabilities set on this {@code NetworkRequest} instance.
      *
-     * @return an array of unwanted capability values for this instance.
+     * @return an array of forbidden capability values for this instance.
      *
      * @hide
      */
     @NonNull
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public @NetCapability int[] getUnwantedCapabilities() {
-        // No need to make a defensive copy here as NC#getUnwantedCapabilities() already returns
+    public @NetCapability int[] getForbiddenCapabilities() {
+        // No need to make a defensive copy here as NC#getForbiddenCapabilities() already returns
         // a new array.
-        return networkCapabilities.getUnwantedCapabilities();
+        return networkCapabilities.getForbiddenCapabilities();
     }
 
     /**

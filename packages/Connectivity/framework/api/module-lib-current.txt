@@ -109,7 +109,7 @@ package android.net {
 
   public final class NetworkCapabilities implements android.os.Parcelable {
     method @Nullable public java.util.Set<android.util.Range<java.lang.Integer>> getUids();
-    method public boolean hasUnwantedCapability(int);
+    method public boolean hasForbiddenCapability(int);
     field public static final long REDACT_ALL = -1L; // 0xffffffffffffffffL
     field public static final long REDACT_FOR_ACCESS_FINE_LOCATION = 1L; // 0x1L
     field public static final long REDACT_FOR_LOCAL_MAC_ADDRESS = 2L; // 0x2L
@@ -123,13 +123,13 @@ package android.net {
   }
 
   public class NetworkRequest implements android.os.Parcelable {
-    method @NonNull public int[] getUnwantedCapabilities();
-    method public boolean hasUnwantedCapability(int);
+    method @NonNull public int[] getForbiddenCapabilities();
+    method public boolean hasForbiddenCapability(int);
   }
 
   public static class NetworkRequest.Builder {
-    method @NonNull public android.net.NetworkRequest.Builder addUnwantedCapability(int);
-    method @NonNull public android.net.NetworkRequest.Builder removeUnwantedCapability(int);
+    method @NonNull public android.net.NetworkRequest.Builder addForbiddenCapability(int);
+    method @NonNull public android.net.NetworkRequest.Builder removeForbiddenCapability(int);
     method @NonNull public android.net.NetworkRequest.Builder setUids(@Nullable java.util.Set<android.util.Range<java.lang.Integer>>);
   }
 
