@@ -928,7 +928,6 @@ public class SyncManager {
         }
 
         if (ArrayUtils.isEmpty(accounts)) {
-            mLogger.log("scheduleSync: no accounts configured, dropping");
             return;
         }
 
