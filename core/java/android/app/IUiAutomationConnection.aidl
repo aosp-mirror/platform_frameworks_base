@@ -20,6 +20,7 @@ import android.accessibilityservice.IAccessibilityServiceClient;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.view.InputEvent;
+import android.view.SurfaceControl;
 import android.view.WindowContentFrameStats;
 import android.view.WindowAnimationFrameStats;
 import android.os.ParcelFileDescriptor;
@@ -42,6 +43,7 @@ interface IUiAutomationConnection {
     void syncInputTransactions(boolean waitForAnimations);
     boolean setRotation(int rotation);
     Bitmap takeScreenshot(in Rect crop);
+    Bitmap takeSurfaceControlScreenshot(in SurfaceControl surfaceControl);
     boolean clearWindowContentFrameStats(int windowId);
     WindowContentFrameStats getWindowContentFrameStats(int windowId);
     void clearWindowAnimationFrameStats();
