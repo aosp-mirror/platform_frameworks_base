@@ -427,35 +427,43 @@ public class PipAnimationController {
                 Rect baseValue, Rect startValue, Rect endValue, Rect sourceHintRect,
                 @PipAnimationController.TransitionDirection int direction, float startingAngle,
                 @Surface.Rotation int rotationDelta) {
+            final boolean isOutPipDirection = isOutPipDirection(direction);
+
             // Just for simplicity we'll interpolate between the source rect hint insets and empty
             // insets to calculate the window crop
             final Rect initialSourceValue;
-            if (isOutPipDirection(direction)) {
+            if (isOutPipDirection) {
                 initialSourceValue = new Rect(endValue);
             } else {
                 initialSourceValue = new Rect(baseValue);
+            }
+
+            final Rect rotatedEndRect;
+            final Rect lastEndRect;
+            final Rect initialContainerRect;
+            if (rotationDelta == ROTATION_90 || rotationDelta == ROTATION_270) {
+                lastEndRect = new Rect(endValue);
+                rotatedEndRect = new Rect(endValue);
+                // Rotate the end bounds according to the rotation delta because the display will
+                // be rotated to the same orientation.
+                rotateBounds(rotatedEndRect, initialSourceValue, rotationDelta);
+                // Use the rect that has the same orientation as the hint rect.
+                initialContainerRect = isOutPipDirection ? rotatedEndRect : initialSourceValue;
+            } else {
+                rotatedEndRect = lastEndRect = null;
+                initialContainerRect = initialSourceValue;
             }
 
             final Rect sourceHintRectInsets;
             if (sourceHintRect == null) {
                 sourceHintRectInsets = null;
             } else {
-                sourceHintRectInsets = new Rect(sourceHintRect.left - initialSourceValue.left,
-                        sourceHintRect.top - initialSourceValue.top,
-                        initialSourceValue.right - sourceHintRect.right,
-                        initialSourceValue.bottom - sourceHintRect.bottom);
+                sourceHintRectInsets = new Rect(sourceHintRect.left - initialContainerRect.left,
+                        sourceHintRect.top - initialContainerRect.top,
+                        initialContainerRect.right - sourceHintRect.right,
+                        initialContainerRect.bottom - sourceHintRect.bottom);
             }
-            final Rect sourceInsets = new Rect(0, 0, 0, 0);
-
-            final Rect rotatedEndRect;
-            if (rotationDelta == ROTATION_90 || rotationDelta == ROTATION_270) {
-                // Rotate the end bounds according to the rotation delta because the display will
-                // be rotated to the same orientation.
-                rotatedEndRect = new Rect(endValue);
-                rotateBounds(rotatedEndRect, endValue, rotationDelta);
-            } else {
-                rotatedEndRect = null;
-            }
+            final Rect zeroInsets = new Rect(0, 0, 0, 0);
 
             // construct new Rect instances in case they are recycled
             return new PipTransitionAnimator<Rect>(taskInfo, leash, ANIM_TYPE_BOUNDS,
@@ -472,8 +480,8 @@ public class PipAnimationController {
                     final Rect end = getEndValue();
                     if (rotatedEndRect != null) {
                         // Animate the bounds in a different orientation. It only happens when
-                        // leaving PiP to fullscreen.
-                        applyRotation(tx, leash, fraction, start, end, rotatedEndRect);
+                        // switching between PiP and fullscreen.
+                        applyRotation(tx, leash, fraction, start, end);
                         return;
                     }
                     Rect bounds = mRectEvaluator.evaluate(fraction, start, end);
@@ -481,20 +489,13 @@ public class PipAnimationController {
                     setCurrentValue(bounds);
                     if (inScaleTransition() || sourceHintRect == null) {
 
-                        if (isOutPipDirection(direction)) {
+                        if (isOutPipDirection) {
                             getSurfaceTransactionHelper().scale(tx, leash, end, bounds);
                         } else {
                             getSurfaceTransactionHelper().scale(tx, leash, base, bounds, angle);
                         }
                     } else {
-                        final Rect insets;
-                        if (isOutPipDirection(direction)) {
-                            insets = mInsetsEvaluator.evaluate(fraction, sourceHintRectInsets,
-                                    sourceInsets);
-                        } else {
-                            insets = mInsetsEvaluator.evaluate(fraction, sourceInsets,
-                                    sourceHintRectInsets);
-                        }
+                        final Rect insets = computeInsets(fraction);
                         getSurfaceTransactionHelper().scaleAndCrop(tx, leash,
                                 initialSourceValue, bounds, insets);
                     }
@@ -502,9 +503,17 @@ public class PipAnimationController {
                 }
 
                 private void applyRotation(SurfaceControl.Transaction tx, SurfaceControl leash,
-                        float fraction, Rect start, Rect end, Rect rotatedEndRect) {
+                        float fraction, Rect start, Rect end) {
+                    if (!end.equals(lastEndRect)) {
+                        // If the end bounds are changed during animating (e.g. shelf height), the
+                        // rotated end bounds also need to be updated.
+                        rotatedEndRect.set(endValue);
+                        rotateBounds(rotatedEndRect, initialSourceValue, rotationDelta);
+                        lastEndRect.set(end);
+                    }
                     final Rect bounds = mRectEvaluator.evaluate(fraction, start, rotatedEndRect);
                     setCurrentValue(bounds);
+                    final Rect insets = computeInsets(fraction);
                     final float degree, x, y;
                     if (rotationDelta == ROTATION_90) {
                         degree = 90 * fraction;
@@ -515,9 +524,19 @@ public class PipAnimationController {
                         x = fraction * (end.left - start.left) + start.left;
                         y = fraction * (end.bottom - start.top) + start.top;
                     }
-                    getSurfaceTransactionHelper().rotateAndScaleWithCrop(tx, leash, bounds,
-                            rotatedEndRect, degree, x, y);
+                    getSurfaceTransactionHelper().rotateAndScaleWithCrop(tx, leash,
+                            initialContainerRect, bounds, insets, degree, x, y, isOutPipDirection,
+                            rotationDelta == ROTATION_270 /* clockwise */);
                     tx.apply();
+                }
+
+                private Rect computeInsets(float fraction) {
+                    if (sourceHintRectInsets == null) {
+                        return zeroInsets;
+                    }
+                    final Rect startRect = isOutPipDirection ? sourceHintRectInsets : zeroInsets;
+                    final Rect endRect = isOutPipDirection ? zeroInsets : sourceHintRectInsets;
+                    return mInsetsEvaluator.evaluate(fraction, startRect, endRect);
                 }
 
                 @Override

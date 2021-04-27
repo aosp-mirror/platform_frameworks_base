@@ -1146,6 +1146,11 @@ public class RecentsAnimationController implements DeathRecipient {
                 PictureInPictureSurfaceTransaction.apply(mFinishTransaction,
                         mTask.mSurfaceControl, pendingTransaction);
                 mTask.setLastRecentsAnimationTransaction(mFinishTransaction);
+                if (mDisplayContent.isFixedRotationLaunchingApp(mTargetActivityRecord)) {
+                    // The transaction is needed for position when rotating the display.
+                    mDisplayContent.mPinnedTaskController.setEnterPipTransaction(
+                            mFinishTransaction);
+                }
                 mFinishTransaction = null;
                 pendingTransaction.apply();
             } else if (!mTask.isAttached()) {

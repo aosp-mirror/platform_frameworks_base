@@ -22,13 +22,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.view.ICrossWindowBlurEnabledListener;
-
-import com.android.internal.annotations.GuardedBy;
 
 /**
  * Keeps track of the different factors that determine whether cross-window blur is enabled
@@ -36,23 +36,18 @@ import com.android.internal.annotations.GuardedBy;
  * blur enabled state changes.
  */
 final class BlurController {
-    private final PowerManager mPowerManager;
+    private final Context mContext;
     private final RemoteCallbackList<ICrossWindowBlurEnabledListener>
             mBlurEnabledListeners = new RemoteCallbackList<>();
     // We don't use the WM global lock, because the BlurController is not involved in window
     // drawing and only receives binder calls that don't need synchronization with the rest of WM
     private final Object mLock = new Object();
-    @GuardedBy("mLock")
-    boolean mBlurEnabled;
-    @GuardedBy("mLock")
-    boolean mBlurForceDisabled;
-    @GuardedBy("mLock")
-    boolean mInBatterySaverMode;
+    private volatile boolean mBlurEnabled;
+    private boolean mInPowerSaveMode;
+    private boolean mBlurDisabledSetting;
 
     BlurController(Context context, PowerManager powerManager) {
-        mPowerManager = powerManager;
-        mInBatterySaverMode = mPowerManager.isPowerSaveMode();
-        updateBlurEnabledLocked();
+        mContext = context;
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
@@ -60,18 +55,36 @@ final class BlurController {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(intent.getAction())) {
-                    setBatterySaverEnabled(mPowerManager.isPowerSaveMode());
+                    // onReceive always gets called on the same thread, so there is no
+                    // multi-threaded execution here. Thus, we don't have to hold mLock here.
+                    mInPowerSaveMode = powerManager.isPowerSaveMode();
+                    updateBlurEnabled();
                 }
             }
         }, filter, null, null);
+        mInPowerSaveMode = powerManager.isPowerSaveMode();
+
+        context.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.DISABLE_WINDOW_BLURS), false,
+                new ContentObserver(null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        super.onChange(selfChange);
+                        // onChange always gets called on the same thread, so there is no
+                        // multi-threaded execution here. Thus, we don't have to hold mLock here.
+                        mBlurDisabledSetting = getBlurDisabledSetting();
+                        updateBlurEnabled();
+                    }
+                });
+        mBlurDisabledSetting = getBlurDisabledSetting();
+
+        updateBlurEnabled();
     }
 
     boolean registerCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener) {
         if (listener == null) return false;
         mBlurEnabledListeners.register(listener);
-        synchronized (mLock) {
-            return mBlurEnabled;
-        }
+        return getBlurEnabled();
     }
 
     void unregisterCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener) {
@@ -79,29 +92,20 @@ final class BlurController {
         mBlurEnabledListeners.unregister(listener);
     }
 
-    void setForceCrossWindowBlurDisabled(boolean disable) {
-        synchronized (mLock) {
-            mBlurForceDisabled = disable;
-            updateBlurEnabledLocked();
-        }
-
+    boolean getBlurEnabled() {
+        return mBlurEnabled;
     }
 
-    void setBatterySaverEnabled(boolean enabled) {
+    private void updateBlurEnabled() {
         synchronized (mLock) {
-            mInBatterySaverMode = enabled;
-            updateBlurEnabledLocked();
+            final boolean newEnabled = CROSS_WINDOW_BLUR_SUPPORTED && !mBlurDisabledSetting
+                    && !mInPowerSaveMode;
+            if (mBlurEnabled == newEnabled) {
+                return;
+            }
+            mBlurEnabled = newEnabled;
+            notifyBlurEnabledChangedLocked(newEnabled);
         }
-    }
-
-    private void updateBlurEnabledLocked() {
-        final boolean newEnabled = CROSS_WINDOW_BLUR_SUPPORTED && !mBlurForceDisabled
-                && !mInBatterySaverMode;
-        if (mBlurEnabled == newEnabled) {
-            return;
-        }
-        mBlurEnabled = newEnabled;
-        notifyBlurEnabledChangedLocked(newEnabled);
     }
 
     private void notifyBlurEnabledChangedLocked(boolean enabled) {
@@ -116,5 +120,10 @@ final class BlurController {
             }
         }
         mBlurEnabledListeners.finishBroadcast();
+    }
+
+    private boolean getBlurDisabledSetting() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DISABLE_WINDOW_BLURS, 0) == 1;
     }
 }

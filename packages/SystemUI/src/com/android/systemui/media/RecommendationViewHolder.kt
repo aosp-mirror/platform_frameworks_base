@@ -20,6 +20,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.IntegerRes
 import com.android.systemui.R
 import com.android.systemui.util.animation.TransitionLayout
@@ -28,6 +29,8 @@ import com.android.systemui.util.animation.TransitionLayout
 class RecommendationViewHolder private constructor(itemView: View) {
 
     val recommendations = itemView as TransitionLayout
+
+    // Recommendation screen
     val mediaCoverItems = listOf<ImageView>(
         itemView.requireViewById(R.id.media_cover1),
         itemView.requireViewById(R.id.media_cover2),
@@ -49,16 +52,27 @@ class RecommendationViewHolder private constructor(itemView: View) {
         R.id.media_logo3,
         R.id.media_logo4)
 
+    // Settings/Guts screen
+    val cancel = itemView.requireViewById<View>(R.id.cancel)
+    val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
+    val dismissLabel = dismiss.getChildAt(0)
+    val recommendationText = itemView.requireViewById<TextView>(R.id.recommendation_text)
+    val settings = itemView.requireViewById<View>(R.id.settings)
+
     init {
         (recommendations.background as IlluminationDrawable).let { background ->
             mediaCoverItems.forEach { background.registerLightSource(it) }
             mediaLogoItems.forEach { background.registerLightSource(it) }
+            background.registerLightSource(cancel)
+            background.registerLightSource(dismiss)
+            background.registerLightSource(dismissLabel)
+            background.registerLightSource(settings)
         }
     }
 
     companion object {
         /**
-         * Creates a PlayerViewHolder.
+         * Creates a RecommendationViewHolder.
          *
          * @param inflater LayoutInflater to use to inflate the layout.
          * @param parent Parent of inflated view.
@@ -76,5 +90,26 @@ class RecommendationViewHolder private constructor(itemView: View) {
             itemView.layoutDirection = View.LAYOUT_DIRECTION_LOCALE
             return RecommendationViewHolder(itemView)
         }
+
+        // Res Ids for the control components on the recommendation view.
+        val controlsIds = setOf(
+            R.id.media_cover1,
+            R.id.media_cover2,
+            R.id.media_cover3,
+            R.id.media_cover4,
+            R.id.media_logo1,
+            R.id.media_logo2,
+            R.id.media_logo3,
+            R.id.media_logo4
+        )
+
+        // Res Ids for the components on the guts panel.
+        val gutsIds = setOf(
+            R.id.recommendation_text,
+            R.id.remove_text,
+            R.id.cancel,
+            R.id.dismiss,
+            R.id.settings
+        )
     }
 }

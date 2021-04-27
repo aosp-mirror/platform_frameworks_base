@@ -53,6 +53,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserManager;
+import android.os.VibrationEffect;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.util.Log;
 import android.util.MathUtils;
@@ -101,6 +102,7 @@ import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -206,6 +208,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final ExpansionCallback mExpansionCallback = new ExpansionCallback();
     private final BiometricUnlockController mBiometricUnlockController;
     private final NotificationPanelView mView;
+    private final VibratorHelper mVibratorHelper;
     private final MetricsLogger mMetricsLogger;
     private final ActivityManager mActivityManager;
     private final ConfigurationController mConfigurationController;
@@ -545,6 +548,14 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     };
 
+    private final FalsingTapListener mFalsingTapListener = new FalsingTapListener() {
+        @Override
+        public void onDoubleTapRequired() {
+            showTransientIndication(R.string.notification_tap_again);
+            mVibratorHelper.vibrate(VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+        }
+    };
+
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
             @Main Resources resources,
@@ -592,6 +603,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 statusBarKeyguardViewManager, latencyTracker, flingAnimationUtilsBuilder.get(),
                 statusBarTouchableRegionManager, ambientState);
         mView = view;
+        mVibratorHelper = vibratorHelper;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
         mConfigurationController = configurationController;
@@ -4015,6 +4027,7 @@ public class NotificationPanelViewController extends PanelViewController {
             // window, so
             // force a call to onThemeChanged
             mConfigurationListener.onThemeChanged();
+            mFalsingManager.addTapListener(mFalsingTapListener);
         }
 
         @Override
@@ -4023,6 +4036,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mStatusBarStateController.removeCallback(mStatusBarStateListener);
             mConfigurationController.removeCallback(mConfigurationListener);
             mUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
+            mFalsingManager.removeTapListener(mFalsingTapListener);
         }
     }
 

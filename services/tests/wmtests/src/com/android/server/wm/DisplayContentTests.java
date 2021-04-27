@@ -1244,7 +1244,6 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent displayContent = createNewDisplay();
         Mockito.doReturn(mockLogger).when(displayContent).getMetricsLogger();
         Mockito.doReturn(oldConfig).doReturn(newConfig).when(displayContent).getConfiguration();
-        doNothing().when(displayContent).preOnConfigurationChanged();
 
         displayContent.onConfigurationChanged(newConfig);
 
@@ -1458,54 +1457,51 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testFixedRotationWithPip() {
         final DisplayContent displayContent = mDefaultDisplay;
         unblockDisplayRotation(displayContent);
+        // Unblock the condition in PinnedTaskController#continueOrientationChangeIfNeeded.
+        doNothing().when(displayContent).prepareAppTransition(anyInt());
         // Make resume-top really update the activity state.
-        setBooted(mWm.mAtmService);
-        // Speed up the test by a few seconds.
-        mWm.mAtmService.deferWindowLayout();
-        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
-
-        final Configuration displayConfig = displayContent.getConfiguration();
-        final ActivityRecord pinnedActivity = createActivityRecord(displayContent,
-                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
-        final Task pinnedTask = pinnedActivity.getRootTask();
-        final ActivityRecord homeActivity = createActivityRecord(displayContent);
-        if (displayConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            homeActivity.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
-            pinnedActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-        } else {
-            homeActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-            pinnedActivity.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
-        }
-        final int homeConfigOrientation = homeActivity.getRequestedConfigurationOrientation();
-        final int pinnedConfigOrientation = pinnedActivity.getRequestedConfigurationOrientation();
-
-        assertEquals(homeConfigOrientation, displayConfig.orientation);
-
+        setBooted(mAtm);
         clearInvocations(mWm);
+        // Speed up the test by a few seconds.
+        mAtm.deferWindowLayout();
+
+        final ActivityRecord homeActivity = createActivityRecord(
+                displayContent.getDefaultTaskDisplayArea().getRootHomeTask());
+        final ActivityRecord pinnedActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task pinnedTask = pinnedActivity.getRootTask();
+        doReturn((displayContent.getRotation() + 1) % 4).when(displayContent)
+                .rotationForActivityInDifferentOrientation(eq(homeActivity));
+        // Enter PiP from fullscreen.
+        pinnedTask.setWindowingMode(WINDOWING_MODE_PINNED);
+
+        assertTrue(displayContent.hasTopFixedRotationLaunchingApp());
+        assertTrue(displayContent.mPinnedTaskController.shouldDeferOrientationChange());
+        verify(mWm, never()).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
+        clearInvocations(pinnedTask);
+
+        // Assume that the PiP enter animation is done then the new bounds are set. Expect the
+        // orientation update is no longer deferred.
+        displayContent.mPinnedTaskController.setEnterPipBounds(pinnedTask.getBounds());
+        // The Task Configuration was frozen to skip the change of orientation.
+        verify(pinnedTask, never()).onConfigurationChanged(any());
+        assertFalse(displayContent.mPinnedTaskController.shouldDeferOrientationChange());
+        assertFalse(displayContent.hasTopFixedRotationLaunchingApp());
+        assertEquals(homeActivity.getConfiguration().orientation,
+                displayContent.getConfiguration().orientation);
+
+        doReturn((displayContent.getRotation() + 1) % 4).when(displayContent)
+                .rotationForActivityInDifferentOrientation(eq(pinnedActivity));
         // Leave PiP to fullscreen. Simulate the step of PipTaskOrganizer that sets the activity
         // to fullscreen, so fixed rotation will apply on it.
         pinnedActivity.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        homeActivity.setState(Task.ActivityState.STOPPED, "test");
-
         assertTrue(displayContent.hasTopFixedRotationLaunchingApp());
-        verify(mWm, never()).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
-        assertNotEquals(pinnedConfigOrientation, displayConfig.orientation);
 
         // Assume the animation of PipTaskOrganizer is done and then commit fullscreen to task.
         pinnedTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         displayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
-        assertFalse(displayContent.getPinnedTaskController().isPipActiveOrWindowingModeChanging());
-        assertEquals(pinnedConfigOrientation, displayConfig.orientation);
-
-        clearInvocations(mWm);
-        // Enter PiP from fullscreen. The orientation can be updated from
-        // ensure-visibility/resume-focused-stack -> ActivityRecord#makeActiveIfNeeded -> resume.
-        pinnedTask.setWindowingMode(WINDOWING_MODE_PINNED);
-
-        assertFalse(displayContent.hasTopFixedRotationLaunchingApp());
-        verify(mWm, atLeastOnce()).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
-        assertEquals(homeConfigOrientation, displayConfig.orientation);
-        assertTrue(displayContent.getPinnedTaskController().isPipActiveOrWindowingModeChanging());
+        assertFalse(displayContent.mPinnedTaskController.isFreezingTaskConfig(pinnedTask));
+        assertEquals(pinnedActivity.getConfiguration().orientation,
+                displayContent.getConfiguration().orientation);
     }
 
     @Test

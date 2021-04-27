@@ -328,15 +328,6 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
-    public void setForceCrossWindowBlurDisabled(boolean disable) {
-        try {
-            WindowManagerGlobal.getWindowManagerService()
-                .setForceCrossWindowBlurDisabled(disable);
-        } catch (RemoteException e) {
-        }
-    }
-
-    @Override
     public boolean isTaskSnapshotSupported() {
         try {
             return WindowManagerGlobal.getWindowManagerService().isTaskSnapshotSupported();

@@ -232,7 +232,8 @@ public class HdmiCecMessageValidator {
                 DEST_DIRECT);
 
         // Messages for Feature Discovery.
-        addValidationInfo(Constants.MESSAGE_GIVE_FEATURES, noneValidator, DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_GIVE_FEATURES, noneValidator,
+                DEST_DIRECT | SRC_UNREGISTERED);
         addValidationInfo(Constants.MESSAGE_REPORT_FEATURES, new VariableLengthValidator(4, 14),
                 DEST_BROADCAST);
 

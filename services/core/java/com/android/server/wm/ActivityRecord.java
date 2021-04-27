@@ -3523,7 +3523,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Reset the last saved PiP snap fraction on removal.
-        mDisplayContent.mPinnedTaskControllerLocked.onActivityHidden(mActivityComponent);
+        mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
         mWmService.mEmbeddedWindowController.onActivityRemoved(this);
         mRemovingFromDisplay = false;
     }
@@ -4882,7 +4882,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "notifyAppStopped: %s", this);
         mAppStopped = true;
         // Reset the last saved PiP snap fraction on app stop.
-        mDisplayContent.mPinnedTaskControllerLocked.onActivityHidden(mActivityComponent);
+        mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
@@ -6604,6 +6604,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
+        mDisplayContent.mPinnedTaskController.onCancelFixedRotationTransform(task);
         // Perform rotation animation according to the rotation of this activity.
         startFreezingScreen(originalDisplayRotation);
         // This activity may relaunch or perform configuration change so once it has reported drawn,
@@ -6993,6 +6994,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (handlesOrientationChangeFromDescendant()) {
             // No need to letterbox because of fixed orientation. Display will handle
             // fixed-orientation requests.
+            return;
+        }
+        if (newParentConfig.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            // PiP bounds have higher priority than the requested orientation. Otherwise the
+            // activity may be squeezed into a small piece.
             return;
         }
 
@@ -7386,8 +7392,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
+        final boolean wasInPictureInPicture = inPinnedWindowingMode();
         final DisplayContent display = mDisplayContent;
-        if (inPinnedWindowingMode() && attachedToProcess() && display != null) {
+        if (wasInPictureInPicture && attachedToProcess() && display != null) {
             // If the PIP activity is changing to fullscreen with display orientation change, the
             // fixed rotation will take effect that requires to send fixed rotation adjustments
             // before the process configuration (if the process is a configuration listener of the
@@ -7417,6 +7424,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // configuration, but it's used to push configuration changes so explicitly update that.
         if (getMergedOverrideConfiguration().seq != getResolvedOverrideConfiguration().seq) {
             onMergedOverrideConfigurationChanged();
+        }
+
+        // Before PiP animation is done, th windowing mode of the activity is still the previous
+        // mode (see RootWindowContainer#moveActivityToPinnedRootTask). So once the windowing mode
+        // of activity is changed, it is the signal of the last step to update the PiP states.
+        if (!wasInPictureInPicture && inPinnedWindowingMode() && task != null) {
+            mTaskSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, task.getBounds());
         }
 
         if (display == null) {

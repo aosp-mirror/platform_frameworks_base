@@ -19,6 +19,7 @@ import static android.app.Notification.CATEGORY_MISSED_CALL;
 
 import static com.android.systemui.people.NotificationHelper.getHighestPriorityNotification;
 import static com.android.systemui.people.NotificationHelper.getMessagingStyleMessages;
+import static com.android.systemui.people.NotificationHelper.getSenderIfGroupConversation;
 import static com.android.systemui.people.NotificationHelper.isMissedCall;
 import static com.android.systemui.people.NotificationHelper.isMissedCallOrHasContent;
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
@@ -32,6 +33,7 @@ import android.app.Notification;
 import android.app.Person;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
@@ -201,5 +203,54 @@ public class NotificationHelperTest extends SysuiTestCase {
 
         assertThat(getHighestPriorityNotification(notifications))
                 .isEqualTo(mNotificationEntry1);
+    }
+
+    @Test
+    public void testGetSenderIfGroupConversation_notGroup() {
+        Notification.MessagingStyle.Message message = new Notification.MessagingStyle.Message(
+                NOTIFICATION_TEXT_3, 10, PERSON);
+        Notification notification = new Notification.Builder(mContext, "test")
+                .setContentTitle("TEST_TITLE")
+                .setContentText("TEST_TEXT")
+                .setShortcutId(SHORTCUT_ID_1)
+                .setStyle(new Notification.MessagingStyle(PERSON).addMessage(message))
+                .build();
+        assertThat(getSenderIfGroupConversation(notification, message)).isNull();
+    }
+
+    @Test
+    public void testGetSenderIfGroupConversation_group() {
+        Bundle extras = new Bundle();
+        extras.putBoolean(Notification.EXTRA_IS_GROUP_CONVERSATION, true);
+        Notification.MessagingStyle.Message message = new Notification.MessagingStyle.Message(
+                NOTIFICATION_TEXT_3, 10, PERSON);
+
+        Notification notification = new Notification.Builder(mContext, "test")
+                .setContentTitle("TEST_TITLE")
+                .setContentText("TEST_TEXT")
+                .setShortcutId(SHORTCUT_ID_1)
+                .setStyle(new Notification.MessagingStyle(PERSON)
+                        .setGroupConversation(true)
+                        .addMessage(message))
+                .addExtras(extras)
+                .build();
+        assertThat(getSenderIfGroupConversation(notification, message)).isEqualTo("name");
+    }
+
+    @Test
+    public void testGetSenderIfGroupConversation_groupNoName() {
+        Bundle extras = new Bundle();
+        extras.putBoolean(Notification.EXTRA_IS_GROUP_CONVERSATION, true);
+        Notification.MessagingStyle.Message message = new Notification.MessagingStyle.Message(
+                NOTIFICATION_TEXT_3, 10, new Person.Builder().build());
+
+        Notification notification = new Notification.Builder(mContext, "test")
+                .setContentTitle("TEST_TITLE")
+                .setContentText("TEST_TEXT")
+                .setShortcutId(SHORTCUT_ID_1)
+                .setStyle(new Notification.MessagingStyle(PERSON).addMessage(message))
+                .setExtras(extras)
+                .build();
+        assertThat(getSenderIfGroupConversation(notification, message)).isNull();
     }
 }

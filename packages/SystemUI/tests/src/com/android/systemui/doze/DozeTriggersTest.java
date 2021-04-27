@@ -35,10 +35,12 @@ import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.doze.DozeTriggers.DozingUpdateUiEvent;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
@@ -76,6 +78,8 @@ public class DozeTriggersTest extends SysuiTestCase {
     private ProximitySensor.ProximityCheck mProximityCheck;
     @Mock
     private AuthController mAuthController;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
@@ -107,7 +111,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers = new DozeTriggers(mContext, mHost, config, dozeParameters,
                 asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
                 mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings(),
-                mAuthController, mExecutor);
+                mAuthController, mExecutor, mUiEventLogger);
         mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }
@@ -192,6 +196,40 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN, 100, 100,
                 new float[]{1});
         mTriggers.onSensor(DozeLog.REASON_SENSOR_TAP, 100, 100, null);
+    }
+
+    @Test
+    public void testQuickPickup() {
+        // GIVEN device is in doze (screen blank, but running doze sensors)
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+
+        // WHEN quick pick up is triggered
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_QUICK_PICKUP, 100, 100, null);
+
+        // THEN device goes into aod (shows clock with black background)
+        verify(mMachine).requestState(DozeMachine.State.DOZE_AOD);
+
+        // THEN a log is taken that quick pick up was triggered
+        verify(mUiEventLogger).log(DozingUpdateUiEvent.DOZING_UPDATE_QUICK_PICKUP);
+    }
+
+    @Test
+    public void testQuickPickupTimeOutAfterExecutables() {
+        // GIVEN quick pickup is triggered when device is in DOZE
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_QUICK_PICKUP, 100, 100, null);
+        verify(mMachine).requestState(DozeMachine.State.DOZE_AOD);
+        verify(mMachine, never()).requestState(DozeMachine.State.DOZE);
+
+        // WHEN next executable is run
+        mExecutor.advanceClockToLast();
+        mExecutor.runAllReady();
+
+        // THEN device goes back into DOZE
+        verify(mMachine).requestState(DozeMachine.State.DOZE);
+
+        // THEN a log is taken that wake up timeout expired
+        verify(mUiEventLogger).log(DozingUpdateUiEvent.DOZING_UPDATE_WAKE_TIMEOUT);
     }
 
     @Test

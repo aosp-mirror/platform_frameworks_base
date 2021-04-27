@@ -84,7 +84,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private int mCutoutHeight;
     private int mGapHeight;
     private int mIndexOfFirstViewInShelf = -1;
-    private int mIndexOfFirstViewInOverflowingSection = -1;
 
     private NotificationShelfController mController;
 
@@ -180,7 +179,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
             viewState.xTranslation = getTranslationX();
             viewState.hasItemsInStableShelf = lastViewState.inShelf;
             viewState.firstViewInShelf = algorithmState.firstViewInShelf;
-            viewState.firstViewInOverflowSection = algorithmState.firstViewInOverflowSection;
             if (mNotGoneIndex != -1) {
                 viewState.notGoneIndex = Math.min(viewState.notGoneIndex, mNotGoneIndex);
             }
@@ -268,17 +266,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
             // TODO(b/172289889) scale mPaddingBetweenElements with expansion amount
             if ((isLastChild && !child.isInShelf()) || aboveShelf || backgroundForceHidden) {
                 notificationClipEnd = stackEnd;
-            } else if (mAmbientState.isExpansionChanging()) {
-                if (mIndexOfFirstViewInOverflowingSection != -1
-                    && i >= mIndexOfFirstViewInOverflowingSection) {
-                    // Clip notifications in (section overflowing into shelf) to shelf start.
-                    notificationClipEnd = shelfStart - mPaddingBetweenElements;
-                } else {
-                    // Clip notifications before the section overflowing into shelf
-                    // to stackEnd because we do not show the shelf if the section right before the
-                    // shelf is still hidden.
-                    notificationClipEnd = stackEnd;
-                }
             } else {
                 notificationClipEnd = shelfStart - mPaddingBetweenElements;
             }
@@ -831,11 +818,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mIndexOfFirstViewInShelf = mHostLayoutController.indexOfChild(firstViewInShelf);
     }
 
-    public void setFirstViewInOverflowingSection(ExpandableView firstViewInOverflowingSection) {
-        mIndexOfFirstViewInOverflowingSection =
-                mHostLayoutController.indexOfChild(firstViewInOverflowingSection);
-    }
-
     private class ShelfState extends ExpandableViewState {
         private boolean hasItemsInStableShelf;
         private ExpandableView firstViewInShelf;
@@ -849,7 +831,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
             super.applyToView(view);
             setIndexOfFirstViewInShelf(firstViewInShelf);
-            setFirstViewInOverflowingSection(firstViewInOverflowSection);
             updateAppearance();
             setHasItemsInStableShelf(hasItemsInStableShelf);
             mShelfIcons.setAnimationsEnabled(mAnimationsEnabled);
@@ -863,7 +844,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
             super.animateTo(child, properties);
             setIndexOfFirstViewInShelf(firstViewInShelf);
-            setFirstViewInOverflowingSection(firstViewInOverflowSection);
             updateAppearance();
             setHasItemsInStableShelf(hasItemsInStableShelf);
             mShelfIcons.setAnimationsEnabled(mAnimationsEnabled);

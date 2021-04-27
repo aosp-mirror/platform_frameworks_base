@@ -5553,11 +5553,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mBlurController.unregisterCrossWindowBlurEnabledListener(listener);
     }
 
-    @Override
-    public void setForceCrossWindowBlurDisabled(boolean disable) {
-        mBlurController.setForceCrossWindowBlurDisabled(disable);
-    }
-
     // -------------------------------------------------------------
     // Internals
     // -------------------------------------------------------------
@@ -6297,7 +6292,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
-        pw.print("  mBlurEnabled="); pw.println(mBlurController.mBlurEnabled);
+        pw.print("  mBlurEnabled="); pw.println(mBlurController.getBlurEnabled());
         pw.print("  mLastDisplayFreezeDuration=");
                 TimeUtils.formatDuration(mLastDisplayFreezeDuration, pw);
                 if ( mLastFinishedFreezeSource != null) {

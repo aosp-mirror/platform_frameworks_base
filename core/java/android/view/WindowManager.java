@@ -908,20 +908,6 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
-     * Disables cross-window blurs device-wide. This includes window blur behind
-     * (see {@link LayoutParams#setBlurBehindRadius}) and window background blur
-     * (see {@link Window#setBackgroundBlurRadius}).
-     *
-     * @param disable specifies whether to disable the blur. Note that calling this
-     *                with 'disable=false' will not enable blurs if there is something
-     *                else disabling blurs.
-     * @hide
-     */
-    @TestApi
-    default void setForceCrossWindowBlurDisabled(boolean disable) {
-    }
-
-    /**
      * @hide
      */
     static String transitTypeToString(@TransitionType int type) {

@@ -18,6 +18,7 @@ package com.android.systemui.people;
 
 import static com.android.systemui.people.NotificationHelper.getContactUri;
 import static com.android.systemui.people.NotificationHelper.getMessagingStyleMessages;
+import static com.android.systemui.people.NotificationHelper.getSenderIfGroupConversation;
 import static com.android.systemui.people.NotificationHelper.hasReadContactsPermission;
 import static com.android.systemui.people.NotificationHelper.isMissedCall;
 import static com.android.systemui.people.NotificationHelper.shouldMatchNotificationByUri;
@@ -233,6 +234,7 @@ public class PeopleSpaceUtils {
                 // Reset notification content.
                 .setNotificationKey(null)
                 .setNotificationContent(null)
+                .setNotificationSender(null)
                 .setNotificationDataUri(null)
                 .setMessagesCount(0)
                 // Reset missed calls category.
@@ -245,9 +247,9 @@ public class PeopleSpaceUtils {
      * {@code messagesCount}.
      */
     public static PeopleSpaceTile augmentTileFromNotification(Context context, PeopleSpaceTile tile,
-            NotificationEntry notificationEntry, int messagesCount) {
+            PeopleTileKey key, NotificationEntry notificationEntry, int messagesCount) {
         if (notificationEntry == null || notificationEntry.getSbn().getNotification() == null) {
-            if (DEBUG) Log.d(TAG, "Notification is null");
+            if (DEBUG) Log.d(TAG, "Tile key: " + key.toString() + ". Notification is null");
             return removeNotificationFields(tile);
         }
         Notification notification = notificationEntry.getSbn().getNotification();
@@ -256,7 +258,7 @@ public class PeopleSpaceUtils {
                 getMessagingStyleMessages(notification);
 
         if (!isMissedCall && ArrayUtils.isEmpty(messages)) {
-            if (DEBUG) Log.d(TAG, "Notification has no content");
+            if (DEBUG) Log.d(TAG, "Tile key: " + key.toString() + ". Notification has no content");
             return removeNotificationFields(tile);
         }
 
@@ -268,13 +270,18 @@ public class PeopleSpaceUtils {
         CharSequence content = (isMissedCall && !hasMessageText)
                 ? context.getString(R.string.missed_call) : message.getText();
         Uri dataUri = message != null ? message.getDataUri() : null;
-        if (DEBUG) Log.d(TAG, "Notification message has text: " + hasMessageText);
+        if (DEBUG) {
+            Log.d(TAG, "Tile key: " + key.toString() + ". Notification message has text: "
+                    + hasMessageText);
+        }
+        CharSequence sender = getSenderIfGroupConversation(notification, message);
 
         return tile
                 .toBuilder()
                 .setNotificationKey(notificationEntry.getSbn().getKey())
                 .setNotificationCategory(notification.category)
                 .setNotificationContent(content)
+                .setNotificationSender(sender)
                 .setNotificationDataUri(dataUri)
                 .setMessagesCount(messagesCount)
                 .build();
@@ -459,7 +466,7 @@ public class PeopleSpaceUtils {
         }
         if (DEBUG) {
             Log.d(TAG, "Widget: " + appWidgetId + ", " + tile.getUserName() + ", "
-                    + tile.getPackageName());
+                    + tile.getPackageName() + ". Updating app widget view.");
         }
         RemoteViews views = new PeopleTileViewHelper(context, tile, appWidgetId,
                 options).getViews();
@@ -472,7 +479,9 @@ public class PeopleSpaceUtils {
     public static void updateAppWidgetOptionsAndView(AppWidgetManager appWidgetManager,
             Context context, int appWidgetId, PeopleSpaceTile tile) {
         if (tile == null) {
-            Log.d(TAG, "Tile is null, skipping storage and update.");
+            if (DEBUG) {
+                Log.w(TAG, "Widget: " + appWidgetId + "Tile is null, skipping storage and update.");
+            }
             return;
         }
         Bundle options = AppWidgetOptionsHelper.setPeopleTile(appWidgetManager, appWidgetId, tile);
@@ -483,7 +492,10 @@ public class PeopleSpaceUtils {
     public static void updateAppWidgetOptionsAndView(AppWidgetManager appWidgetManager,
             Context context, int appWidgetId, Optional<PeopleSpaceTile> optionalTile) {
         if (!optionalTile.isPresent()) {
-            Log.d(TAG, "Tile is null, skipping storage and update.");
+            if (DEBUG) {
+                Log.w(TAG, "Widget: " + appWidgetId
+                        + "Optional tile is not present, skipping storage and update.");
+            }
             return;
         }
         updateAppWidgetOptionsAndView(appWidgetManager, context, appWidgetId, optionalTile.get());

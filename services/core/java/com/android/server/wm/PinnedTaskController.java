@@ -16,20 +16,26 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.app.PictureInPictureParams;
 import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
+import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
-import android.view.DisplayInfo;
 import android.view.IPinnedTaskListener;
+import android.view.SurfaceControl;
+import android.window.PictureInPictureSurfaceTransaction;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -54,6 +60,7 @@ import java.util.List;
 class PinnedTaskController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "PinnedTaskController" : TAG_WM;
+    private static final int DEFER_ORIENTATION_CHANGE_TIMEOUT_MS = 1000;
 
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
@@ -62,8 +69,21 @@ class PinnedTaskController {
     private final PinnedTaskListenerDeathHandler mPinnedTaskListenerDeathHandler =
             new PinnedTaskListenerDeathHandler();
 
-    /** Whether the PiP is entering or leaving. */
-    private boolean mIsPipWindowingModeChanging;
+    /**
+     * Non-null if the entering PiP task will cause display rotation to change. The bounds are
+     * based on the new rotation.
+     */
+    private Rect mDestRotatedBounds;
+    /**
+     * Non-null if the entering PiP task from recents animation will cause display rotation to
+     * change. The transaction is based on the old rotation.
+     */
+    private PictureInPictureSurfaceTransaction mPipTransaction;
+    /** Whether to skip task configuration change once. */
+    private boolean mFreezingTaskConfig;
+    /** Defer display orientation change if the PiP task is animating across orientations. */
+    private boolean mDeferOrientationChanging;
+    private final Runnable mDeferOrientationTimeoutRunnable;
 
     private boolean mIsImeShowing;
     private int mImeHeight;
@@ -72,15 +92,9 @@ class PinnedTaskController {
     private ArrayList<RemoteAction> mActions = new ArrayList<>();
     private float mAspectRatio = -1f;
 
-    // Used to calculate task bounds across rotations
-    private final DisplayInfo mDisplayInfo = new DisplayInfo();
-
     // The aspect ratio bounds of the PIP.
     private float mMinAspectRatio;
     private float mMaxAspectRatio;
-
-    // Temp vars for calculation
-    private final DisplayMetrics mTmpMetrics = new DisplayMetrics();
 
     /**
      * Handler for the case where the listener dies.
@@ -89,23 +103,32 @@ class PinnedTaskController {
 
         @Override
         public void binderDied() {
-            // Clean up the state if the listener dies
-            if (mPinnedTaskListener != null) {
-                mPinnedTaskListener.asBinder().unlinkToDeath(mPinnedTaskListenerDeathHandler, 0);
+            synchronized (mService.mGlobalLock) {
+                mPinnedTaskListener = null;
+                mFreezingTaskConfig = false;
+                mDeferOrientationTimeoutRunnable.run();
             }
-            mPinnedTaskListener = null;
         }
     }
 
     PinnedTaskController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
-        mDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
+        mDeferOrientationTimeoutRunnable = () -> {
+            synchronized (mService.mGlobalLock) {
+                if (mDeferOrientationChanging) {
+                    continueOrientationChange();
+                    mService.mWindowPlacerLocked.requestTraversal();
+                }
+            }
+        };
         reloadResources();
     }
 
-    void onConfigurationChanged() {
+    /** Updates the resources used by pinned controllers.  */
+    void onPostDisplayConfigurationChanged() {
         reloadResources();
+        mFreezingTaskConfig = false;
     }
 
     /**
@@ -113,7 +136,6 @@ class PinnedTaskController {
      */
     private void reloadResources() {
         final Resources res = mService.mContext.getResources();
-        mDisplayContent.getDisplay().getRealMetrics(mTmpMetrics);
         mMinAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
         mMaxAspectRatio = res.getFloat(
@@ -143,18 +165,150 @@ class PinnedTaskController {
                 && Float.compare(aspectRatio, mMaxAspectRatio) <= 0;
     }
 
-    /** Returns {@code true} if the PiP is on screen or is changing windowing mode. */
-    boolean isPipActiveOrWindowingModeChanging() {
-        if (mIsPipWindowingModeChanging) {
-            return true;
+    /**
+     * Called when a fullscreen task is entering PiP with display orientation change. This is used
+     * to avoid flickering when running PiP animation across different orientations.
+     */
+    void deferOrientationChangeForEnteringPipFromFullScreenIfNeeded() {
+        final Task topFullscreenTask = mDisplayContent.getDefaultTaskDisplayArea()
+                .getTopRootTaskInWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        final ActivityRecord topFullscreen = topFullscreenTask != null
+                ? topFullscreenTask.topRunningActivity() : null;
+        if (topFullscreen == null || topFullscreen.hasFixedRotationTransform()) {
+            return;
         }
-        final Task pinnedTask = mDisplayContent.getDefaultTaskDisplayArea().getRootPinnedTask();
-        return pinnedTask != null && pinnedTask.hasChild();
+        final int rotation = mDisplayContent.rotationForActivityInDifferentOrientation(
+                topFullscreen);
+        if (rotation == ROTATION_UNDEFINED) {
+            return;
+        }
+        // If the next top activity will change the orientation of display, start fixed rotation to
+        // notify PipTaskOrganizer before it receives task appeared. And defer display orientation
+        // update until the new PiP bounds are set.
+        mDisplayContent.setFixedRotationLaunchingApp(topFullscreen, rotation);
+        mDeferOrientationChanging = true;
+        mService.mH.removeCallbacks(mDeferOrientationTimeoutRunnable);
+        final float animatorScale = Math.max(1, mService.getCurrentAnimatorScale());
+        mService.mH.postDelayed(mDeferOrientationTimeoutRunnable,
+                (int) (animatorScale * DEFER_ORIENTATION_CHANGE_TIMEOUT_MS));
     }
 
-    /** Sets whether a visible task is changing from or to pinned mode. */
-    void setPipWindowingModeChanging(boolean isPipWindowingModeChanging) {
-        mIsPipWindowingModeChanging = isPipWindowingModeChanging;
+    /** Defers orientation change while there is a top fixed rotation activity. */
+    boolean shouldDeferOrientationChange() {
+        return mDeferOrientationChanging;
+    }
+
+    /**
+     * Sets the bounds for {@link #startSeamlessRotationIfNeeded} if the orientation of display
+     * will be changed.
+     */
+    void setEnterPipBounds(Rect bounds) {
+        if (!mDeferOrientationChanging) {
+            return;
+        }
+        mFreezingTaskConfig = true;
+        mDestRotatedBounds = new Rect(bounds);
+        continueOrientationChange();
+    }
+
+    /**
+     * Sets the transaction for {@link #startSeamlessRotationIfNeeded} if the orientation of display
+     * will be changed. This is only called when finishing recents animation with pending
+     * orientation change that will be handled by
+     * {@link DisplayContent.FixedRotationTransitionListener#onFinishRecentsAnimation}.
+     */
+    void setEnterPipTransaction(PictureInPictureSurfaceTransaction tx) {
+        mFreezingTaskConfig = true;
+        mPipTransaction = tx;
+    }
+
+    /** Called when the activity in PiP task has PiP windowing mode (at the end of animation). */
+    private void continueOrientationChange() {
+        mDeferOrientationChanging = false;
+        mService.mH.removeCallbacks(mDeferOrientationTimeoutRunnable);
+        final WindowContainer<?> orientationSource = mDisplayContent.getLastOrientationSource();
+        if (orientationSource != null && !orientationSource.isAppTransitioning()) {
+            mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
+        }
+    }
+
+    /**
+     * Resets rotation and applies scale and position to PiP task surface to match the current
+     * rotation of display. The final surface matrix will be replaced by PiPTaskOrganizer after it
+     * receives the callback of fixed rotation completion.
+     */
+    void startSeamlessRotationIfNeeded(SurfaceControl.Transaction t) {
+        final Rect bounds = mDestRotatedBounds;
+        final PictureInPictureSurfaceTransaction pipTx = mPipTransaction;
+        if (bounds == null && pipTx == null) {
+            return;
+        }
+        final TaskDisplayArea taskArea = mDisplayContent.getDefaultTaskDisplayArea();
+        final Task pinnedTask = taskArea.getRootPinnedTask();
+        if (pinnedTask == null) {
+            return;
+        }
+
+        mDestRotatedBounds = null;
+        mPipTransaction = null;
+        final Rect areaBounds = taskArea.getBounds();
+        if (pipTx != null) {
+            // The transaction from recents animation is in old rotation. So the position needs to
+            // be rotated.
+            float dx = pipTx.mPositionX;
+            float dy = pipTx.mPositionY;
+            if (pipTx.mRotation == 90) {
+                dx = pipTx.mPositionY;
+                dy = areaBounds.right - pipTx.mPositionX;
+            } else if (pipTx.mRotation == -90) {
+                dx = areaBounds.bottom - pipTx.mPositionY;
+                dy = pipTx.mPositionX;
+            }
+            final Matrix matrix = new Matrix();
+            matrix.setScale(pipTx.mScaleX, pipTx.mScaleY);
+            matrix.postTranslate(dx, dy);
+            t.setMatrix(pinnedTask.getSurfaceControl(), matrix, new float[9]);
+            Slog.i(TAG, "Seamless rotation PiP tx=" + pipTx + " pos=" + dx + "," + dy);
+            return;
+        }
+
+        final PictureInPictureParams params = pinnedTask.getPictureInPictureParams();
+        final Rect sourceHintRect = params != null && params.hasSourceBoundsHint()
+                ? params.getSourceRectHint()
+                : null;
+        Slog.i(TAG, "Seamless rotation PiP bounds=" + bounds + " hintRect=" + sourceHintRect);
+        final Rect contentBounds = sourceHintRect != null && areaBounds.contains(sourceHintRect)
+                ? sourceHintRect : areaBounds;
+        final int w = contentBounds.width();
+        final int h = contentBounds.height();
+        final float scale = w <= h ? (float) bounds.width() / w : (float) bounds.height() / h;
+        final int insetLeft = (int) ((contentBounds.left - areaBounds.left) * scale + .5f);
+        final int insetTop = (int) ((contentBounds.top - areaBounds.top) * scale + .5f);
+        final Matrix matrix = new Matrix();
+        matrix.setScale(scale, scale);
+        matrix.postTranslate(bounds.left - insetLeft, bounds.top - insetTop);
+        t.setMatrix(pinnedTask.getSurfaceControl(), matrix, new float[9]);
+    }
+
+    /**
+     * Returns {@code true} to skip {@link Task#onConfigurationChanged} because it is expected that
+     * there will be a orientation change and a PiP configuration change.
+     */
+    boolean isFreezingTaskConfig(Task task) {
+        return mFreezingTaskConfig
+                && task == mDisplayContent.getDefaultTaskDisplayArea().getRootPinnedTask();
+    }
+
+    /** Resets the states which were used to perform fixed rotation with PiP task. */
+    void onCancelFixedRotationTransform(Task task) {
+        mFreezingTaskConfig = false;
+        mDeferOrientationChanging = false;
+        mDestRotatedBounds = null;
+        mPipTransaction = null;
+        if (!task.isOrganized()) {
+            // Force clearing Task#mForceNotOrganized because the display didn't rotate.
+            task.onConfigurationChanged(task.getParent().getConfiguration());
+        }
     }
 
     /**
@@ -272,6 +426,14 @@ class PinnedTaskController {
 
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "PinnedTaskController");
+        if (mDeferOrientationChanging) pw.println(prefix + "  mDeferOrientationChanging=true");
+        if (mFreezingTaskConfig) pw.println(prefix + "  mFreezingTaskConfig=true");
+        if (mDestRotatedBounds != null) {
+            pw.println(prefix + "  mPendingBounds=" + mDestRotatedBounds);
+        }
+        if (mPipTransaction != null) {
+            pw.println(prefix + "  mPipTransaction=" + mPipTransaction);
+        }
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
         pw.println(prefix + "  mImeHeight=" + mImeHeight);
         pw.println(prefix + "  mAspectRatio=" + mAspectRatio);
@@ -288,6 +450,5 @@ class PinnedTaskController {
             }
             pw.println(prefix + "  ]");
         }
-        pw.println(prefix + "  mDisplayInfo=" + mDisplayInfo);
     }
 }

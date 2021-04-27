@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Point;
@@ -64,6 +65,33 @@ import java.util.Objects;
  */
 final class LogicalDisplay {
     private static final String TAG = "LogicalDisplay";
+
+    /**
+     * Phase indicating the logical display's existence is hidden from the rest of the framework.
+     * This can happen if the current layout has specifically requested to keep this display
+     * disabled.
+     */
+    static final int DISPLAY_PHASE_DISABLED = -1;
+
+    /**
+     * Phase indicating that the logical display is going through a layout transition.
+     * When in this phase, other systems can choose to special case power-state handling of a
+     * display that might be in a transition.
+     */
+    static final int DISPLAY_PHASE_LAYOUT_TRANSITION = 0;
+
+    /**
+     * The display is exposed to the rest of the system and its power state is determined by a
+     * power-request from PowerManager.
+     */
+    static final int DISPLAY_PHASE_ENABLED = 1;
+
+    @IntDef(prefix = {"DISPLAY_PHASE" }, value = {
+        DISPLAY_PHASE_DISABLED,
+        DISPLAY_PHASE_LAYOUT_TRANSITION,
+        DISPLAY_PHASE_ENABLED
+    })
+    @interface DisplayPhase {}
 
     // The layer stack we use when the display has been blanked to prevent any
     // of its content from appearing.
@@ -129,10 +157,12 @@ final class LogicalDisplay {
     private final Rect mTempDisplayRect = new Rect();
 
     /**
-     * Indicates that the Logical display is enabled (default). See {@link #setEnabled} for
-     * more information.
+     * Indicates the current phase of the display. Generally, phases supersede any
+     * requests from PowerManager in DPC's calculation for the display state. Only when the
+     * phase is ENABLED does PowerManager's request for the display take effect.
      */
-    private boolean mIsEnabled = true;
+    @DisplayPhase
+    private int mPhase = DISPLAY_PHASE_ENABLED;
 
     /**
      * The UID mappings for refresh rate override
@@ -721,27 +751,32 @@ final class LogicalDisplay {
         return old;
     }
 
-    /**
-     * Sets the LogicalDisplay to be enabled or disabled. If the display is not enabled,
-     * the system will always set the display to power off, regardless of the global state of the
-     * device.
-     * TODO: b/170498827 - Remove when updateDisplayStateLocked is updated.
-     */
-    public void setEnabled(boolean isEnabled) {
-        mIsEnabled = isEnabled;
+    public void setPhase(@DisplayPhase int phase) {
+        mPhase = phase;
     }
 
     /**
-     * @return {@code true} iff the LogicalDisplay is enabled or {@code false}
-     * if disabled indicating that the display has been forced to be OFF.
+     * Returns the currently set phase for this LogicalDisplay. Phases are used when transitioning
+     * from one device state to another. {@see LogicalDisplayMapper}.
+     */
+    @DisplayPhase
+    public int getPhase() {
+        return mPhase;
+    }
+
+    /**
+     * @return {@code true} if the LogicalDisplay is enabled or {@code false}
+     * if disabled indicating that the display should be hidden from the rest of the apps and
+     * framework.
      */
     public boolean isEnabled() {
-        return mIsEnabled;
+        // DISPLAY_PHASE_LAYOUT_TRANSITION is still considered an 'enabled' phase.
+        return mPhase == DISPLAY_PHASE_ENABLED || mPhase == DISPLAY_PHASE_LAYOUT_TRANSITION;
     }
 
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
-        pw.println("mIsEnabled=" + mIsEnabled);
+        pw.println("mPhase=" + mPhase);
         pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
         pw.println("mDesiredDisplayModeSpecs={" + mDesiredDisplayModeSpecs + "}");

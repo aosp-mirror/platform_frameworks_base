@@ -493,7 +493,8 @@ public abstract class PackageSettingBase extends SettingBase {
             ArrayMap<String, PackageUserState.SuspendParams> suspendParams, boolean instantApp,
             boolean virtualPreload, String lastDisableAppCaller,
             ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
-            int installReason, int uninstallReason, String harmfulAppWarning) {
+            int installReason, int uninstallReason, String harmfulAppWarning,
+            String splashScreenTheme) {
         PackageUserState state = modifyUserState(userId);
         state.ceDataInode = ceDataInode;
         state.enabled = enabled;
@@ -512,6 +513,7 @@ public abstract class PackageSettingBase extends SettingBase {
         state.instantApp = instantApp;
         state.virtualPreload = virtualPreload;
         state.harmfulAppWarning = harmfulAppWarning;
+        state.splashScreenTheme = splashScreenTheme;
         onChanged();
     }
 
@@ -522,7 +524,8 @@ public abstract class PackageSettingBase extends SettingBase {
                 otherState.instantApp,
                 otherState.virtualPreload, otherState.lastDisableAppCaller,
                 otherState.enabledComponents, otherState.disabledComponents,
-                otherState.installReason, otherState.uninstallReason, otherState.harmfulAppWarning);
+                otherState.installReason, otherState.uninstallReason, otherState.harmfulAppWarning,
+                otherState.splashScreenTheme);
     }
 
     ArraySet<String> getEnabledComponents(int userId) {
@@ -720,6 +723,26 @@ public abstract class PackageSettingBase extends SettingBase {
      */
     public void resetOverrideComponentLabelIcon(@UserIdInt int userId) {
         modifyUserState(userId).resetOverrideComponentLabelIcon();
+    }
+
+    /**
+     * @param userId    the specified user to modify the theme for
+     * @param themeName the theme name to persist
+     * @see android.window.SplashScreen#setSplashScreenTheme(int)
+     */
+    public void setSplashScreenTheme(@UserIdInt int userId, @Nullable String themeName) {
+        modifyUserState(userId).splashScreenTheme = themeName;
+    }
+
+    /**
+     * @param userId the specified user to get the theme setting from
+     * @return the theme name previously persisted for the user or null
+     * if no splashscreen theme is persisted.
+     * @see android.window.SplashScreen#setSplashScreenTheme(int)
+     */
+    @Nullable
+    public String getSplashScreenTheme(@UserIdInt int userId) {
+        return readUserState(userId).splashScreenTheme;
     }
 
     /**

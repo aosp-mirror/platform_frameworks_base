@@ -137,23 +137,41 @@ public class PipSurfaceTransactionHelper {
      * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
     public PipSurfaceTransactionHelper rotateAndScaleWithCrop(SurfaceControl.Transaction tx,
-            SurfaceControl leash, Rect sourceBounds, Rect destinationBounds, float degrees,
-            float positionX, float positionY) {
+            SurfaceControl leash, Rect sourceBounds, Rect destinationBounds, Rect insets,
+            float degrees, float positionX, float positionY, boolean isExpanding,
+            boolean clockwise) {
         mTmpDestinationRect.set(sourceBounds);
-        final int dw = destinationBounds.width();
-        final int dh = destinationBounds.height();
+        mTmpDestinationRect.inset(insets);
+        final int srcW = mTmpDestinationRect.width();
+        final int srcH = mTmpDestinationRect.height();
+        final int destW = destinationBounds.width();
+        final int destH = destinationBounds.height();
         // Scale by the short side so there won't be empty area if the aspect ratio of source and
         // destination are different.
-        final float scale = dw <= dh
-                ? (float) sourceBounds.width() / dw
-                : (float) sourceBounds.height() / dh;
+        final float scale = srcW <= srcH ? (float) destW / srcW : (float) destH / srcH;
+        final Rect crop = mTmpDestinationRect;
+        crop.set(0, 0, destW, destH);
         // Inverse scale for crop to fit in screen coordinates.
-        mTmpDestinationRect.scale(1 / scale);
-        mTmpTransform.setRotate(degrees);
-        mTmpTransform.postScale(scale, scale);
+        crop.scale(1 / scale);
+        crop.offset(insets.left, insets.top);
+        if (isExpanding) {
+            // Expand bounds (shrink insets) in source orientation.
+            positionX -= insets.left * scale;
+            positionY -= insets.top * scale;
+        } else {
+            // Shrink bounds (expand insets) in destination orientation.
+            if (clockwise) {
+                positionX -= insets.top * scale;
+                positionY -= insets.left * scale;
+            } else {
+                positionX += insets.top * scale;
+                positionY += insets.left * scale;
+            }
+        }
+        mTmpTransform.setScale(scale, scale);
+        mTmpTransform.postRotate(degrees);
         mTmpTransform.postTranslate(positionX, positionY);
-        tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
-                .setWindowCrop(leash, mTmpDestinationRect.width(), mTmpDestinationRect.height());
+        tx.setMatrix(leash, mTmpTransform, mTmpFloat9).setWindowCrop(leash, crop);
         return this;
     }
 
