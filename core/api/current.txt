@@ -26456,7 +26456,6 @@ package android.net {
     method @Deprecated public static int getDefaultPort();
     method @Deprecated public static String getHost(android.content.Context);
     method @Deprecated public static int getPort(android.content.Context);
-    field @Deprecated public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
     field public static final String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
   }
 
