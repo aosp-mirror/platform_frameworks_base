@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch (184 mm x 267 mm)"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto (203 mm x 254 mm)"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap (203 mm x 330 mm)"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K (270 mm x 390 mm)"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K (195 mm x 270 mm)"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1 (102 mm x 165 mm)"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu (240 mm x 322,1 mm)"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2 (240 mm x 332 mm)"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4 (105 mm x 235 mm)"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Tuntematon pystykoko"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Tuntematon vaakakoko"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Peruutettu"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Järjestelmänvalvoja päivitti tämän."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Järjestelmänvalvoja poisti tämän."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Virransäästö laittaa tumman teeman päälle ja laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja tiettyjä muita ominaisuuksia.\n\n"<annotation id="url">"Lue lisää"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"Virransäästö laittaa tumman teeman päälle ja laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja tiettyjä muita ominaisuuksia."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Otetaanko Data Saver käyttöön?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ota käyttöön"</string>
@@ -2099,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Tämä ilmoitus hiljennettiin. Lähetä palautetta napauttamalla."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Tämän ilmoituksen tasoa nostettiin. Lähetä palautetta napauttamalla."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Tämän ilmoituksen tasoa laskettiin. Lähetä palautetta napauttamalla."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Kokeile parann. ilmoituksia"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Jos haluat jatkossakin saada ehdotuksia toiminnoista, vastauksista ja muista, laita parannetut ilmoitukset päälle. Androidin mukautuvia ilmoituksia ei enää tueta."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Laita päälle"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Ei nyt"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Parannetut ilmoitukset"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Parannetut ehdotukset tarjoavat nyt toiminto- ja vastausehdotuksia. Androidin mukautuvia ilmoituksia ei enää tueta."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Laita pois päältä"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lue lisää"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Parannetut ilmoitukset voivat lukea kaikkea ilmoitussisältöä, myös henkilökohtaisia tietoja (esim. kontaktien nimet ja viestit). Ominaisuus voi myös ohittaa ilmoituksia tai käyttää niiden toimintopainikkeita, esim. vastata puheluihin.\n\nLisäksi ominaisuus voi laittaa Tärkeät-tilan päälle tai pois päältä ja muuttaa siihen liittyviä asetuksia."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Parannetut ilmoitukset korvasivat Androidin mukautuvat ilmoitukset Android 12:ssa. Tämä ominaisuus näyttää toiminto- ja vastausehdotuksia ja järjestää ilmoituksesi.\n\nParannetuilla ilmoituksilla on pääsy kaikkeen ilmoitussisältöön, myös henkilökohtaisiin tietoihin (esim. kontaktien nimet ja viestit). Tämä ominaisuus voi myös ohittaa ilmoituksia tai vastata niihin, esim. vastata puheluihin ja ohjata Älä häiritse ‑tilaa."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohjelmatilan tietoilmoitus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akku saattaa loppua ennen normaalia latausaikaa"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Virransäästö otettu käyttöön akunkeston pidentämiseksi"</string>

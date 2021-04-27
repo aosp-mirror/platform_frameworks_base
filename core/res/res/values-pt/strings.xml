@@ -1820,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Retrato desconhecido"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Paisagem desconhecido"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Cancelado"</string>
@@ -1865,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atualizado pelo seu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Excluído pelo seu administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"A Economia de bateria ativa o tema escuro e limita ou desativa as atividades em segundo plano, alguns efeitos visuais e recursos específicos.\n\n"<annotation id="url">"Saiba mais"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"A Economia de bateria ativa o tema escuro e limita ou desativa as atividades em segundo plano, alguns efeitos visuais e recursos específicos."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não sejam exibidas até que você toque nelas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar \"Economia de dados\"?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
@@ -2088,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificação foi rebaixada a Silenciosa. Toque para enviar seu feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificação foi classificada com maior prioridade. Toque para enviar seu feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificação foi classificada com menor prioridade. Toque para enviar seu feedback."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Testar notif. aprimoradas"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Para continuar a receber sugestões de ações, respostas e muito mais, ative as notificações aprimoradas. As Notificações adaptáveis do Android não estão mais disponíveis."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Ativar"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Agora não"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notificações aprimoradas"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"As ações e respostas sugeridas agora são fornecidas pelas notificações aprimoradas. As Notificações adaptáveis do Android não estão mais disponíveis."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desativar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saiba mais"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"As notificações aprimoradas podem ler todo o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Além disso, esse recurso pode dispensar notificações e usar os botões delas para, por exemplo, atender chamadas telefônicas.\n\nEle também pode ativar ou desativar o modo Prioridade e mudar as configurações relacionadas."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"No Android 12, as notificações aprimoradas substituíram as Notificações adaptáveis. Esse recurso exibe ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações aprimoradas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender chamadas telefônicas e controlar o Não perturbe."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informação do modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A bateria pode acabar antes da recarga normal"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"A Economia de bateria foi ativada para aumentar a duração da carga"</string>

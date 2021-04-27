@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"မိုနာချ့်"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"ကွာတို"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"ဖူးစကဒ်"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"အာအိုစီ ၈ကေ"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"အာအိုစီ ၁၆ကေ"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"ပီအာစီ ၁"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"ကဟူ"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"ကဟူ၂"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"ယူ၄"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"ဒေါင်လိုက် အရွယ်မသိ"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"အလျားလိုက် အရွယ်မသိ"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ဖျက်သိမ်းလိုက်ပြီး"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့နှင့် ဝန်ဆောင်မှုအချို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။\n\n"<annotation id="url">"ပိုမိုလေ့လာရန်"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့နှင့် ဝန်ဆောင်မှုအချို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ပါ"</string>
@@ -2099,12 +2085,17 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ဤအကြောင်းကြားချက်ကို \'အသံတိတ်ခြင်း\' သို့ ပြန်ချိန်ညှိထားသည်။ အကြံပြုချက်ပေးရန် တို့ပါ။"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ဤအကြောင်းကြားချက်ကို အဆင့်တိုးထားသည်။ အကြံပြုချက်ပေးရန် တို့ပါ။"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ဤအကြောင်းကြားချက်ကို အဆင့်လျှော့ထားသည်။ အကြံပြုချက်ပေးရန် တို့ပါ။"</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"အဆင့်မြင့် အကြောင်းကြားချက်များ စမ်းသုံးကြည့်ခြင်း"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"အကြံပြုထားသော လုပ်ဆောင်ချက်များ၊ ပြန်စာများ စသည်တို့ကို ဆက်လက်ရယူရန် အဆင့်မြင့် အကြောင်းကြားချက်များကို ဖွင့်ပါ။ ‘Android အလိုက်သင့် အကြောင်းကြားချက်များ’ ကို ပံ့ပိုးမထားတော့ပါ။"</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ဖွင့်ရန်"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"ယခုမလုပ်ပါ"</string>
+    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
+    <skip />
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ပိုမိုလေ့လာရန်"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"အဆင့်မြင့် အကြောင်းကြားချက်များသည် အဆက်အသွယ်အမည်နှင့် မက်ဆေ့ဂျ်များကဲ့သို့ ကိုယ်ရေးကိုယ်တာအချက်လက်များ အပါအဝင် အကြောင်းကြားချက် အကြောင်းအရာအားလုံးကို ဖတ်နိုင်သည်။ ဤဝန်ဆောင်မှုသည် အကြောင်းကြားချက်များကို ပယ်ခြင်း (သို့) ဖုန်းခေါ်ဆိုမှုများ ဖြေခြင်းကဲ့သို့ အကြောင်းကြားချက်များရှိ ခလုတ်များ နှိပ်ခြင်းကိုလည်း ပြုလုပ်နိုင်သည်။\n\nဤဝန်ဆောင်မှုသည် ‘ဦးစားပေးမုဒ်’ ကို ဖွင့်ခြင်း (သို့) ပိတ်ခြင်း ပြုလုပ်နိုင်ပြီး ဆက်စပ်နေသော ဆက်တင်များကိုလည်း ပြောင်းနိုင်သည်။"</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ပုံမှန်မုဒ်အတွက် အချက်အလက်ပြသည့် အကြောင်းကြားချက်"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ပုံမှန်အားသွင်းမှုမပြုလုပ်မီ ဘက်ထရီကုန်သွားနိုင်သည်"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ဘက်ထရီသက်တမ်းကို တိုးမြှင့်ရန် \'ဘက်ထရီအားထိန်း\' စတင်ပြီးပါပြီ"</string>

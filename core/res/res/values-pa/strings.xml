@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"ਸਮਰਾਟ"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"ਚੁਪੱਤਰੀ"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -2099,12 +2088,17 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ਇਸ ਸੂਚਨਾ ਦਾ ਦਰਜਾ ਘਟਾ ਕੇ ਸ਼ਾਂਤ \'ਤੇ ਸੈੱਟ ਕੀਤਾ ਗਿਆ। ਵਿਚਾਰ ਮੁਹੱਈਆ ਕਰਵਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ਇਸ ਸੂਚਨਾ ਦਾ ਦਰਜਾ ਵਧਾ ਦਿੱਤਾ ਗਿਆ। ਵਿਚਾਰ ਮੁਹੱਈਆ ਕਰਵਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ਇਸ ਸੂਚਨਾ ਦਾ ਦਰਜਾ ਘਟਾ ਦਿੱਤਾ ਗਿਆ। ਵਿਚਾਰ ਮੁਹੱਈਆ ਕਰਵਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"ਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਅਜ਼ਮਾਓ"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"ਸੁਝਾਈਆਂ ਗਈਆਂ ਕਾਰਵਾਈਆਂ, ਜਵਾਬਾਂ ਅਤੇ ਹੋਰ ਬਹੁਤ ਕੁਝ ਨੂੰ ਪ੍ਰਾਪਤ ਕਰਦੇ ਰਹਿਣ ਲਈ, ਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ। Android ਅਡੈਪਟਿਵ ਸੂਚਨਾਵਾਂ ਹੁਣ ਸਮਰਥਿਤ ਨਹੀਂ ਹਨ।"</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ਚਾਲੂ ਕਰੋ"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"ਹੁਣੇ ਨਹੀਂ"</string>
+    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
+    <skip />
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ਹੋਰ ਜਾਣੋ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"ਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਸਾਰੀ ਸੂਚਨਾ ਸਮੱਗਰੀ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀਆਂ ਹਨ, ਜਿਸ ਵਿੱਚ ਸੰਪਰਕ ਨਾਮ ਅਤੇ ਸੁਨੇਹੇ ਵਰਗੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਵੀ ਸ਼ਾਮਲ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਸੂਚਨਾਵਾਂ ਨੂੰ ਖਾਰਜ ਵੀ ਕਰ ਸਕਦੀ ਹੈ ਜਾਂ ਸੂਚਨਾਵਾਂ ਵਿੱਚ ਬਟਨਾਂ \'ਤੇ ਕਾਰਵਾਈਆਂ ਵੀ ਕਰ ਸਕਦੀ ਹੈ, ਜਿਵੇਂ ਕਿ ਫ਼ੋਨ ਕਾਲਾਂ ਦਾ ਜਵਾਬ ਦੇਣਾ।\n\nਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਤਰਜੀਹੀ ਮੋਡ ਨੂੰ ਚਾਲੂ ਜਾਂ ਬੰਦ ਵੀ ਕਰ ਸਕਦੀ ਹੈ ਅਤੇ ਸੰਬੰਧਿਤ ਸੈਟਿੰਗਾਂ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ਨਿਯਮਬੱਧ ਮੋਡ ਦੀ ਜਾਣਕਾਰੀ ਵਾਲੀ ਸੂਚਨਾ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ਬੈਟਰੀ ਚਾਰਜ ਕਰਨ ਦੇ ਮਿੱਥੇ ਸਮੇਂ ਤੋਂ ਪਹਿਲਾਂ ਸ਼ਾਇਦ ਬੈਟਰੀ ਖਤਮ ਹੋ ਜਾਵੇ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>

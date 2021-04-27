@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"모나크"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"쿼토"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"풀스캡"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"지정되지 않은 세로 방향"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"지정되지 않은 가로 방향"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"취소됨"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"관리자에 의해 삭제되었습니다."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"확인"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"절전 모드는 어두운 테마를 사용 설정하고 백그라운드 활동, 일부 시각 효과, 특정 기능을 제한하거나 사용 중지합니다.\n\n"<annotation id="url">"자세히 알아보기"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"절전 모드는 어두운 테마를 사용 설정하고 백그라운드 활동, 일부 시각 효과, 특정 기능을 제한하거나 사용 중지합니다."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용 설정하시겠습니까?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"사용 설정"</string>
@@ -2099,12 +2085,17 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"이 알림의 중요도가 무음으로 하향되었습니다. 의견을 보내려면 탭하세요."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"이전에 이 알림의 중요도는 더 높았습니다. 의견을 보내려면 탭하세요."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"이전에 이 알림의 중요도는 더 낮았습니다. 의견을 보내려면 탭하세요."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"개선된 알림 기능 사용해 보기"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"추천 작업, 답장 등을 계속 받으려면 개선된 알림 기능을 사용 설정하세요. Android 적응형 알림은 더 이상 지원되지 않습니다."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"사용 설정"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"나중에"</string>
+    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
+    <skip />
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"자세히 알아보기"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"개선된 알림 기능은 연락처 이름과 메시지 등 개인 정보가 포함된 모든 알림 내용을 읽어줍니다. 알림을 닫거나 알림에 표시되는 버튼 관련 작업(예: 전화 받기)을 실행할 수도 있습니다.\n\n또한 이 기능은 우선순위 모드를 사용 또는 사용 중지하고 관련 설정을 변경할 수 있습니다."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"루틴 모드 정보 알림"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"배터리 수명을 연장하기 위해 절전 모드가 활성화되었습니다."</string>
