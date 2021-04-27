@@ -1707,8 +1707,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"முடிந்தது"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ஷார்ட்கட்டை முடக்கு"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ஷார்ட்கட்டைப் பயன்படுத்து"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"கலர் இன்வெர்ஷன்"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"வண்ணத் திருத்தம்"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"நிற நேரெதிர் மாற்றம்"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"நிறத் திருத்தம்"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"மிகக் குறைவான வெளிச்சம்"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆன் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆஃப் செய்யப்பட்டது."</string>
@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"மோனார்க்"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"குவார்டோ"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"பூல்ஸ்கேப்"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"அறியப்படாத நிலைபதிப்பு"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"அறியப்படாத நிலைபரப்பு"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ரத்துசெய்யப்பட்டது"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"சரி"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"பேட்டரி சேமிப்பான் டார்க் தீமை ஆன் செய்யும். பின்னணிச் செயல்பாடு, சில விஷுவல் எஃபெக்ட்கள் மற்றும் குறிப்பிட்ட அம்சங்களைக் கட்டுப்படுத்தும் அல்லது ஆஃப் செய்யும்.\n\n"<annotation id="url">"மேலும் அறிக"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"பேட்டரி சேமிப்பான் டார்க் தீமை ஆன் செய்யும். பின்னணிச் செயல்பாடு, சில விஷுவல் எஃபெக்ட்கள் மற்றும் குறிப்பிட்ட அம்சங்களைக் கட்டுப்படுத்தும் அல்லது ஆஃப் செய்யும்."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில ஆப்ஸை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் ஆப்ஸானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"இயக்கு"</string>
@@ -2099,12 +2085,17 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"இந்த அறிவிப்பின் முக்கியத்துவம் நிசப்த நிலைக்குக் குறைத்து அமைக்கப்பட்டது. கருத்து தெரிவிக்க தட்டவும்."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"இந்த அறிவிப்பின் முக்கியத்துவம் உயர்த்தப்பட்டது. கருத்து தெரிவிக்க தட்டவும்."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"இந்த அறிவிப்பின் முக்கியத்துவம் குறைக்கப்பட்டது. கருத்து தெரிவிக்க தட்டவும்."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"மேம்பட்ட அறிவிப்புகளை முயல்க"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"பரிந்துரைக்கப்பட்ட செயல்பாடுகள், பதில்கள் மற்றும் பலவற்றையும் தொடர்ந்து பெற மேம்பட்ட அறிவிப்புகளை ஆன் செய்யவும். Android சூழலுக்கேற்ற அறிவிப்புகள் இனி ஆதரிக்கப்படாது."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ஆன் செய்"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"இப்போது வேண்டாம்"</string>
+    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
+    <skip />
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"மேலும் அறிக"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"மேம்பட்ட அறிவிப்புகளால் அனைத்து அறிவிப்புகளின் உள்ளடக்கத்தையும் (தொடர்புகளின் பெயர்கள், மெசேஜ்கள் போன்ற தனிப்பட்ட தகவல்கள் உட்பட) படிக்க முடியும். இந்த அம்சத்தால் அறிவிப்புகளை நிராகரிக்கவோ அறிவிப்புகளிலுள்ள பட்டன்களை இயக்கவோ (அழைப்புகளுக்குப் பதிலளிப்பது போன்றவை) முடியும்.\n\nஇந்த அம்சத்தால் முன்னுரிமைப் பயன்முறையை இயக்கவோ முடக்கவோ முடியும் மற்றும் தொடர்புடைய அமைப்புகளை மாற்றவும் முடியும்."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>

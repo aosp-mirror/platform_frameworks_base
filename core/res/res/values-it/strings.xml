@@ -1820,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Verticale sconosciuto"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Orizzontale sconosciuto"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Annullato"</string>
@@ -1865,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminato dall\'amministratore"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"La funzionalità Risparmio energetico attiva il tema scuro e limita o disattiva le attività in background, alcuni effetti visivi e funzionalità.\n\n"<annotation id="url">"Scopri di più"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"La funzionalità Risparmio energetico attiva il tema scuro e limita o disattiva le attività in background, alcuni effetti visivi e funzionalità."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Attiva"</string>
@@ -2088,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Questa notifica è stata retrocessa a Silenziosa. Tocca per dare un feedback."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Questa notifica è stata posizionata più in alto. Tocca per dare un feedback."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Questa notifica è stata posizionata più in basso. Tocca per dare un feedback."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Prova le notifiche avanzate"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Per continuare a ricevere suggerimenti di azioni, risposte e altro, attiva le notifiche avanzate. Le notifiche adattive Android non sono più supportate."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Attiva"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Non ora"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notifiche avanzate"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Ora le risposte e le azioni suggerite vengono fornite dalle notifiche avanzate. Le notifiche adattive Android non sono più supportate."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Disattiva"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Scopri di più"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Le notifiche avanzate possono accedere all\'intero contenuto di una notifica, incluse le informazioni personali, come i nomi dei contatti e i messaggi. Questa funzionalità può anche ignorare le notifiche o svolgere azioni sui pulsanti nelle notifiche, come rispondere alle telefonate.\n\nQuesta funzionalità può anche attivare o disattivare la modalità Priorità e modificare le relative impostazioni."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Le notifiche adattive Android sono state sostituite dalle notifiche avanzate in Android 12. Questa funzionalità mostra risposte e azioni suggerite e organizza le tue notifiche.\n\nLe notifiche avanzate possono accedere ai contenuti di una notifica, incluse le informazioni personali, come i nomi dei contatti e i messaggi. Questa funzionalità può anche ignorare le notifiche o rispondervi, ad esempio accettando le telefonate e controllando Non disturbare."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifica di informazioni sulla modalità Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La batteria potrebbe esaurirsi prima della ricarica abituale"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Risparmio energetico attivo per far durare di più la batteria"</string>

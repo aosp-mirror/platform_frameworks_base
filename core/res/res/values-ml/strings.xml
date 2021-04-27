@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"മൊണാർക്ക്"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"ക്വാർട്ടോ"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"ഫൂൾസ്‌കെയ്പ്പ്"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"കഹു"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"അജ്ഞാത പോർട്രെയ്റ്റ്"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"അജ്ഞാത ലാൻഡ്‌സ്‌കെയ്പ്പ്"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"റദ്ദാക്കി"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ശരി"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"ബാറ്ററി ലാഭിക്കൽ ഡാർക്ക് തീം ഓണാക്കുന്നു, കൂടാതെ പശ്ചാത്തല ആക്റ്റിവിറ്റി, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, ചില ഫീച്ചറുകൾ എന്നിവ പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു.\n\n"<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"ബാറ്ററി ലാഭിക്കൽ ഡാർക്ക് തീം ഓണാക്കുന്നു, കൂടാതെ പശ്ചാത്തല ആക്റ്റിവിറ്റി, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, ചില ഫീച്ചറുകൾ എന്നിവ പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ഓണാക്കുക"</string>
@@ -2099,12 +2085,17 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ഈ അറിയിപ്പിനെ നിശബ്‌ദമാക്കി തരം താഴ്‌ത്തി. ഫീഡ്ബാക്ക് നൽകാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ഈ അറിയിപ്പിന് ഉയർന്ന റാങ്ക് നൽകി. ഫീഡ്ബാക്ക് നൽകാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ഈ അറിയിപ്പിന് താഴ്‌ന്ന റാങ്ക് നൽകി. ഫീഡ്ബാക്ക് നൽകാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ പരീക്ഷിക്കൂ"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"നിർദ്ദേശിച്ച പ്രവർത്തനങ്ങളും മറുപടികളും മറ്റും ലഭിക്കുന്നത് തുടരാൻ, മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ ഓണാക്കുക. Android അഡാപ്റ്റീവ് അറിയിപ്പുകൾക്ക് ഇനി പിന്തുണയില്ല."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ഓണാക്കുക"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"ഇപ്പോൾ വേണ്ട"</string>
+    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
+    <skip />
+    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
+    <skip />
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"കൂടുതലറിയുക"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾക്ക്, കോൺടാക്‌റ്റ് പേരുകളും സന്ദേശങ്ങളും പോലുള്ള വ്യക്തിപരമായ വിവരങ്ങൾ ഉൾപ്പെടെ എല്ലാ അറിയിപ്പ് ഉള്ളടക്കവും വായിക്കാനാകും. അറിയിപ്പുകൾ ഡിസ്‌മിസ് ചെയ്യാനോ ഫോൺ കോളുകൾക്ക് മറുപടി നൽകുന്നത് പോലെ അറിയിപ്പുകളിലെ ബട്ടണുകളിൽ നടപടിയെടുക്കാനോ ഈ ഫീച്ചറിന് കഴിയും.\n\nമുൻഗണനാ മോഡ് ഓണാക്കാനോ ഓഫാക്കാനോ ബന്ധപ്പെട്ട ക്രമീകരണം മാറ്റാനോ ഈ ഫീച്ചറിന് കഴിയും."</string>
+    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"സാധാരണയുള്ളതിലും നേരത്തെ ബാറ്ററിയുടെ ചാർജ് തീർന്നേക്കാം"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ബാറ്ററി ലൈഫ് വര്‍ദ്ധിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ സജീവമാക്കി"</string>

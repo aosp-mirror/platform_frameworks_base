@@ -1864,8 +1864,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Neznámý formát na výšku"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Neznámý formát na šířku"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Zrušeno"</string>
@@ -1911,10 +1910,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Smazáno administrátorem"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Spořič baterie zapíná tmavý motiv a omezuje či vypíná aktivitu na pozadí, některé vizuální efekty a některé funkce.\n\n"<annotation id="url">"Další informace"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"Spořič baterie zapíná tmavý motiv a omezuje či vypíná aktivitu na pozadí, některé vizuální efekty a některé funkce."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Z důvodu snížení využití dat brání spořič dat některým aplikacím v odesílání nebo příjmu dat na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnout Spořič dat?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnout"</string>
@@ -2154,12 +2151,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Toto oznámení bylo ztlumeno. Po klepnutí můžete zadat zpětnou vazbu."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"U tohoto oznámení byla zvýšena priorita. Po klepnutí můžete zadat zpětnou vazbu."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"U tohoto oznámení byla snížena priorita. Po klepnutí můžete zadat zpětnou vazbu."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Vyzkoušejte vylepšená oznámení"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Pokud chcete dál dostávat návrhy akcí, odpovědí a další, zapněte vylepšená oznámení. Adaptivní oznámení systému Android už nejsou podporována."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Zapnout"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Teď ne"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Vylepšená oznámení"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Navrhované akce a odpovědi jsou teď poskytovány prostřednictvím vylepšených oznámení. Adaptivní oznámení systému Android už nejsou podporována."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Vypnout"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Další informace"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Vylepšená oznámení mohou číst veškerý obsah oznámení včetně osobních údajů, jako jsou jména kontaktů a obsah zpráv. Tato funkce také může zavírat oznámení nebo aktivovat tlačítka v oznámeních, například přijímat telefonické hovory.\n\nMůže také zapnout nebo vypnout prioritní režim a změnit související nastavení."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Adaptivní oznámení pro Android byla v systému Android 12 nahrazena vylepšenými oznámeními. Tato funkce ukazuje navrhované akce a odpovědi a uspořádává oznámení.\n\nVylepšená oznámení mají přístup k obsahu oznámení, včetně osobních údajů, jako jsou jména kontaktů a zprávy. Tato funkce také může zavírat oznámení nebo na ně odpovídat, například přijímat telefonní hovory a ovládat režim Nerušit."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informační oznámení režimu sledu činností"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterie se možná vybije před obvyklým časem nabití"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Byl aktivován spořič baterie za účelem prodloužení výdrže"</string>
