@@ -6607,7 +6607,6 @@ public final class Settings {
          *
          * @hide
          */
-        @Readable
         public static final String ALWAYS_ON_VPN_APP = "always_on_vpn_app";
 
         /**
