@@ -25,6 +25,8 @@ class MediaHost constructor(
 
     private val tmpLocationOnScreen: IntArray = intArrayOf(0, 0)
 
+    private var inited: Boolean = false
+
     /**
      * Get the current bounds on the screen. This makes sure the state is fresh and up to date
      */
@@ -84,6 +86,11 @@ class MediaHost constructor(
      *                 transitions.
      */
     fun init(@MediaLocation location: Int) {
+        if (inited) {
+            return
+        }
+        inited = true
+
         this.location = location
         hostView = mediaHierarchyManager.register(this)
         hostView.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
