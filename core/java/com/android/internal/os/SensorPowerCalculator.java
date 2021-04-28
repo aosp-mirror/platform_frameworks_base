@@ -40,7 +40,7 @@ public class SensorPowerCalculator extends PowerCalculator {
     @Override
     protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
-        app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SENSORS,
+        app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SENSORS,
                         calculateDuration(u, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED))
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS,
                         calculatePowerMah(u, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED));

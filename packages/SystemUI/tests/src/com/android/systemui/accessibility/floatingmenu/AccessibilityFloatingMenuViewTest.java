@@ -16,6 +16,9 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.view.View.OVER_SCROLL_ALWAYS;
+import static android.view.View.OVER_SCROLL_NEVER;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -435,6 +438,30 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
 
         assertThat(infos.getActionList().stream().anyMatch(
                 action -> action.getId() == R.id.action_move_to_edge_and_hide)).isTrue();
+    }
+
+    @Test
+    public void onTargetsChanged_exceedAvailableHeight_overScrollAlways() {
+        final RecyclerView listView = new RecyclerView(mContext);
+        final AccessibilityFloatingMenuView menuView =
+                spy(new AccessibilityFloatingMenuView(mContext, listView));
+        doReturn(true).when(menuView).hasExceededMaxLayoutHeight();
+
+        menuView.onTargetsChanged(mTargets);
+
+        assertThat(listView.getOverScrollMode()).isEqualTo(OVER_SCROLL_ALWAYS);
+    }
+
+    @Test
+    public void onTargetsChanged_notExceedAvailableHeight_overScrollNever() {
+        final RecyclerView listView = new RecyclerView(mContext);
+        final AccessibilityFloatingMenuView menuView =
+                spy(new AccessibilityFloatingMenuView(mContext, listView));
+        doReturn(false).when(menuView).hasExceededMaxLayoutHeight();
+
+        mMenuView.onTargetsChanged(mTargets);
+
+        assertThat(mListView.getOverScrollMode()).isEqualTo(OVER_SCROLL_NEVER);
     }
 
     @After

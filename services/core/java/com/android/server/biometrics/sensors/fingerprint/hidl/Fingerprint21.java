@@ -26,9 +26,7 @@ import android.app.UserSwitchObserver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
@@ -50,9 +48,7 @@ import android.os.UserManager;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
@@ -314,17 +310,22 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         }
     }
 
-    Fingerprint21(@NonNull Context context, @NonNull BiometricScheduler scheduler,
-            @NonNull Handler handler, int sensorId,
-            @BiometricManager.Authenticators.Types int strength,
+    Fingerprint21(@NonNull Context context,
+            @NonNull FingerprintSensorPropertiesInternal sensorProps,
+            @NonNull BiometricScheduler scheduler, @NonNull Handler handler,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull HalResultController controller) {
         mContext = context;
-        mSensorId = sensorId;
+
+        mSensorProperties = sensorProps;
+        mSensorId = sensorProps.sensorId;
+        mIsUdfps = sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
+                || sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC;
+        mIsPowerbuttonFps = sensorProps.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON;
+
         mScheduler = scheduler;
         mHandler = handler;
         mActivityTaskManager = ActivityTaskManager.getInstance();
-
         mTaskStackListener = new BiometricTaskStackListener();
         mAuthenticatorIds = Collections.synchronizedMap(new HashMap<>());
         mLazyDaemon = Fingerprint21.this::getDaemon;
@@ -341,46 +342,20 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to register user switch observer");
         }
-
-        // TODO(b/179175438): Remove this code block after transition to AIDL.
-        // The existence of config_udfps_sensor_props indicates that the sensor is UDFPS.
-        mIsUdfps = !ArrayUtils.isEmpty(
-                mContext.getResources().getIntArray(R.array.config_udfps_sensor_props));
-
-        // config_is_powerbutton_fps indicates whether device has a power button fingerprint sensor.
-        mIsPowerbuttonFps = mContext.getResources().getBoolean(R.bool.config_is_powerbutton_fps);
-
-        final @FingerprintSensorProperties.SensorType int sensorType;
-        if (mIsUdfps) {
-            sensorType = FingerprintSensorProperties.TYPE_UDFPS_OPTICAL;
-        } else if (mIsPowerbuttonFps) {
-            sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON;
-        } else {
-            sensorType = FingerprintSensorProperties.TYPE_REAR;
-        }
-
-        // IBiometricsFingerprint@2.1 does not manage timeout below the HAL, so the Gatekeeper HAT
-        // cannot be checked
-        final boolean resetLockoutRequiresHardwareAuthToken = false;
-        final int maxEnrollmentsPerUser = mContext.getResources()
-                .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
-
-        mSensorProperties = new FingerprintSensorPropertiesInternal(context, sensorId,
-                Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,
-                new ArrayList<ComponentInfoInternal>() /* componentInfo */, sensorType,
-                resetLockoutRequiresHardwareAuthToken);
     }
 
-    public static Fingerprint21 newInstance(@NonNull Context context, int sensorId, int strength,
+    public static Fingerprint21 newInstance(@NonNull Context context,
+            @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         final Handler handler = new Handler(Looper.getMainLooper());
         final BiometricScheduler scheduler =
                 new BiometricScheduler(TAG, gestureAvailabilityDispatcher);
-        final HalResultController controller = new HalResultController(sensorId, context, handler,
+        final HalResultController controller = new HalResultController(sensorProps.sensorId,
+                context, handler,
                 scheduler);
-        return new Fingerprint21(context, scheduler, handler, sensorId, strength,
-                lockoutResetDispatcher, controller);
+        return new Fingerprint21(context, sensorProps, scheduler, handler, lockoutResetDispatcher,
+                controller);
     }
 
     @Override

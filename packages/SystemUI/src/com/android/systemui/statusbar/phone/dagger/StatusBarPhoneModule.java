@@ -38,6 +38,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -214,7 +215,8 @@ public interface StatusBarPhoneModule {
             SystemStatusAnimationScheduler animationScheduler,
             PrivacyDotViewController dotViewController,
             TunerService tunerService,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -300,6 +302,7 @@ public interface StatusBarPhoneModule {
                 animationScheduler,
                 dotViewController,
                 tunerService,
-                featureFlags);
+                featureFlags,
+                keyguardUnlockAnimationController);
     }
 }

@@ -2189,6 +2189,8 @@ public class Intent implements Parcelable, Cloneable {
      * Type: String
      * </p>
      *
+     * E.g. {@link android.Manifest.permission_group.CONTACTS}
+     *
      * @hide
      */
     @SystemApi
@@ -5338,6 +5340,8 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * A String[] holding attribution tags when used with
      * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     *
+     * E.g. an attribution tag could be location_provider, com.google.android.gms.*, etc.
      *
      * @hide
      */

@@ -147,9 +147,9 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
         private double mPowerConsumedByAppsMah;
         private List<UidBatteryConsumer.Builder> mUidBatteryConsumers;
 
-        Builder(@NonNull String[] customPowerComponentNames, int customTimeComponentCount,
+        Builder(@NonNull String[] customPowerComponentNames,
                 boolean includePowerModels, @DrainType int drainType) {
-            super(customPowerComponentNames, customTimeComponentCount, includePowerModels);
+            super(customPowerComponentNames, includePowerModels);
             mDrainType = drainType;
         }
 

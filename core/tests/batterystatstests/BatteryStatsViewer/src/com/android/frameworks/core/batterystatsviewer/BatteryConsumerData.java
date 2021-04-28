@@ -68,7 +68,7 @@ public class BatteryConsumerData {
         double[] totalPowerByComponentMah = new double[BatteryConsumer.POWER_COMPONENT_COUNT];
         double[] totalModeledPowerByComponentMah =
                 new double[BatteryConsumer.POWER_COMPONENT_COUNT];
-        long[] totalDurationByComponentMs = new long[BatteryConsumer.TIME_COMPONENT_COUNT];
+        long[] totalDurationByComponentMs = new long[BatteryConsumer.POWER_COMPONENT_COUNT];
         final int customComponentCount =
                 requestedBatteryConsumer.getCustomPowerComponentCount();
         double[] totalCustomPowerByComponentMah = new double[customComponentCount];
@@ -108,7 +108,7 @@ public class BatteryConsumerData {
                     mBatteryConsumerInfo.isSystemBatteryConsumer);
         }
 
-        for (int component = 0; component < BatteryConsumer.TIME_COMPONENT_COUNT; component++) {
+        for (int component = 0; component < BatteryConsumer.POWER_COMPONENT_COUNT; component++) {
             final String metricTitle = getTimeMetricTitle(component);
             addEntry(metricTitle, EntryType.DURATION,
                     requestedBatteryConsumer.getUsageDurationMillis(component),
@@ -141,7 +141,7 @@ public class BatteryConsumerData {
 
     static String getTimeMetricTitle(int componentId) {
         final String componentName = DebugUtils.constantToString(BatteryConsumer.class,
-                "TIME_COMPONENT_", componentId);
+                "POWER_COMPONENT_", componentId);
         return componentName.charAt(0) + componentName.substring(1).toLowerCase().replace('_', ' ')
                 + " time";
     }
@@ -159,7 +159,7 @@ public class BatteryConsumerData {
     private void computeTotalDuration(BatteryUsageStats batteryUsageStats,
             long[] durationByComponentMs) {
         for (BatteryConsumer consumer : batteryUsageStats.getUidBatteryConsumers()) {
-            for (int component = 0; component < BatteryConsumer.TIME_COMPONENT_COUNT;
+            for (int component = 0; component < BatteryConsumer.POWER_COMPONENT_COUNT;
                     component++) {
                 durationByComponentMs[component] += consumer.getUsageDurationMillis(component);
             }

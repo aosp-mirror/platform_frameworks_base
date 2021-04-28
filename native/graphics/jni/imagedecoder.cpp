@@ -442,6 +442,15 @@ int AImageDecoder_advanceFrame(AImageDecoder* decoder) {
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
+    const auto colorType = imageDecoder->getOutputInfo().colorType();
+    switch (colorType) {
+        case kN32_SkColorType:
+        case kRGBA_F16_SkColorType:
+            break;
+        default:
+            return ANDROID_IMAGE_DECODER_INVALID_STATE;
+    }
+
     if (imageDecoder->advanceFrame()) {
         return ANDROID_IMAGE_DECODER_SUCCESS;
     }

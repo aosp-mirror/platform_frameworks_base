@@ -43,7 +43,7 @@ public class RecognizerIntent {
 
     /**
      * The extra key used in an intent which is providing an already opened audio source for the
-     * RecognitionService to use.
+     * RecognitionService to use. Data should be a URI to an audio resource.
      */
     public static final String EXTRA_AUDIO_INJECT_SOURCE =
             "android.speech.extra.AUDIO_INJECT_SOURCE";

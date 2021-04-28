@@ -29,17 +29,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
-import android.view.View;
 
-import com.android.systemui.R;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -51,9 +47,9 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -84,6 +80,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock KeyguardDisplayManager mKeyguardDisplayManager;
     private @Mock DozeParameters mDozeParameters;
     private @Mock StatusBarStateController mStatusBarStateController;
+    private @Mock KeyguardStateController mKeyguardStateController;
+    private @Mock KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -102,7 +100,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mStatusBarKeyguardViewManager,
                 mDismissCallbackRegistry, mUpdateMonitor, mDumpManager, mUiBgExecutor,
                 mPowerManager, mTrustManager, mDeviceConfig, mNavigationModeController,
-                mKeyguardDisplayManager, mDozeParameters, mStatusBarStateController);
+                mKeyguardDisplayManager, mDozeParameters, mStatusBarStateController,
+                mKeyguardStateController, () -> mKeyguardUnlockAnimationController);
         mViewMediator.start();
     }
 

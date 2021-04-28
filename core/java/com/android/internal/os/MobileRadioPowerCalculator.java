@@ -107,7 +107,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
         if (total.remainingPowerMah != 0 || total.totalAppPowerMah != 0) {
             builder.getOrCreateSystemBatteryConsumerBuilder(
                         SystemBatteryConsumer.DRAIN_TYPE_MOBILE_RADIO)
-                    .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_MOBILE_RADIO,
+                    .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                             total.durationMs)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                             total.remainingPowerMah + total.totalAppPowerMah,
@@ -128,7 +128,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
                 radioActiveDurationMs, consumptionUC);
         total.totalAppPowerMah += powerMah;
 
-        app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_MOBILE_RADIO,
+        app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                         radioActiveDurationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO, powerMah,
                         powerModel);
