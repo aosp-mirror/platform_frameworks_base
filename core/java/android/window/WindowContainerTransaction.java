@@ -339,33 +339,6 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
-     * Sets the container as launch adjacent flag root. Task starting with
-     * {@link FLAG_ACTIVITY_LAUNCH_ADJACENT} will be launching to.
-     *
-     * @hide
-     */
-    @NonNull
-    public WindowContainerTransaction setLaunchAdjacentFlagRoot(
-            @NonNull WindowContainerToken container) {
-        mHierarchyOps.add(HierarchyOp.createForSetLaunchAdjacentFlagRoot(container.asBinder(),
-                false /* clearRoot */));
-        return this;
-    }
-
-    /**
-     * Clears launch adjacent flag root for the display area of passing container.
-     *
-     * @hide
-     */
-    @NonNull
-    public WindowContainerTransaction clearLaunchAdjacentFlagRoot(
-            @NonNull WindowContainerToken container) {
-        mHierarchyOps.add(HierarchyOp.createForSetLaunchAdjacentFlagRoot(container.asBinder(),
-                true /* clearRoot */));
-        return this;
-    }
-
-    /**
      * Starts a task by id. The task is expected to already exist (eg. as a recent task).
      * @param taskId Id of task to start.
      * @param options bundle containing ActivityOptions for the task's top activity.
@@ -704,7 +677,6 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT = 3;
         public static final int HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS = 4;
         public static final int HIERARCHY_OP_TYPE_LAUNCH_TASK = 5;
-        public static final int HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT = 6;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -761,14 +733,6 @@ public final class WindowContainerTransaction implements Parcelable {
             return new HierarchyOp(HIERARCHY_OP_TYPE_LAUNCH_TASK, null, null, null, null, true,
                     fullOptions);
         }
-
-        /** Create a hierarchy op for setting launch adjacent flag root. */
-        public static HierarchyOp createForSetLaunchAdjacentFlagRoot(IBinder container,
-                boolean clearRoot) {
-            return new HierarchyOp(HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT, container, null,
-                    null, null, clearRoot, null);
-        }
-
 
         private HierarchyOp(int type, @Nullable IBinder container, @Nullable IBinder reparent,
                 int[] windowingModes, int[] activityTypes, boolean toTop,
@@ -865,9 +829,6 @@ public final class WindowContainerTransaction implements Parcelable {
                             + " adjacentRoot=" + mReparent + "}";
                 case HIERARCHY_OP_TYPE_LAUNCH_TASK:
                     return "{LaunchTask: " + mLaunchOptions + "}";
-                case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT:
-                    return "{SetAdjacentFlagRoot: container=" + mContainer + " clearRoot=" + mToTop
-                            + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop + " mWindowingMode=" + mWindowingModes
