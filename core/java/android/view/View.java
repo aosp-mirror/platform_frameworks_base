@@ -30876,7 +30876,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Called when the content from {@link View#onCreateViewTranslationRequest} had been translated
-     * by the TranslationService.
+     * by the TranslationService. The {@link ViewTranslationResponse} should be saved here so that
+     * the {@link ViewTranslationResponse} can be used to display the translation when the system
+     * calls {@link ViewTranslationCallback#onShowTranslation}.
      *
      * <p> The default implementation will set the ViewTranslationResponse that can be get from
      * {@link View#getViewTranslationResponse}. </p>
@@ -30929,7 +30931,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * information, e.g. source spec, target spec.
      * @param requests fill in with {@link ViewTranslationRequest}s for translation purpose.
      */
-    public void dispatchRequestTranslation(@NonNull Map<AutofillId, long[]> viewIds,
+    public void dispatchCreateViewTranslationRequest(@NonNull Map<AutofillId, long[]> viewIds,
             @NonNull @DataFormat int[] supportedFormats,
             @NonNull TranslationCapability capability,
             @NonNull List<ViewTranslationRequest> requests) {
