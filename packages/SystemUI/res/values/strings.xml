@@ -2971,4 +2971,7 @@
     <!-- Accessibility action for tapping on an affordance on an unlocked lock screen (ie: "Double
      tap to enter device") [CHAR LIMIT=NONE] -->
     <string name="accessibility_enter_hint">enter device</string>
+    <!-- Message shown to suggest authentication using [CHAR LIMIT=60]-->
+    <string name="keyguard_try_fingerprint">Use fingerprint to open</string>
+
 </resources>
