@@ -25,6 +25,7 @@ import android.graphics.drawable.RippleDrawable
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -43,7 +44,7 @@ open class QSTileViewHorizontal(
     private var paintColor = Color.WHITE
     private var paintAnimator: ValueAnimator? = null
     private var labelAnimator: ValueAnimator? = null
-    private var mSideView: ImageView = ImageView(mContext)
+    private var sideView: ImageView = ImageView(mContext)
     override var heightOverride: Int = HeightOverrideable.NO_OVERRIDE
 
     init {
@@ -59,13 +60,14 @@ open class QSTileViewHorizontal(
         val iconSize = context.resources.getDimensionPixelSize(R.dimen.qs_icon_size)
         addView(mIcon, 0, LayoutParams(iconSize, iconSize))
 
-        mSideView.visibility = View.GONE
-        addView(
-                mSideView,
-                -1,
-                LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
-                    gravity = Gravity.CENTER_VERTICAL
-        })
+        sideView.visibility = View.GONE
+        val sideViewLayoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            marginStart = context.resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
+        }
+        addView(sideView, -1, sideViewLayoutParams)
+        sideView.adjustViewBounds = true
+        sideView.scaleType = ImageView.ScaleType.FIT_CENTER
 
         mColorLabelActive = ColorStateList.valueOf(getColorForState(getContext(), STATE_ACTIVE))
         changeLabelColor(getLabelColor(mState)) // Matches the default state of the tile
@@ -89,16 +91,17 @@ open class QSTileViewHorizontal(
         mLabelContainer.setPadding(0, 0, 0, 0)
         (mLabelContainer.layoutParams as MarginLayoutParams).apply {
             marginStart = context.resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
+            marginEnd = 0
+            gravity = Gravity.CENTER_VERTICAL or Gravity.START
         }
         mLabel.gravity = Gravity.START
         mLabel.textDirection = TEXT_DIRECTION_LOCALE
         mSecondLine.gravity = Gravity.START
         mSecondLine.textDirection = TEXT_DIRECTION_LOCALE
 
-        (mLabelContainer.layoutParams as LayoutParams).gravity =
-            Gravity.CENTER_VERTICAL or Gravity.START
         if (mCollapsedView) {
-            mSecondLine.visibility = GONE
+            mSecondLine.alpha = 0f
+            mLabelContainer.setIgnoredView(mSecondLine)
         }
     }
 
@@ -183,9 +186,7 @@ open class QSTileViewHorizontal(
 
     private fun setLabelsColor(color: ColorStateList) {
         mLabel.setTextColor(color)
-        if (!mCollapsedView) {
-            mSecondLine.setTextColor(color)
-        }
+        mSecondLine.setTextColor(color)
     }
 
     private fun clearBackgroundAnimator() {
@@ -198,19 +199,17 @@ open class QSTileViewHorizontal(
 
     private fun loadSideViewDrawableIfNecessary(state: QSTile.State) {
         if (state.sideViewDrawable != null) {
-            (mSideView.layoutParams as MarginLayoutParams).apply {
-                marginStart =
-                        context.resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
-            }
-            mSideView.setImageDrawable(state.sideViewDrawable)
-            mSideView.visibility = View.VISIBLE
-            mSideView.adjustViewBounds = true
-            mSideView.scaleType = ImageView.ScaleType.FIT_CENTER
+            sideView.setImageDrawable(state.sideViewDrawable)
+            sideView.visibility = View.VISIBLE
         } else {
-            mSideView.setImageDrawable(null)
-            mSideView.visibility = GONE
+            sideView.setImageDrawable(null)
+            sideView.visibility = GONE
         }
     }
 
     override fun handleExpand(dualTarget: Boolean) {}
+
+    override fun getSecondaryIcon(): View {
+        return sideView
+    }
 }
