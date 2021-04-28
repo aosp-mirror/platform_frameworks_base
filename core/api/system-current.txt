@@ -317,6 +317,7 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
+    field public static final int durationBetweenRequestsMillis;
     field public static final int hotwordDetectionService;
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
@@ -325,7 +326,6 @@ package android {
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
     field public static final int sdkVersion = 16844304; // 0x1010610
     field public static final int supportsAmbientMode = 16844173; // 0x101058d
-    field public static final int throttleDurationMillis;
     field public static final int userRestriction = 16844164; // 0x1010584
   }
 
@@ -9867,7 +9867,7 @@ package android.service.displayhash {
   public final class DisplayHashParams implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.util.Size getBufferSize();
-    method public boolean isUseGrayscale();
+    method public boolean isGrayscaleBuffer();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.displayhash.DisplayHashParams> CREATOR;
   }
@@ -9876,7 +9876,7 @@ package android.service.displayhash {
     ctor public DisplayHashParams.Builder();
     method @NonNull public android.service.displayhash.DisplayHashParams build();
     method @NonNull public android.service.displayhash.DisplayHashParams.Builder setBufferSize(int, int);
-    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setUseGrayscale(boolean);
+    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setGrayscaleBuffer(boolean);
   }
 
   public abstract class DisplayHashingService extends android.app.Service {
