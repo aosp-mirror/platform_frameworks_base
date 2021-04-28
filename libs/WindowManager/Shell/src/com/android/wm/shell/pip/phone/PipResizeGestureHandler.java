@@ -232,7 +232,8 @@ public class PipResizeGestureHandler {
         }
     }
 
-    private void onInputEvent(InputEvent ev) {
+    @VisibleForTesting
+    void onInputEvent(InputEvent ev) {
         // Don't allow resize when PiP is stashed.
         if (mPipBoundsState.isStashed()) {
             return;
@@ -366,7 +367,8 @@ public class PipResizeGestureHandler {
         return mIsSysUiStateValid;
     }
 
-    private void onPinchResize(MotionEvent ev) {
+    @VisibleForTesting
+    void onPinchResize(MotionEvent ev) {
         int action = ev.getActionMasked();
 
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
@@ -411,7 +413,7 @@ public class PipResizeGestureHandler {
             if (!mThresholdCrossed
                     && (distanceBetween(mDownSecondPoint, mLastSecondPoint) > mTouchSlop
                             || distanceBetween(mDownPoint, mLastPoint) > mTouchSlop)) {
-                mInputMonitor.pilferPointers();
+                pilferPointers();
                 mThresholdCrossed = true;
                 // Reset the down to begin resizing from this point
                 mDownPoint.set(mLastPoint);
@@ -547,6 +549,17 @@ public class PipResizeGestureHandler {
     Rect getUserResizeBounds() {
         return mUserResizeBounds;
     }
+
+    @VisibleForTesting
+    Rect getLastResizeBounds() {
+        return mLastResizeBounds;
+    }
+
+    @VisibleForTesting
+    void pilferPointers() {
+        mInputMonitor.pilferPointers();
+    }
+
 
     @VisibleForTesting public void updateMaxSize(int maxX, int maxY) {
         mMaxSize.set(maxX, maxY);
