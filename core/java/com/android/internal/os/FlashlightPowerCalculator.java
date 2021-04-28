@@ -39,7 +39,7 @@ public class FlashlightPowerCalculator extends PowerCalculator {
         final long durationMs = mPowerEstimator.calculateDuration(u.getFlashlightTurnedOnTimer(),
                 rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah = mPowerEstimator.calculatePower(durationMs);
-        app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_FLASHLIGHT, durationMs)
+        app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, powerMah);
     }
 

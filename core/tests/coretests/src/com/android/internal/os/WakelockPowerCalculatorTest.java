@@ -62,13 +62,13 @@ public class WakelockPowerCalculatorTest {
         mStatsRule.apply(calculator);
 
         UidBatteryConsumer consumer = mStatsRule.getUidBatteryConsumer(APP_UID);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WAKELOCK))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WAKELOCK))
                 .isEqualTo(1000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK))
                 .isWithin(PRECISION).of(0.1);
 
         UidBatteryConsumer osConsumer = mStatsRule.getUidBatteryConsumer(Process.ROOT_UID);
-        assertThat(osConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WAKELOCK))
+        assertThat(osConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WAKELOCK))
                 .isEqualTo(5000);
         assertThat(osConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK))
                 .isWithin(PRECISION).of(0.5);

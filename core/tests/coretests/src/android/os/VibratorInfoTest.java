@@ -108,6 +108,8 @@ public class VibratorInfoTest {
                 .build();
         assertEquals(20, info.getPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_CLICK));
         assertEquals(0, info.getPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_TICK));
+        assertEquals(0, new VibratorInfo.Builder(TEST_VIBRATOR_ID).build()
+                .getPrimitiveDuration(VibrationEffect.Composition.PRIMITIVE_TICK));
     }
 
     @Test

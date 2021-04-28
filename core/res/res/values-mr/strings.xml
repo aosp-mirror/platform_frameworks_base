@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"अज्ञात पोट्रेट"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"अज्ञात लँडस्केप"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"रद्द केले"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"आपल्या प्रशासकाने हटवले"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ओके"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"बॅटरी सेव्हर गडद थीम सुरू करते आणि बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट व ठरावीक वैशिष्ट्ये मर्यादित किंवा बंद करते.\n\n"<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"बॅटरी सेव्हर गडद थीम सुरू करते आणि बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट व ठरावीक वैशिष्ट्ये मर्यादित किंवा बंद करते."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना बॅकग्राउंडमध्ये डेटा पाठवण्यास किंवा मिळवण्यास डेटा सर्व्हर प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अ‍ॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा की, तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असे होऊ शकते."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेव्हर सुरू करायचे?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"सुरू करा"</string>
@@ -2099,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ही सूचना सायलंट करण्यात आली आहे. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"हा सूचनेला उच्च रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"या सूचनेला कमी रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"वर्धित सूचना वापरून पहा"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"सुचवलेल्या कृती, उत्तरे आणि आणखी बरेच काही मिळवत राहण्यासाठी, वर्धित सूचना सुरू करा. Android अ‍ॅडॅप्टिव्ह सूचना यांना आता सपोर्ट नाही."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"सुरू करा"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"आता नको"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"वर्धित सूचना"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"सुचवलेल्या कृती आणि उत्तरे आता वर्धित सूचनांद्वारे दिल्या जातात. Android अ‍ॅडॅप्टिव्ह सूचना यांना आता सपोर्ट नाही."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ओके"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"बंद करा"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"अधिक जाणून घ्या"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"संपर्कांची नावे आणि मेसेज यांसारख्या वैयक्तिक माहितीच्या समावेशासह वर्धित सूचना या सर्व सूचनांचा आशय वाचू शकतात. हे वैशिष्‍ट्य सूचना डिसमिस करू शकते किंवा फोन कॉलना उत्तर देण्यासारख्या सूचनांमधील बटणवर कृतीदेखील करू शकते.\n\nहे वैशिष्‍ट्य प्राधान्य मोड सुरू किंवा बंद करू शकते आणि संबंधित सेटिंग्जदेखील बदलू शकते."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12 मधील Android अ‍ॅडॅप्टिव्ह सूचना यांना आता वर्धित सूचनांनी बदलले आहे. हे वैशिष्ट्य सुचवलेल्या कृती आणि उत्तरे दाखवते व तुमच्या सूचना व्यवस्थापित करते.\n\nवर्धित सूचना या संपर्कांची नावे आणि मेसेज यांसारख्या वैयक्तिक माहितीसह सर्व सूचनांचा आशय अ‍ॅक्सेस करू शकतात. हे वैशिष्‍ट्य फोन कॉलना उत्तर देणे आणि व्यत्यय आणू नका नियंत्रित करणे यांसारख्या कृती करून सूचना डिसमिस करू शकते किंवा त्यांना प्रतिसाद देऊ शकते."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनक्रम मोडची माहिती सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"चार्जिंगची सामान्य पातळी गाठेपर्यंत कदाचित बॅटरी संपू शकते"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर सुरू केला आहे"</string>

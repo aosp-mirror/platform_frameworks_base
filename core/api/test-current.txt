@@ -382,6 +382,7 @@ package android.app {
     method @Deprecated public boolean revokeRuntimePermission(String, String, android.os.UserHandle);
     method public void syncInputTransactions();
     method public void syncInputTransactions(boolean);
+    method @Nullable public android.graphics.Bitmap takeScreenshot(@NonNull android.view.Window);
     field @NonNull public static final java.util.Set<java.lang.String> ALL_PERMISSIONS;
   }
 

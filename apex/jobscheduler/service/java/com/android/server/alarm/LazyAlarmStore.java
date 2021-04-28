@@ -47,11 +47,13 @@ public class LazyAlarmStore implements AlarmStore {
     interface Stats {
         int GET_NEXT_DELIVERY_TIME = 0;
         int GET_NEXT_WAKEUP_DELIVERY_TIME = 1;
+        int GET_COUNT = 2;
     }
 
     final StatLogger mStatLogger = new StatLogger(TAG + " stats", new String[]{
             "GET_NEXT_DELIVERY_TIME",
             "GET_NEXT_WAKEUP_DELIVERY_TIME",
+            "GET_COUNT",
     });
 
     // Decreasing time order because it is more efficient to remove from the tail of an array list.
@@ -220,5 +222,19 @@ public class LazyAlarmStore implements AlarmStore {
     @Override
     public String getName() {
         return TAG;
+    }
+
+    @Override
+    public int getCount(Predicate<Alarm> condition) {
+        long start = mStatLogger.getTime();
+
+        int count = 0;
+        for (final Alarm a : mAlarms) {
+            if (condition.test(a)) {
+                count++;
+            }
+        }
+        mStatLogger.logDurationStat(Stats.GET_COUNT, start);
+        return count;
     }
 }

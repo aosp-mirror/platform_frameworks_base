@@ -1320,6 +1320,8 @@ public class DisplayContentTests extends WindowTestsBase {
         app.setRequestedOrientation(newOrientation);
 
         assertTrue(app.isFixedRotationTransforming());
+        assertTrue(mAppWindow.matchesDisplayAreaBounds());
+        assertFalse(mAppWindow.isLetterboxedAppWindow());
         assertTrue(mDisplayContent.getDisplayRotation().shouldRotateSeamlessly(
                 ROTATION_0 /* oldRotation */, ROTATION_90 /* newRotation */,
                 false /* forceUpdate */));

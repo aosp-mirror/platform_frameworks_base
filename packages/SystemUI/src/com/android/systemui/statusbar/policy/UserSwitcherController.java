@@ -78,6 +78,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Keeps a list of all users on the device for user switching.
@@ -128,14 +129,14 @@ public class UserSwitcherController implements Dumpable {
             @Main Handler handler, ActivityStarter activityStarter,
             BroadcastDispatcher broadcastDispatcher, UiEventLogger uiEventLogger,
             TelephonyListenerManager telephonyListenerManager,
-            IActivityTaskManager activityTaskManager) {
+            IActivityTaskManager activityTaskManager, UserDetailAdapter userDetailAdapter) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mTelephonyListenerManager = telephonyListenerManager;
         mActivityTaskManager = activityTaskManager;
         mUiEventLogger = uiEventLogger;
         mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(mUiEventLogger);
-        mUserDetailAdapter = new UserDetailAdapter(this, mContext, mUiEventLogger);
+        mUserDetailAdapter = userDetailAdapter;
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
         }
@@ -577,11 +578,13 @@ public class UserSwitcherController implements Dumpable {
         pw.println("mSimpleUserSwitcher=" + mSimpleUserSwitcher);
     }
 
-    public String getCurrentUserName(Context context) {
+    /** Returns the name of the current user of the phone. */
+    public String getCurrentUserName() {
         if (mUsers.isEmpty()) return null;
         UserRecord item = mUsers.get(0);
         if (item == null || item.info == null) return null;
-        if (item.isGuest) return context.getString(com.android.settingslib.R.string.guest_nickname);
+        if (item.isGuest) return mContext.getString(
+                com.android.settingslib.R.string.guest_nickname);
         return item.info.name;
     }
 
@@ -787,15 +790,14 @@ public class UserSwitcherController implements Dumpable {
     public static class UserDetailAdapter implements DetailAdapter {
         private final Intent USER_SETTINGS_INTENT = new Intent(Settings.ACTION_USER_SETTINGS);
 
-        private final UserSwitcherController mUserSwitcherController;
         private final Context mContext;
-        private final UiEventLogger mUiEventLogger;
+        private final Provider<UserDetailView.Adapter> mUserDetailViewAdapterProvider;
 
-        UserDetailAdapter(UserSwitcherController userSwitcherController, Context context,
-                UiEventLogger uiEventLogger) {
-            mUserSwitcherController = userSwitcherController;
+        @Inject
+        UserDetailAdapter(Context context,
+                Provider<UserDetailView.Adapter> userDetailViewAdapterProvider) {
             mContext = context;
-            mUiEventLogger = uiEventLogger;
+            mUserDetailViewAdapterProvider = userDetailViewAdapterProvider;
         }
 
         @Override
@@ -808,7 +810,7 @@ public class UserSwitcherController implements Dumpable {
             UserDetailView v;
             if (!(convertView instanceof UserDetailView)) {
                 v = UserDetailView.inflate(context, parent, false);
-                v.createAndSetAdapter(mUserSwitcherController, mUiEventLogger);
+                v.setAdapter(mUserDetailViewAdapterProvider.get());
             } else {
                 v = (UserDetailView) convertView;
             }

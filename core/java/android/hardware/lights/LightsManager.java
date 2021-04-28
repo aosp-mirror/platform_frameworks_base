@@ -99,6 +99,15 @@ public abstract class LightsManager {
     /**
      * Encapsulates a session that can be used to control device lights and represents the lifetime
      * of the requests.
+     *
+     * <p>Any lights requests always live in a lights session which defines the lifecycle of the
+     * lights requests. A lights session is AutoCloseable that will get closed when leaving the
+     * session context.
+     *
+     * <p>Multiple sessions can make lights requests which contains same light. In the case the
+     * LightsManager implementation will arbitrate and honor one of the session's request. When
+     * the session hold the current light request closed, LightsManager implementation will choose
+     * another live session to honor its lights requests.
      */
     public abstract static class LightsSession implements AutoCloseable {
         private final IBinder mToken = new Binder();

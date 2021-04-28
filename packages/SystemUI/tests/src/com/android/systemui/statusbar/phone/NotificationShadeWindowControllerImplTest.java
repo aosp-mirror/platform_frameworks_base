@@ -134,6 +134,19 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void attach_animatingKeyguardAndSurface_wallpaperVisible() {
+        clearInvocations(mWindowManager);
+        when(mKeyguardViewMediator.isShowingAndNotOccluded()).thenReturn(true);
+        when(mKeyguardViewMediator
+                .isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe())
+                .thenReturn(true);
+        mNotificationShadeWindowController.attach();
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SHOW_WALLPAPER) != 0).isTrue();
+    }
+
+    @Test
     public void setBackgroundBlurRadius_expandedWithBlurs() {
         mNotificationShadeWindowController.setBackgroundBlurRadius(10);
         verify(mNotificationShadeWindowView).setVisibility(eq(View.VISIBLE));

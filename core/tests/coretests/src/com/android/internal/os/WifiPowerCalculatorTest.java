@@ -87,7 +87,7 @@ public class WifiPowerCalculatorTest {
         mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
-        assertThat(uidConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI))
+        assertThat(uidConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isEqualTo(1423);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isWithin(PRECISION).of(0.2214666);
@@ -96,7 +96,7 @@ public class WifiPowerCalculatorTest {
 
         SystemBatteryConsumer systemConsumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_WIFI);
-        assertThat(systemConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI))
+        assertThat(systemConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isEqualTo(5577);
         assertThat(systemConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isWithin(PRECISION).of(1.11153);
@@ -117,7 +117,7 @@ public class WifiPowerCalculatorTest {
         mStatsRule.apply(calculator);
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
-        assertThat(uidConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI))
+        assertThat(uidConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isEqualTo(1423);
         /* Same ratio as in testPowerControllerBasedModel_nonMeasured but scaled by 1_000_000uC. */
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
@@ -127,7 +127,7 @@ public class WifiPowerCalculatorTest {
 
         SystemBatteryConsumer systemConsumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_WIFI);
-        assertThat(systemConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI))
+        assertThat(systemConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isEqualTo(5577);
         /* Same ratio as in testPowerControllerBasedModel_nonMeasured but scaled by 1_000_000uC. */
         assertThat(systemConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
@@ -162,7 +162,7 @@ public class WifiPowerCalculatorTest {
         mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
-        assertThat(uidConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI))
+        assertThat(uidConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isEqualTo(1000);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isWithin(PRECISION).of(0.8231573);
@@ -171,7 +171,7 @@ public class WifiPowerCalculatorTest {
 
         SystemBatteryConsumer systemConsumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_WIFI);
-        assertThat(systemConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI))
+        assertThat(systemConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isEqualTo(2222);
         assertThat(systemConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isWithin(PRECISION).of(2.575000);
@@ -193,7 +193,7 @@ public class WifiPowerCalculatorTest {
         mStatsRule.apply(calculator);
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
-        assertThat(uidConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI))
+        assertThat(uidConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isEqualTo(1000);
         /* Same ratio as in testTimerBasedModel_nonMeasured but scaled by 1_000_000uC. */
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
@@ -203,7 +203,7 @@ public class WifiPowerCalculatorTest {
 
         SystemBatteryConsumer systemConsumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_WIFI);
-        assertThat(systemConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI))
+        assertThat(systemConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isEqualTo(2222);
         /* Same ratio as in testTimerBasedModel_nonMeasured but scaled by 1_000_000uC. */
         assertThat(systemConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))

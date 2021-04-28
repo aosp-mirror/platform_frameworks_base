@@ -51,7 +51,6 @@ import android.net.LinkProperties;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.ChildSaProposal;
-import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
@@ -181,7 +180,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
 
         final List<ChildSaProposal> saProposals =
-                ((IkeTunnelConnectionParams) mConfig.getTunnelConnectionParams())
+                mConfig.getTunnelConnectionParams()
                         .getTunnelModeChildSessionParams()
                         .getSaProposals();
         final int expectedMtu =
