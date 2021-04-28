@@ -336,7 +336,7 @@ public class BiometricManager {
      * @hide
      */
     public long[] getAuthenticatorIds() {
-        return getAuthenticatorIds(UserHandle.getCallingUserId());
+        return getAuthenticatorIds(UserHandle.myUserId());
     }
 
     /**
