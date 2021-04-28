@@ -1949,7 +1949,10 @@
 
         <!-- Applications can set this attribute to an xml resource within their app where they
          specified the rules determining which files and directories can be copied from the device
-         as part of backup or transfer operations. -->
+         as part of backup or transfer operations.
+
+         See the <a href="{@docRoot}about/versions/12/backup-restore">Changes in backup and restore</a>
+         document for the format of the XML file.-->
         <attr name="dataExtractionRules" format="reference"/>
     </declare-styleable>
 
