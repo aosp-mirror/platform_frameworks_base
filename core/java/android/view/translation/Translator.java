@@ -214,6 +214,11 @@ public class Translator {
     }
 
     /** @hide */
+    public TranslationContext getTranslationContext() {
+        return mTranslationContext;
+    }
+
+    /** @hide */
     public int getTranslatorId() {
         return mId;
     }
