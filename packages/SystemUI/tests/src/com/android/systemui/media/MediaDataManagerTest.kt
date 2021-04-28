@@ -425,4 +425,30 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.lastActive).isLessThan(currentTimeMillis)
     }
+
+    @Test
+    fun testTooManyCompactActions_isTruncated() {
+        // GIVEN a notification where too many compact actions were specified
+        val notif = SbnBuilder().run {
+            setPkg(PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.setStyle(MediaStyle().apply {
+                    setMediaSession(session.sessionToken)
+                    setShowActionsInCompactView(0, 1, 2, 3, 4)
+                })
+            }
+            build()
+        }
+
+        // WHEN the notification is loaded
+        mediaDataManager.onNotificationAdded(KEY, notif)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+
+        // THEN only the first MAX_COMPACT_ACTIONS are actually set
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor))
+        assertThat(mediaDataCaptor.value.actionsToShowInCompact.size).isEqualTo(
+                MediaDataManager.MAX_COMPACT_ACTIONS)
+    }
 }
