@@ -31,6 +31,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -364,6 +365,15 @@ public final class BluetoothHeadset implements BluetoothProfile {
         mServiceListener = l;
         mAdapter = adapter;
         mAttributionSource = adapter.getAttributionSource();
+
+        // Preserve legacy compatibility where apps were depending on
+        // registerStateChangeCallback() performing a permissions check which
+        // has been relaxed in modern platform versions
+        if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.R
+                && context.checkSelfPermission(android.Manifest.permission.BLUETOOTH)
+                        != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Need BLUETOOTH permission");
+        }
 
         IBluetoothManager mgr = mAdapter.getBluetoothManager();
         if (mgr != null) {
