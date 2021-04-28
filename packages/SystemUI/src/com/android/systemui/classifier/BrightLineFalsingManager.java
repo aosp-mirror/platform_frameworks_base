@@ -16,6 +16,8 @@
 
 package com.android.systemui.classifier;
 
+import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
+import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.FalsingManagerProxy.FALSING_SUCCESS;
 import static com.android.systemui.classifier.FalsingModule.BRIGHT_LINE_GESTURE_CLASSIFERS;
 
@@ -196,7 +198,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     @Override
     public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
         mPriorInteractionType = interactionType;
-        if (skipFalsing()) {
+        if (skipFalsing(interactionType)) {
             mPriorResults = getPassedResult(1);
             logDebug("Skipped falsing");
             return false;
@@ -229,7 +231,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseTap(@Penalty int penalty) {
-        if (skipFalsing()) {
+        if (skipFalsing(GENERIC)) {
             mPriorResults = getPassedResult(1);
             logDebug("Skipped falsing");
             return false;
@@ -291,7 +293,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseDoubleTap() {
-        if (skipFalsing()) {
+        if (skipFalsing(GENERIC)) {
             mPriorResults = getPassedResult(1);
             logDebug("Skipped falsing");
             return false;
@@ -306,8 +308,9 @@ public class BrightLineFalsingManager implements FalsingManager {
         return result.isFalse();
     }
 
-    private boolean skipFalsing() {
-        return !mKeyguardStateController.isShowing()
+    private boolean skipFalsing(@Classifier.InteractionType  int interactionType) {
+        return interactionType == BACK_GESTURE
+                || !mKeyguardStateController.isShowing()
                 || mTestHarness
                 || mDataProvider.isJustUnlockedWithFace()
                 || mDockManager.isDocked();
