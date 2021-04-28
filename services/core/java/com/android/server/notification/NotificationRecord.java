@@ -877,6 +877,10 @@ public final class NotificationRecord {
         return mHidden;
     }
 
+    public boolean isForegroundService() {
+        return 0 != (getFlags() & Notification.FLAG_FOREGROUND_SERVICE);
+    }
+
     /**
      * Override of all alerting information on the channel and notification. Used when notifications
      * are reposted in response to direct user action and thus don't need to alert.
