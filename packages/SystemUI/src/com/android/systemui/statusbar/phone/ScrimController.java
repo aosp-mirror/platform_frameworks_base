@@ -49,7 +49,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.scrim.ScrimView;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -211,10 +210,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             AlarmManager alarmManager, KeyguardStateController keyguardStateController,
             DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor, DockManager dockManager,
-            ConfigurationController configurationController,
-            FeatureFlags featureFlags, @Main Executor mainExecutor) {
+            ConfigurationController configurationController, @Main Executor mainExecutor) {
         mScrimStateListener = lightBarController::setScrimState;
-        mDefaultScrimAlpha = featureFlags.isShadeOpaque() ? BUSY_SCRIM_ALPHA : GAR_SCRIM_ALPHA;
+        mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
         ScrimState.BUBBLE_EXPANDED.setBubbleAlpha(BUBBLE_SCRIM_ALPHA);
 
         mKeyguardStateController = keyguardStateController;

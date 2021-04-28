@@ -50,7 +50,6 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.scrim.ScrimView;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -107,8 +106,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     private DockManager mDockManager;
     @Mock
     private ConfigurationController mConfigurationController;
-    @Mock
-    private FeatureFlags mFeatureFlags;
 
 
     private static class AnimatorListener implements Animator.AnimatorListener {
@@ -217,14 +214,12 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mDelayedWakeLockBuilder.setTag(any(String.class)))
                 .thenReturn(mDelayedWakeLockBuilder);
         when(mDelayedWakeLockBuilder.build()).thenReturn(mWakeLock);
-        when(mFeatureFlags.isShadeOpaque()).thenReturn(true);
         when(mDockManager.isDocked()).thenReturn(false);
 
         mScrimController = new ScrimController(mLightBarController,
                 mDozeParameters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
-                mDockManager, mConfigurationController, mFeatureFlags,
-                new FakeExecutor(new FakeSystemClock()));
+                mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()));
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront,
                 mScrimForBubble);
