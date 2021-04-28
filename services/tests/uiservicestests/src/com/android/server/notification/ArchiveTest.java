@@ -144,15 +144,21 @@ public class ArchiveTest extends UiServiceTestCase {
     @Test
     public void testRemoveChannelNotifications() {
         List<String> expected = new ArrayList<>();
-        for (int i = 0; i < SIZE; i++) {
+        // Add one extra notification to the beginning to test when 2 adjacent notifications will be
+        // removed in the same pass.
+        StatusBarNotification sbn0 = getNotification("pkg", 0, UserHandle.of(USER_CURRENT));
+        mArchive.record(sbn0, REASON_CANCEL);
+        for (int i = 0; i < SIZE - 1; i++) {
             StatusBarNotification sbn = getNotification("pkg", i, UserHandle.of(USER_CURRENT));
             mArchive.record(sbn, REASON_CANCEL);
-            if (i != 3) {
-                // Will delete notification for this user in channel "test3".
+            if (i != 0 && i != SIZE - 2) {
+                // Will delete notification for this user in channel "test0", and also the last
+                // element in the list.
                 expected.add(sbn.getKey());
             }
         }
-        mArchive.removeChannelNotifications("pkg", USER_CURRENT, "test3");
+        mArchive.removeChannelNotifications("pkg", USER_CURRENT, "test0");
+        mArchive.removeChannelNotifications("pkg", USER_CURRENT, "test" + (SIZE - 2));
         List<StatusBarNotification> actual = Arrays.asList(mArchive.getArray(SIZE, true));
         assertThat(actual).hasSize(expected.size());
         for (StatusBarNotification sbn : actual) {

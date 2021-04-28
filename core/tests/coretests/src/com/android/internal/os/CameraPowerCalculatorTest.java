@@ -52,7 +52,7 @@ public class CameraPowerCalculatorTest {
         mStatsRule.apply(calculator);
 
         UidBatteryConsumer consumer = mStatsRule.getUidBatteryConsumer(APP_UID);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CAMERA))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA))
                 .isEqualTo(1000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA))
                 .isWithin(PRECISION).of(0.1);

@@ -59,6 +59,7 @@ public class SplashscreenIconDrawableFactory {
             return new ImmobileIconDrawable((AdaptiveIconDrawable) foregroundDrawable, iconSize,
                     splashscreenWorkerHandler);
         } else {
+            // TODO for legacy icon don't use adaptive icon drawable to wrapper it
             return new ImmobileIconDrawable(new AdaptiveIconDrawable(
                     new ColorDrawable(backgroundColor), foregroundDrawable), iconSize,
                     splashscreenWorkerHandler);

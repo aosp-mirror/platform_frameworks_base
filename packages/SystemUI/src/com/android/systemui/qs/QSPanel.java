@@ -326,6 +326,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         super.onConfigurationChanged(newConfig);
         mOnConfigurationChangedListeners.forEach(
                 listener -> listener.onConfigurationChange(newConfig));
+        switchSecurityFooter();
     }
 
     @Override
@@ -364,19 +365,25 @@ public class QSPanel extends LinearLayout implements Tunable {
         switchToParent((View) newLayout, parent, index);
         index++;
 
-        if (mSecurityFooter != null) {
-            if (mUsingHorizontalLayout && mHeaderContainer != null) {
-                // Adding the security view to the header, that enables us to avoid scrolling
-                switchToParent(mSecurityFooter, mHeaderContainer, 0);
-            } else {
-                switchToParent(mSecurityFooter, parent, index);
-                index++;
-            }
-        }
-
         if (mFooter != null) {
             // Then the footer with the settings
             switchToParent(mFooter, parent, index);
+            index++;
+        }
+
+        // The security footer is switched on orientation changes
+    }
+
+    private void switchSecurityFooter() {
+        if (mSecurityFooter != null) {
+            if (mContext.getResources().getConfiguration().orientation
+                    == Configuration.ORIENTATION_LANDSCAPE && mHeaderContainer != null
+                    && !mSecurityFooter.getParent().equals(mHeaderContainer)) {
+                // Adding the security view to the header, that enables us to avoid scrolling
+                switchToParent(mSecurityFooter, mHeaderContainer, 0);
+            } else {
+                switchToParent(mSecurityFooter, this, -1);
+            }
         }
     }
 
@@ -668,6 +675,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     public void setSecurityFooter(View view) {
         mSecurityFooter = view;
+        switchSecurityFooter();
     }
 
     void setUsingHorizontalLayout(boolean horizontal, ViewGroup mediaHostView, boolean force,

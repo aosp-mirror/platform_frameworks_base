@@ -33,6 +33,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 
 import java.io.PrintWriter;
@@ -50,9 +51,10 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
     private static final int MAX_TUTORIAL_SHOW_COUNT = 2;
     private final WindowManager mWindowManager;
     private final String mPackageName;
-    private final Rect mDisplaySize;
+    private final float mTutorialHeightRatio;
 
     private Context mContext;
+    private Rect mDisplayBounds;
     private View mTutorialView;
     private ContentResolver mContentResolver;
     private boolean mCanShowTutorial;
@@ -94,23 +96,22 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         }
     };
 
-    public OneHandedTutorialHandler(Context context, WindowManager windowManager,
-            ShellExecutor mainExecutor) {
+    public OneHandedTutorialHandler(Context context, DisplayLayout displayLayout,
+            WindowManager windowManager, ShellExecutor mainExecutor) {
         mContext = context;
         mWindowManager = windowManager;
-        mDisplaySize = windowManager.getCurrentWindowMetrics().getBounds();
         mPackageName = context.getPackageName();
         mContentResolver = context.getContentResolver();
-        mCanShowTutorial = (Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0) >= MAX_TUTORIAL_SHOW_COUNT)
-                ? false : true;
-        mIsOneHandedMode = false;
         final float offsetPercentageConfig = context.getResources().getFraction(
                 R.fraction.config_one_handed_offset, 1, 1);
         final int sysPropPercentageConfig = SystemProperties.getInt(
                 ONE_HANDED_MODE_OFFSET_PERCENTAGE, Math.round(offsetPercentageConfig * 100.0f));
-        mTutorialAreaHeight = Math.round(
-                mDisplaySize.height() * (sysPropPercentageConfig / 100.0f));
+        mTutorialHeightRatio = sysPropPercentageConfig / 100.0f;
+        onDisplayChanged(displayLayout);
+        mCanShowTutorial = (Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0) >= MAX_TUTORIAL_SHOW_COUNT)
+                ? false : true;
+        mIsOneHandedMode = false;
 
         mainExecutor.execute(() -> {
             recreateTutorialView(mContext);
@@ -129,6 +130,20 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         updateFinished(View.INVISIBLE, -mTargetViewContainer.getHeight());
         removeTutorialFromWindowManager();
         mTriggerState = ONE_HANDED_TRIGGER_STATE.UNSET;
+    }
+
+    /**
+     * Called when onDisplayAdded() or onDisplayRemoved() callback
+     * @param displayLayout The latest {@link DisplayLayout} representing current displayId
+     */
+    public void onDisplayChanged(DisplayLayout displayLayout) {
+        // Ensure the mDisplayBounds is portrait, due to OHM only support on portrait
+        if (displayLayout.height() > displayLayout.width()) {
+            mDisplayBounds = new Rect(0, 0, displayLayout.width(), displayLayout.height());
+        } else {
+            mDisplayBounds = new Rect(0, 0, displayLayout.height(), displayLayout.width());
+        }
+        mTutorialAreaHeight = Math.round(mDisplayBounds.height() * mTutorialHeightRatio);
     }
 
     private void recreateTutorialView(Context context) {
@@ -190,7 +205,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
      */
     private WindowManager.LayoutParams getTutorialTargetLayoutParams() {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                mDisplaySize.width(), mTutorialAreaHeight, 0, 0,
+                mDisplayBounds.width(), mTutorialAreaHeight, 0, 0,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
@@ -207,8 +222,8 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         pw.println(TAG + " states: ");
         pw.print(innerPrefix + "mTriggerState=");
         pw.println(mTriggerState);
-        pw.print(innerPrefix + "mDisplaySize=");
-        pw.println(mDisplaySize);
+        pw.print(innerPrefix + "mDisplayBounds=");
+        pw.println(mDisplayBounds);
         pw.print(innerPrefix + "mTutorialAreaHeight=");
         pw.println(mTutorialAreaHeight);
     }

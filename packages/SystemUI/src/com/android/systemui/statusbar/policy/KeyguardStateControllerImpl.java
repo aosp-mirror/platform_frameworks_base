@@ -70,6 +70,28 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private boolean mDebugUnlocked = false;
     private boolean mFaceAuthEnabled;
 
+    private float mDismissAmount = 0f;
+    private boolean mDismissingFromTouch = false;
+
+    /**
+     * Whether the panel is currently flinging to a collapsed state, which means we're dismissing
+     * the keyguard.
+     */
+    private boolean mFlingingToDismissKeyguard = false;
+
+    /**
+     * Whether the panel is currently flinging to a collapsed state, which means we're dismissing
+     * the keyguard, and the fling started during a swipe gesture. This means that we need to take
+     * over the gesture and animate the rest of the way dismissed.
+     */
+    private boolean mFlingingToDismissKeyguardDuringSwipeGesture = false;
+
+    /**
+     * Whether the panel is currently flinging to an expanded state, which means we cancelled the
+     * dismiss gesture and are snapping back to the keyguard state.
+     */
+    private boolean mSnappingKeyguardBackAfterSwipe = false;
+
     /**
      */
     @Inject
@@ -241,8 +263,56 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
+    public boolean isFlingingToDismissKeyguard() {
+        return mFlingingToDismissKeyguard;
+    }
+
+    @Override
+    public boolean isFlingingToDismissKeyguardDuringSwipeGesture() {
+        return mFlingingToDismissKeyguardDuringSwipeGesture;
+    }
+
+    @Override
+    public boolean isSnappingKeyguardBackAfterSwipe() {
+        return mSnappingKeyguardBackAfterSwipe;
+    }
+
+    @Override
+    public float getDismissAmount() {
+        return mDismissAmount;
+    }
+
+    @Override
+    public boolean isDismissingFromSwipe() {
+        return mDismissingFromTouch;
+    }
+
+    @Override
     public void notifyKeyguardGoingAway(boolean keyguardGoingAway) {
         mKeyguardGoingAway = keyguardGoingAway;
+    }
+
+    @Override
+    public void notifyPanelFlingEnd() {
+        mFlingingToDismissKeyguard = false;
+        mFlingingToDismissKeyguardDuringSwipeGesture = false;
+        mSnappingKeyguardBackAfterSwipe = false;
+    }
+
+    @Override
+    public void notifyPanelFlingStart(boolean flingToDismiss) {
+        mFlingingToDismissKeyguard = flingToDismiss;
+        mFlingingToDismissKeyguardDuringSwipeGesture =
+                flingToDismiss && mDismissingFromTouch;
+        mSnappingKeyguardBackAfterSwipe = !flingToDismiss;
+    }
+
+    @Override
+    public void notifyKeyguardDismissAmountChanged(float dismissAmount,
+            boolean dismissingFromTouch) {
+        mDismissAmount = dismissAmount;
+        mDismissingFromTouch = dismissingFromTouch;
+        new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardDismissAmountChanged);
     }
 
     @Override

@@ -74,7 +74,7 @@ public class GnssPowerCalculator extends PowerCalculator {
                 powerMah = computePower(durationMs, averageGnssPowerMa);
         }
 
-        app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_GNSS, durationMs)
+        app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_GNSS, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_GNSS, powerMah, powerModel);
     }
 

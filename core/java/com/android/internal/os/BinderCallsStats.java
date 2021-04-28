@@ -57,7 +57,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public static final boolean DEFAULT_TRACK_SCREEN_INTERACTIVE = false;
     public static final boolean DEFAULT_TRACK_DIRECT_CALLING_UID = true;
     public static final boolean DEFAULT_IGNORE_BATTERY_STATUS = false;
-    public static final boolean DEFAULT_COLLECT_LATENCY_DATA = false;
+    public static final boolean DEFAULT_COLLECT_LATENCY_DATA = true;
     public static final int MAX_BINDER_CALL_STATS_COUNT_DEFAULT = 1500;
     private static final String DEBUG_ENTRY_PREFIX = "__DEBUG_";
 

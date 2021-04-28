@@ -52,7 +52,7 @@ public class FlashlightPowerCalculatorTest {
         mStatsRule.apply(calculator);
 
         UidBatteryConsumer consumer = mStatsRule.getUidBatteryConsumer(APP_UID);
-        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_FLASHLIGHT))
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
                 .isEqualTo(1000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
                 .isWithin(PRECISION).of(0.1);

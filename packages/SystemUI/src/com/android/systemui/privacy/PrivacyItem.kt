@@ -58,7 +58,7 @@ data class PrivacyItem(
     val paused: Boolean = false
 ) {
     val log = "(${privacyType.logName}, ${application.packageName}(${application.uid}), " +
-            "$timeStampElapsed)"
+            "$timeStampElapsed, paused=$paused)"
 }
 
 data class PrivacyApplication(val packageName: String, val uid: Int)

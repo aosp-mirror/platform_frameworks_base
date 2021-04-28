@@ -1820,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Непознат портрет"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Непознат пејзаж"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Откажано"</string>
@@ -1865,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"„Штедачот на батерија“ ја вклучува темната тема и ги ограничува или исклучува активноста во заднина, некои визуелни ефекти и одредени функции.\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"„Штедачот на батерија“ ја вклучува темната тема и ги ограничува или исклучува активноста во заднина, некои визуелни ефекти и одредени функции."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
@@ -2088,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Приоритетноста на известувањево е намалена на „Тивко“. Допрете за да дадете повратни информации."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Известувањево е рангирано повисоко. Допрете за да дадете повратни информации."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Известувањево е рангирано пониско. Допрете за да дадете повратни информации."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Пробај „Подобрени известувања“"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Вклучете ги „Подобрените известувања“ за да продолжите да добивате предлози за дејства, одговори и слично. „Приспособливите известувања на Android“ веќе не се достапни."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Вклучи"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Не сега"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Подобрени известувања"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"„Подобрените известувања“ сега ги даваат предложените дејства и одговорите. „Приспособливите известувања на Android“ веќе не се достапни."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Во ред"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Исклучи"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Дознајте повеќе"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"„Подобрените известувања“ може да ги читаат сите содржини од известувањата, вклучително и личните податоци, како што се имињата на контактите и пораките. Функцијава ќе може и да отфрла известувања или да ги користи копчињата во известувањата, како на пр., да одговара на телефонски повици.\n\nФункцијава може и да го вклучува или исклучува „Приоритетниот режим“ и да ги менува поврзаните поставки."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"„Подобрените известувања“ ги заменија „Приспособливите известувања на Android“ во Android 12. Оваа функција прикажува предложени дејства и одговори и ги организира вашите известувања.\n\n„Подобрените известувања“ може да пристапат до содржините од известувањата, вклучително и личните податоци, како што се имињата на контактите и пораките. Функцијава може и да отфрла или одговара на известувања, како на пример, одговарање телефонски повици и контролирање на „Не вознемирувај“."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известување за информации за режимот за рутини"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батеријата може да се потроши пред вообичаеното време за полнење"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Активиран е „Штедачот на батерија“ за да се продолжи траењето на батеријата"</string>

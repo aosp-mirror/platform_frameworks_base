@@ -50,7 +50,9 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.HIDE_BUBBLES,
         SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR,
         SoftInputShowHideReason.HIDE_REMOVE_CLIENT,
-        SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY})
+        SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY,
+        SoftInputShowHideReason.SHOW_TOGGLE_SOFT_INPUT,
+        SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT})
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
     int SHOW_SOFT_INPUT = 0;
@@ -174,4 +176,16 @@ public @interface SoftInputShowHideReason {
      * {@link com.android.server.wm.WindowManagerInternal#shouldRestoreImeVisibility}.
      */
     int SHOW_RESTORE_IME_VISIBILITY = 22;
+
+    /**
+     * Show soft input by
+     * {@link android.view.inputmethod.InputMethodManager#toggleSoftInput(int, int)};
+     */
+    int SHOW_TOGGLE_SOFT_INPUT = 23;
+
+    /**
+     * Hide soft input by
+     * {@link android.view.inputmethod.InputMethodManager#toggleSoftInput(int, int)};
+     */
+    int HIDE_TOGGLE_SOFT_INPUT = 24;
 }

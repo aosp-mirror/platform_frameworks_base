@@ -128,6 +128,8 @@ public class ConversationLayout extends FrameLayout
     private CharSequence mFallbackChatName;
     private CharSequence mFallbackGroupChatName;
     private CharSequence mConversationTitle;
+    private int mMessageSpacingStandard;
+    private int mMessageSpacingGroup;
     private int mNotificationHeaderExpandedPadding;
     private View mConversationHeader;
     private View mContentContainer;
@@ -241,6 +243,10 @@ public class ConversationLayout extends FrameLayout
         mContentContainer = findViewById(R.id.notification_action_list_margin_target);
         mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
         mExpandButton = findViewById(R.id.expand_button);
+        mMessageSpacingStandard = getResources().getDimensionPixelSize(
+                R.dimen.notification_messaging_spacing);
+        mMessageSpacingGroup = getResources().getDimensionPixelSize(
+                R.dimen.notification_messaging_spacing_conversation_group);
         mNotificationHeaderExpandedPadding = getResources().getDimensionPixelSize(
                 R.dimen.conversation_header_expanded_padding_end);
         mContentMarginEnd = getResources().getDimensionPixelSize(
@@ -699,6 +705,10 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updatePaddingsBasedOnContentAvailability() {
+        // groups have avatars that need more spacing
+        mMessagingLinearLayout.setSpacing(
+                mIsOneToOne ? mMessageSpacingStandard : mMessageSpacingGroup);
+
         int messagingPadding = mIsOneToOne || mIsCollapsed
                 ? 0
                 // Add some extra padding to the messages, since otherwise it will overlap with the

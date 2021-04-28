@@ -127,6 +127,8 @@ interface IFaceService {
     void getFeature(IBinder token, int userId, int feature, IFaceServiceReceiver receiver,
             String opPackageName);
 
-    // Give FaceService its ID. See AuthService.java
-    void initializeConfiguration(int sensorId, int strength);
+    // Registers all HIDL and AIDL sensors. Only HIDL sensor properties need to be provided, because
+    // AIDL sensor properties are retrieved directly from the available HALs. If no HIDL HALs exist,
+    // hidlSensors must be non-null and empty. See AuthService.java
+    void registerAuthenticators(in List<FaceSensorPropertiesInternal> hidlSensors);
 }
