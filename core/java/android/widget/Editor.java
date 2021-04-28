@@ -6684,13 +6684,13 @@ public class Editor {
                     if (TextView.DEBUG_CURSOR) {
                         logCursor("SelectionModifierCursorController: onTouchEvent", "ACTION_UP");
                     }
+                    if (mEndHandle != null) {
+                        mEndHandle.dismissMagnifier();
+                    }
                     if (!isDragAcceleratorActive()) {
                         break;
                     }
                     updateSelection(event);
-                    if (mEndHandle != null) {
-                        mEndHandle.dismissMagnifier();
-                    }
 
                     // No longer dragging to select text, let the parent intercept events.
                     mTextView.getParent().requestDisallowInterceptTouchEvent(false);
