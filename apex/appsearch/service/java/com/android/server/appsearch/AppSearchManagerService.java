@@ -501,7 +501,8 @@ public class AppSearchManagerService extends SystemService {
                                     packageName,
                                     databaseName,
                                     queryExpression,
-                                    new SearchSpec(searchSpecBundle));
+                                    new SearchSpec(searchSpecBundle),
+                                    /*logger=*/ null);
                     invokeCallbackOnResult(
                             callback,
                             AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
@@ -535,7 +536,8 @@ public class AppSearchManagerService extends SystemService {
                                     queryExpression,
                                     new SearchSpec(searchSpecBundle),
                                     packageName,
-                                    callingUid);
+                                    callingUid,
+                                    /*logger=*/ null);
                     invokeCallbackOnResult(
                             callback,
                             AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
@@ -609,7 +611,8 @@ public class AppSearchManagerService extends SystemService {
                                 packageName,
                                 databaseName,
                                 queryExpression,
-                                new SearchSpec(searchSpecBundle));
+                                new SearchSpec(searchSpecBundle),
+                                /*logger=*/ null);
                         while (!searchResultPage.getResults().isEmpty()) {
                             for (int i = 0; i < searchResultPage.getResults().size(); i++) {
                                 AppSearchMigrationHelper.writeBundleToOutputStream(
