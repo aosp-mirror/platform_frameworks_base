@@ -42,6 +42,8 @@ public class AppSearchException extends Exception {
      * Initializes an {@link AppSearchException} with a result code and message.
      *
      * @param resultCode One of the constants documented in {@link AppSearchResult#getResultCode}.
+     * @param message The detail message (which is saved for later retrieval by the {@link
+     *     #getMessage()} method).
      */
     public AppSearchException(
             @AppSearchResult.ResultCode int resultCode, @Nullable String message) {
@@ -52,6 +54,11 @@ public class AppSearchException extends Exception {
      * Initializes an {@link AppSearchException} with a result code, message and cause.
      *
      * @param resultCode One of the constants documented in {@link AppSearchResult#getResultCode}.
+     * @param message The detail message (which is saved for later retrieval by the {@link
+     *     #getMessage()} method).
+     * @param cause The cause (which is saved for later retrieval by the {@link #getCause()}
+     *     method). (A null value is permitted, and indicates that the cause is nonexistent or
+     *     unknown.)
      */
     public AppSearchException(
             @AppSearchResult.ResultCode int resultCode,
