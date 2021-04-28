@@ -363,14 +363,6 @@ public class JobParameters implements Parcelable {
     }
 
     /**
-     * @deprecated Use {@link #isExpeditedJob()} instead.
-     */
-    @Deprecated
-    public boolean isForegroundJob() {
-        return mIsExpedited;
-    }
-
-    /**
      * For jobs with {@link android.app.job.JobInfo.Builder#setOverrideDeadline(long)} set, this
      * provides an easy way to tell whether the job is being executed due to the deadline
      * expiring. Note: If the job is running because its deadline expired, it implies that its
