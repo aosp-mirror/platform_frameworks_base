@@ -21,12 +21,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.hardware.biometrics.BiometricSourceType;
 import android.icu.text.NumberFormat;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
@@ -35,13 +37,15 @@ import java.util.Objects;
 import java.util.TimeZone;
 
 /**
- * Controller for an AnimatableClockView.
+ * Controller for an AnimatableClockView. Instantiated by {@link KeyguardClockSwitchController}.
  */
 public class AnimatableClockController extends ViewController<AnimatableClockView> {
     private static final int FORMAT_NUMBER = 1234567890;
 
     private final StatusBarStateController mStatusBarStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final KeyguardBypassController mBypassController;
     private final int mDozingColor = Color.WHITE;
     private int mLockScreenColor;
 
@@ -59,12 +63,16 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
             AnimatableClockView view,
             StatusBarStateController statusBarStateController,
             BroadcastDispatcher broadcastDispatcher,
-            BatteryController batteryController) {
+            BatteryController batteryController,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            KeyguardBypassController bypassController) {
         super(view);
         mStatusBarStateController = statusBarStateController;
         mIsDozing = mStatusBarStateController.isDozing();
         mDozeAmount = mStatusBarStateController.getDozeAmount();
         mBroadcastDispatcher = broadcastDispatcher;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mBypassController = bypassController;
 
         mBurmeseNumerals = mBurmeseNf.format(FORMAT_NUMBER);
         mBurmeseLineSpacing = getContext().getResources().getFloat(
@@ -98,14 +106,29 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mIsDozing = mStatusBarStateController.isDozing();
         mDozeAmount = mStatusBarStateController.getDozeAmount();
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
+
         refreshTime();
         initColors();
     }
+
+    private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
+                boolean isStrongBiometric) {
+            if (biometricSourceType == BiometricSourceType.FACE
+                    && mBypassController.canBypass()) {
+                mView.animateDisappear();
+            }
+        }
+    };
 
     @Override
     protected void onViewDetached() {
         mBroadcastDispatcher.unregisterReceiver(mLocaleBroadcastReceiver);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
+        mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
     }
 
     /**
