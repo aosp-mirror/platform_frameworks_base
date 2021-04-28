@@ -31,9 +31,7 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.rotationresolver.RotationResolverInternal;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -66,7 +64,6 @@ public abstract class WindowOrientationListener {
 
     private static final boolean USE_GRAVITY_SENSOR = false;
     private static final int DEFAULT_BATCH_LATENCY = 100000;
-    private static final int DEFAULT_ROTATION_RESOLVER_ENABLED = 0; // disabled
     private static final String KEY_ROTATION_RESOLVER_TIMEOUT = "rotation_resolver_timeout_millis";
     private static final long DEFAULT_ROTATION_RESOLVER_TIMEOUT_MILLIS = 700L;
 
@@ -278,11 +275,7 @@ public abstract class WindowOrientationListener {
      * screen rotation.
      */
     @VisibleForTesting
-    boolean isRotationResolverEnabled() {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.CAMERA_AUTOROTATE, DEFAULT_ROTATION_RESOLVER_ENABLED,
-                UserHandle.USER_CURRENT) == 1;
-    }
+    abstract boolean isRotationResolverEnabled();
 
     /**
      * Called when the rotation view of the device has changed.
