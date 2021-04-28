@@ -22,7 +22,6 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -44,7 +43,7 @@ public class QSTileView extends QSTileBaseView {
     protected TextView mSecondLine;
     private ImageView mPadLock;
     protected int mState;
-    protected ViewGroup mLabelContainer;
+    protected ButtonRelativeLayout mLabelContainer;
     private View mExpandIndicator;
     private View mExpandSpace;
     protected ColorStateList mColorLabelActive;
@@ -92,7 +91,7 @@ public class QSTileView extends QSTileBaseView {
     }
 
     protected void createLabel() {
-        mLabelContainer = (ViewGroup) LayoutInflater.from(getContext())
+        mLabelContainer = (ButtonRelativeLayout) LayoutInflater.from(getContext())
                 .inflate(R.layout.qs_tile_label, this, false);
         mLabelContainer.setClipChildren(false);
         mLabelContainer.setClipToPadding(false);
@@ -140,7 +139,7 @@ public class QSTileView extends QSTileBaseView {
         }
         if (!Objects.equals(mSecondLine.getText(), state.secondaryLabel)) {
             mSecondLine.setText(state.secondaryLabel);
-            mSecondLine.setVisibility(TextUtils.isEmpty(state.secondaryLabel) || mCollapsedView
+            mSecondLine.setVisibility(TextUtils.isEmpty(state.secondaryLabel)
                     ? View.GONE : View.VISIBLE);
         }
         boolean dualTarget = mDualTargetAllowed && state.dualTarget;
@@ -192,5 +191,10 @@ public class QSTileView extends QSTileBaseView {
     @Override
     public View getLabelContainer() {
         return mLabelContainer;
+    }
+
+    @Override
+    public View getSecondaryLabel() {
+        return mSecondLine;
     }
 }
