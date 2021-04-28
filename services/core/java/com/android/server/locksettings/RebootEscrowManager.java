@@ -31,6 +31,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -224,6 +225,12 @@ class RebootEscrowManager {
         }
 
         public boolean serverBasedResumeOnReboot() {
+            // Always use the server based RoR if the HAL isn't installed on device.
+            if (!mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_REBOOT_ESCROW)) {
+                return true;
+            }
+
             return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_OTA,
                     "server_based_ror_enabled", false);
         }
