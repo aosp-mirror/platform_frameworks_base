@@ -427,4 +427,10 @@
     <!-- Darkest shade of the secondary neutral color used by the system. Black.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_neutral2_1000">#000000</color>
+
+    <!-- Accessibility shortcut icon background color -->
+    <color name="accessibility_feature_background">#5F6368</color> <!-- Google grey 700 -->
+    <color name="accessibility_magnification_background">#F50D60</color>
+    <color name="accessibility_daltonizer_background">#00BCD4</color>
+    <color name="accessibility_color_inversion_background">#546E7A</color>
 </resources>
