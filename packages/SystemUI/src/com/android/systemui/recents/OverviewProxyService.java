@@ -213,7 +213,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 // TODO move this logic to message queue
                 mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
                     StatusBar statusBar = statusBarLazy.get();
-                    statusBar.getPanelController().startExpandLatencyTracking();
+                    if (event.getActionMasked() == ACTION_DOWN) {
+                        statusBar.getPanelController().startExpandLatencyTracking();
+                    }
                     mHandler.post(()-> {
                         int action = event.getActionMasked();
                         if (action == ACTION_DOWN) {
