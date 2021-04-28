@@ -138,7 +138,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
             mHorizontalTileLayout = createHorizontalTileLayout();
             LayoutParams lp = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1);
-            int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
+            int marginSize = (int) mContext.getResources().getDimension(R.dimen.qs_media_padding);
             lp.setMarginStart(0);
             lp.setMarginEnd(marginSize);
             lp.gravity = Gravity.CENTER_VERTICAL;
