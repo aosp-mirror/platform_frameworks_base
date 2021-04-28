@@ -984,8 +984,9 @@ public class BinderCallsStatsTest {
                     return mHandler;
                 }
 
-                public BinderLatencyObserver getLatencyObserver() {
-                    return new BinderLatencyObserverTest.TestBinderLatencyObserver();
+                @Override
+                public BinderLatencyObserver getLatencyObserver(int processSource) {
+                    return new BinderLatencyObserverTest.TestBinderLatencyObserver(processSource);
                 }
             });
             setSamplingInterval(1);
