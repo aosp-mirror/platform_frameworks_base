@@ -307,6 +307,56 @@ public final class DeviceStateProviderImplTest {
         assertEquals(1, mIntegerCaptor.getValue().intValue());
     }
 
+    @Test
+    public void create_invalidSensor() throws Exception {
+        Sensor sensor = newSensor("sensor", Sensor.STRING_TYPE_HINGE_ANGLE);
+        when(mSensorManager.getSensorList(anyInt())).thenReturn(List.of());
+
+        String configString = "<device-state-config>\n"
+                + "    <device-state>\n"
+                + "        <identifier>1</identifier>\n"
+                + "        <name>CLOSED</name>\n"
+                + "        <conditions>\n"
+                + "            <sensor>\n"
+                + "                <type>" + sensor.getStringType() + "</type>\n"
+                + "                <name>" + sensor.getName() + "</name>\n"
+                + "                <value>\n"
+                + "                    <max>90</max>\n"
+                + "                </value>\n"
+                + "            </sensor>\n"
+                + "        </conditions>\n"
+                + "    </device-state>\n"
+                + "    <device-state>\n"
+                + "        <identifier>2</identifier>\n"
+                + "        <name>HALF_OPENED</name>\n"
+                + "        <conditions>\n"
+                + "            <sensor>\n"
+                + "                <type>" + sensor.getStringType() + "</type>\n"
+                + "                <name>" + sensor.getName() + "</name>\n"
+                + "                <value>\n"
+                + "                    <min-inclusive>90</min-inclusive>\n"
+                + "                    <max>180</max>\n"
+                + "                </value>\n"
+                + "            </sensor>\n"
+                + "        </conditions>\n"
+                + "    </device-state>\n"
+                + "</device-state-config>\n";
+        DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
+        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(mContext,
+                config);
+
+        DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
+        provider.setListener(listener);
+
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
+        assertArrayEquals(
+                new DeviceState[]{ new DeviceState(1, "CLOSED"), new DeviceState(2, "HALF_OPENED"),
+                        }, mDeviceStateArrayCaptor.getValue());
+        // onStateChanged() should be called because the provider could not find the sensor.
+        verify(listener).onStateChanged(mIntegerCaptor.capture());
+        assertEquals(1, mIntegerCaptor.getValue().intValue());
+    }
+
     private static Sensor newSensor(String name, String type) throws Exception {
         Constructor<Sensor> constructor = Sensor.class.getDeclaredConstructor();
         constructor.setAccessible(true);
