@@ -75,6 +75,11 @@ public class ResourcesManager {
     private static ResourcesManager sResourcesManager;
 
     /**
+     * Internal lock object
+     */
+    private final Object mLock = new Object();
+
+    /**
      * The global compatibility settings.
      */
     private CompatibilityInfo mResCompatibilityInfo;
@@ -275,7 +280,7 @@ public class ResourcesManager {
      * try as hard as possible to release any open FDs.
      */
     public void invalidatePath(String path) {
-        synchronized (this) {
+        synchronized (mLock) {
             int count = 0;
 
             for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
@@ -304,7 +309,7 @@ public class ResourcesManager {
     }
 
     public Configuration getConfiguration() {
-        synchronized (this) {
+        synchronized (mLock) {
             return mResConfiguration;
         }
     }
@@ -351,13 +356,15 @@ public class ResourcesManager {
         config.compatSmallestScreenWidthDp = config.smallestScreenWidthDp;
     }
 
-    public boolean applyCompatConfigurationLocked(int displayDensity,
+    public boolean applyCompatConfiguration(int displayDensity,
             @NonNull Configuration compatConfiguration) {
-        if (mResCompatibilityInfo != null && !mResCompatibilityInfo.supportsScreen()) {
-            mResCompatibilityInfo.applyToConfiguration(displayDensity, compatConfiguration);
-            return true;
+        synchronized (mLock) {
+            if (mResCompatibilityInfo != null && !mResCompatibilityInfo.supportsScreen()) {
+                mResCompatibilityInfo.applyToConfiguration(displayDensity, compatConfiguration);
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 
     /**
@@ -376,7 +383,7 @@ public class ResourcesManager {
         final Pair<Integer, DisplayAdjustments> key =
                 Pair.create(displayId, displayAdjustmentsCopy);
         SoftReference<Display> sd;
-        synchronized (this) {
+        synchronized (mLock) {
             sd = mAdjustedDisplays.get(key);
         }
         if (sd != null) {
@@ -392,7 +399,7 @@ public class ResourcesManager {
         }
         final Display display = dm.getCompatibleDisplay(displayId, key.second);
         if (display != null) {
-            synchronized (this) {
+            synchronized (mLock) {
                 mAdjustedDisplays.put(key, new SoftReference<>(display));
             }
         }
@@ -407,7 +414,7 @@ public class ResourcesManager {
      * @param resources The {@link Resources} backing the display adjustments.
      */
     public Display getAdjustedDisplay(final int displayId, Resources resources) {
-        synchronized (this) {
+        synchronized (mLock) {
             final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
             if (dm == null) {
                 // may be null early in system startup
@@ -425,7 +432,7 @@ public class ResourcesManager {
         ApkAssets apkAssets;
 
         // Optimistically check if this ApkAssets exists somewhere else.
-        synchronized (this) {
+        synchronized (mLock) {
             final WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.get(key);
             if (apkAssetsRef != null) {
                 apkAssets = apkAssetsRef.get();
@@ -447,7 +454,7 @@ public class ResourcesManager {
                     key.sharedLib ? ApkAssets.PROPERTY_DYNAMIC : 0);
         }
 
-        synchronized (this) {
+        synchronized (mLock) {
             mCachedApkAssets.put(key, new WeakReference<>(apkAssets));
         }
 
@@ -559,7 +566,7 @@ public class ResourcesManager {
      * @hide
      */
     public void dump(String prefix, PrintWriter printWriter) {
-        synchronized (this) {
+        synchronized (mLock) {
             IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
             for (int i = 0; i < prefix.length() / 2; i++) {
                 pw.increaseIndent();
@@ -688,7 +695,7 @@ public class ResourcesManager {
      */
     boolean isSameResourcesOverrideConfig(@Nullable IBinder activityToken,
             @Nullable Configuration overrideConfig) {
-        synchronized (this) {
+        synchronized (mLock) {
             final ActivityResources activityResources
                     = activityToken != null ? mActivityResourceReferences.get(activityToken) : null;
             if (activityResources == null) {
@@ -834,7 +841,7 @@ public class ResourcesManager {
                         + " with key=" + key);
             }
 
-            synchronized (this) {
+            synchronized (mLock) {
                 // Force the creation of an ActivityResourcesStruct.
                 getOrCreateActivityResourcesStructLocked(token);
             }
@@ -842,7 +849,7 @@ public class ResourcesManager {
             // Update any existing Activity Resources references.
             updateResourcesForActivity(token, overrideConfig, displayId);
 
-            synchronized (this) {
+            synchronized (mLock) {
                 Resources resources = findResourcesForActivityLocked(token, key,
                         classLoader);
                 if (resources != null) {
@@ -868,7 +875,7 @@ public class ResourcesManager {
      */
     private void rebaseKeyForActivity(IBinder activityToken, ResourcesKey key,
             boolean overridesActivityDisplay) {
-        synchronized (this) {
+        synchronized (mLock) {
             final ActivityResources activityResources =
                     getOrCreateActivityResourcesStructLocked(activityToken);
 
@@ -960,7 +967,7 @@ public class ResourcesManager {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                 "ResourcesManager#createApkAssetsSupplierNotLocked");
         try {
-            if (DEBUG && Thread.holdsLock(this)) {
+            if (DEBUG && Thread.holdsLock(mLock)) {
                 Slog.w(TAG, "Calling thread " + Thread.currentThread().getName()
                     + " is holding mLock", new Throwable());
             }
@@ -994,7 +1001,7 @@ public class ResourcesManager {
     @Nullable
     private Resources createResources(@NonNull ResourcesKey key, @NonNull ClassLoader classLoader,
             @Nullable ApkAssetsSupplier apkSupplier) {
-        synchronized (this) {
+        synchronized (mLock) {
             if (DEBUG) {
                 Throwable here = new Throwable();
                 here.fillInStackTrace();
@@ -1015,7 +1022,7 @@ public class ResourcesManager {
             @NonNull ResourcesKey key, @NonNull Configuration initialOverrideConfig,
             @Nullable Integer overrideDisplayId, @NonNull ClassLoader classLoader,
             @Nullable ApkAssetsSupplier apkSupplier) {
-        synchronized (this) {
+        synchronized (mLock) {
             if (DEBUG) {
                 Throwable here = new Throwable();
                 here.fillInStackTrace();
@@ -1130,7 +1137,7 @@ public class ResourcesManager {
             if (displayId == INVALID_DISPLAY) {
                 throw new IllegalArgumentException("displayId can not be INVALID_DISPLAY");
             }
-            synchronized (this) {
+            synchronized (mLock) {
                 final ActivityResources activityResources =
                         getOrCreateActivityResourcesStructLocked(activityToken);
 
@@ -1269,67 +1276,64 @@ public class ResourcesManager {
 
     public final boolean applyConfigurationToResources(@NonNull Configuration config,
             @Nullable CompatibilityInfo compat) {
-        synchronized(this) {
-            return applyConfigurationToResourcesLocked(config, compat, null /* adjustments */);
-        }
-    }
-
-    public final boolean applyConfigurationToResourcesLocked(@NonNull Configuration config,
-            @Nullable CompatibilityInfo compat) {
-        return applyConfigurationToResourcesLocked(config, compat, null /* adjustments */);
+        return applyConfigurationToResources(config, compat, null /* adjustments */);
     }
 
     /** Applies the global configuration to the managed resources. */
-    public final boolean applyConfigurationToResourcesLocked(@NonNull Configuration config,
+    public final boolean applyConfigurationToResources(@NonNull Configuration config,
             @Nullable CompatibilityInfo compat, @Nullable DisplayAdjustments adjustments) {
-        try {
-            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
-                    "ResourcesManager#applyConfigurationToResourcesLocked");
+        synchronized (mLock) {
+            try {
+                Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
+                        "ResourcesManager#applyConfigurationToResources");
 
-            if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
-                if (DEBUG || DEBUG_CONFIGURATION) Slog.v(TAG, "Skipping new config: curSeq="
-                        + mResConfiguration.seq + ", newSeq=" + config.seq);
-                return false;
-            }
-
-            // Things might have changed in display manager, so clear the cached displays.
-            mAdjustedDisplays.clear();
-
-            int changes = mResConfiguration.updateFrom(config);
-            if (compat != null && (mResCompatibilityInfo == null ||
-                    !mResCompatibilityInfo.equals(compat))) {
-                mResCompatibilityInfo = compat;
-                changes |= ActivityInfo.CONFIG_SCREEN_LAYOUT
-                        | ActivityInfo.CONFIG_SCREEN_SIZE
-                        | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
-            }
-
-            DisplayMetrics displayMetrics = getDisplayMetrics();
-            if (adjustments != null) {
-                // Currently the only case where the adjustment takes effect is to simulate placing
-                // an app in a rotated display.
-                adjustments.adjustGlobalAppMetrics(displayMetrics);
-            }
-            Resources.updateSystemConfiguration(config, displayMetrics, compat);
-
-            ApplicationPackageManager.configurationChanged();
-
-            Configuration tmpConfig = new Configuration();
-
-            for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
-                ResourcesKey key = mResourceImpls.keyAt(i);
-                WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
-                ResourcesImpl r = weakImplRef != null ? weakImplRef.get() : null;
-                if (r != null) {
-                    applyConfigurationToResourcesLocked(config, compat, tmpConfig, key, r);
-                } else {
-                    mResourceImpls.removeAt(i);
+                if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
+                    if (DEBUG || DEBUG_CONFIGURATION) {
+                        Slog.v(TAG, "Skipping new config: curSeq="
+                                + mResConfiguration.seq + ", newSeq=" + config.seq);
+                    }
+                    return false;
                 }
-            }
 
-            return changes != 0;
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+                // Things might have changed in display manager, so clear the cached displays.
+                mAdjustedDisplays.clear();
+
+                int changes = mResConfiguration.updateFrom(config);
+                if (compat != null && (mResCompatibilityInfo == null
+                        || !mResCompatibilityInfo.equals(compat))) {
+                    mResCompatibilityInfo = compat;
+                    changes |= ActivityInfo.CONFIG_SCREEN_LAYOUT
+                            | ActivityInfo.CONFIG_SCREEN_SIZE
+                            | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+                }
+
+                DisplayMetrics displayMetrics = getDisplayMetrics();
+                if (adjustments != null) {
+                    // Currently the only case where the adjustment takes effect is to simulate
+                    // placing an app in a rotated display.
+                    adjustments.adjustGlobalAppMetrics(displayMetrics);
+                }
+                Resources.updateSystemConfiguration(config, displayMetrics, compat);
+
+                ApplicationPackageManager.configurationChanged();
+
+                Configuration tmpConfig = new Configuration();
+
+                for (int i = mResourceImpls.size() - 1; i >= 0; i--) {
+                    ResourcesKey key = mResourceImpls.keyAt(i);
+                    WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
+                    ResourcesImpl r = weakImplRef != null ? weakImplRef.get() : null;
+                    if (r != null) {
+                        applyConfigurationToResourcesLocked(config, compat, tmpConfig, key, r);
+                    } else {
+                        mResourceImpls.removeAt(i);
+                    }
+                }
+
+                return changes != 0;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+            }
         }
     }
 
@@ -1378,7 +1382,7 @@ public class ResourcesManager {
      * @param libAssets The library asset paths to add.
      */
     public void appendLibAssetsForMainAssetPath(String assetPath, String[] libAssets) {
-        synchronized (this) {
+        synchronized (mLock) {
             // Record which ResourcesImpl need updating
             // (and what ResourcesKey they should update to).
             final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
@@ -1414,54 +1418,56 @@ public class ResourcesManager {
     }
 
     // TODO(adamlesinski): Make this accept more than just overlay directories.
-    final void applyNewResourceDirsLocked(@NonNull final ApplicationInfo appInfo,
+    void applyNewResourceDirs(@NonNull final ApplicationInfo appInfo,
             @Nullable final String[] oldPaths) {
-        try {
-            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
-                    "ResourcesManager#applyNewResourceDirsLocked");
+        synchronized (mLock) {
+            try {
+                Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
+                        "ResourcesManager#applyNewResourceDirsLocked");
 
-            String baseCodePath = appInfo.getBaseCodePath();
+                String baseCodePath = appInfo.getBaseCodePath();
 
-            final int myUid = Process.myUid();
-            String[] newSplitDirs = appInfo.uid == myUid
-                    ? appInfo.splitSourceDirs
-                    : appInfo.splitPublicSourceDirs;
+                final int myUid = Process.myUid();
+                String[] newSplitDirs = appInfo.uid == myUid
+                        ? appInfo.splitSourceDirs
+                        : appInfo.splitPublicSourceDirs;
 
-            // ApplicationInfo is mutable, so clone the arrays to prevent outside modification
-            String[] copiedSplitDirs = ArrayUtils.cloneOrNull(newSplitDirs);
-            String[] copiedResourceDirs = combinedOverlayPaths(appInfo.resourceDirs,
-                    appInfo.overlayPaths);
+                // ApplicationInfo is mutable, so clone the arrays to prevent outside modification
+                String[] copiedSplitDirs = ArrayUtils.cloneOrNull(newSplitDirs);
+                String[] copiedResourceDirs = combinedOverlayPaths(appInfo.resourceDirs,
+                        appInfo.overlayPaths);
 
-            final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
-            final int implCount = mResourceImpls.size();
-            for (int i = 0; i < implCount; i++) {
-                final ResourcesKey key = mResourceImpls.keyAt(i);
-                final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
-                final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
+                final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
+                final int implCount = mResourceImpls.size();
+                for (int i = 0; i < implCount; i++) {
+                    final ResourcesKey key = mResourceImpls.keyAt(i);
+                    final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
+                    final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
 
-                if (impl == null) {
-                    continue;
+                    if (impl == null) {
+                        continue;
+                    }
+
+                    if (key.mResDir == null
+                            || key.mResDir.equals(baseCodePath)
+                            || ArrayUtils.contains(oldPaths, key.mResDir)) {
+                        updatedResourceKeys.put(impl, new ResourcesKey(
+                                baseCodePath,
+                                copiedSplitDirs,
+                                copiedResourceDirs,
+                                key.mLibDirs,
+                                key.mDisplayId,
+                                key.mOverrideConfiguration,
+                                key.mCompatInfo,
+                                key.mLoaders
+                        ));
+                    }
                 }
 
-                if (key.mResDir == null
-                        || key.mResDir.equals(baseCodePath)
-                        || ArrayUtils.contains(oldPaths, key.mResDir)) {
-                    updatedResourceKeys.put(impl, new ResourcesKey(
-                            baseCodePath,
-                            copiedSplitDirs,
-                            copiedResourceDirs,
-                            key.mLibDirs,
-                            key.mDisplayId,
-                            key.mOverrideConfiguration,
-                            key.mCompatInfo,
-                            key.mLoaders
-                    ));
-                }
+                redirectResourcesToNewImplLocked(updatedResourceKeys);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
             }
-
-            redirectResourcesToNewImplLocked(updatedResourceKeys);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
     }
 
@@ -1556,7 +1562,7 @@ public class ResourcesManager {
     public boolean overrideTokenDisplayAdjustments(IBinder token,
             @Nullable Consumer<DisplayAdjustments> override) {
         boolean handled = false;
-        synchronized (this) {
+        synchronized (mLock) {
             final ActivityResources tokenResources = mActivityResourceReferences.get(token);
             if (tokenResources == null) {
                 return false;
@@ -1589,7 +1595,7 @@ public class ResourcesManager {
         @Override
         public void onLoadersChanged(@NonNull Resources resources,
                 @NonNull List<ResourcesLoader> newLoader) {
-            synchronized (ResourcesManager.this) {
+            synchronized (mLock) {
                 final ResourcesKey oldKey = findKeyForResourceImplLocked(resources.getImpl());
                 if (oldKey == null) {
                     throw new IllegalArgumentException("Cannot modify resource loaders of"
@@ -1617,7 +1623,7 @@ public class ResourcesManager {
          **/
         @Override
         public void onLoaderUpdated(@NonNull ResourcesLoader loader) {
-            synchronized (ResourcesManager.this) {
+            synchronized (mLock) {
                 final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceImplKeys =
                         new ArrayMap<>();
 
