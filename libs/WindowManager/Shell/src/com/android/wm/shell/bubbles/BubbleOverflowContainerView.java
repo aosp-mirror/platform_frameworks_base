@@ -220,18 +220,25 @@ public class BubbleOverflowContainerView extends LinearLayout {
                     Log.d(TAG, "remove: " + toRemove);
                 }
                 toRemove.cleanupViews();
-                final int i = mOverflowBubbles.indexOf(toRemove);
+                final int indexToRemove = mOverflowBubbles.indexOf(toRemove);
                 mOverflowBubbles.remove(toRemove);
-                mAdapter.notifyItemRemoved(i);
+                mAdapter.notifyItemRemoved(indexToRemove);
             }
 
             Bubble toAdd = update.addedOverflowBubble;
             if (toAdd != null) {
+                final int indexToAdd = mOverflowBubbles.indexOf(toAdd);
                 if (DEBUG_OVERFLOW) {
-                    Log.d(TAG, "add: " + toAdd);
+                    Log.d(TAG, "add: " + toAdd + " prevIndex: " + indexToAdd);
                 }
-                mOverflowBubbles.add(0, toAdd);
-                mAdapter.notifyItemInserted(0);
+                if (indexToAdd > 0) {
+                    mOverflowBubbles.remove(toAdd);
+                    mOverflowBubbles.add(0, toAdd);
+                    mAdapter.notifyItemMoved(indexToAdd, 0);
+                } else {
+                    mOverflowBubbles.add(0, toAdd);
+                    mAdapter.notifyItemInserted(0);
+                }
             }
 
             updateEmptyStateVisibility();
