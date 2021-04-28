@@ -542,10 +542,10 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"برنامه مجاز می‌شود در دستگاه‌های بلوتوث اطراف تبلیغ کند."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"مشخص کردن موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف را مشخص کند"</string>
-    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی «ارتباط میدان نزدیک» (NFC)"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پولی «ارتباط میدان نزدیک» (NFC)، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پولی NFC، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
-    <string name="permdesc_nfc" msgid="8352737680695296741">"‏به برنامه اجازه می‎دهد تا با تگ‌های «ارتباط میدان نزدیک» (NFC)، کارت‌ها و فایل‌خوان ارتباط برقرار کند."</string>
+    <string name="permdesc_nfc" msgid="8352737680695296741">"‏به برنامه اجازه می‎دهد تا با تگ‌های NFC، کارت‌ها و فایل‌خوان ارتباط برقرار کند."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"غیرفعال کردن قفل صفحه شما"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"به برنامه امکان می‌دهد قفل کلید و هر گونه امنیت گذرواژه مرتبط را غیرفعال کند. به‌عنوان مثال تلفن هنگام دریافت یک تماس تلفنی ورودی قفل کلید را غیرفعال می‌کند و بعد از پایان تماس، قفل کلید را دوباره فعال می‌کند."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"درخواست پیچیدگی قفل صفحه"</string>
@@ -712,7 +712,7 @@
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"‏حذف گواهی‌های DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"‏به برنامه امکان می‌دهد گواهی‌های DRM را حذف کند. نباید برای برنامه‌های عادی هیچ‌وقت لازم باشد."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"مقید به سرویس پیام‌رسانی شرکت مخابراتی"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"به کنترل‌کننده اجازه می‌دهد که به سطح بالای رابط کاربر سرویس پیام‌رسانی شرکت مخابراتی مقید شود. هرگز نباید برای برنامه‌های عادی مورد نیاز شود."</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"به کنترل‌کننده اجازه می‌دهد که به سطح بالای میانای کاربر سرویس پیام‌رسانی شرکت مخابراتی مقید شود. هرگز نباید برای برنامه‌های عادی مورد نیاز شود."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"اتصال به سرویس‌های شرکت مخابراتی"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"به دارنده امکان می‌دهد به سرویس‌های شرکت مخابراتی متصل شود. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"دسترسی به حالت «مزاحم نشوید»"</string>
@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"بزرگ"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"عمودی نامشخص"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"افقی نامشخص"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"لغو شد"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"تأیید"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"«بهینه‌سازی باتری» «طرح زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، و ویژگی‌هایی خاص را محدود یا خاموش می‌کند.\n\n"<annotation id="url">"بیشتر بدانید"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"«بهینه‌سازی باتری» «طرح زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، و ویژگی‌هایی خاص را محدود یا خاموش می‌کند."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه در بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است. این می‌تواند به این معنی باشد که، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>
@@ -2099,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"این اعلان به «بی‌صدا» تنزل داده شد. برای ارائه بازخورد، ضربه بزنید."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"این اعلان در رتبه بالاتری قرار گرفت. برای ارائه بازخورد، ضربه بزنید."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"این اعلان در رتبه پایین‌تری قرار گرفت. برای ارائه بازخورد، ضربه بزنید."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"امتحان کردن اعلان‌های بهبودیافته"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"‏برای اینکه پاسخ‌ها و کنش‌های پیشنهادی و موارد دیگر را همچنان دریافت کنید، اعلان‌های بهبودیافته را روشن کنید. از «اعلان‌های تطبیقی Android» دیگر پشتیبانی نمی‌شود."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"روشن کردن"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"الآن نه"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"اعلان‌های بهبودیافته"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"‏اکنون پاسخ‌ها و کنش‌های پیشنهادی ازطریق اعلان‌های بهبودیافته ارائه می‌شوند. «اعلان‌های تطبیقی Android» دیگر پشتیبانی نمی‌شوند."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"تأیید"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"خاموش کردن"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"بیشتر بدانید"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"اعلان‌های بهبودیافته می‌تواند محتوای همه اعلان‌ها، ازجمله اطلاعات شخصی مثل نام مخاطبین و پیام‌ها را بخواند. این ویژگی همچنین می‌تواند اعلان‌ها را ببندد یا بااستفاده از دکمه‌های موجود در اعلان‌ها اقداماتی انجام دهد، مثلاً به تماس‌های تلفنی پاسخ دهد.\n\nبه‌علاوه، این ویژگی می‌تواند «حالت اولویت» را روشن یا خاموش کند و تنظیمات مربوطه را تغییر دهد."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"‏در Android نسخه ۱۲، اعلان‌های بهبودیافته جایگزین «اعلان‌های تطبیقی» شده است. این ویژگی پاسخ‌ها و کنش‌های پیشنهادی را نمایش می‌دهد و اعلان‌هایتان را سازمان‌دهی می‌کند.\n\nاعلان‌های بهبودیافته می‌توانند به محتوای اعلان، ازجمله اطلاعات شخصی مثل نام‌ها و پیام‌های مخاطبین دسترسی داشته باشند. این ویژگی همچنین می‌تواند اعلان‌ها را رد کند یا به آن‌ها پاسخ دهد؛ مثلاً پاسخ به تماس‌های تلفنی و کنترل کردن «مزاحم نشوید»."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"اعلان اطلاعات حالت روال معمول"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ممکن است شارژ باتری قبل از شارژ معمول تمام شود"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"جهت افزایش عمر باتری، «بهینه‌سازی باتری» فعال شد"</string>

@@ -35,6 +35,7 @@ import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.CrossFadeHelper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -44,6 +45,7 @@ import java.io.PrintWriter;
  * - keyguard clock
  * - logout button (on certain managed devices)
  * - owner information (if set)
+ * - media player (split shade mode only)
  */
 public class KeyguardStatusView extends GridLayout {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -60,6 +62,7 @@ public class KeyguardStatusView extends GridLayout {
     private KeyguardSliceView mKeyguardSlice;
     private Runnable mPendingMarqueeStart;
     private Handler mHandler;
+    private View mMediaHostContainer;
 
     private float mDarkAmount = 0;
     private int mTextColor;
@@ -148,6 +151,8 @@ public class KeyguardStatusView extends GridLayout {
         mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);
         onSliceContentChanged();
 
+        mMediaHostContainer = findViewById(R.id.status_view_media_container);
+
         updateOwnerInfo();
         updateDark();
     }
@@ -223,6 +228,9 @@ public class KeyguardStatusView extends GridLayout {
         }
         mDarkAmount = darkAmount;
         mClockView.setDarkAmount(darkAmount);
+        if (mMediaHostContainer.getVisibility() != View.GONE) {
+            CrossFadeHelper.fadeOut(mMediaHostContainer, darkAmount);
+        }
         updateDark();
     }
 

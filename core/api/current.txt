@@ -18965,20 +18965,25 @@ package android.hardware.lights {
     method public int getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
-    field public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10; // 0xa
-    field public static final int LIGHT_TYPE_INPUT_RGB = 11; // 0xb
-    field public static final int LIGHT_TYPE_INPUT_SINGLE = 9; // 0x9
+    field public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10002; // 0x2712
+    field public static final int LIGHT_TYPE_INPUT_RGB = 10003; // 0x2713
+    field public static final int LIGHT_TYPE_INPUT_SINGLE = 10001; // 0x2711
     field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
   }
 
   public final class LightState implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public static android.hardware.lights.LightState forColor(@ColorInt int);
-    method @NonNull public static android.hardware.lights.LightState forPlayerId(int);
     method @ColorInt public int getColor();
     method public int getPlayerId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.LightState> CREATOR;
+  }
+
+  public static final class LightState.Builder {
+    ctor public LightState.Builder();
+    method @NonNull public android.hardware.lights.LightState build();
+    method @NonNull public android.hardware.lights.LightState.Builder setColor(@ColorInt int);
+    method @NonNull public android.hardware.lights.LightState.Builder setPlayerId(int);
   }
 
   public abstract class LightsManager {
@@ -18996,6 +19001,7 @@ package android.hardware.lights {
   public final class LightsRequest {
     method @NonNull public java.util.List<android.hardware.lights.LightState> getLightStates();
     method @NonNull public java.util.List<java.lang.Integer> getLights();
+    method @NonNull public java.util.Map<java.lang.Integer,android.hardware.lights.LightState> getLightsAndStates();
   }
 
   public static final class LightsRequest.Builder {
@@ -19316,7 +19322,7 @@ package android.inputmethodservice {
     method public void appPrivateCommand(String, android.os.Bundle);
     method public void displayCompletions(android.view.inputmethod.CompletionInfo[]);
     method public void finishInput();
-    method public void toggleSoftInput(int, int);
+    method @Deprecated public void toggleSoftInput(int, int);
     method public void updateCursor(android.graphics.Rect);
     method public void updateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
     method public void updateExtractedText(int, android.view.inputmethod.ExtractedText);
@@ -26456,7 +26462,6 @@ package android.net {
     method @Deprecated public static int getDefaultPort();
     method @Deprecated public static String getHost(android.content.Context);
     method @Deprecated public static int getPort(android.content.Context);
-    field @Deprecated public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
     field public static final String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
   }
 
@@ -26540,9 +26545,6 @@ package android.net {
     method public static void untagFileDescriptor(java.io.FileDescriptor) throws java.io.IOException;
     method public static void untagSocket(java.net.Socket) throws java.net.SocketException;
     field public static final int UNSUPPORTED = -1; // 0xffffffff
-  }
-
-  public interface TunnelConnectionParams {
   }
 
   public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
@@ -27113,7 +27115,7 @@ package android.net.vcn {
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
-    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.TunnelConnectionParams);
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.ipsec.ike.IkeTunnelConnectionParams);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
@@ -52000,8 +52002,8 @@ package android.view.inputmethod {
     method @Deprecated public void showStatusIcon(android.os.IBinder, String, @DrawableRes int);
     method @Deprecated public boolean switchToLastInputMethod(android.os.IBinder);
     method @Deprecated public boolean switchToNextInputMethod(android.os.IBinder, boolean);
-    method public void toggleSoftInput(int, int);
-    method public void toggleSoftInputFromWindow(android.os.IBinder, int, int);
+    method @Deprecated public void toggleSoftInput(int, int);
+    method @Deprecated public void toggleSoftInputFromWindow(android.os.IBinder, int, int);
     method @Deprecated public void updateCursor(android.view.View, int, int, int, int);
     method public void updateCursorAnchorInfo(android.view.View, android.view.inputmethod.CursorAnchorInfo);
     method public void updateExtractedText(android.view.View, int, android.view.inputmethod.ExtractedText);
@@ -52024,7 +52026,7 @@ package android.view.inputmethod {
     method public void dispatchTrackballEvent(int, android.view.MotionEvent, android.view.inputmethod.InputMethodSession.EventCallback);
     method public void displayCompletions(android.view.inputmethod.CompletionInfo[]);
     method public void finishInput();
-    method public void toggleSoftInput(int, int);
+    method @Deprecated public void toggleSoftInput(int, int);
     method public void updateCursor(android.graphics.Rect);
     method public void updateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
     method public void updateExtractedText(int, android.view.inputmethod.ExtractedText);
@@ -52839,7 +52841,8 @@ package android.view.translation {
     method public void addOnDeviceTranslationCapabilityUpdateListener(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.translation.TranslationCapability>);
     method @Deprecated public void addOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
     method @Deprecated public void addTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
-    method @Nullable @WorkerThread public android.view.translation.Translator createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext);
+    method public void createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.translation.Translator>);
+    method @Deprecated @Nullable @WorkerThread public android.view.translation.Translator createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext);
     method @Deprecated @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationContext);
     method @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getOnDeviceTranslationCapabilities(int, int);
     method @Nullable public android.app.PendingIntent getOnDeviceTranslationSettingsActivityIntent();

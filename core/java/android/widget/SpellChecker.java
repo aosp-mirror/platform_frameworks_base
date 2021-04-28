@@ -461,7 +461,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
     @Override
     public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results) {
         final Editable editable = (Editable) mTextView.getText();
-
+        final int sentenceLength = editable.length();
         for (int i = 0; i < results.length; ++i) {
             final SentenceSuggestionsInfo ssi = results[i];
             if (ssi == null) {
@@ -475,6 +475,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 }
                 final int offset = ssi.getOffsetAt(j);
                 final int length = ssi.getLengthAt(j);
+                if (offset < 0 || offset + length > sentenceLength) {
+                    continue;
+                }
                 final SpellCheckSpan scs = onGetSuggestionsInternal(
                         suggestionsInfo, offset, length);
                 if (spellCheckSpan == null && scs != null) {

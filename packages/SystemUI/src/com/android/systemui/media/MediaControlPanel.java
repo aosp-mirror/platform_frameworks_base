@@ -532,7 +532,10 @@ public class MediaControlPanel {
             mediaCoverImageView.setImageIcon(recommendation.getIcon());
 
             // Set up the click listener if applicable.
-            setSmartspaceRecItemOnClickListener(mediaCoverImageView, recommendation,
+            setSmartspaceRecItemOnClickListener(
+                    mediaCoverImageView,
+                    recommendation,
+                    target.getSmartspaceTargetId(),
                     view -> mMediaDataManagerLazy
                             .get()
                             .dismissSmartspaceRecommendation(0L /* delay */));
@@ -640,6 +643,7 @@ public class MediaControlPanel {
     private void setSmartspaceRecItemOnClickListener(
             @NonNull View view,
             @NonNull SmartspaceAction action,
+            @NonNull String targetId,
             @Nullable View.OnClickListener callback) {
         if (view == null || action == null || action.getIntent() == null) {
             Log.e(TAG, "No tap action can be set up");
@@ -647,6 +651,16 @@ public class MediaControlPanel {
         }
 
         view.setOnClickListener(v -> {
+            // When media recommendation card is shown, there could be only one card.
+            SysUiStatsLog.write(SysUiStatsLog.SMARTSPACE_CARD_REPORTED,
+                    760, // SMARTSPACE_CARD_CLICK
+                    targetId.hashCode(),
+                    SysUiStatsLog
+                            .SMART_SPACE_CARD_REPORTED__CARD_TYPE__HEADPHONE_MEDIA_RECOMMENDATIONS,
+                    getSurfaceForSmartspaceLogging(mMediaViewController.getCurrentEndLocation()),
+                    /* rank */ 1,
+                    /* cardinality */ 1);
+
             mActivityStarter.postStartActivityDismissingKeyguard(
                     action.getIntent(),
                     0 /* delay */,

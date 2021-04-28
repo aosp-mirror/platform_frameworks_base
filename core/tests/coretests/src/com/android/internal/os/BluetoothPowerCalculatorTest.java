@@ -147,7 +147,7 @@ public class BluetoothPowerCalculatorTest {
                 .isEqualTo(powerModel);
 
         long usageDurationMillis = batteryConsumer.getUsageDurationMillis(
-                BatteryConsumer.TIME_COMPONENT_BLUETOOTH);
+                BatteryConsumer.POWER_COMPONENT_BLUETOOTH);
 
         assertThat(usageDurationMillis).isEqualTo(durationMs);
     }

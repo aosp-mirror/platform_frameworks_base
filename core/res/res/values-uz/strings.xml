@@ -1708,7 +1708,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tezkor ishga tushirishni o‘chirib qo‘yish"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Tezkor ishga tushirishdan foydalanish"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ranglarni akslantirish"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Rangni tuzatish"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Ranglarni tuzatish"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Juda xira"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> yoqildi."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> faolsizlantirildi."</string>
@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarx"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -2099,12 +2088,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Bu bildirishnoma darajasi Tovushsiz darajaga tushirildi Fikr-mulohaza bildirish uchun bosing."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildirishnoma darajasi oshirildi. Fikr-mulohaza bildirish uchun bosing."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildirishnoma darajasi pasaytirildi. Fikr-mulohaza bildirish uchun bosing."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Yangicha bildirishnomalar"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Amallar, javoblar va boshqa takliflarni olishda davom etish uchun yaxshilangan bildirishnomalarni yoqing. Android moslashuvchan bildirishnomalari endi ishlamaydi."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Yoqish"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Hozir emas"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Yangicha bildirishnomalar"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Amallar va javoblar taklifi endi yangicha bildirishnomalar orqali chiqadi. Android moslashuvchan bildirishnomalari endi ishlamaydi."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Faolsizlantirish"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Batafsil"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Yangicha bildirishnomalar funksiyasi barcha bildirishnomalarni, jumladan, shaxsiy maʼlumotlarni (kontakt nomlari va xabarlar) oʻqiy oladi. Shuningdek, bu funksiya bildirishnomalarni yopishi yoki telefon chaqiruvlariga javob berish kabi bildirishnomalarda tugmalar bilan amallar bajarishi mumkin.\n\nBu funksiya Faqat muhim rejimini yoqishi va faolsizlantirishi yoki unga aloqador sozlamalarni oʻzgartirishi ham mumkin."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12 tizimida moslashuvchan bildirishnomalar oʻrniga yangicha bildirishnomalar chiqadi. Bu funksiya amallar va javoblarni taklif qiladi va bildirishnomalaringizni boshqaradi.\n\nYangicha bildirishnomalar barcha bildirishnomalar kontentini, jumladan kontakt nomlari va xabarlar kabi shaxsiy bildirishnomalarni ham oʻqiy oladi. Shuningdek, bu funksiya bildirishnomalarni yopishi yoki telefon chaqiruvlariga javob berishi va Bezovta qilinmasin rejimini boshqarishi mumkin."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Kun tartibi rejimi haqidagi bildirishnoma"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya quvvati odatdagidan ertaroq tugashi mumkin"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash rejimi yoqildi"</string>

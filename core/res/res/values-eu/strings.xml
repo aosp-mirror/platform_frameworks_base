@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"Monarch (AEB)"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"Quarto (AEB)"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap (AEB)"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K (Txina)"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K (Txina)"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1 (Txina)"</string>
@@ -1831,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu (Japonia)"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2 (Japonia)"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4 (Japonia)"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Bertikal ezezaguna"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Horizontal ezezaguna"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Bertan behera utzi da"</string>
@@ -1876,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"Bateria-aurrezleak gai iluna aktibatzen du, eta murriztu edo desaktibatu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta eginbide jakin batzuk.\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"Bateria-aurrezleak gai iluna aktibatzen du, eta murriztu edo desaktibatu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta eginbide jakin batzuk."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazio batek datuak atzitu ahal izango ditu, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>
@@ -2099,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Isilarazi da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Mailaz igo da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Mailaz jaitsi da jakinarazpena. Sakatu hau oharrak bidaltzeko."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"Probatu jakinarazpen hobetuak"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"Iradokitako ekintzak, erantzunak eta abar jasotzen jarraitzeko, aktibatu jakinarazpen hobetuak. Android-en jakinarazpen egokituak ez dira onartzen jada."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"Aktibatu"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"Orain ez"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Jakinarazpen hobetuak"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Orain, jakinarazpen hobetuen bitartez iradokitzen dira ekintzak eta erantzunak. Android-eko jakinarazpen egokituak ez dira onartzen jada."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Ados"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desaktibatu"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lortu informazio gehiago"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"Jakinarazpen hobetuek jakinarazpenen eduki osoa irakur dezakete, informazio pertsonala barne (esaterako, kontaktuen izenak eta mezuak). Halaber, jakinarazpenak baztertu edo jakinarazpenetako botoiak erabil ditzake eginbideak; adibidez, telefono-deiak erantzun.\n\nHorretaz gain, lehentasunezko modua aktibatu edo desaktiba dezake, eta erlazionatutako ezarpenak aldatu."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12n, jakinarazpen hobetuek ordeztu dituzte Android-eko jakinarazpen egokituak. Eginbide horrek, iradokitako ekintzak eta erantzunak erakutsi, eta zure jakinarazpenak antolatzen ditu.\n\nJakinarazpen hobetuek jakinarazpenen eduki osoa atzi dezakete, informazio pertsonala barne (esaterako, kontaktuen izenak eta mezuak). Halaber, jakinarazpenak baztertu edo haiei erantzun diezaieke eginbideak; adibidez, telefono-deiak erantzun eta ez molestatzeko modua kontrolatu."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohitura moduaren informazio-jakinarazpena"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baliteke bateria ohi baino lehenago agortzea"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bateria-aurrezlea aktibatuta dago bateriaren iraupena luzatzeko"</string>

@@ -938,17 +938,9 @@ public class BinderCallsStatsTest {
     }
 
     @Test
-    public void testLatencyCollectionDisabledByDefault() {
+    public void testLatencyCollectionEnabledByDefault() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
-        assertEquals(false, bcs.getCollectLatencyData());
-
-        Binder binder = new Binder();
-        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
-        bcs.time += 10;
-        bcs.elapsedTime += 20;
-        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
-
-        assertEquals(0, bcs.getLatencyObserver().getLatencyHistograms().size());
+        assertEquals(true, bcs.getCollectLatencyData());
     }
 
     private static class TestHandler extends Handler {

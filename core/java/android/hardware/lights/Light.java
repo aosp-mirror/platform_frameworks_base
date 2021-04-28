@@ -37,20 +37,25 @@ public final class Light implements Parcelable {
     /** Type for lights that indicate microphone usage */
     public static final int LIGHT_TYPE_MICROPHONE = 8;
 
+    // These enum values start from 10001 to avoid collision with expanding of HAL light types.
     /**
      * Type for lights that indicate a monochrome color LED light.
      */
-    public static final int LIGHT_TYPE_INPUT_SINGLE = 9;
+    public static final int LIGHT_TYPE_INPUT_SINGLE = 10001;
 
     /**
      * Type for lights that indicate a group of LED lights representing player ID.
+     * Player ID lights normally present on game controllers are lights that consist of a row of
+     * LEDs.
+     * During multi-player game, the player ID for the current game controller is represented by
+     * one of the LED that is lit according to its position in the row.
      */
-    public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10;
+    public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10002;
 
     /**
      * Type for lights that indicate a color LED light.
      */
-    public static final int LIGHT_TYPE_INPUT_RGB = 11;
+    public static final int LIGHT_TYPE_INPUT_RGB = 10003;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

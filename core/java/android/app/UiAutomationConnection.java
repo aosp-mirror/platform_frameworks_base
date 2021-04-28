@@ -18,6 +18,7 @@ package android.app;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -204,6 +205,30 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Nullable
+    @Override
+    public Bitmap takeSurfaceControlScreenshot(@NonNull SurfaceControl surfaceControl) {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+
+        SurfaceControl.ScreenshotHardwareBuffer captureBuffer;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            captureBuffer = SurfaceControl.captureLayers(
+                    new SurfaceControl.LayerCaptureArgs.Builder(surfaceControl).build());
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        if (captureBuffer == null) {
+            return null;
+        }
+        return captureBuffer.asBitmap();
     }
 
     @Override

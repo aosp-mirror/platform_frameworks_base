@@ -58,16 +58,16 @@ public class UserPowerCalculatorTest {
         assertThat(mStatsRule.getUserBatteryConsumer(USER1)).isNull();
 
         assertThat(mStatsRule.getUidBatteryConsumer(UserHandle.getUid(USER1, APP_UID1))
-                .getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_AUDIO)).isEqualTo(3000);
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO)).isEqualTo(3000);
         assertThat(mStatsRule.getUidBatteryConsumer(UserHandle.getUid(USER1, APP_UID1))
-                .getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_VIDEO)).isEqualTo(7000);
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_VIDEO)).isEqualTo(7000);
 
         assertThat(mStatsRule.getUserBatteryConsumer(USER2)).isNull();
 
         assertThat(mStatsRule.getUidBatteryConsumer(UserHandle.getUid(USER2, APP_UID2))
-                .getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_AUDIO)).isEqualTo(5555);
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO)).isEqualTo(5555);
         assertThat(mStatsRule.getUidBatteryConsumer(UserHandle.getUid(USER2, APP_UID2))
-                .getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_VIDEO)).isEqualTo(9999);
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_VIDEO)).isEqualTo(9999);
     }
 
     @Test
@@ -82,19 +82,19 @@ public class UserPowerCalculatorTest {
         assertThat(mStatsRule.getUserBatteryConsumer(USER1)).isNull();
 
         assertThat(mStatsRule.getUidBatteryConsumer(UserHandle.getUid(USER1, APP_UID1))
-                .getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_AUDIO)).isEqualTo(3000);
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO)).isEqualTo(3000);
         assertThat(mStatsRule.getUidBatteryConsumer(UserHandle.getUid(USER1, APP_UID1))
-                .getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_VIDEO)).isEqualTo(7000);
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_VIDEO)).isEqualTo(7000);
         assertThat(mStatsRule.getUidBatteryConsumer(UserHandle.getUid(USER1, APP_UID2))).isNull();
         assertThat(mStatsRule.getUidBatteryConsumer(UserHandle.getUid(USER1, APP_UID3))
-                .getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_AUDIO)).isEqualTo(7070);
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO)).isEqualTo(7070);
         assertThat(mStatsRule.getUidBatteryConsumer(UserHandle.getUid(USER1, APP_UID3))
-                .getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_VIDEO)).isEqualTo(11110);
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_VIDEO)).isEqualTo(11110);
 
         UserBatteryConsumer user2 = mStatsRule.getUserBatteryConsumer(USER2);
-        assertThat(user2.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_AUDIO))
+        assertThat(user2.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO))
                 .isEqualTo(15308);
-        assertThat(user2.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_VIDEO))
+        assertThat(user2.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_VIDEO))
                 .isEqualTo(24196);
 
         assertThat(mStatsRule.getUidBatteryConsumer(UserHandle.getUid(USER2, APP_UID1))).isNull();
@@ -130,7 +130,7 @@ public class UserPowerCalculatorTest {
         protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
                 long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
             long durationMs = u.getAudioTurnedOnTimer().getTotalTimeLocked(rawRealtimeUs, 0);
-            app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_AUDIO, durationMs / 1000);
+            app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO, durationMs / 1000);
         }
     }
 
@@ -139,7 +139,7 @@ public class UserPowerCalculatorTest {
         protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
                 long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
             long durationMs = u.getVideoTurnedOnTimer().getTotalTimeLocked(rawRealtimeUs, 0);
-            app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_VIDEO, durationMs / 1000);
+            app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_VIDEO, durationMs / 1000);
         }
     }
 }

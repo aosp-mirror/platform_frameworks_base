@@ -3083,6 +3083,7 @@
   <java-symbol type="string" name="negative_duration" />
 
   <java-symbol type="dimen" name="notification_messaging_spacing" />
+  <java-symbol type="dimen" name="notification_messaging_spacing_conversation_group" />
 
   <java-symbol type="dimen" name="notification_text_margin_top" />
   <java-symbol type="dimen" name="notification_inbox_item_top_padding" />
@@ -4090,7 +4091,6 @@
   <java-symbol type="dimen" name="button_inset_horizontal_material" />
   <java-symbol type="layout" name="conversation_face_pile_layout" />
   <java-symbol type="string" name="unread_convo_overflow" />
-  <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Conversation.AppName" />
   <java-symbol type="drawable" name="conversation_badge_background" />
   <java-symbol type="drawable" name="conversation_badge_ring" />
   <java-symbol type="color" name="conversation_important_highlight" />

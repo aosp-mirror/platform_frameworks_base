@@ -167,6 +167,27 @@ interface IIncrementalService {
      */
     const @utf8InCpp String METRICS_MILLIS_SINCE_OLDEST_PENDING_READ = "millisSinceOldestPendingRead";
     /**
+     * Metrics key for whether read logs are enabled. The value is a boolean.
+     */
+    const @utf8InCpp String METRICS_READ_LOGS_ENABLED = "readLogsEnabled";
+    /**
+     * Metrics key for the storage health status. The value is an int.
+     */
+    const @utf8InCpp String METRICS_STORAGE_HEALTH_STATUS_CODE = "storageHealthStatusCode";
+    /**
+     * Metrics key for the data loader status. The value is an int.
+     */
+    const @utf8InCpp String METRICS_DATA_LOADER_STATUS_CODE = "dataLoaderStatusCode";
+    /**
+     * Metrics key for duration since last data loader binding attempt. The value is a long.
+     */
+    const @utf8InCpp String METRICS_MILLIS_SINCE_LAST_DATA_LOADER_BIND = "millisSinceLastDataLoaderBind";
+    /**
+     * Metrics key for delay in milliseconds to retry data loader binding. The value is a long.
+     */
+    const @utf8InCpp String METRICS_DATA_LOADER_BIND_DELAY_MILLIS = "dataLoaderBindDelayMillis";
+
+    /**
      * Return a bundle containing the requested metrics keys and their values.
      */
     PersistableBundle getMetrics(int storageId);
