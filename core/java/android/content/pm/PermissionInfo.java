@@ -211,6 +211,8 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * Additional flag for {@link #protectionLevel}, corresponding to the
      * {@code documenter} value of {@link android.R.attr#protectionLevel}.
      *
+     * @deprecated this protectionLevel is obsolete. Permissions previously granted
+     * through this protectionLevel have been migrated to use <code>role</code> instead
      * @hide
      */
     @SystemApi
@@ -309,7 +311,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             PROTECTION_FLAG_OEM,
             PROTECTION_FLAG_VENDOR_PRIVILEGED,
             PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER,
-            PROTECTION_FLAG_DOCUMENTER,
             PROTECTION_FLAG_CONFIGURATOR,
             PROTECTION_FLAG_INCIDENT_REPORT_APPROVER,
             PROTECTION_FLAG_APP_PREDICTOR,
@@ -560,9 +561,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER) != 0) {
             protLevel.append("|textClassifier");
-        }
-        if ((level & PermissionInfo.PROTECTION_FLAG_DOCUMENTER) != 0) {
-            protLevel.append("|documenter");
         }
         if ((level & PROTECTION_FLAG_CONFIGURATOR) != 0) {
             protLevel.append("|configurator");
