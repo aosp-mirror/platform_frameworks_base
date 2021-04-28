@@ -246,7 +246,8 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
             boolean sysuiResourceCanUseOneHandedKeyguard,
             SecurityMode securityMode) {
         TestableResources testableResources = mContext.getOrCreateTestableResources();
-        testableResources.addOverride(com.android.internal.R.bool.config_enableOneHandedKeyguard,
+        testableResources.addOverride(
+                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning,
                 deviceConfigCanUseOneHandedKeyguard);
         testableResources.addOverride(R.bool.can_use_one_handed_bouncer,
                 sysuiResourceCanUseOneHandedKeyguard);

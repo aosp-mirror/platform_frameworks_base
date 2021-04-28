@@ -4245,7 +4245,7 @@
 
   <java-symbol type="bool" name="config_voice_data_sms_auto_fallback" />
 
-  <java-symbol type="bool" name="config_enableOneHandedKeyguard" />
+  <java-symbol type="bool" name="config_enableDynamicKeyguardPositioning" />
 
   <java-symbol type="attr" name="colorAccentPrimary" />
   <java-symbol type="attr" name="colorAccentSecondary" />
