@@ -374,6 +374,7 @@ class RebootEscrowManager {
         try {
             escrowKey = getAndClearRebootEscrowKey(kk);
         } catch (IOException e) {
+            Slog.i(TAG, "Failed to load escrow key, scheduling retry.", e);
             scheduleLoadRebootEscrowDataOrFail(retryHandler, attemptNumber + 1, users,
                     rebootEscrowUsers);
             return;
