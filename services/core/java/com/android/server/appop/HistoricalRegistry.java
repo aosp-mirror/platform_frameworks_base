@@ -553,6 +553,11 @@ final class HistoricalRegistry {
                     if (mMode == AppOpsManager.HISTORICAL_MODE_DISABLED) {
                         clearHistoryOnDiskDLocked();
                     }
+                    if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_PASSIVE) {
+                        mDiscreteRegistry.setDebugMode(true);
+                    } else {
+                        mDiscreteRegistry.setDebugMode(false);
+                    }
                 }
                 if (mBaseSnapshotInterval != baseSnapshotInterval) {
                     mBaseSnapshotInterval = baseSnapshotInterval;
@@ -591,6 +596,7 @@ final class HistoricalRegistry {
                 mPersistence.persistHistoricalOpsDLocked(history);
             }
         }
+        mDiscreteRegistry.offsetHistory(offsetMillis);
     }
 
     void addHistoricalOps(HistoricalOps ops) {
