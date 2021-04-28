@@ -92,8 +92,8 @@ final class DiscreteRegistry {
             "discrete_history_quantization_millis";
     private static final String PROPERTY_DISCRETE_FLAGS = "discrete_history_op_flags";
     private static final String PROPERTY_DISCRETE_OPS_LIST = "discrete_history_ops_cslist";
-    private static final String DEFAULT_DISCRETE_OPS = OP_CAMERA + "," + OP_RECORD_AUDIO + ","
-            + OP_FINE_LOCATION + "," + OP_COARSE_LOCATION;
+    private static final String DEFAULT_DISCRETE_OPS = OP_FINE_LOCATION + "," + OP_COARSE_LOCATION
+            + "," + OP_CAMERA + "," + OP_RECORD_AUDIO;
     private static final long DEFAULT_DISCRETE_HISTORY_CUTOFF = Duration.ofHours(24).toMillis();
     private static final long MAXIMUM_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(30).toMillis();
     private static final long DEFAULT_DISCRETE_HISTORY_QUANTIZATION =
@@ -103,7 +103,6 @@ final class DiscreteRegistry {
     private static long sDiscreteHistoryQuantization;
     private static int[] sDiscreteOps;
     private static int sDiscreteFlags;
-
 
     private static final String TAG_HISTORY = "h";
     private static final String ATTR_VERSION = "v";
@@ -144,6 +143,8 @@ final class DiscreteRegistry {
     @GuardedBy("mOnDiskLock")
     private DiscreteOps mCachedOps = null;
 
+    private boolean mDebugMode = false;
+
     DiscreteRegistry(Object inMemoryLock) {
         mInMemoryLock = inMemoryLock;
     }
@@ -159,40 +160,35 @@ final class DiscreteRegistry {
                 AsyncTask.THREAD_POOL_EXECUTOR, (DeviceConfig.Properties p) -> {
                     setDiscreteHistoryParameters(p);
                 });
-        sDiscreteHistoryCutoff = DeviceConfig.getLong(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_DISCRETE_HISTORY_CUTOFF, DEFAULT_DISCRETE_HISTORY_CUTOFF);
-        sDiscreteHistoryQuantization = DeviceConfig.getLong(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_DISCRETE_HISTORY_QUANTIZATION, DEFAULT_DISCRETE_HISTORY_QUANTIZATION);
-        sDiscreteFlags = DeviceConfig.getInt(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_DISCRETE_FLAGS, OP_FLAGS_DISCRETE);
-        sDiscreteOps = parseOpsList(DeviceConfig.getString(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_DISCRETE_OPS_LIST, DEFAULT_DISCRETE_OPS));
+        setDiscreteHistoryParameters(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_PRIVACY));
     }
 
     private void setDiscreteHistoryParameters(DeviceConfig.Properties p) {
         if (p.getKeyset().contains(PROPERTY_DISCRETE_HISTORY_CUTOFF)) {
             sDiscreteHistoryCutoff = p.getLong(PROPERTY_DISCRETE_HISTORY_CUTOFF,
                     DEFAULT_DISCRETE_HISTORY_CUTOFF);
-            if (!Build.IS_DEBUGGABLE) {
+            if (!Build.IS_DEBUGGABLE && !mDebugMode) {
                 sDiscreteHistoryCutoff = min(MAXIMUM_DISCRETE_HISTORY_CUTOFF,
                         sDiscreteHistoryCutoff);
             }
+        } else {
+            sDiscreteHistoryCutoff = DEFAULT_DISCRETE_HISTORY_CUTOFF;
         }
         if (p.getKeyset().contains(PROPERTY_DISCRETE_HISTORY_QUANTIZATION)) {
             sDiscreteHistoryQuantization = p.getLong(PROPERTY_DISCRETE_HISTORY_QUANTIZATION,
                     DEFAULT_DISCRETE_HISTORY_QUANTIZATION);
-            if (!Build.IS_DEBUGGABLE) {
+            if (!Build.IS_DEBUGGABLE && !mDebugMode) {
                 sDiscreteHistoryQuantization = max(DEFAULT_DISCRETE_HISTORY_QUANTIZATION,
                         sDiscreteHistoryQuantization);
             }
+        } else {
+            sDiscreteHistoryQuantization = DEFAULT_DISCRETE_HISTORY_QUANTIZATION;
         }
-        if (p.getKeyset().contains(PROPERTY_DISCRETE_FLAGS)) {
-            sDiscreteFlags = p.getInt(PROPERTY_DISCRETE_FLAGS, OP_FLAGS_DISCRETE);
-        }
-        if (p.getKeyset().contains(PROPERTY_DISCRETE_OPS_LIST)) {
-            sDiscreteOps = parseOpsList(p.getString(PROPERTY_DISCRETE_OPS_LIST,
-                    DEFAULT_DISCRETE_OPS));
-        }
+        sDiscreteFlags = p.getKeyset().contains(PROPERTY_DISCRETE_FLAGS) ? sDiscreteFlags =
+                p.getInt(PROPERTY_DISCRETE_FLAGS, OP_FLAGS_DISCRETE) : OP_FLAGS_DISCRETE;
+        sDiscreteOps = p.getKeyset().contains(PROPERTY_DISCRETE_OPS_LIST) ? parseOpsList(
+                p.getString(PROPERTY_DISCRETE_OPS_LIST, DEFAULT_DISCRETE_OPS)) : parseOpsList(
+                DEFAULT_DISCRETE_OPS);
     }
 
     void recordDiscreteAccess(int uid, String packageName, int op, @Nullable String attributionTag,
@@ -232,6 +228,8 @@ final class DiscreteRegistry {
             @Nullable String packageNameFilter, @Nullable String[] opNamesFilter,
             @Nullable String attributionTagFilter, @AppOpsManager.OpFlags int flagsFilter) {
         DiscreteOps discreteOps = getAllDiscreteOps();
+        beginTimeMillis = max(beginTimeMillis, Instant.now().minus(sDiscreteHistoryCutoff,
+                ChronoUnit.MILLIS).toEpochMilli());
         discreteOps.filter(beginTimeMillis, endTimeMillis, filter, uidFilter, packageNameFilter,
                 opNamesFilter, attributionTagFilter, flagsFilter);
         discreteOps.applyToHistoricalOps(result);
@@ -278,6 +276,18 @@ final class DiscreteRegistry {
                 clearHistory();
             }
             discreteOps.clearHistory(uid, packageName);
+            persistDiscreteOpsLocked(discreteOps);
+        }
+    }
+
+    void offsetHistory(long offset) {
+        synchronized (mOnDiskLock) {
+            DiscreteOps discreteOps;
+            synchronized (mInMemoryLock) {
+                discreteOps = getAllDiscreteOps();
+                clearHistory();
+            }
+            discreteOps.offsetHistory(offset);
             persistDiscreteOpsLocked(discreteOps);
         }
     }
@@ -360,6 +370,13 @@ final class DiscreteRegistry {
                 if (mUids.valueAt(i).isEmpty()) {
                     mUids.removeAt(i);
                 }
+            }
+        }
+
+        private void offsetHistory(long offset) {
+            int nUids = mUids.size();
+            for (int i = 0; i < nUids; i++) {
+                mUids.valueAt(i).offsetHistory(offset);
             }
         }
 
@@ -549,6 +566,13 @@ final class DiscreteRegistry {
             }
         }
 
+        private void offsetHistory(long offset) {
+            int nPackages = mPackages.size();
+            for (int i = 0; i < nPackages; i++) {
+                mPackages.valueAt(i).offsetHistory(offset);
+            }
+        }
+
         private void clearPackage(String packageName) {
             mPackages.remove(packageName);
         }
@@ -656,6 +680,13 @@ final class DiscreteRegistry {
             }
         }
 
+        private void offsetHistory(long offset) {
+            int nOps = mPackageOps.size();
+            for (int i = 0; i < nOps; i++) {
+                mPackageOps.valueAt(i).offsetHistory(offset);
+            }
+        }
+
         private DiscreteOp getOrCreateDiscreteOp(int op) {
             DiscreteOp result = mPackageOps.get(op);
             if (result == null) {
@@ -749,12 +780,29 @@ final class DiscreteRegistry {
             }
         }
 
+        private void offsetHistory(long offset) {
+            int nTags = mAttributedOps.size();
+            for (int i = 0; i < nTags; i++) {
+                List<DiscreteOpEvent> list = mAttributedOps.valueAt(i);
+
+                int n = list.size();
+                for (int j = 0; j < n; j++) {
+                    DiscreteOpEvent event = list.get(j);
+                    list.set(j, new DiscreteOpEvent(event.mNoteTime - offset, event.mNoteDuration,
+                            event.mUidState, event.mOpFlag));
+                }
+            }
+        }
+
         void addDiscreteAccess(@Nullable String attributionTag,
                 @AppOpsManager.OpFlags int flags, @AppOpsManager.UidState int uidState,
                 long accessTime, long accessDuration) {
             List<DiscreteOpEvent> attributedOps = getOrCreateDiscreteOpEventsList(
                     attributionTag);
             accessTime = accessTime / sDiscreteHistoryQuantization * sDiscreteHistoryQuantization;
+            accessDuration = accessDuration == -1 ? -1
+                    : (accessDuration + sDiscreteHistoryQuantization - 1)
+                            / sDiscreteHistoryQuantization * sDiscreteHistoryQuantization;
 
             int nAttributedOps = attributedOps.size();
             int i = nAttributedOps;
@@ -764,8 +812,7 @@ final class DiscreteRegistry {
                     break;
                 }
                 if (previousOp.mOpFlag == flags && previousOp.mUidState == uidState) {
-                    if (accessDuration != previousOp.mNoteDuration
-                            && accessDuration > sDiscreteHistoryQuantization) {
+                    if (accessDuration != previousOp.mNoteDuration) {
                         break;
                     } else {
                         return;
@@ -982,6 +1029,10 @@ final class DiscreteRegistry {
             return false;
         }
         return true;
+    }
+
+    void setDebugMode(boolean debugMode) {
+        this.mDebugMode = debugMode;
     }
 }
 
