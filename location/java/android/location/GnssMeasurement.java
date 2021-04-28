@@ -1530,6 +1530,10 @@ public final class GnssMeasurement implements Parcelable {
      *
      * <p>The value does not include the inter-frequency Ionospheric bias.
      *
+     * <p>The sign of the value is defined by the following equation:
+     * <pre>
+     *     corrected pseudorange = raw pseudorange - FullInterSignalBiasNanos</pre>
+     *
      * <p>The value is only available if {@link #hasFullInterSignalBiasNanos()} is {@code true}.
      */
     public double getFullInterSignalBiasNanos() {
@@ -1625,6 +1629,10 @@ public final class GnssMeasurement implements Parcelable {
      * <li>Satellite inter-code bias (e.g., Differential Code Bias (DCB)) (with respect to the code
      * type in {@link GnssClock#getReferenceConstellationTypeForIsb())</li>
      * </ul>
+     *
+     * <p>The sign of the value is defined by the following equation:
+     * <pre>
+     *     corrected pseudorange = raw pseudorange - SatelliteInterSignalBiasNanos</pre>
      *
      * <p>The value is only available if {@link #hasSatelliteInterSignalBiasNanos()} is {@code
      * true}.
