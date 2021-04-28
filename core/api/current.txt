@@ -11160,11 +11160,13 @@ package android.content {
     field public static final String CATEGORY_APP_CONTACTS = "android.intent.category.APP_CONTACTS";
     field public static final String CATEGORY_APP_EMAIL = "android.intent.category.APP_EMAIL";
     field public static final String CATEGORY_APP_FILES = "android.intent.category.APP_FILES";
+    field public static final String CATEGORY_APP_FITNESS = "android.intent.category.APP_FITNESS";
     field public static final String CATEGORY_APP_GALLERY = "android.intent.category.APP_GALLERY";
     field public static final String CATEGORY_APP_MAPS = "android.intent.category.APP_MAPS";
     field public static final String CATEGORY_APP_MARKET = "android.intent.category.APP_MARKET";
     field public static final String CATEGORY_APP_MESSAGING = "android.intent.category.APP_MESSAGING";
     field public static final String CATEGORY_APP_MUSIC = "android.intent.category.APP_MUSIC";
+    field public static final String CATEGORY_APP_WEATHER = "android.intent.category.APP_WEATHER";
     field public static final String CATEGORY_BROWSABLE = "android.intent.category.BROWSABLE";
     field public static final String CATEGORY_CAR_DOCK = "android.intent.category.CAR_DOCK";
     field public static final String CATEGORY_CAR_MODE = "android.intent.category.CAR_MODE";

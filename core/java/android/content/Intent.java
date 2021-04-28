@@ -5232,6 +5232,30 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_APP_FILES = "android.intent.category.APP_FILES";
 
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the weather application.
+     * The activity should be able to give the user information about the weather
+     * <p>NOTE: This should not be used as the primary key of an Intent,
+     * since it will not result in the app launching with the correct
+     * action and category.  Instead, use this with
+     * {@link #makeMainSelectorActivity(String, String)} to generate a main
+     * Intent with this category in the selector.</p>
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_WEATHER = "android.intent.category.APP_WEATHER";
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the fitness application.
+     * The activity should be able to give the user fitness information and manage workouts
+     * <p>NOTE: This should not be used as the primary key of an Intent,
+     * since it will not result in the app launching with the correct
+     * action and category.  Instead, use this with
+     * {@link #makeMainSelectorActivity(String, String)} to generate a main
+     * Intent with this category in the selector.</p>
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_FITNESS = "android.intent.category.APP_FITNESS";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard extra data keys.
