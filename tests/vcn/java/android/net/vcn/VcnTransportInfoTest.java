@@ -16,6 +16,8 @@
 
 package android.net.vcn;
 
+import static android.net.NetworkCapabilities.REDACT_ALL;
+import static android.net.NetworkCapabilities.REDACT_FOR_NETWORK_SETTINGS;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static org.junit.Assert.assertEquals;
@@ -37,6 +39,12 @@ public class VcnTransportInfoTest {
     private static final VcnTransportInfo WIFI_UNDERLYING_INFO = new VcnTransportInfo(WIFI_INFO);
 
     @Test
+    public void testRedactionDefaults() {
+        assertEquals(REDACT_ALL, CELL_UNDERLYING_INFO.getRedaction());
+        assertEquals(REDACT_ALL, WIFI_UNDERLYING_INFO.getRedaction());
+    }
+
+    @Test
     public void testGetWifiInfo() {
         assertEquals(WIFI_INFO, WIFI_UNDERLYING_INFO.getWifiInfo());
 
@@ -48,6 +56,18 @@ public class VcnTransportInfoTest {
         assertEquals(SUB_ID, CELL_UNDERLYING_INFO.getSubId());
 
         assertEquals(INVALID_SUBSCRIPTION_ID, WIFI_UNDERLYING_INFO.getSubId());
+    }
+
+    @Test
+    public void testMakeCopySetsRedactions() {
+        assertEquals(
+                REDACT_FOR_NETWORK_SETTINGS,
+                ((VcnTransportInfo) CELL_UNDERLYING_INFO.makeCopy(REDACT_FOR_NETWORK_SETTINGS))
+                        .getRedaction());
+        assertEquals(
+                REDACT_FOR_NETWORK_SETTINGS,
+                ((VcnTransportInfo) WIFI_UNDERLYING_INFO.makeCopy(REDACT_FOR_NETWORK_SETTINGS))
+                        .getRedaction());
     }
 
     @Test
@@ -64,8 +84,29 @@ public class VcnTransportInfoTest {
     }
 
     private void verifyParcelingIsNull(VcnTransportInfo vcnTransportInfo) {
+        // Verify redacted by default
         Parcel parcel = Parcel.obtain();
         vcnTransportInfo.writeToParcel(parcel, 0 /* flags */);
+        parcel.setDataPosition(0);
+
         assertNull(VcnTransportInfo.CREATOR.createFromParcel(parcel));
+    }
+
+    @Test
+    public void testParcelUnparcelNotRedactedForSysUi() {
+        verifyParcelingForSysUi(CELL_UNDERLYING_INFO);
+        verifyParcelingForSysUi(WIFI_UNDERLYING_INFO);
+    }
+
+    private void verifyParcelingForSysUi(VcnTransportInfo vcnTransportInfo) {
+        // Allow fully unredacted; SysUI will have all the relevant permissions.
+        final VcnTransportInfo unRedacted = (VcnTransportInfo) vcnTransportInfo.makeCopy(0);
+        final Parcel parcel = Parcel.obtain();
+        unRedacted.writeToParcel(parcel, 0 /* flags */);
+        parcel.setDataPosition(0);
+
+        final VcnTransportInfo unparceled = VcnTransportInfo.CREATOR.createFromParcel(parcel);
+        assertEquals(vcnTransportInfo, unparceled);
+        assertEquals(REDACT_ALL, unparceled.getRedaction());
     }
 }
