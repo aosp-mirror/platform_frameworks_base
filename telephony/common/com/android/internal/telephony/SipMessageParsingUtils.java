@@ -81,6 +81,15 @@ public class SipMessageParsingUtils {
     }
 
     /**
+     * @return true if the SIP message start line is considered a response.
+     */
+    public static boolean isSipResponse(String startLine) {
+        String[] splitLine = splitStartLineAndVerify(startLine);
+        if (splitLine == null) return false;
+        return verifySipResponse(splitLine);
+    }
+
+    /**
      * Return the via branch parameter, which is used to identify the transaction ID (request and
      * response pair) in a SIP transaction.
      * @param headerString The string containing the headers of the SIP message.
@@ -140,7 +149,12 @@ public class SipMessageParsingUtils {
         return !headers.isEmpty() ? headers.get(0).second : null;
     }
 
-    private static String[] splitStartLineAndVerify(String startLine) {
+    /**
+     * Validate that the start line is correct and split into its three segments.
+     * @param startLine The start line to verify and split.
+     * @return The split start line, which will always have three segments.
+     */
+    public static String[] splitStartLineAndVerify(String startLine) {
         String[] splitLine = startLine.split(" ");
         if (isStartLineMalformed(splitLine)) return null;
         return splitLine;
@@ -184,7 +198,7 @@ public class SipMessageParsingUtils {
      *                           (This is internally an equalsIgnoreMatch comparison).
      * @return the matched header keys and values.
      */
-    private static List<Pair<String, String>> parseHeaders(String headerString,
+    public static List<Pair<String, String>> parseHeaders(String headerString,
             boolean stopAtFirstMatch, String... matchingHeaderKeys) {
         // Ensure there is no leading whitespace
         headerString = removeLeadingWhitespace(headerString);
