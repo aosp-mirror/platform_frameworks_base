@@ -663,7 +663,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
                 final long gnssChargeUC = measuredEnergyDeltas.gnssChargeUC;
                 if (gnssChargeUC != MeasuredEnergySnapshot.UNAVAILABLE) {
-                    mStats.updateGnssMeasuredEnergyStatsLocked(displayChargeUC, elapsedRealtime);
+                    mStats.updateGnssMeasuredEnergyStatsLocked(gnssChargeUC, elapsedRealtime);
                 }
             }
             // Inform mStats about each applicable custom energy bucket.
