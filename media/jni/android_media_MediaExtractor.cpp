@@ -295,8 +295,8 @@ status_t JMediaExtractor::getAudioPresentations(size_t trackIdx,
     return mImpl->getAudioPresentations(trackIdx, presentations);
 }
 
-status_t JMediaExtractor::setPlaybackId(const String8 &playbackId) {
-    return mImpl->setPlaybackId(playbackId);
+status_t JMediaExtractor::setLogSessionId(const String8 &LogSessionId) {
+    return mImpl->setLogSessionId(LogSessionId);
 }
 }  // namespace android
 
@@ -924,21 +924,21 @@ android_media_MediaExtractor_native_getMetrics(JNIEnv * env, jobject thiz)
 }
 
 static void
-android_media_MediaExtractor_native_setPlaybackId(
-        JNIEnv * env, jobject thiz, jstring playbackIdJString)
+android_media_MediaExtractor_native_setLogSessionId(
+        JNIEnv * env, jobject thiz, jstring logSessionIdJString)
 {
-    ALOGV("android_media_MediaExtractor_native_setPlaybackId");
+    ALOGV("android_media_MediaExtractor_native_setLogSessionId");
 
     sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
     if (extractor == nullptr) {
         jniThrowException(env, "java/lang/IllegalStateException", nullptr);
     }
 
-    const char* playbackId = env->GetStringUTFChars(playbackIdJString, nullptr);
-    if (extractor->setPlaybackId(String8(playbackId)) != OK) {
-        ALOGE("setPlaybackId failed");
+    const char* logSessionId = env->GetStringUTFChars(logSessionIdJString, nullptr);
+    if (extractor->setLogSessionId(String8(logSessionId)) != OK) {
+        ALOGE("setLogSessionId failed");
     }
-    env->ReleaseStringUTFChars(playbackIdJString, playbackId);
+    env->ReleaseStringUTFChars(logSessionIdJString, logSessionId);
 }
 
 static const JNINativeMethod gMethods[] = {
@@ -1010,8 +1010,8 @@ static const JNINativeMethod gMethods[] = {
     {"native_getMetrics",          "()Landroid/os/PersistableBundle;",
       (void *)android_media_MediaExtractor_native_getMetrics},
 
-    { "native_setPlaybackId", "(Ljava/lang/String;)V",
-      (void *)android_media_MediaExtractor_native_setPlaybackId},
+    { "native_setLogSessionId", "(Ljava/lang/String;)V",
+      (void *)android_media_MediaExtractor_native_setLogSessionId},
 
     { "native_getAudioPresentations", "(I)Ljava/util/List;",
       (void *)android_media_MediaExtractor_getAudioPresentations },
