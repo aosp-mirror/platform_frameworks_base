@@ -20,9 +20,9 @@
 
     <bool name="flag_notification_pipeline2">true</bool>
     <bool name="flag_notification_pipeline2_rendering">false</bool>
-    <bool name="flag_notif_updates">false</bool>
+    <bool name="flag_notif_updates">true</bool>
 
-    <bool name="flag_shade_is_opaque">false</bool>
+    <bool name="flag_shade_is_opaque">true</bool>
     <bool name="flag_monet">false</bool>
 
     <!-- b/171917882 -->
