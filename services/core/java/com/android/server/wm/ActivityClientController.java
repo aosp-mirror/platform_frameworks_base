@@ -827,9 +827,9 @@ class ActivityClientController extends IActivityClientController.Stub {
 
                 if (rootTask.inFreeformWindowingMode()) {
                     rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-                } else if (!mService.mSupportsNonResizableMultiWindow && r.inSizeCompatMode()) {
-                    throw new IllegalStateException("Size-compat windows are currently not"
-                            + "freeform-enabled");
+                } else if (!r.supportsFreeform()) {
+                    throw new IllegalStateException(
+                            "This activity is currently not freeform-enabled");
                 } else if (rootTask.getParent().inFreeformWindowingMode()) {
                     // If the window is on a freeform display, set it to undefined. It will be
                     // resolved to freeform and it can adjust windowing mode when the display mode

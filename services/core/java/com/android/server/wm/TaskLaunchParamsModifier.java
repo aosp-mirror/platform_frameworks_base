@@ -612,7 +612,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
     private boolean shouldLaunchUnresizableAppInFreeform(ActivityRecord activity,
             TaskDisplayArea displayArea) {
-        if (!mSupervisor.mService.mSupportsNonResizableMultiWindow || activity.isResizeable()) {
+        if (!activity.supportsFreeform() || activity.isResizeable()) {
             return false;
         }
 
