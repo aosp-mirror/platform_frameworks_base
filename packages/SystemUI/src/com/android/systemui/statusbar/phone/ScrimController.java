@@ -269,7 +269,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         updateThemeColors();
 
         behindScrim.enableBottomEdgeConcave(mClipsQsScrim);
-        mNotificationsScrim.enableRoundedCorners();
+        mNotificationsScrim.enableRoundedCorners(true);
 
         if (mScrimBehindChangeRunnable != null) {
             mScrimBehind.setChangeRunnable(mScrimBehindChangeRunnable, mMainExecutor);
@@ -292,6 +292,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
         updateScrims();
         mKeyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
+    }
+
+    /**
+     * Sets corner radius of scrims.
+     */
+    public void setScrimCornerRadius(int radius) {
+        if (mScrimBehind == null || mNotificationsScrim == null) {
+            return;
+        }
+        mScrimBehind.setCornerRadius(radius);
+        mNotificationsScrim.setCornerRadius(radius);
     }
 
     void setScrimVisibleListener(Consumer<Integer> listener) {
