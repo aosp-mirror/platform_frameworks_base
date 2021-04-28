@@ -101,6 +101,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -1175,6 +1176,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         accessibilityButton.setOnLongClickListener(this::onAccessibilityLongClick);
         updateAccessibilityServicesState(mAccessibilityManager);
 
+        ButtonDispatcher imeSwitcherButton = mNavigationBarView.getImeSwitchButton();
+        imeSwitcherButton.setOnClickListener(this::onImeSwitcherClick);
+
         updateScreenPinningGestures();
     }
 
@@ -1274,6 +1278,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mCommandQueue.toggleRecentApps();
     }
 
+    private void onImeSwitcherClick(View v) {
+        mContext.getSystemService(InputMethodManager.class).showInputMethodPickerFromSystem(
+                true /* showAuxiliarySubtypes */, mDisplayId);
+    };
+
     private boolean onLongPressBackHome(View v) {
         return onLongPressNavigationButtons(v, R.id.back, R.id.home);
     }
@@ -1281,7 +1290,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private boolean onLongPressBackRecents(View v) {
         return onLongPressNavigationButtons(v, R.id.back, R.id.recent_apps);
     }
-
 
     /**
      * This handles long-press of both back and recents/home. Back is the common button with
