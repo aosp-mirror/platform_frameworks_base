@@ -37,7 +37,7 @@
     <!-- Text size of the message within a toast -->
     <dimen name="toast_text_size">14sp</dimen>
     <!-- Elevation of toast view -->
-    <dimen name="toast_elevation">6dp</dimen>
+    <dimen name="toast_elevation">2dp</dimen>
 
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">@dimen/status_bar_height_portrait</dimen>
