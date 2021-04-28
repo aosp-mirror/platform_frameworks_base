@@ -28,7 +28,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
@@ -76,52 +75,6 @@ import org.junit.runner.RunWith;
 public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
-    public void getLaunchRootTask_checksLaunchAdjacentFlagRoot() {
-        final Task rootTask = createTask(
-                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        rootTask.mCreatedByOrganizer = true;
-        final Task adjacentRootTask = createTask(
-                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        adjacentRootTask.mCreatedByOrganizer = true;
-        final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
-        adjacentRootTask.mAdjacentTask = rootTask;
-        rootTask.mAdjacentTask = adjacentRootTask;
-
-        taskDisplayArea.setLaunchAdjacentFlagRootTask(adjacentRootTask);
-        Task actualRootTask = taskDisplayArea.getLaunchRootTask(
-                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, null /* options */,
-                null /* sourceTask */, FLAG_ACTIVITY_LAUNCH_ADJACENT);
-        assertSame(adjacentRootTask, actualRootTask.getRootTask());
-
-        taskDisplayArea.setLaunchAdjacentFlagRootTask(null);
-        actualRootTask = taskDisplayArea.getLaunchRootTask(WINDOWING_MODE_UNDEFINED,
-                ACTIVITY_TYPE_STANDARD, null /* options */, null /* sourceTask */,
-                FLAG_ACTIVITY_LAUNCH_ADJACENT);
-        assertNull(actualRootTask);
-    }
-
-    @Test
-    public void getLaunchRootTask_fromLaunchAdjacentFlagRoot_checksAdjacentRoot() {
-        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
-        final Task rootTask = createTask(
-                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        rootTask.mCreatedByOrganizer = true;
-        final Task adjacentRootTask = createTask(
-                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        adjacentRootTask.mCreatedByOrganizer = true;
-        final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
-        adjacentRootTask.mAdjacentTask = rootTask;
-        rootTask.mAdjacentTask = adjacentRootTask;
-
-        taskDisplayArea.setLaunchAdjacentFlagRootTask(adjacentRootTask);
-        final Task actualRootTask = taskDisplayArea.getLaunchRootTask(
-                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, null /* options */,
-                adjacentRootTask /* sourceTask */, FLAG_ACTIVITY_LAUNCH_ADJACENT);
-
-        assertSame(rootTask, actualRootTask.getRootTask());
-    }
-
-    @Test
     public void getOrCreateLaunchRootRespectsResolvedWindowingMode() {
         final Task rootTask = createTask(
                 mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
@@ -137,8 +90,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         launchParams.mWindowingMode = WINDOWING_MODE_FREEFORM;
 
         final Task actualRootTask = taskDisplayArea.getOrCreateRootTask(
-                activity, null /* options */, candidateRootTask, null /* sourceTask */,
-                launchParams, 0 /* launchFlags */, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+                activity, null /* options */, candidateRootTask,
+                launchParams, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         assertSame(rootTask, actualRootTask.getRootTask());
     }
 
@@ -158,9 +111,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         options.setLaunchWindowingMode(WINDOWING_MODE_FREEFORM);
 
         final Task actualRootTask = taskDisplayArea.getOrCreateRootTask(
-                activity, options, candidateRootTask, null /* sourceTask */,
-                null /* launchParams */, 0 /* launchFlags */, ACTIVITY_TYPE_STANDARD,
-                true /* onTop */);
+                activity, options, candidateRootTask,
+                null /* launchParams */, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         assertSame(rootTask, actualRootTask.getRootTask());
     }
 
@@ -506,8 +458,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
             boolean reuseCandidate) {
         final TaskDisplayArea taskDisplayArea = candidateTask.getDisplayArea();
         final Task rootTask = taskDisplayArea.getOrCreateRootTask(windowingMode, activityType,
-                false /* onTop */, candidateTask /* candidateTask */, null /* sourceTask */,
-                null /* activityOptions */, 0 /* launchFlags */);
+                false /* onTop */, null /* intent */, candidateTask /* candidateTask */,
+                null /* activityOptions */);
         assertEquals(reuseCandidate, rootTask == candidateTask);
     }
 

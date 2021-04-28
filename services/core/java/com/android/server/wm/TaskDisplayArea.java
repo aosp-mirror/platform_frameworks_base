@@ -27,7 +27,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -44,6 +43,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
+import android.content.Intent;
 import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
@@ -131,11 +131,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
     }
     private final ArrayList<LaunchRootTaskDef> mLaunchRootTasks = new ArrayList<>();
-
-    /**
-     * A launch root task for activity launching with {@link FLAG_ACTIVITY_LAUNCH_ADJACENT} flag.
-     */
-    private Task mLaunchAdjacentFlagRootTask;
 
     /**
      * A focusable root task that is purposely to be positioned at the top. Although the root
@@ -1018,9 +1013,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         if (mPreferredTopFocusableRootTask == rootTask) {
             mPreferredTopFocusableRootTask = null;
         }
-        if (mLaunchAdjacentFlagRootTask == rootTask) {
-            mLaunchAdjacentFlagRootTask = null;
-        }
         mDisplayContent.releaseSelfIfNeeded();
         onRootTaskOrderChanged(rootTask);
     }
@@ -1055,11 +1047,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * Returns an existing root task compatible with the windowing mode and activity type or
      * creates one if a compatible root task doesn't exist.
      *
-     * @see #getOrCreateRootTask(int, int, boolean, Task, Task, ActivityOptions, int)
+     * @see #getOrCreateRootTask(int, int, boolean, Intent, Task, ActivityOptions)
      */
     Task getOrCreateRootTask(int windowingMode, int activityType, boolean onTop) {
-        return getOrCreateRootTask(windowingMode, activityType, onTop, null /* candidateTask */,
-                null /* sourceTask */, null /* options */, 0 /* intent */);
+        return getOrCreateRootTask(windowingMode, activityType, onTop, null /* intent */,
+                null /* candidateTask */, null /* options */);
     }
 
     /**
@@ -1068,21 +1060,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * For one level task, the candidate task would be reused to also be the root task or create
      * a new root task if no candidate task.
      *
-     * @param windowingMode The windowing mode the root task should be created in.
-     * @param activityType  The activityType the root task should be created in.
-     * @param onTop         If true the root task will be created at the top of the display,
-     *                      else at the bottom.
-     * @param candidateTask The possible task the activity might be launched in. Can be null.
-     * @param sourceTask    The task requesting to start activity. Used to determine which of the
-     *                      adjacent roots should be launch root of the new task. Can be null.
-     * @param options       The activity options used to the launch. Can be null.
-     * @param launchFlags   The launch flags for this launch.
-     * @return The root task to use for the launch.
      * @see #getRootTask(int, int)
+     * @see #createRootTask(int, int, boolean)
      */
     Task getOrCreateRootTask(int windowingMode, int activityType, boolean onTop,
-            @Nullable Task candidateTask, @Nullable Task sourceTask,
-            @Nullable ActivityOptions options, int launchFlags) {
+            Intent intent, Task candidateTask, ActivityOptions options) {
         // Need to pass in a determined windowing mode to see if a new root task should be created,
         // so use its parent's windowing mode if it is undefined.
         if (!alwaysCreateRootTask(
@@ -1095,8 +1077,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         } else if (candidateTask != null) {
             final Task rootTask = candidateTask;
             final int position = onTop ? POSITION_TOP : POSITION_BOTTOM;
-            final Task launchRootTask = getLaunchRootTask(windowingMode, activityType, options,
-                    sourceTask, launchFlags);
+            final Task launchRootTask = getLaunchRootTask(windowingMode, activityType, options);
 
             if (launchRootTask != null) {
                 if (rootTask.getParent() == null) {
@@ -1122,9 +1103,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 .setActivityType(activityType)
                 .setOnTop(onTop)
                 .setParent(this)
-                .setSourceTask(sourceTask)
+                .setIntent(intent)
                 .setActivityOptions(options)
-                .setLaunchFlags(launchFlags)
                 .build();
     }
 
@@ -1134,9 +1114,9 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      *
      * @see #getOrCreateRootTask(int, int, boolean)
      */
-    Task getOrCreateRootTask(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
-            @Nullable Task candidateTask, @Nullable Task sourceTask,
-            @Nullable LaunchParams launchParams, int launchFlags, int activityType, boolean onTop) {
+    Task getOrCreateRootTask(@Nullable ActivityRecord r,
+            @Nullable ActivityOptions options, @Nullable Task candidateTask,
+            @Nullable LaunchParams launchParams, int activityType, boolean onTop) {
         int windowingMode = WINDOWING_MODE_UNDEFINED;
         if (launchParams != null) {
             // If launchParams isn't null, windowing mode is already resolved.
@@ -1150,8 +1130,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // UNDEFINED windowing mode is a valid result and means that the new root task will inherit
         // it's display's windowing mode.
         windowingMode = validateWindowingMode(windowingMode, r, candidateTask, activityType);
-        return getOrCreateRootTask(windowingMode, activityType, onTop, candidateTask, sourceTask,
-                options, launchFlags);
+        return getOrCreateRootTask(windowingMode, activityType, onTop, null /* intent */,
+                candidateTask, options);
     }
 
     @VisibleForTesting
@@ -1219,24 +1199,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
     }
 
-    void setLaunchAdjacentFlagRootTask(@Nullable Task adjacentFlagRootTask) {
-        if (adjacentFlagRootTask != null) {
-            if (!adjacentFlagRootTask.mCreatedByOrganizer) {
-                throw new IllegalArgumentException(
-                        "Can't set not mCreatedByOrganizer as launch adjacent flag root tr="
-                                + adjacentFlagRootTask);
-            }
-
-            if (adjacentFlagRootTask.mAdjacentTask == null) {
-                throw new UnsupportedOperationException(
-                        "Can't set non-adjacent root as launch adjacent flag root tr="
-                                + adjacentFlagRootTask);
-            }
-        }
-
-        mLaunchAdjacentFlagRootTask = adjacentFlagRootTask;
-    }
-
     private @Nullable LaunchRootTaskDef getLaunchRootTaskDef(Task rootTask) {
         LaunchRootTaskDef def = null;
         for (int i = mLaunchRootTasks.size() - 1; i >= 0; --i) {
@@ -1247,28 +1209,13 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         return def;
     }
 
-    @Nullable
-    Task getLaunchRootTask(int windowingMode, int activityType, @Nullable ActivityOptions options,
-            @Nullable Task sourceTask, int launchFlags) {
+    Task getLaunchRootTask(int windowingMode, int activityType, ActivityOptions options) {
         // Try to use the launch root task in options if available.
         if (options != null) {
             final Task launchRootTask = Task.fromWindowContainerToken(options.getLaunchRootTask());
             // We only allow this for created by organizer tasks.
             if (launchRootTask != null && launchRootTask.mCreatedByOrganizer) {
                 return launchRootTask;
-            }
-        }
-
-        // Use launch-adjacent-flag-root if launching with launch-adjacent flag.
-        if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
-                && mLaunchAdjacentFlagRootTask != null) {
-            // If the adjacent launch is coming from the same root, launch to adjacent root instead.
-            if (sourceTask != null
-                    && sourceTask.getRootTask().mTaskId == mLaunchAdjacentFlagRootTask.mTaskId
-                    && mLaunchAdjacentFlagRootTask.mAdjacentTask != null) {
-                return mLaunchAdjacentFlagRootTask.mAdjacentTask;
-            } else {
-                return mLaunchAdjacentFlagRootTask;
             }
         }
 
@@ -2016,11 +1963,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 // Reparent task to corresponding launch root or display area.
                 final WindowContainer launchRoot = task.supportsSplitScreenWindowingMode()
                         ? toDisplayArea.getLaunchRootTask(
-                                task.getWindowingMode(),
-                                task.getActivityType(),
-                                null /* options */,
-                                null /* sourceTask */,
-                                0 /* launchFlags */)
+                                task.getWindowingMode(), task.getActivityType(), null /* options */)
                         : null;
                 task.reparent(launchRoot == null ? toDisplayArea : launchRoot, POSITION_TOP);
 
