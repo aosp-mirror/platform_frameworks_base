@@ -27,6 +27,7 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Slog;
 
