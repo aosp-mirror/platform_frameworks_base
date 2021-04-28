@@ -52,7 +52,8 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.HIDE_REMOVE_CLIENT,
         SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY,
         SoftInputShowHideReason.SHOW_TOGGLE_SOFT_INPUT,
-        SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT})
+        SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT,
+        SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API})
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
     int SHOW_SOFT_INPUT = 0;
@@ -188,4 +189,10 @@ public @interface SoftInputShowHideReason {
      * {@link android.view.inputmethod.InputMethodManager#toggleSoftInput(int, int)};
      */
     int HIDE_TOGGLE_SOFT_INPUT = 24;
+
+    /**
+     * Show soft input by
+     * {@link android.view.InsetsController#show(int)};
+     */
+    int SHOW_SOFT_INPUT_BY_INSETS_API = 25;
 }
