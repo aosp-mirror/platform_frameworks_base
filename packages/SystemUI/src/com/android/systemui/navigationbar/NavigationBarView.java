@@ -83,7 +83,6 @@ import com.android.systemui.navigationbar.gestural.RegionSamplingHelper;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsOnboarding;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
@@ -113,7 +112,6 @@ public class NavigationBarView extends FrameLayout implements
     private final RegionSamplingHelper mRegionSamplingHelper;
     private final int mNavColorSampleMargin;
     private final SysUiState mSysUiFlagContainer;
-    private final PluginManager mPluginManager;
 
     View mCurrentView = null;
     private View mVertical;
@@ -316,7 +314,6 @@ public class NavigationBarView extends FrameLayout implements
         boolean isGesturalMode = isGesturalMode(mNavBarMode);
 
         mSysUiFlagContainer = Dependency.get(SysUiState.class);
-        mPluginManager = Dependency.get(PluginManager.class);
         // Set up the context group of buttons
         mContextualButtonGroup = new ContextualButtonGroup(R.id.menu_container);
         final ContextualButton imeSwitcherButton = new ContextualButton(R.id.ime_switcher,
@@ -366,8 +363,8 @@ public class NavigationBarView extends FrameLayout implements
 
         mNavColorSampleMargin = getResources()
                         .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
-        mEdgeBackGestureHandler = new EdgeBackGestureHandler(context, mOverviewProxyService,
-                mSysUiFlagContainer, mPluginManager, this::updateStates);
+        mEdgeBackGestureHandler = Dependency.get(EdgeBackGestureHandler.class);
+        mEdgeBackGestureHandler.setStateChangeCallback(this::updateStates);
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {
                     @Override
