@@ -13311,12 +13311,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         final long ident = mInjector.binderClearCallingIdentity();
         try {
-            final int uidForPackage = mInjector.getPackageManager().getPackageUidAsUser(
-                    packageName, caller.getUserId());
-            Preconditions.checkArgument(caller.getUid() == uidForPackage,
+            final List<String> callerUidPackageNames = Arrays.asList(
+                    mInjector.getPackageManager().getPackagesForUid(caller.getUid()));
+            Preconditions.checkArgument(callerUidPackageNames.contains(packageName),
                     "Caller uid doesn't match the one for the provided package.");
-        } catch (NameNotFoundException e) {
-            throw new IllegalArgumentException("Invalid package provided " + packageName, e);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
