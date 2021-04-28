@@ -2810,11 +2810,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return false;
     }
 
-    Task getLaunchRootTask(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
-            @Nullable Task candidateTask, boolean onTop) {
-        return getLaunchRootTask(r, options, candidateTask, null /* sourceTask */, onTop,
-                null /* launchParams */, 0 /* launchFlags */, -1 /* no realCallingPid */,
-                -1 /* no realCallingUid */);
+    Task getLaunchRootTask(@Nullable ActivityRecord r,
+            @Nullable ActivityOptions options, @Nullable Task candidateTask, boolean onTop) {
+        return getLaunchRootTask(r, options, candidateTask, onTop, null /* launchParams */,
+                -1 /* no realCallingPid */, -1 /* no realCallingUid */);
     }
 
     /**
@@ -2823,18 +2822,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * @param r              The activity we are trying to launch. Can be null.
      * @param options        The activity options used to the launch. Can be null.
      * @param candidateTask  The possible task the activity might be launched in. Can be null.
-     * @param sourceTask     The task requesting to start activity. Can be null.
      * @param launchParams   The resolved launch params to use.
-     * @param launchFlags    The launch flags for this launch.
      * @param realCallingPid The pid from {@link ActivityStarter#setRealCallingPid}
      * @param realCallingUid The uid from {@link ActivityStarter#setRealCallingUid}
      * @return The root task to use for the launch or INVALID_TASK_ID.
      */
     Task getLaunchRootTask(@Nullable ActivityRecord r,
-            @Nullable ActivityOptions options, @Nullable Task candidateTask,
-            @Nullable Task sourceTask, boolean onTop,
-            @Nullable LaunchParamsController.LaunchParams launchParams, int launchFlags,
-            int realCallingPid, int realCallingUid) {
+            @Nullable ActivityOptions options, @Nullable Task candidateTask, boolean onTop,
+            @Nullable LaunchParamsController.LaunchParams launchParams, int realCallingPid,
+            int realCallingUid) {
         int taskId = INVALID_TASK_ID;
         int displayId = INVALID_DISPLAY;
         TaskDisplayArea taskDisplayArea = null;
@@ -2898,7 +2894,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // Falling back to default task container
                 taskDisplayArea = taskDisplayArea.mDisplayContent.getDefaultTaskDisplayArea();
                 rootTask = taskDisplayArea.getOrCreateRootTask(r, options, candidateTask,
-                        sourceTask, launchParams, launchFlags, activityType, onTop);
+                        launchParams, activityType, onTop);
                 if (rootTask != null) {
                     return rootTask;
                 }
@@ -2953,8 +2949,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        return container.getOrCreateRootTask(r, options, candidateTask, sourceTask, launchParams,
-                launchFlags, activityType, onTop);
+        return container.getOrCreateRootTask(
+                r, options, candidateTask, launchParams, activityType, onTop);
     }
 
     /** @return true if activity record is null or can be launched on provided display. */
