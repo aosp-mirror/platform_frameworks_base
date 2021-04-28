@@ -45,8 +45,8 @@ import android.security.keystore2.AndroidKeyStoreProvider;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
-import android.system.StructCapUserData;
-import android.system.StructCapUserHeader;
+import android.system.StructUserCapData;
+import android.system.StructUserCapHeader;
 import android.text.Hyphenator;
 import android.util.EventLog;
 import android.util.Log;
@@ -742,9 +742,9 @@ public class ZygoteInit {
                 OsConstants.CAP_BLOCK_SUSPEND
         );
         /* Containers run without some capabilities, so drop any caps that are not available. */
-        StructCapUserHeader header = new StructCapUserHeader(
+        StructUserCapHeader header = new StructUserCapHeader(
                 OsConstants._LINUX_CAPABILITY_VERSION_3, 0);
-        StructCapUserData[] data;
+        StructUserCapData[] data;
         try {
             data = Os.capget(header);
         } catch (ErrnoException ex) {
