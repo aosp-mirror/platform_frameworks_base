@@ -3273,6 +3273,13 @@ class ContextImpl extends Context {
                     dir = null;
                 }
             }
+            if (!dir.canWrite()) {
+                // Older versions of the MediaProvider mainline module had a rare early boot race
+                // condition where app-private dirs could be created with the wrong permissions;
+                // fix this up here. This check should be very fast, because dir.exists() above
+                // will already have loaded the dentry in the cache.
+                sm.fixupAppDir(dir);
+            }
             result[i] = dir;
         }
         return result;
