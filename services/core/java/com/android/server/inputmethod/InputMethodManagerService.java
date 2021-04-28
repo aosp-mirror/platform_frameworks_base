@@ -6039,10 +6039,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void updateStatusIcon(String packageName, @DrawableRes int iconId,
-                IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.updateStatusIcon(mToken, packageName, iconId));
+        public void updateStatusIconAsync(String packageName, @DrawableRes int iconId) {
+            mImms.updateStatusIcon(mToken, packageName, iconId);
         }
 
         @BinderThread

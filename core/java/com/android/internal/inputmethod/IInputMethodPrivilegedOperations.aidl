@@ -39,7 +39,7 @@ oneway interface IInputMethodPrivilegedOperations {
             in IVoidResultCallback resultCallback);
     void hideMySoftInput(int flags, in IVoidResultCallback resultCallback);
     void showMySoftInput(int flags, in IVoidResultCallback resultCallback);
-    void updateStatusIcon(String packageName, int iconId, in IVoidResultCallback resultCallback);
+    void updateStatusIconAsync(String packageName, int iconId);
     void switchToPreviousInputMethod(in IBooleanResultCallback resultCallback);
     void switchToNextInputMethod(boolean onlyCurrentIme, in IBooleanResultCallback resultCallback);
     void shouldOfferSwitchingToNextInputMethod(in IBooleanResultCallback resultCallback);
