@@ -365,18 +365,16 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#notifyUserAction(IVoidResultCallback)}
+     * Calls {@link IInputMethodPrivilegedOperations#notifyUserActionAsync()}
      */
     @AnyThread
-    public void notifyUserAction() {
+    public void notifyUserActionAsync() {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.notifyUserAction(ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.notifyUserActionAsync();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

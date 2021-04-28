@@ -3313,7 +3313,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (mNotifyUserActionSent) {
                 return;
             }
-            mPrivOps.notifyUserAction();
+            mPrivOps.notifyUserActionAsync();
             mNotifyUserActionSent = true;
         }
     }
