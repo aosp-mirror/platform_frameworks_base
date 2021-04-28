@@ -3023,18 +3023,21 @@ public class NotificationManagerService extends SystemService {
                     getRealUserId(r.getSbn().getUserId()));
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryAddItem");
             try {
-                mHistoryManager.addNotification(new HistoricalNotification.Builder()
-                        .setPackage(r.getSbn().getPackageName())
-                        .setUid(r.getSbn().getUid())
-                        .setUserId(r.getSbn().getNormalizedUserId())
-                        .setChannelId(r.getChannel().getId())
-                        .setChannelName(r.getChannel().getName().toString())
-                        .setPostedTimeMs(System.currentTimeMillis())
-                        .setTitle(getHistoryTitle(r.getNotification()))
-                        .setText(getHistoryText(
-                                r.getSbn().getPackageContext(getContext()), r.getNotification()))
-                        .setIcon(r.getNotification().getSmallIcon())
-                        .build());
+                if (r.getNotification().getSmallIcon() != null) {
+                    mHistoryManager.addNotification(new HistoricalNotification.Builder()
+                            .setPackage(r.getSbn().getPackageName())
+                            .setUid(r.getSbn().getUid())
+                            .setUserId(r.getSbn().getNormalizedUserId())
+                            .setChannelId(r.getChannel().getId())
+                            .setChannelName(r.getChannel().getName().toString())
+                            .setPostedTimeMs(System.currentTimeMillis())
+                            .setTitle(getHistoryTitle(r.getNotification()))
+                            .setText(getHistoryText(
+                                    r.getSbn().getPackageContext(getContext()),
+                                    r.getNotification()))
+                            .setIcon(r.getNotification().getSmallIcon())
+                            .build());
+                }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
