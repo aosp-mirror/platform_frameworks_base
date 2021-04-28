@@ -1558,8 +1558,22 @@ public class VcnGatewayConnection extends StateMachine {
                                 teardownAsynchronously();
                             } /* networkUnwantedCallback */,
                             (status) -> {
-                                if (status == NetworkAgent.VALIDATION_STATUS_VALID) {
-                                    clearFailedAttemptCounterAndSafeModeAlarm();
+                                switch (status) {
+                                    case NetworkAgent.VALIDATION_STATUS_VALID:
+                                        clearFailedAttemptCounterAndSafeModeAlarm();
+                                        break;
+                                    case NetworkAgent.VALIDATION_STATUS_NOT_VALID:
+                                        // Will only set a new alarm if no safe mode alarm is
+                                        // currently scheduled.
+                                        setSafeModeAlarm();
+                                        break;
+                                    default:
+                                        Slog.wtf(
+                                                TAG,
+                                                "Unknown validation status "
+                                                        + status
+                                                        + "; ignoring");
+                                        break;
                                 }
                             } /* validationStatusCallback */);
 
