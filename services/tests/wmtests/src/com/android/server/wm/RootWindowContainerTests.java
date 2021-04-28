@@ -980,8 +980,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         doReturn(true).when(mSupervisor).canPlaceEntityOnDisplay(secondaryDisplay.mDisplayId,
                 300 /* test realCallerPid */, 300 /* test realCallerUid */, r.info);
         final Task result = mRootWindowContainer.getLaunchRootTask(r, options,
-                null /* task */, null /* sourceTask */, true /* onTop */, null /* launchParams */,
-                0 /* launchFlags */, 300 /* test realCallerPid */,
+                null /* task */, true /* onTop */, null, 300 /* test realCallerPid */,
                 300 /* test realCallerUid */);
 
         // Assert that the root task is returned as expected.
