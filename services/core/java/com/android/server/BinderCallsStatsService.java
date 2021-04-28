@@ -19,6 +19,15 @@ package com.android.server;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_COLLECT_LATENCY_DATA_KEY;
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_DETAILED_TRACKING_KEY;
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_ENABLED_KEY;
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_IGNORE_BATTERY_STATUS_KEY;
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_MAX_CALL_STATS_KEY;
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_SAMPLING_INTERVAL_KEY;
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_TRACK_DIRECT_CALLING_UID_KEY;
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY;
+
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -43,7 +52,6 @@ import com.android.internal.os.AppIdToPackageMap;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
-import com.android.internal.os.BinderLatencyObserver;
 import com.android.internal.os.CachedDeviceState;
 import com.android.internal.util.DumpUtils;
 
@@ -125,28 +133,6 @@ public class BinderCallsStatsService extends Binder {
 
     /** Listens for flag changes. */
     private static class SettingsObserver extends ContentObserver {
-        // Settings for BinderCallsStats.
-        private static final String SETTINGS_ENABLED_KEY = "enabled";
-        private static final String SETTINGS_DETAILED_TRACKING_KEY = "detailed_tracking";
-        private static final String SETTINGS_UPLOAD_DATA_KEY = "upload_data";
-        private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
-        private static final String SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY = "track_screen_state";
-        private static final String SETTINGS_TRACK_DIRECT_CALLING_UID_KEY = "track_calling_uid";
-        private static final String SETTINGS_MAX_CALL_STATS_KEY = "max_call_stats_count";
-        private static final String SETTINGS_IGNORE_BATTERY_STATUS_KEY = "ignore_battery_status";
-        // Settings for BinderLatencyObserver.
-        private static final String SETTINGS_COLLECT_LATENCY_DATA_KEY = "collect_Latency_data";
-        private static final String SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY =
-                "latency_observer_sampling_interval";
-        private static final String SETTINGS_LATENCY_OBSERVER_PUSH_INTERVAL_MINUTES_KEY =
-                "latency_observer_push_interval_minutes";
-        private static final String SETTINGS_LATENCY_HISTOGRAM_BUCKET_COUNT_KEY =
-                "latency_histogram_bucket_count";
-        private static final String SETTINGS_LATENCY_HISTOGRAM_FIRST_BUCKET_SIZE_KEY =
-                "latency_histogram_first_bucket_size";
-        private static final String SETTINGS_LATENCY_HISTOGRAM_BUCKET_SCALE_FACTOR_KEY =
-                "latency_histogram_bucket_scale_factor";
-
         private boolean mEnabled;
         private final Uri mUri = Settings.Global.getUriFor(Settings.Global.BINDER_CALLS_STATS);
         private final Context mContext;
@@ -206,23 +192,9 @@ public class BinderCallsStatsService extends Binder {
                     mParser.getBoolean(SETTINGS_COLLECT_LATENCY_DATA_KEY,
                     BinderCallsStats.DEFAULT_COLLECT_LATENCY_DATA));
             // Binder latency observer settings.
-            BinderLatencyObserver binderLatencyObserver = mBinderCallsStats.getLatencyObserver();
-            binderLatencyObserver.setSamplingInterval(mParser.getInt(
-                    SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY,
-                    BinderLatencyObserver.PERIODIC_SAMPLING_INTERVAL_DEFAULT));
-            binderLatencyObserver.setHistogramBucketsParams(
-                    mParser.getInt(
-                        SETTINGS_LATENCY_HISTOGRAM_BUCKET_COUNT_KEY,
-                        BinderLatencyObserver.BUCKET_COUNT_DEFAULT),
-                    mParser.getInt(
-                        SETTINGS_LATENCY_HISTOGRAM_FIRST_BUCKET_SIZE_KEY,
-                        BinderLatencyObserver.FIRST_BUCKET_SIZE_DEFAULT),
-                    mParser.getFloat(
-                        SETTINGS_LATENCY_HISTOGRAM_BUCKET_SCALE_FACTOR_KEY,
-                        BinderLatencyObserver.BUCKET_SCALE_FACTOR_DEFAULT));
-            binderLatencyObserver.setPushInterval(mParser.getInt(
-                    SETTINGS_LATENCY_OBSERVER_PUSH_INTERVAL_MINUTES_KEY,
-                    BinderLatencyObserver.STATSD_PUSH_INTERVAL_MINUTES_DEFAULT));
+            BinderCallsStats.SettingsObserver.configureLatencyObserver(
+                    mParser,
+                    mBinderCallsStats.getLatencyObserver());
 
             final boolean enabled =
                     mParser.getBoolean(SETTINGS_ENABLED_KEY, BinderCallsStats.ENABLED_DEFAULT);
