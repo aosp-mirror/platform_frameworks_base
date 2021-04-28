@@ -203,7 +203,7 @@ public final class SensorPrivacyService extends SystemService {
                     SparseBooleanArray userIndividualEnabled =
                             mIndividualEnabled.valueAt(i);
                     for (int j = 0; j < userIndividualEnabled.size(); j++) {
-                        int sensor = userIndividualEnabled.keyAt(i);
+                        int sensor = userIndividualEnabled.keyAt(j);
                         boolean enabled = userIndividualEnabled.valueAt(j);
                         setUserRestriction(userId, sensor, enabled);
                     }
