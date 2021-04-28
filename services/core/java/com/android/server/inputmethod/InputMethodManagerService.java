@@ -3143,7 +3143,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void showSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
-            ResultReceiver resultReceiver, IBooleanResultCallback resultCallback) {
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
+            IBooleanResultCallback resultCallback) {
         CallbackUtils.onResult(resultCallback, () -> {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
             int uid = Binder.getCallingUid();
@@ -3172,8 +3173,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     }
                     if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
-                    return showCurrentInputLocked(windowToken, flags, resultReceiver,
-                                    SoftInputShowHideReason.SHOW_SOFT_INPUT);
+                    return showCurrentInputLocked(windowToken, flags, resultReceiver, reason);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -3262,7 +3262,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void hideSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
-            ResultReceiver resultReceiver, IBooleanResultCallback resultCallback) {
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
+            IBooleanResultCallback resultCallback) {
         CallbackUtils.onResult(resultCallback, () -> {
             int uid = Binder.getCallingUid();
             ImeTracing.getInstance().triggerManagerServiceDump(
@@ -3296,8 +3297,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                     if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
                     return InputMethodManagerService.this.hideCurrentInputLocked(windowToken,
-                            flags, resultReceiver,
-                            SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                            flags, resultReceiver, reason);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -3326,8 +3326,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // since Android Eclair.  That's why we need to accept IMM#hideSoftInput() even when only
         // IMMS#InputShown indicates that the software keyboard is shown.
         // TODO: Clean up, IMMS#mInputShown, IMMS#mImeWindowVis and mShowRequested.
-        final boolean shouldHideSoftInput = (mCurMethod != null) && (mInputShown ||
-                (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
+        final boolean shouldHideSoftInput = (mCurMethod != null) && (mInputShown
+                || (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
         boolean res;
         if (shouldHideSoftInput) {
             final Binder hideInputToken = new Binder();
@@ -4476,7 +4476,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     ((IInputMethod) args.arg1).showSoftInput(
                             (IBinder) args.arg3, msg.arg1, (ResultReceiver) args.arg2);
                     mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
-                            mCurClient, mCurAttribute,
+                            mCurFocusedWindowClient, mCurAttribute,
                             mWindowManagerInternal.getWindowName(mCurFocusedWindow),
                             mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
                             mWindowManagerInternal.getWindowName(
@@ -4499,7 +4499,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     ((IInputMethod)args.arg1).hideSoftInput(
                             (IBinder) args.arg3, 0, (ResultReceiver)args.arg2);
                     mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
-                            mCurClient, mCurAttribute,
+                            mCurFocusedWindowClient, mCurAttribute,
                             mWindowManagerInternal.getWindowName(mCurFocusedWindow),
                             mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
                             mWindowManagerInternal.getWindowName(

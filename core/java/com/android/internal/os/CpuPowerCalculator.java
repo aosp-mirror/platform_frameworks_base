@@ -97,9 +97,7 @@ public class CpuPowerCalculator extends PowerCalculator {
                 result);
 
         app.setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, result.powerMah, powerModel)
-                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CPU, result.durationMs)
-                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND,
-                        result.durationFgMs)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CPU, result.durationMs)
                 .setPackageWithHighestDrain(result.packageWithHighestDrain);
     }
 

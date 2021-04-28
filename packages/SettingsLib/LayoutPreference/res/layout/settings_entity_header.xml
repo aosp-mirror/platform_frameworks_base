@@ -64,7 +64,9 @@
             style="@style/TextAppearance.EntityHeaderSummary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"/>
+            android:layout_marginTop="2dp"
+            android:singleLine="false"
+            android:textAlignment="center"/>
 
         <TextView
             android:id="@+id/entity_header_second_summary"

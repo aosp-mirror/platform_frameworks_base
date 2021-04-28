@@ -17,7 +17,6 @@
 package com.android.server.alarm;
 
 import static com.android.server.alarm.AlarmManagerService.DEBUG_BATCH;
-import static com.android.server.alarm.AlarmManagerService.TAG;
 import static com.android.server.alarm.AlarmManagerService.clampPositive;
 import static com.android.server.alarm.AlarmManagerService.dumpAlarmList;
 import static com.android.server.alarm.AlarmManagerService.isTimeTickAlarm;
@@ -50,10 +49,12 @@ public class BatchingAlarmStore implements AlarmStore {
 
     interface Stats {
         int REBATCH_ALL_ALARMS = 0;
+        int GET_COUNT = 1;
     }
 
     final StatLogger mStatLogger = new StatLogger(TAG + " stats", new String[]{
             "REBATCH_ALL_ALARMS",
+            "GET_COUNT",
     });
 
     private static final Comparator<Batch> sBatchOrder = Comparator.comparingLong(b -> b.mStart);
@@ -217,6 +218,22 @@ public class BatchingAlarmStore implements AlarmStore {
     @Override
     public String getName() {
         return TAG;
+    }
+
+    @Override
+    public int getCount(Predicate<Alarm> condition) {
+        long start = mStatLogger.getTime();
+
+        int count = 0;
+        for (Batch b : mAlarmBatches) {
+            for (int i = 0; i < b.size(); i++) {
+                if (condition.test(b.get(i))) {
+                    count++;
+                }
+            }
+        }
+        mStatLogger.logDurationStat(Stats.GET_COUNT, start);
+        return count;
     }
 
     private void insertAndBatchAlarm(Alarm alarm) {

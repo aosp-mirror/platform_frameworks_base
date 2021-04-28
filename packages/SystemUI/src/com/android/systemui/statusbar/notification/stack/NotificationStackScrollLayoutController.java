@@ -708,9 +708,10 @@ public class NotificationStackScrollLayoutController {
             mView.setKeyguardMediaControllorVisible(visible);
             if (visible) {
                 mView.generateAddAnimation(
-                        mKeyguardMediaController.getView(), false /*fromMoreCard */);
+                        mKeyguardMediaController.getSinglePaneContainer(),
+                        false /*fromMoreCard */);
             } else {
-                mView.generateRemoveAnimation(mKeyguardMediaController.getView());
+                mView.generateRemoveAnimation(mKeyguardMediaController.getSinglePaneContainer());
             }
             mView.requestChildrenUpdate();
             return Unit.INSTANCE;

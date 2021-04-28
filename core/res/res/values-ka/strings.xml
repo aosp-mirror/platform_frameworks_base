@@ -1820,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"დიდი"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"უცნობი პორტრეტი"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"უცნობი ლანდშაფტი"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"გაუქმებული"</string>
@@ -1865,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"წაიშალა თქვენი ადმინისტრატორის მიერ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"კარგი"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"ბატარეის დამზოგი ჩართავს მუქ თემას და შეზღუდავს ან გამორთავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტსა და გარკვეულ ფუნქციებს.\n\n"<annotation id="url">"შეიტყვეთ მეტი"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"ბატარეის დამზოგი ჩართავს მუქ თემას და შეზღუდავს ან გამორთავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტსა და გარკვეულ ფუნქციებს."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ჩართვა"</string>
@@ -2088,12 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ეს შეტყობინება ჩამოქვეითდა და გახდა „ჩუმი“. შეეხეთ გამოხმაურების მოსაწოდებლად."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ეს შეტყობინება დაწინაურდა. შეეხეთ გამოხმაურების მოსაწოდებლად."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ეს შეტყობინება ჩამოქვეითდა. შეეხეთ გამოხმაურების მოსაწოდებლად."</string>
-    <string name="nas_upgrade_notification_title" msgid="4224351129445073051">"გამოცადეთ გაფართოებული შეტყობინებები"</string>
-    <string name="nas_upgrade_notification_content" msgid="7036860187157134706">"შემოთავაზებული ქმედებების, პასუხების და სხვა მითითებების მიღების გასაგრძელებლად ჩართეთ გაფართოებული შეტყობინებები. Android-ის ადაპტაციური შეტყობინებები აღარაა მხარდაჭერილი."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="4823652531622744798">"ჩართვა"</string>
-    <string name="nas_upgrade_notification_disable_action" msgid="7561210256700811433">"ახლა არა"</string>
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"გაფართოებული შეტყობინებები"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"შემოთავაზებული მოქმედებები და პასუხები ამიერიდან უზრუნველყოფილია გაფართოებული შეტყობინებების მიერ. Android-ის ადაპტაციური შეტყობინებები აღარაა მხარდაჭერილი."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"კარგი"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"გამორთვა"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"შეიტყვეთ მეტი"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="6276343083934111208">"გაფართოებულ შეტყობინებებს შეუძლია ყველა შეტყობინების კონტენტის, მათ შორის, ისეთი პერსონალური ინფორმაციის წაკითხვა, როგორიცაა კონტაქტების სახელები და შეტყობინებები. ამ ფუნქციას ასევე შეუძლია შეტყობინებების დახურვა ან შეტყობინებათა ღილაკების ამოქმედება, მაგალითად, სატელეფონო ზარებზე პასუხი.\n\nამ ფუნქციას ასევე შეუძლია პრიორიტეტული რეჟიმის ჩართვა თუ გამორთვა და დაკავშირებული პარამეტრების შეცვლა."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"გაფართოებულმა შეტყობინებებმა ჩაანაცვლა Android-ის ადაპტაციური შეტყობინებების ფუნქცია Android 12-ში. ეს ფუნქცია გაჩვენებთ შემოთავაზებულ მოქმედებებს და პასუხებს, ამასთანავე კი ახდენს თქვენი შეტყობინებების ორგანიზებას.\n\nგაფართოებულ შეტყობინებებს შეუძლია ყველა შეტყობინების კონტენტზე, მათ შორის, ისეთ პერსონალურ ინფორმაციაზე წვდომა, როგორიცაა კონტაქტების სახელები და შეტყობინებები. ამ ფუნქციას ასევე შეუძლია შეტყობინებათა დახურვა ან მათზე პასუხის გაცემა, მაგალითად, სატელეფონო ზარებზე პასუხი და „არ შემაწუხოთ“ რეჟიმის მართვა."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"რუტინის რეჟიმის საინფორმაციო შეტყობინება"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ბატარეა შეიძლება დაჯდეს დატენის ჩვეულ დრომდე"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ბატარეის დამზოგი გააქტიურდა ბატარეის მუშაობის გასახანგრძლივლებლად"</string>

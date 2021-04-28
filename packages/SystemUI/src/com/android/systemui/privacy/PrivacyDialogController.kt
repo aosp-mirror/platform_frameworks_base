@@ -179,12 +179,16 @@ class PrivacyDialogController(
             }
             uiExecutor.execute {
                 val elements = filterAndSelect(items)
-                val d = dialogProvider.makeDialog(context, elements, this::startActivity)
-                d.setShowForAllUsers(true)
-                d.addOnDismissListener(onDialogDismissed)
-                d.show()
-                privacyLogger.logShowDialogContents(elements)
-                dialog = d
+                if (elements.isNotEmpty()) {
+                    val d = dialogProvider.makeDialog(context, elements, this::startActivity)
+                    d.setShowForAllUsers(true)
+                    d.addOnDismissListener(onDialogDismissed)
+                    d.show()
+                    privacyLogger.logShowDialogContents(elements)
+                    dialog = d
+                } else {
+                    Log.w(TAG, "Trying to show empty dialog")
+                }
             }
         }
     }

@@ -28,7 +28,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
@@ -36,7 +35,9 @@ import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.qs.tiles.UserDetailView;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -48,6 +49,7 @@ import com.android.systemui.statusbar.phone.UserAvatarView;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Manages the user switch on the Keyguard that is used for opening the QS user panel.
@@ -67,7 +69,9 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
     private final ScreenLifecycle mScreenLifecycle;
     private UserSwitcherController.BaseUserAdapter mAdapter;
     private final KeyguardStateController mKeyguardStateController;
+    private final FalsingManager mFalsingManager;
     protected final SysuiStatusBarStateController mStatusBarStateController;
+    private final ConfigurationController mConfigurationController;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
     private final KeyguardUserDetailAdapter mUserDetailAdapter;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -76,7 +80,6 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
 
     // State info for the user switch and keyguard
     private int mBarState;
-    private float mDarkAmount;
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
@@ -97,6 +100,15 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
                 }
             };
 
+    private ConfigurationController.ConfigurationListener
+            mConfigurationListener = new ConfigurationController.ConfigurationListener() {
+
+                @Override
+                public void onUiModeChanged() {
+                    updateView(true);
+                }
+            };
+
     @Inject
     public KeyguardQsUserSwitchController(
             UserAvatarView view,
@@ -106,9 +118,11 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             ScreenLifecycle screenLifecycle,
             UserSwitcherController userSwitcherController,
             KeyguardStateController keyguardStateController,
+            FalsingManager falsingManager,
+            ConfigurationController configurationController,
             SysuiStatusBarStateController statusBarStateController,
             DozeParameters dozeParameters,
-            UiEventLogger uiEventLogger) {
+            Provider<UserDetailView.Adapter> userDetailViewAdapterProvider) {
         super(view);
         if (DEBUG) Log.d(TAG, "New KeyguardQsUserSwitchController");
         mContext = context;
@@ -117,11 +131,12 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         mScreenLifecycle = screenLifecycle;
         mUserSwitcherController = userSwitcherController;
         mKeyguardStateController = keyguardStateController;
+        mFalsingManager = falsingManager;
+        mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters);
-        mUserDetailAdapter = new KeyguardUserDetailAdapter(mUserSwitcherController, mContext,
-                uiEventLogger);
+        mUserDetailAdapter = new KeyguardUserDetailAdapter(context, userDetailViewAdapterProvider);
     }
 
     @Override
@@ -136,6 +151,10 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         };
 
         mView.setOnClickListener(v -> {
+            if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                return;
+            }
+
             if (isListAnimating()) {
                 return;
             }
@@ -153,8 +172,6 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
                                 R.string.accessibility_quick_settings_choose_user_action)));
             }
         });
-
-        updateView(true /* forceUpdate */);
     }
 
     @Override
@@ -163,6 +180,8 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         mAdapter.registerDataSetObserver(mDataSetObserver);
         mDataSetObserver.onChanged();
         mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mConfigurationController.addCallback(mConfigurationListener);
+        updateView(true /* forceUpdate */);
     }
 
     @Override
@@ -171,6 +190,7 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
 
         mAdapter.unregisterDataSetObserver(mDataSetObserver);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
+        mConfigurationController.removeCallback(mConfigurationListener);
     }
 
     public final DataSetObserver mDataSetObserver = new DataSetObserver() {
@@ -304,9 +324,9 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
     }
 
     class KeyguardUserDetailAdapter extends UserSwitcherController.UserDetailAdapter {
-        KeyguardUserDetailAdapter(UserSwitcherController userSwitcherController, Context context,
-                UiEventLogger uiEventLogger) {
-            super(userSwitcherController, context, uiEventLogger);
+        KeyguardUserDetailAdapter(Context context,
+                Provider<UserDetailView.Adapter> userDetailViewAdapterProvider) {
+            super(context, userDetailViewAdapterProvider);
         }
 
         @Override

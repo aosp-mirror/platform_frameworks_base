@@ -367,6 +367,9 @@
     <!-- The spacing between messages in Notification.MessagingStyle -->
     <dimen name="notification_messaging_spacing">6dp</dimen>
 
+    <!-- The spacing between messages in Notification.MessagingStyle -->
+    <dimen name="notification_messaging_spacing_conversation_group">24dp</dimen>
+
     <!-- The rounding for messaging images -->
     <dimen name="messaging_image_rounding">4dp</dimen>
 
@@ -760,7 +763,7 @@
     <!-- The maximum size of the grayscale icon -->
     <dimen name="notification_grayscale_icon_max_size">256dp</dimen>
 
-    <dimen name="messaging_avatar_size">36dp</dimen>
+    <dimen name="messaging_avatar_size">48dp</dimen>
     <dimen name="conversation_avatar_size">48dp</dimen>
     <!-- start margin of the icon circle in the conversation's skin of the header -->
     <dimen name="conversation_icon_circle_start">28dp</dimen>
@@ -779,17 +782,17 @@
     <!-- size of the face pile icons -->
     <dimen name="conversation_face_pile_avatar_size">32dp</dimen>
     <!-- size of the face pile icons when the group is expanded -->
-    <dimen name="conversation_face_pile_avatar_size_group_expanded">25dp</dimen>
+    <dimen name="conversation_face_pile_avatar_size_group_expanded">@dimen/conversation_face_pile_avatar_size</dimen>
     <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
-    <dimen name="conversation_badge_side_margin_group_expanded">22dp</dimen>
+    <dimen name="conversation_badge_side_margin_group_expanded">@dimen/conversation_badge_side_margin</dimen>
     <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
-    <dimen name="conversation_badge_side_margin_group_expanded_face_pile">18dp</dimen>
+    <dimen name="conversation_badge_side_margin_group_expanded_face_pile">@dimen/conversation_badge_side_margin</dimen>
     <!-- The width of the protection of the face pile layout-->
     <dimen name="conversation_face_pile_protection_width">2dp</dimen>
     <!-- The width of the protection of the face pile layout when expanded-->
-    <dimen name="conversation_face_pile_protection_width_expanded">1dp</dimen>
+    <dimen name="conversation_face_pile_protection_width_expanded">@dimen/conversation_face_pile_protection_width</dimen>
     <!-- The padding of the expanded message container-->
-    <dimen name="expanded_group_conversation_message_padding">17dp</dimen>
+    <dimen name="expanded_group_conversation_message_padding">32dp</dimen>
     <!-- The stroke width of the ring used to visually mark a conversation as important -->
     <dimen name="importance_ring_stroke_width">2dp</dimen>
     <!-- The maximum stroke width used for the animation shown when a conversation is marked as important -->
@@ -801,7 +804,7 @@
     <dimen name="conversation_icon_container_top_padding">20dp</dimen>
 
     <!-- The top padding of the conversation icon container when the avatar is small-->
-    <dimen name="conversation_icon_container_top_padding_small_avatar">9dp</dimen>
+    <dimen name="conversation_icon_container_top_padding_small_avatar">8dp</dimen>
 
     <!-- The padding of the conversation header when expanded. This is calculated from the expand button size + notification_content_margin_end -->
     <dimen name="conversation_header_expanded_padding_end">38dp</dimen>

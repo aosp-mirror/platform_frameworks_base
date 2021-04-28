@@ -197,31 +197,25 @@ public class BrightLineFalsingManager implements FalsingManager {
     public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
         mPriorInteractionType = interactionType;
         if (skipFalsing()) {
+            mPriorResults = getPassedResult(1);
+            logDebug("Skipped falsing");
             return false;
         }
 
-        final boolean booleanResult;
+        final boolean[] localResult = {false};
+        mPriorResults = mClassifiers.stream().map(falsingClassifier -> {
+            FalsingClassifier.Result r = falsingClassifier.classifyGesture(
+                    interactionType,
+                    mHistoryTracker.falseBelief(),
+                    mHistoryTracker.falseConfidence());
+            localResult[0] |= r.isFalse();
 
-        if (!mTestHarness && !mDataProvider.isJustUnlockedWithFace() && !mDockManager.isDocked()) {
-            final boolean[] localResult = {false};
-            mPriorResults = mClassifiers.stream().map(falsingClassifier -> {
-                FalsingClassifier.Result r = falsingClassifier.classifyGesture(
-                        interactionType,
-                        mHistoryTracker.falseBelief(),
-                        mHistoryTracker.falseConfidence());
-                localResult[0] |= r.isFalse();
+            return r;
+        }).collect(Collectors.toList());
 
-                return r;
-            }).collect(Collectors.toList());
-            booleanResult = localResult[0];
-        } else {
-            booleanResult = false;
-            mPriorResults = Collections.singleton(FalsingClassifier.Result.passed(1));
-        }
+        logDebug("False Gesture: " + localResult[0]);
 
-        logDebug("False Gesture: " + booleanResult);
-
-        return booleanResult;
+        return localResult[0];
     }
 
     @Override
@@ -236,6 +230,8 @@ public class BrightLineFalsingManager implements FalsingManager {
     @Override
     public boolean isFalseTap(@Penalty int penalty) {
         if (skipFalsing()) {
+            mPriorResults = getPassedResult(1);
+            logDebug("Skipped falsing");
             return false;
         }
 
@@ -264,7 +260,7 @@ public class BrightLineFalsingManager implements FalsingManager {
         if (!singleTapResult.isFalse()) {
             if (mDataProvider.isJustUnlockedWithFace()) {
                 // Immediately pass if a face is detected.
-                mPriorResults = Collections.singleton(FalsingClassifier.Result.passed(1));
+                mPriorResults = getPassedResult(1);
                 logDebug("False Single Tap: false (face detected)");
                 return false;
             } else if (!isFalseDoubleTap()) {
@@ -281,7 +277,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                 mFalsingTapListeners.forEach(FalsingTapListener::onDoubleTapRequired);
                 return true;
             } else {
-                mPriorResults = Collections.singleton(FalsingClassifier.Result.passed(0.1));
+                mPriorResults = getPassedResult(0.1);
                 logDebug("False Single Tap: false (default)");
                 return false;
             }
@@ -296,6 +292,8 @@ public class BrightLineFalsingManager implements FalsingManager {
     @Override
     public boolean isFalseDoubleTap() {
         if (skipFalsing()) {
+            mPriorResults = getPassedResult(1);
+            logDebug("Skipped falsing");
             return false;
         }
 
@@ -309,7 +307,10 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     private boolean skipFalsing() {
-        return !mKeyguardStateController.isShowing();
+        return !mKeyguardStateController.isShowing()
+                || mTestHarness
+                || mDataProvider.isJustUnlockedWithFace()
+                || mDockManager.isDocked();
     }
 
     @Override
@@ -409,6 +410,10 @@ public class BrightLineFalsingManager implements FalsingManager {
         mClassifiers.forEach(FalsingClassifier::cleanup);
         mFalsingBeliefListeners.clear();
         mHistoryTracker.removeBeliefListener(mBeliefListener);
+    }
+
+    private static Collection<FalsingClassifier.Result> getPassedResult(double confidence) {
+        return Collections.singleton(FalsingClassifier.Result.passed(confidence));
     }
 
     static void logDebug(String msg) {

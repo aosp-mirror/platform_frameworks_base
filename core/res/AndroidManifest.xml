@@ -2333,6 +2333,11 @@
     <permission android:name="android.permission.CAMERA_SEND_SYSTEM_EVENTS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows injecting the external camera to replace the internal camera.
+        @hide -->
+    <permission android:name="android.permission.CAMERA_INJECT_EXTERNAL_CAMERA"
+        android:protectionLevel="signature" />
+
     <!-- =========================================== -->
     <!-- Permissions associated with telephony state -->
     <!-- =========================================== -->
