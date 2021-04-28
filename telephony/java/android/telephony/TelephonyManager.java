@@ -11205,26 +11205,26 @@ public class TelephonyManager {
     }
 
     /**
-     * Return a list of certs in hex string from loaded carrier privileges access rules.
+     * Return a list of certs as hex strings from loaded carrier privileges access rules.
      *
-     * @return a list of certificate in hex string. return {@code null} if there is no certs
-     * or privilege rules are not loaded yet.
-     *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
+     * @return a list of certificates as hex strings, or an empty list if there are no certs or
+     *     privilege rules are not loaded yet.
      * @hide
      */
+    @TestApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
     public List<String> getCertsFromCarrierPrivilegeAccessRules() {
+        List<String> certs = null;
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getCertsFromCarrierPrivilegeAccessRules(getSubId());
+                certs = service.getCertsFromCarrierPrivilegeAccessRules(getSubId());
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
         }
-        return null;
+        return certs == null ? Collections.emptyList() : certs;
     }
 
     /**
