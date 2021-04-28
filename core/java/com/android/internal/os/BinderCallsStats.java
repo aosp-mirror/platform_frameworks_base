@@ -16,18 +16,25 @@
 
 package com.android.internal.os;
 
+import static com.android.internal.os.BinderLatencyProto.Dims.SYSTEM_SERVER;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.KeyValueListParser;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -157,15 +164,20 @@ public class BinderCallsStats implements BinderInternal.Observer {
             return new Handler(Looper.getMainLooper());
         }
 
-        public BinderLatencyObserver getLatencyObserver() {
-            return new BinderLatencyObserver(new BinderLatencyObserver.Injector());
+        /** Create a latency observer for the specified process. */
+        public BinderLatencyObserver getLatencyObserver(int processSource) {
+            return new BinderLatencyObserver(new BinderLatencyObserver.Injector(), processSource);
         }
     }
 
     public BinderCallsStats(Injector injector) {
+        this(injector, SYSTEM_SERVER);
+    }
+
+    public BinderCallsStats(Injector injector, int processSource) {
         this.mRandom = injector.getRandomGenerator();
         this.mCallStatsObserverHandler = injector.getHandler();
-        this.mLatencyObserver = injector.getLatencyObserver();
+        this.mLatencyObserver = injector.getLatencyObserver(processSource);
     }
 
     public void setDeviceState(@NonNull CachedDeviceState.Readonly deviceState) {
@@ -1073,5 +1085,121 @@ public class BinderCallsStats implements BinderInternal.Observer {
         return result != 0
                 ? result
                 : Integer.compare(a.transactionCode, b.transactionCode);
+    }
+
+
+    /**
+     * Settings observer for other processes (not system_server).
+     *
+     * We do not want to collect cpu data from other processes so only latency collection should be
+     * possible to enable.
+     */
+    public static class SettingsObserver extends ContentObserver {
+        // Settings for BinderCallsStats.
+        public static final String SETTINGS_ENABLED_KEY = "enabled";
+        public static final String SETTINGS_DETAILED_TRACKING_KEY = "detailed_tracking";
+        public static final String SETTINGS_UPLOAD_DATA_KEY = "upload_data";
+        public static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
+        public static final String SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY = "track_screen_state";
+        public static final String SETTINGS_TRACK_DIRECT_CALLING_UID_KEY = "track_calling_uid";
+        public static final String SETTINGS_MAX_CALL_STATS_KEY = "max_call_stats_count";
+        public static final String SETTINGS_IGNORE_BATTERY_STATUS_KEY = "ignore_battery_status";
+        // Settings for BinderLatencyObserver.
+        public static final String SETTINGS_COLLECT_LATENCY_DATA_KEY = "collect_Latency_data";
+        public static final String SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY =
+                "latency_observer_sampling_interval";
+        public static final String SETTINGS_LATENCY_OBSERVER_PUSH_INTERVAL_MINUTES_KEY =
+                "latency_observer_push_interval_minutes";
+        public static final String SETTINGS_LATENCY_HISTOGRAM_BUCKET_COUNT_KEY =
+                "latency_histogram_bucket_count";
+        public static final String SETTINGS_LATENCY_HISTOGRAM_FIRST_BUCKET_SIZE_KEY =
+                "latency_histogram_first_bucket_size";
+        public static final String SETTINGS_LATENCY_HISTOGRAM_BUCKET_SCALE_FACTOR_KEY =
+                "latency_histogram_bucket_scale_factor";
+
+        private boolean mEnabled;
+        private final Uri mUri = Settings.Global.getUriFor(Settings.Global.BINDER_CALLS_STATS);
+        private final Context mContext;
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
+        private final BinderCallsStats mBinderCallsStats;
+        private final int mProcessSource;
+
+        public SettingsObserver(Context context, BinderCallsStats binderCallsStats,
+                    int processSource, int userHandle) {
+            super(BackgroundThread.getHandler());
+            mContext = context;
+            context.getContentResolver().registerContentObserver(mUri, false, this,
+                    userHandle);
+            mBinderCallsStats = binderCallsStats;
+            mProcessSource = processSource;
+            // Always kick once to ensure that we match current state
+            onChange();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri, int userId) {
+            if (mUri.equals(uri)) {
+                onChange();
+            }
+        }
+
+        void onChange() {
+            try {
+                mParser.setString(Settings.Global.getString(mContext.getContentResolver(),
+                        Settings.Global.BINDER_CALLS_STATS));
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Bad binder call stats settings", e);
+            }
+
+            // Cpu data collection should always be disabled for other processes.
+            mBinderCallsStats.setDetailedTracking(false);
+            mBinderCallsStats.setTrackScreenInteractive(false);
+            mBinderCallsStats.setTrackDirectCallerUid(false);
+
+            mBinderCallsStats.setIgnoreBatteryStatus(
+                    mParser.getBoolean(SETTINGS_IGNORE_BATTERY_STATUS_KEY,
+                            BinderCallsStats.DEFAULT_IGNORE_BATTERY_STATUS));
+            mBinderCallsStats.setCollectLatencyData(
+                    mParser.getBoolean(SETTINGS_COLLECT_LATENCY_DATA_KEY,
+                            BinderCallsStats.DEFAULT_COLLECT_LATENCY_DATA));
+
+            // Binder latency observer settings.
+            configureLatencyObserver(mParser, mBinderCallsStats.getLatencyObserver());
+
+            final boolean enabled =
+                    mParser.getBoolean(SETTINGS_ENABLED_KEY, BinderCallsStats.ENABLED_DEFAULT);
+            if (mEnabled != enabled) {
+                if (enabled) {
+                    Binder.setObserver(mBinderCallsStats);
+                } else {
+                    Binder.setObserver(null);
+                }
+                mEnabled = enabled;
+                mBinderCallsStats.reset();
+                mBinderCallsStats.setAddDebugEntries(enabled);
+                mBinderCallsStats.getLatencyObserver().reset();
+            }
+        }
+
+        /** Configures the binder latency observer related settings. */
+        public static void configureLatencyObserver(
+                    KeyValueListParser mParser, BinderLatencyObserver binderLatencyObserver) {
+            binderLatencyObserver.setSamplingInterval(mParser.getInt(
+                    SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY,
+                    BinderLatencyObserver.PERIODIC_SAMPLING_INTERVAL_DEFAULT));
+            binderLatencyObserver.setHistogramBucketsParams(
+                    mParser.getInt(
+                            SETTINGS_LATENCY_HISTOGRAM_BUCKET_COUNT_KEY,
+                            BinderLatencyObserver.BUCKET_COUNT_DEFAULT),
+                    mParser.getInt(
+                            SETTINGS_LATENCY_HISTOGRAM_FIRST_BUCKET_SIZE_KEY,
+                            BinderLatencyObserver.FIRST_BUCKET_SIZE_DEFAULT),
+                    mParser.getFloat(
+                            SETTINGS_LATENCY_HISTOGRAM_BUCKET_SCALE_FACTOR_KEY,
+                            BinderLatencyObserver.BUCKET_SCALE_FACTOR_DEFAULT));
+            binderLatencyObserver.setPushInterval(mParser.getInt(
+                    SETTINGS_LATENCY_OBSERVER_PUSH_INTERVAL_MINUTES_KEY,
+                    BinderLatencyObserver.STATSD_PUSH_INTERVAL_MINUTES_DEFAULT));
+        }
     }
 }
