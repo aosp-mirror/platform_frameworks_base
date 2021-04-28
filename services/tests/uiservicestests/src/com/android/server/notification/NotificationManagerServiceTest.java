@@ -4730,6 +4730,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testMaybeRecordInterruptionLocked_smallIconsRequiredForHistory()
+            throws RemoteException {
+        final NotificationRecord r = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        r.setInterruptive(true);
+        r.getSbn().getNotification().setSmallIcon(null);
+        mService.addNotification(r);
+
+        mService.maybeRecordInterruptionLocked(r);
+
+        verify(mAppUsageStats, times(1)).reportInterruptiveNotification(
+                anyString(), anyString(), anyInt());
+        verify(mHistoryManager, never()).addNotification(any());
+    }
+
+    @Test
     public void testBubble() throws Exception {
         mBinderService.setBubblesAllowed(PKG, mUid, BUBBLE_PREFERENCE_NONE);
         assertFalse(mBinderService.areBubblesAllowed(PKG));
