@@ -187,22 +187,19 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#updateStatusIcon(String, int,
-     * IVoidResultCallback)}.
+     * Calls {@link IInputMethodPrivilegedOperations#updateStatusIconAsync(String, int)}.
      *
      * @param packageName package name from which the status icon should be loaded
      * @param iconResId resource ID of the icon to be loaded
      */
     @AnyThread
-    public void updateStatusIcon(String packageName, @DrawableRes int iconResId) {
+    public void updateStatusIconAsync(String packageName, @DrawableRes int iconResId) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.updateStatusIcon(packageName, iconResId, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.updateStatusIconAsync(packageName, iconResId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
