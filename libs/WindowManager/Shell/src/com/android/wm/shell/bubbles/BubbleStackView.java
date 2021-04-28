@@ -1598,6 +1598,7 @@ public class BubbleStackView extends FrameLayout
             // can start fresh.
             cancelAllExpandCollapseSwitchAnimations();
         }
+        showManageMenu(false /* show */);
 
         // If we're expanded, screenshot the currently expanded bubble (before expanding the newly
         // selected bubble) so we can animate it out.
