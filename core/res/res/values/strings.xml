@@ -6006,4 +6006,8 @@ ul.</string>
     <string name="view_and_control_notification_title">Check access settings</string>
     <!-- Notification content to prompt the user that some accessibility service has view and control access. [CHAR LIMIT=none] -->
     <string name="view_and_control_notification_content"><xliff:g id="service_name" example="TalkBack">%s</xliff:g> can view and control your screen. Tap to review.</string>
+    <!-- Accessibility message announced when the view text displayed on the screen that has been translated to a different language by the system. [CHAR LIMIT=NONE] -->
+    <string name="ui_translation_accessibility_translated_text"><xliff:g id="message" example="Hello">%1$s</xliff:g> Translated.</string>
+    <!-- Accessibility message announced to notify the user when the system has finished translating the content displayed on the screen to a different language after the user requested translation. [CHAR LIMIT=NONE] -->
+    <string name="ui_translation_accessibility_translation_finished">Message translated from <xliff:g id="from_language" example="English">%1$s</xliff:g> to <xliff:g id="to_language" example="French">%2$s</xliff:g>.</string>
 </resources>
