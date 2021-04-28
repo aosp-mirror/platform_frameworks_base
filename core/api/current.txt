@@ -8014,7 +8014,6 @@ package android.app.job {
     method @Nullable public String[] getTriggeredContentAuthorities();
     method @Nullable public android.net.Uri[] getTriggeredContentUris();
     method public boolean isExpeditedJob();
-    method @Deprecated public boolean isForegroundJob();
     method public boolean isOverrideDeadlineExpired();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.job.JobParameters> CREATOR;
