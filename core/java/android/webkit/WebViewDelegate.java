@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -226,6 +227,7 @@ public final class WebViewDelegate {
      * WebViewChromiumFactoryProvider#create method was invoked.
      */
     @NonNull
+    @ElapsedRealtimeLong
     public long[] getTimestamps() {
         return WebViewFactory.getTimestamps();
     }
