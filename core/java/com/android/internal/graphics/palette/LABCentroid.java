@@ -62,6 +62,6 @@ public class LABCentroid implements CentroidProvider {
         double dL = a[0] - b[0];
         double dA = a[1] - b[1];
         double dB = a[2] - b[2];
-        return (float) (Math.pow(dL, 2) + Math.pow(dA, 2) + Math.pow(dB, 2));
+        return (float) (dL * dL + dA * dA + dB * dB);
     }
 }
