@@ -114,10 +114,10 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
         when(mRootWindowContainer.getDisplayContent(eq(mDisplayUniqueId)))
                 .thenReturn(mTestDisplay);
 
-        Task stack = mTestDisplay.getDefaultTaskDisplayArea()
+        Task rootTask = mTestDisplay.getDefaultTaskDisplayArea()
                 .createRootTask(TEST_WINDOWING_MODE, ACTIVITY_TYPE_STANDARD, /* onTop */ true);
-        mTestTask = new TaskBuilder(mSupervisor).setComponent(TEST_COMPONENT).setParentTask(stack)
-                .build();
+        mTestTask = new TaskBuilder(mSupervisor).setComponent(TEST_COMPONENT)
+                .setParentTask(rootTask).build();
         mTestTask.mUserId = TEST_USER_ID;
         mTestTask.mLastNonFullscreenBounds = TEST_BOUNDS;
         mTestTask.setHasBeenVisible(true);
@@ -155,6 +155,17 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
         mTarget.getLaunchParams(mTestTask, null, mResult);
 
         assertTrue("Default result should be empty.", mResult.isEmpty());
+    }
+
+    @Test
+    public void testSavingTestWithoutRealActivityWontMakePackageRemovalCrash() {
+        Task rootTask = mTestDisplay.getDefaultTaskDisplayArea()
+                .createRootTask(TEST_WINDOWING_MODE, ACTIVITY_TYPE_STANDARD, /* onTop */ true);
+        assertNull(rootTask.realActivity);
+
+        mTarget.saveTask(rootTask);
+
+        mTarget.removeRecordForPackage(TEST_COMPONENT.getPackageName());
     }
 
     @Test
