@@ -74,7 +74,7 @@ public interface OnReceiveContentListener {
      * preserve the common behavior for inserting text. See the class javadoc for a sample
      * implementation.
      *
-     * <p>Handling different content
+     * <h3>Handling different content</h3>
      * <ul>
      *     <li>Text. If the {@link ContentInfo#getSource() source} is
      *     {@link ContentInfo#SOURCE_AUTOFILL autofill}, the view's content should be fully
@@ -84,6 +84,25 @@ public interface OnReceiveContentListener {
      *     <li>Non-text content (e.g. images). The content may be inserted inline if the widget
      *     supports this, or it may be added as an attachment (could potentially be shown in a
      *     completely separate view).
+     * </ul>
+     *
+     * <h3>URI permissions</h3>
+     * <p>{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION Read permissions} are
+     * granted automatically by the platform for any
+     * {@link android.content.ContentResolver#SCHEME_CONTENT content URIs} in the payload passed
+     * to this listener. Permissions are transient and will be released automatically by the
+     * platform.
+     * <ul>
+     *     <li>If the {@link ContentInfo#getSource() source} is the
+     *     {@link ContentInfo#SOURCE_CLIPBOARD clipboard}, permissions are released whenever the
+     *     next copy action is performed by the user.
+     *     <li>If the source is {@link ContentInfo#SOURCE_AUTOFILL autofill}, permissions are tied
+     *     to the target {@link android.app.Activity} lifecycle (released when the activity
+     *     finishes).
+     *     <li>For other sources, permissions are tied to the passed-in {@code payload} object
+     *     (released automatically when there are no more references to it). To ensure that
+     *     permissions are not released prematurely, implementations of this listener should pass
+     *     along the {@code payload} object if processing is done on a background thread.
      * </ul>
      *
      * @param view The view where the content insertion was requested.

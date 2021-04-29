@@ -32,8 +32,7 @@ import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.util.ArrayList;
 
-class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
-        implements IBinder.DeathRecipient {
+class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub {
 
     private static final String TAG = "DragAndDrop";
     private static final boolean DEBUG = false;
@@ -49,7 +48,6 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
 
     private IBinder mActivityToken = null;
     private IBinder mPermissionOwnerToken = null;
-    private IBinder mAppToken = null;
 
     DragAndDropPermissionsHandler(WindowManagerGlobalLock lock, ClipData clipData, int sourceUid,
             String targetPackage, int mode, int sourceUserId, int targetUserId) {
@@ -94,18 +92,15 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
     }
 
     @Override
-    public void takeTransient(IBinder appToken) throws RemoteException {
+    public void takeTransient() throws RemoteException {
         if (mActivityToken != null || mPermissionOwnerToken != null) {
             return;
         }
         if (DEBUG) {
-            Log.d(TAG, this + ": taking permissions bound to app process: "
-                    + toHexString(appToken.hashCode()));
+            Log.d(TAG, this + ": taking transient permissions");
         }
         mPermissionOwnerToken = LocalServices.getService(UriGrantsManagerInternal.class)
                 .newUriPermissionOwner("drop");
-        mAppToken = appToken;
-        mAppToken.linkToDeath(this, 0);
 
         doTake(mPermissionOwnerToken);
     }
@@ -132,10 +127,8 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         } else {
             permissionOwner = mPermissionOwnerToken;
             mPermissionOwnerToken = null;
-            mAppToken.unlinkToDeath(this, 0);
-            mAppToken = null;
             if (DEBUG) {
-                Log.d(TAG, this + ": releasing process-bound permissions");
+                Log.d(TAG, this + ": releasing transient permissions");
             }
         }
 
@@ -157,15 +150,18 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         }
     }
 
+    /**
+     * If permissions are not tied to an activity, release whenever there are no more references
+     * to this object (if not already released).
+     */
     @Override
-    public void binderDied() {
+    protected void finalize() throws Throwable {
         if (DEBUG) {
-            Log.d(TAG, this + ": app process died: " + toHexString(mAppToken.hashCode()));
+            Log.d(TAG, this + ": running finalizer");
         }
-        try {
-            release();
-        } catch (RemoteException e) {
-            // Cannot happen, local call.
+        if (mActivityToken != null || mPermissionOwnerToken == null) {
+            return;
         }
+        release();
     }
 }
