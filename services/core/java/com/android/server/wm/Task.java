@@ -7177,8 +7177,11 @@ class Task extends WindowContainer<WindowContainer> {
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task="
                 + tr.mTaskId);
 
-        mDisplayContent.prepareAppTransition(TRANSIT_TO_BACK);
-        mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_TO_BACK, tr);
+        // Skip the transition for pinned task.
+        if (!inPinnedWindowingMode()) {
+            mDisplayContent.prepareAppTransition(TRANSIT_TO_BACK);
+            mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_TO_BACK, tr);
+        }
         moveToBack("moveTaskToBackLocked", tr);
 
         if (inPinnedWindowingMode()) {
