@@ -300,4 +300,6 @@ interface ISub {
     boolean canDisablePhysicalSubscription();
 
     int setUiccApplicationsEnabled(boolean enabled, int subscriptionId);
+
+    int setDeviceToDeviceStatusSharing(int sharing, int subId);
 }
