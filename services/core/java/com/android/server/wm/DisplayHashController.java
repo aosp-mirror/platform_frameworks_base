@@ -129,10 +129,10 @@ public class DisplayHashController {
     private boolean mParsedXml;
 
     /**
-     * Specified throttle time in milliseconds. Don't allow an app to generate a display hash more
-     * than once per throttleTime
+     * Specified duration between requests to generate a display hash in milliseconds. Requests
+     * faster than this delay will be throttled.
      */
-    private int mThrottleDurationMillis = 0;
+    private int mDurationBetweenRequestMillis = 0;
 
     /**
      * The last time an app requested to generate a display hash in System time.
@@ -203,8 +203,8 @@ public class DisplayHashController {
             return true;
         }
 
-        int throttleDurationMs = getThrottleDurationMillis();
-        if (currentTime - mLastRequestTimeMs < throttleDurationMs) {
+        int mDurationBetweenRequestsMs = getDurationBetweenRequestMillis();
+        if (currentTime - mLastRequestTimeMs < mDurationBetweenRequestsMs) {
             return false;
         }
 
@@ -233,7 +233,7 @@ public class DisplayHashController {
                     (float) size.getHeight() / boundsInWindow.height());
         }
 
-        args.setGrayscale(displayHashParams.isUseGrayscale());
+        args.setGrayscale(displayHashParams.isGrayscaleBuffer());
 
         SurfaceControl.ScreenshotHardwareBuffer screenshotHardwareBuffer =
                 SurfaceControl.captureLayers(args.build());
@@ -356,11 +356,11 @@ public class DisplayHashController {
         }
     }
 
-    private int getThrottleDurationMillis() {
+    private int getDurationBetweenRequestMillis() {
         if (!parseXmlProperties()) {
             return 0;
         }
-        return mThrottleDurationMillis;
+        return mDurationBetweenRequestMillis;
     }
 
     private boolean parseXmlProperties() {
@@ -406,8 +406,8 @@ public class DisplayHashController {
             }
 
             TypedArray sa = res.obtainAttributes(attrs, R.styleable.DisplayHashingService);
-            mThrottleDurationMillis = sa.getInt(
-                    R.styleable.DisplayHashingService_throttleDurationMillis, 0);
+            mDurationBetweenRequestMillis = sa.getInt(
+                    R.styleable.DisplayHashingService_durationBetweenRequestsMillis, 0);
             sa.recycle();
             mParsedXml = true;
             return true;
