@@ -69,6 +69,7 @@ public final class TestRunningTaskInfoBuilder {
         info.configuration.windowConfiguration.setActivityType(mActivityType);
         info.token = mToken;
         info.isResizeable = true;
+        info.supportsMultiWindow = true;
         return info;
     }
 }

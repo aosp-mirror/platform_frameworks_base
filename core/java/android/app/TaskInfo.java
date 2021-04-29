@@ -138,6 +138,13 @@ public class TaskInfo {
     public boolean supportsSplitScreenMultiWindow;
 
     /**
+     * Whether this task supports multi windowing modes based on the device settings and the
+     * root activity resizability and configuration.
+     * @hide
+     */
+    public boolean supportsMultiWindow;
+
+    /**
      * The resize mode of the task. See {@link ActivityInfo#resizeMode}.
      * @hide
      */
@@ -329,6 +336,7 @@ public class TaskInfo {
         }
         return topActivityType == that.topActivityType
                 && isResizeable == that.isResizeable
+                && supportsMultiWindow == that.supportsMultiWindow
                 && Objects.equals(positionInParent, that.positionInParent)
                 && Objects.equals(pictureInPictureParams, that.pictureInPictureParams)
                 && getWindowingMode() == that.getWindowingMode()
@@ -375,6 +383,7 @@ public class TaskInfo {
 
         taskDescription = source.readTypedObject(ActivityManager.TaskDescription.CREATOR);
         supportsSplitScreenMultiWindow = source.readBoolean();
+        supportsMultiWindow = source.readBoolean();
         resizeMode = source.readInt();
         configuration.readFromParcel(source);
         token = WindowContainerToken.CREATOR.createFromParcel(source);
@@ -412,6 +421,7 @@ public class TaskInfo {
 
         dest.writeTypedObject(taskDescription, flags);
         dest.writeBoolean(supportsSplitScreenMultiWindow);
+        dest.writeBoolean(supportsMultiWindow);
         dest.writeInt(resizeMode);
         configuration.writeToParcel(dest, flags);
         token.writeToParcel(dest, flags);
@@ -440,6 +450,7 @@ public class TaskInfo {
                 + " numActivities=" + numActivities
                 + " lastActiveTime=" + lastActiveTime
                 + " supportsSplitScreenMultiWindow=" + supportsSplitScreenMultiWindow
+                + " supportsMultiWindow=" + supportsMultiWindow
                 + " resizeMode=" + resizeMode
                 + " isResizeable=" + isResizeable
                 + " token=" + token
