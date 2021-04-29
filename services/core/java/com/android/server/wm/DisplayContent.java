@@ -2108,9 +2108,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
 
             // Check if input device can dispatch events to current display.
-            // If display type is virtual, will follow the default display.
-            if (!mWmService.mInputManager.canDispatchToDisplay(device.getId(),
-                    displayInfo.type == Display.TYPE_VIRTUAL ? DEFAULT_DISPLAY : mDisplayId)) {
+            if (!mWmService.mInputManager.canDispatchToDisplay(device.getId(), mDisplayId)) {
                 continue;
             }
 
