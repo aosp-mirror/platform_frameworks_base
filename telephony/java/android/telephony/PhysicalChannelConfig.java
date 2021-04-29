@@ -182,16 +182,6 @@ public final class PhysicalChannelConfig implements Parcelable {
     }
 
     /**
-     * @return the absolute radio frequency channel number for this physical channel,
-     * {@link #CHANNEL_NUMBER_UNKNOWN} if unknown.
-     * @deprecated Use {@link #getDownlinkChannelNumber()} to get the channel number.
-     */
-    @Deprecated
-    public int getChannelNumber() {
-        return getDownlinkChannelNumber();
-    }
-
-    /**
      * @return the rough frequency range for this physical channel,
      * {@link ServiceState#FREQUENCY_RANGE_UNKNOWN} if unknown.
      * @see {@link ServiceState#FREQUENCY_RANGE_LOW}
