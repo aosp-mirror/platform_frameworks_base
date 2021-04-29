@@ -41,6 +41,7 @@
         android:ellipsize="end"
         android:gravity="start"
         android:textAlignment="viewStart"
+        android:textColor="?android:attr/textColorPrimaryInverse"
         android:text="@string/bubbles_user_education_manage_title"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Headline"/>
 
@@ -55,6 +56,7 @@
         android:ellipsize="end"
         android:gravity="start"
         android:textAlignment="viewStart"
+        android:textColor="?android:attr/textColorPrimaryInverse"
         android:fontFamily="@*android:string/config_bodyFontFamily"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"/>
 
