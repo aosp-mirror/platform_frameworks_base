@@ -561,6 +561,14 @@ public abstract class ActivityTaskManagerInternal {
     public abstract ActivityMetricsLaunchObserverRegistry getLaunchObserverRegistry();
 
     /**
+     * Returns the URI permission owner associated with the given activity (see
+     * {@link ActivityRecord#getUriPermissionsLocked()}). If the passed-in activity token is
+     * invalid, returns null.
+     */
+    @Nullable
+    public abstract IBinder getUriPermissionOwnerForActivity(@NonNull IBinder activityToken);
+
+    /**
      * Gets bitmap snapshot of the provided task id.
      *
      * <p>Warning! this may restore the snapshot from disk so can block, don't call in a latency

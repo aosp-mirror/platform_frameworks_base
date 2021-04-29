@@ -81,6 +81,14 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 @Override
                 public void onOneHandedAnimationStart(
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
+                    final boolean isEntering = animator.getTransitionDirection()
+                            == TRANSITION_DIRECTION_TRIGGER;
+                    if (!mTransitionCallbacks.isEmpty()) {
+                        for (int i = mTransitionCallbacks.size() - 1; i >= 0; i--) {
+                            final OneHandedTransitionCallback cb = mTransitionCallbacks.get(i);
+                            cb.onStartTransition(isEntering);
+                        }
+                    }
                 }
 
                 @Override
@@ -262,11 +270,12 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         mLastVisualDisplayBounds.offsetTo(0,
                 direction == TRANSITION_DIRECTION_TRIGGER ? offset : 0);
         for (int i = mTransitionCallbacks.size() - 1; i >= 0; i--) {
-            final OneHandedTransitionCallback callback = mTransitionCallbacks.get(i);
+            final OneHandedTransitionCallback cb = mTransitionCallbacks.get(i);
+            cb.onStartTransition(false /* isTransitioning */);
             if (direction == TRANSITION_DIRECTION_TRIGGER) {
-                callback.onStartFinished(getLastVisualDisplayBounds());
+                cb.onStartFinished(getLastVisualDisplayBounds());
             } else {
-                callback.onStopFinished(getLastVisualDisplayBounds());
+                cb.onStopFinished(getLastVisualDisplayBounds());
             }
         }
     }

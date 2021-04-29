@@ -3035,6 +3035,10 @@ public final class OomAdjuster {
             return;
         }
 
+        if (app.mOptRecord.isFreezeExempt()) {
+            return;
+        }
+
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         // if an app is already frozen and shouldNotFreeze becomes true, immediately unfreeze
         if (opt.isFrozen() && opt.shouldNotFreeze()) {

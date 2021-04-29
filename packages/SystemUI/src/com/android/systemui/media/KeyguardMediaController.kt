@@ -54,6 +54,14 @@ class KeyguardMediaController @Inject constructor(
                 }
             }
         })
+
+        // First let's set the desired state that we want for this host
+        mediaHost.expansion = MediaHostState.COLLAPSED
+        mediaHost.showsOnlyActiveMedia = true
+        mediaHost.falsingProtectionNeeded = true
+
+        // Let's now initialize this view, which also creates the host view for us.
+        mediaHost.init(MediaHierarchyManager.LOCATION_LOCKSCREEN)
     }
 
     var visibilityChangedListener: ((Boolean) -> Unit)? = null
@@ -71,13 +79,7 @@ class KeyguardMediaController @Inject constructor(
      */
     fun attachSinglePaneContainer(mediaView: MediaHeaderView?) {
         singlePaneContainer = mediaView
-        // First let's set the desired state that we want for this host
-        mediaHost.expansion = MediaHostState.COLLAPSED
-        mediaHost.showsOnlyActiveMedia = true
-        mediaHost.falsingProtectionNeeded = true
 
-        // Let's now initialize this view, which also creates the host view for us.
-        mediaHost.init(MediaHierarchyManager.LOCATION_LOCKSCREEN)
         // Required to show it for the first time, afterwards visibility is managed automatically
         mediaHost.visible = true
         mediaHost.addVisibilityChangeListener { visible ->
@@ -133,6 +135,10 @@ class KeyguardMediaController @Inject constructor(
         }
         // might be called a few times for the same view, no need to add hostView again
         if (activeContainer?.childCount == 0) {
+            // Detach the hostView from its parent view if exists
+            mediaHost.hostView.parent ?.let {
+                (it as? ViewGroup)?.removeView(mediaHost.hostView)
+            }
             activeContainer.addView(mediaHost.hostView)
         }
         setVisibility(activeContainer, View.VISIBLE)

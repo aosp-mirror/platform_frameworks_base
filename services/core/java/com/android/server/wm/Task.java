@@ -7952,12 +7952,33 @@ class Task extends WindowContainer<WindowContainer> {
         private boolean mHasBeenVisible;
         private boolean mRemoveWithTaskOrganizer;
 
+        /**
+         * Records the source task that requesting to build a new task, used to determine which of
+         * the adjacent roots should be launch root of the new task.
+         */
+        private Task mSourceTask;
+
+        /**
+         * Records launch flags to apply when launching new task.
+         */
+        private int mLaunchFlags;
+
         Builder(ActivityTaskManagerService atm) {
             mAtmService = atm;
         }
 
         Builder setParent(WindowContainer parent) {
             mParent = parent;
+            return this;
+        }
+
+        Builder setSourceTask(Task sourceTask) {
+            mSourceTask = sourceTask;
+            return this;
+        }
+
+        Builder setLaunchFlags(int launchFlags) {
+            mLaunchFlags = launchFlags;
             return this;
         }
 
@@ -8215,9 +8236,14 @@ class Task extends WindowContainer<WindowContainer> {
                 tda.getRootPinnedTask().dismissPip();
             }
 
+            if (mIntent != null) {
+                mLaunchFlags |= mIntent.getFlags();
+            }
+
             // Task created by organizer are added as root.
             final Task launchRootTask = mCreatedByOrganizer
-                    ? null : tda.getLaunchRootTask(mWindowingMode, mActivityType, mActivityOptions);
+                    ? null : tda.getLaunchRootTask(mWindowingMode, mActivityType, mActivityOptions,
+                    mSourceTask, mLaunchFlags);
             if (launchRootTask != null) {
                 // Since this task will be put into a root task, its windowingMode will be
                 // inherited.

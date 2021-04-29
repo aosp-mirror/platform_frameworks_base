@@ -95,7 +95,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var collapsedSet: ConstraintSet
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     private lateinit var appIcon: ImageView
-    private lateinit var appName: TextView
     private lateinit var albumView: ImageView
     private lateinit var titleText: TextView
     private lateinit var artistText: TextView
@@ -138,8 +137,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(holder.player).thenReturn(view)
         appIcon = ImageView(context)
         whenever(holder.appIcon).thenReturn(appIcon)
-        appName = TextView(context)
-        whenever(holder.appName).thenReturn(appName)
         albumView = ImageView(context)
         whenever(holder.albumView).thenReturn(albumView)
         titleText = TextView(context)
@@ -220,7 +217,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
                 emptyList(), PACKAGE, session.getSessionToken(), null, device, true, null)
         player.bindPlayer(state, PACKAGE)
-        assertThat(appName.getText()).isEqualTo(APP)
         assertThat(titleText.getText()).isEqualTo(TITLE)
         assertThat(artistText.getText()).isEqualTo(ARTIST)
     }
