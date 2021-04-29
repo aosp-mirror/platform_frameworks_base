@@ -24,7 +24,6 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkIdentity.SUBTYPE_COMBINED;
 import static android.net.NetworkStack.checkNetworkStackPermission;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
@@ -97,12 +96,12 @@ import android.net.INetworkStatsSession;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
+import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
 import android.net.NetworkStats;
 import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
-import android.net.NetworkSpecifier;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.TrafficStats;
@@ -1296,9 +1295,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final ArraySet<String> mobileIfaces = new ArraySet<>();
         for (NetworkStateSnapshot snapshot : snapshots) {
             final int displayTransport =
-                    getDisplayTransport(snapshot.networkCapabilities.getTransportTypes());
+                    getDisplayTransport(snapshot.getNetworkCapabilities().getTransportTypes());
             final boolean isMobile = (NetworkCapabilities.TRANSPORT_CELLULAR == displayTransport);
-            final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, snapshot.network);
+            final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, snapshot.getNetwork());
             final int subType = combineSubtypeEnabled ? SUBTYPE_COMBINED
                     : getSubTypeForStateSnapshot(snapshot);
             final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, snapshot,
@@ -1306,7 +1305,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             // Traffic occurring on the base interface is always counted for
             // both total usage and UID details.
-            final String baseIface = snapshot.linkProperties.getInterfaceName();
+            final String baseIface = snapshot.getLinkProperties().getInterfaceName();
             if (baseIface != null) {
                 findOrCreateNetworkIdentitySet(mActiveIfaces, baseIface).add(ident);
                 findOrCreateNetworkIdentitySet(mActiveUidIfaces, baseIface).add(ident);
@@ -1316,7 +1315,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 // If IMS is metered, then the IMS network usage has already included VT usage.
                 // VT is considered always metered in framework's layer. If VT is not metered
                 // per carrier's policy, modem will report 0 usage for VT calls.
-                if (snapshot.networkCapabilities.hasCapability(
+                if (snapshot.getNetworkCapabilities().hasCapability(
                         NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.getMetered()) {
 
                     // Copy the identify from IMS one but mark it as metered.
@@ -1364,7 +1363,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // accounting is explicitly bypassed for traffic from the clat uid.
             //
             // TODO: This code might be combined to above code.
-            for (String iface : snapshot.linkProperties.getAllInterfaceNames()) {
+            for (String iface : snapshot.getLinkProperties().getAllInterfaceNames()) {
                 // baseIface has been handled, so ignore it.
                 if (TextUtils.equals(baseIface, iface)) continue;
                 if (iface != null) {
@@ -1383,11 +1382,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private static int getSubIdForMobile(@NonNull NetworkStateSnapshot state) {
-        if (!state.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+        if (!state.getNetworkCapabilities().hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
             throw new IllegalArgumentException("Mobile state need capability TRANSPORT_CELLULAR");
         }
 
-        final NetworkSpecifier spec = state.networkCapabilities.getNetworkSpecifier();
+        final NetworkSpecifier spec = state.getNetworkCapabilities().getNetworkSpecifier();
         if (spec instanceof TelephonyNetworkSpecifier) {
              return ((TelephonyNetworkSpecifier) spec).getSubscriptionId();
         } else {
@@ -1402,11 +1401,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * transport types do not actually fill this value.
      */
     private int getSubTypeForStateSnapshot(@NonNull NetworkStateSnapshot state) {
-        if (!state.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+        if (!state.getNetworkCapabilities().hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
             return 0;
         }
 
-        return mNetworkStatsSubscriptionsMonitor.getRatTypeForSubscriberId(state.subscriberId);
+        return mNetworkStatsSubscriptionsMonitor.getRatTypeForSubscriberId(state.getSubscriberId());
     }
 
     private static <K> NetworkIdentitySet findOrCreateNetworkIdentitySet(
