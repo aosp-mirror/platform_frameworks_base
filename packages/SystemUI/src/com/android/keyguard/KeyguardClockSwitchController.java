@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -90,10 +91,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private SmartspaceSession mSmartspaceSession;
     private SmartspaceSession.OnTargetsAvailableListener mSmartspaceCallback;
-    private int mWallpaperTextColor;
     private ConfigurationController mConfigurationController;
     private ActivityStarter mActivityStarter;
     private FalsingManager mFalsingManager;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final KeyguardBypassController mBypassController;
 
     /**
      * Listener for changes to the color palette.
@@ -147,7 +149,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             ConfigurationController configurationController,
             SystemUIFactory systemUIFactory,
             ActivityStarter activityStarter,
-            FalsingManager falsingManager) {
+            FalsingManager falsingManager,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            KeyguardBypassController bypassController) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
@@ -162,6 +166,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mSystemUIFactory = systemUIFactory;
         mActivityStarter = activityStarter;
         mFalsingManager = falsingManager;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mBypassController = bypassController;
     }
 
     /**
@@ -185,19 +191,23 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
 
         mClockViewController =
-            new AnimatableClockController(
-                mView.findViewById(R.id.animatable_clock_view),
-                mStatusBarStateController,
-                mBroadcastDispatcher,
-                mBatteryController);
+                new AnimatableClockController(
+                        mView.findViewById(R.id.animatable_clock_view),
+                        mStatusBarStateController,
+                        mBroadcastDispatcher,
+                        mBatteryController,
+                        mKeyguardUpdateMonitor,
+                        mBypassController);
         mClockViewController.init();
 
         mLargeClockViewController =
-            new AnimatableClockController(
-                mView.findViewById(R.id.animatable_clock_view_large),
-                mStatusBarStateController,
-                mBroadcastDispatcher,
-                mBatteryController);
+                new AnimatableClockController(
+                        mView.findViewById(R.id.animatable_clock_view_large),
+                        mStatusBarStateController,
+                        mBroadcastDispatcher,
+                        mBatteryController,
+                        mKeyguardUpdateMonitor,
+                        mBypassController);
         mLargeClockViewController.init();
 
         mStatusBarStateController.addCallback(mStatusBarStateListener);
