@@ -2085,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificación descendió de a Silenciada. Presiona para enviar comentarios."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificación recibió una clasificación superior. Presiona para enviar comentarios."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificación recibió una clasificación inferior. Presiona para enviar comentarios."</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notificaciones mejoradas"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Las notificaciones mejoradas ahora brindan respuestas y acciones sugeridas. Ya no se admiten las notificaciones adaptables de Android."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Aceptar"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactivar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Más información"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Las notificaciones mejoradas reemplazaron a las notificaciones adaptables en Android 12. Esta función muestra respuestas y acciones sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder a todo el contenido de notificaciones, lo que incluye información personal, como nombres de contactos y mensajes. También puede descartar o responder notificaciones, como responder llamadas y controlar la función No interrumpir."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación de información del modo de Rutinas"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Es posible que la batería se agote antes de la carga habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Se activó el Ahorro de batería para extender la duración de la batería"</string>
@@ -2292,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imagen de marca de la aplicación"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Verifica la configuración de acceso"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> puede ver y controlar tu pantalla. Presiona para revisar esta opción."</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

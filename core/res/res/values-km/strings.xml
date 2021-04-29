@@ -2085,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ការជូនដំណឹងនេះ​ត្រូវបានបន្ទាបតំណែងទៅ​ស្ងាត់។ សូមចុច​ដើម្បី​ផ្ដល់មតិកែលម្អ។"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ការជូនដំណឹងនេះ​ត្រូវបានចាត់ថ្នាក់​ខ្ពស់ជាងមុន។ សូមចុច​ដើម្បី​ផ្ដល់មតិកែលម្អ។"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ការជូនដំណឹងនេះ​ត្រូវបានចាត់ថ្នាក់​ទាបជាងមុន។ សូមចុច​ដើម្បី​ផ្ដល់មតិកែលម្អ។"</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"ការជូនដំណឹងប្រសើរជាងមុន"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"ឥឡូវនេះ ការឆ្លើយតប និងសកម្មភាពដែលបានណែនាំត្រូវបានផ្ដល់ដោយការជូនដំណឹងប្រសើរជាងមុន។ មិនអាចប្រើ​ការជូនដំណឹង​ដែលមានភាព​បត់បែនរបស់ Android បានទៀតទេ។"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"យល់ព្រម"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"បិទ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ស្វែងយល់បន្ថែម"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"ការជូនដំណឹងប្រសើរជាងមុន​បានជំនួស​ការជូនដំណឹងដែលមានភាពបត់បែន Android នៅក្នុង Android 12។ មុខងារនេះបង្ហាញការឆ្លើយតប និងសកម្មភាពដែលបានណែនាំ ព្រមទាំងរៀបចំការជូនដំណឹងរបស់អ្នក។\n\nការជូនដំណឹងប្រសើរជាងមុនអាចចូលប្រើខ្លឹមសារនៃការជូនដំណឹង រួមទាំងព័ត៌មានផ្ទាល់ខ្លួនដូចជា ឈ្មោះទំនាក់ទំនង និងសារជាដើម។ មុខងារនេះក៏អាចច្រានចោល ឬឆ្លើយតបនឹងការជូនដំណឹងដូចជា ការទទួល​ការហៅទូរសព្ទ និងការគ្រប់គ្រង​មុខងារកុំរំខានផងដែរ។"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការមុខងារ​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
@@ -2292,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"រូបភាព​ផ្សព្វផ្សាយម៉ាក​កម្មវិធី"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"ពិនិត្យមើល​ការកំណត់​សិទ្ធិចូលប្រើ"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> អាច​មើល និង​គ្រប់គ្រង​អេក្រង់​របស់អ្នក​បាន។ សូមចុច ដើម្បី​ពិនិត្យមើល។"</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

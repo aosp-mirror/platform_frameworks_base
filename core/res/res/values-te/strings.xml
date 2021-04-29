@@ -1820,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"కాహు"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"కాకు2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"యు4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"తెలియని పొర్ట్రెయిట్"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"తెలియని ల్యాండ్‍స్కేప్"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"రద్దు చేయబడింది"</string>
@@ -1865,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"సరే"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేసి, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లు, నిర్దిష్ట ఫీచర్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది.\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేసి, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లు, నిర్దిష్ట ఫీచర్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు నొక్కే వరకు ఫోటోలు ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ఆన్ చేయి"</string>
@@ -2295,4 +2292,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"యాప్ బ్రాండింగ్ ఇమేజ్"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"యాక్సెస్ సెట్టింగ్‌లను చెక్ చేయండి"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> మీ స్క్రీన్‌ను చూడవచ్చు, కంట్రోల్ చేయవచ్చు. రివ్యూ చేయడానికి ట్యాప్ చేయండి."</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

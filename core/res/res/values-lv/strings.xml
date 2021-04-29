@@ -2118,17 +2118,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Šī paziņojuma svarīgums tika pazemināts, un paziņojums tiks rādīts bez skaņas. Lai sniegtu atsauksmes, pieskarieties."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Šī paziņojuma rangs tika paaugstināts. Lai sniegtu atsauksmes, pieskarieties."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Šī paziņojuma rangs tika pazemināts. Lai sniegtu atsauksmes, pieskarieties."</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Uzlabotie paziņojumi"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Tagad ieteiktās darbības un atbildes nodrošina funkcija Uzlabotie paziņojumi. Android adaptīvie paziņojumi vairs netiek atbalstīti."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Labi"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Izslēgt"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Uzzināt vairāk"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12 versijā Android adaptīvos paziņojumus aizstāja funkcija “Uzlabotie paziņojumi”. Šī funkcija parāda ieteiktās darbības un atbildes, kā arī kārto jūsu paziņojumus.\n\nFunkcija “Uzlabotie paziņojumi” var piekļūt paziņojumu saturam, tostarp personas informācijai, piemēram, kontaktpersonu vārdiem un ziņojumiem. Šī funkcija var arī noraidīt paziņojumus vai atbildēt uz tiem, piemēram, atbildēt uz tālruņa zvaniem vai pārvaldīt funkciju Netraucēt."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatīvs paziņojums par akumulatoru"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulators var izlādēties pirms parastā uzlādes laika"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Aktivizēts akumulatora enerģijas taupīšanas režīms, lai palielinātu akumulatora darbības ilgumu"</string>
@@ -2326,4 +2321,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Lietojumprogrammas zīmola attēls"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Pārbaudiet piekļuves iestatījumus"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"Pakalpojums <xliff:g id="SERVICE_NAME">%s</xliff:g> var skatīt un kontrolēt jūsu ekrānu. Pieskarieties, lai to pārskatītu."</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

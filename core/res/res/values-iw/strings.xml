@@ -2151,17 +2151,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ההתראה הזו הורדה בדרגה ל\'שקטה\'. יש להקיש כדי לשלוח משוב."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"דירוג ההתראה הזו הוגבה. יש להקיש כדי לשלוח משוב."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ההתראה הזו דורגה נמוך יותר. יש להקיש כדי לשלוח משוב."</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"התראות משופרות"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"‏ההתראות המשופרות מספקות מעכשיו הצעות לפעולות ולתשובות. אין יותר תמיכה בהתראות מותאמות ל-Android."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"אישור"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"השבתה"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"מידע נוסף"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"‏ההתראות המשופרות החליפו את ההתראות המותאמות ל-Android ב-Android 12. התכונה הזו מציגה הצעות לפעולות ולתשובות ומארגנת את ההתראות שלך.\n\nההתראות המשופרות יכולות לקבל גישה לתוכן של התראות, כולל מידע אישי כמו שמות אנשי קשר והודעות. התכונה הזו יכולה גם לסגור התראות או להשיב להן, למשל מענה לשיחות טלפון ושליטה בתכונה \'נא לא להפריע\'."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"התראת מידע לגבי מצב שגרתי"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"הסוללה עלולה להתרוקן לפני המועד הרגיל של הטעינה"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"תכונת החיסכון בסוללה הופעלה כדי להאריך את חיי הסוללה"</string>
@@ -2360,4 +2355,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"תדמית המותג של האפליקציה"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"בדיקה של הגדרות הגישה"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"לשירות <xliff:g id="SERVICE_NAME">%s</xliff:g> יש הרשאה להצגת המסך ושליטה בו. אפשר להקיש כדי לבדוק."</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>
