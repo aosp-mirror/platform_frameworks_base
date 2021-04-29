@@ -2060,7 +2060,8 @@ public class NotificationPanelViewController extends PanelViewController {
         int bottom = 0;
         int left = 0;
         int right = 0;
-        boolean visible = qsFraction > 0 || qsPanelBottomY > 0;
+        boolean visible = (qsFraction > 0 || qsPanelBottomY > 0)
+                && !mShouldUseSplitNotificationShade;
         int radius = mScrimCornerRadius;
         if (visible || !mShouldUseSplitNotificationShade) {
             if (!mShouldUseSplitNotificationShade) {
@@ -2079,11 +2080,11 @@ public class NotificationPanelViewController extends PanelViewController {
             }
         }
 
+        // Fancy clipping for quick settings
+        if (mQs != null) {
+            mQs.setFancyClipping(top, bottom, radius, visible);
+        }
         if (!mShouldUseSplitNotificationShade) {
-            // Fancy clipping for quick settings
-            if (mQs != null) {
-                mQs.setFancyClipping(top, bottom, radius, visible);
-            }
             // The padding on this area is large enough that we can use a cheaper clipping strategy
             mKeyguardStatusAreaClipBounds.set(left, top, right, bottom);
             mKeyguardStatusViewController.setClipBounds(visible
