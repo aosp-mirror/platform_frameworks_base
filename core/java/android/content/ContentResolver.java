@@ -63,7 +63,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.system.ErrnoException;
 import android.system.Int64Ref;
+import android.system.Os;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -76,8 +78,10 @@ import com.android.internal.util.MimeIconUtils;
 import dalvik.system.CloseGuard;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -864,6 +868,20 @@ public abstract class ContentResolver implements ContentInterface {
         return wrap((ContentInterface) wrapped);
     }
 
+    /**
+     * Offer to locally truncate the given file when opened using the write-only
+     * mode. This is typically used to preserve legacy compatibility behavior.
+     */
+    private static void maybeTruncate(FileDescriptor fd, String mode) throws FileNotFoundException {
+        if ("w".equals(mode)) {
+            try {
+                Os.ftruncate(fd, 0);
+            } catch (ErrnoException e) {
+                throw new FileNotFoundException("Failed to truncate: " + e.getMessage());
+            }
+        }
+    }
+
     /** @hide */
     @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
@@ -1525,8 +1543,20 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /**
-     * Synonym for {@link #openOutputStream(Uri, String)
-     * openOutputStream(uri, "w")}.
+     * Open a stream on to the content associated with a content URI.  If there
+     * is no data associated with the URI, FileNotFoundException is thrown.
+     *
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * </ul>
+     *
+     * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
+     * on these schemes.
+     *
+     * <p>This method behaves like {@link FileOutputStream} and automatically
+     * truncates any existing contents.
      *
      * @param uri The desired URI.
      * @return an OutputStream or {@code null} if the provider recently crashed.
@@ -1534,7 +1564,16 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public final @Nullable OutputStream openOutputStream(@NonNull Uri uri)
             throws FileNotFoundException {
-        return openOutputStream(uri, "w");
+        AssetFileDescriptor fd = openAssetFileDescriptor(uri, "w", null);
+        if (fd == null) return null;
+        try {
+            final FileOutputStream res = fd.createOutputStream();
+            // Unconditionally truncate to mirror FileOutputStream behavior
+            maybeTruncate(res.getFD(), "w");
+            return res;
+        } catch (IOException e) {
+            throw new FileNotFoundException("Unable to create stream");
+        }
     }
 
     /**
@@ -1551,7 +1590,9 @@ public abstract class ContentResolver implements ContentInterface {
      * on these schemes.
      *
      * @param uri The desired URI.
-     * @param mode May be "w", "wa", "rw", or "rwt".
+     * @param mode The string representation of the file mode. Can be "r", "w",
+     *            "wt", "wa", "rw" or "rwt". See
+     *            {@link ParcelFileDescriptor#parseMode} for more details.
      * @return an OutputStream or {@code null} if the provider recently crashed.
      * @throws FileNotFoundException if the provided URI could not be opened.
      * @see #openAssetFileDescriptor(Uri, String)
@@ -1559,8 +1600,14 @@ public abstract class ContentResolver implements ContentInterface {
     public final @Nullable OutputStream openOutputStream(@NonNull Uri uri, @NonNull String mode)
             throws FileNotFoundException {
         AssetFileDescriptor fd = openAssetFileDescriptor(uri, mode, null);
+        if (fd == null) return null;
         try {
-            return fd != null ? fd.createOutputStream() : null;
+            final FileOutputStream res = fd.createOutputStream();
+            // Preserve legacy behavior by offering to truncate
+            if (mTargetSdkVersion < Build.VERSION_CODES.Q) {
+                maybeTruncate(res.getFD(), mode);
+            }
+            return res;
         } catch (IOException e) {
             throw new FileNotFoundException("Unable to create stream");
         }
@@ -1607,8 +1654,9 @@ public abstract class ContentResolver implements ContentInterface {
      * provider, use {@link ParcelFileDescriptor#closeWithError(String)}.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openFile
-     * ContentProvider.openFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w",
+     *            "wt", "wa", "rw" or "rwt". See
+     *            {@link ParcelFileDescriptor#parseMode} for more details.
      * @return Returns a new ParcelFileDescriptor pointing to the file or {@code null} if the
      * provider recently crashed. You own this descriptor and are responsible for closing it
      * when done.
@@ -1650,8 +1698,9 @@ public abstract class ContentResolver implements ContentInterface {
      * provider, use {@link ParcelFileDescriptor#closeWithError(String)}.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openFile
-     * ContentProvider.openFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w",
+     *            "wt", "wa", "rw" or "rwt". See
+     *            {@link ParcelFileDescriptor#parseMode} for more details.
      * @param cancellationSignal A signal to cancel the operation in progress,
      *         or null if none. If the operation is canceled, then
      *         {@link OperationCanceledException} will be thrown.
@@ -1744,8 +1793,9 @@ public abstract class ContentResolver implements ContentInterface {
      * from any built-in data conversion that a provider implements.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
-     * ContentProvider.openAssetFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w",
+     *            "wt", "wa", "rw" or "rwt". See
+     *            {@link ParcelFileDescriptor#parseMode} for more details.
      * @return Returns a new ParcelFileDescriptor pointing to the file or {@code null} if the
      * provider recently crashed. You own this descriptor and are responsible for closing it
      * when done.
@@ -1798,8 +1848,9 @@ public abstract class ContentResolver implements ContentInterface {
      * from any built-in data conversion that a provider implements.
      *
      * @param uri The desired URI to open.
-     * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
-     * ContentProvider.openAssetFile}.
+     * @param mode The string representation of the file mode. Can be "r", "w",
+     *            "wt", "wa", "rw" or "rwt". See
+     *            {@link ParcelFileDescriptor#parseMode} for more details.
      * @param cancellationSignal A signal to cancel the operation in progress, or null if
      *            none. If the operation is canceled, then
      *            {@link OperationCanceledException} will be thrown.
@@ -1835,6 +1886,10 @@ public abstract class ContentResolver implements ContentInterface {
         } else if (SCHEME_FILE.equals(scheme)) {
             ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
                     new File(uri.getPath()), ParcelFileDescriptor.parseMode(mode));
+            // Preserve legacy behavior by offering to truncate
+            if (mTargetSdkVersion < Build.VERSION_CODES.Q) {
+                maybeTruncate(pfd.getFileDescriptor(), mode);
+            }
             return new AssetFileDescriptor(pfd, 0, -1);
         } else {
             if ("r".equals(mode)) {
@@ -1891,6 +1946,11 @@ public abstract class ContentResolver implements ContentInterface {
                     // Success!  Don't release the provider when exiting, let
                     // ParcelFileDescriptorInner do that when it is closed.
                     stableProvider = null;
+
+                    // Preserve legacy behavior by offering to truncate
+                    if (mTargetSdkVersion < Build.VERSION_CODES.Q) {
+                        maybeTruncate(pfd.getFileDescriptor(), mode);
+                    }
 
                     return new AssetFileDescriptor(pfd, fd.getStartOffset(),
                             fd.getDeclaredLength());
