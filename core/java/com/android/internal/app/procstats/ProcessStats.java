@@ -78,18 +78,20 @@ public final class ProcessStats implements Parcelable {
     public static final int STATE_NOTHING = -1;
     public static final int STATE_PERSISTENT = 0;
     public static final int STATE_TOP = 1;
-    public static final int STATE_IMPORTANT_FOREGROUND = 2;
-    public static final int STATE_IMPORTANT_BACKGROUND = 3;
-    public static final int STATE_BACKUP = 4;
-    public static final int STATE_SERVICE = 5;
-    public static final int STATE_SERVICE_RESTARTING = 6;
-    public static final int STATE_RECEIVER = 7;
-    public static final int STATE_HEAVY_WEIGHT = 8;
-    public static final int STATE_HOME = 9;
-    public static final int STATE_LAST_ACTIVITY = 10;
-    public static final int STATE_CACHED_ACTIVITY = 11;
-    public static final int STATE_CACHED_ACTIVITY_CLIENT = 12;
-    public static final int STATE_CACHED_EMPTY = 13;
+    public static final int STATE_BOUND_TOP_OR_FGS = 2;
+    public static final int STATE_FGS = 3;
+    public static final int STATE_IMPORTANT_FOREGROUND = 4;
+    public static final int STATE_IMPORTANT_BACKGROUND = 5;
+    public static final int STATE_BACKUP = 6;
+    public static final int STATE_SERVICE = 7;
+    public static final int STATE_SERVICE_RESTARTING = 8;
+    public static final int STATE_RECEIVER = 9;
+    public static final int STATE_HEAVY_WEIGHT = 10;
+    public static final int STATE_HOME = 11;
+    public static final int STATE_LAST_ACTIVITY = 12;
+    public static final int STATE_CACHED_ACTIVITY = 13;
+    public static final int STATE_CACHED_ACTIVITY_CLIENT = 14;
+    public static final int STATE_CACHED_EMPTY = 15;
     public static final int STATE_COUNT = STATE_CACHED_EMPTY+1;
 
     public static final int PSS_SAMPLE_COUNT = 0;
@@ -149,8 +151,8 @@ public final class ProcessStats implements Parcelable {
     public static final int[] ALL_SCREEN_ADJ = new int[] { ADJ_SCREEN_OFF, ADJ_SCREEN_ON };
 
     public static final int[] NON_CACHED_PROC_STATES = new int[] {
-            STATE_PERSISTENT, STATE_TOP, STATE_IMPORTANT_FOREGROUND,
-            STATE_IMPORTANT_BACKGROUND, STATE_BACKUP,
+            STATE_PERSISTENT, STATE_TOP, STATE_BOUND_TOP_OR_FGS, STATE_FGS,
+            STATE_IMPORTANT_FOREGROUND, STATE_IMPORTANT_BACKGROUND, STATE_BACKUP,
             STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER, STATE_HEAVY_WEIGHT
     };
 
@@ -160,7 +162,8 @@ public final class ProcessStats implements Parcelable {
     };
 
     public static final int[] ALL_PROC_STATES = new int[] { STATE_PERSISTENT,
-            STATE_TOP, STATE_IMPORTANT_FOREGROUND, STATE_IMPORTANT_BACKGROUND, STATE_BACKUP,
+            STATE_TOP, STATE_BOUND_TOP_OR_FGS, STATE_FGS, STATE_IMPORTANT_FOREGROUND,
+            STATE_IMPORTANT_BACKGROUND, STATE_BACKUP,
             STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER,
             STATE_HEAVY_WEIGHT, STATE_HOME, STATE_LAST_ACTIVITY, STATE_CACHED_ACTIVITY,
             STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_EMPTY
@@ -186,7 +189,7 @@ public final class ProcessStats implements Parcelable {
             {"proc", "pkg-proc", "pkg-svc", "pkg-asc", "pkg-all", "all"};
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 39;
+    private static final int PARCEL_VERSION = 40;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
