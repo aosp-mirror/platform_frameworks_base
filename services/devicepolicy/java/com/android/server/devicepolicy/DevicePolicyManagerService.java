@@ -883,6 +883,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 synchronized (getLockObject()) {
                     // Check whether the user is affiliated, *before* removing its data.
                     boolean isRemovedUserAffiliated = isUserAffiliatedWithDeviceLocked(userHandle);
+                    if (isProfileOwnerOfOrganizationOwnedDevice(userHandle)) {
+                        // Disable network and security logging
+                        mInjector.securityLogSetLoggingEnabledProperty(false);
+                        mSecurityLogMonitor.stop();
+                        setNetworkLoggingActiveInternal(false);
+                    }
                     removeUserData(userHandle);
                     if (!isRemovedUserAffiliated) {
                         // We discard the logs when unaffiliated users are deleted (so that the
