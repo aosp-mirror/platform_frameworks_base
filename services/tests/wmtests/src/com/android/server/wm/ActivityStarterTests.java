@@ -339,8 +339,8 @@ public class ActivityStarterTests extends WindowTestsBase {
             // Direct starter to use spy stack.
             doReturn(stack).when(mRootWindowContainer)
                     .getLaunchRootTask(any(), any(), any(), anyBoolean());
-            doReturn(stack).when(mRootWindowContainer).getLaunchRootTask(any(), any(), any(), any(),
-                    anyBoolean(), any(), anyInt(), anyInt(), anyInt());
+            doReturn(stack).when(mRootWindowContainer).getLaunchRootTask(any(), any(), any(),
+                    anyBoolean(), any(), anyInt(), anyInt());
         }
 
         // Set up mock package manager internal and make sure no unmocked methods are called
@@ -1119,8 +1119,8 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         stack.addChild(targetRecord);
 
-        doReturn(stack).when(mRootWindowContainer).getLaunchRootTask(any(), any(), any(), any(),
-                anyBoolean(), any(), anyInt(), anyInt(), anyInt());
+        doReturn(stack).when(mRootWindowContainer)
+                .getLaunchRootTask(any(), any(), any(), anyBoolean(), any(), anyInt(), anyInt());
 
         starter.mStartActivity = new ActivityBuilder(mAtm).build();
 

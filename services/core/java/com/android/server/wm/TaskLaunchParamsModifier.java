@@ -292,8 +292,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                     mSupervisor.mRootWindowContainer.resolveActivityType(root, options, task);
             display.forAllTaskDisplayAreas(displayArea -> {
                 final Task launchRoot = displayArea.getLaunchRootTask(
-                        resolvedMode, activityType, null /* ActivityOptions */,
-                        null /* sourceTask*/, 0 /* launchFlags */);
+                        resolvedMode, activityType, null /* ActivityOptions */);
                 if (launchRoot == null) {
                     return false;
                 }
