@@ -9035,7 +9035,7 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getType();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public android.os.ParcelUuid[] getUuids();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setAlias(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPairingConfirmation(boolean);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setPairingConfirmation(boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setPin(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_ACL_CONNECTED = "android.bluetooth.device.action.ACL_CONNECTED";
