@@ -745,6 +745,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Slogf.wtfStack(LOG_TAG, "Not holding DPMS lock.");
     }
 
+    /**
+     * Calls wtfStack() if called with the DPMS lock held.
+     */
+    private void wtfIfInLock() {
+        if (Thread.holdsLock(mLockDoNoUseDirectly)) {
+            Slogf.wtfStack(LOG_TAG, "Shouldn't be called with DPMS lock held");
+        }
+    }
+
     @VisibleForTesting
     final TransferOwnershipMetadataManager mTransferOwnershipMetadataManager;
 
@@ -8138,8 +8147,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkArgument(admin != null);
 
         final CallerIdentity caller = getCallerIdentity();
+        // Cannot be called while holding the lock:
+        final boolean hasIncompatibleAccountsOrNonAdb =
+                hasIncompatibleAccountsOrNonAdbNoLock(caller, userId, admin);
         synchronized (getLockObject()) {
-            enforceCanSetDeviceOwnerLocked(caller, admin, userId);
+            enforceCanSetDeviceOwnerLocked(caller, admin, userId, hasIncompatibleAccountsOrNonAdb);
             Preconditions.checkArgument(isPackageInstalledForUser(admin.getPackageName(), userId),
                     "Invalid component " + admin + " for device owner");
             final ActiveAdmin activeAdmin = getActiveAdminUncheckedLocked(admin, userId);
@@ -8534,8 +8546,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkArgument(who != null);
 
         final CallerIdentity caller = getCallerIdentity();
+        // Cannot be called while holding the lock:
+        final boolean hasIncompatibleAccountsOrNonAdb =
+                hasIncompatibleAccountsOrNonAdbNoLock(caller, userHandle, who);
         synchronized (getLockObject()) {
-            enforceCanSetProfileOwnerLocked(caller, who, userHandle);
+            enforceCanSetProfileOwnerLocked(
+                    caller, who, userHandle, hasIncompatibleAccountsOrNonAdb);
             Preconditions.checkArgument(isPackageInstalledForUser(who.getPackageName(), userHandle),
                     "Component " + who + " not installed for userId:" + userHandle);
             final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
@@ -9114,15 +9130,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Calls wtfStack() if called with the DPMS lock held.
-     */
-    private void wtfIfInLock() {
-        if (Thread.holdsLock(this)) {
-            Slogf.wtfStack(LOG_TAG, "Shouldn't be called with DPMS lock held");
-        }
-    }
-
-    /**
      * The profile owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission.
      * The profile owner can only be set before the user setup phase has completed,
@@ -9130,8 +9137,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * - SYSTEM_UID
      * - adb unless hasIncompatibleAccountsOrNonAdb is true.
      */
-    private void enforceCanSetProfileOwnerLocked(CallerIdentity caller,
-            @Nullable ComponentName owner, int userHandle) {
+    private void enforceCanSetProfileOwnerLocked(
+            CallerIdentity caller, @Nullable ComponentName owner, int userHandle,
+            boolean hasIncompatibleAccountsOrNonAdb) {
         UserInfo info = getUserInfo(userHandle);
         if (info == null) {
             // User doesn't exist.
@@ -9151,7 +9159,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         if (isAdb(caller)) {
             if ((mIsWatch || hasUserSetupCompleted(userHandle))
-                    && hasIncompatibleAccountsOrNonAdbNoLock(caller, userHandle, owner)) {
+                    && hasIncompatibleAccountsOrNonAdb) {
                 throw new IllegalStateException("Not allowed to set the profile owner because "
                         + "there are already some accounts on the profile");
             }
@@ -9188,8 +9196,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * The Device owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission.
      */
-    private void enforceCanSetDeviceOwnerLocked(CallerIdentity caller,
-            @Nullable ComponentName owner, @UserIdInt int deviceOwnerUserId) {
+    private void enforceCanSetDeviceOwnerLocked(
+            CallerIdentity caller, @Nullable ComponentName owner, @UserIdInt int deviceOwnerUserId,
+            boolean hasIncompatibleAccountsOrNonAdb) {
         if (!isAdb(caller)) {
             Preconditions.checkCallAuthorization(
                     hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
@@ -9197,8 +9206,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int code = checkDeviceOwnerProvisioningPreConditionLocked(owner,
                 /* deviceOwnerUserId= */ deviceOwnerUserId, /* callingUserId*/ caller.getUserId(),
-                isAdb(caller),
-                hasIncompatibleAccountsOrNonAdbNoLock(caller, deviceOwnerUserId, owner));
+                isAdb(caller), hasIncompatibleAccountsOrNonAdb);
         if (code != CODE_OK) {
             throw new IllegalStateException(
                     computeProvisioningErrorString(code, deviceOwnerUserId));
@@ -11923,17 +11931,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
 
+        UserHandle userHandle = caller.getUserHandle();
+        if (mIsAutomotive) {
+            Slogf.v(LOG_TAG, "setLocationEnabled(%s, %b): ignoring for user %s on automotive build",
+                    who.flattenToShortString(), locationEnabled, userHandle);
+            return;
+        }
+
         mInjector.binderWithCleanCallingIdentity(() -> {
             boolean wasLocationEnabled = mInjector.getLocationManager().isLocationEnabledForUser(
-                    caller.getUserHandle());
-            mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled,
-                    caller.getUserHandle());
+                    userHandle);
+            Slogf.v(LOG_TAG, "calling locationManager.setLocationEnabledForUser(%b, %s)",
+                    locationEnabled, userHandle);
+            mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled, userHandle);
 
             // make a best effort to only show the notification if the admin is actually enabling
             // location. this is subject to race conditions with settings changes, but those are
             // unlikely to realistically interfere
             if (locationEnabled && !wasLocationEnabled) {
-                showLocationSettingsEnabledNotification(caller.getUserHandle());
+                showLocationSettingsEnabledNotification(userHandle);
             }
         });
 

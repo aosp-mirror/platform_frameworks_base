@@ -33,6 +33,9 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
+import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManagerInternal;
+import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
 import android.apphibernation.IAppHibernationService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -148,8 +151,8 @@ public final class AppHibernationService extends SystemService {
         intentFilter.addAction(ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
         userAllContext.registerReceiver(mBroadcastReceiver, intentFilter);
-
         LocalServices.addService(AppHibernationManagerInternal.class, mLocalService);
+        mInjector.getUsageStatsManagerInternal().registerListener(mUsageEventListener);
     }
 
     @Override
@@ -785,6 +788,20 @@ public final class AppHibernationService extends SystemService {
         }
     };
 
+    private final UsageEventListener mUsageEventListener = (userId, event) -> {
+        if (!isAppHibernationEnabled()) {
+            return;
+        }
+        final int eventType = event.mEventType;
+        if (eventType == UsageEvents.Event.USER_INTERACTION
+                || eventType == UsageEvents.Event.ACTIVITY_RESUMED
+                || eventType == UsageEvents.Event.APP_COMPONENT_USED) {
+            final String pkgName = event.mPackage;
+            setHibernatingForUser(pkgName, userId, false);
+            setHibernatingGlobally(pkgName, false);
+        }
+    };
+
     /**
      * Whether app hibernation is enabled on this device.
      *
@@ -816,6 +833,8 @@ public final class AppHibernationService extends SystemService {
         UserManager getUserManager();
 
         Executor getBackgroundExecutor();
+
+        UsageStatsManagerInternal getUsageStatsManagerInternal();
 
         HibernationStateDiskStore<GlobalLevelState> getGlobalLevelDiskStore();
 
@@ -864,6 +883,11 @@ public final class AppHibernationService extends SystemService {
         @Override
         public Executor getBackgroundExecutor() {
             return mScheduledExecutorService;
+        }
+
+        @Override
+        public UsageStatsManagerInternal getUsageStatsManagerInternal() {
+            return LocalServices.getService(UsageStatsManagerInternal.class);
         }
 
         @Override

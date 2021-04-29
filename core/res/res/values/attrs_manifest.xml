@@ -285,9 +285,6 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the system default text classifier -->
         <flag name="textClassifier" value="0x10000" />
-        <!-- Additional flag from base permission type: this permission can be automatically
-            granted to the document manager -->
-        <flag name="documenter" value="0x40000" />
         <!-- Additional flag from base permission type: this permission automatically
             granted to device configurator -->
         <flag name="configurator" value="0x80000" />

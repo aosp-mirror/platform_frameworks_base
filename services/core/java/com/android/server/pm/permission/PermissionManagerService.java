@@ -3553,14 +3553,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // Special permissions for the device configurator.
             allowed = true;
         }
-        if (!allowed && bp.isDocumenter()
-                && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_DOCUMENTER, UserHandle.USER_SYSTEM),
-                pkg.getPackageName())) {
-            // If this permission is to be granted to the documenter and
-            // this app is the documenter, then it gets the permission.
-            allowed = true;
-        }
         if (!allowed && bp.isIncidentReportApprover()
                 && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                         PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER,

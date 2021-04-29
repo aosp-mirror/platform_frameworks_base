@@ -6511,13 +6511,21 @@ public class AppOpsManager {
             NoteOpEvent note = new NoteOpEvent(discreteAccessTime, discreteAccessDuration, null);
             accessEvents.append(key, note);
             AttributedOpEntry access = new AttributedOpEntry(mOp, false, accessEvents, null);
-            for (int i = discreteAccesses.size() - 1; i >= 0; i--) {
-                if (discreteAccesses.get(i).getLastAccessTime(OP_FLAGS_ALL) < discreteAccessTime) {
-                    discreteAccesses.add(i + 1, access);
-                    return;
+            int insertionPoint = discreteAccesses.size() - 1;
+            for (; insertionPoint >= 0; insertionPoint--) {
+                if (discreteAccesses.get(insertionPoint).getLastAccessTime(OP_FLAGS_ALL)
+                        < discreteAccessTime) {
+                    break;
                 }
             }
-            discreteAccesses.add(0, access);
+            insertionPoint++;
+            if (insertionPoint < discreteAccesses.size() && discreteAccesses.get(
+                    insertionPoint).getLastAccessTime(OP_FLAGS_ALL) == discreteAccessTime) {
+                discreteAccesses.set(insertionPoint, mergeAttributedOpEntries(
+                        Arrays.asList(discreteAccesses.get(insertionPoint), access)));
+            } else {
+                discreteAccesses.add(insertionPoint, access);
+            }
         }
 
         /**
@@ -9858,7 +9866,10 @@ public class AppOpsManager {
                 NoteOpEvent reject = a.getLastRejectEvent(uidState, uidState, flags);
 
                 if (access != null) {
-                    accessEvents.append(key, access);
+                    NoteOpEvent existingAccess = accessEvents.get(key);
+                    if (existingAccess == null || existingAccess.getDuration() == -1) {
+                        accessEvents.append(key, access);
+                    }
                 }
                 if (reject != null) {
                     rejectEvents.append(key, reject);

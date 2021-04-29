@@ -20,7 +20,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.annotation.IntegerRes
 import com.android.systemui.R
 import com.android.systemui.util.animation.TransitionLayout
@@ -56,7 +55,6 @@ class RecommendationViewHolder private constructor(itemView: View) {
     val cancel = itemView.requireViewById<View>(R.id.cancel)
     val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
     val dismissLabel = dismiss.getChildAt(0)
-    val recommendationText = itemView.requireViewById<TextView>(R.id.recommendation_text)
     val settings = itemView.requireViewById<View>(R.id.settings)
 
     init {
@@ -105,7 +103,6 @@ class RecommendationViewHolder private constructor(itemView: View) {
 
         // Res Ids for the components on the guts panel.
         val gutsIds = setOf(
-            R.id.recommendation_text,
             R.id.remove_text,
             R.id.cancel,
             R.id.dismiss,

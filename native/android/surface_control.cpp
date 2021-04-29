@@ -449,7 +449,7 @@ void ASurfaceTransaction_setGeometry(ASurfaceTransaction* aSurfaceTransaction,
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
-    transaction->setCrop(surfaceControl, sourceRect);
+    transaction->setBufferCrop(surfaceControl, sourceRect);
 
     float dsdx = (destination.right - destination.left) /
             static_cast<float>(sourceRect.right - sourceRect.left);

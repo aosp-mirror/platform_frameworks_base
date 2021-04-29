@@ -3363,55 +3363,17 @@ public class AlarmManagerService extends SystemService {
 
     void removeUserLocked(int userHandle) {
         if (userHandle == USER_SYSTEM) {
-            // If we're told we're removing the system user, ignore it.
+            Slog.w(TAG, "Ignoring attempt to remove system-user state!");
             return;
         }
         final Predicate<Alarm> whichAlarms =
-                (Alarm a) -> UserHandle.getUserId(a.creatorUid) == userHandle;
-        final ArrayList<Alarm> removedAlarms = mAlarmStore.remove(whichAlarms);
-        for (final Alarm removed : removedAlarms) {
-            decrementAlarmCount(removed.uid, 1);
-        }
-        final boolean didRemove = !removedAlarms.isEmpty();
+                (Alarm a) -> UserHandle.getUserId(a.uid) == userHandle;
+        removeAlarmsInternalLocked(whichAlarms);
 
-        for (int i = mPendingBackgroundAlarms.size() - 1; i >= 0; i--) {
-            if (UserHandle.getUserId(mPendingBackgroundAlarms.keyAt(i)) == userHandle) {
-                final ArrayList<Alarm> toRemove = mPendingBackgroundAlarms.valueAt(i);
-                if (toRemove != null) {
-                    for (int j = 0; j < toRemove.size(); j++) {
-                        decrementAlarmCount(toRemove.get(j).uid, 1);
-                    }
-                }
-                mPendingBackgroundAlarms.removeAt(i);
-            }
-        }
         for (int i = mLastPriorityAlarmDispatch.size() - 1; i >= 0; i--) {
             if (UserHandle.getUserId(mLastPriorityAlarmDispatch.keyAt(i)) == userHandle) {
                 mLastPriorityAlarmDispatch.removeAt(i);
             }
-        }
-        if (mNextWakeFromIdle != null && whichAlarms.test(mNextWakeFromIdle)) {
-            mNextWakeFromIdle = mAlarmStore.getNextWakeFromIdleAlarm();
-            if (mPendingIdleUntil != null) {
-                final boolean updated = mAlarmStore.updateAlarmDeliveries(alarm -> {
-                    if (alarm != mPendingIdleUntil) {
-                        return false;
-                    }
-                    return adjustIdleUntilTime(alarm);
-                });
-                if (updated) {
-                    mAlarmStore.updateAlarmDeliveries(
-                            alarm -> adjustDeliveryTimeBasedOnDeviceIdle(alarm));
-                }
-            }
-        }
-
-        if (didRemove) {
-            if (DEBUG_BATCH) {
-                Slog.v(TAG, "remove(user) changed bounds; rebatching");
-            }
-            rescheduleKernelAlarmsLocked();
-            updateNextAlarmClockLocked();
         }
     }
 

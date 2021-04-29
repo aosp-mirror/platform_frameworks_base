@@ -632,7 +632,7 @@ public class FaceService extends SystemService {
             for (String instance : instances) {
                 final String fqName = IFace.DESCRIPTOR + "/" + instance;
                 final IFace face = IFace.Stub.asInterface(
-                        ServiceManager.waitForDeclaredService(fqName));
+                        Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
                 if (face == null) {
                     Slog.e(TAG, "Unable to get declared service: " + fqName);
                     continue;

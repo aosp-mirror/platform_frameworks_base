@@ -209,23 +209,24 @@ class RollbackStore {
      * Creates a new Rollback instance for a non-staged rollback with
      * backupDir assigned.
      */
-    Rollback createNonStagedRollback(int rollbackId, int userId, String installerPackageName,
-            int[] packageSessionIds, SparseIntArray extensionVersions) {
+    Rollback createNonStagedRollback(int rollbackId, int originalSessionId, int userId,
+            String installerPackageName, int[] packageSessionIds,
+            SparseIntArray extensionVersions) {
         File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
-        return new Rollback(rollbackId, backupDir, -1, userId, installerPackageName,
-                packageSessionIds, extensionVersions);
+        return new Rollback(rollbackId, backupDir, originalSessionId, /* isStaged */ false, userId,
+                installerPackageName, packageSessionIds, extensionVersions);
     }
 
     /**
      * Creates a new Rollback instance for a staged rollback with
      * backupDir assigned.
      */
-    Rollback createStagedRollback(int rollbackId, int stagedSessionId, int userId,
+    Rollback createStagedRollback(int rollbackId, int originalSessionId, int userId,
             String installerPackageName, int[] packageSessionIds,
             SparseIntArray extensionVersions) {
         File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
-        return new Rollback(rollbackId, backupDir, stagedSessionId, userId, installerPackageName,
-                packageSessionIds, extensionVersions);
+        return new Rollback(rollbackId, backupDir, originalSessionId, /* isStaged */ true, userId,
+                installerPackageName, packageSessionIds, extensionVersions);
     }
 
     private static boolean isLinkPossible(File oldFile, File newFile) {
@@ -312,7 +313,7 @@ class RollbackStore {
             JSONObject dataJson = new JSONObject();
             dataJson.put("info", rollbackInfoToJson(rollback.info));
             dataJson.put("timestamp", rollback.getTimestamp().toString());
-            dataJson.put("stagedSessionId", rollback.getStagedSessionId());
+            dataJson.put("originalSessionId", rollback.getOriginalSessionId());
             dataJson.put("state", rollback.getStateAsString());
             dataJson.put("stateDescription", rollback.getStateDescription());
             dataJson.put("restoreUserDataInProgress", rollback.isRestoreUserDataInProgress());
@@ -380,7 +381,9 @@ class RollbackStore {
                 rollbackInfoFromJson(dataJson.getJSONObject("info")),
                 backupDir,
                 Instant.parse(dataJson.getString("timestamp")),
-                dataJson.getInt("stagedSessionId"),
+                // Backward compatibility: Historical rollbacks are not erased upon OTA update.
+                //  Need to load the old field 'stagedSessionId' as fallback.
+                dataJson.optInt("originalSessionId", dataJson.optInt("stagedSessionId", -1)),
                 rollbackStateFromString(dataJson.getString("state")),
                 dataJson.optString("stateDescription"),
                 dataJson.getBoolean("restoreUserDataInProgress"),
