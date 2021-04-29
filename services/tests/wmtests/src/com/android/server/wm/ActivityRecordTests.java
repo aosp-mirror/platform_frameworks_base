@@ -2009,17 +2009,17 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Non-resizable
         mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertFalse(activity.supportsSplitScreenWindowingMode());
 
         // Force resizable
         mAtm.mForceResizableActivities = true;
-        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsSplitScreenWindowingMode());
 
         // Allow non-resizable
         mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         assertTrue(activity.supportsSplitScreenWindowingMode());
     }
 
@@ -2033,17 +2033,17 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Non-resizable
         mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertFalse(activity.supportsFreeform());
 
         // Force resizable
         mAtm.mForceResizableActivities = true;
-        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsFreeform());
 
         // Allow non-resizable
         mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         assertTrue(activity.supportsFreeform());
     }
 
