@@ -1311,7 +1311,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void unlockKeystore(byte[] password, int userHandle) {
         if (DEBUG) Slog.v(TAG, "Unlock keystore for user: " + userHandle);
-        Authorization.onLockScreenEvent(false, userHandle, password);
+        Authorization.onLockScreenEvent(false, userHandle, password, null);
     }
 
     @VisibleForTesting /** Note: this method is overridden in unit tests */

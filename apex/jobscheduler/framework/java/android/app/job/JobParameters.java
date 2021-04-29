@@ -45,25 +45,25 @@ public class JobParameters implements Parcelable {
 
     /** @hide */
     public static final int INTERNAL_STOP_REASON_CANCELED =
-            JobProtoEnums.STOP_REASON_CANCELLED; // 0.
+            JobProtoEnums.INTERNAL_STOP_REASON_CANCELLED; // 0.
     /** @hide */
     public static final int INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED =
-            JobProtoEnums.STOP_REASON_CONSTRAINTS_NOT_SATISFIED; // 1.
+            JobProtoEnums.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED; // 1.
     /** @hide */
     public static final int INTERNAL_STOP_REASON_PREEMPT =
-            JobProtoEnums.STOP_REASON_PREEMPT; // 2.
+            JobProtoEnums.INTERNAL_STOP_REASON_PREEMPT; // 2.
     /**
      * The job ran for at least its minimum execution limit.
      * @hide
      */
     public static final int INTERNAL_STOP_REASON_TIMEOUT =
-            JobProtoEnums.STOP_REASON_TIMEOUT; // 3.
+            JobProtoEnums.INTERNAL_STOP_REASON_TIMEOUT; // 3.
     /** @hide */
     public static final int INTERNAL_STOP_REASON_DEVICE_IDLE =
-            JobProtoEnums.STOP_REASON_DEVICE_IDLE; // 4.
+            JobProtoEnums.INTERNAL_STOP_REASON_DEVICE_IDLE; // 4.
     /** @hide */
     public static final int INTERNAL_STOP_REASON_DEVICE_THERMAL =
-            JobProtoEnums.STOP_REASON_DEVICE_THERMAL; // 5.
+            JobProtoEnums.INTERNAL_STOP_REASON_DEVICE_THERMAL; // 5.
     /**
      * The job is in the {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
      * bucket.
@@ -71,26 +71,30 @@ public class JobParameters implements Parcelable {
      * @hide
      */
     public static final int INTERNAL_STOP_REASON_RESTRICTED_BUCKET =
-            JobProtoEnums.STOP_REASON_RESTRICTED_BUCKET; // 6.
+            JobProtoEnums.INTERNAL_STOP_REASON_RESTRICTED_BUCKET; // 6.
     /**
      * The app was uninstalled.
      * @hide
      */
-    public static final int INTERNAL_STOP_REASON_UNINSTALL = 7;
+    public static final int INTERNAL_STOP_REASON_UNINSTALL =
+            JobProtoEnums.INTERNAL_STOP_REASON_UNINSTALL; // 7.
     /**
      * The app's data was cleared.
      * @hide
      */
-    public static final int INTERNAL_STOP_REASON_DATA_CLEARED = 8;
+    public static final int INTERNAL_STOP_REASON_DATA_CLEARED =
+            JobProtoEnums.INTERNAL_STOP_REASON_DATA_CLEARED; // 8.
     /**
      * @hide
      */
-    public static final int INTERNAL_STOP_REASON_RTC_UPDATED = 9;
+    public static final int INTERNAL_STOP_REASON_RTC_UPDATED =
+            JobProtoEnums.INTERNAL_STOP_REASON_RTC_UPDATED; // 9.
     /**
      * The app called jobFinished() on its own.
      * @hide
      */
-    public static final int INTERNAL_STOP_REASON_SUCCESSFUL_FINISH = 10;
+    public static final int INTERNAL_STOP_REASON_SUCCESSFUL_FINISH =
+            JobProtoEnums.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH; // 10.
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
@@ -109,6 +113,10 @@ public class JobParameters implements Parcelable {
             INTERNAL_STOP_REASON_DEVICE_IDLE,
             INTERNAL_STOP_REASON_DEVICE_THERMAL,
             INTERNAL_STOP_REASON_RESTRICTED_BUCKET,
+            INTERNAL_STOP_REASON_UNINSTALL,
+            INTERNAL_STOP_REASON_DATA_CLEARED,
+            INTERNAL_STOP_REASON_RTC_UPDATED,
+            INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
     };
 
     /**
@@ -359,14 +367,6 @@ public class JobParameters implements Parcelable {
      * @see JobInfo.Builder#setExpedited(boolean)
      */
     public boolean isExpeditedJob() {
-        return mIsExpedited;
-    }
-
-    /**
-     * @deprecated Use {@link #isExpeditedJob()} instead.
-     */
-    @Deprecated
-    public boolean isForegroundJob() {
         return mIsExpedited;
     }
 

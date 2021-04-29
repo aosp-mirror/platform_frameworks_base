@@ -1947,12 +1947,12 @@ public class InputMethodService extends AbstractInputMethodService {
 
     public void showStatusIcon(@DrawableRes int iconResId) {
         mStatusIcon = iconResId;
-        mPrivOps.updateStatusIcon(getPackageName(), iconResId);
+        mPrivOps.updateStatusIconAsync(getPackageName(), iconResId);
     }
 
     public void hideStatusIcon() {
         mStatusIcon = 0;
-        mPrivOps.updateStatusIcon(null, 0);
+        mPrivOps.updateStatusIconAsync(null, 0);
     }
 
     /**

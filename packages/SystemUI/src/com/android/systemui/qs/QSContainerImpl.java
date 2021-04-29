@@ -154,11 +154,9 @@ public class QSContainerImpl extends FrameLayout {
         // bottom and footer are inside the screen.
         MarginLayoutParams layoutParams = (MarginLayoutParams) mQSPanelContainer.getLayoutParams();
 
-        // The footer is pinned to the bottom of QSPanel (same bottoms), therefore we don't need to
-        // subtract its height. We do not care if the collapsed notifications fit in the screen.
-        int maxQs = getDisplayHeight() - layoutParams.topMargin - layoutParams.bottomMargin
+        int availableScreenHeight = getDisplayHeight() - mNavBarInset;
+        int maxQs = availableScreenHeight - layoutParams.topMargin - layoutParams.bottomMargin
                 - getPaddingBottom();
-        maxQs -= mNavBarInset;
         int padding = mPaddingLeft + mPaddingRight + layoutParams.leftMargin
                 + layoutParams.rightMargin;
         final int qsPanelWidthSpec = getChildMeasureSpec(widthMeasureSpec, padding,
@@ -169,7 +167,7 @@ public class QSContainerImpl extends FrameLayout {
         int height = layoutParams.topMargin + layoutParams.bottomMargin
                 + mQSPanelContainer.getMeasuredHeight() + getPaddingBottom();
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+                MeasureSpec.makeMeasureSpec(availableScreenHeight, MeasureSpec.EXACTLY));
         // QSCustomizer will always be the height of the screen, but do this after
         // other measuring to avoid changing the height of the QS.
         mQSCustomizer.measure(widthMeasureSpec,

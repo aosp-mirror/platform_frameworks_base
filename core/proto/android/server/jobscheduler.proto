@@ -51,7 +51,7 @@ message JobSchedulerServiceDumpProto {
     message JobRestriction {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional .android.app.job.StopReasonEnum reason = 1;
+        optional .android.app.job.InternalStopReasonEnum reason = 1;
         optional bool is_restricting = 2;
     }
 
@@ -856,7 +856,7 @@ message DataSetProto {
         message StopReasonCount {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-            optional .android.app.job.StopReasonEnum reason = 1;
+            optional .android.app.job.InternalStopReasonEnum reason = 1;
             optional int32 count = 2;
         }
         repeated StopReasonCount stop_reasons = 9;
@@ -907,7 +907,7 @@ message JobPackageHistoryProto {
         optional int32 job_id = 4;
         optional string tag = 5;
         // Only valid for STOP_JOB or STOP_PERIODIC_JOB Events.
-        optional .android.app.job.StopReasonEnum stop_reason = 6;
+        optional .android.app.job.InternalStopReasonEnum stop_reason = 6;
     }
     repeated HistoryEvent history_event = 1;
 }

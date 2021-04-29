@@ -168,7 +168,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final boolean DEBUG = false; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
     static final boolean DEBUG_PROCSTATE = false; // STOPSHIP if true
-    static final boolean DEBUG_REBOOT = true;
+    static final boolean DEBUG_REBOOT = false; // STOPSHIP if true
 
     @VisibleForTesting
     static final long DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day
@@ -2241,6 +2241,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 packageShortcutsChanged(packageName, userId, changedShortcuts, removedShortcuts);
 
+                reportShortcutUsedInternal(packageName, shortcut.getId(), userId);
+
                 verifyStates();
 
                 ret.complete(null);
@@ -2851,18 +2853,22 @@ public class ShortcutService extends IShortcutService.Stub {
                     }
                 }
 
-                final long token = injectClearCallingIdentity();
-                try {
-                    mUsageStatsManagerInternal.reportShortcutUsage(packageName, shortcutId, userId);
-                } finally {
-                    injectRestoreCallingIdentity(token);
-                }
+                reportShortcutUsedInternal(packageName, shortcutId, userId);
                 ret.complete(true);
             } catch (Exception e) {
                 ret.completeExceptionally(e);
             }
         });
         return ret;
+    }
+
+    private void reportShortcutUsedInternal(String packageName, String shortcutId, int userId) {
+        final long token = injectClearCallingIdentity();
+        try {
+            mUsageStatsManagerInternal.reportShortcutUsage(packageName, shortcutId, userId);
+        } finally {
+            injectRestoreCallingIdentity(token);
+        }
     }
 
     @Override
