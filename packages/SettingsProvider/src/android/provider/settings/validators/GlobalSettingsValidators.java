@@ -20,6 +20,7 @@ import static android.media.AudioFormat.SURROUND_SOUND_ENCODING;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PACKAGE_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PERCENTAGE_INTEGER_VALIDATOR;
 import static android.view.Display.HdrCapabilities.HDR_TYPES;
@@ -306,6 +307,9 @@ public class GlobalSettingsValidators {
                                 String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_TIME_ONLY),
                                 String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_CUSTOM)
                         }));
+        VALIDATORS.put(
+                Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS,
+                NON_NEGATIVE_INTEGER_VALIDATOR);
     }
 }
 

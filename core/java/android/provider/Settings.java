@@ -16757,6 +16757,13 @@ public final class Settings {
              * @hide
              */
             public static final int BATTERY_SAVER_MODE_CUSTOM = 4;
+
+            /**
+             * The maximum ambient mode duration when an activity is allowed to auto resume.
+             * @hide
+             */
+            public static final String WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS =
+                    "wear_activity_auto_resume_timeout_ms";
         }
     }
 

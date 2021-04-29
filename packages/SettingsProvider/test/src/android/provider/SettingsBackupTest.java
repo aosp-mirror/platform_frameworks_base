@@ -656,7 +656,8 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.SETUP_LOCALE,
                     Settings.Global.Wearable.OEM_SETUP_VERSION,
                     Settings.Global.Wearable.MASTER_GESTURES_ENABLED,
-                    Settings.Global.Wearable.UNGAZE_ENABLED);
+                    Settings.Global.Wearable.UNGAZE_ENABLED,
+                    Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
