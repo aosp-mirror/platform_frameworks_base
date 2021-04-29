@@ -205,12 +205,11 @@ public class AlarmManagerService extends SystemService {
     final LocalLog mLog = new LocalLog(TAG);
 
     AppOpsManager mAppOps;
-    IAppOpsService mAppOpsService;
     DeviceIdleInternal mLocalDeviceIdleController;
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
     private PackageManagerInternal mPackageManagerInternal;
-    private PermissionManagerServiceInternal mLocalPermissionManager;
+    private volatile PermissionManagerServiceInternal mLocalPermissionManager;
 
     final Object mLock = new Object();
 
@@ -1506,7 +1505,7 @@ public class AlarmManagerService extends SystemService {
     @Override
     public void onStart() {
         mInjector.init();
-        mMetricsHelper = new MetricsHelper(getContext());
+        mMetricsHelper = new MetricsHelper(getContext(), mLock);
 
         mListenerDeathRecipient = new IBinder.DeathRecipient() {
             @Override
@@ -1630,39 +1629,13 @@ public class AlarmManagerService extends SystemService {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             synchronized (mLock) {
                 mConstants.start();
+
                 mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
-                mAppOpsService = mInjector.getAppOpsService();
-                try {
-                    mAppOpsService.startWatchingMode(AppOpsManager.OP_SCHEDULE_EXACT_ALARM, null,
-                            new IAppOpsCallback.Stub() {
-                                @Override
-                                public void opChanged(int op, int uid, String packageName)
-                                        throws RemoteException {
-                                    if (op != AppOpsManager.OP_SCHEDULE_EXACT_ALARM) {
-                                        return;
-                                    }
-                                    if (!hasScheduleExactAlarmInternal(packageName, uid)) {
-                                        mHandler.obtainMessage(AlarmHandler.REMOVE_EXACT_ALARMS,
-                                                uid, 0, packageName).sendToTarget();
-                                    }
-                                }
-                            });
-                } catch (RemoteException e) {
-                }
-                mMetricsHelper.registerPuller(mAlarmStore);
 
                 mLocalDeviceIdleController =
                         LocalServices.getService(DeviceIdleInternal.class);
                 mUsageStatsManagerInternal =
                         LocalServices.getService(UsageStatsManagerInternal.class);
-
-                mLocalPermissionManager = LocalServices.getService(
-                        PermissionManagerServiceInternal.class);
-                refreshExactAlarmCandidates();
-
-                AppStandbyInternal appStandbyInternal =
-                        LocalServices.getService(AppStandbyInternal.class);
-                appStandbyInternal.addListener(new AppStandbyTracker());
 
                 mAppStateTracker =
                         (AppStateTrackerImpl) LocalServices.getService(AppStateTracker.class);
@@ -1671,6 +1644,34 @@ public class AlarmManagerService extends SystemService {
                 mClockReceiver.scheduleTimeTickEvent();
                 mClockReceiver.scheduleDateChangedEvent();
             }
+            IAppOpsService iAppOpsService = mInjector.getAppOpsService();
+            try {
+                iAppOpsService.startWatchingMode(AppOpsManager.OP_SCHEDULE_EXACT_ALARM, null,
+                        new IAppOpsCallback.Stub() {
+                            @Override
+                            public void opChanged(int op, int uid, String packageName)
+                                    throws RemoteException {
+                                if (op != AppOpsManager.OP_SCHEDULE_EXACT_ALARM) {
+                                    return;
+                                }
+                                if (!hasScheduleExactAlarmInternal(packageName, uid)) {
+                                    mHandler.obtainMessage(AlarmHandler.REMOVE_EXACT_ALARMS,
+                                            uid, 0, packageName).sendToTarget();
+                                }
+                            }
+                        });
+            } catch (RemoteException e) {
+            }
+
+            mLocalPermissionManager = LocalServices.getService(
+                    PermissionManagerServiceInternal.class);
+            refreshExactAlarmCandidates();
+
+            AppStandbyInternal appStandbyInternal =
+                    LocalServices.getService(AppStandbyInternal.class);
+            appStandbyInternal.addListener(new AppStandbyTracker());
+
+            mMetricsHelper.registerPuller(() -> mAlarmStore);
         }
     }
 
