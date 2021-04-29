@@ -499,4 +499,84 @@ public class MeasuredEnergyStatsTest {
         assertEquals(exp, MeasuredEnergyStats.getDisplayPowerBucket(Display.STATE_DOZE));
         assertEquals(exp, MeasuredEnergyStats.getDisplayPowerBucket(Display.STATE_DOZE_SUSPEND));
     }
+
+    /** Test MeasuredEnergyStats#isSupportEqualTo */
+    @Test
+    public void testIsSupportEqualTo() {
+        final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
+        Arrays.fill(supportedStandardBuckets, true);
+        final String[] customBucketNames = {"A", "B"};
+
+        final MeasuredEnergyStats stats =
+                new MeasuredEnergyStats(supportedStandardBuckets.clone(),
+                        customBucketNames.clone());
+
+        assertTrue(
+                "All standard and custom bucket supports match",
+                stats.isSupportEqualTo(supportedStandardBuckets, customBucketNames));
+
+        boolean[] differentSupportedStandardBuckets = supportedStandardBuckets.clone();
+        differentSupportedStandardBuckets[0] = !differentSupportedStandardBuckets[0];
+        assertFalse(
+                "Standard bucket support mismatch",
+                stats.isSupportEqualTo(differentSupportedStandardBuckets, customBucketNames));
+
+        assertFalse(
+                "Custom bucket support mismatch",
+                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"C", "B"}));
+
+        assertFalse(
+                "Fewer custom buckets supported",
+                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"A"}));
+
+        assertFalse(
+                "More custom bucket supported",
+                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"A", "B", "C"}));
+
+        assertFalse(
+                "Custom bucket support order changed",
+                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"B", "A"}));
+    }
+
+    /** Test MeasuredEnergyStats#isSupportEqualTo when holding a null array of custom buckets */
+    @Test
+    public void testIsSupportEqualTo_nullCustomBuckets() {
+        final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
+
+        final MeasuredEnergyStats stats =
+                new MeasuredEnergyStats(supportedStandardBuckets.clone(), null);
+
+        assertTrue(
+                "Null custom bucket name lists should match",
+                stats.isSupportEqualTo(supportedStandardBuckets, null));
+
+        assertTrue(
+                "Null and empty custom buckets should match",
+                stats.isSupportEqualTo(supportedStandardBuckets, new String[0]));
+
+        assertFalse(
+                "Null custom buckets should not match populated list",
+                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"A", "B"}));
+    }
+
+    /** Test MeasuredEnergyStats#isSupportEqualTo when holding an empty array of custom buckets */
+    @Test
+    public void testIsSupportEqualTo_emptyCustomBuckets() {
+        final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
+
+        final MeasuredEnergyStats stats =
+                new MeasuredEnergyStats(supportedStandardBuckets.clone(), new String[0]);
+
+        assertTrue(
+                "Empty custom buckets should match",
+                stats.isSupportEqualTo(supportedStandardBuckets, new String[0]));
+
+        assertTrue(
+                "Empty and null custom buckets should match",
+                stats.isSupportEqualTo(supportedStandardBuckets, null));
+
+        assertFalse(
+                "Empty custom buckets should not match populated list",
+                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"A", "B"}));
+    }
 }

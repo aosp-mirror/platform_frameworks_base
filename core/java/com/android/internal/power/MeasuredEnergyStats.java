@@ -33,6 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 
 /**
  * Tracks the measured charge consumption of various subsystems according to their
@@ -96,8 +97,10 @@ public class MeasuredEnergyStats {
      * supportedStandardBuckets must be of size {@link #NUMBER_STANDARD_POWER_BUCKETS}.
      * numCustomBuckets >= 0 is the number of (non-standard) custom power buckets on the device.
      */
-    public MeasuredEnergyStats(boolean[] supportedStandardBuckets, String[] customBucketNames) {
-        final int numTotalBuckets = NUMBER_STANDARD_POWER_BUCKETS + customBucketNames.length;
+    public MeasuredEnergyStats(@NonNull boolean[] supportedStandardBuckets,
+            @Nullable String[] customBucketNames) {
+        mCustomBucketNames = customBucketNames == null ? new String[0] : customBucketNames;
+        final int numTotalBuckets = NUMBER_STANDARD_POWER_BUCKETS + mCustomBucketNames.length;
         mAccumulatedChargeMicroCoulomb = new long[numTotalBuckets];
         // Initialize to all zeros where supported, otherwise POWER_DATA_UNAVAILABLE.
         // All custom buckets are, by definition, supported, so their values stay at 0.
@@ -106,7 +109,6 @@ public class MeasuredEnergyStats {
                 mAccumulatedChargeMicroCoulomb[stdBucket] = POWER_DATA_UNAVAILABLE;
             }
         }
-        mCustomBucketNames = customBucketNames;
     }
 
     /**
@@ -431,14 +433,22 @@ public class MeasuredEnergyStats {
 
     /** Check if the supported power buckets are precisely those given. */
     public boolean isSupportEqualTo(
-            @NonNull boolean[] queriedStandardBuckets, String[] customBucketNames) {
+            @NonNull boolean[] queriedStandardBuckets, @Nullable String[] customBucketNames) {
+        if (customBucketNames == null) {
+            //In practice customBucketNames should never be null, but sanitize it just to be sure.
+            customBucketNames = new String[0];
+        }
 
         final int numBuckets = getNumberOfIndices();
-        // TODO(b/178504428): Detect whether custom buckets have changed qualitatively, not just
-        //                    quantitatively, and treat as mismatch if so.
-        if (numBuckets != NUMBER_STANDARD_POWER_BUCKETS + customBucketNames.length) {
+        final int numCustomBuckets = customBucketNames == null ? 0 : customBucketNames.length;
+        if (numBuckets != NUMBER_STANDARD_POWER_BUCKETS + numCustomBuckets) {
             return false;
         }
+
+        if (!Arrays.equals(mCustomBucketNames, customBucketNames)) {
+            return false;
+        }
+
         for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_POWER_BUCKETS; stdBucket++) {
             if (isStandardBucketSupported(stdBucket) != queriedStandardBuckets[stdBucket]) {
                 return false;
