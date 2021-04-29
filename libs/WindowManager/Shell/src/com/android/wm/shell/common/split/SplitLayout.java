@@ -231,6 +231,7 @@ public class SplitLayout {
     }
 
     private void flingDividePosition(int from, int to) {
+        if (from == to) return;
         ValueAnimator animator = ValueAnimator
                 .ofInt(from, to)
                 .setDuration(250);
