@@ -24,8 +24,16 @@ import android.app.WallpaperManager;
 import android.app.smartspace.SmartspaceConfig;
 import android.app.smartspace.SmartspaceManager;
 import android.app.smartspace.SmartspaceSession;
+import android.app.smartspace.SmartspaceTarget;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
@@ -47,6 +55,7 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin.IntentStarter;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -57,6 +66,7 @@ import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.Locale;
 import java.util.TimeZone;
@@ -96,6 +106,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private FalsingManager mFalsingManager;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardBypassController mBypassController;
+    private Handler mHandler;
+    private UserTracker mUserTracker;
+    private SecureSettings mSecureSettings;
+    private ContentObserver mSettingsObserver;
+    private boolean mShowSensitiveContentForCurrentUser;
+    private boolean mShowSensitiveContentForManagedUser;
+    private UserHandle mManagedUserHandle;
+    private UserTracker.Callback mUserTrackerCallback;
 
     /**
      * Listener for changes to the color palette.
@@ -151,7 +169,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             ActivityStarter activityStarter,
             FalsingManager falsingManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardBypassController bypassController) {
+            KeyguardBypassController bypassController,
+            @Main Handler handler,
+            UserTracker userTracker,
+            SecureSettings secureSettings) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
@@ -168,6 +189,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mBypassController = bypassController;
+        mHandler = handler;
+        mUserTracker = userTracker;
+        mSecureSettings = secureSettings;
     }
 
     /**
@@ -258,13 +282,72 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             mSmartspaceSession = getContext().getSystemService(SmartspaceManager.class)
                     .createSmartspaceSession(
                             new SmartspaceConfig.Builder(getContext(), "lockscreen").build());
-            mSmartspaceCallback = targets -> smartspaceDataPlugin.onTargetsAvailable(targets);
+            mSmartspaceCallback = targets -> {
+                targets.removeIf(this::filterSmartspaceTarget);
+                smartspaceDataPlugin.onTargetsAvailable(targets);
+            };
             mSmartspaceSession.addOnTargetsAvailableListener(mUiExecutor, mSmartspaceCallback);
-            mSmartspaceSession.requestSmartspaceUpdate();
+            mSettingsObserver = new ContentObserver(mHandler) {
+                @Override
+                public void onChange(boolean selfChange, Uri uri) {
+                    reloadSmartspace();
+                }
+            };
+
+            mUserTrackerCallback = new UserTracker.Callback() {
+                public void onUserChanged(int newUser, Context userContext) {
+                    reloadSmartspace();
+                }
+            };
+            mUserTracker.addCallback(mUserTrackerCallback, mUiExecutor);
+
+            getContext().getContentResolver().registerContentObserver(
+                    Settings.Secure.getUriFor(
+                            Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
+                    true, mSettingsObserver, UserHandle.USER_ALL);
+            reloadSmartspace();
         }
 
         float dozeAmount = mStatusBarStateController.getDozeAmount();
         mStatusBarStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
+    }
+
+    @VisibleForTesting
+    boolean filterSmartspaceTarget(SmartspaceTarget t) {
+        if (!t.isSensitive()) return false;
+
+        if (t.getUserHandle().equals(mUserTracker.getUserHandle())) {
+            return !mShowSensitiveContentForCurrentUser;
+        }
+        if (t.getUserHandle().equals(mManagedUserHandle)) {
+            return !mShowSensitiveContentForManagedUser;
+        }
+
+        return false;
+    }
+
+    private void reloadSmartspace() {
+        mManagedUserHandle = getWorkProfileUser();
+        final String setting = Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS;
+
+        mShowSensitiveContentForCurrentUser =
+                mSecureSettings.getIntForUser(setting, 0, mUserTracker.getUserId()) == 1;
+        if (mManagedUserHandle != null) {
+            int id = mManagedUserHandle.getIdentifier();
+            mShowSensitiveContentForManagedUser =
+                    mSecureSettings.getIntForUser(setting, 0, id) == 1;
+        }
+
+        mSmartspaceSession.requestSmartspaceUpdate();
+    }
+
+    private UserHandle getWorkProfileUser() {
+        for (UserInfo userInfo : mUserTracker.getUserProfiles()) {
+            if (userInfo.isManagedProfile()) {
+                return userInfo.getUserHandle();
+            }
+        }
+        return null;
     }
 
     private void updateWallpaperColor() {
@@ -289,6 +372,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mConfigurationController.removeCallback(mConfigurationListener);
+
+        if (mSettingsObserver != null) {
+            getContext().getContentResolver().unregisterContentObserver(mSettingsObserver);
+        }
+
+        if (mUserTrackerCallback != null) {
+            mUserTracker.removeCallback(mUserTrackerCallback);
+        }
     }
 
     /**
@@ -436,5 +527,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     @VisibleForTesting
     ConfigurationController.ConfigurationListener getConfigurationListener() {
         return mConfigurationListener;
+    }
+
+    @VisibleForTesting
+    ContentObserver getSettingsObserver() {
+        return mSettingsObserver;
     }
 }
