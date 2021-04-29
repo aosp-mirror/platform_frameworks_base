@@ -65,17 +65,17 @@ public class MediaCommunicationService extends SystemService {
 
     final Context mContext;
 
-    private final Object mLock = new Object();
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    final Object mLock = new Object();
+    final Handler mHandler = new Handler(Looper.getMainLooper());
 
     @GuardedBy("mLock")
     private final SparseIntArray mFullUserIds = new SparseIntArray();
     @GuardedBy("mLock")
     private final SparseArray<FullUserRecord> mUserRecords = new SparseArray<>();
 
-    private final Executor mRecordExecutor = Executors.newSingleThreadExecutor();
+    final Executor mRecordExecutor = Executors.newSingleThreadExecutor();
     @GuardedBy("mLock")
-    private final List<CallbackRecord> mCallbackRecords = new ArrayList<>();
+    final List<CallbackRecord> mCallbackRecords = new ArrayList<>();
     final NotificationManager mNotificationManager;
 
     public MediaCommunicationService(Context context) {
@@ -111,14 +111,14 @@ public class MediaCommunicationService extends SystemService {
             FullUserRecord user = getFullUserRecordLocked(userId);
             if (user != null) {
                 if (user.getFullUserId() == userId) {
-                    user.destroySessionsForUserLocked(UserHandle.ALL.getIdentifier());
+                    user.destroyAllSessions();
                     mUserRecords.remove(userId);
                 } else {
-                    user.destroySessionsForUserLocked(userId);
+                    user.destroySessionsForUser(userId);
                 }
             }
-            updateUser();
         }
+        updateUser();
     }
 
     @Nullable
@@ -132,6 +132,22 @@ public class MediaCommunicationService extends SystemService {
             }
         }
         return null;
+    }
+
+    List<Session2Token> getSession2TokensLocked(int userId) {
+        List<Session2Token> list = new ArrayList<>();
+        if (userId == ALL.getIdentifier()) {
+            int size = mUserRecords.size();
+            for (int i = 0; i < size; i++) {
+                list.addAll(mUserRecords.valueAt(i).getAllSession2Tokens());
+            }
+        } else {
+            FullUserRecord user = getFullUserRecordLocked(userId);
+            if (user != null) {
+                list.addAll(user.getSession2Tokens(userId));
+            }
+        }
+        return list;
     }
 
     private FullUserRecord getFullUserRecordLocked(int userId) {
@@ -188,27 +204,54 @@ public class MediaCommunicationService extends SystemService {
         }
     }
 
-    void dispatchSessionCreated(Session2Token token) {
-        for (CallbackRecord record : mCallbackRecords) {
-            if (record.mUserId != ALL.getIdentifier()
-                    && record.mUserId != getUserHandleForUid(token.getUid()).getIdentifier()) {
-                continue;
-            }
-            try {
-                record.mCallback.onSession2Created(token);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    void onSessionDied(Session2Record record) {
+    void dispatchSession2Created(Session2Token token) {
         synchronized (mLock) {
-            destroySessionLocked(record);
+            for (CallbackRecord record : mCallbackRecords) {
+                if (record.mUserId != ALL.getIdentifier()
+                        && record.mUserId != getUserHandleForUid(token.getUid()).getIdentifier()) {
+                    continue;
+                }
+                try {
+                    record.mCallback.onSession2Created(token);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to notify session2 token created " + record);
+                }
+            }
         }
     }
 
-    private void destroySessionLocked(Session2Record session) {
+    void dispatchSession2Changed(int userId) {
+        MediaParceledListSlice<Session2Token> allSession2Tokens;
+        MediaParceledListSlice<Session2Token> userSession2Tokens;
+
+        synchronized (mLock) {
+            allSession2Tokens =
+                    new MediaParceledListSlice<>(getSession2TokensLocked(ALL.getIdentifier()));
+            userSession2Tokens = new MediaParceledListSlice<>(getSession2TokensLocked(userId));
+        }
+        allSession2Tokens.setInlineCountLimit(1);
+        userSession2Tokens.setInlineCountLimit(1);
+
+        synchronized (mLock) {
+            for (CallbackRecord record : mCallbackRecords) {
+                if (record.mUserId == ALL.getIdentifier()) {
+                    try {
+                        record.mCallback.onSession2Changed(allSession2Tokens);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Failed to notify session2 tokens changed " + record);
+                    }
+                } else if (record.mUserId == userId) {
+                    try {
+                        record.mCallback.onSession2Changed(userSession2Tokens);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Failed to notify session2 tokens changed " + record);
+                    }
+                }
+            }
+        }
+    }
+
+    void onSessionDied(Session2Record session) {
         if (DEBUG) {
             Log.d(TAG, "Destroying " + session);
         }
@@ -217,12 +260,10 @@ public class MediaCommunicationService extends SystemService {
             return;
         }
 
-        FullUserRecord user = getFullUserRecordLocked(session.getUserId());
-
+        FullUserRecord user = session.getFullUser();
         if (user != null) {
             user.removeSession(session);
         }
-
         session.close();
     }
 
@@ -241,17 +282,17 @@ public class MediaCommunicationService extends SystemService {
                     throw new SecurityException("Unexpected Session2Token's UID, expected=" + uid
                             + " but actually=" + sessionToken.getUid());
                 }
+                FullUserRecord user;
+                int userId = getUserHandleForUid(sessionToken.getUid()).getIdentifier();
                 synchronized (mLock) {
-                    int userId = getUserHandleForUid(sessionToken.getUid()).getIdentifier();
-                    FullUserRecord user = getFullUserRecordLocked(userId);
-                    if (user == null) {
-                        Log.w(TAG, "notifySession2Created: Ignore session of an unknown user");
-                        return;
-                    }
-                    user.addSession(new Session2Record(MediaCommunicationService.this,
-                            sessionToken, mRecordExecutor));
-                    mHandler.post(() -> dispatchSessionCreated(sessionToken));
+                    user = getFullUserRecordLocked(userId);
                 }
+                if (user == null) {
+                    Log.w(TAG, "notifySession2Created: Ignore session of an unknown user");
+                    return;
+                }
+                user.addSession(new Session2Record(MediaCommunicationService.this,
+                        user, sessionToken, mRecordExecutor));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -299,10 +340,11 @@ public class MediaCommunicationService extends SystemService {
                 int resolvedUserId = handleIncomingUser(pid, uid, userId, null);
                 List<Session2Token> result;
                 synchronized (mLock) {
-                    FullUserRecord user = getFullUserRecordLocked(userId);
-                    result = user.getSession2Tokens(resolvedUserId);
+                    result = getSession2TokensLocked(resolvedUserId);
                 }
-                return new MediaParceledListSlice(result);
+                MediaParceledListSlice parceledListSlice = new MediaParceledListSlice<>(result);
+                parceledListSlice.setInlineCountLimit(1);
+                return parceledListSlice;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -427,7 +469,8 @@ public class MediaCommunicationService extends SystemService {
 
     final class FullUserRecord {
         private final int mFullUserId;
-        /** Sorted list of media sessions */
+        private final Object mUserLock = new Object();
+        @GuardedBy("mUserLock")
         private final List<Session2Record> mSessionRecords = new ArrayList<>();
 
         FullUserRecord(int fullUserId) {
@@ -435,11 +478,18 @@ public class MediaCommunicationService extends SystemService {
         }
 
         public void addSession(Session2Record record) {
-            mSessionRecords.add(record);
+            synchronized (mUserLock) {
+                mSessionRecords.add(record);
+            }
+            mHandler.post(() -> dispatchSession2Created(record.mSessionToken));
+            mHandler.post(() -> dispatchSession2Changed(mFullUserId));
         }
 
-        public void removeSession(Session2Record record) {
-            mSessionRecords.remove(record);
+        private void removeSession(Session2Record record) {
+            synchronized (mUserLock) {
+                mSessionRecords.remove(record);
+            }
+            mHandler.post(() -> dispatchSession2Changed(mFullUserId));
             //TODO: Handle if the removed session was the media button session.
         }
 
@@ -447,42 +497,68 @@ public class MediaCommunicationService extends SystemService {
             return mFullUserId;
         }
 
-        public List<Session2Token> getSession2Tokens(int userId) {
-            return mSessionRecords.stream()
-                    .filter(record -> record.isActive()
-                            && (userId == UserHandle.ALL.getIdentifier()
-                                    || record.getUserId() == userId))
-                    .map(Session2Record::getSessionToken)
-                    .collect(Collectors.toList());
+        public List<Session2Token> getAllSession2Tokens() {
+            synchronized (mUserLock) {
+                return mSessionRecords.stream()
+                        .map(Session2Record::getSessionToken)
+                        .collect(Collectors.toList());
+            }
         }
 
-        public void destroySessionsForUserLocked(int userId) {
-            synchronized (mLock) {
-                for (Session2Record record : mSessionRecords) {
-                    if (userId == UserHandle.ALL.getIdentifier()
-                            || record.getUserId() == userId) {
-                        destroySessionLocked(record);
+        public List<Session2Token> getSession2Tokens(int userId) {
+            synchronized (mUserLock) {
+                return mSessionRecords.stream()
+                        .filter(record -> record.getUserId() == userId)
+                        .map(Session2Record::getSessionToken)
+                        .collect(Collectors.toList());
+            }
+        }
+
+        public void destroyAllSessions() {
+            synchronized (mUserLock) {
+                for (Session2Record session : mSessionRecords) {
+                    session.close();
+                }
+                mSessionRecords.clear();
+            }
+            mHandler.post(() -> dispatchSession2Changed(mFullUserId));
+        }
+
+        public void destroySessionsForUser(int userId) {
+            boolean changed = false;
+            synchronized (mUserLock) {
+                for (int i = mSessionRecords.size() - 1; i >= 0; i--) {
+                    Session2Record session = mSessionRecords.get(i);
+                    if (session.getUserId() == userId) {
+                        mSessionRecords.remove(i);
+                        session.close();
+                        changed = true;
                     }
                 }
+            }
+            if (changed) {
+                mHandler.post(() -> dispatchSession2Changed(mFullUserId));
             }
         }
     }
 
     static final class Session2Record {
-        private final Session2Token mSessionToken;
-        private final Object mLock = new Object();
-        private final WeakReference<MediaCommunicationService> mServiceRef;
-        @GuardedBy("mLock")
+        final Session2Token mSessionToken;
+        final Object mSession2RecordLock = new Object();
+        final WeakReference<MediaCommunicationService> mServiceRef;
+        final WeakReference<FullUserRecord> mFullUserRef;
+        @GuardedBy("mSession2RecordLock")
         private final MediaController2 mController;
 
-        @GuardedBy("mLock")
-        private boolean mIsConnected;
-        @GuardedBy("mLock")
+        @GuardedBy("mSession2RecordLock")
+        boolean mIsConnected;
+        @GuardedBy("mSession2RecordLock")
         private boolean mIsClosed;
 
-        Session2Record(MediaCommunicationService service, Session2Token token,
-                Executor controllerExecutor) {
+        Session2Record(MediaCommunicationService service, FullUserRecord fullUser,
+                Session2Token token, Executor controllerExecutor) {
             mServiceRef = new WeakReference<>(service);
+            mFullUserRef = new WeakReference<>(fullUser);
             mSessionToken = token;
             mController = new MediaController2.Builder(service.getContext(), token)
                     .setControllerCallback(controllerExecutor, new Controller2Callback())
@@ -493,23 +569,19 @@ public class MediaCommunicationService extends SystemService {
             return UserHandle.getUserHandleForUid(mSessionToken.getUid()).getIdentifier();
         }
 
-        public boolean isActive() {
-            synchronized (mLock) {
-                return mIsConnected;
-            }
+        public FullUserRecord getFullUser() {
+            return mFullUserRef.get();
         }
 
         public boolean isClosed() {
-            synchronized (mLock) {
+            synchronized (mSession2RecordLock) {
                 return mIsClosed;
             }
         }
 
         public void close() {
-            synchronized (mLock) {
+            synchronized (mSession2RecordLock) {
                 mIsClosed = true;
-                // Call close regardless of the mIsConnected. This may be called when it's not yet
-                // connected.
                 mController.close();
             }
         }
@@ -525,12 +597,8 @@ public class MediaCommunicationService extends SystemService {
                 if (DEBUG) {
                     Log.d(TAG, "connected to " + mSessionToken + ", allowed=" + allowedCommands);
                 }
-                synchronized (mLock) {
+                synchronized (mSession2RecordLock) {
                     mIsConnected = true;
-                }
-                MediaCommunicationService service = mServiceRef.get();
-                if (service != null) {
-                    //TODO: notify session state changed
                 }
             }
 
@@ -539,7 +607,7 @@ public class MediaCommunicationService extends SystemService {
                 if (DEBUG) {
                     Log.d(TAG, "disconnected from " + mSessionToken);
                 }
-                synchronized (mLock) {
+                synchronized (mSession2RecordLock) {
                     mIsConnected = false;
                 }
                 MediaCommunicationService service = mServiceRef.get();
