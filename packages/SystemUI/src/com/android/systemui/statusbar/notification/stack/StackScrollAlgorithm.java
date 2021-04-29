@@ -151,7 +151,9 @@ public class StackScrollAlgorithm {
 
     private void updateClipping(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        float drawStart = !ambientState.isOnKeyguard() ? ambientState.getStackY() : 0;
+        float drawStart = !ambientState.isOnKeyguard() ? ambientState.getTopPadding()
+                + ambientState.getStackTranslation()
+                : 0;
         float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
         boolean firstHeadsUp = true;
@@ -164,7 +166,8 @@ public class StackScrollAlgorithm {
             float newYTranslation = state.yTranslation;
             float newHeight = state.height;
             float newNotificationEnd = newYTranslation + newHeight;
-            boolean isHeadsUp = (child instanceof ExpandableNotificationRow) && child.isPinned();
+            boolean isHeadsUp = (child instanceof ExpandableNotificationRow)
+                    && ((ExpandableNotificationRow) child).isPinned();
             if (mClipNotificationScrollToTop
                     && (!state.inShelf || (isHeadsUp && !firstHeadsUp))
                     && newYTranslation < clipStart
