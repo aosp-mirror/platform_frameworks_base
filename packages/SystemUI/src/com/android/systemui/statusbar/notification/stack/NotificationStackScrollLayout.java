@@ -431,6 +431,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private DismissAllAnimationListener mDismissAllAnimationListener;
     private NotificationRemoteInputManager mRemoteInputManager;
     private ShadeController mShadeController;
+    private Runnable mOnStackYChanged;
 
     private final DisplayMetrics mDisplayMetrics = Dependency.get(DisplayMetrics.class);
     private final LockscreenGestureLogger mLockscreenGestureLogger =
@@ -1142,12 +1143,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private void updateStackPosition() {
         // Consider interpolating from an mExpansionStartY for use on lockscreen and AOD
-        mAmbientState.setStackY(
-                MathUtils.lerp(0, mTopPadding, mAmbientState.getExpansionFraction()));
+        final float stackY = MathUtils.lerp(0, mTopPadding, mAmbientState.getExpansionFraction());
+        mAmbientState.setStackY(stackY);
+        if (mOnStackYChanged != null) {
+            mOnStackYChanged.run();
+        }
+
         final float shadeBottom = getHeight() - getEmptyBottomMargin();
         mAmbientState.setStackEndHeight(shadeBottom - mTopPadding);
         mAmbientState.setStackHeight(
                 MathUtils.lerp(0, shadeBottom - mTopPadding, mAmbientState.getExpansionFraction()));
+    }
+
+    void setOnStackYChanged(Runnable onStackYChanged) {
+        mOnStackYChanged = onStackYChanged;
     }
 
     /**
@@ -4533,7 +4542,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             // We still want to call the normal scrolled changed for accessibility reasons
             onScrollChanged(mScrollX, ownScrollY, mScrollX, mOwnScrollY);
             mOwnScrollY = ownScrollY;
+            updateChildren();
             updateOnScrollChange();
+            updateStackPosition();
         }
     }
 
