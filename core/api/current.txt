@@ -18991,7 +18991,6 @@ package android.hardware.lights {
   }
 
   public abstract static class LightsManager.LightsSession implements java.lang.AutoCloseable {
-    ctor public LightsManager.LightsSession();
     method public abstract void close();
     method public abstract void requestLights(@NonNull android.hardware.lights.LightsRequest);
   }

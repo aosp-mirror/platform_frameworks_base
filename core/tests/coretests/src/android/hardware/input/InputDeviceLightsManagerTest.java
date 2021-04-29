@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.hardware.lights.LightsManager;
+import android.hardware.lights.LightsRequest;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
@@ -224,4 +225,25 @@ public class InputDeviceLightsManagerTest {
         session.close();
         verify(mIInputManagerMock).closeLightSession(eq(DEVICE_ID), eq(token));
     }
+
+    @Test
+    public void testLightsRequest() throws Exception {
+        Light light = new Light(1 /* id */, 0 /* ordinal */,  Light.LIGHT_TYPE_INPUT_PLAYER_ID);
+        LightState state = new LightState(0xf1);
+        LightsRequest request = new Builder().addLight(light, state).build();
+
+        // Covers the LightsRequest.getLights
+        assertThat(request.getLights().size()).isEqualTo(1);
+        assertThat(request.getLights().get(0)).isEqualTo(1);
+
+        // Covers the LightsRequest.getLightStates
+        assertThat(request.getLightStates().size()).isEqualTo(1);
+        assertThat(request.getLightStates().get(0)).isEqualTo(state);
+
+        // Covers the LightsRequest.getLightsAndStates
+        assertThat(request.getLightsAndStates().size()).isEqualTo(1);
+        assertThat(request.getLightsAndStates().containsKey(1)).isTrue();
+        assertThat(request.getLightsAndStates().get(1)).isEqualTo(state);
+    }
+
 }
