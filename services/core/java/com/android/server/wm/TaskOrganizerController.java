@@ -215,23 +215,15 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             }
         }
 
-        SurfaceControl prepareLeash(Task task, boolean visible, String reason) {
-            SurfaceControl outSurfaceControl = new SurfaceControl(task.getSurfaceControl(), reason);
-            if (!task.mCreatedByOrganizer && !visible) {
-                // To prevent flashes, we hide the task prior to sending the leash to the
-                // task org if the task has previously hidden (ie. when entering PIP)
-                mTransaction.hide(outSurfaceControl);
-                mTransaction.apply();
-            }
-            return outSurfaceControl;
+        SurfaceControl prepareLeash(Task task, String reason) {
+            return new SurfaceControl(task.getSurfaceControl(), reason);
         }
 
         void onTaskAppeared(Task task) {
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Task appeared taskId=%d", task.mTaskId);
-            final boolean visible = task.isVisible();
             final RunningTaskInfo taskInfo = task.getTaskInfo();
             try {
-                mTaskOrganizer.onTaskAppeared(taskInfo, prepareLeash(task, visible,
+                mTaskOrganizer.onTaskAppeared(taskInfo, prepareLeash(task,
                         "TaskOrganizerController.onTaskAppeared"));
             } catch (RemoteException e) {
                 Slog.e(TAG, "Exception sending onTaskAppeared callback", e);
@@ -331,7 +323,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             if (!mOrganizedTasks.contains(t)) {
                 mOrganizedTasks.add(t);
             }
-            return mOrganizer.prepareLeash(t, t.isVisible(), reason);
+            return mOrganizer.prepareLeash(t, reason);
         }
 
         private boolean addTask(Task t) {
@@ -434,7 +426,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     // Set of organized tasks (by taskId) that dispatch back pressed to their organizers
     private final HashSet<Integer> mInterceptBackPressedOnRootTasks = new HashSet();
 
-    private SurfaceControl.Transaction mTransaction;
     private RunningTaskInfo mTmpTaskInfo;
     private Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
 
@@ -479,13 +470,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             synchronized (mGlobalLock) {
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Register task organizer=%s uid=%d",
                         organizer.asBinder(), uid);
-
-                // Defer initializing the transaction since the transaction factory can be set up
-                // by the tests after construction of the controller
-                if (mTransaction == null) {
-                    mTransaction = mService.mWindowManager.mTransactionFactory.get();
-                }
-
                 if (!mTaskOrganizerStates.containsKey(organizer.asBinder())) {
                     mTaskOrganizers.add(organizer);
                     mTaskOrganizerStates.put(organizer.asBinder(),

@@ -4971,12 +4971,13 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     boolean showSurfaceOnCreation() {
+        if (mCreatedByOrganizer) {
+            // Tasks created by the organizer are default visible because they can synchronously
+            // update the leash before new children are added to the task.
+            return true;
+        }
         // Organized tasks handle their own surface visibility
-        final boolean willBeOrganized =
-                mAtmService.mTaskOrganizerController.isSupportedWindowingMode(getWindowingMode())
-                && isRootTask();
-        return !mAtmService.getTransitionController().isShellTransitionsEnabled()
-                || !willBeOrganized;
+        return !canBeOrganized();
     }
 
     @Override
@@ -4992,22 +4993,8 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void setHasBeenVisible(boolean hasBeenVisible) {
-        final boolean prevHasBeenVisible = mHasBeenVisible;
         mHasBeenVisible = hasBeenVisible;
         if (hasBeenVisible) {
-            // If the task is not yet visible when it is added to the task organizer, then we should
-            // hide it to allow the task organizer to show it when it is properly reparented. We
-            // skip this for tasks created by the organizer because they can synchronously update
-            // the leash before new children are added to the task.  Also skip this if the task
-            // has already been sent to the organizer which can happen before the first draw if
-            // an existing task is reported to the organizer when it first registers.
-            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()
-                    && !mCreatedByOrganizer && !mTaskAppearedSent
-                    && mTaskOrganizer != null && !prevHasBeenVisible) {
-                getSyncTransaction().hide(getSurfaceControl());
-                commitPendingTransaction();
-            }
-
             if (!mDeferTaskAppear) sendTaskAppeared();
             if (!isRootTask()) {
                 getRootTask().setHasBeenVisible(true);
