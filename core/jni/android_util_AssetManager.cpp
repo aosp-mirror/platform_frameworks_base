@@ -42,6 +42,7 @@
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/ResourceUtils.h"
 
+#include "android_content_res_ApkAssets.h"
 #include "android_util_AssetManager_private.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
@@ -50,9 +51,9 @@
 #include "nativehelper/ScopedStringChars.h"
 #include "nativehelper/ScopedUtfChars.h"
 #include "utils/Log.h"
-#include "utils/misc.h"
 #include "utils/String8.h"
 #include "utils/Trace.h"
+#include "utils/misc.h"
 
 extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
@@ -307,7 +308,9 @@ static void NativeSetApkAssets(JNIEnv* env, jclass /*clazz*/, jlong ptr,
     if (env->ExceptionCheck()) {
       return;
     }
-    apk_assets.push_back(reinterpret_cast<const ApkAssets*>(apk_assets_native_ptr));
+
+    auto scoped_assets = ScopedLock(ApkAssetsFromLong(apk_assets_native_ptr));
+    apk_assets.push_back(scoped_assets->get());
   }
 
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
