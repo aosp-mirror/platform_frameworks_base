@@ -47,4 +47,6 @@ interface IImsConfig {
     void removeRcsConfigCallback(IRcsConfigCallback c);
     void triggerRcsReconfiguration();
     void setRcsClientConfiguration(in RcsClientConfiguration rcc);
+    void notifyIntImsConfigChanged(int item, int value);
+    void notifyStringImsConfigChanged(int item, String value);
 }
