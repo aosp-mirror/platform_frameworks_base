@@ -58,6 +58,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayAdjustments;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import dalvik.system.BaseDexClassLoader;
@@ -156,6 +157,7 @@ public final class LoadedApk {
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
         = new ArrayMap<>();
     private AppComponentFactory mAppComponentFactory;
+    private final Object mLock = new Object();
 
     Application getApplication() {
         return mApplication;
@@ -354,7 +356,7 @@ public final class LoadedApk {
         } else {
             addedPaths.addAll(newPaths);
         }
-        synchronized (this) {
+        synchronized (mLock) {
             createOrUpdateClassLoaderLocked(addedPaths);
             if (mResources != null) {
                 final String[] splitPaths;
@@ -589,7 +591,9 @@ public final class LoadedApk {
      * include the base APK in the list of splits.
      */
     private class SplitDependencyLoaderImpl extends SplitDependencyLoader<NameNotFoundException> {
+        @GuardedBy("mLock")
         private final String[][] mCachedResourcePaths;
+        @GuardedBy("mLock")
         private final ClassLoader[] mCachedClassLoaders;
 
         SplitDependencyLoaderImpl(@NonNull SparseArray<int[]> dependencies) {
@@ -600,37 +604,41 @@ public final class LoadedApk {
 
         @Override
         protected boolean isSplitCached(int splitIdx) {
-            return mCachedClassLoaders[splitIdx] != null;
+            synchronized (mLock) {
+                return mCachedClassLoaders[splitIdx] != null;
+            }
         }
 
         @Override
         protected void constructSplit(int splitIdx, @NonNull int[] configSplitIndices,
                 int parentSplitIdx) throws NameNotFoundException {
-            final ArrayList<String> splitPaths = new ArrayList<>();
-            if (splitIdx == 0) {
-                createOrUpdateClassLoaderLocked(null);
-                mCachedClassLoaders[0] = mClassLoader;
+            synchronized (mLock) {
+                final ArrayList<String> splitPaths = new ArrayList<>();
+                if (splitIdx == 0) {
+                    createOrUpdateClassLoaderLocked(null);
+                    mCachedClassLoaders[0] = mClassLoader;
 
-                // Never add the base resources here, they always get added no matter what.
+                    // Never add the base resources here, they always get added no matter what.
+                    for (int configSplitIdx : configSplitIndices) {
+                        splitPaths.add(mSplitResDirs[configSplitIdx - 1]);
+                    }
+                    mCachedResourcePaths[0] = splitPaths.toArray(new String[splitPaths.size()]);
+                    return;
+                }
+
+                // Since we handled the special base case above, parentSplitIdx is always valid.
+                final ClassLoader parent = mCachedClassLoaders[parentSplitIdx];
+                mCachedClassLoaders[splitIdx] = ApplicationLoaders.getDefault().getClassLoader(
+                        mSplitAppDirs[splitIdx - 1], getTargetSdkVersion(), false, null,
+                        null, parent, mSplitClassLoaderNames[splitIdx - 1]);
+
+                Collections.addAll(splitPaths, mCachedResourcePaths[parentSplitIdx]);
+                splitPaths.add(mSplitResDirs[splitIdx - 1]);
                 for (int configSplitIdx : configSplitIndices) {
                     splitPaths.add(mSplitResDirs[configSplitIdx - 1]);
                 }
-                mCachedResourcePaths[0] = splitPaths.toArray(new String[splitPaths.size()]);
-                return;
+                mCachedResourcePaths[splitIdx] = splitPaths.toArray(new String[splitPaths.size()]);
             }
-
-            // Since we handled the special base case above, parentSplitIdx is always valid.
-            final ClassLoader parent = mCachedClassLoaders[parentSplitIdx];
-            mCachedClassLoaders[splitIdx] = ApplicationLoaders.getDefault().getClassLoader(
-                    mSplitAppDirs[splitIdx - 1], getTargetSdkVersion(), false, null, null, parent,
-                    mSplitClassLoaderNames[splitIdx - 1]);
-
-            Collections.addAll(splitPaths, mCachedResourcePaths[parentSplitIdx]);
-            splitPaths.add(mSplitResDirs[splitIdx - 1]);
-            for (int configSplitIdx : configSplitIndices) {
-                splitPaths.add(mSplitResDirs[configSplitIdx - 1]);
-            }
-            mCachedResourcePaths[splitIdx] = splitPaths.toArray(new String[splitPaths.size()]);
         }
 
         private int ensureSplitLoaded(String splitName) throws NameNotFoundException {
@@ -648,11 +656,17 @@ public final class LoadedApk {
         }
 
         ClassLoader getClassLoaderForSplit(String splitName) throws NameNotFoundException {
-            return mCachedClassLoaders[ensureSplitLoaded(splitName)];
+            final int idx = ensureSplitLoaded(splitName);
+            synchronized (mLock) {
+                return mCachedClassLoaders[idx];
+            }
         }
 
         String[] getSplitPathsForSplit(String splitName) throws NameNotFoundException {
-            return mCachedResourcePaths[ensureSplitLoaded(splitName)];
+            final int idx = ensureSplitLoaded(splitName);
+            synchronized (mLock) {
+                return mCachedResourcePaths[idx];
+            }
         }
     }
 
@@ -749,6 +763,7 @@ public final class LoadedApk {
         }
     }
 
+    @GuardedBy("mLock")
     private void createOrUpdateClassLoaderLocked(List<String> addedPaths) {
         if (mPackageName.equals("android")) {
             // Note: This branch is taken for system server and we don't need to setup
@@ -1023,7 +1038,7 @@ public final class LoadedApk {
 
     @UnsupportedAppUsage
     public ClassLoader getClassLoader() {
-        synchronized (this) {
+        synchronized (mLock) {
             if (mClassLoader == null) {
                 createOrUpdateClassLoaderLocked(null /*addedPaths*/);
             }

@@ -1689,7 +1689,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (content != null) {
             final AutofillUriGrantsManager autofillUgm =
                     remoteAugmentedAutofillService.getAutofillUriGrantsManager();
-            autofillUgm.grantUriPermissions(mComponentName, userId, content);
+            autofillUgm.grantUriPermissions(mComponentName, mActivityToken, userId, content);
         }
 
         // Fill the value into the field.
@@ -3537,7 +3537,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     synchronized (mLock) {
                         logAugmentedAutofillRequestLocked(mode, remoteService.getComponentName(),
                                 focusedId, isWhitelisted, inlineSuggestionsRequest != null);
-                        remoteService.onRequestAutofillLocked(id, mClient, taskId, mComponentName,
+                        remoteService.onRequestAutofillLocked(id, mClient,
+                                taskId, mComponentName, mActivityToken,
                                 AutofillId.withoutSession(focusedId), currentValue,
                                 inlineSuggestionsRequest, inlineSuggestionsResponseCallback,
                                 /*onErrorCallback=*/ () -> {
@@ -4166,13 +4167,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mService.getRemoteInlineSuggestionRenderServiceLocked();
         if (remoteRenderService != null) {
             remoteRenderService.destroySuggestionViews(userId, id);
-        }
-        final RemoteAugmentedAutofillService remoteAugmentedAutofillService =
-                mService.getRemoteAugmentedAutofillServiceIfCreatedLocked();
-        if (remoteAugmentedAutofillService != null) {
-            final AutofillUriGrantsManager autofillUgm =
-                    remoteAugmentedAutofillService.getAutofillUriGrantsManager();
-            autofillUgm.revokeUriPermissions(mComponentName, userId);
         }
 
         mDestroyed = true;

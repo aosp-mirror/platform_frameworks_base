@@ -34,8 +34,14 @@ import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.leak.RotationUtils
 import com.android.systemui.R
+import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import javax.inject.Inject
+import kotlin.math.min
+import kotlin.math.pow
+
+private const val MAX_DEBOUNCE_LEVEL = 3
+private const val BASE_DEBOUNCE_TIME = 2000
 
 /***
  * Controls the ripple effect that shows when wired charging begins.
@@ -47,7 +53,9 @@ class WiredChargingRippleController @Inject constructor(
     batteryController: BatteryController,
     configurationController: ConfigurationController,
     featureFlags: FeatureFlags,
-    private val context: Context
+    private val context: Context,
+    private val windowManager: WindowManager,
+    private val systemClock: SystemClock
 ) {
     private var charging: Boolean? = null
     private val rippleEnabled: Boolean = featureFlags.isChargingRippleEnabled &&
@@ -68,6 +76,8 @@ class WiredChargingRippleController @Inject constructor(
                 or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
         setTrustedOverlay()
     }
+    private var lastTriggerTime: Long? = null
+    private var debounceLevel = 0
 
     @VisibleForTesting
     var rippleView: ChargingRippleView = ChargingRippleView(context, attrs = null)
@@ -88,7 +98,7 @@ class WiredChargingRippleController @Inject constructor(
                 charging = nowCharging
                 // Only triggers when the keyguard is active and the device is just plugged in.
                 if ((wasCharging == null || !wasCharging) && nowCharging) {
-                    startRipple()
+                    startRippleWithDebounce()
                 }
             }
         }
@@ -118,6 +128,22 @@ class WiredChargingRippleController @Inject constructor(
         updateRippleColor()
     }
 
+    // Lazily debounce ripple to avoid triggering ripple constantly (e.g. from flaky chargers).
+    internal fun startRippleWithDebounce() {
+        val now = systemClock.elapsedRealtime()
+        // Debounce wait time = 2 ^ debounce level
+        if (lastTriggerTime == null ||
+                (now - lastTriggerTime!!) > BASE_DEBOUNCE_TIME * (2.0.pow(debounceLevel))) {
+            // Not waiting for debounce. Start ripple.
+            startRipple()
+            debounceLevel = 0
+        } else {
+            // Still waiting for debounce. Ignore ripple and bump debounce level.
+            debounceLevel = min(MAX_DEBOUNCE_LEVEL, debounceLevel + 1)
+        }
+        lastTriggerTime = now
+    }
+
     fun startRipple() {
         if (!rippleEnabled || rippleView.rippleInProgress || rippleView.parent != null) {
             // Skip if ripple is still playing, or not playing but already added the parent
@@ -125,7 +151,6 @@ class WiredChargingRippleController @Inject constructor(
             // the animation ends.)
             return
         }
-        val mWM = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowLayoutParams.packageName = context.opPackageName
         rippleView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewDetachedFromWindow(view: View?) {}
@@ -133,12 +158,12 @@ class WiredChargingRippleController @Inject constructor(
             override fun onViewAttachedToWindow(view: View?) {
                 layoutRipple()
                 rippleView.startRipple(Runnable {
-                    mWM.removeView(rippleView)
+                    windowManager.removeView(rippleView)
                 })
                 rippleView.removeOnAttachStateChangeListener(this)
             }
         })
-        mWM.addView(rippleView, windowLayoutParams)
+        windowManager.addView(rippleView, windowLayoutParams)
     }
 
     private fun layoutRipple() {

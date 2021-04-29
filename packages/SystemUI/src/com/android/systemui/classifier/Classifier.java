@@ -43,6 +43,7 @@ public abstract class Classifier {
     public static final int UDFPS_AUTHENTICATION = 13;
     public static final int DISABLED_UDFPS_AFFORDANCE = 14;
     public static final int QS_SWIPE = 15;
+    public static final int BACK_GESTURE = 16;
 
     @IntDef({
             QUICK_SETTINGS,
@@ -61,7 +62,8 @@ public abstract class Classifier {
             BRIGHTNESS_SLIDER,
             UDFPS_AUTHENTICATION,
             DISABLED_UDFPS_AFFORDANCE,
-            QS_SWIPE
+            QS_SWIPE,
+            BACK_GESTURE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InteractionType {}

@@ -71,7 +71,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
             }
         }
 
-    @Presubmit
+    @FlakyTest(bugId = 185400889)
     @Test
     override fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation,
         testSpec.config.endRotation, allStates = false)
@@ -88,7 +88,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation,
             testSpec.config.endRotation)
 
-    @Presubmit
+    @FlakyTest(bugId = 185400889)
     @Test
     fun appLayerRotates_StartingBounds() {
         testSpec.assertLayersStart {
@@ -97,7 +97,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 185400889)
     @Test
     fun appLayerRotates_EndingBounds() {
         testSpec.assertLayersEnd {

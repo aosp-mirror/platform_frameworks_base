@@ -115,12 +115,15 @@ class MediaDataManager(
         // UI surface label for subscribing Smartspace updates.
         @JvmField
         val SMARTSPACE_UI_SURFACE_LABEL = "media_data_manager"
+
+        // Maximum number of actions allowed in compact view
+        @JvmField
+        val MAX_COMPACT_ACTIONS = 3
     }
 
     private val themeText = com.android.settingslib.Utils.getColorAttr(context,
             com.android.internal.R.attr.textColorPrimary).defaultColor
-    private val bgColor = com.android.settingslib.Utils.getColorAttr(context,
-            com.android.internal.R.attr.colorBackground).defaultColor
+    private val bgColor = context.getColor(android.R.color.system_accent2_50)
 
     // Internal listeners are part of the internal pipeline. External listeners (those registered
     // with [MediaDeviceManager.addListener]) receive events after they have propagated through
@@ -549,8 +552,12 @@ class MediaDataManager(
         // Control buttons
         val actionIcons: MutableList<MediaAction> = ArrayList()
         val actions = notif.actions
-        val actionsToShowCollapsed = notif.extras.getIntArray(
+        var actionsToShowCollapsed = notif.extras.getIntArray(
                 Notification.EXTRA_COMPACT_ACTIONS)?.toMutableList() ?: mutableListOf<Int>()
+        if (actionsToShowCollapsed.size > MAX_COMPACT_ACTIONS) {
+            Log.e(TAG, "Too many compact actions for $key, limiting to first $MAX_COMPACT_ACTIONS")
+            actionsToShowCollapsed = actionsToShowCollapsed.subList(0, MAX_COMPACT_ACTIONS)
+        }
         // TODO: b/153736623 look into creating actions when this isn't a media style notification
 
         if (actions != null) {

@@ -34,6 +34,7 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Slog;
 
@@ -557,7 +558,7 @@ public class BiometricManager {
      * @hide
      */
     public long[] getAuthenticatorIds() {
-        return getAuthenticatorIds(UserHandle.getCallingUserId());
+        return getAuthenticatorIds(UserHandle.myUserId());
     }
 
     /**

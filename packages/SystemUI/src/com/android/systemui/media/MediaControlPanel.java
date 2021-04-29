@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -33,10 +32,8 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
-import android.os.SystemProperties;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewOutlineProvider;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -46,7 +43,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.constraintlayout.widget.ConstraintSet;
 
-import com.android.settingslib.Utils;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -75,11 +71,6 @@ public class MediaControlPanel {
     private static final String EXTRAS_MEDIA_SOURCE_PACKAGE_NAME = "package_name";
     private static final int MEDIA_RECOMMENDATION_MAX_NUM = 4;
 
-    private final boolean mShowAppName = SystemProperties.getBoolean(
-            "persist.sysui.qs_media_show_app_name", false);
-    private final boolean mShowDeviceName = SystemProperties.getBoolean(
-            "persist.sysui.qs_media_show_device_name", false);
-
     private static final Intent SETTINGS_INTENT = new Intent(ACTION_MEDIA_CONTROLS_SETTINGS);
 
     // Button IDs for QS controls
@@ -106,10 +97,8 @@ public class MediaControlPanel {
     private KeyguardDismissUtil mKeyguardDismissUtil;
     private Lazy<MediaDataManager> mMediaDataManagerLazy;
     private int mBackgroundColor;
+    private int mDevicePadding;
     private int mAlbumArtSize;
-    private int mAlbumArtRadius;
-    // This will provide the corners for the album art.
-    private final ViewOutlineProvider mViewOutlineProvider;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
 
     /**
@@ -133,13 +122,6 @@ public class MediaControlPanel {
         mKeyguardDismissUtil = keyguardDismissUtil;
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
         loadDimens();
-
-        mViewOutlineProvider = new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRoundRect(0, 0, mAlbumArtSize, mAlbumArtSize, mAlbumArtRadius);
-            }
-        };
     }
 
     public void onDestroy() {
@@ -151,9 +133,9 @@ public class MediaControlPanel {
     }
 
     private void loadDimens() {
-        mAlbumArtRadius = mContext.getResources().getDimensionPixelSize(
-                Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
         mAlbumArtSize = mContext.getResources().getDimensionPixelSize(R.dimen.qs_media_album_size);
+        mDevicePadding = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.qs_media_album_device_padding);
     }
 
     /**
@@ -210,10 +192,6 @@ public class MediaControlPanel {
     public void attachPlayer(PlayerViewHolder vh) {
         mPlayerViewHolder = vh;
         TransitionLayout player = vh.getPlayer();
-
-        ImageView albumView = vh.getAlbumView();
-        albumView.setOutlineProvider(mViewOutlineProvider);
-        albumView.setClipToOutline(true);
 
         mSeekBarObserver = new SeekBarObserver(vh);
         mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
@@ -297,10 +275,19 @@ public class MediaControlPanel {
         boolean hasArtwork = data.getArtwork() != null;
         if (hasArtwork) {
             Drawable artwork = scaleDrawable(data.getArtwork());
+            albumView.setPadding(0, 0, 0, 0);
             albumView.setImageDrawable(artwork);
+        } else {
+            Drawable deviceIcon;
+            if (data.getDevice() != null && data.getDevice().getIcon() != null) {
+                deviceIcon = data.getDevice().getIcon().getConstantState().newDrawable().mutate();
+            } else {
+                deviceIcon = getContext().getDrawable(R.drawable.ic_headphone);
+            }
+            deviceIcon.setTintList(ColorStateList.valueOf(mBackgroundColor));
+            albumView.setPadding(mDevicePadding, mDevicePadding, mDevicePadding, mDevicePadding);
+            albumView.setImageDrawable(deviceIcon);
         }
-        setVisibleAndAlpha(collapsedSet, R.id.album_art, hasArtwork);
-        setVisibleAndAlpha(expandedSet, R.id.album_art, hasArtwork);
 
         // App icon
         ImageView appIcon = mPlayerViewHolder.getAppIcon();
@@ -315,13 +302,6 @@ public class MediaControlPanel {
         TextView titleText = mPlayerViewHolder.getTitleText();
         titleText.setText(data.getSong());
 
-        // App title
-        TextView appName = mPlayerViewHolder.getAppName();
-        appName.setText(data.getApp());
-        appName.setVisibility(mShowAppName ? View.VISIBLE : View.GONE);
-        setVisibleAndAlpha(collapsedSet, R.id.app_name, mShowAppName);
-        setVisibleAndAlpha(expandedSet, R.id.app_name, mShowAppName);
-
         // Artist name
         TextView artistText = mPlayerViewHolder.getArtistText();
         artistText.setText(data.getArtist());
@@ -333,10 +313,6 @@ public class MediaControlPanel {
         mPlayerViewHolder.getSeamless().setOnClickListener(v -> {
             mMediaOutputDialogFactory.create(data.getPackageName(), true);
         });
-        TextView mDeviceName = mPlayerViewHolder.getSeamlessText();
-        mDeviceName.setVisibility(mShowDeviceName ? View.VISIBLE : View.GONE);
-        setVisibleAndAlpha(collapsedSet, R.id.media_seamless_text, mShowDeviceName);
-        setVisibleAndAlpha(expandedSet, R.id.media_seamless_text, mShowDeviceName);
 
         ImageView iconView = mPlayerViewHolder.getSeamlessIcon();
         TextView deviceName = mPlayerViewHolder.getSeamlessText();
@@ -406,8 +382,12 @@ public class MediaControlPanel {
 
         // Hide any unused buttons
         for (; i < ACTION_IDS.length; i++) {
-            setVisibleAndAlpha(expandedSet, ACTION_IDS[i], false /*visible */);
             setVisibleAndAlpha(collapsedSet, ACTION_IDS[i], false /*visible */);
+            setVisibleAndAlpha(expandedSet, ACTION_IDS[i], false /* visible */);
+        }
+        // If no expanded buttons, set the first view as INVISIBLE so z remains constant
+        if (actionIcons.size() == 0) {
+            expandedSet.setVisibility(ACTION_IDS[0], ConstraintSet.INVISIBLE);
         }
 
         // Seek Bar

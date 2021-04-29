@@ -83,16 +83,27 @@ public final class WebViewFactory {
     public @interface Timestamp {
     }
 
+    /** When the overall WebView provider load began. */
     public static final int WEBVIEW_LOAD_START = 0;
+    /** Before creating the WebView APK Context. */
     public static final int CREATE_CONTEXT_START = 1;
+    /** After creating the WebView APK Context. */
     public static final int CREATE_CONTEXT_END = 2;
+    /** Before adding WebView assets to AssetManager. */
     public static final int ADD_ASSETS_START = 3;
+    /** After adding WebView assets to AssetManager. */
     public static final int ADD_ASSETS_END = 4;
+    /** Before creating the WebView ClassLoader. */
     public static final int GET_CLASS_LOADER_START = 5;
+    /** After creating the WebView ClassLoader. */
     public static final int GET_CLASS_LOADER_END = 6;
+    /** Before preloading the WebView native library. */
     public static final int NATIVE_LOAD_START = 7;
+    /** After preloading the WebView native library. */
     public static final int NATIVE_LOAD_END = 8;
+    /** Before looking up the WebView provider class. */
     public static final int PROVIDER_CLASS_FOR_NAME_START = 9;
+    /** After looking up the WebView provider class. */
     public static final int PROVIDER_CLASS_FOR_NAME_END = 10;
     private static final int TIMESTAMPS_SIZE = 11;
 

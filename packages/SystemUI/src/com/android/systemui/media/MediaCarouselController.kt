@@ -1,6 +1,5 @@
 package com.android.systemui.media
 
-import android.animation.ArgbEvaluator
 import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.content.Intent
@@ -116,8 +115,7 @@ class MediaCarouselController @Inject constructor(
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
     private var bgColor = getBackgroundColor()
-    private var fgColor = com.android.settingslib.Utils.getColorAttr(context,
-            com.android.internal.R.attr.textColorPrimary).defaultColor
+    private var fgColor = getForegroundColor()
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -359,9 +357,7 @@ class MediaCarouselController @Inject constructor(
 
     private fun recreatePlayers() {
         bgColor = getBackgroundColor()
-
-        fgColor = com.android.settingslib.Utils.getColorAttr(context,
-                com.android.internal.R.attr.textColorPrimary).defaultColor
+        fgColor = getForegroundColor()
         pageIndicator.tintList = ColorStateList.valueOf(fgColor)
 
         MediaPlayerData.mediaData().forEach { (key, data) ->
@@ -371,12 +367,12 @@ class MediaCarouselController @Inject constructor(
     }
 
     private fun getBackgroundColor(): Int {
-        val themeAccent = com.android.settingslib.Utils.getColorAttr(context,
-                com.android.internal.R.attr.colorAccent).defaultColor
-        val themeBackground = com.android.settingslib.Utils.getColorAttr(context,
-                com.android.internal.R.attr.colorBackground).defaultColor
-        // Simulate transparency - cannot be actually transparent because of lockscreen
-        return ArgbEvaluator().evaluate(0.25f, themeBackground, themeAccent) as Int
+        return context.getColor(android.R.color.system_accent2_50)
+    }
+
+    private fun getForegroundColor(): Int {
+        return com.android.settingslib.Utils.getColorAttr(context,
+                com.android.internal.R.attr.textColorPrimary).defaultColor
     }
 
     private fun updatePageIndicator() {

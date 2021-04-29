@@ -138,7 +138,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
             mHorizontalTileLayout = createHorizontalTileLayout();
             LayoutParams lp = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1);
-            int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
+            int marginSize = (int) mContext.getResources().getDimension(R.dimen.qs_media_padding);
             lp.setMarginStart(0);
             lp.setMarginEnd(marginSize);
             lp.gravity = Gravity.CENTER_VERTICAL;
@@ -301,12 +301,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected void updatePadding() {
         final Resources res = mContext.getResources();
         int padding = res.getDimensionPixelSize(R.dimen.qs_panel_padding_top);
-        if (mUsingHorizontalLayout) {
-            // When using the horizontal layout, our space is quite constrained. We therefore
-            // reduce some of the padding on the top, which makes the brightness bar overlapp,
-            // but since that has naturally quite a bit of built in padding, that's fine.
-            padding = (int) (padding * 0.6f);
-        }
         setPaddingRelative(getPaddingStart(),
                 padding,
                 getPaddingEnd(),

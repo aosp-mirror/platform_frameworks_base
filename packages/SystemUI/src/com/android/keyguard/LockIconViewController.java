@@ -83,6 +83,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mQsExpanded;
     private int mStatusBarState;
     private boolean mIsKeyguardShowing;
+    private boolean mUserUnlockedWithBiometric;
 
     private boolean mShowButton;
     private boolean mShowUnlockIcon;
@@ -155,7 +156,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mView.setLocation(new PointF(props[0], props[1]), props[2]);
         }
 
-        mIsKeyguardShowing = mKeyguardViewController.isShowing();
+        updateKeyguardShowing();
+        mUserUnlockedWithBiometric = false;
         mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
         mIsDozing = mStatusBarStateController.isDozing();
         mRunningFPS = mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
@@ -216,7 +218,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
 
         // these three states are mutually exclusive:
-        mShowButton = mUdfpsEnrolled && !mCanDismissLockScreen && !mRunningFPS && isLockScreen();
+        mShowButton = mUdfpsEnrolled && !mCanDismissLockScreen && !mRunningFPS
+                && !mUserUnlockedWithBiometric && isLockScreen();
         mShowUnlockIcon = mFaceAuthEnrolled & mCanDismissLockScreen && isLockScreen();
         mShowLockIcon = !mUdfpsEnrolled && !mCanDismissLockScreen && isLockScreen()
             && mFaceAuthEnrolled;
@@ -289,6 +292,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
     }
 
+    private void updateKeyguardShowing() {
+        mIsKeyguardShowing = mKeyguardStateController.isShowing()
+                && !mKeyguardStateController.isKeyguardGoingAway();
+    }
+
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("  mShowBouncerButton: " + mShowButton);
@@ -300,6 +308,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mIsKeyguardShowing: " + mIsKeyguardShowing);
         pw.println("  mIsDozing: " + mIsDozing);
         pw.println("  mIsBouncerShowing: " + mIsBouncerShowing);
+        pw.println("  mUserUnlockedWithBiometric: " + mUserUnlockedWithBiometric);
         pw.println("  mRunningFPS: " + mRunningFPS);
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
         pw.println("  mStatusBarState: " + StatusBarState.toShortString(mStatusBarState));
@@ -326,18 +335,20 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 @Override
                 public void onKeyguardBouncerChanged(boolean bouncer) {
                     mIsBouncerShowing = bouncer;
-                    mIsKeyguardShowing = mKeyguardStateController.isShowing();
                     updateVisibility();
                 }
 
                 @Override
                 public void onBiometricRunningStateChanged(boolean running,
                         BiometricSourceType biometricSourceType) {
+                    mUserUnlockedWithBiometric =
+                            mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
+                                    KeyguardUpdateMonitor.getCurrentUser());
+
                     if (biometricSourceType == FINGERPRINT) {
                         mRunningFPS = running;
+                        updateVisibility();
                     }
-
-                    updateVisibility();
                 }
             };
 
@@ -346,13 +357,21 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         @Override
         public void onUnlockedChanged() {
             mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
+            updateKeyguardShowing();
             updateVisibility();
         }
+
         @Override
         public void onKeyguardShowingChanged() {
-            mIsKeyguardShowing = mKeyguardStateController.isShowing();
+            updateKeyguardShowing();
             mUdfpsEnrolled = mKeyguardUpdateMonitor.isUdfpsEnrolled();
             mFaceAuthEnrolled = mKeyguardUpdateMonitor.isFaceEnrolled();
+            updateVisibility();
+        }
+
+        @Override
+        public void onKeyguardFadingAwayChanged() {
+            updateKeyguardShowing();
             updateVisibility();
         }
     };
