@@ -30,8 +30,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.ArraySet;
 
-import com.android.internal.infra.AndroidFuture;
-
 import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -43,6 +41,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -95,7 +94,7 @@ public class AppSearchMigrationHelper implements Closeable {
         File queryFile = File.createTempFile(/*prefix=*/"appsearch", /*suffix=*/null);
         try (ParcelFileDescriptor fileDescriptor =
                      ParcelFileDescriptor.open(queryFile, MODE_WRITE_ONLY)) {
-            AndroidFuture<AppSearchResult<Void>> androidFuture = new AndroidFuture<>();
+            CompletableFuture<AppSearchResult<Void>> future = new CompletableFuture<>();
             mService.writeQueryResultsToFile(mPackageName, mDatabaseName,
                     fileDescriptor,
                     /*queryExpression=*/ "",
@@ -106,11 +105,11 @@ public class AppSearchMigrationHelper implements Closeable {
                     mUserId,
                     new IAppSearchResultCallback.Stub() {
                         @Override
-                        public void onResult(AppSearchResult result) throws RemoteException {
-                            androidFuture.complete(result);
+                        public void onResult(AppSearchResult result) {
+                            future.complete(result);
                         }
                     });
-            AppSearchResult<Void> result = androidFuture.get();
+            AppSearchResult<Void> result = future.get();
             if (!result.isSuccess()) {
                 throw new AppSearchException(result.getResultCode(), result.getErrorMessage());
             }
@@ -142,15 +141,15 @@ public class AppSearchMigrationHelper implements Closeable {
         }
         try (ParcelFileDescriptor fileDescriptor =
                      ParcelFileDescriptor.open(mMigratedFile, MODE_READ_ONLY)) {
-            AndroidFuture<AppSearchResult<List<Bundle>>> androidFuture = new AndroidFuture<>();
+            CompletableFuture<AppSearchResult<List<Bundle>>> future = new CompletableFuture<>();
             mService.putDocumentsFromFile(mPackageName, mDatabaseName, fileDescriptor, mUserId,
                     new IAppSearchResultCallback.Stub() {
                         @Override
-                        public void onResult(AppSearchResult result) throws RemoteException {
-                            androidFuture.complete(result);
+                        public void onResult(AppSearchResult result) {
+                            future.complete(result);
                         }
                     });
-            AppSearchResult<List<Bundle>> result = androidFuture.get();
+            AppSearchResult<List<Bundle>> result = future.get();
             if (!result.isSuccess()) {
                 return AppSearchResult.newFailedResult(result);
             }

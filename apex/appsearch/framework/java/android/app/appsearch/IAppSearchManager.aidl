@@ -17,14 +17,9 @@ package android.app.appsearch;
 
 import android.os.Bundle;
 
-import android.app.appsearch.AppSearchBatchResult;
-import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.IAppSearchBatchResultCallback;
 import android.app.appsearch.IAppSearchResultCallback;
 import android.os.ParcelFileDescriptor;
-import com.android.internal.infra.AndroidFuture;
-
-parcelable SearchResults;
 
 /** {@hide} */
 interface IAppSearchManager {
