@@ -15,34 +15,73 @@
  */
 package android.app.search;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.app.slice.SliceManager;
 import android.appwidget.AppWidgetProviderInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * A representation of a searchable item info.
+ * A representation of a search result. Search result can be expressed in one of the following:
+ * app icon, shortcut, slice, widget, or a custom object using {@link SearchAction}. While
+ * app icon ({@link PackageManager}, shortcut {@link ShortcutManager}, slice {@link SliceManager},
+ * or widget (@link AppWidgetManager} are published content backed by the system service,
+ * {@link SearchAction} is a custom object that the service can use to send search result to the
+ * client.
+ *
+ * These various types of Android primitives could be defined as {@link SearchResultType}. Some
+ * times, the result type can define the layout type that that this object can be rendered in.
+ * (e.g., app widget). Most times, {@link #getLayoutType()} assigned by the service
+ * can recommend which layout this target should be rendered in.
+ *
+ * The service can also use fields such as {@link #getScore()} to indicate
+ * how confidence the search result is and {@link #shouldHide()} to indicate
+ * whether it is recommended to be shown by default.
+ *
+ * Finally, {@link #getId()} is the unique identifier of this search target and a single
+ * search target is defined by being able to express a single launcheable item. In case the
+ * service want to recommend how to combine multiple search target objects to render in a group
+ * (e.g., same row), {@link #getParentId()} can be assigned on the sub targets of the group
+ * using the primary search target's identifier.
  *
  * @hide
  */
 @SystemApi
 public final class SearchTarget implements Parcelable {
 
-
-    @NonNull
+    public static final int RESULT_TYPE_APPLICATION = 1 << 0;
+    public static final int RESULT_TYPE_SHORTCUT = 1 << 1;
+    public static final int RESULT_TYPE_SLICE = 1 << 2;
+    public static final int RESULT_TYPE_WIDGETS = 1 << 3;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = {"RESULT_TYPE_"}, value = {
+            RESULT_TYPE_APPLICATION,
+            RESULT_TYPE_SHORTCUT,
+            RESULT_TYPE_SLICE,
+            RESULT_TYPE_WIDGETS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SearchResultType {}
     private final int mResultType;
 
     /**
-     * Constant to express how the group of {@link SearchTarget} should be laid out.
+     * Constant to express how the group of {@link SearchTarget} should be rendered on
+     * the client side. (e.g., "icon", "icon_row", "short_icon_row")
      */
     @NonNull
     private final String mLayoutType;
@@ -69,13 +108,13 @@ public final class SearchTarget implements Parcelable {
     private final AppWidgetProviderInfo mAppWidgetProviderInfo;
     @Nullable
     private final Uri mSliceUri;
-    @Nullable
+
+    @NonNull
     private final Bundle mExtras;
 
     private SearchTarget(Parcel parcel) {
         mResultType = parcel.readInt();
         mLayoutType = parcel.readString();
-
         mId = parcel.readString();
         mParentId = parcel.readString();
         mScore = parcel.readFloat();
@@ -102,7 +141,7 @@ public final class SearchTarget implements Parcelable {
             @Nullable ShortcutInfo shortcutInfo,
             @Nullable Uri sliceUri,
             @Nullable AppWidgetProviderInfo appWidgetProviderInfo,
-            @Nullable Bundle extras) {
+            @NonNull Bundle extras) {
         mResultType = resultType;
         mLayoutType = Objects.requireNonNull(layoutType);
         mId = Objects.requireNonNull(id);
@@ -129,9 +168,9 @@ public final class SearchTarget implements Parcelable {
     }
 
     /**
-     * Retrieves the result type.
+     * Retrieves the result type {@see SearchResultType}.
      */
-    public int getResultType() {
+    public @SearchResultType int getResultType() {
         return mResultType;
     }
 
@@ -167,7 +206,7 @@ public final class SearchTarget implements Parcelable {
     }
 
     /**
-     * TODO: add comment
+     * Indicates whether this object should be hidden and shown only on demand.
      */
     public boolean shouldHide() {
         return mShouldHide;
@@ -198,7 +237,7 @@ public final class SearchTarget implements Parcelable {
     }
 
     /**
-     * Return widget provider info.
+     * Return a widget provider info.
      */
     @Nullable
     public AppWidgetProviderInfo getAppWidgetProviderInfo() {
@@ -206,7 +245,7 @@ public final class SearchTarget implements Parcelable {
     }
 
     /**
-     * Return slice uri.
+     * Returns a slice uri.
      */
     @Nullable
     public Uri getSliceUri() {
@@ -214,7 +253,7 @@ public final class SearchTarget implements Parcelable {
     }
 
     /**
-     * Return search action.
+     * Returns a search action.
      */
     @Nullable
     public SearchAction getSearchAction() {
@@ -224,8 +263,7 @@ public final class SearchTarget implements Parcelable {
     /**
      * Return extra bundle.
      */
-    @Nullable
-    @SuppressLint("NullableCollection")
+    @NonNull
     public Bundle getExtras() {
         return mExtras;
     }
@@ -295,10 +333,10 @@ public final class SearchTarget implements Parcelable {
         private Uri mSliceUri;
         @Nullable
         private AppWidgetProviderInfo mAppWidgetProviderInfo;
-        @Nullable
+        @NonNull
         private Bundle mExtras;
 
-        public Builder(int resultType,
+        public Builder(@SearchResultType int resultType,
                 @NonNull String layoutType,
                 @NonNull String id) {
             mId = id;
@@ -369,32 +407,30 @@ public final class SearchTarget implements Parcelable {
          */
         @NonNull
         public Builder setSliceUri(@NonNull Uri sliceUri) {
-            // TODO: add packageName check
             mSliceUri = sliceUri;
             return this;
         }
 
         /**
-         * TODO: add comment
+         * Set the {@link SearchAction} object to this target.
          */
         @NonNull
-        public Builder setSearchAction(@Nullable SearchAction remoteAction) {
-            // TODO: add packageName check
-            mSearchAction = remoteAction;
+        public Builder setSearchAction(@Nullable SearchAction searchAction) {
+            mSearchAction = searchAction;
             return this;
         }
 
         /**
-         * TODO: add comment
+         * Set any extra information that needs to be shared between service and the client.
          */
         @NonNull
-        public Builder setExtras(@SuppressLint("NullableCollection") @Nullable Bundle extras) {
-            mExtras = extras;
+        public Builder setExtras(@NonNull Bundle extras) {
+            mExtras = Objects.requireNonNull(extras);
             return this;
         }
 
         /**
-         * TODO: add comment
+         * Sets the score of the object.
          */
         @NonNull
         public Builder setScore(float score) {
@@ -403,7 +439,7 @@ public final class SearchTarget implements Parcelable {
         }
 
         /**
-         * TODO: add comment
+         * Sets whether the result should be hidden by default inside client.
          */
         @NonNull
         public Builder setShouldHide(boolean shouldHide) {
