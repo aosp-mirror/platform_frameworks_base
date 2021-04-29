@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -561,7 +562,12 @@ public final class SipDelegateImsConfiguration implements Parcelable {
         builder.setSipCniHeader(getString(KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING));
         builder.setSipAssociatedUriHeader(getString(KEY_SIP_CONFIG_P_ASSOCIATED_URI_HEADER_STRING));
         if (getBoolean(KEY_SIP_CONFIG_IS_GRUU_ENABLED_BOOL, false)) {
-            builder.setPublicGruuUri(Uri.parse(getString(KEY_SIP_CONFIG_UE_PUBLIC_GRUU_STRING)));
+            String uri = getString(KEY_SIP_CONFIG_UE_PUBLIC_GRUU_STRING);
+            Uri gruuUri = null;
+            if (!TextUtils.isEmpty(uri)) {
+                gruuUri = Uri.parse(uri);
+            }
+            builder.setPublicGruuUri(gruuUri);
         }
         if (getBoolean(KEY_SIP_CONFIG_IS_IPSEC_ENABLED_BOOL, false)) {
             builder.setIpSecConfiguration(new SipDelegateConfiguration.IpSecConfiguration(
