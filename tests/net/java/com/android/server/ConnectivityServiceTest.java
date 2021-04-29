@@ -5819,10 +5819,10 @@ public class ConnectivityServiceTest {
         if (vpnUid != null) {
             assertEquals("Should have exactly one VPN:", 1, infos.length);
             UnderlyingNetworkInfo info = infos[0];
-            assertEquals("Unexpected VPN owner:", (int) vpnUid, info.ownerUid);
-            assertEquals("Unexpected VPN interface:", vpnIfname, info.iface);
+            assertEquals("Unexpected VPN owner:", (int) vpnUid, info.getOwnerUid());
+            assertEquals("Unexpected VPN interface:", vpnIfname, info.getIface());
             assertSameElementsNoDuplicates(underlyingIfaces,
-                    info.underlyingIfaces.toArray(new String[0]));
+                    info.getUnderlyingIfaces().toArray(new String[0]));
         } else {
             assertEquals(0, infos.length);
             return;
@@ -5966,8 +5966,8 @@ public class ConnectivityServiceTest {
         // network for the VPN...
         verify(mStatsManager, never()).notifyNetworkStatus(any(List.class),
                 any(List.class), any() /* anyString() doesn't match null */,
-                argThat(infos -> infos.get(0).underlyingIfaces.size() == 1
-                        && WIFI_IFNAME.equals(infos.get(0).underlyingIfaces.get(0))));
+                argThat(infos -> infos.get(0).getUnderlyingIfaces().size() == 1
+                        && WIFI_IFNAME.equals(infos.get(0).getUnderlyingIfaces().get(0))));
         verifyNoMoreInteractions(mStatsManager);
         reset(mStatsManager);
 
@@ -5980,8 +5980,8 @@ public class ConnectivityServiceTest {
         waitForIdle();
         verify(mStatsManager).notifyNetworkStatus(any(List.class),
                 any(List.class), any() /* anyString() doesn't match null */,
-                argThat(vpnInfos -> vpnInfos.get(0).underlyingIfaces.size() == 1
-                        && WIFI_IFNAME.equals(vpnInfos.get(0).underlyingIfaces.get(0))));
+                argThat(vpnInfos -> vpnInfos.get(0).getUnderlyingIfaces().size() == 1
+                        && WIFI_IFNAME.equals(vpnInfos.get(0).getUnderlyingIfaces().get(0))));
         mEthernetNetworkAgent.disconnect();
         waitForIdle();
         reset(mStatsManager);

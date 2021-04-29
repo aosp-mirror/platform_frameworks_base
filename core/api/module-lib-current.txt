@@ -89,11 +89,11 @@ package android.net {
   public final class UnderlyingNetworkInfo implements android.os.Parcelable {
     ctor public UnderlyingNetworkInfo(int, @NonNull String, @NonNull java.util.List<java.lang.String>);
     method public int describeContents();
+    method @NonNull public String getIface();
+    method public int getOwnerUid();
+    method @NonNull public java.util.List<java.lang.String> getUnderlyingIfaces();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.UnderlyingNetworkInfo> CREATOR;
-    field @NonNull public final String iface;
-    field public final int ownerUid;
-    field @NonNull public final java.util.List<java.lang.String> underlyingIfaces;
   }
 
   public class VpnManager {
