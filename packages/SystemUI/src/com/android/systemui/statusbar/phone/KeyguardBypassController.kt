@@ -217,7 +217,7 @@ open class KeyguardBypassController : Dumpable {
     }
 
     companion object {
-        const val BYPASS_PANEL_FADE_DURATION = 67
+        const val BYPASS_FADE_DURATION = 67
 
         private const val FACE_UNLOCK_BYPASS_NO_OVERRIDE = 0
         private const val FACE_UNLOCK_BYPASS_ALWAYS = 1

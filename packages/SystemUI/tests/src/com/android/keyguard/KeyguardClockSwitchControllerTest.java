@@ -49,6 +49,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -114,6 +115,10 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     ActivityStarter mActivityStarter;
     @Mock
     FalsingManager mFalsingManager;
+    @Mock
+    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock
+    KeyguardBypassController mBypassController;
 
     private KeyguardClockSwitchController mController;
     private View mStatusArea;
@@ -152,7 +157,9 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mConfigurationController,
                 mSystemUIFactory,
                 mActivityStarter,
-                mFalsingManager
+                mFalsingManager,
+                mKeyguardUpdateMonitor,
+                mBypassController
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
