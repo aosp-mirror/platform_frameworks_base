@@ -2465,8 +2465,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (windowingMode == WINDOWING_MODE_PINNED && info.supportsPictureInPicture()) {
             return false;
         }
-        if (WindowConfiguration.inMultiWindowMode(windowingMode)
-                && mAtmService.mSupportsNonResizableMultiWindow
+        if (WindowConfiguration.inMultiWindowMode(windowingMode) && supportsMultiWindow()
                 && !mAtmService.mForceResizableActivities) {
             // The non resizable app will be letterboxed instead of being forced resizable.
             return false;
