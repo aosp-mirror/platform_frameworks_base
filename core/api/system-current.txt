@@ -1503,7 +1503,7 @@ package android.bluetooth {
 
   public static interface BluetoothAdapter.OobDataCallback {
     method public void onError(int);
-    method public void onOobData(int, @Nullable android.bluetooth.OobData);
+    method public void onOobData(int, @NonNull android.bluetooth.OobData);
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
