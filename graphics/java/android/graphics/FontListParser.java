@@ -74,7 +74,7 @@ public class FontListParser {
         parser.setInput(in, null);
         parser.nextTag();
         return readFamilies(parser, "/system/fonts/", new FontCustomizationParser.Result(), null,
-                0, 0);
+                0, 0, true);
     }
 
     /**
@@ -116,7 +116,7 @@ public class FontListParser {
             parser.setInput(is, null);
             parser.nextTag();
             return readFamilies(parser, systemFontDir, oemCustomization, updatableFontMap,
-                    lastModifiedDate, configVersion);
+                    lastModifiedDate, configVersion, false /* filter out the non-exising files */);
         }
     }
 
@@ -126,7 +126,8 @@ public class FontListParser {
             @NonNull FontCustomizationParser.Result customization,
             @Nullable Map<String, File> updatableFontMap,
             long lastModifiedDate,
-            int configVersion)
+            int configVersion,
+            boolean allowNonExistingFile)
             throws XmlPullParserException, IOException {
         List<FontConfig.FontFamily> families = new ArrayList<>();
         List<FontConfig.Alias> aliases = new ArrayList<>(customization.getAdditionalAliases());
@@ -139,7 +140,11 @@ public class FontListParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
             if (tag.equals("family")) {
-                FontConfig.FontFamily family = readFamily(parser, fontDir, updatableFontMap);
+                FontConfig.FontFamily family = readFamily(parser, fontDir, updatableFontMap,
+                        allowNonExistingFile);
+                if (family == null) {
+                    continue;
+                }
                 String name = family.getName();
                 if (name == null || !oemNamedFamilies.containsKey(name)) {
                     // The OEM customization overrides system named family. Skip if OEM
@@ -165,9 +170,15 @@ public class FontListParser {
 
     /**
      * Read family tag in fonts.xml or oem_customization.xml
+     *
+     * @param parser An XML parser.
+     * @param fontDir a font directory name.
+     * @param updatableFontMap a updated font file map.
+     * @param allowNonExistingFile true to allow font file that doesn't exists
+     * @return a FontFamily instance. null if no font files are available in this FontFamily.
      */
-    public static FontConfig.FontFamily readFamily(XmlPullParser parser, String fontDir,
-            @Nullable Map<String, File> updatableFontMap)
+    public static @Nullable FontConfig.FontFamily readFamily(XmlPullParser parser, String fontDir,
+            @Nullable Map<String, File> updatableFontMap, boolean allowNonExistingFile)
             throws XmlPullParserException, IOException {
         final String name = parser.getAttributeValue(null, "name");
         final String lang = parser.getAttributeValue("", "lang");
@@ -177,7 +188,11 @@ public class FontListParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             final String tag = parser.getName();
             if (tag.equals(TAG_FONT)) {
-                fonts.add(readFont(parser, fontDir, updatableFontMap));
+                FontConfig.Font font = readFont(parser, fontDir, updatableFontMap,
+                        allowNonExistingFile);
+                if (font != null) {
+                    fonts.add(font);
+                }
             } else {
                 skip(parser);
             }
@@ -190,6 +205,9 @@ public class FontListParser {
                 intVariant = FontConfig.FontFamily.VARIANT_ELEGANT;
             }
         }
+        if (fonts.isEmpty()) {
+            return null;
+        }
         return new FontConfig.FontFamily(fonts, name, LocaleList.forLanguageTags(lang), intVariant);
     }
 
@@ -197,10 +215,11 @@ public class FontListParser {
     private static final Pattern FILENAME_WHITESPACE_PATTERN =
             Pattern.compile("^[ \\n\\r\\t]+|[ \\n\\r\\t]+$");
 
-    private static FontConfig.Font readFont(
+    private static @Nullable FontConfig.Font readFont(
             @NonNull XmlPullParser parser,
             @NonNull String fontDir,
-            @Nullable Map<String, File> updatableFontMap)
+            @Nullable Map<String, File> updatableFontMap,
+            boolean allowNonExistingFile)
             throws XmlPullParserException, IOException {
 
         String indexStr = parser.getAttributeValue(null, ATTR_INDEX);
@@ -253,7 +272,9 @@ public class FontListParser {
 
         File file = new File(filePath);
 
-
+        if (!(allowNonExistingFile || file.isFile())) {
+            return null;
+        }
 
         return new FontConfig.Font(file,
                 originalPath == null ? null : new File(originalPath),

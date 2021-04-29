@@ -963,7 +963,7 @@ public final class UpdatableFontDirTest {
         parser.setInput(is, "UTF-8");
         parser.nextTag();
 
-        FontConfig.FontFamily fontFamily = FontListParser.readFamily(parser, "", null);
+        FontConfig.FontFamily fontFamily = FontListParser.readFamily(parser, "", null, true);
         List<FontUpdateRequest.Font> fonts = new ArrayList<>();
         for (FontConfig.Font font : fontFamily.getFontList()) {
             String name = font.getFile().getName();
