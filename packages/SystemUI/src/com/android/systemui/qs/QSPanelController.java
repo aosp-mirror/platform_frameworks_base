@@ -321,5 +321,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     public boolean isExpanded() {
         return mView.isExpanded();
     }
+
+    void setPageMargin(int pageMargin) {
+        mView.setPageMargin(pageMargin);
+    }
 }
 

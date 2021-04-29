@@ -36,6 +36,8 @@
         android:elevation="4dp"
         android:importantForAccessibility="no"
         android:scrollbars="none"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:layout_weight="1">
         <com.android.systemui.qs.QSPanel
             android:id="@+id/quick_settings_panel"
@@ -43,7 +45,9 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:focusable="true"
-            android:accessibilityTraversalBefore="@android:id/edit">
+            android:accessibilityTraversalBefore="@android:id/edit"
+            android:clipToPadding="false"
+            android:clipChildren="false">
             <include layout="@layout/qs_footer_impl" />
             <include layout="@layout/qs_media_divider"
                 android:id="@+id/divider"/>

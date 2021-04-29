@@ -8,7 +8,6 @@ import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -63,7 +62,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mPageToRestore = -1;
     private int mLayoutOrientation;
     private int mLayoutDirection;
-    private final Rect mClippingRect;
     private final UiEventLogger mUiEventLogger = QSEvents.INSTANCE.getQsUiEventsLogger();
     private int mExcessHeight;
     private int mLastExcessHeight;
@@ -78,13 +76,15 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         setCurrentItem(0, false);
         mLayoutOrientation = getResources().getConfiguration().orientation;
         mLayoutDirection = getLayoutDirection();
-        mClippingRect = new Rect();
-
-        // Make sure there's a space between pages when scroling
-        setPageMargin(context.getResources().getDimensionPixelOffset(
-                    R.dimen.qs_tile_margin_horizontal));
     }
     private int mLastMaxHeight = -1;
+
+    @Override
+    public void setPageMargin(int marginPixels) {
+        if (marginPixels != getPageMargin()) {
+            super.setPageMargin(marginPixels);
+        }
+    }
 
     public void saveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_PAGE, getCurrentItem());
@@ -350,14 +350,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             requestLayout();
         }
         return changed;
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        // Clip to margins
-        mClippingRect.set(0, 0, (r - l), b - t);
-        setClipBounds(mClippingRect);
     }
 
     @Override
