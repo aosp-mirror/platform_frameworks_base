@@ -101,6 +101,29 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     }
 
     @Test
+    public void getLaunchRootTask_checksFocusedRootTask() {
+        final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
+        final Task rootTask = createTaskWithActivity(
+                taskDisplayArea,
+                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, ON_TOP, true);
+        rootTask.mCreatedByOrganizer = true;
+
+        final Task adjacentRootTask = createTask(
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        adjacentRootTask.mCreatedByOrganizer = true;
+        adjacentRootTask.mAdjacentTask = rootTask;
+        rootTask.mAdjacentTask = adjacentRootTask;
+
+        taskDisplayArea.setLaunchRootTask(rootTask,
+                new int[]{WINDOWING_MODE_MULTI_WINDOW}, new int[]{ACTIVITY_TYPE_STANDARD});
+
+        Task actualRootTask = taskDisplayArea.getLaunchRootTask(
+                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, null /* options */,
+                null /* sourceTask */, 0 /*launchFlags*/);
+        assertTrue(actualRootTask.isFocusedRootTaskOnDisplay());
+    }
+
+    @Test
     public void getLaunchRootTask_fromLaunchAdjacentFlagRoot_checksAdjacentRoot() {
         final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
         final Task rootTask = createTask(
