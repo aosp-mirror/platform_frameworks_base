@@ -118,7 +118,9 @@ public class StartingSurfaceController {
                 return null;
             }
             if (topFullscreenActivity.getWindowConfiguration().getRotation()
-                    != taskSnapshot.getRotation()) {
+                    != taskSnapshot.getRotation()
+                    // Use normal rotation to avoid flickering of IME window in old orientation.
+                    && !taskSnapshot.hasImeSurface()) {
                 // The snapshot should have been checked by ActivityRecord#isSnapshotCompatible
                 // that the activity will be updated to the same rotation as the snapshot. Since
                 // the transition is not started yet, fixed rotation transform needs to be applied
