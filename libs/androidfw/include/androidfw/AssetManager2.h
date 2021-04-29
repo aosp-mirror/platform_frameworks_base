@@ -94,6 +94,7 @@ class AssetManager2 {
   };
 
   AssetManager2();
+  explicit AssetManager2(AssetManager2&& other) = default;
 
   // Sets/resets the underlying ApkAssets for this AssetManager. The ApkAssets
   // are not owned by the AssetManager, and must have a longer lifetime.
