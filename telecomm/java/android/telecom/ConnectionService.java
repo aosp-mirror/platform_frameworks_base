@@ -3448,4 +3448,13 @@ public abstract class ConnectionService extends Service {
     public Handler getHandler() {
         return mHandler;
     }
+
+    /**
+     * Sets this {@link ConnectionService} ready for testing purposes.
+     * @hide
+     */
+    @VisibleForTesting
+    public void setReadyForTest() {
+        mAreAccountsInitialized = true;
+    }
 }
