@@ -29,7 +29,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A representation of an app target event.
+ * A representation of an search target event.
+ *
+ * There are two types of events. First type of event correspends to the user interaction
+ * that happens on the search surface. (e.g., {@link #ACTION_TAP}. Second type of events
+ * correspends to the lifecycle event of the search surface {@link #ACTION_SURFACE_VISIBLE}.
  *
  * @hide
  */
