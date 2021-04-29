@@ -9576,8 +9576,9 @@
     <attr name="lStar" format="float"/>
 
     <declare-styleable name="DisplayHashingService">
-        <!-- The throttle duration for display hash requests
+        <!-- The interval required between display hash requests. Requests made faster than this
+             delay will be throttled."
              @hide @SystemApi -->
-        <attr name="throttleDurationMillis" format="integer" />
+        <attr name="durationBetweenRequestsMillis" format="integer" />
     </declare-styleable>
 </resources>
