@@ -1538,6 +1538,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // to cover the activity configuration change.
             return false;
         }
+        if (r.mStartingData != null && r.mStartingData.hasImeSurface()) {
+            // Currently it is unknown that when will IME window be ready. Reject the case to
+            // avoid flickering by showing IME in inconsistent orientation.
+            return false;
+        }
         if (checkOpening) {
             if (!mAppTransition.isTransitionSet() || !mOpeningApps.contains(r)) {
                 // Apply normal rotation animation in case of the activity set different requested

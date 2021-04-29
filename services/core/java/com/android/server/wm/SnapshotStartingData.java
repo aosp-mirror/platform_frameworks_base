@@ -39,4 +39,9 @@ class SnapshotStartingData extends StartingData {
         return mService.mStartingSurfaceController.createTaskSnapshotSurface(activity,
                 mSnapshot);
     }
+
+    @Override
+    boolean hasImeSurface() {
+        return mSnapshot.hasImeSurface();
+    }
 }
