@@ -6123,10 +6123,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void applyImeVisibility(IBinder windowToken, boolean setVisible,
-                IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.applyImeVisibility(mToken, windowToken, setVisible));
+        public void applyImeVisibilityAsync(IBinder windowToken, boolean setVisible) {
+            mImms.applyImeVisibility(mToken, windowToken, setVisible);
         }
     }
 }
