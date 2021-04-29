@@ -19,14 +19,21 @@ package com.android.keyguard;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.smartspace.SmartspaceTarget;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.util.AttributeSet;
@@ -47,6 +54,7 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin.IntentStarter;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -54,6 +62,7 @@ import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -63,6 +72,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 @SmallTest
@@ -119,9 +130,18 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     KeyguardBypassController mBypassController;
+    @Mock
+    Handler mHandler;
+    @Mock
+    UserTracker mUserTracker;
+    @Mock
+    SecureSettings mSecureSettings;
 
     private KeyguardClockSwitchController mController;
     private View mStatusArea;
+
+    private static final int USER_ID = 5;
+    private static final int MANAGED_USER_ID = 15;
 
     @Before
     public void setup() {
@@ -159,7 +179,10 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mActivityStarter,
                 mFalsingManager,
                 mKeyguardUpdateMonitor,
-                mBypassController
+                mBypassController,
+                mHandler,
+                mUserTracker,
+                mSecureSettings
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
@@ -258,6 +281,89 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         mController.getConfigurationListener().onThemeChanged();
         verify(mSmartspaceView, times(2)).setPrimaryTextColor(anyInt());
+    }
+
+    @Test
+    public void doNotFilterRegularTarget() {
+        setupPrimaryAndManagedUser();
+        mController.init();
+
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), eq(USER_ID))).thenReturn(0);
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), eq(MANAGED_USER_ID)))
+                .thenReturn(0);
+
+        mController.getSettingsObserver().onChange(true, null);
+
+        SmartspaceTarget t = mock(SmartspaceTarget.class);
+        when(t.isSensitive()).thenReturn(false);
+        when(t.getUserHandle()).thenReturn(new UserHandle(USER_ID));
+        assertEquals(false, mController.filterSmartspaceTarget(t));
+
+        reset(t);
+        when(t.isSensitive()).thenReturn(false);
+        when(t.getUserHandle()).thenReturn(new UserHandle(MANAGED_USER_ID));
+        assertEquals(false, mController.filterSmartspaceTarget(t));
+    }
+
+    @Test
+    public void filterAllSensitiveTargetsAllUsers() {
+        setupPrimaryAndManagedUser();
+        mController.init();
+
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), eq(USER_ID))).thenReturn(0);
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), eq(MANAGED_USER_ID)))
+                .thenReturn(0);
+
+        mController.getSettingsObserver().onChange(true, null);
+
+        SmartspaceTarget t = mock(SmartspaceTarget.class);
+        when(t.isSensitive()).thenReturn(true);
+        when(t.getUserHandle()).thenReturn(new UserHandle(USER_ID));
+        assertEquals(true, mController.filterSmartspaceTarget(t));
+
+        reset(t);
+        when(t.isSensitive()).thenReturn(true);
+        when(t.getUserHandle()).thenReturn(new UserHandle(MANAGED_USER_ID));
+        assertEquals(true, mController.filterSmartspaceTarget(t));
+    }
+
+    @Test
+    public void filterSensitiveManagedUserTargets() {
+        setupPrimaryAndManagedUser();
+        mController.init();
+
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), eq(USER_ID))).thenReturn(1);
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), eq(MANAGED_USER_ID)))
+                .thenReturn(0);
+
+        mController.getSettingsObserver().onChange(true, null);
+
+        SmartspaceTarget t = mock(SmartspaceTarget.class);
+        when(t.isSensitive()).thenReturn(true);
+        when(t.getUserHandle()).thenReturn(new UserHandle(USER_ID));
+        assertEquals(false, mController.filterSmartspaceTarget(t));
+
+        reset(t);
+        when(t.isSensitive()).thenReturn(true);
+        when(t.getUserHandle()).thenReturn(new UserHandle(MANAGED_USER_ID));
+        assertEquals(true, mController.filterSmartspaceTarget(t));
+    }
+
+    private void setupPrimaryAndManagedUser() {
+        UserInfo userInfo = mock(UserInfo.class);
+        when(userInfo.isManagedProfile()).thenReturn(true);
+        when(userInfo.getUserHandle()).thenReturn(new UserHandle(MANAGED_USER_ID));
+        when(mUserTracker.getUserProfiles()).thenReturn(List.of(userInfo));
+
+        when(mUserTracker.getUserId()).thenReturn(USER_ID);
+        when(mUserTracker.getUserHandle()).thenReturn(new UserHandle(USER_ID));
+    }
+
+    private void setupPrimaryAndNoManagedUser() {
+        when(mUserTracker.getUserProfiles()).thenReturn(Collections.emptyList());
+
+        when(mUserTracker.getUserId()).thenReturn(USER_ID);
+        when(mUserTracker.getUserHandle()).thenReturn(new UserHandle(USER_ID));
     }
 
     private void verifyAttachment(VerificationMode times) {
