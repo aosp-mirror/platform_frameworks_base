@@ -3382,7 +3382,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Sets the inactive state of an app.");
             pw.println("  get-inactive [--user <USER_ID>] <PACKAGE>");
             pw.println("      Returns the inactive state of an app.");
-            pw.println("  set-standby-bucket [--user <USER_ID>] <PACKAGE> active|working_set|frequent|rare");
+            pw.println("  set-standby-bucket [--user <USER_ID>] <PACKAGE> active|working_set|frequent|rare|restricted");
             pw.println("      Puts an app in the standby bucket.");
             pw.println("  get-standby-bucket [--user <USER_ID>] <PACKAGE>");
             pw.println("      Returns the standby bucket of an app.");

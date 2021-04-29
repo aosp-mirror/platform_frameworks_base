@@ -523,12 +523,13 @@ public class NotificationPanelViewController extends PanelViewController {
     private final Rect mKeyguardStatusAreaClipBounds = new Rect();
     private int mOldLayoutDirection;
     private NotificationShelfController mNotificationShelfController;
+    private int mScrimCornerRadius;
+    private int mScreenCornerRadius;
 
     private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final Executor mUiExecutor;
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
-    private int mScrimCornerRadius;
     private KeyguardMediaController mKeyguardMediaController;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
@@ -807,6 +808,10 @@ public class NotificationPanelViewController extends PanelViewController {
                 com.android.internal.R.dimen.status_bar_height);
         mHeadsUpInset = statusbarHeight + mResources.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
+        mScrimCornerRadius = mResources.getDimensionPixelSize(
+                R.dimen.notification_scrim_corner_radius);
+        mScreenCornerRadius = mResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.rounded_corner_radius);
     }
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
@@ -871,8 +876,6 @@ public class NotificationPanelViewController extends PanelViewController {
     public void updateResources() {
         mSplitShadeNotificationsTopPadding =
                 mResources.getDimensionPixelSize(R.dimen.notifications_top_padding_split_shade);
-        mScrimCornerRadius =
-                mResources.getDimensionPixelSize(R.dimen.notification_scrim_corner_radius);
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
         mShouldUseSplitNotificationShade =
@@ -2058,6 +2061,7 @@ public class NotificationPanelViewController extends PanelViewController {
         int left = 0;
         int right = 0;
         boolean visible = qsFraction > 0 || qsPanelBottomY > 0;
+        int radius = mScrimCornerRadius;
         if (visible || !mShouldUseSplitNotificationShade) {
             if (!mShouldUseSplitNotificationShade) {
                 float notificationTop = mAmbientState.getStackY() - mQsNotificationTopPadding;
@@ -2065,6 +2069,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 bottom = getView().getBottom();
                 left = getView().getLeft();
                 right = getView().getRight();
+                radius = (int) MathUtils.lerp(mScreenCornerRadius, mScrimCornerRadius,
+                        Math.min(top / (float) mScrimCornerRadius, 1f));
             } else {
                 top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
                 bottom = mNotificationStackScrollLayoutController.getHeight();
@@ -2076,7 +2082,7 @@ public class NotificationPanelViewController extends PanelViewController {
         if (!mShouldUseSplitNotificationShade) {
             // Fancy clipping for quick settings
             if (mQs != null) {
-                mQs.setFancyClipping(top, bottom, mScrimCornerRadius, visible);
+                mQs.setFancyClipping(top, bottom, radius, visible);
             }
             // The padding on this area is large enough that we can use a cheaper clipping strategy
             mKeyguardStatusAreaClipBounds.set(left, top, right, bottom);
@@ -2084,6 +2090,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     ? mKeyguardStatusAreaClipBounds : null);
         }
         mScrimController.setNotificationsBounds(left, top, right, bottom);
+        mScrimController.setScrimCornerRadius(radius);
     }
 
     private int calculateQsBottomPosition(float qsExpansionFraction) {

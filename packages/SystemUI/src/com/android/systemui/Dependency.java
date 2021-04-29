@@ -54,6 +54,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarOverlayController;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginDependencyProvider;
@@ -356,6 +357,7 @@ public class Dependency {
     @Inject Lazy<TelephonyListenerManager> mTelephonyListenerManager;
     @Inject Lazy<SystemStatusAnimationScheduler> mSystemStatusAnimationSchedulerLazy;
     @Inject Lazy<PrivacyDotViewController> mPrivacyDotViewControllerLazy;
+    @Inject Lazy<EdgeBackGestureHandler> mEdgeBackGestureHandler;
 
     @Inject
     public Dependency() {
@@ -568,6 +570,7 @@ public class Dependency {
         mProviders.put(SystemStatusAnimationScheduler.class,
                 mSystemStatusAnimationSchedulerLazy::get);
         mProviders.put(PrivacyDotViewController.class, mPrivacyDotViewControllerLazy::get);
+        mProviders.put(EdgeBackGestureHandler.class, mEdgeBackGestureHandler::get);
 
         Dependency.setInstance(this);
     }

@@ -343,6 +343,31 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         assertFalse(mGatewayConnection.isInSafeMode());
     }
 
+    @Test
+    public void testSubsequentFailedValidationTriggersSafeMode() throws Exception {
+        triggerChildOpened();
+        mTestLooper.dispatchAll();
+
+        triggerValidation(NetworkAgent.VALIDATION_STATUS_VALID);
+        assertFalse(mGatewayConnection.isInSafeMode());
+
+        // Trigger a failed validation, and the subsequent safemode timeout.
+        triggerValidation(NetworkAgent.VALIDATION_STATUS_NOT_VALID);
+        mTestLooper.dispatchAll();
+
+        final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mDeps, times(2))
+                .newWakeupMessage(
+                        eq(mVcnContext),
+                        any(),
+                        eq(VcnGatewayConnection.SAFEMODE_TIMEOUT_ALARM),
+                        runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+        mTestLooper.dispatchAll();
+
+        assertTrue(mGatewayConnection.isInSafeMode());
+    }
+
     private Consumer<VcnNetworkAgent> setupNetworkAndGetUnwantedCallback() {
         triggerChildOpened();
         mTestLooper.dispatchAll();

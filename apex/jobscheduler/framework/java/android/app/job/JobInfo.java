@@ -1513,6 +1513,11 @@ public class JobInfo implements Parcelable {
          * available quota (and the job will not be successfully scheduled).
          *
          * <p>
+         * Expedited job quota will replenish over time and as the user interacts with the app,
+         * so you should not have to worry about running out of quota because of processing from
+         * frequent user engagement.
+         *
+         * <p>
          * Expedited jobs may only set network, storage-not-low, and persistence constraints.
          * No other constraints are allowed.
          *

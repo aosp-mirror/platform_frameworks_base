@@ -78,6 +78,7 @@ class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarVi
     fun setVerticalPadding(padding: Int) {
         val leftPadding = holder.seekBar.paddingLeft
         val rightPadding = holder.seekBar.paddingRight
-        holder.seekBar.setPadding(leftPadding, padding, rightPadding, padding)
+        val bottomPadding = holder.seekBar.paddingBottom
+        holder.seekBar.setPadding(leftPadding, padding, rightPadding, bottomPadding)
     }
 }
