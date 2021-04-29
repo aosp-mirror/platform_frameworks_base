@@ -247,13 +247,14 @@ class ActivityMetricsLogger {
         @Nullable
         static TransitionInfo create(@NonNull ActivityRecord r,
                 @NonNull LaunchingState launchingState, @Nullable ActivityOptions options,
-                boolean processRunning, boolean processSwitch, int startResult) {
+                boolean processRunning, boolean processSwitch, boolean newActivityCreated,
+                int startResult) {
             if (startResult != START_SUCCESS && startResult != START_TASK_TO_FRONT) {
                 return null;
             }
             final int transitionType;
             if (processRunning) {
-                transitionType = r.attachedToProcess()
+                transitionType = !newActivityCreated && r.attachedToProcess()
                         ? TYPE_TRANSITION_HOT_LAUNCH
                         : TYPE_TRANSITION_WARM_LAUNCH;
             } else {
@@ -560,10 +561,12 @@ class ActivityMetricsLogger {
      * @param resultCode One of the {@link android.app.ActivityManager}.START_* flags, indicating
      *                   the result of the launch.
      * @param launchedActivity The activity that is being launched
+     * @param newActivityCreated Whether a new activity instance is created.
      * @param options The given options of the launching activity.
      */
     void notifyActivityLaunched(@NonNull LaunchingState launchingState, int resultCode,
-            @Nullable ActivityRecord launchedActivity, @Nullable ActivityOptions options) {
+            boolean newActivityCreated, @Nullable ActivityRecord launchedActivity,
+            @Nullable ActivityOptions options) {
         if (launchedActivity == null) {
             // The launch is aborted, e.g. intent not resolved, class not found.
             abort(null /* info */, "nothing launched");
@@ -587,7 +590,8 @@ class ActivityMetricsLogger {
         if (DEBUG_METRICS) {
             Slog.i(TAG, "notifyActivityLaunched" + " resultCode=" + resultCode
                     + " launchedActivity=" + launchedActivity + " processRunning=" + processRunning
-                    + " processSwitch=" + processSwitch + " info=" + info);
+                    + " processSwitch=" + processSwitch
+                    + " newActivityCreated=" + newActivityCreated + " info=" + info);
         }
 
         if (launchedActivity.isReportedDrawn() && launchedActivity.isVisible()) {
@@ -608,7 +612,7 @@ class ActivityMetricsLogger {
         }
 
         final TransitionInfo newInfo = TransitionInfo.create(launchedActivity, launchingState,
-                options, processRunning, processSwitch, resultCode);
+                options, processRunning, processSwitch, newActivityCreated, resultCode);
         if (newInfo == null) {
             abort(info, "unrecognized launch");
             return;
