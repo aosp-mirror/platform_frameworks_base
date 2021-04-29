@@ -110,6 +110,10 @@ public class DividerView extends FrameLayout implements View.OnTouchListener,
             return false;
         }
 
+        if (mDoubleTapDetector.onTouchEvent(event)) {
+            return true;
+        }
+
         final int action = event.getAction() & MotionEvent.ACTION_MASK;
         final boolean isLandscape = isLandscape();
         // Using raw xy to prevent lost track of motion events while moving divider bar.
@@ -136,21 +140,22 @@ public class DividerView extends FrameLayout implements View.OnTouchListener,
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mVelocityTracker.addMovement(event);
+                releaseTouching();
+
+                if (!mMoving) break;
+
                 mVelocityTracker.computeCurrentVelocity(1000 /* units */);
                 final float velocity = isLandscape
                         ? mVelocityTracker.getXVelocity()
                         : mVelocityTracker.getYVelocity();
-                releaseTouching();
-                mMoving = false;
-
                 final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
                 final DividerSnapAlgorithm.SnapTarget snapTarget =
                         mSplitLayout.findSnapTarget(position, velocity, false /* hardDismiss */);
                 mSplitLayout.snapToTarget(position, snapTarget);
+                mMoving = false;
                 break;
         }
 
-        mDoubleTapDetector.onTouchEvent(event);
         return true;
     }
 
@@ -229,7 +234,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener,
             if (mSplitLayout != null) {
                 mSplitLayout.onDoubleTappedDivider();
             }
-            return false;
+            return true;
         }
     }
 }
