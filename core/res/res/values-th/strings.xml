@@ -2085,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"การแจ้งเตือนนี้มีการลดระดับเป็นแบบปิดเสียง แตะเพื่อแสดงความคิดเห็น"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"การแจ้งเตือนนี้มีการเพิ่มระดับ แตะเพื่อแสดงความคิดเห็น"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"การแจ้งเตือนนี้มีการลดระดับ แตะเพื่อแสดงความคิดเห็น"</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"การแจ้งเตือนที่เพิ่มประสิทธิภาพ"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"การดำเนินการและการตอบกลับที่แนะนำจะแสดงผ่านการแจ้งเตือนที่เพิ่มประสิทธิภาพ ไม่รองรับการแจ้งเตือนแบบปรับอัตโนมัติใน Android อีกต่อไป"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ตกลง"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ปิด"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ดูข้อมูลเพิ่มเติม"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"การแจ้งเตือนที่เพิ่มประสิทธิภาพมาแทนที่การแจ้งเตือนแบบปรับอัตโนมัติของ Android ใน Android 12 ฟีเจอร์นี้จะแสดงการดำเนินการและการตอบกลับที่แนะนำ ตลอดจนจัดระเบียบการแจ้งเตือน\n\nการแจ้งเตือนที่เพิ่มประสิทธิภาพจะเข้าถึงเนื้อหาของการแจ้งเตือนได้ ซึ่งรวมถึงข้อมูลส่วนบุคคล เช่น ชื่อผู้ติดต่อและข้อความ ฟีเจอร์นี้ยังปิดหรือตอบสนองต่อการแจ้งเตือนได้ด้วย เช่น การรับสายโทรศัพท์และการควบคุมโหมดห้ามรบกวน"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"การแจ้งเตือนข้อมูลโหมดกิจวัตร"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"แบตเตอรี่อาจหมดก่อนการชาร์จปกติ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"เปิดใช้งานโหมดประหยัดแบตเตอรี่แล้วเพื่อยืดอายุการใช้งานแบตเตอรี่"</string>
@@ -2292,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ภาพลักษณ์ของแบรนด์แอปพลิเคชัน"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"ตรวจสอบการตั้งค่าการเข้าถึง"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> จะดูและควบคุมหน้าจอของคุณได้ แตะเพื่อตรวจสอบ"</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

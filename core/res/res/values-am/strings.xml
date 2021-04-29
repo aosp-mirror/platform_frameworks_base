@@ -2085,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ይህ ማሳወቂያ ወደ ዝምታ ዝቅ ብሏል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ይህ ማሳወቂያ ከፍተኛ ደረጃ ተሰጥቶታል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ይህ ማሳወቂያ ዝቅተኛ ደረጃ ተሰጥቶታል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"የተሻሻሉ ማሳወቂያዎች"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"የተጠቆሙ እርምጃዎች እና ምላሾች አሁን በተሻሻሉ ማሳወቂያዎች ቀርበዋል። የAndroid አስማሚ ማሳወቂያዎች ከእንግዲህ አይደገፉም።"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"እሺ"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"አጥፋ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"የበለጠ ለመረዳት"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"የተሻሻሉ ማሳወቂያዎች በAndroid 12 ውስጥ Android ራስ-አስማሚ ማሳወቂያዎችን ተክተዋል። ይህ ባህሪ የተጠቆሙ እርምጃዎችን እና ምላሾችን ያሳያል እንዲሁም ማሳወቂያዎችዎን ያደራጃል።\n\nየተሻሻሉ ማሳወቂያዎች እንደ የእውቂያ ስሞች እና መልዕክቶች ያሉ የግል መረጃዎችን ጨምሮ የማሳወቂያ ይዘቶችን መድረስ ይችላሉ። ይህ ባህሪ እንደ የስልክ ጥሪዎችን መመለስ እና አትረብሽን መቆጣጠርን ያሉ ማሳወቂያዎችን ማሰናበት ወይም ምላሽ መስጠት ይችላል።"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"የዕለት ተዕለት ሁነታ መረጃ ማሳወቂያዎች"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ባትሪ ከተለመደው ኃይል መሙላት በፊት ሊያልቅ ይችላል"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"የባትሪ ቆጣቢ የባትሪ ዕድሜን ለማራዘም ገብሯል።"</string>
@@ -2292,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"የመተግበሪያ የምርት ስም ምስል"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"የመዳረሻ ቅንብሮችን ይፈትሹ"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ማያ ገጽዎን ማየት እና መቆጣጠር ይችላል። ለመገምገም መታ ያድርጉ።"</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

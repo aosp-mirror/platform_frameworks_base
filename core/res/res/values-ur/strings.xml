@@ -1820,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"نامعلوم پورٹریٹ"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"نامعلوم لینڈ اسکیپ"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"منسوخ کر دیا گیا"</string>
@@ -1865,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"آپ کے منتظم کے ذریعے اپ ڈیٹ کیا گیا"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"آپ کے منتظم کے ذریعے حذف کیا گیا"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ٹھیک ہے"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"بیٹری سیور گہری تھیم کو آن کرتی ہے اور پس منظر کی سرگرمی، کچھ بصری اثرات اور کچھ مخصوص خصوصیات کو محدود یا آف کرتی ہے۔\n\n"<annotation id="url">"مزید جانیں"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"بیٹری سیور گہری تھیم کو آن کرتی ہے اور پس منظر کی سرگرمی، کچھ بصری اثرات اور کچھ مخصوص خصوصیات کو محدود یا آف کرتی ہے۔"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتی ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا تک رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا اکثر نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ڈیٹا سیور آن کریں؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"آن کریں"</string>
@@ -2088,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"اس اطلاع کو خاموش پر ڈیموٹ کیا گيا۔ تاثرات فراہم کرنے کے ليے تھپتھپائیں۔"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"اس اطلاع کو اعلی درجہ دیا گیا۔ تاثرات فراہم کرنے کے ليے تھپتھپائیں۔"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"اس اطلاع کو کم درجہ دیا گیا۔ تاثرات فراہم کرنے کے ليے تھپتھپائیں۔"</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"بہتر کردہ اطلاعات"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"‏تجویز کردہ کارروائیاں اور جوابات اب بہتر اطلاعات کے ذریعے فراہم کیے جاتے ہیں۔ Android اڈاپٹیو کی اطلاعات اب تعاون یافتہ نہیں ہیں۔"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ٹھیک ہے"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"آف کریں"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"مزید جانیں"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"‏Android 12 میں بہتر کردہ اطلاعات کو Android اڈاپٹیو کی اطلاعات سے تبدیل کیا گیا ہے۔ یہ خصوصیت تجویز کردہ کارروائیاں اور جوابات دکھاتی ہے اور آپ کی اطلاعات کا نظم کرتی ہے۔\n\nبہتر کردہ اطلاعات رابطوں کے نام اور پیغامات جیسی ذاتی معلومات سمیت اطلاعات کے مواد تک رسائی حاصل کر سکتی ہیں۔ یہ خصوصیت اطلاعات کو برخاست کر سکتی ہے یا اس کا جواب بھی دے سکتی ہے جیسے فون کالز کا جواب دینا اور ڈسٹرب نہ کریں کو کنٹرول کرنا۔"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"روٹین موڈ معلومات کی اطلاع"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"معمول چارج سے پہلے بیٹری ختم ہو سکتی ہے"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"بیٹری لائف کو بڑھانے کے لیے بیٹری سیور کو فعال کر دیا گیا ہے"</string>
@@ -2295,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ایپلیکیشن کی برانڈنگ تصویر"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"رسائی کی ترتیبات چیک کریں"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"‫<xliff:g id="SERVICE_NAME">%s</xliff:g> آپ کی اسکرین کو دیکھ اور کنٹرول کر سکتی ہیں۔ جائزے کے لیے تھپتھپائیں۔"</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

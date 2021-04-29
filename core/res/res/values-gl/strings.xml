@@ -2287,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imaxe de marca da aplicación"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Comproba a configuración do acceso"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"Agora <xliff:g id="SERVICE_NAME">%s</xliff:g> pode ver e controlar a túa pantalla. Toca para revisalo."</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>
