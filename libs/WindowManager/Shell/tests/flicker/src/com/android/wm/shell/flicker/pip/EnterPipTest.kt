@@ -65,7 +65,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Test
     fun pipLayerBecomesVisible() {
         testSpec.assertLayers {
-            this.isVisible(pipApp.launcherName)
+            this.isVisible(pipApp.windowName)
         }
     }
 
@@ -73,9 +73,11 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Test
     fun pipWindowBecomesVisible() {
         testSpec.assertWm {
-            invoke("pipWindowIsNotVisible") { !it.wmState.hasPipWindow() }
-                .then()
-                .invoke("pipWindowIsVisible") { it.wmState.hasPipWindow() }
+            invoke("pipWindowIsNotVisible") {
+                verify("Has no pip window").that(it.wmState.hasPipWindow()).isTrue()
+            }.then().invoke("pipWindowIsVisible") {
+                verify("Has pip window").that(it.wmState.hasPipWindow()).isTrue()
+            }
         }
     }
 
