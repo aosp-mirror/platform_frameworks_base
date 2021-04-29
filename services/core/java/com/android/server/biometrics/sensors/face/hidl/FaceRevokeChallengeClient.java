@@ -43,8 +43,10 @@ public class FaceRevokeChallengeClient extends RevokeChallengeClient<IBiometrics
     protected void startHalOperation() {
         try {
             getFreshDaemon().revokeChallenge();
+            mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "revokeChallenge failed", e);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

@@ -42,7 +42,6 @@ public abstract class RevokeChallengeClient<T> extends HalClientMonitor<T> {
         super.start(callback);
 
         startHalOperation();
-        mCallback.onClientFinished(this, true /* success */);
     }
 
     @Override
