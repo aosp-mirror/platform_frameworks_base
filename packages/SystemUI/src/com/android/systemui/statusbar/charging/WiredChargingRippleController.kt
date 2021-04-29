@@ -57,7 +57,7 @@ class WiredChargingRippleController @Inject constructor(
     private val windowManager: WindowManager,
     private val systemClock: SystemClock
 ) {
-    private var charging: Boolean? = null
+    private var pluggedIn: Boolean? = null
     private val rippleEnabled: Boolean = featureFlags.isChargingRippleEnabled &&
             !SystemProperties.getBoolean("persist.debug.suppress-charging-ripple", false)
     private var normalizedPortPosX: Float = context.resources.getFloat(
@@ -86,18 +86,17 @@ class WiredChargingRippleController @Inject constructor(
         val batteryStateChangeCallback = object : BatteryController.BatteryStateChangeCallback {
             override fun onBatteryLevelChanged(
                 level: Int,
-                pluggedIn: Boolean,
-                nowCharging: Boolean
+                nowPluggedIn: Boolean,
+                charging: Boolean
             ) {
                 // Suppresses the ripple when it's disabled, or when the state change comes
                 // from wireless charging.
-                if (!rippleEnabled || batteryController.isWirelessCharging) {
+                if (!rippleEnabled || batteryController.isPluggedInWireless) {
                     return
                 }
-                val wasCharging = charging
-                charging = nowCharging
-                // Only triggers when the keyguard is active and the device is just plugged in.
-                if ((wasCharging == null || !wasCharging) && nowCharging) {
+                val wasPluggedIn = pluggedIn
+                pluggedIn = nowPluggedIn
+                if ((wasPluggedIn == null || !wasPluggedIn) && nowPluggedIn) {
                     startRippleWithDebounce()
                 }
             }
