@@ -81,7 +81,7 @@ interface IConnectivityManager
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     NetworkState[] getAllNetworkState();
 
-    List<NetworkStateSnapshot> getAllNetworkStateSnapshot();
+    List<NetworkStateSnapshot> getAllNetworkStateSnapshots();
 
     boolean isActiveNetworkMetered();
 
