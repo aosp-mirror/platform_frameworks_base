@@ -706,8 +706,7 @@ public class HorizontalScrollView extends FrameLayout {
                 if (getChildCount() == 0) {
                     return false;
                 }
-                if ((mIsBeingDragged = !mScroller.isFinished() || !mEdgeGlowRight.isFinished()
-                        || !mEdgeGlowLeft.isFinished())) {
+                if (!mScroller.isFinished()) {
                     final ViewParent parent = getParent();
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
