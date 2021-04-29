@@ -8123,6 +8123,16 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        if (mRecentsAnimationController != null
+                && mRecentsAnimationController.getTargetAppMainWindow() == touchedWindow) {
+            // If there is an active recents animation and touched window is the target, then ignore
+            // the touch. The target already handles touches using its own input monitor and we
+            // don't want to trigger any lifecycle changes from focusing another window.
+            // TODO(b/186770026): We should remove this once we support multiple resumed activities
+            //                    while in overview
+            return;
+        }
+
         ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "onPointerDownOutsideFocusLocked called on %s",
                 touchedWindow);
         final DisplayContent displayContent = touchedWindow.getDisplayContent();
