@@ -57,6 +57,7 @@ enum class ResourceType {
   kInteger,
   kInterpolator,
   kLayout,
+  kMacro,
   kMenu,
   kMipmap,
   kNavigation,

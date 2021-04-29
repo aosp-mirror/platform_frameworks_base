@@ -628,7 +628,7 @@ uint32_t AndroidTypeToAttributeTypeMask(uint16_t type) {
 
 std::unique_ptr<Item> TryParseItemForAttribute(
     const StringPiece& value, uint32_t type_mask,
-    const std::function<void(const ResourceName&)>& on_create_reference) {
+    const std::function<bool(const ResourceName&)>& on_create_reference) {
   using android::ResTable_map;
 
   auto null_or_empty = TryParseNullOrEmpty(value);
@@ -639,8 +639,11 @@ std::unique_ptr<Item> TryParseItemForAttribute(
   bool create = false;
   auto reference = TryParseReference(value, &create);
   if (reference) {
+    reference->type_flags = type_mask;
     if (create && on_create_reference) {
-      on_create_reference(reference->name.value());
+      if (!on_create_reference(reference->name.value())) {
+        return {};
+      }
     }
     return std::move(reference);
   }
@@ -689,7 +692,7 @@ std::unique_ptr<Item> TryParseItemForAttribute(
  */
 std::unique_ptr<Item> TryParseItemForAttribute(
     const StringPiece& str, const Attribute* attr,
-    const std::function<void(const ResourceName&)>& on_create_reference) {
+    const std::function<bool(const ResourceName&)>& on_create_reference) {
   using android::ResTable_map;
 
   const uint32_t type_mask = attr->type_mask;
