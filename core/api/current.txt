@@ -17136,11 +17136,11 @@ package android.graphics.text {
 
 package android.hardware {
 
-  public abstract class Battery {
-    ctor public Battery();
+  public abstract class BatteryState {
+    ctor public BatteryState();
     method @FloatRange(from=-1.0F, to=1.0f) public abstract float getCapacity();
     method public abstract int getStatus();
-    method public abstract boolean hasBattery();
+    method public abstract boolean isPresent();
     field public static final int STATUS_CHARGING = 2; // 0x2
     field public static final int STATUS_DISCHARGING = 3; // 0x3
     field public static final int STATUS_FULL = 5; // 0x5
@@ -47130,7 +47130,7 @@ package android.view {
 
   public final class InputDevice implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public android.hardware.Battery getBattery();
+    method @NonNull public android.hardware.BatteryState getBatteryState();
     method public int getControllerNumber();
     method public String getDescriptor();
     method public static android.view.InputDevice getDevice(int);
