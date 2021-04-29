@@ -25,13 +25,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 @RunWith(AndroidJUnit4.class)
 public class OrdinalGeneratorTest {
 
     @Test
-    public void testOrdinal() {
-        OrdinalGenerator<String> ordinalGenerator = new OrdinalGenerator<>();
+    public void testOrdinal_withIdentityFunction() {
+        OrdinalGenerator<String> ordinalGenerator = new OrdinalGenerator<>(Function.identity());
         int oneOrd = ordinalGenerator.ordinal("One");
         int twoOrd = ordinalGenerator.ordinal("Two");
         assertNotEquals(oneOrd, twoOrd);
@@ -45,13 +46,42 @@ public class OrdinalGeneratorTest {
     }
 
     @Test
-    public void testOrdinals() {
-        OrdinalGenerator<String> ordinalGenerator = new OrdinalGenerator<>();
+    public void testOrdinals_withIdentityFunction() {
+        OrdinalGenerator<String> ordinalGenerator = new OrdinalGenerator<>(Function.identity());
         int[] oneTwoOrds = ordinalGenerator.ordinals(Arrays.asList("One", "Two"));
         int[] twoThreeOrds = ordinalGenerator.ordinals(Arrays.asList("Two", "Three"));
         assertEquals(oneTwoOrds[0], ordinalGenerator.ordinal("One"));
         assertEquals(oneTwoOrds[1], ordinalGenerator.ordinal("Two"));
         assertEquals(twoThreeOrds[0], ordinalGenerator.ordinal("Two"));
         assertEquals(twoThreeOrds[1], ordinalGenerator.ordinal("Three"));
+    }
+
+    @Test
+    public void testOrdinal_withCanonicalizationFunction() {
+        OrdinalGenerator<String> ordinalGenerator = new OrdinalGenerator<>(String::toLowerCase);
+
+        int oneOrd = ordinalGenerator.ordinal("One");
+        int twoOrd = ordinalGenerator.ordinal("Two");
+        assertNotEquals(oneOrd, twoOrd);
+
+        assertEquals(oneOrd, ordinalGenerator.ordinal("ONE"));
+        assertEquals(twoOrd, ordinalGenerator.ordinal("two"));
+
+        int threeOrd = ordinalGenerator.ordinal("Three");
+        assertNotEquals(oneOrd, threeOrd);
+        assertNotEquals(twoOrd, threeOrd);
+    }
+
+    @Test
+    public void testOrdinals_withCanonicalizationFunction() {
+        OrdinalGenerator<String> ordinalGenerator = new OrdinalGenerator<>(String::toLowerCase);
+
+        int[] oneTwoOrds = ordinalGenerator.ordinals(Arrays.asList("One", "Two"));
+        int[] twoThreeOrds = ordinalGenerator.ordinals(Arrays.asList("Two", "Three"));
+
+        assertEquals(oneTwoOrds[0], ordinalGenerator.ordinal("ONE"));
+        assertEquals(oneTwoOrds[1], ordinalGenerator.ordinal("two"));
+        assertEquals(twoThreeOrds[0], ordinalGenerator.ordinal("TWO"));
+        assertEquals(twoThreeOrds[1], ordinalGenerator.ordinal("threE"));
     }
 }

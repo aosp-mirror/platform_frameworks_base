@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 /**
  * White-box unit tests for {@link TimeZoneDetectorStrategyImpl}.
@@ -1008,7 +1009,7 @@ public class TimeZoneDetectorStrategyImplTest {
         // Check the various feature state values are what we expect.
         assertFeatureStateMatchesConfig(expectedInternalConfig, actualState, expectedDetectionMode);
 
-        OrdinalGenerator<String> tzIdOrdinalGenerator = new OrdinalGenerator<>();
+        OrdinalGenerator<String> tzIdOrdinalGenerator = new OrdinalGenerator<>(Function.identity());
         MetricsTimeZoneDetectorState expectedState =
                 MetricsTimeZoneDetectorState.create(
                         tzIdOrdinalGenerator, expectedInternalConfig, expectedDeviceTimeZoneId,
