@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import android.app.smartspace.SmartspaceAction
 import android.app.smartspace.SmartspaceTarget
 import android.os.SystemProperties
 import android.util.Log
@@ -121,6 +122,12 @@ class MediaDataFilter @Inject constructor(
         }
 
         // If no recent media, continue with smartspace update
+        if (isMediaRecommendationEmpty(data)) {
+            Log.d(TAG, "Empty media recommendations. Skip showing the card")
+            return
+        }
+
+        // Proceed only if the Smartspace recommendation is not empty.
         listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data) }
     }
 
@@ -214,4 +221,10 @@ class MediaDataFilter @Inject constructor(
      * Remove a listener that was registered with addListener
      */
     fun removeListener(listener: MediaDataManager.Listener) = _listeners.remove(listener)
+
+    /** Check if the Smartspace sends an empty update. */
+    private fun isMediaRecommendationEmpty(data: SmartspaceTarget): Boolean {
+        val mediaRecommendationList: List<SmartspaceAction> = data.getIconGrid()
+        return mediaRecommendationList == null || mediaRecommendationList.isEmpty()
+    }
 }
