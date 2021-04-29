@@ -1947,8 +1947,9 @@ public class ActivityManager {
             pw.print(((baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0));
             pw.print(" activityType="); pw.print(activityTypeToString(getActivityType()));
             pw.print(" windowingMode="); pw.print(windowingModeToString(getWindowingMode()));
-            pw.print(" supportsSplitScreenMultiWindow=");
-            pw.println(supportsSplitScreenMultiWindow);
+            pw.print(" supportsSplitScreenMultiWindow="); pw.print(supportsSplitScreenMultiWindow);
+            pw.print(" supportsMultiWindow=");
+            pw.println(supportsMultiWindow);
             if (taskDescription != null) {
                 pw.print("   ");
                 final ActivityManager.TaskDescription td = taskDescription;
