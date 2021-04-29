@@ -111,12 +111,15 @@ bool Reference::Equals(const Value* value) const {
   if (!other) {
     return false;
   }
-  return reference_type == other->reference_type &&
-         private_reference == other->private_reference && id == other->id &&
-         name == other->name;
+  return reference_type == other->reference_type && private_reference == other->private_reference &&
+         id == other->id && name == other->name && type_flags == other->type_flags;
 }
 
 bool Reference::Flatten(android::Res_value* out_value) const {
+  if (name && name.value().type == ResourceType::kMacro) {
+    return false;
+  }
+
   const ResourceId resid = id.value_or_default(ResourceId(0));
   const bool dynamic = resid.is_valid() && is_dynamic;
 
@@ -551,7 +554,7 @@ bool Attribute::IsCompatibleWith(const Attribute& attr) const {
   return this_type_mask == that_type_mask;
 }
 
-std::string Attribute::MaskString() const {
+std::string Attribute::MaskString(uint32_t type_mask) {
   if (type_mask == android::ResTable_map::TYPE_ANY) {
     return "any";
   }
@@ -648,6 +651,10 @@ std::string Attribute::MaskString() const {
     out << "flags";
   }
   return out.str();
+}
+
+std::string Attribute::MaskString() const {
+  return MaskString(type_mask);
 }
 
 void Attribute::Print(std::ostream* out) const {
@@ -1017,6 +1024,21 @@ void Styleable::Print(std::ostream* out) const {
        << " [" << util::Joiner(entries, ", ") << "]";
 }
 
+bool Macro::Equals(const Value* value) const {
+  const Macro* other = ValueCast<Macro>(value);
+  if (!other) {
+    return false;
+  }
+  return other->raw_value == raw_value && other->style_string.spans == style_string.spans &&
+         other->style_string.str == style_string.str &&
+         other->untranslatable_sections == untranslatable_sections &&
+         other->alias_namespaces == alias_namespaces;
+}
+
+void Macro::Print(std::ostream* out) const {
+  *out << "(macro) ";
+}
+
 bool operator<(const Reference& a, const Reference& b) {
   int cmp = a.name.value_or_default({}).compare(b.name.value_or_default({}));
   if (cmp != 0) return cmp < 0;
@@ -1146,6 +1168,11 @@ std::unique_ptr<Styleable> CloningValueTransformer::TransformDerived(const Style
   for (const Reference& s : value->entries) {
     new_value->entries.emplace_back(*s.Transform(*this));
   }
+  return CopyValueFields(std::move(new_value), value);
+}
+
+std::unique_ptr<Macro> CloningValueTransformer::TransformDerived(const Macro* value) {
+  auto new_value = std::make_unique<Macro>(*value);
   return CopyValueFields(std::move(new_value), value);
 }
 

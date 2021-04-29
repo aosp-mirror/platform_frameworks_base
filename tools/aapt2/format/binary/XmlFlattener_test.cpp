@@ -222,7 +222,7 @@ TEST_F(XmlFlattenerTest, FlattenNonStandardPackageId) {
             android:id="@id/foo"
             app:foo="@id/foo" />)");
 
-  XmlReferenceLinker linker;
+  XmlReferenceLinker linker(nullptr);
   ASSERT_TRUE(linker.Consume(context_.get(), doc.get()));
 
   // The tree needs a custom DynamicRefTable since it is not using a standard app ID (0x7f).
