@@ -1649,7 +1649,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tezkor ishga tushirishni o‘chirib qo‘yish"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Tezkor ishga tushirishdan foydalanish"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ranglarni akslantirish"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Rangni tuzatish"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Ranglarni tuzatish"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> yoqildi."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> faolsizlantirildi."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> xizmatidan foydalanish uchun ikkala ovoz balandligi tugmalarini uzoq bosib turing"</string>

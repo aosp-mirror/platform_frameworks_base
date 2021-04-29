@@ -93,7 +93,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"कुनै स्क्रिन रेकर्ड गर्ने सत्रका लागि चलिरहेको सूचना"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"रेकर्ड गर्न थाल्ने हो?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"रेकर्ड गर्दा, Android सिस्टमले तपाईंको स्क्रिनमा देखिने वा तपाईंको डिभाइसमा प्ले गरिने सबै संवेदनशील जानकारी रेकर्ड गर्न सक्छ। यो जानकारीमा पासवर्ड, भुक्तानीसम्बन्धी जानकारी, फोटो, सन्देश र अडियो समावेश हुन्छ।"</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"अडियो रेकर्ड गर्नुहोस्"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"अडियो रेकर्ड गरियोस्"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिभाइसको अडियो"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तपाईंको डिभाइसका सङ्गीत, कल र रिङटोन जस्ता आवाज"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"माइक्रोफोन"</string>
@@ -364,7 +364,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"पोट्रेट"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"परिदृश्य"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"आगत विधि"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"स्थान"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"लोकेसन"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"स्थान बन्द छ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"मिडिया उपकरण"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
@@ -825,7 +825,7 @@
     <string name="data_saver" msgid="3484013368530820763">"डेटा सेभर"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"डेटा सेभर सक्रिय छ"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"डेटा सेभर बन्द छ"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"सक्रिय गर्नुहोस्"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"अन छ"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"अफ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"उपलब्ध छैन"</string>
     <string name="nav_bar" msgid="4642708685386136807">"नेभिगेशन पट्टी"</string>
