@@ -943,16 +943,7 @@ public class UsageStatsService extends SystemService implements
                                     .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND);
                     // check if this activity has already been resumed
                     if (mVisibleActivities.get(event.mInstanceId) != null) break;
-                    final String usageSourcePackage;
-                    switch(mUsageSource) {
-                        case USAGE_SOURCE_CURRENT_ACTIVITY:
-                            usageSourcePackage = event.mPackage;
-                            break;
-                        case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
-                        default:
-                            usageSourcePackage = event.mTaskRootPackage;
-                            break;
-                    }
+                    final String usageSourcePackage = getUsageSourcePackage(event);
                     try {
                         mAppTimeLimit.noteUsageStart(usageSourcePackage, userId);
                     } catch (IllegalArgumentException iae) {
@@ -964,26 +955,34 @@ public class UsageStatsService extends SystemService implements
                     mVisibleActivities.put(event.mInstanceId, resumedData);
                     break;
                 case Event.ACTIVITY_PAUSED:
-                    final ActivityData pausedData = mVisibleActivities.get(event.mInstanceId);
+                    ActivityData pausedData = mVisibleActivities.get(event.mInstanceId);
                     if (pausedData == null) {
-                        Slog.w(TAG, "Unexpected activity event reported! (" + event.mPackage
-                                + "/" + event.mClass + " event : " + event.mEventType
-                                + " instanceId : " + event.mInstanceId + ")");
-                    } else {
-                        pausedData.lastEvent = Event.ACTIVITY_PAUSED;
-                        if (event.mTaskRootPackage == null) {
-                            // Task Root info is missing. Repair the event based on previous data
-                            event.mTaskRootPackage = pausedData.mTaskRootPackage;
-                            event.mTaskRootClass = pausedData.mTaskRootClass;
+                        // Must have transitioned from Stopped/Destroyed to Paused state.
+                        final String usageSourcePackage2 = getUsageSourcePackage(event);
+                        try {
+                            mAppTimeLimit.noteUsageStart(usageSourcePackage2, userId);
+                        } catch (IllegalArgumentException iae) {
+                            Slog.e(TAG, "Failed to note usage start", iae);
                         }
+                        pausedData = new ActivityData(event.mTaskRootPackage, event.mTaskRootClass,
+                                usageSourcePackage2);
+                        mVisibleActivities.put(event.mInstanceId, pausedData);
+                    } else {
+                        FrameworkStatsLog.write(
+                                FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
+                                uid,
+                                event.mPackage,
+                                event.mClass,
+                                FrameworkStatsLog
+                                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
                     }
-                    FrameworkStatsLog.write(
-                            FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                            uid,
-                            event.mPackage,
-                            event.mClass,
-                            FrameworkStatsLog
-                                .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
+
+                    pausedData.lastEvent = Event.ACTIVITY_PAUSED;
+                    if (event.mTaskRootPackage == null) {
+                        // Task Root info is missing. Repair the event based on previous data
+                        event.mTaskRootPackage = pausedData.mTaskRootPackage;
+                        event.mTaskRootClass = pausedData.mTaskRootClass;
+                    }
                     break;
                 case Event.ACTIVITY_DESTROYED:
                     // Treat activity destroys like activity stops.
@@ -993,7 +992,9 @@ public class UsageStatsService extends SystemService implements
                     final ActivityData prevData =
                             mVisibleActivities.removeReturnOld(event.mInstanceId);
                     if (prevData == null) {
-                        // The activity stop was already handled.
+                        Slog.w(TAG, "Unexpected activity event reported! (" + event.mPackage
+                                + "/" + event.mClass + " event : " + event.mEventType
+                                + " instanceId : " + event.mInstanceId + ")");
                         return;
                     }
 
@@ -1056,6 +1057,16 @@ public class UsageStatsService extends SystemService implements
         final int size = mUsageEventListeners.size();
         for (int i = 0; i < size; ++i) {
             mUsageEventListeners.valueAt(i).onUsageEvent(userId, event);
+        }
+    }
+
+    private String getUsageSourcePackage(Event event) {
+        switch(mUsageSource) {
+            case USAGE_SOURCE_CURRENT_ACTIVITY:
+                return event.mPackage;
+            case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
+            default:
+                return event.mTaskRootPackage;
         }
     }
 
