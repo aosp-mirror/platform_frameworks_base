@@ -894,7 +894,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         final LinkProperties stackedProp = new LinkProperties();
         stackedProp.setInterfaceName(stackedIface);
         final NetworkStateSnapshot wifiState = buildWifiState();
-        wifiState.linkProperties.addStackedLink(stackedProp);
+        wifiState.getLinkProperties().addStackedLink(stackedProp);
         NetworkStateSnapshot[] states = new NetworkStateSnapshot[] {wifiState};
 
         expectNetworkStatsSummary(buildEmptyStats());
@@ -1585,10 +1585,10 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     }
 
     private String getActiveIface(NetworkStateSnapshot... states) throws Exception {
-        if (states == null || states.length == 0 || states[0].linkProperties == null) {
+        if (states == null || states.length == 0 || states[0].getLinkProperties() == null) {
             return null;
         }
-        return states[0].linkProperties.getInterfaceName();
+        return states[0].getLinkProperties().getInterfaceName();
     }
 
     private void expectNetworkStatsSummary(NetworkStats summary) throws Exception {

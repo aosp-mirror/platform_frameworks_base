@@ -2179,11 +2179,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (NetworkStateSnapshot snapshot : getAllNetworkStateSnapshots()) {
             // NetworkStateSnapshot doesn't contain NetworkInfo, so need to fetch it from the
             // NetworkAgentInfo.
-            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(snapshot.network);
+            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(snapshot.getNetwork());
             if (nai != null && nai.networkInfo.isConnected()) {
                 result.add(new NetworkState(new NetworkInfo(nai.networkInfo),
-                        snapshot.linkProperties, snapshot.networkCapabilities, snapshot.network,
-                        snapshot.subscriberId));
+                        snapshot.getLinkProperties(), snapshot.getNetworkCapabilities(),
+                        snapshot.getNetwork(), snapshot.getSubscriberId()));
             }
         }
         return result.toArray(new NetworkState[result.size()]);
