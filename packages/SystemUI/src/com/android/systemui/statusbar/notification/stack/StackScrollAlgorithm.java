@@ -151,7 +151,8 @@ public class StackScrollAlgorithm {
 
     private void updateClipping(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        float drawStart = !ambientState.isOnKeyguard() ? ambientState.getStackY() : 0;
+        float drawStart = !ambientState.isOnKeyguard()
+                ? ambientState.getStackY() - ambientState.getScrollY() : 0;
         float clipStart = 0;
         int childCount = algorithmState.visibleChildren.size();
         boolean firstHeadsUp = true;

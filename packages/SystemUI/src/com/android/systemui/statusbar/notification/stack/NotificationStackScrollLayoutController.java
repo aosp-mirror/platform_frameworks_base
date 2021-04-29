@@ -971,6 +971,10 @@ public class NotificationStackScrollLayoutController {
         mView.setQsExpansionFraction(expansionFraction);
     }
 
+    public void setOnStackYChanged(Runnable onStackYChanged) {
+        mView.setOnStackYChanged(onStackYChanged);
+    }
+
     public float calculateAppearFractionBypass() {
         return mView.calculateAppearFractionBypass();
     }
