@@ -4079,6 +4079,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.lastActiveTime = lastActiveTime;
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
+        info.supportsMultiWindow = supportsMultiWindow();
         info.configuration.setTo(getConfiguration());
         // Update to the task's current activity type and windowing mode which may differ from the
         // window configuration
