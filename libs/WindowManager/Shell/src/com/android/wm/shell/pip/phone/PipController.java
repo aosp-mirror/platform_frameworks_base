@@ -464,7 +464,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             pipSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
                     snapFraction, mPipBoundsState.getStashedState(),
                     mPipBoundsState.getStashOffset(),
-                    mPipBoundsState.getDisplayBounds());
+                    mPipBoundsState.getDisplayBounds(),
+                    mPipBoundsState.getDisplayLayout().stableInsets());
 
             mTouchHandler.getMotionHelper().movePip(postChangeStackBounds);
         } else {
@@ -668,7 +669,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 postChangeStackBounds, false /* adjustForIme */);
         pipSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
                 snapFraction, mPipBoundsState.getStashedState(), mPipBoundsState.getStashOffset(),
-                mPipBoundsState.getDisplayBounds());
+                mPipBoundsState.getDisplayBounds(),
+                mPipBoundsState.getDisplayLayout().stableInsets());
 
         mPipBoundsAlgorithm.getInsetBounds(outInsetBounds);
         outBounds.set(postChangeStackBounds);

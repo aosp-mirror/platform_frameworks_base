@@ -109,13 +109,14 @@ public class PipSnapAlgorithm {
      * consideration.
      */
     public void applySnapFraction(Rect stackBounds, Rect movementBounds, float snapFraction,
-            @PipBoundsState.StashType int stashType, int stashOffset, Rect displayBounds) {
+            @PipBoundsState.StashType int stashType, int stashOffset, Rect displayBounds,
+            Rect insetBounds) {
         applySnapFraction(stackBounds, movementBounds, snapFraction);
 
         if (stashType != STASH_TYPE_NONE) {
             stackBounds.offsetTo(stashType == STASH_TYPE_LEFT
-                            ? stashOffset - stackBounds.width()
-                            : displayBounds.right - stashOffset,
+                            ? stashOffset - stackBounds.width() + insetBounds.left
+                            : displayBounds.right - stashOffset - insetBounds.right,
                     stackBounds.top);
         }
     }
