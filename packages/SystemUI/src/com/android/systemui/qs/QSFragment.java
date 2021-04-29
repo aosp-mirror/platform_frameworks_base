@@ -172,7 +172,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSContainerImplController = qsFragmentComponent.getQSContainerImplController();
         mQSContainerImplController.init();
         mContainer = mQSContainerImplController.getView();
-        mContainer.setBackgroundVisible(!mFeatureFlags.isShadeOpaque());
 
         mQSDetail.setQsPanel(mQSPanelController, mHeader, mFooter);
         mQSAnimator = qsFragmentComponent.getQSAnimator();
