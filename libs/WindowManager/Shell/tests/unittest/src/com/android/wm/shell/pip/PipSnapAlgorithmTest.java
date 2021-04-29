@@ -38,6 +38,8 @@ public class PipSnapAlgorithmTest extends ShellTestCase {
     private static final int DEFAULT_STASH_OFFSET = 32;
     private static final Rect DISPLAY_BOUNDS = new Rect(0, 0, 2000, 2000);
     private static final Rect STACK_BOUNDS_CENTERED = new Rect(900, 900, 1100, 1100);
+    private static final Rect INSET_BOUNDS_EMPTY = new Rect(0, 0, 0, 0);
+    private static final Rect INSET_BOUNDS_RIGHT = new Rect(0, 0, 200, 0);
     private static final Rect MOVEMENT_BOUNDS = new Rect(0, 0,
             DISPLAY_BOUNDS.width() - STACK_BOUNDS_CENTERED.width(),
             DISPLAY_BOUNDS.width() - STACK_BOUNDS_CENTERED.width());
@@ -99,7 +101,8 @@ public class PipSnapAlgorithmTest extends ShellTestCase {
         final Rect bounds = new Rect(STACK_BOUNDS_CENTERED);
 
         mPipSnapAlgorithm.applySnapFraction(bounds, MOVEMENT_BOUNDS, snapFraction,
-                PipBoundsState.STASH_TYPE_NONE, DEFAULT_STASH_OFFSET, DISPLAY_BOUNDS);
+                PipBoundsState.STASH_TYPE_NONE, DEFAULT_STASH_OFFSET, DISPLAY_BOUNDS,
+                INSET_BOUNDS_EMPTY);
 
         assertEquals(MOVEMENT_BOUNDS.right, bounds.left);
         assertEquals(MOVEMENT_BOUNDS.bottom, bounds.top);
@@ -111,7 +114,8 @@ public class PipSnapAlgorithmTest extends ShellTestCase {
         final Rect bounds = new Rect(STACK_BOUNDS_CENTERED);
 
         mPipSnapAlgorithm.applySnapFraction(bounds, MOVEMENT_BOUNDS, snapFraction,
-                PipBoundsState.STASH_TYPE_LEFT, DEFAULT_STASH_OFFSET, DISPLAY_BOUNDS);
+                PipBoundsState.STASH_TYPE_LEFT, DEFAULT_STASH_OFFSET, DISPLAY_BOUNDS,
+                INSET_BOUNDS_EMPTY);
 
         final int offBoundsWidth = bounds.width() - DEFAULT_STASH_OFFSET;
         assertEquals(MOVEMENT_BOUNDS.left - offBoundsWidth, bounds.left);
@@ -124,9 +128,24 @@ public class PipSnapAlgorithmTest extends ShellTestCase {
         final Rect bounds = new Rect(STACK_BOUNDS_CENTERED);
 
         mPipSnapAlgorithm.applySnapFraction(bounds, MOVEMENT_BOUNDS, snapFraction,
-                PipBoundsState.STASH_TYPE_RIGHT, DEFAULT_STASH_OFFSET, DISPLAY_BOUNDS);
+                PipBoundsState.STASH_TYPE_RIGHT, DEFAULT_STASH_OFFSET, DISPLAY_BOUNDS,
+                INSET_BOUNDS_EMPTY);
 
         assertEquals(DISPLAY_BOUNDS.right - DEFAULT_STASH_OFFSET, bounds.left);
+        assertEquals(MOVEMENT_BOUNDS.bottom, bounds.top);
+    }
+
+    @Test
+    public void testApplySnapFraction_stashedRight_withInset() {
+        final float snapFraction = 2f;
+        final Rect bounds = new Rect(STACK_BOUNDS_CENTERED);
+
+        mPipSnapAlgorithm.applySnapFraction(bounds, MOVEMENT_BOUNDS, snapFraction,
+                PipBoundsState.STASH_TYPE_RIGHT, DEFAULT_STASH_OFFSET, DISPLAY_BOUNDS,
+                INSET_BOUNDS_RIGHT);
+
+        assertEquals(DISPLAY_BOUNDS.right - DEFAULT_STASH_OFFSET - INSET_BOUNDS_RIGHT.right,
+                bounds.left);
         assertEquals(MOVEMENT_BOUNDS.bottom, bounds.top);
     }
 
@@ -183,7 +202,8 @@ public class PipSnapAlgorithmTest extends ShellTestCase {
         final Rect bounds = new Rect(STACK_BOUNDS_CENTERED);
         // Stash it on the left side.
         mPipSnapAlgorithm.applySnapFraction(bounds, MOVEMENT_BOUNDS, 3.5f,
-                PipBoundsState.STASH_TYPE_LEFT, DEFAULT_STASH_OFFSET, DISPLAY_BOUNDS);
+                PipBoundsState.STASH_TYPE_LEFT, DEFAULT_STASH_OFFSET, DISPLAY_BOUNDS,
+                INSET_BOUNDS_EMPTY);
 
         mPipSnapAlgorithm.snapRectToClosestEdge(bounds, MOVEMENT_BOUNDS, bounds,
                 PipBoundsState.STASH_TYPE_LEFT);
