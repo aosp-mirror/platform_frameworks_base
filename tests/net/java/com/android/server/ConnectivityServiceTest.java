@@ -5898,9 +5898,9 @@ public class ConnectivityServiceTest {
             assertEquals("Should have exactly one VPN:", 1, infos.length);
             UnderlyingNetworkInfo info = infos[0];
             assertEquals("Unexpected VPN owner:", (int) vpnUid, info.getOwnerUid());
-            assertEquals("Unexpected VPN interface:", vpnIfname, info.getIface());
+            assertEquals("Unexpected VPN interface:", vpnIfname, info.getInterface());
             assertSameElementsNoDuplicates(underlyingIfaces,
-                    info.getUnderlyingIfaces().toArray(new String[0]));
+                    info.getUnderlyingInterfaces().toArray(new String[0]));
         } else {
             assertEquals(0, infos.length);
             return;
@@ -6044,8 +6044,8 @@ public class ConnectivityServiceTest {
         // network for the VPN...
         verify(mStatsManager, never()).notifyNetworkStatus(any(List.class),
                 any(List.class), any() /* anyString() doesn't match null */,
-                argThat(infos -> infos.get(0).getUnderlyingIfaces().size() == 1
-                        && WIFI_IFNAME.equals(infos.get(0).getUnderlyingIfaces().get(0))));
+                argThat(infos -> infos.get(0).getUnderlyingInterfaces().size() == 1
+                        && WIFI_IFNAME.equals(infos.get(0).getUnderlyingInterfaces().get(0))));
         verifyNoMoreInteractions(mStatsManager);
         reset(mStatsManager);
 
@@ -6059,8 +6059,8 @@ public class ConnectivityServiceTest {
         waitForIdle();
         verify(mStatsManager).notifyNetworkStatus(any(List.class),
                 any(List.class), any() /* anyString() doesn't match null */,
-                argThat(vpnInfos -> vpnInfos.get(0).getUnderlyingIfaces().size() == 1
-                        && WIFI_IFNAME.equals(vpnInfos.get(0).getUnderlyingIfaces().get(0))));
+                argThat(vpnInfos -> vpnInfos.get(0).getUnderlyingInterfaces().size() == 1
+                        && WIFI_IFNAME.equals(vpnInfos.get(0).getUnderlyingInterfaces().get(0))));
         mEthernetNetworkAgent.disconnect();
         waitForIdle();
         reset(mStatsManager);
