@@ -106,12 +106,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private final OngoingCallListener mOngoingCallListener = new OngoingCallListener() {
         @Override
-        public void onOngoingCallStarted(boolean animate) {
-            disable(getContext().getDisplayId(), mDisabled1, mDisabled2, animate);
-        }
-
-        @Override
-        public void onOngoingCallEnded(boolean animate) {
+        public void onOngoingCallStateChanged(boolean animate) {
             disable(getContext().getDisplayId(), mDisabled1, mDisabled2, animate);
         }
     };
