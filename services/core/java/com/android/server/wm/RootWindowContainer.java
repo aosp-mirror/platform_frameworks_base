@@ -2657,9 +2657,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void addStartingWindowsForVisibleActivities() {
+        final ArrayList<Task> addedTasks = new ArrayList<>();
         forAllActivities((r) -> {
-            if (r.mVisibleRequested) {
+            final Task task = r.getTask();
+            if (r.mVisibleRequested && r.mStartingData == null && !addedTasks.contains(task)) {
                 r.showStartingWindow(true /*taskSwitch*/);
+                addedTasks.add(task);
             }
         });
     }
