@@ -43,6 +43,13 @@ public interface BatteryController extends DemoMode, Dumpable,
     boolean isPluggedIn();
 
     /**
+     * Returns {@code true} if the device is currently plugged in via wireless charger.
+     */
+    default boolean isPluggedInWireless() {
+        return false;
+    }
+
+    /**
      * Returns {@code true} if the device is currently in power save mode.
      */
     boolean isPowerSave();
