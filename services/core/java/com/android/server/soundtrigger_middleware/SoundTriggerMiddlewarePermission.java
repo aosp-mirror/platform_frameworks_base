@@ -21,6 +21,7 @@ import static android.Manifest.permission.RECORD_AUDIO;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.PermissionChecker;
 import android.media.permission.Identity;
@@ -132,7 +133,12 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
      * Throws a {@link SecurityException} iff the originator has permission to receive data.
      */
     void enforcePermissionsForDataDelivery(@NonNull Identity identity, @NonNull String reason) {
-        enforcePermissionForDataDelivery(mContext, identity, RECORD_AUDIO, reason);
+        // START TEMP HACK
+        enforcePermissionForPreflight(mContext, identity, RECORD_AUDIO);
+        int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
+        mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(hotwordOp, identity.uid,
+                identity.packageName, identity.attributionTag, reason);
+        // END TEMP HACK
         enforcePermissionForDataDelivery(mContext, identity, CAPTURE_AUDIO_HOTWORD,
                 reason);
     }
