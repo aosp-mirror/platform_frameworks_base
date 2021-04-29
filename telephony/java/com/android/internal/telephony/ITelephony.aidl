@@ -2398,6 +2398,12 @@ interface ITelephony {
     String getLastUcePidfXmlShell(int subId);
 
     /**
+      * Remove UCE requests cannot be sent to the network status.
+      * Note: This is designed for a SHELL command only.
+      */
+    boolean removeUceRequestDisallowedStatus(int subId);
+
+    /**
      * Set a SignalStrengthUpdateRequest to receive notification when Signal Strength breach the
      * specified thresholds.
      */
