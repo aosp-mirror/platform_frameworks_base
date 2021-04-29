@@ -44,6 +44,5 @@ oneway interface IInputMethodPrivilegedOperations {
     void switchToNextInputMethod(boolean onlyCurrentIme, in IBooleanResultCallback resultCallback);
     void shouldOfferSwitchingToNextInputMethod(in IBooleanResultCallback resultCallback);
     void notifyUserActionAsync();
-    void applyImeVisibility(IBinder showOrHideInputToken, boolean setVisible,
-            in IVoidResultCallback resultCallback);
+    void applyImeVisibilityAsync(IBinder showOrHideInputToken, boolean setVisible);
 }
