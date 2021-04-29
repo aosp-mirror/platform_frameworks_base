@@ -28,10 +28,12 @@ import static com.android.internal.app.procstats.ProcessStats.PSS_USS_AVERAGE;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MAXIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MINIMUM;
 import static com.android.internal.app.procstats.ProcessStats.STATE_BACKUP;
+import static com.android.internal.app.procstats.ProcessStats.STATE_BOUND_TOP_OR_FGS;
 import static com.android.internal.app.procstats.ProcessStats.STATE_CACHED_ACTIVITY;
 import static com.android.internal.app.procstats.ProcessStats.STATE_CACHED_ACTIVITY_CLIENT;
 import static com.android.internal.app.procstats.ProcessStats.STATE_CACHED_EMPTY;
 import static com.android.internal.app.procstats.ProcessStats.STATE_COUNT;
+import static com.android.internal.app.procstats.ProcessStats.STATE_FGS;
 import static com.android.internal.app.procstats.ProcessStats.STATE_HEAVY_WEIGHT;
 import static com.android.internal.app.procstats.ProcessStats.STATE_HOME;
 import static com.android.internal.app.procstats.ProcessStats.STATE_IMPORTANT_BACKGROUND;
@@ -82,9 +84,9 @@ public final class ProcessState {
         STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT
         STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         STATE_TOP,                      // ActivityManager.PROCESS_STATE_TOP
-        STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_BOUND_TOP
-        STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
-        STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
+        STATE_BOUND_TOP_OR_FGS,         // ActivityManager.PROCESS_STATE_BOUND_TOP
+        STATE_FGS,                      // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+        STATE_BOUND_TOP_OR_FGS,         // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
         STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         STATE_IMPORTANT_BACKGROUND,     // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
         STATE_IMPORTANT_BACKGROUND,     // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
@@ -919,6 +921,12 @@ public final class ProcessState {
                 screenStates, memStates, new int[] { STATE_PERSISTENT }, now, totalTime, true);
         dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_TOP],
                 screenStates, memStates, new int[] {STATE_TOP}, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_BOUND_TOP_OR_FGS],
+                screenStates, memStates, new int[] { STATE_BOUND_TOP_OR_FGS}, now, totalTime,
+                true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_FGS],
+                screenStates, memStates, new int[] { STATE_FGS}, now, totalTime,
+                true);
         dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_IMPORTANT_FOREGROUND],
                 screenStates, memStates, new int[] { STATE_IMPORTANT_FOREGROUND }, now, totalTime,
                 true);
