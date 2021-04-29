@@ -406,11 +406,14 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 .flingThenSpring(
                         FloatProperties.RECT_Y, velocityY, mFlingConfigY, mSpringConfig);
 
+        final Rect insetBounds = mPipBoundsState.getDisplayLayout().stableInsets();
         final float leftEdge = isStash
                 ? mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width()
+                + insetBounds.left
                 : mPipBoundsState.getMovementBounds().left;
         final float rightEdge = isStash
                 ?  mPipBoundsState.getDisplayBounds().right - mPipBoundsState.getStashOffset()
+                - insetBounds.right
                 : mPipBoundsState.getMovementBounds().right;
 
         final float xEndValue = velocityX < 0 ? leftEdge : rightEdge;
@@ -483,7 +486,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
         mSnapAlgorithm.applySnapFraction(normalBounds, normalMovementBounds, savedSnapFraction,
                 mPipBoundsState.getStashedState(), mPipBoundsState.getStashOffset(),
-                mPipBoundsState.getDisplayBounds());
+                mPipBoundsState.getDisplayBounds(),
+                mPipBoundsState.getDisplayLayout().stableInsets());
 
         if (immediate) {
             movePip(normalBounds);
@@ -529,10 +533,13 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mFlingConfigY = new PhysicsAnimator.FlingConfig(DEFAULT_FRICTION,
                 mPipBoundsState.getMovementBounds().top,
                 mPipBoundsState.getMovementBounds().bottom);
+        final Rect insetBounds = mPipBoundsState.getDisplayLayout().stableInsets();
         mStashConfigX = new PhysicsAnimator.FlingConfig(
                 DEFAULT_FRICTION,
-                mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width(),
-                mPipBoundsState.getDisplayBounds().right - mPipBoundsState.getStashOffset());
+                mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width()
+                        + insetBounds.left,
+                mPipBoundsState.getDisplayBounds().right - mPipBoundsState.getStashOffset()
+                        - insetBounds.right);
     }
 
     private void startBoundsAnimator(float toX, float toY) {
