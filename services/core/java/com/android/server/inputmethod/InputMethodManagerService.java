@@ -6117,8 +6117,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void notifyUserAction(IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback, () -> mImms.notifyUserAction(mToken));
+        public void notifyUserActionAsync() {
+            mImms.notifyUserAction(mToken);
         }
 
         @BinderThread
