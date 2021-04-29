@@ -31,6 +31,14 @@ final class UserLevelState {
     @CurrentTimeMillisLong
     public long lastUnhibernatedMs;
 
+    UserLevelState() {}
+
+    UserLevelState(UserLevelState state) {
+        packageName = state.packageName;
+        hibernated = state.hibernated;
+        lastUnhibernatedMs = state.lastUnhibernatedMs;
+    }
+
     @Override
     public String toString() {
         return "UserLevelState{"
