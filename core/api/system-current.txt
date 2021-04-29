@@ -2140,8 +2140,6 @@ package android.bluetooth {
   }
 
   public final class OobData implements android.os.Parcelable {
-    method @NonNull public static android.bluetooth.OobData.ClassicBuilder createClassicBuilder(@NonNull byte[], @NonNull byte[], @NonNull byte[]);
-    method @NonNull public static android.bluetooth.OobData.LeBuilder createLeBuilder(@NonNull byte[], @NonNull byte[], int);
     method @NonNull public byte[] getClassOfDevice();
     method @NonNull public byte[] getClassicLength();
     method @NonNull public byte[] getConfirmationHash();
@@ -2174,6 +2172,7 @@ package android.bluetooth {
   }
 
   public static final class OobData.ClassicBuilder {
+    ctor public OobData.ClassicBuilder(@NonNull byte[], @NonNull byte[], @NonNull byte[]);
     method @NonNull public android.bluetooth.OobData build();
     method @NonNull public android.bluetooth.OobData.ClassicBuilder setClassOfDevice(@NonNull byte[]);
     method @NonNull public android.bluetooth.OobData.ClassicBuilder setDeviceName(@NonNull byte[]);
@@ -2181,6 +2180,7 @@ package android.bluetooth {
   }
 
   public static final class OobData.LeBuilder {
+    ctor public OobData.LeBuilder(@NonNull byte[], @NonNull byte[], int);
     method @NonNull public android.bluetooth.OobData build();
     method @NonNull public android.bluetooth.OobData.LeBuilder setDeviceName(@NonNull byte[]);
     method @NonNull public android.bluetooth.OobData.LeBuilder setLeFlags(int);
