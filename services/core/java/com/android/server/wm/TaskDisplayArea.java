@@ -1274,7 +1274,15 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
         for (int i = mLaunchRootTasks.size() - 1; i >= 0; --i) {
             if (mLaunchRootTasks.get(i).contains(windowingMode, activityType)) {
-                return mLaunchRootTasks.get(i).task;
+                final Task launchRootTask = mLaunchRootTasks.get(i).task;
+                // Return the focusable root task for improving the UX with staged split screen.
+                final Task adjacentRootTask = launchRootTask != null
+                        ? launchRootTask.mAdjacentTask : null;
+                if (adjacentRootTask != null && adjacentRootTask.isFocusedRootTaskOnDisplay()) {
+                    return adjacentRootTask;
+                } else {
+                    return launchRootTask;
+                }
             }
         }
         return null;
