@@ -205,10 +205,14 @@ public final class AdvertisingSet {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothAdvertisePermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_ADVERTISE,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public void getOwnAddress() {
         try {
-            mGatt.getOwnAddress(mAdvertiserId);
+            mGatt.getOwnAddress(mAdvertiserId, mAttributionSource);
         } catch (RemoteException e) {
             Log.e(TAG, "remote exception - ", e);
         }
