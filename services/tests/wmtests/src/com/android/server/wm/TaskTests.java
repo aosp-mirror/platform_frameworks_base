@@ -80,6 +80,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
+import android.view.Display;
 import android.view.DisplayInfo;
 
 import androidx.test.filters.MediumTest;
@@ -1336,6 +1337,16 @@ public class TaskTests extends WindowTestsBase {
         display.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, task.getOrientation());
         verify(display).onDescendantOrientationChanged(same(task));
+    }
+
+    @Test
+    public void testGetNonNullDimmerOnUntrustedDisplays() {
+        final DisplayInfo untrustedDisplayInfo = new DisplayInfo(mDisplayInfo);
+        untrustedDisplayInfo.flags &= ~Display.FLAG_TRUSTED;
+        final DisplayContent untrustedDisplay = createNewDisplay(untrustedDisplayInfo);
+        final ActivityRecord activity = createActivityRecord(untrustedDisplay);
+        activity.setOccludesParent(false);
+        assertNotNull(activity.getTask().getDimmer());
     }
 
     private Task getTestTask() {
