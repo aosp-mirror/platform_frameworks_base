@@ -586,7 +586,6 @@ package android {
     field public static final int dropDownWidth = 16843362; // 0x1010262
     field public static final int duplicateParentState = 16842985; // 0x10100e9
     field public static final int duration = 16843160; // 0x1010198
-    field public static final int edgeEffectType;
     field public static final int editTextBackground = 16843602; // 0x1010352
     field public static final int editTextColor = 16843601; // 0x1010351
     field public static final int editTextPreferenceStyle = 16842898; // 0x1010092
@@ -53791,7 +53790,6 @@ package android.widget {
     method public int getCheckedItemPosition();
     method public android.util.SparseBooleanArray getCheckedItemPositions();
     method public int getChoiceMode();
-    method public int getEdgeEffectType();
     method public int getListPaddingBottom();
     method public int getListPaddingLeft();
     method public int getListPaddingRight();
@@ -53833,7 +53831,6 @@ package android.widget {
     method public void setChoiceMode(int);
     method public void setDrawSelectorOnTop(boolean);
     method public void setEdgeEffectColor(@ColorInt int);
-    method public void setEdgeEffectType(int);
     method public void setFastScrollAlwaysVisible(boolean);
     method public void setFastScrollEnabled(boolean);
     method public void setFastScrollStyle(int);
@@ -54524,7 +54521,6 @@ package android.widget {
     method @ColorInt public int getColor();
     method public float getDistance();
     method public int getMaxHeight();
-    method public int getType();
     method public boolean isFinished();
     method public void onAbsorb(int);
     method public void onPull(float);
@@ -54534,10 +54530,7 @@ package android.widget {
     method public void setBlendMode(@Nullable android.graphics.BlendMode);
     method public void setColor(@ColorInt int);
     method public void setSize(int, int);
-    method public void setType(int);
     field public static final android.graphics.BlendMode DEFAULT_BLEND_MODE;
-    field public static final int TYPE_GLOW = 0; // 0x0
-    field public static final int TYPE_STRETCH = 1; // 0x1
   }
 
   public class EditText extends android.widget.TextView {
@@ -54842,7 +54835,6 @@ package android.widget {
     method public boolean executeKeyEvent(android.view.KeyEvent);
     method public void fling(int);
     method public boolean fullScroll(int);
-    method public int getEdgeEffectType();
     method @ColorInt public int getLeftEdgeEffectColor();
     method public int getMaxScrollAmount();
     method @ColorInt public int getRightEdgeEffectColor();
@@ -54850,7 +54842,6 @@ package android.widget {
     method public boolean isSmoothScrollingEnabled();
     method public boolean pageScroll(int);
     method public void setEdgeEffectColor(@ColorInt int);
-    method public void setEdgeEffectType(int);
     method public void setFillViewport(boolean);
     method public void setLeftEdgeEffectColor(@ColorInt int);
     method public void setRightEdgeEffectColor(@ColorInt int);
@@ -55736,7 +55727,6 @@ package android.widget {
     method public void fling(int);
     method public boolean fullScroll(int);
     method @ColorInt public int getBottomEdgeEffectColor();
-    method public int getEdgeEffectType();
     method public int getMaxScrollAmount();
     method @ColorInt public int getTopEdgeEffectColor();
     method public boolean isFillViewport();
@@ -55745,7 +55735,6 @@ package android.widget {
     method public void scrollToDescendant(@NonNull android.view.View);
     method public void setBottomEdgeEffectColor(@ColorInt int);
     method public void setEdgeEffectColor(@ColorInt int);
-    method public void setEdgeEffectType(int);
     method public void setFillViewport(boolean);
     method public void setSmoothScrollingEnabled(boolean);
     method public void setTopEdgeEffectColor(@ColorInt int);
