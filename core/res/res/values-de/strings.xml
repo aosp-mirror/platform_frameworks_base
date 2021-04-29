@@ -1458,7 +1458,7 @@
     <string name="gpsNotifTicker" msgid="3207361857637620780">"Standortabfrage von <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="1590033371665669570">"Standortabfrage"</string>
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Angefordert von <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
-    <string name="gpsVerifYes" msgid="3719843080744112940">"„Ja“"</string>
+    <string name="gpsVerifYes" msgid="3719843080744112940">"Ja"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nein"</string>
     <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Zugriff auf Gerätestandort bei Notfall"</string>
     <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Dein Gerätehersteller hat vor Kurzem während eines Notfalls auf deinen Standort zugegriffen"</string>
