@@ -39,6 +39,8 @@ import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -61,6 +63,8 @@ public class DozeParameters implements TunerService.Tunable,
     private final Resources mResources;
     private final BatteryController mBatteryController;
     private final FeatureFlags mFeatureFlags;
+
+    private final Set<Callback> mCallbacks = new HashSet<>();
 
     private boolean mDozeAlwaysOn;
     private boolean mControlScreenOffAnimation;
@@ -250,9 +254,26 @@ public class DozeParameters implements TunerService.Tunable,
         return mResources.getBoolean(R.bool.doze_long_press_uses_prox);
     }
 
+    /**
+     * Callback to listen for DozeParameter changes.
+     */
+    public void addCallback(Callback callback) {
+        mCallbacks.add(callback);
+    }
+
+    /**
+     * Remove callback that listens for DozeParameter changes.
+     */
+    public void removeCallback(Callback callback) {
+        mCallbacks.remove(callback);
+    }
+
     @Override
     public void onTuningChanged(String key, String newValue) {
         mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+        for (Callback callback : mCallbacks) {
+            callback.onAlwaysOnChange();
+        }
     }
 
     @Override
@@ -269,5 +290,12 @@ public class DozeParameters implements TunerService.Tunable,
         pw.print("getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
         pw.print("getSelectivelyRegisterSensorsUsingProx(): ");
         pw.println(getSelectivelyRegisterSensorsUsingProx());
+    }
+
+    interface Callback {
+        /**
+         * Invoked when the value of getAlwaysOn may have changed.
+         */
+        void onAlwaysOnChange();
     }
 }
