@@ -81,11 +81,12 @@ class MediaDataManagerTest : SysuiTestCase() {
     lateinit var mediaDataManager: MediaDataManager
     lateinit var mediaNotification: StatusBarNotification
     @Captor lateinit var mediaDataCaptor: ArgumentCaptor<MediaData>
+    private val clock = FakeSystemClock()
 
     @Before
     fun setup() {
-        foregroundExecutor = FakeExecutor(FakeSystemClock())
-        backgroundExecutor = FakeExecutor(FakeSystemClock())
+        foregroundExecutor = FakeExecutor(clock)
+        backgroundExecutor = FakeExecutor(clock)
         smartspaceMediaDataProvider = SmartspaceMediaDataProvider()
         mediaDataManager = MediaDataManager(
             context = context,
@@ -103,7 +104,8 @@ class MediaDataManagerTest : SysuiTestCase() {
             activityStarter = activityStarter,
             smartspaceMediaDataProvider = smartspaceMediaDataProvider,
             useMediaResumption = true,
-            useQsMediaPlayer = true
+            useQsMediaPlayer = true,
+            systemClock = clock
         )
         session = MediaSession(context, "MediaDataManagerTestSession")
         mediaNotification = SbnBuilder().run {
@@ -310,7 +312,7 @@ class MediaDataManagerTest : SysuiTestCase() {
             setTitle(SESSION_TITLE)
             build()
         }
-        val currentTimeMillis = System.currentTimeMillis()
+        val currentTime = clock.elapsedRealtime()
         mediaDataManager.addResumptionControls(USER_ID, desc, Runnable {}, session.sessionToken,
                 APP_NAME, pendingIntent, PACKAGE_NAME)
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
@@ -322,7 +324,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(data.song).isEqualTo(SESSION_TITLE)
         assertThat(data.app).isEqualTo(APP_NAME)
         assertThat(data.actions).hasSize(1)
-        assertThat(data.lastActive).isAtLeast(currentTimeMillis)
+        assertThat(data.lastActive).isAtLeast(currentTime)
     }
 
     @Test
@@ -380,12 +382,12 @@ class MediaDataManagerTest : SysuiTestCase() {
 
     @Test
     fun testOnMediaDataChanged_updatesLastActiveTime() {
-        val currentTimeMillis = System.currentTimeMillis()
+        val currentTime = clock.elapsedRealtime()
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor))
-        assertThat(mediaDataCaptor.value!!.lastActive).isAtLeast(currentTimeMillis)
+        assertThat(mediaDataCaptor.value!!.lastActive).isAtLeast(currentTime)
     }
 
     @Test
@@ -396,12 +398,13 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
 
         // WHEN the notification times out
-        val currentTimeMillis = System.currentTimeMillis()
+        clock.advanceTime(100)
+        val currentTime = clock.elapsedRealtime()
         mediaDataManager.setTimedOut(KEY, true, true)
 
         // THEN the last active time is not changed
         verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY), capture(mediaDataCaptor))
-        assertThat(mediaDataCaptor.value.lastActive).isLessThan(currentTimeMillis)
+        assertThat(mediaDataCaptor.value.lastActive).isLessThan(currentTime)
     }
 
     @Test
@@ -417,13 +420,14 @@ class MediaDataManagerTest : SysuiTestCase() {
         mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
 
         // WHEN the notification is removed
-        val currentTimeMillis = System.currentTimeMillis()
+        clock.advanceTime(100)
+        val currentTime = clock.elapsedRealtime()
         mediaDataManager.onNotificationRemoved(KEY)
 
         // THEN the last active time is not changed
         verify(listener).onMediaDataLoaded(eq(PACKAGE_NAME), eq(KEY), capture(mediaDataCaptor))
         assertThat(mediaDataCaptor.value.resumption).isTrue()
-        assertThat(mediaDataCaptor.value.lastActive).isLessThan(currentTimeMillis)
+        assertThat(mediaDataCaptor.value.lastActive).isLessThan(currentTime)
     }
 
     @Test
