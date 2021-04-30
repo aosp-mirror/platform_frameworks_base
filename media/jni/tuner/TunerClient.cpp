@@ -326,6 +326,7 @@ void TunerClient::updateTunerResources() {
     // TODO: update Demux, Descrambler.
 }
 
+// TODO: remove after migration to Tuner Service is done.
 void TunerClient::updateFrontendResources() {
     vector<FrontendId> ids = getFrontendIds();
     if (ids.size() == 0) {
@@ -446,6 +447,7 @@ sp<ILnb> TunerClient::openHidlLnbByName(string name, LnbId& lnbId) {
     return lnb;
 }
 
+// TODO: remove after migration to Tuner Service is done.
 vector<int> TunerClient::getLnbHandles() {
     vector<int> lnbHandles;
     if (mTuner != NULL) {
@@ -612,12 +614,13 @@ FrontendInfo TunerClient::frontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendI
     return hidlFrontendInfo;
 }
 
+// TODO: remove after migration to Tuner Service is done.
 int TunerClient::getResourceIdFromHandle(int handle, int /*resourceType*/) {
     return (handle & 0x00ff0000) >> 16;
 }
 
+// TODO: remove after migration to Tuner Service is done.
 int TunerClient::getResourceHandleFromId(int id, int resourceType) {
-    // TODO: build up randomly generated id to handle mapping
     return (resourceType & 0x000000ff) << 24
             | (id << 16)
             | (mResourceRequestCount++ & 0xffff);
