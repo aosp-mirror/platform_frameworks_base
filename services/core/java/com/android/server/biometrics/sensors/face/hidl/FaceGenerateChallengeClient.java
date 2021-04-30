@@ -67,6 +67,7 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<IBiomet
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "generateChallenge failed", e);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }
