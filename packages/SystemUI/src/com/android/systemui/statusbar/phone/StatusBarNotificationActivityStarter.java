@@ -283,7 +283,13 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mLogger.logHandleClickAfterKeyguardDismissed(entry.getKey());
 
         // TODO: Some of this code may be able to move to NotificationEntryManager.
-        removeHUN(row);
+        String key = row.getEntry().getSbn().getKey();
+        if (mHeadsUpManager != null && mHeadsUpManager.isAlerting(key)) {
+            // Release the HUN notification to the shade.
+            if (mPresenter.isPresenterFullyCollapsed()) {
+                HeadsUpUtil.setIsClickedHeadsUpNotification(row, true);
+            }
+        }
 
         final Runnable runnable = () -> handleNotificationClickAfterPanelCollapsed(
                 entry, row, controller, intent,
@@ -331,6 +337,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 // bypass work challenge
                 if (mStatusBarRemoteInputCallback.startWorkChallengeIfNecessary(userId,
                         intent.getIntentSender(), notificationKey)) {
+                    removeHUN(row);
                     // Show work challenge, do not run PendingIntent and
                     // remove notification
                     collapseOnMainThread();
@@ -350,6 +357,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         final boolean canBubble = entry.canBubble();
         if (canBubble) {
             mLogger.logExpandingBubble(notificationKey);
+            removeHUN(row);
             expandBubbleStackOnMainThread(entry);
         } else {
             startNotificationIntent(
@@ -422,14 +430,13 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             boolean isActivityIntent) {
         mLogger.logStartNotificationIntent(entry.getKey(), intent);
         try {
-            ActivityLaunchAnimator.Controller animationController = null;
-            if (!wasOccluded && mStatusBar.areLaunchAnimationsEnabled()) {
-                animationController = new StatusBarLaunchAnimatorController(
-                        mNotificationAnimationProvider.getAnimatorController(row), mStatusBar,
-                        isActivityIntent);
-            }
+            ActivityLaunchAnimator.Controller animationController =
+                    new StatusBarLaunchAnimatorController(
+                            mNotificationAnimationProvider.getAnimatorController(row), mStatusBar,
+                            isActivityIntent);
 
             mActivityLaunchAnimator.startPendingIntentWithAnimation(animationController,
+                    !wasOccluded && mStatusBar.areLaunchAnimationsEnabled(),
                     (adapter) -> {
                         long eventTime = row.getAndResetLastActionUpTime();
                         Bundle options = eventTime > 0
@@ -442,13 +449,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                         return intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                                 null, null, options);
                     });
-
-            // Note that other cases when we should still collapse (like activity already on top) is
-            // handled by the StatusBarLaunchAnimatorController.
-            boolean shouldCollapse = animationController == null;
-            if (shouldCollapse) {
-                collapseOnMainThread();
-            }
         } catch (PendingIntent.CanceledException e) {
             // the stack trace isn't very helpful here.
             // Just log the exception message.
@@ -462,34 +462,19 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             ExpandableNotificationRow row) {
         mActivityStarter.dismissKeyguardThenExecute(() -> {
             AsyncTask.execute(() -> {
-                ActivityLaunchAnimator.Controller animationController = null;
-                if (mStatusBar.areLaunchAnimationsEnabled()) {
-                    animationController = new StatusBarLaunchAnimatorController(
-                            mNotificationAnimationProvider.getAnimatorController(row), mStatusBar,
-                            true /* isActivityIntent */);
-                }
+                ActivityLaunchAnimator.Controller animationController =
+                        new StatusBarLaunchAnimatorController(
+                                mNotificationAnimationProvider.getAnimatorController(row),
+                                mStatusBar, true /* isActivityIntent */);
 
                 mActivityLaunchAnimator.startIntentWithAnimation(
-                        animationController,
+                        animationController, mStatusBar.areLaunchAnimationsEnabled(),
                         (adapter) -> TaskStackBuilder.create(mContext)
                                 .addNextIntentWithParentStack(intent)
                                 .startActivities(getActivityOptions(
                                         mStatusBar.getDisplayId(),
                                         adapter),
                                         new UserHandle(UserHandle.getUserId(appUid))));
-
-                // Note that other cases when we should still collapse (like activity already on
-                // top) is handled by the StatusBarLaunchAnimatorController.
-                boolean shouldCollapse = animationController == null;
-
-                // Putting it back on the main thread, since we're touching views
-                mMainThreadHandler.post(() -> {
-                    removeHUN(row);
-                    if (shouldCollapse) {
-                        mCommandQueue.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
-                                true /* force */);
-                    }
-                });
             });
             return true;
         }, null, false /* afterKeyguardGone */);
@@ -508,26 +493,16 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     tsb.addNextIntent(intent);
                 }
 
-                ActivityLaunchAnimator.Controller animationController = null;
-                if (mStatusBar.areLaunchAnimationsEnabled()) {
-                    animationController = new StatusBarLaunchAnimatorController(
-                            ActivityLaunchAnimator.Controller.fromView(view), mStatusBar,
-                            true /* isActivityIntent */);
-                }
+                ActivityLaunchAnimator.Controller animationController =
+                        new StatusBarLaunchAnimatorController(
+                                ActivityLaunchAnimator.Controller.fromView(view), mStatusBar,
+                                true /* isActivityIntent */);
 
                 mActivityLaunchAnimator.startIntentWithAnimation(animationController,
+                        mStatusBar.areLaunchAnimationsEnabled(),
                         (adapter) -> tsb.startActivities(
                                 getActivityOptions(mStatusBar.getDisplayId(), adapter),
                                 UserHandle.CURRENT));
-
-                // Note that other cases when we should still collapse (like activity already on
-                // top) is handled by the StatusBarLaunchAnimatorController.
-                boolean shouldCollapse = animationController == null;
-                if (shouldCollapse) {
-                    // Putting it back on the main thread, since we're touching views
-                    mMainThreadHandler.post(() -> mCommandQueue.animateCollapsePanels(
-                            CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */));
-                }
             });
             return true;
         }, null, false /* afterKeyguardGone */);
@@ -536,11 +511,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private void removeHUN(ExpandableNotificationRow row) {
         String key = row.getEntry().getSbn().getKey();
         if (mHeadsUpManager != null && mHeadsUpManager.isAlerting(key)) {
-            // Release the HUN notification to the shade.
-            if (mPresenter.isPresenterFullyCollapsed()) {
-                HeadsUpUtil.setIsClickedHeadsUpNotification(row, true);
-            }
-
             // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
             // become canceled shortly by NoMan, but we can't assume that.
             mHeadsUpManager.removeNotification(key, true /* releaseImmediately */);
