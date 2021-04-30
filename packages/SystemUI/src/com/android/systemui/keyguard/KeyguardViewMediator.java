@@ -2100,7 +2100,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 playSounds(false);
             }
 
-            if (KeyguardService.sEnableRemoteKeyguardAnimation) {
+            if (KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation) {
                 mSurfaceBehindRemoteAnimationFinishedCallback = finishedCallback;
                 mSurfaceBehindRemoteAnimationRunning = true;
 
