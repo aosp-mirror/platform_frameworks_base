@@ -5153,7 +5153,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             .compose();
                 }
                 // fallback for devices without composition support
-                return VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+                return VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
 
             default:
                 return null;
