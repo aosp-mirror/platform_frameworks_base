@@ -3602,6 +3602,10 @@
         <attr name="__removed2" format="boolean" />
         <!-- Specifies whether the IME supports showing inline suggestions. -->
         <attr name="supportsInlineSuggestions" format="boolean" />
+        <!-- Specifies whether the IME suppresses system spell checker.
+             The default value is false. If an IME sets this attribute to true,
+             the system spell checker will be disabled while the IME has an
+             active input session. -->
         <attr name="suppressesSpellChecker" format="boolean" />
         <!-- Specifies whether the IME wants to be shown in the Input Method picker. Defaults to
              true. Set this to false if the IME is intended to be accessed programmatically.
