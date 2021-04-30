@@ -76,7 +76,7 @@ static void android_net_utils_attachDropAllBPFFilter(JNIEnv *env, jobject clazz,
         filter_code,
     };
 
-    int fd = AFileDescriptor_getFD(env, javaFd);
+    int fd = AFileDescriptor_getFd(env, javaFd);
     if (setsockopt(fd, SOL_SOCKET, SO_ATTACH_FILTER, &filter, sizeof(filter)) != 0) {
         jniThrowExceptionFmt(env, "java/net/SocketException",
                 "setsockopt(SO_ATTACH_FILTER): %s", strerror(errno));
@@ -86,7 +86,7 @@ static void android_net_utils_attachDropAllBPFFilter(JNIEnv *env, jobject clazz,
 static void android_net_utils_detachBPFFilter(JNIEnv *env, jobject clazz, jobject javaFd)
 {
     int optval_ignored = 0;
-    int fd = AFileDescriptor_getFD(env, javaFd);
+    int fd = AFileDescriptor_getFd(env, javaFd);
     if (setsockopt(fd, SOL_SOCKET, SO_DETACH_FILTER, &optval_ignored, sizeof(optval_ignored)) !=
         0) {
         jniThrowExceptionFmt(env, "java/net/SocketException",
@@ -112,7 +112,7 @@ static jboolean android_net_utils_bindProcessToNetworkForHostResolution(JNIEnv *
 
 static jint android_net_utils_bindSocketToNetwork(JNIEnv *env, jobject thiz, jobject javaFd,
                                                   jint netId) {
-    return setNetworkForSocket(netId, AFileDescriptor_getFD(env, javaFd));
+    return setNetworkForSocket(netId, AFileDescriptor_getFd(env, javaFd));
 }
 
 static bool checkLenAndCopy(JNIEnv* env, const jbyteArray& addr, int len, void* dst)
@@ -160,7 +160,7 @@ static jobject android_net_utils_resNetworkSend(JNIEnv *env, jobject thiz, jint 
 }
 
 static jobject android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, jobject javaFd) {
-    int fd = AFileDescriptor_getFD(env, javaFd);
+    int fd = AFileDescriptor_getFd(env, javaFd);
     int rcode;
     std::vector<uint8_t> buf(MAXPACKETSIZE, 0);
 
@@ -187,7 +187,7 @@ static jobject android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, job
 }
 
 static void android_net_utils_resNetworkCancel(JNIEnv *env, jobject thiz, jobject javaFd) {
-    int fd = AFileDescriptor_getFD(env, javaFd);
+    int fd = AFileDescriptor_getFd(env, javaFd);
     resNetworkCancel(fd);
     jniSetFileDescriptorOfFD(env, javaFd, -1);
 }
@@ -213,7 +213,7 @@ static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, j
         return NULL;
     }
 
-    int fd = AFileDescriptor_getFD(env, javaFd);
+    int fd = AFileDescriptor_getFd(env, javaFd);
     struct tcp_repair_window trw = {};
     socklen_t size = sizeof(trw);
 
