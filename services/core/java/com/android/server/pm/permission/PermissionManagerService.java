@@ -565,18 +565,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+
+        final List<PermissionInfo> out = new ArrayList<>(10);
         synchronized (mLock) {
             if (groupName != null && mRegistry.getPermissionGroup(groupName) == null) {
                 return null;
             }
-            final ArrayList<PermissionInfo> out = new ArrayList<PermissionInfo>(10);
             for (Permission bp : mRegistry.getPermissions()) {
                 if (Objects.equals(bp.getGroup(), groupName)) {
                     out.add(bp.generatePermissionInfo(flags));
                 }
             }
-            return new ParceledListSlice<>(out);
         }
+
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        out.removeIf(it -> mPackageManagerInt.filterAppAccess(it.packageName, callingUid,
+                callingUserId));
+        return new ParceledListSlice<>(out);
     }
 
     @Override
