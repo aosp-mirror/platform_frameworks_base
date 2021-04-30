@@ -20,12 +20,17 @@ import static android.Manifest.permission.MANAGE_SENSOR_PRIVACY;
 import static android.app.ActivityManager.RunningServiceInfo;
 import static android.app.ActivityManager.RunningTaskInfo;
 import static android.app.ActivityManager.getCurrentUser;
+import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
+import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS;
 import static android.hardware.SensorPrivacyManager.EXTRA_SENSOR;
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
@@ -60,6 +65,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -141,6 +147,7 @@ public final class SensorPrivacyService extends SystemService {
     private static final int VER0_INDIVIDUAL_ENABLED = 1;
     private static final int VER1_ENABLED = 0;
     private static final int VER1_INDIVIDUAL_ENABLED = 1;
+    public static final int REMINDER_DIALOG_DELAY_MILLIS = 500;
 
     private final Context mContext;
     private final SensorPrivacyServiceImpl mSensorPrivacyServiceImpl;
@@ -206,6 +213,36 @@ public final class SensorPrivacyService extends SystemService {
         private ArrayMap<Pair<String, UserHandle>, ArrayList<IBinder>> mSuppressReminders =
                 new ArrayMap<>();
 
+        private final ArrayMap<SensorUseReminderDialogInfo, ArraySet<Integer>>
+                mQueuedSensorUseReminderDialogs = new ArrayMap<>();
+
+        private class SensorUseReminderDialogInfo {
+            private int mTaskId;
+            private UserHandle mUser;
+            private String mPackageName;
+
+            SensorUseReminderDialogInfo(int taskId, UserHandle user, String packageName) {
+                mTaskId = taskId;
+                mUser = user;
+                mPackageName = packageName;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || !(o instanceof SensorUseReminderDialogInfo)) return false;
+                SensorUseReminderDialogInfo that = (SensorUseReminderDialogInfo) o;
+                return mTaskId == that.mTaskId
+                        && Objects.equals(mUser, that.mUser)
+                        && Objects.equals(mPackageName, that.mPackageName);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mTaskId, mUser, mPackageName);
+            }
+        }
+
         SensorPrivacyServiceImpl() {
             mHandler = new SensorPrivacyHandler(FgThread.get().getLooper(), mContext);
             File sensorPrivacyFile = new File(Environment.getDataSystemDirectory(),
@@ -228,7 +265,8 @@ public final class SensorPrivacyService extends SystemService {
                 }
             }
 
-            int[] micAndCameraOps = new int[]{OP_RECORD_AUDIO, OP_CAMERA};
+            int[] micAndCameraOps = new int[]{OP_RECORD_AUDIO, OP_PHONE_CALL_MICROPHONE,
+                    OP_CAMERA, OP_PHONE_CALL_CAMERA};
             mAppOpsManager.startWatchingNoted(micAndCameraOps, this);
             mAppOpsManager.startWatchingStarted(micAndCameraOps, this);
 
@@ -254,15 +292,29 @@ public final class SensorPrivacyService extends SystemService {
         public void onOpNoted(int code, int uid, String packageName,
                 String attributionTag, @AppOpsManager.OpFlags int flags,
                 @AppOpsManager.Mode int result) {
-            if (result != MODE_IGNORED || (flags & AppOpsManager.OP_FLAGS_ALL_TRUSTED) == 0) {
+            if ((flags & AppOpsManager.OP_FLAGS_ALL_TRUSTED) == 0) {
                 return;
             }
 
             int sensor;
-            if (code == OP_RECORD_AUDIO) {
-                sensor = MICROPHONE;
+            if (result == MODE_IGNORED) {
+                if (code == OP_RECORD_AUDIO) {
+                    sensor = MICROPHONE;
+                } else if (code == OP_CAMERA) {
+                    sensor = CAMERA;
+                } else {
+                    return;
+                }
+            } else if (result == MODE_ALLOWED) {
+                if (code == OP_PHONE_CALL_MICROPHONE) {
+                    sensor = MICROPHONE;
+                } else if (code == OP_PHONE_CALL_CAMERA) {
+                    sensor = CAMERA;
+                } else {
+                    return;
+                }
             } else {
-                sensor = CAMERA;
+                return;
             }
 
             long token = Binder.clearCallingIdentity();
@@ -294,6 +346,11 @@ public final class SensorPrivacyService extends SystemService {
                 }
             }
 
+            if (uid == Process.SYSTEM_UID) {
+                enqueueSensorUseReminderDialogAsync(-1, user, packageName, sensor);
+                return;
+            }
+
             // TODO: Handle reminders with multiple sensors
 
             // - If we have a likely activity that triggered the sensor use overlay a dialog over
@@ -312,7 +369,7 @@ public final class SensorPrivacyService extends SystemService {
                 if (task.isVisible && task.topActivity.getPackageName().equals(packageName)) {
                     if (task.isFocused) {
                         // There is the one focused activity
-                        showSensorUseReminderDialog(task.taskId, user, packageName, sensor);
+                        enqueueSensorUseReminderDialogAsync(task.taskId, user, packageName, sensor);
                         return;
                     }
 
@@ -323,7 +380,7 @@ public final class SensorPrivacyService extends SystemService {
             // TODO: Test this case
             // There is one or more non-focused activity
             if (tasksOfPackageUsingSensor.size() == 1) {
-                showSensorUseReminderDialog(tasksOfPackageUsingSensor.get(0).taskId, user,
+                enqueueSensorUseReminderDialogAsync(tasksOfPackageUsingSensor.get(0).taskId, user,
                         packageName, sensor);
                 return;
             } else if (tasksOfPackageUsingSensor.size() > 1) {
@@ -360,21 +417,60 @@ public final class SensorPrivacyService extends SystemService {
          * @param packageName The name of the package using the sensor.
          * @param sensor The sensor that is being used.
          */
-        private void showSensorUseReminderDialog(int taskId, @NonNull UserHandle user,
+        private void enqueueSensorUseReminderDialogAsync(int taskId, @NonNull UserHandle user,
                 @NonNull String packageName, int sensor) {
+            mHandler.sendMessage(PooledLambda.obtainMessage(
+                    this:: enqueueSensorUseReminderDialog, taskId, user, packageName, sensor));
+        }
+
+        private void enqueueSensorUseReminderDialog(int taskId, @NonNull UserHandle user,
+                @NonNull String packageName, int sensor) {
+            SensorUseReminderDialogInfo info =
+                    new SensorUseReminderDialogInfo(taskId, user, packageName);
+            if (!mQueuedSensorUseReminderDialogs.containsKey(info)) {
+                ArraySet<Integer> sensors = new ArraySet<Integer>();
+                sensors.add(sensor);
+                mQueuedSensorUseReminderDialogs.put(info, sensors);
+                mHandler.sendMessageDelayed(
+                        PooledLambda.obtainMessage(this::showSensorUserReminderDialog, info),
+                        REMINDER_DIALOG_DELAY_MILLIS);
+                return;
+            }
+            ArraySet<Integer> sensors = mQueuedSensorUseReminderDialogs.get(info);
+            sensors.add(sensor);
+        }
+
+        private void showSensorUserReminderDialog(@NonNull SensorUseReminderDialogInfo info) {
+            ArraySet<Integer> sensors = mQueuedSensorUseReminderDialogs.get(info);
+            mQueuedSensorUseReminderDialogs.remove(info);
+            if (sensors == null) {
+                Log.e(TAG, "Unable to show sensor use dialog because sensor set is null."
+                        + " Was the dialog queue modified from outside the handler thread?");
+                return;
+            }
             Intent dialogIntent = new Intent();
             dialogIntent.setComponent(ComponentName.unflattenFromString(
                     mContext.getResources().getString(
                             R.string.config_sensorUseStartedActivity)));
 
             ActivityOptions options = ActivityOptions.makeBasic();
-            options.setLaunchTaskId(taskId);
+            options.setLaunchTaskId(info.mTaskId);
             options.setTaskOverlay(true, true);
 
-            dialogIntent.putExtra(EXTRA_PACKAGE_NAME, packageName);
-            dialogIntent.putExtra(EXTRA_SENSOR, sensor);
+            dialogIntent.addFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 
-            mContext.startActivityAsUser(dialogIntent, options.toBundle(), user);
+            dialogIntent.putExtra(EXTRA_PACKAGE_NAME, info.mPackageName);
+            if (sensors.size() == 1) {
+                dialogIntent.putExtra(EXTRA_SENSOR, sensors.valueAt(0));
+            } else if (sensors.size() == 2) {
+                dialogIntent.putExtra(EXTRA_ALL_SENSORS, true);
+            } else {
+                // Currently the only cases can be 1 or two
+                Log.e(TAG, "Attempted to show sensor use dialog for " + sensors.size()
+                        + " sensors");
+                return;
+            }
+            mContext.startActivityAsUser(dialogIntent, options.toBundle(), info.mUser);
         }
 
         /**
