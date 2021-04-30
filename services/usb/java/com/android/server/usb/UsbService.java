@@ -200,7 +200,7 @@ public class UsbService extends IUsbManager.Stub {
         final IntentFilter filter = new IntentFilter();
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        mContext.registerReceiver(receiver, filter, null, null);
+        mContext.registerReceiverAsUser(receiver, UserHandle.ALL, filter, null, null);
     }
 
     /**
