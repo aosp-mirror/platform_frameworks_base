@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageSettingsSnapshotProvider;
 import android.content.pm.ResolveInfo;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
@@ -36,7 +37,6 @@ import android.util.Pair;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
-import com.android.internal.util.FunctionalUtils;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.Settings;
@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface DomainVerificationManagerInternal {
@@ -406,7 +405,8 @@ public interface DomainVerificationManagerInternal {
             @NonNull Set<String> domains, int state) throws NameNotFoundException;
 
 
-    interface Connection extends DomainVerificationEnforcer.Callback {
+    interface Connection extends DomainVerificationEnforcer.Callback,
+            PackageSettingsSnapshotProvider {
 
         /**
          * Notify that a settings change has been made and that eventually
@@ -430,60 +430,7 @@ public interface DomainVerificationManagerInternal {
          */
         void schedule(int code, @Nullable Object object);
 
-        /**
-         * Run a function block that requires access to {@link PackageSetting} data. This will
-         * ensure the {@link PackageManagerService} is taken before
-         * {@link DomainVerificationManagerInternal}'s lock is taken to avoid deadlock.
-         */
-        void withPackageSettings(@NonNull Consumer<Function<String, PackageSetting>> block);
-
-        /**
-         * Variant which returns a value to the caller.
-         * @see #withPackageSettings(Consumer)
-         */
-        <Output> Output withPackageSettingsReturning(
-                @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageSetting>, Output>
-                        block);
-
-        /**
-         * Variant which throws.
-         * @see #withPackageSettings(Consumer)
-         */
-        <ExceptionType extends Exception> void withPackageSettingsThrowing(
-                @NonNull ThrowingConsumer<Function<String, PackageSetting>, ExceptionType> block)
-                throws ExceptionType;
-
-        /**
-         * Variant which throws 2 exceptions.
-         * @see #withPackageSettings(Consumer)
-         */
-        <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
-                withPackageSettingsThrowing2(
-                        @NonNull Throwing2Consumer<Function<String, PackageSetting>, ExceptionOne,
-                                ExceptionTwo> block) throws ExceptionOne, ExceptionTwo;
-
-        /**
-         * Variant which returns a value to the caller and throws.
-         * @see #withPackageSettings(Consumer)
-         */
-        <Output, ExceptionType extends Exception> Output withPackageSettingsReturningThrowing(
-                @NonNull ThrowingFunction<Function<String, PackageSetting>, Output, ExceptionType>
-                        block) throws ExceptionType;
-
         @UserIdInt
         int[] getAllUserIds();
-
-        interface ThrowingConsumer<Input, ExceptionType extends Exception> {
-            void accept(Input input) throws ExceptionType;
-        }
-
-        interface Throwing2Consumer<Input, ExceptionOne extends Exception,
-                ExceptionTwo extends Exception> {
-            void accept(Input input) throws ExceptionOne, ExceptionTwo;
-        }
-
-        interface ThrowingFunction<Input, Output, ExceptionType extends Exception> {
-            Output apply(Input input) throws ExceptionType;
-        }
     }
 }
