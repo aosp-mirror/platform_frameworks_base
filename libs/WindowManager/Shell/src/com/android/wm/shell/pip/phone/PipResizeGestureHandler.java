@@ -21,6 +21,7 @@ import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_LEFT;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_NONE;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_RIGHT;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_TOP;
+import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_NONE;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -471,7 +472,7 @@ public class PipResizeGestureHandler {
                     }
                     if (mThresholdCrossed) {
                         if (mPhonePipMenuController.isMenuVisible()) {
-                            mPhonePipMenuController.hideMenu(false /* animate */,
+                            mPhonePipMenuController.hideMenu(ANIM_TYPE_NONE,
                                     false /* resize */);
                         }
                         final Rect currentPipBounds = mPipBoundsState.getBounds();
