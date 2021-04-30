@@ -19,6 +19,7 @@ package com.android.server;
 import static android.os.PowerExemptionManager.REASON_SHELL;
 import static android.os.PowerExemptionManager.REASON_UNKNOWN;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 import static android.os.Process.INVALID_UID;
 
 import android.Manifest;
@@ -58,6 +59,7 @@ import android.os.Handler;
 import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.PowerManager;
@@ -2015,6 +2017,12 @@ public class DeviceIdleController extends SystemService
         public void unregisterStationaryListener(StationaryListener listener) {
             DeviceIdleController.this.unregisterStationaryListener(listener);
         }
+
+        @Override
+        public @TempAllowListType int getTempAllowListType(@ReasonCode int reasonCode,
+                @TempAllowListType int defaultType) {
+            return DeviceIdleController.this.getTempAllowListType(reasonCode, defaultType);
+        }
     }
 
     private class LocalPowerAllowlistService implements PowerAllowlistInternal {
@@ -2689,6 +2697,18 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    private @TempAllowListType int getTempAllowListType(@ReasonCode int reasonCode,
+            @TempAllowListType int defaultType) {
+        switch (reasonCode) {
+            case PowerExemptionManager.REASON_PUSH_MESSAGING_OVER_QUOTA:
+                return mLocalActivityManager.getPushMessagingOverQuotaBehavior();
+            case PowerExemptionManager.REASON_DENIED:
+                return TEMPORARY_ALLOW_LIST_TYPE_NONE;
+            default:
+                return defaultType;
+        }
+    }
+
     void addPowerSaveTempAllowlistAppChecked(String packageName, long duration,
             int userId, @ReasonCode int reasonCode, @Nullable String reason)
             throws RemoteException {
@@ -2705,9 +2725,12 @@ public class DeviceIdleController extends SystemService
                 "addPowerSaveTempWhitelistApp", null);
         final long token = Binder.clearCallingIdentity();
         try {
-            addPowerSaveTempAllowlistAppInternal(callingUid,
-                    packageName, duration, TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
-                    userId, true, reasonCode, reason);
+            @TempAllowListType int type = getTempAllowListType(reasonCode,
+                    TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED);
+            if (type != TEMPORARY_ALLOW_LIST_TYPE_NONE) {
+                addPowerSaveTempAllowlistAppInternal(callingUid,
+                        packageName, duration, type, userId, true, reasonCode, reason);
+            }
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -2741,16 +2764,6 @@ public class DeviceIdleController extends SystemService
     void addPowerSaveTempAllowlistAppInternal(int callingUid, String packageName,
             long durationMs, @TempAllowListType int tempAllowListType, int userId, boolean sync,
             @ReasonCode int reasonCode, @Nullable String reason) {
-        synchronized (this) {
-            int callingAppId = UserHandle.getAppId(callingUid);
-            if (callingAppId >= Process.FIRST_APPLICATION_UID) {
-                if (!mPowerSaveWhitelistSystemAppIds.get(callingAppId)) {
-                    throw new SecurityException(
-                            "Calling app " + UserHandle.formatUid(callingUid)
-                                    + " is not on whitelist");
-                }
-            }
-        }
         try {
             int uid = getContext().getPackageManager().getPackageUidAsUser(packageName, userId);
             addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, durationMs,
