@@ -45,6 +45,7 @@ import com.android.server.biometrics.sensors.face.ReEnrollNotificationUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Face-specific enroll client for the {@link IFace} AIDL HAL interface.
@@ -55,6 +56,7 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
 
     @NonNull private final int[] mEnrollIgnoreList;
     @NonNull private final int[] mEnrollIgnoreListVendor;
+    @NonNull private final int[] mDisabledFeatures;
     @Nullable private ICancellationSignal mCancellationSignal;
     @Nullable private android.hardware.common.NativeHandle mPreviewSurface;
     private final int mMaxTemplatesPerUser;
@@ -75,6 +77,7 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
                 .getIntArray(R.array.config_face_acquire_vendor_enroll_ignorelist);
         mMaxTemplatesPerUser = maxTemplatesPerUser;
         mDebugConsent = debugConsent;
+        mDisabledFeatures = disabledFeatures;
         try {
             // We must manually close the duplicate handle after it's no longer needed.
             // The caller is responsible for closing the original handle.
@@ -144,27 +147,34 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
 
     @Override
     protected void startHalOperation() {
-        final ArrayList<Byte> token = new ArrayList<>();
-        for (byte b : mHardwareAuthToken) {
-            token.add(b);
-        }
-
         try {
-            // TODO(b/172593978): Pass features.
-            // TODO(b/174619156): Handle accessibility enrollment.
-            byte[] features;
+            List<Byte> featureList = new ArrayList<Byte>();
             if (mDebugConsent) {
-                features = new byte[1];
-                features[0] = Feature.DEBUG;
-            } else {
-                features = new byte[0];
+                featureList.add(new Byte(Feature.DEBUG));
+            }
+
+            boolean shouldAddDiversePoses = true;
+            for (int i = 0; i < mDisabledFeatures.length; i++) {
+                if (AidlConversionUtils.convertFrameworkToAidlFeature(mDisabledFeatures[i])
+                        == Feature.REQUIRE_DIVERSE_POSES) {
+                    shouldAddDiversePoses = false;
+                }
+            }
+
+            if (shouldAddDiversePoses) {
+                featureList.add(new Byte(Feature.REQUIRE_DIVERSE_POSES));
+            }
+
+            byte[] features = new byte[featureList.size()];
+            for (int i = 0; i < featureList.size(); i++) {
+                features[i] = featureList.get(i);
             }
 
             mCancellationSignal = getFreshDaemon().enroll(
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken),
                     EnrollmentType.DEFAULT, features, mPreviewSurface);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception when requesting enroll", e);
+        } catch (RemoteException | IllegalArgumentException e) {
+            Slog.e(TAG, "Exception when requesting enroll", e);
             onError(BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS, 0 /* vendorCode */);
             mCallback.onClientFinished(this, false /* success */);
         }
