@@ -200,6 +200,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setProfileableByShell(boolean profileableByShell);
 
+    ParsingPackage setProfileable(boolean profileable);
+
     ParsingPackage setRequestLegacyExternalStorage(boolean requestLegacyExternalStorage);
 
     ParsingPackage setAllowNativeHeapPointerTagging(boolean allowNativeHeapPointerTagging);
