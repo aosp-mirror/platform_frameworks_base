@@ -241,6 +241,7 @@ public class PackageInfoUtils {
 
         info.flags |= appInfoFlags(info.flags, pkgSetting);
         info.privateFlags |= appInfoPrivateFlags(info.privateFlags, pkgSetting);
+        info.privateFlagsExt |= appInfoPrivateFlagsExt(info.privateFlagsExt, pkgSetting);
 
         return info;
     }
@@ -499,6 +500,24 @@ public class PackageInfoUtils {
 
     /** @see ApplicationInfo#privateFlags */
     public static int appInfoPrivateFlags(int pkgWithoutStateFlags, @Nullable PackageSetting pkgSetting) {
+        // @formatter:off
+        // TODO: Add state specific flags
+        return pkgWithoutStateFlags;
+        // @formatter:on
+    }
+
+    /** @see ApplicationInfo#privateFlagsExt */
+    public static int appInfoPrivateFlagsExt(AndroidPackage pkg,
+                                             @Nullable PackageSetting pkgSetting) {
+        // @formatter:off
+        int pkgWithoutStateFlags = PackageInfoWithoutStateUtils.appInfoPrivateFlagsExt(pkg);
+        return appInfoPrivateFlagsExt(pkgWithoutStateFlags, pkgSetting);
+        // @formatter:on
+    }
+
+    /** @see ApplicationInfo#privateFlagsExt */
+    public static int appInfoPrivateFlagsExt(int pkgWithoutStateFlags,
+                                             @Nullable PackageSetting pkgSetting) {
         // @formatter:off
         // TODO: Add state specific flags
         return pkgWithoutStateFlags;
