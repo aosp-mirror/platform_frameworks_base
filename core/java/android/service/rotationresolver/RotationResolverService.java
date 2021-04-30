@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.view.Surface;
 
 import java.lang.annotation.Retention;
@@ -136,12 +137,16 @@ public abstract class RotationResolverService extends Service {
     @MainThread
     private void resolveRotation(IRotationResolverCallback callback,
             RotationResolutionRequest request, ICancellationSignal transport) {
+        // If there is a valid, uncancelled pending callback running in process, the new rotation
+        // resolution request will be rejected immediately with a failure result.
         if (mPendingCallback != null
-                && (mCancellationSignal == null || !mCancellationSignal.isCanceled())) {
+                && (mCancellationSignal == null || !mCancellationSignal.isCanceled())
+                && (SystemClock.uptimeMillis() < mPendingCallback.mExpirationTime)) {
             reportFailures(callback, ROTATION_RESULT_FAILURE_PREEMPTED);
             return;
         }
-        mPendingCallback = new RotationResolverCallbackWrapper(callback, this);
+        mPendingCallback = new RotationResolverCallbackWrapper(callback, this,
+                SystemClock.uptimeMillis() + request.getTimeoutMillis());
         mCancellationSignal = CancellationSignal.fromTransport(transport);
 
         onResolveRotation(request, mCancellationSignal, mPendingCallback);
@@ -224,12 +229,15 @@ public abstract class RotationResolverService extends Service {
         @NonNull
         private final Handler mHandler;
 
+        private final long mExpirationTime;
+
         private RotationResolverCallbackWrapper(
                 @NonNull android.service.rotationresolver.IRotationResolverCallback callback,
-                RotationResolverService service) {
+                RotationResolverService service, long expirationTime) {
             mCallback = callback;
             mService = service;
             mHandler = service.mMainThreadHandler;
+            mExpirationTime = expirationTime;
             Objects.requireNonNull(mHandler);
         }
 
