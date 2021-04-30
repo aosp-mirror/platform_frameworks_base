@@ -96,4 +96,13 @@ public interface DeviceIdleInternal {
      * that the device is stationary or in motion.
      */
     void unregisterStationaryListener(StationaryListener listener);
+
+    /**
+     * Apply some restrictions on temp allowlist type based on the reasonCode.
+     * @param reasonCode temp allowlist reason code.
+     * @param defaultType default temp allowlist type if reasonCode can not decide a type.
+     * @return temp allowlist type based on the reasonCode.
+     */
+    @TempAllowListType int getTempAllowListType(@ReasonCode int reasonCode,
+            @TempAllowListType int defaultType);
 }
