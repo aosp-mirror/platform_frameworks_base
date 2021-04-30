@@ -393,6 +393,7 @@ public final class AppHibernationService extends SystemService {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackage");
         pkgState.hibernated = false;
         pkgState.lastUnhibernatedMs = System.currentTimeMillis();
+        final long caller = Binder.clearCallingIdentity();
         // Deliver LOCKED_BOOT_COMPLETE AND BOOT_COMPLETE broadcast so app can re-register
         // their alarms/jobs/etc.
         try {
@@ -435,8 +436,10 @@ public final class AppHibernationService extends SystemService {
                     userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(caller);
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         }
-        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
     /**
