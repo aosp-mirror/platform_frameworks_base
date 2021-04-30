@@ -51,7 +51,6 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.systemui.SystemUIApplication;
-import com.android.wm.shell.transition.Transitions;
 
 import javax.inject.Inject;
 
@@ -63,29 +62,16 @@ public class KeyguardService extends Service {
      * Run Keyguard animation as remote animation in System UI instead of local animation in
      * the server process.
      *
-     * 0: Runs all keyguard animation as local animation
-     * 1: Only runs keyguard going away animation as remote animation
-     * 2: Runs all keyguard animation as remote animation
-     *
      * Note: Must be consistent with WindowManagerService.
      */
     private static final String ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY =
             "persist.wm.enable_remote_keyguard_animation";
 
-    private static final int sEnableRemoteKeyguardAnimation =
-            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 1);
-
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
      */
-    public static boolean sEnableRemoteKeyguardGoingAwayAnimation =
-            !Transitions.ENABLE_SHELL_TRANSITIONS && sEnableRemoteKeyguardAnimation >= 1;
-
-    /**
-     * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
-     */
-    public static boolean sEnableRemoteKeyguardOccludeAnimation =
-            !Transitions.ENABLE_SHELL_TRANSITIONS && sEnableRemoteKeyguardAnimation >= 2;
+    static boolean sEnableRemoteKeyguardAnimation =
+            SystemProperties.getBoolean(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, false);
 
     private final KeyguardViewMediator mKeyguardViewMediator;
     private final KeyguardLifecyclesDispatcher mKeyguardLifecyclesDispatcher;
@@ -97,22 +83,20 @@ public class KeyguardService extends Service {
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
 
-        RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
-        if (sEnableRemoteKeyguardGoingAwayAnimation) {
+        if (sEnableRemoteKeyguardAnimation) {
+            RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
             final RemoteAnimationAdapter exitAnimationAdapter =
                     new RemoteAnimationAdapter(mExitAnimationRunner, 0, 0);
             definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY, exitAnimationAdapter);
             definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
                     exitAnimationAdapter);
-        }
-        if (sEnableRemoteKeyguardOccludeAnimation) {
             final RemoteAnimationAdapter occludeAnimationAdapter =
                     new RemoteAnimationAdapter(mOccludeAnimationRunner, 0, 0);
             definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_OCCLUDE, occludeAnimationAdapter);
             definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_UNOCCLUDE, occludeAnimationAdapter);
+            ActivityTaskManager.getInstance().registerRemoteAnimationsForDisplay(
+                    DEFAULT_DISPLAY, definition);
         }
-        ActivityTaskManager.getInstance().registerRemoteAnimationsForDisplay(
-                DEFAULT_DISPLAY, definition);
     }
 
     @Override
