@@ -1152,6 +1152,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     private boolean checkExistsAndEnforceCannotModifyImmutablyRestrictedPermission(
             @NonNull String permName) {
+        final String permissionPackageName;
         final boolean isImmutablyRestrictedPermission;
         synchronized (mLock) {
             final Permission bp = mRegistry.getPermission(permName);
@@ -1159,15 +1160,25 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 Slog.w(TAG, "No such permissions: " + permName);
                 return false;
             }
+            permissionPackageName = bp.getPackageName();
             isImmutablyRestrictedPermission = bp.isHardOrSoftRestricted()
                     && bp.isImmutablyRestricted();
         }
+
+        final int callingUid = getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (mPackageManagerInt.filterAppAccess(permissionPackageName, callingUid, callingUserId)) {
+            EventLog.writeEvent(0x534e4554, "186404356", callingUid, permName);
+            return false;
+        }
+
         if (isImmutablyRestrictedPermission && mContext.checkCallingOrSelfPermission(
                 Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Cannot modify allowlisting of an immutably "
                     + "restricted permission: " + permName);
         }
+
         return true;
     }
 
