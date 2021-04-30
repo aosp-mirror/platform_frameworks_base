@@ -32,6 +32,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.IntDef;
 import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
 import android.content.ComponentName;
@@ -64,6 +65,8 @@ import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,9 +77,26 @@ public class PipMenuView extends FrameLayout {
 
     private static final String TAG = "PipMenuView";
 
+    private static final int ANIMATION_NONE_DURATION_MS = 0;
+    private static final int ANIMATION_HIDE_DURATION_MS = 125;
+
+    /** No animation performed during menu hide. */
+    public static final int ANIM_TYPE_NONE = 0;
+    /** Fade out the menu until it's invisible. Used when the PIP window remains visible.  */
+    public static final int ANIM_TYPE_HIDE = 1;
+    /** Fade out the menu in sync with the PIP window. */
+    public static final int ANIM_TYPE_DISMISS = 2;
+
+    @IntDef(prefix = { "ANIM_TYPE_" }, value = {
+            ANIM_TYPE_NONE,
+            ANIM_TYPE_HIDE,
+            ANIM_TYPE_DISMISS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AnimationType {}
+
     private static final int INITIAL_DISMISS_DELAY = 3500;
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
-    private static final long MENU_FADE_DURATION = 125;
     private static final long MENU_SHOW_ON_EXPAND_START_DELAY = 30;
 
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
@@ -87,6 +107,7 @@ public class PipMenuView extends FrameLayout {
     private int mMenuState;
     private boolean mAllowMenuTimeout = true;
     private boolean mAllowTouches = true;
+    private int mDismissFadeOutDurationMs;
 
     private final List<RemoteAction> mActions = new ArrayList<>();
 
@@ -167,6 +188,8 @@ public class PipMenuView extends FrameLayout {
         mPipMenuIconsAlgorithm = new PipMenuIconsAlgorithm(mContext);
         mPipMenuIconsAlgorithm.bindViews((ViewGroup) mViewRoot, (ViewGroup) mTopEndContainer,
                 mResizeHandle, mSettingsButton, mDismissButton);
+        mDismissFadeOutDurationMs = context.getResources()
+                .getInteger(R.integer.config_pipExitAnimationDuration);
 
         initAccessibility();
     }
@@ -258,7 +281,7 @@ public class PipMenuView extends FrameLayout {
                 mMenuContainerAnimator.playTogether(dismissAnim, resizeAnim);
             }
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
-            mMenuContainerAnimator.setDuration(MENU_FADE_DURATION);
+            mMenuContainerAnimator.setDuration(ANIMATION_HIDE_DURATION_MS);
             if (allowMenuTimeout) {
                 mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -320,17 +343,18 @@ public class PipMenuView extends FrameLayout {
         hideMenu(null);
     }
 
-    void hideMenu(boolean animate, boolean resize) {
-        hideMenu(null, true /* notifyMenuVisibility */, animate, resize);
-    }
-
     void hideMenu(Runnable animationEndCallback) {
-        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, true /* animate */,
-                true /* resize */);
+        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, true /* resize */,
+                ANIM_TYPE_HIDE);
     }
 
-    private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility,
-            boolean animate, boolean resize) {
+    void hideMenu(boolean resize, @AnimationType int animationType) {
+        hideMenu(null /* animationFinishedRunnable */, true /* notifyMenuVisibility */, resize,
+                animationType);
+    }
+
+    void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility,
+            boolean resize, @AnimationType int animationType) {
         if (mMenuState != MENU_STATE_NONE) {
             cancelDelayedHide();
             if (notifyMenuVisibility) {
@@ -348,7 +372,7 @@ public class PipMenuView extends FrameLayout {
                     mResizeHandle.getAlpha(), 0f);
             mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim, resizeAnim);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_OUT);
-            mMenuContainerAnimator.setDuration(animate ? MENU_FADE_DURATION : 0);
+            mMenuContainerAnimator.setDuration(getFadeOutDuration(animationType));
             mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -478,19 +502,17 @@ public class PipMenuView extends FrameLayout {
     private void expandPip() {
         // Do not notify menu visibility when hiding the menu, the controller will do this when it
         // handles the message
-        hideMenu(mController::onPipExpand, false /* notifyMenuVisibility */, true /* animate */,
-                true /* resize */);
+        hideMenu(mController::onPipExpand, false /* notifyMenuVisibility */, true /* resize */,
+                ANIM_TYPE_HIDE);
     }
 
     private void dismissPip() {
-        // Since tapping on the close-button invokes a double-tap wait callback in PipTouchHandler,
-        // we want to disable animating the fadeout animation of the buttons in order to call on
-        // PipTouchHandler#onPipDismiss fast enough.
-        final boolean animate = mMenuState != MENU_STATE_CLOSE;
-        // Do not notify menu visibility when hiding the menu, the controller will do this when it
-        // handles the message
-        hideMenu(mController::onPipDismiss, false /* notifyMenuVisibility */, animate,
-                true /* resize */);
+        if (mMenuState != MENU_STATE_NONE) {
+            // Do not call hideMenu() directly. Instead, let the menu controller handle it just as
+            // any other dismissal that will update the touch state and fade out the PIP task
+            // and the menu view at the same time.
+            mController.onPipDismiss();
+        }
     }
 
     private void showSettings() {
@@ -513,5 +535,18 @@ public class PipMenuView extends FrameLayout {
                 FLAG_CONTENT_ICONS | FLAG_CONTENT_CONTROLS);
         mMainExecutor.removeCallbacks(mHideMenuRunnable);
         mMainExecutor.executeDelayed(mHideMenuRunnable, recommendedTimeout);
+    }
+
+    private long getFadeOutDuration(@AnimationType int animationType) {
+        switch (animationType) {
+            case ANIM_TYPE_NONE:
+                return ANIMATION_NONE_DURATION_MS;
+            case ANIM_TYPE_HIDE:
+                return ANIMATION_HIDE_DURATION_MS;
+            case ANIM_TYPE_DISMISS:
+                return mDismissFadeOutDurationMs;
+            default:
+                throw new IllegalStateException("Invalid animation type " + animationType);
+        }
     }
 }
