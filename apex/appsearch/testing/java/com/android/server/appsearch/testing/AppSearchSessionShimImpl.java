@@ -179,7 +179,7 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
 
     @Override
     @NonNull
-    public ListenableFuture<Void> maybeFlush() {
+    public ListenableFuture<Void> requestFlush() {
         SettableFuture<AppSearchResult<Void>> future = SettableFuture.create();
         // The data in platform will be flushed by scheduled task. AppSearchSession won't do
         // anything extra flush.

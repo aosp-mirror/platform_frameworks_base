@@ -102,7 +102,7 @@ public class AppSearchLoggerTest {
         int nativeIndexRestorationCause =
                 InitializeStatsProto.RecoveryCause.INCONSISTENT_WITH_GROUND_TRUTH_VALUE;
         int nativeSchemaStoreRecoveryCause =
-                InitializeStatsProto.RecoveryCause.TOTAL_CHECKSUM_MISMATCH_VALUE;
+                InitializeStatsProto.RecoveryCause.SCHEMA_CHANGES_OUT_OF_SYNC_VALUE;
         int nativeDocumentStoreRecoveryLatencyMillis = 7;
         int nativeIndexRestorationLatencyMillis = 8;
         int nativeSchemaStoreRecoveryLatencyMillis = 9;
