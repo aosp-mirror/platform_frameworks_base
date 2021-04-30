@@ -133,6 +133,7 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
      * Throws a {@link SecurityException} iff the originator has permission to receive data.
      */
     void enforcePermissionsForDataDelivery(@NonNull Identity identity, @NonNull String reason) {
+        // TODO(b/186164881): remove
         // START TEMP HACK
         enforcePermissionForPreflight(mContext, identity, RECORD_AUDIO);
         int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
