@@ -323,6 +323,7 @@ public final class SearchSpec {
             mBundle = new Bundle();
             mBundle.putInt(NUM_PER_PAGE_FIELD, DEFAULT_NUM_PER_PAGE);
             mBundle.putInt(TERM_MATCH_TYPE_FIELD, TERM_MATCH_PREFIX);
+            mBundle.putInt(SNIPPET_COUNT_PER_PROPERTY_FIELD, MAX_SNIPPET_PER_PROPERTY_COUNT);
         }
 
         /**
@@ -471,8 +472,11 @@ public final class SearchSpec {
          * Only the first {@code snippetCount} documents based on the ranking strategy will have
          * snippet information provided.
          *
-         * <p>If set to 0 (default), snippeting is disabled and {@link SearchResult#getMatches} will
-         * return {@code null} for that result.
+         * <p>The list returned from {@link SearchResult#getMatchInfos} will contain at most this
+         * many entries.
+         *
+         * <p>If set to 0 (default), snippeting is disabled and the list returned from {@link
+         * SearchResult#getMatchInfos} will be empty.
          */
         @NonNull
         public SearchSpec.Builder setSnippetCount(
@@ -485,10 +489,14 @@ public final class SearchSpec {
 
         /**
          * Sets {@code snippetCountPerProperty}. Only the first {@code snippetCountPerProperty}
-         * snippets for each property of {@link GenericDocument} will contain snippet information.
+         * snippets for each property of each {@link GenericDocument} will contain snippet
+         * information.
          *
-         * <p>If set to 0, snippeting is disabled and {@link SearchResult#getMatches} will return
-         * {@code null} for that result.
+         * <p>If set to 0, snippeting is disabled and the list returned from {@link
+         * SearchResult#getMatchInfos} will be empty.
+         *
+         * <p>The default behavior is to snippet all matches a property contains, up to the maximum
+         * value of 10,000.
          */
         @NonNull
         public SearchSpec.Builder setSnippetCountPerProperty(
