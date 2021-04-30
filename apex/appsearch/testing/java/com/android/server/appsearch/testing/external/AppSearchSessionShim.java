@@ -240,13 +240,16 @@ public interface AppSearchSessionShim extends Closeable {
     /**
      * Flush all schema and document updates, additions, and deletes to disk if possible.
      *
+     * <p>The request is not guaranteed to be handled and may be ignored by some implementations of
+     * AppSearchSessionShim.
+     *
      * @return The pending result of performing this operation. {@link
      *     android.app.appsearch.exceptions.AppSearchException} with {@link
      *     AppSearchResult#RESULT_INTERNAL_ERROR} will be set to the future if we hit error when
      *     save to disk.
      */
     @NonNull
-    ListenableFuture<Void> maybeFlush();
+    ListenableFuture<Void> requestFlush();
 
     /**
      * Closes the {@link AppSearchSessionShim} to persist all schema and document updates,
