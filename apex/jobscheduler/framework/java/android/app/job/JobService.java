@@ -153,6 +153,10 @@ public abstract class JobService extends Service {
      * Once this method returns (or times out), the system releases the wakelock that it is holding
      * on behalf of the job.</p>
      *
+     * <p class="caution"><strong>Note:</strong> When a job is stopped and rescheduled via this
+     * method call, the deadline constraint is excluded from the rescheduled job's constraint set.
+     * The rescheduled job will run again once all remaining constraints are satisfied.
+     *
      * @param params The parameters identifying this job, similar to what was supplied to the job in
      *               the {@link #onStartJob(JobParameters)} callback, but with the stop reason
      *               included.
