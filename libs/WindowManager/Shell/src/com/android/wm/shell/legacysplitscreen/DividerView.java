@@ -49,7 +49,6 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
-import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowManager;
@@ -524,9 +523,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             case MotionEvent.ACTION_CANCEL:
                 mVelocityTracker.addMovement(event);
 
+                if (!mMoving) break;
+
                 x = (int) event.getRawX();
                 y = (int) event.getRawY();
-
                 mVelocityTracker.computeCurrentVelocity(1000);
                 int position = calculatePosition(x, y);
                 stopDragging(position, isHorizontalDivision() ? mVelocityTracker.getYVelocity()

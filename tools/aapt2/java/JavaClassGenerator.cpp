@@ -616,8 +616,9 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
 
   for (const auto& package : table_->packages) {
     for (const auto& type : package->types) {
-      if (type->type == ResourceType::kAttrPrivate) {
-        // We generate these as part of the kAttr type, so skip them here.
+      if (type->type == ResourceType::kAttrPrivate || type->type == ResourceType::kMacro) {
+        // We generate kAttrPrivate as part of the kAttr type, so skip them here.
+        // Macros are not actual resources, so skip them as well.
         continue;
       }
 

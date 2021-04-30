@@ -1820,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"ଅଜଣା ପୋର୍ଟ୍ରେଟ୍‍"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"ଅଜଣା ଲ୍ୟାଣ୍ଡସ୍କେପ୍‌"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ବାତିଲ୍‍ କରାଗଲା"</string>
@@ -1865,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଅପଡେଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଡିଲିଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ଠିକ୍ ଅଛି"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"ବ୍ୟାଟେରୀ ସେଭର୍ ଗାଢ଼ା ଥିମକୁ ଚାଲୁ କରେ ଏବଂ ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ, କିଛି ଭିଜୁଆଲ୍ ଇଫେକ୍ଟ ଏବଂ କିଛି ଫିଚରଗୁଡ଼ିକୁ ସୀମିତ କିମ୍ବା ବନ୍ଦ କରେ।\n\n"<annotation id="url">"ଅଧିକ ଜାଣନ୍ତୁ"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"ବ୍ୟାଟେରୀ ସେଭର୍ ଗାଢ଼ା ଥିମକୁ ଚାଲୁ କରେ ଏବଂ ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ, କିଛି ଭିଜୁଆଲ୍ ଇଫେକ୍ଟ ଏବଂ କିଛି ଫିଚରଗୁଡ଼ିକୁ ସୀମିତ କିମ୍ବା ବନ୍ଦ କରେ।"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବାରଣ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ଥର କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ ଯେମିତି ଆପଣ ଇମେଜଗୁଡ଼ିକୁ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ସେଗୁଡ଼ିକ ଡିସପ୍ଲେ ହୁଏ ନାହିଁ।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ଡାଟା ସେଭର୍‌ ଚାଲୁ କରିବେ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ଚାଲୁ କରନ୍ତୁ"</string>
@@ -2088,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ଏହି ବିଜ୍ଞପ୍ତିକୁ ନୀରବ ଭାବେ ଡିମୋଟ୍ କରାଯାଇଛି। ମତାମତ ପ୍ରଦାନ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ଏହି ବିଜ୍ଞପ୍ତିର ରେଙ୍କ ଉପରକୁ କରାଯାଇଛି। ମତାମତ ପ୍ରଦାନ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ଏହି ବିଜ୍ଞପ୍ତିର ରେଙ୍କ ତଳକୁ କରାଯାଇଛି। ମତାମତ ପ୍ରଦାନ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"ଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"ପ୍ରସ୍ତାବିତ କାର୍ଯ୍ୟ ଏବଂ ପ୍ରତ୍ୟୁତ୍ତରଗୁଡ଼ିକ ବର୍ତ୍ତମାନ ଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ମାଧ୍ୟମରେ ପ୍ରଦାନ କରାଯାଉଛି। Android ଆଡେପ୍ଟିଭ୍ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଆଉ ସମର୍ଥିତ ନୁହେଁ।"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ଠିକ୍ ଅଛି"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12ରେ Android ଆଡେପ୍ଟିଭ୍ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକରେ ପରିବର୍ତ୍ତନ କରାଯାଇଛି। ଏହି ଫିଚର୍ ପ୍ରସ୍ତାବିତ କାର୍ଯ୍ୟ ଏବଂ ପ୍ରତ୍ୟୁତ୍ତରଗୁଡ଼ିକୁ ଦେଖାଏ ଏବଂ ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ବ୍ୟବସ୍ଥିତ କରେ।\n\nଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଯୋଗାଯୋଗ ନାମ ଏବଂ ମେସେଜଗୁଡ଼ିକ ପରି ବ୍ୟକ୍ତିଗତ ସୂଚନା ସମେତ ବିଜ୍ଞପ୍ତିର ବିଷୟବସ୍ତୁକୁ ଆକ୍ସେସ୍ କରିପାରିବ। ଏହି ଫିଚର୍ ଫୋନ୍ କଲଗୁଡ଼ିକର ଉତ୍ତର ଦେବା ଏବଂ \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ନିୟନ୍ତ୍ରଣ କରିବା ପରି, ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ମଧ୍ୟ ଖାରଜ କରିପାରିବ କିମ୍ବା ସେଗୁଡ଼ିକର ଉତ୍ତର ଦେଇପାରିବ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ନିୟମିତ ମୋଡ୍‍ ସୂଚନା ବିଜ୍ଞପ୍ତି"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ସାଧାରଣ ଭାବରେ ଚାର୍ଜ୍ କରିବା ପୂର୍ବରୁ ବ୍ୟାଟେରୀ ସରିଯାଇପାରେ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ବ୍ୟାଟେରୀର ସମୟକୁ ବଢ଼ାଇବା ପାଇଁ ବ୍ୟଟେରୀ ସେଭର୍‍କୁ କାର୍ଯ୍ୟକାରୀ କରାଯାଇଛି"</string>
@@ -2295,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ଆପ୍ଲିକେସନ୍ ବ୍ରାଣ୍ଡିଂ ଛବି"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"ଆକ୍ସେସ୍ ସେଟିଂସକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ଦେଖିପାରିବ ଏବଂ ନିୟନ୍ତ୍ରଣ କରିପାରିବ। ସମୀକ୍ଷା କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

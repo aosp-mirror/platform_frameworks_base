@@ -6397,7 +6397,9 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_ACTIVITY_NO_HISTORY = 0x40000000;
     /**
      * If set, the activity will not be launched if it is already running
-     * at the top of the history stack.
+     * at the top of the history stack.  See
+     * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html#TaskLaunchModes">
+     * Tasks and Back Stack</a> for more information.
      */
     public static final int FLAG_ACTIVITY_SINGLE_TOP = 0x20000000;
     /**
@@ -6537,8 +6539,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_ACTIVITY_RESET_TASK_IF_NEEDED = 0x00200000;
     /**
      * This flag is not normally set by application code, but set for you by
-     * the system if this activity is being launched from history
-     * (longpress home key).
+     * the system if this activity is being launched from history.
      */
     public static final int FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY = 0x00100000;
     /**
@@ -6571,7 +6572,9 @@ public class Intent implements Parcelable, Cloneable {
      * equivalent of the Activity manifest specifying {@link
      * android.R.attr#documentLaunchMode}="intoExisting". When used with
      * FLAG_ACTIVITY_MULTIPLE_TASK it is the equivalent of the Activity manifest specifying
-     * {@link android.R.attr#documentLaunchMode}="always".
+     * {@link android.R.attr#documentLaunchMode}="always". The flag is ignored even in
+     * conjunction with {@link #FLAG_ACTIVITY_MULTIPLE_TASK} when the Activity manifest specifies
+     * {@link android.R.attr#documentLaunchMode}="never".
      *
      * Refer to {@link android.R.attr#documentLaunchMode} for more information.
      *

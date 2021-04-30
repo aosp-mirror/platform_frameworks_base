@@ -153,8 +153,6 @@ class LoadedPackage {
   static std::unique_ptr<const LoadedPackage> Load(const Chunk& chunk,
                                                    package_property_t property_flags);
 
-  ~LoadedPackage();
-
   // Finds the entry with the specified type name and entry name. The names are in UTF-16 because
   // the underlying ResStringPool API expects this. For now this is acceptable, but since
   // the default policy in AAPT2 is to build UTF-8 string pools, this needs to change.
@@ -275,7 +273,7 @@ class LoadedPackage {
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
 
-  LoadedPackage();
+  LoadedPackage() = default;
 
   ResStringPool type_string_pool_;
   ResStringPool key_string_pool_;

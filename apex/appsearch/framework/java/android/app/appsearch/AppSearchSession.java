@@ -28,7 +28,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 
 import java.io.Closeable;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -708,8 +708,8 @@ public final class AppSearchSession implements Closeable {
             try {
                 // Migration process
                 // 1. Validate and retrieve all active migrators.
-                AndroidFuture<AppSearchResult<GetSchemaResponse>> getSchemaFuture =
-                        new AndroidFuture<>();
+                CompletableFuture<AppSearchResult<GetSchemaResponse>> getSchemaFuture =
+                        new CompletableFuture<>();
                 getSchema(callbackExecutor, getSchemaFuture::complete);
                 AppSearchResult<GetSchemaResponse> getSchemaResult = getSchemaFuture.get();
                 if (!getSchemaResult.isSuccess()) {
@@ -733,7 +733,8 @@ public final class AppSearchSession implements Closeable {
 
                 // 2. SetSchema with forceOverride=false, to retrieve the list of
                 // incompatible/deleted types.
-                AndroidFuture<AppSearchResult<Bundle>> setSchemaFuture = new AndroidFuture<>();
+                CompletableFuture<AppSearchResult<Bundle>> setSchemaFuture =
+                        new CompletableFuture<>();
                 mService.setSchema(
                         mPackageName,
                         mDatabaseName,
@@ -781,8 +782,8 @@ public final class AppSearchSession implements Closeable {
                     // failed.
                     if (!setSchemaResponse.getIncompatibleTypes().isEmpty()
                             || !setSchemaResponse.getDeletedTypes().isEmpty()) {
-                        AndroidFuture<AppSearchResult<Bundle>> setSchema2Future =
-                                new AndroidFuture<>();
+                        CompletableFuture<AppSearchResult<Bundle>> setSchema2Future =
+                                new CompletableFuture<>();
                         // only trigger second setSchema() call if the first one is fail.
                         mService.setSchema(
                                 mPackageName,

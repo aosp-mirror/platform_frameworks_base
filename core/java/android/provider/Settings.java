@@ -8515,6 +8515,12 @@ public final class Settings {
                 "swipe_bottom_to_notification_enabled";
 
         /**
+         * Controls whether One-Handed mode is currently activated.
+         * @hide
+         */
+        public static final String ONE_HANDED_MODE_ACTIVATED = "one_handed_mode_activated";
+
+        /**
          * For user preference if One-Handed Mode enabled.
          * @hide
          */

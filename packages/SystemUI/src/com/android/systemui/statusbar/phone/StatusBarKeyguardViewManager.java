@@ -615,7 +615,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             boolean needsFading = needsBypassFading();
             if (needsFading) {
                 delay = 0;
-                fadeoutDuration = KeyguardBypassController.BYPASS_PANEL_FADE_DURATION;
+                fadeoutDuration = KeyguardBypassController.BYPASS_FADE_DURATION;
             } else if (wakeUnlockPulsing) {
                 delay = 0;
                 fadeoutDuration = 240;
@@ -979,7 +979,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             resetAlternateAuth(false);
             executeAfterKeyguardGoneAction();
         }
-
     }
 
     public void showBouncerMessage(String message, ColorStateList colorState) {

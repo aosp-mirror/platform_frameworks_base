@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.internal.annotations;
+#ifndef ANDROID_CONTENT_RES_APKASSETS_H
+#define ANDROID_CONTENT_RES_APKASSETS_H
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+#include "androidfw/ApkAssets.h"
+#include "androidfw/MutexGuard.h"
 
-/**
- * Annotation type used to mark a class which is immutable.
- */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
-public @interface Immutable {
-}
+#include "jni.h"
+
+namespace android {
+
+Guarded<std::unique_ptr<const ApkAssets>>& ApkAssetsFromLong(jlong ptr);
+
+} // namespace android
+
+#endif // ANDROID_CONTENT_RES_APKASSETS_H

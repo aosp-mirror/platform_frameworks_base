@@ -2085,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"此通知的重要性已降低為「靜音」。輕按即可提供意見。"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"此通知的重要性已提升。輕按即可提供意見。"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"此通知的重要性已降級。輕按即可提供意見。"</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"強化通知"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"建議的操作和回覆目前由強化通知功能提供。系統已不再支援 Android 自動調整通知功能。"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"確定"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"關閉"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"瞭解詳情"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"在 Android 12 中，我們將 Android 自動調整通知取代成強化通知。此功能可顯示建議操作和回覆，以及整理通知。\n\n強化通知功能可讀取所有通知內容 (包括聯絡人姓名和訊息等個人資料)，以及關閉或回應通知，例如接聽來電和控制「請勿騷擾」功能。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"「日常安排模式」資料通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電量可能會在日常充電前耗盡"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"「省電模式」已啟用，以便延長電池壽命"</string>
@@ -2292,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"應用程式品牌形象"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"檢查存取權設定"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> 可以查看及控制您的螢幕。輕按即可查看。"</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

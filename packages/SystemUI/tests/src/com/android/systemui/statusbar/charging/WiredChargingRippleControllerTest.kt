@@ -71,8 +71,8 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
         // Verify ripple added to window manager.
         captor.value.onBatteryLevelChanged(
                 0 /* unusedBatteryLevel */,
-                false /* plugged in */,
-                true /* charging */)
+                true /* plugged in */,
+                false /* charging */)
         val attachListenerCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener::class.java)
         verify(rippleView).addOnAttachStateChangeListener(attachListenerCaptor.capture())

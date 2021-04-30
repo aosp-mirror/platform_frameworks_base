@@ -883,6 +883,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 synchronized (getLockObject()) {
                     // Check whether the user is affiliated, *before* removing its data.
                     boolean isRemovedUserAffiliated = isUserAffiliatedWithDeviceLocked(userHandle);
+                    if (isProfileOwnerOfOrganizationOwnedDevice(userHandle)) {
+                        // Disable network and security logging
+                        mInjector.securityLogSetLoggingEnabledProperty(false);
+                        mSecurityLogMonitor.stop();
+                        setNetworkLoggingActiveInternal(false);
+                    }
                     removeUserData(userHandle);
                     if (!isRemovedUserAffiliated) {
                         // We discard the logs when unaffiliated users are deleted (so that the
@@ -8552,11 +8558,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             enforceCanSetProfileOwnerLocked(
                     caller, who, userHandle, hasIncompatibleAccountsOrNonAdb);
-            Preconditions.checkArgument(isPackageInstalledForUser(who.getPackageName(), userHandle),
-                    "Component " + who + " not installed for userId:" + userHandle);
             final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
-            Preconditions.checkArgument(admin != null && !getUserData(
-                    userHandle).mRemovingAdmins.contains(who), "Not active admin: " + who);
+            Preconditions.checkArgument(
+                    isPackageInstalledForUser(who.getPackageName(), userHandle)
+                            && admin != null
+                            && !getUserData(userHandle).mRemovingAdmins.contains(who),
+                    "Not active admin: " + who);
 
             final int parentUserId = getProfileParentId(userHandle);
             // When trying to set a profile owner on a new user, it may be that this user is
@@ -8896,17 +8903,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public ComponentName getProfileOwnerAsUser(int userHandle) {
+    public ComponentName getProfileOwnerAsUser(int userId) {
         if (!mHasFeature) {
             return null;
         }
-        Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
+        Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userHandle));
+        CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
-            return mOwners.getProfileOwnerComponent(userHandle);
+            return mOwners.getProfileOwnerComponent(userId);
         }
     }
 
@@ -9350,19 +9357,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public List<UserHandle> listForegroundAffiliatedUsers() {
         checkIsDeviceOwner(getCallerIdentity());
 
-        int userId = mInjector.binderWithCleanCallingIdentity(() -> getCurrentForegroundUserId());
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            int userId = getCurrentForegroundUserId();
+            boolean isAffiliated;
+            synchronized (getLockObject()) {
+                isAffiliated = isUserAffiliatedWithDeviceLocked(userId);
+            }
 
-        boolean isAffiliated;
-        synchronized (getLockObject()) {
-            isAffiliated = isUserAffiliatedWithDeviceLocked(userId);
-        }
+            if (!isAffiliated) return Collections.emptyList();
 
-        if (!isAffiliated) return Collections.emptyList();
+            List<UserHandle> users = new ArrayList<>(1);
+            users.add(UserHandle.of(userId));
 
-        List<UserHandle> users = new ArrayList<>(1);
-        users.add(UserHandle.of(userId));
-
-        return users;
+            return users;
+        });
     }
 
     protected int getProfileParentId(int userHandle) {
@@ -13319,12 +13327,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         final long ident = mInjector.binderClearCallingIdentity();
         try {
-            final int uidForPackage = mInjector.getPackageManager().getPackageUidAsUser(
-                    packageName, caller.getUserId());
-            Preconditions.checkArgument(caller.getUid() == uidForPackage,
+            final List<String> callerUidPackageNames = Arrays.asList(
+                    mInjector.getPackageManager().getPackagesForUid(caller.getUid()));
+            Preconditions.checkArgument(callerUidPackageNames.contains(packageName),
                     "Caller uid doesn't match the one for the provided package.");
-        } catch (NameNotFoundException e) {
-            throw new IllegalArgumentException("Invalid package provided " + packageName, e);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
@@ -14124,7 +14130,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean isUserAffiliatedWithDeviceLocked(int userId) {
+    private boolean isUserAffiliatedWithDeviceLocked(@UserIdInt int userId) {
         if (!mOwners.hasDeviceOwner()) {
             return false;
         }

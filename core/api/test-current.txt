@@ -2685,6 +2685,12 @@ package android.view {
 
   public final class ContentInfo {
     method @NonNull public android.util.Pair<android.view.ContentInfo,android.view.ContentInfo> partition(@NonNull java.util.function.Predicate<android.content.ClipData.Item>);
+    method public void releasePermissions();
+  }
+
+  public static final class ContentInfo.Builder {
+    method @NonNull public android.view.ContentInfo.Builder setDragAndDropPermissions(@Nullable android.view.DragAndDropPermissions);
+    method @NonNull public android.view.ContentInfo.Builder setInputContentInfo(@Nullable android.view.inputmethod.InputContentInfo);
   }
 
   public final class Display {
