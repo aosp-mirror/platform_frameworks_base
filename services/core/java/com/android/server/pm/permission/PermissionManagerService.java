@@ -532,16 +532,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+
         final AndroidPackage opPackage = mPackageManagerInt.getPackage(opPackageName);
         final int targetSdkVersion = getPermissionInfoCallingTargetSdkVersion(opPackage,
                 callingUid);
+        final PermissionInfo permissionInfo;
         synchronized (mLock) {
             final Permission bp = mRegistry.getPermission(permName);
             if (bp == null) {
                 return null;
             }
-            return bp.generatePermissionInfo(flags, targetSdkVersion);
+            permissionInfo = bp.generatePermissionInfo(flags, targetSdkVersion);
         }
+
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (mPackageManagerInt.filterAppAccess(permissionInfo.packageName, callingUid,
+                callingUserId)) {
+            EventLog.writeEvent(0x534e4554, "183122164", callingUid, permName);
+            return null;
+        }
+        return permissionInfo;
     }
 
     private int getPermissionInfoCallingTargetSdkVersion(@Nullable AndroidPackage pkg, int uid) {
