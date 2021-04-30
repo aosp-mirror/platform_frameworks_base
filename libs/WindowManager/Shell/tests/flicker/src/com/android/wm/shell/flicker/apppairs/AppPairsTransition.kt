@@ -22,6 +22,7 @@ import android.platform.test.annotations.Presubmit
 import android.system.helpers.ActivityHelper
 import android.util.Log
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.compatibility.common.util.SystemUtil
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -138,7 +139,7 @@ abstract class AppPairsTransition(protected val testSpec: FlickerTestParameter) 
         append("$primaryApp $secondaryApp")
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 186510496)
     @Test
     open fun navBarLayerIsAlwaysVisible() {
         testSpec.navBarLayerIsAlwaysVisible()

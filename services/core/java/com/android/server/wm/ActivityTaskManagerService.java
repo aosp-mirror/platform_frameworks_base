@@ -3340,11 +3340,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public boolean supportsNonResizableMultiWindow() {
-        return mSupportsNonResizableMultiWindow;
-    }
-
-    @Override
     public boolean updateConfiguration(Configuration values) {
         mAmInternal.enforceCallingPermission(CHANGE_CONFIGURATION, "updateConfiguration()");
 

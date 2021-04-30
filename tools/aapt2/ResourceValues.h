@@ -164,6 +164,8 @@ struct Reference : public TransformableItem<Reference, BaseItem<Reference>> {
   Reference::Type reference_type;
   bool private_reference = false;
   bool is_dynamic = false;
+  std::optional<uint32_t> type_flags;
+  bool allow_raw;
 
   Reference();
   explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);
@@ -311,6 +313,8 @@ struct Attribute : public TransformableValue<Attribute, BaseValue<Attribute>> {
   bool IsCompatibleWith(const Attribute& attr) const;
 
   std::string MaskString() const;
+  static std::string MaskString(uint32_t type_mask);
+
   void Print(std::ostream* out) const override;
   bool Matches(const Item& item, DiagMessage* out_msg = nullptr) const;
 };
@@ -362,6 +366,28 @@ struct Styleable : public TransformableValue<Styleable, BaseValue<Styleable>> {
   void MergeWith(Styleable* styleable);
 };
 
+struct Macro : public TransformableValue<Macro, BaseValue<Macro>> {
+  std::string raw_value;
+  StyleString style_string;
+  std::vector<UntranslatableSection> untranslatable_sections;
+
+  struct Namespace {
+    std::string alias;
+    std::string package_name;
+    bool is_private;
+
+    bool operator==(const Namespace& right) const {
+      return alias == right.alias && package_name == right.package_name &&
+             is_private == right.is_private;
+    }
+  };
+
+  std::vector<Namespace> alias_namespaces;
+
+  bool Equals(const Value* value) const override;
+  void Print(std::ostream* out) const override;
+};
+
 template <typename T>
 typename std::enable_if<std::is_base_of<Value, T>::value, std::ostream&>::type operator<<(
     std::ostream& out, const std::unique_ptr<T>& value) {
@@ -388,6 +414,7 @@ struct CloningValueTransformer : public ValueTransformer {
   std::unique_ptr<Array> TransformDerived(const Array* value) override;
   std::unique_ptr<Plural> TransformDerived(const Plural* value) override;
   std::unique_ptr<Styleable> TransformDerived(const Styleable* value) override;
+  std::unique_ptr<Macro> TransformDerived(const Macro* value) override;
 };
 
 }  // namespace aapt

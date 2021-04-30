@@ -80,6 +80,7 @@ import static com.android.server.alarm.AlarmManagerService.Constants.MAX_EXACT_A
 import static com.android.server.alarm.AlarmManagerService.FREQUENT_INDEX;
 import static com.android.server.alarm.AlarmManagerService.INDEFINITE_DELAY;
 import static com.android.server.alarm.AlarmManagerService.IS_WAKEUP_MASK;
+import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_UNDEFINED;
 import static com.android.server.alarm.AlarmManagerService.TIME_CHANGED_MASK;
 import static com.android.server.alarm.AlarmManagerService.WORKING_INDEX;
 import static com.android.server.alarm.Constants.TEST_CALLING_PACKAGE;
@@ -771,10 +772,10 @@ public class AlarmManagerServiceTest {
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 6, pi6);
         assertEquals(mNowElapsedTest + 6, mTestTimer.getElapsed());
 
-        mService.removeLocked(pi6, null);
+        mService.removeLocked(pi6, null, REMOVE_REASON_UNDEFINED);
         assertEquals(mNowElapsedTest + 8, mTestTimer.getElapsed());
 
-        mService.removeLocked(pi8, null);
+        mService.removeLocked(pi8, null, REMOVE_REASON_UNDEFINED);
         assertEquals(mNowElapsedTest + 9, mTestTimer.getElapsed());
     }
 
@@ -1252,7 +1253,8 @@ public class AlarmManagerServiceTest {
             setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 10, getNewMockPendingIntent());
         }
         assertEquals(numAlarms, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
-        mService.removeLocked(TEST_CALLING_UID);
+        mService.removeLocked(TEST_CALLING_UID,
+                REMOVE_REASON_UNDEFINED);
         assertEquals(0, mService.mAlarmsPerUid.get(TEST_CALLING_UID, 0));
     }
 
@@ -1292,7 +1294,7 @@ public class AlarmManagerServiceTest {
         }
         assertEquals(numAlarms, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
         for (int i = 0; i < numAlarms; i++) {
-            mService.removeLocked(pis[i], null);
+            mService.removeLocked(pis[i], null, REMOVE_REASON_UNDEFINED);
             assertEquals(numAlarms - i - 1, mService.mAlarmsPerUid.get(TEST_CALLING_UID, 0));
         }
     }
@@ -1422,7 +1424,7 @@ public class AlarmManagerServiceTest {
         mTestTimer.expire();
         assertEquals(numAlarms, mService.mPendingNonWakeupAlarms.size());
         for (int i = 0; i < numAlarms; i++) {
-            mService.removeLocked(pis[i], null);
+            mService.removeLocked(pis[i], null, REMOVE_REASON_UNDEFINED);
             assertEquals(numAlarms - i - 1, mService.mAlarmsPerUid.get(TEST_CALLING_UID, 0));
         }
     }
@@ -1492,13 +1494,13 @@ public class AlarmManagerServiceTest {
         assertEquals(trigger6, mTestTimer.getElapsed());
         assertEquals(trigger6, mService.mNextWakeFromIdle.getWhenElapsed());
 
-        mService.removeLocked(wakeFromIdle6, null);
+        mService.removeLocked(wakeFromIdle6, null, REMOVE_REASON_UNDEFINED);
 
         assertTrue(mService.mNextWakeFromIdle.matches(wakeFromIdle10, null));
         assertEquals(trigger10, mTestTimer.getElapsed());
         assertEquals(trigger10, mService.mNextWakeFromIdle.getWhenElapsed());
 
-        mService.removeLocked(wakeFromIdle10, null);
+        mService.removeLocked(wakeFromIdle10, null, REMOVE_REASON_UNDEFINED);
         assertNull(mService.mNextWakeFromIdle);
     }
 
@@ -1524,13 +1526,13 @@ public class AlarmManagerServiceTest {
         setWakeFromIdle(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 12, wakeFromIdle12);
         assertEquals(mNowElapsedTest + 5, mService.mPendingIdleUntil.getWhenElapsed());
 
-        mService.removeLocked(wakeFromIdle5, null);
+        mService.removeLocked(wakeFromIdle5, null, REMOVE_REASON_UNDEFINED);
         assertEquals(mNowElapsedTest + 8, mService.mPendingIdleUntil.getWhenElapsed());
 
-        mService.removeLocked(wakeFromIdle8, null);
+        mService.removeLocked(wakeFromIdle8, null, REMOVE_REASON_UNDEFINED);
         assertEquals(requestedIdleUntil, mService.mPendingIdleUntil.getWhenElapsed());
 
-        mService.removeLocked(idleUntilPi, null);
+        mService.removeLocked(idleUntilPi, null, REMOVE_REASON_UNDEFINED);
         assertNull(mService.mPendingIdleUntil);
 
         setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 15, idleUntilPi);
@@ -1641,7 +1643,7 @@ public class AlarmManagerServiceTest {
         verify(pis[0], never()).send(eq(mMockContext), eq(0), any(Intent.class), any(),
                 any(Handler.class), isNull(), any());
 
-        mService.removeLocked(idleUntil, null);
+        mService.removeLocked(idleUntil, null, REMOVE_REASON_UNDEFINED);
         mTestTimer.expire();
         // Now, the first 5 alarms (upto i = 4) should expire.
         for (int i = 0; i < 5; i++) {
@@ -1688,14 +1690,16 @@ public class AlarmManagerServiceTest {
                 getNewMockPendingIntent(), false), quota, mAllowWhileIdleWindow);
 
         // Refresh the state
-        mService.removeLocked(TEST_CALLING_UID);
+        mService.removeLocked(TEST_CALLING_UID,
+                REMOVE_REASON_UNDEFINED);
         mService.mAllowWhileIdleHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
 
         testQuotasDeferralOnExpiration(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP,
                 trigger, getNewMockPendingIntent(), false), quota, mAllowWhileIdleWindow);
 
         // Refresh the state
-        mService.removeLocked(TEST_CALLING_UID);
+        mService.removeLocked(TEST_CALLING_UID,
+                REMOVE_REASON_UNDEFINED);
         mService.mAllowWhileIdleHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
 
         testQuotasNoDeferral(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, trigger,

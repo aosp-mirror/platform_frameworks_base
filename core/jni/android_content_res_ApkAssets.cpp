@@ -16,6 +16,8 @@
 
 #define ATRACE_TAG ATRACE_TAG_RESOURCES
 
+#include <mutex>
+
 #include "signal.h"
 
 #include "android-base/logging.h"
@@ -26,6 +28,7 @@
 #include "utils/misc.h"
 #include "utils/Trace.h"
 
+#include "android_content_res_ApkAssets.h"
 #include "android_util_AssetManager_private.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
@@ -71,6 +74,19 @@ enum : format_type_t {
   // The path used to load the apk assets represents the a directory.
   FORMAT_DIRECTORY = 3,
 };
+
+Guarded<std::unique_ptr<const ApkAssets>>& ApkAssetsFromLong(jlong ptr) {
+    return *reinterpret_cast<Guarded<std::unique_ptr<const ApkAssets>>*>(ptr);
+}
+
+static jlong CreateGuardedApkAssets(std::unique_ptr<const ApkAssets> assets) {
+    auto guarded_assets = new Guarded<std::unique_ptr<const ApkAssets>>(std::move(assets));
+    return reinterpret_cast<jlong>(guarded_assets);
+}
+
+static void DeleteGuardedApkAssets(Guarded<std::unique_ptr<const ApkAssets>>& apk_assets) {
+    delete &apk_assets;
+}
 
 class LoaderAssetsProvider : public AssetsProvider {
  public:
@@ -227,7 +243,7 @@ static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t forma
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }
-  return reinterpret_cast<jlong>(apk_assets.release());
+  return CreateGuardedApkAssets(std::move(apk_assets));
 }
 
 static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, const format_type_t format,
@@ -279,7 +295,7 @@ static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, const format_type_t
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }
-  return reinterpret_cast<jlong>(apk_assets.release());
+  return CreateGuardedApkAssets(std::move(apk_assets));
 }
 
 static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_type_t format,
@@ -347,12 +363,12 @@ static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }
-  return reinterpret_cast<jlong>(apk_assets.release());
+  return CreateGuardedApkAssets(std::move(apk_assets));
 }
 
 static jlong NativeLoadEmpty(JNIEnv* env, jclass /*clazz*/, jint flags, jobject assets_provider) {
   auto apk_assets = ApkAssets::Load(LoaderAssetsProvider::Create(env, assets_provider), flags);
-  return reinterpret_cast<jlong>(apk_assets.release());
+  return CreateGuardedApkAssets(std::move(apk_assets));
 }
 
 // STOPSHIP (b/159041693): Revert signal handler when reason for issue is found.
@@ -383,54 +399,60 @@ static void DestroyErrorHandler(int sig, siginfo_t* info, void* ucontext) {
 }
 
 static void NativeDestroy(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
-  auto apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
-  destroy_info << "{ptr=" << apk_assets;
-  if (apk_assets != nullptr) {
-    destroy_info << ", name='" << apk_assets->GetDebugName() << "'"
-                 << ", idmap=" << apk_assets->GetLoadedIdmap()
-                 << ", {arsc=" << apk_assets->GetLoadedArsc();
-    if (auto arsc = apk_assets->GetLoadedArsc()) {
-      destroy_info << ", strings=" << arsc->GetStringPool()
-                   << ", packages=" << &arsc->GetPackages()
-                   << " [";
-      for (auto& package : arsc->GetPackages()) {
-        destroy_info << "{unique_ptr=" << &package
-                     << ", package=" << package.get() << "},";
-      }
-      destroy_info << "]";
+    {
+        auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+        auto apk_assets = scoped_apk_assets->get();
+        destroy_info << "{ptr=" << apk_assets;
+        if (apk_assets != nullptr) {
+            destroy_info << ", name='" << apk_assets->GetDebugName() << "'"
+                         << ", idmap=" << apk_assets->GetLoadedIdmap()
+                         << ", {arsc=" << apk_assets->GetLoadedArsc();
+            if (auto arsc = apk_assets->GetLoadedArsc()) {
+                destroy_info << ", strings=" << arsc->GetStringPool()
+                             << ", packages=" << &arsc->GetPackages() << " [";
+                for (auto& package : arsc->GetPackages()) {
+                    destroy_info << "{unique_ptr=" << &package << ", package=" << package.get()
+                                 << "},";
+                }
+                destroy_info << "]";
+            }
+            destroy_info << "}";
+        }
+        destroy_info << "}";
     }
-    destroy_info << "}";
-  }
-  destroy_info << "}";
 
-  delete apk_assets;
+    DeleteGuardedApkAssets(ApkAssetsFromLong(ptr));
 
-  // Deleting the apk assets did not lead to a crash.
-  destroy_info.str("");
-  destroy_info.clear();
+    // Deleting the apk assets did not lead to a crash.
+    destroy_info.str("");
+    destroy_info.clear();
 }
 
 static jstring NativeGetAssetPath(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
-  auto apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
-  if (auto path = apk_assets->GetPath()) {
-    return env->NewStringUTF(path->data());
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
+    if (auto path = apk_assets->GetPath()) {
+        return env->NewStringUTF(path->data());
   }
   return nullptr;
 }
 
 static jstring NativeGetDebugName(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
-  auto apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
-  return env->NewStringUTF(apk_assets->GetDebugName().c_str());
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
+    return env->NewStringUTF(apk_assets->GetDebugName().c_str());
 }
 
 static jlong NativeGetStringBlock(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
-  return reinterpret_cast<jlong>(apk_assets->GetLoadedArsc()->GetStringPool());
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
+    return reinterpret_cast<jlong>(apk_assets->GetLoadedArsc()->GetStringPool());
 }
 
 static jboolean NativeIsUpToDate(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
-  return apk_assets->IsUpToDate() ? JNI_TRUE : JNI_FALSE;
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
+    return apk_assets->IsUpToDate() ? JNI_TRUE : JNI_FALSE;
 }
 
 static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring file_name) {
@@ -439,7 +461,8 @@ static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring fil
     return 0;
   }
 
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+  auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+  auto apk_assets = scoped_apk_assets->get();
   std::unique_ptr<Asset> asset = apk_assets->GetAssetsProvider()->Open(
       path_utf8.c_str(),Asset::AccessMode::ACCESS_RANDOM);
   if (asset == nullptr) {
@@ -467,12 +490,13 @@ static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring fil
 
 static jobject NativeGetOverlayableInfo(JNIEnv* env, jclass /*clazz*/, jlong ptr,
                                          jstring overlayable_name) {
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
 
-  const auto& packages = apk_assets->GetLoadedArsc()->GetPackages();
-  if (packages.empty()) {
-    jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
-    return 0;
+    const auto& packages = apk_assets->GetLoadedArsc()->GetPackages();
+    if (packages.empty()) {
+        jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
+        return 0;
   }
 
   // TODO(b/119899133): Convert this to a search for the info rather than assuming it's at index 0
@@ -502,13 +526,14 @@ static jobject NativeGetOverlayableInfo(JNIEnv* env, jclass /*clazz*/, jlong ptr
 }
 
 static jboolean NativeDefinesOverlayable(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
-  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+    auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
+    auto apk_assets = scoped_apk_assets->get();
 
-  const auto& packages = apk_assets->GetLoadedArsc()->GetPackages();
-  if (packages.empty()) {
-    // Must throw to prevent bypass by returning false
-    jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
-    return 0;
+    const auto& packages = apk_assets->GetLoadedArsc()->GetPackages();
+    if (packages.empty()) {
+        // Must throw to prevent bypass by returning false
+        jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
+        return 0;
   }
 
   const auto& overlayable_infos = packages[0]->GetOverlayableMap();

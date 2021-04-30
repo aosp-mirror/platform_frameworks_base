@@ -40,4 +40,9 @@ public abstract class StartingData {
      *         {@link StartingSurface#remove}
      */
     abstract StartingSurface createStartingSurface(ActivityRecord activity);
+
+    /** @see android.window.TaskSnapshot#hasImeSurface() */
+    boolean hasImeSurface() {
+        return false;
+    }
 }

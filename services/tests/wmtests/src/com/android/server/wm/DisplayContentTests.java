@@ -54,6 +54,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -1907,6 +1910,32 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(appWin1.getTask());
         assertNotNull(mDisplayContent.mImeScreenshot);
         verify(t).show(mDisplayContent.mImeScreenshot);
+    }
+
+    @UseTestDisplay(addWindows = {W_INPUT_METHOD}, addAllCommonWindows = true)
+    @Test
+    public void testShowImeScreenshot() {
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+        task.getDisplayContent().prepareAppTransition(TRANSIT_CLOSE);
+        doReturn(true).when(task).okToAnimate();
+        ArrayList<WindowContainer> sources = new ArrayList<>();
+        sources.add(activity);
+
+        mDisplayContent.setImeLayeringTarget(win);
+        spyOn(mDisplayContent);
+
+        // Expecting the IME screenshot only be attached when performing task closing transition.
+        task.applyAnimation(null, TRANSIT_OLD_TASK_CLOSE, false /* enter */,
+                false /* isVoiceInteraction */, sources);
+        verify(mDisplayContent).showImeScreenshot();
+
+        clearInvocations(mDisplayContent);
+        activity.applyAnimation(null, TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE, false /* enter */,
+                false /* isVoiceInteraction */, sources);
+        verify(mDisplayContent, never()).showImeScreenshot();
     }
 
     @Test

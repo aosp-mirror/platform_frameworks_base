@@ -2761,8 +2761,8 @@ class ActivityStarter {
 
         final boolean onTop =
                 (aOptions == null || !aOptions.getAvoidMoveToFront()) && !mLaunchTaskBehind;
-        return mRootWindowContainer.getLaunchRootTask(r, aOptions, task, onTop, mLaunchParams,
-                mRequest.realCallingPid, mRequest.realCallingUid);
+        return mRootWindowContainer.getLaunchRootTask(r, aOptions, task, mSourceRootTask, onTop,
+                mLaunchParams, launchFlags, mRequest.realCallingPid, mRequest.realCallingUid);
     }
 
     private boolean isLaunchModeOneOf(int mode1, int mode2) {

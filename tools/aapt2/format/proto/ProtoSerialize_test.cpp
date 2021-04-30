@@ -894,4 +894,38 @@ TEST(ProtoSerializeTest, ObfuscatingResourceNamesWithNameCollapseExemptionsSucce
   EXPECT_THAT(*(s->value), Eq("foo"));
 }
 
+TEST(ProtoSerializeTest, SerializeMacro) {
+  auto original = std::make_unique<Macro>();
+  original->raw_value = "\nThis being human is a guest house.";
+  original->style_string.str = " This being human is a guest house.";
+  original->style_string.spans.emplace_back(Span{.name = "b", .first_char = 12, .last_char = 16});
+  original->untranslatable_sections.emplace_back(UntranslatableSection{.start = 12, .end = 17});
+  original->alias_namespaces.emplace_back(
+      Macro::Namespace{.alias = "prefix", .package_name = "package.name", .is_private = true});
+
+  CloningValueTransformer cloner(nullptr);
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+                                             .Add(NewResourceBuilder("com.app.a:macro/foo")
+                                                      .SetValue(original->Transform(cloner))
+                                                      .Build())
+                                             .Build();
+
+  ResourceTable new_table;
+  pb::ResourceTable pb_table;
+  MockFileCollection files;
+  std::string error;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  EXPECT_THAT(error, IsEmpty());
+
+  Macro* deserialized = test::GetValue<Macro>(&new_table, "com.app.a:macro/foo");
+  ASSERT_THAT(deserialized, NotNull());
+  EXPECT_THAT(deserialized->raw_value, Eq(original->raw_value));
+  EXPECT_THAT(deserialized->style_string.str, Eq(original->style_string.str));
+  EXPECT_THAT(deserialized->style_string.spans, Eq(original->style_string.spans));
+  EXPECT_THAT(deserialized->untranslatable_sections, Eq(original->untranslatable_sections));
+  EXPECT_THAT(deserialized->alias_namespaces, Eq(original->alias_namespaces));
+}
+
 }  // namespace aapt

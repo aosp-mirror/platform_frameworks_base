@@ -358,7 +358,7 @@ java_defaults {
     visibility: ["//visibility:private"],
 }
 
-java_library_static {
+java_library {
     name: "android-non-updatable.stubs",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":api-stubs-docs-non-updatable"],
@@ -368,7 +368,7 @@ java_library_static {
     },
 }
 
-java_library_static {
+java_library {
     name: "android-non-updatable.stubs.system",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":system-api-stubs-docs-non-updatable"],
@@ -378,7 +378,7 @@ java_library_static {
     },
 }
 
-java_library_static {
+java_library {
     name: "android-non-updatable.stubs.module_lib",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":module-lib-api-stubs-docs-non-updatable"],
@@ -392,7 +392,7 @@ java_library_static {
     },
 }
 
-java_library_static {
+java_library {
     name: "android-non-updatable.stubs.test",
     defaults: ["android-non-updatable_defaults_stubs_current"],
     srcs: [":test-api-stubs-docs-non-updatable"],
@@ -415,7 +415,7 @@ java_defaults {
     defaults_visibility: ["//frameworks/base/services"],
 }
 
-java_library_static {
+java_library {
     name: "android_stubs_current",
     static_libs: modules_public_stubs + [
         "android-non-updatable.stubs",
@@ -424,7 +424,7 @@ java_library_static {
     defaults: ["android.jar_defaults"],
 }
 
-java_library_static {
+java_library {
     name: "android_system_stubs_current",
     static_libs: modules_system_stubs + [
         "android-non-updatable.stubs.system",
@@ -450,7 +450,7 @@ java_library_static {
     ],
 }
 
-java_library_static {
+java_library {
     name: "android_test_stubs_current",
     // Modules do not have test APIs, but we want to include their SystemApis, like we include
     // the SystemApi of framework-non-updatable-sources.
@@ -467,7 +467,7 @@ java_library_static {
     },
 }
 
-java_library_static {
+java_library {
     name: "android_module_lib_stubs_current",
     defaults: [
         "android.jar_defaults",
@@ -531,7 +531,7 @@ droidstubs {
     visibility: ["//visibility:private"],
 }
 
-java_library_static {
+java_library {
     name: "hwbinder.stubs",
     sdk_version: "core_current",
     libs: ["framework-annotations-lib"],

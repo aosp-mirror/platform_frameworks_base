@@ -1691,7 +1691,11 @@ public class AppTransition implements Dump {
 
     static boolean isTaskTransitOld(@TransitionOldType int transit) {
         return isTaskOpenTransitOld(transit)
-                || transit == TRANSIT_OLD_TASK_CLOSE
+                || isTaskCloseTransitOld(transit);
+    }
+
+    static boolean isTaskCloseTransitOld(@TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_TASK_CLOSE
                 || transit == TRANSIT_OLD_TASK_TO_BACK;
     }
 

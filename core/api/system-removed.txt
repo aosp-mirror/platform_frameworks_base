@@ -48,6 +48,18 @@ package android.app.prediction {
 
 }
 
+package android.app.search {
+
+  public final class Query implements android.os.Parcelable {
+    method @Deprecated @NonNull public long getTimestamp();
+  }
+
+  public final class SearchSession implements java.lang.AutoCloseable {
+    method @Deprecated public void destroy();
+  }
+
+}
+
 package android.bluetooth {
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
@@ -159,6 +171,14 @@ package android.service.notification {
   public static class NotificationListenerService.Ranking {
     method public java.util.List<java.lang.String> getAdditionalPeople();
     method public java.util.List<android.service.notification.SnoozeCriterion> getSnoozeCriteria();
+  }
+
+}
+
+package android.service.search {
+
+  public abstract class SearchUiService extends android.app.Service {
+    method @Deprecated public void onCreateSearchSession(@NonNull android.app.search.SearchContext, @NonNull android.app.search.SearchSessionId);
   }
 
 }

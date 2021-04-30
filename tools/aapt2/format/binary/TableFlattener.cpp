@@ -567,13 +567,10 @@ class PackageFlattener {
   }
 
   bool FlattenTypes(BigBuffer* buffer) {
-    // Sort the types by their IDs. They will be inserted into the StringPool in
-    // this order.
-
     size_t expected_type_id = 1;
     for (const ResourceTableTypeView& type : package_.types) {
-      if (type.type == ResourceType::kStyleable) {
-        // Styleables aren't real Resource Types, they are represented in the R.java file.
+      if (type.type == ResourceType::kStyleable || type.type == ResourceType::kMacro) {
+        // Styleables and macros are not real resource types.
         continue;
       }
 

@@ -37,6 +37,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
+import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -2696,7 +2697,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             @Nullable ArrayList<WindowContainer> sources) {
         final Task task = asTask();
         if (task != null && !enter && !task.isHomeOrRecentsRootTask()) {
-            mDisplayContent.showImeScreenshot();
+            final InsetsControlTarget imeTarget = mDisplayContent.getImeTarget(IME_TARGET_LAYERING);
+            final boolean isImeLayeringTarget = imeTarget != null && imeTarget.getWindow() != null
+                    && imeTarget.getWindow().getTask() == task;
+            // Attach and show the IME screenshot when the task is the IME target and performing
+            // task closing transition to the next task.
+            if (isImeLayeringTarget && AppTransition.isTaskCloseTransitOld(transit)) {
+                mDisplayContent.showImeScreenshot();
+            }
         }
         final Pair<AnimationAdapter, AnimationAdapter> adapters = getAnimationAdapter(lp,
                 transit, enter, isVoiceInteraction);

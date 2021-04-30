@@ -2085,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Hệ thống đã hạ mức ưu tiên của thông báo này xuống thành Im lặng. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Hệ thống đã nâng mức ưu tiên của thông báo này. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Hệ thống đã hạ mức ưu tiên của thông báo này. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Thông báo nâng cao"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Thông báo nâng cao hiện cung cấp các thao tác và câu trả lời đề xuất. Thông báo thích ứng trên Android không được hỗ trợ nữa."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Tắt"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Tìm hiểu thêm"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Thông báo nâng cao đã thay thế Thông báo thích ứng trên Android trong Android 12. Tính năng này hiển thị những thao tác và câu trả lời đề xuất, đồng thời sắp xếp các thông báo của bạn.\n\nThông báo nâng cao có thể đọc mọi nội dung thông báo, bao gồm cả thông tin cá nhân như tên liên hệ và tin nhắn. Tính năng này cũng có thể đóng hoặc phản hồi các thông báo, chẳng hạn như trả lời cuộc gọi điện thoại và điều khiển chế độ Không làm phiền."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pin có thể hết trước khi sạc bình thường"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>
@@ -2292,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Hình ảnh thương hiệu của ứng dụng"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Hãy kiểm tra chế độ cài đặt quyền truy cập"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> có thể xem và điều khiển màn hình của bạn. Nhấn để xem lại."</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

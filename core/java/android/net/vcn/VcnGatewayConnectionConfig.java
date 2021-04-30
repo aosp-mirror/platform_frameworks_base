@@ -141,7 +141,7 @@ public final class VcnGatewayConnectionConfig {
      * <p>To ensure the device is not constantly being woken up, this retry interval MUST be greater
      * than this value.
      *
-     * @see {@link Builder#setRetryIntervalsMs()}
+     * @see {@link Builder#setRetryIntervalsMillis()}
      */
     private static final long MINIMUM_REPEATING_RETRY_INTERVAL_MS = TimeUnit.MINUTES.toMillis(15);
 
@@ -342,10 +342,10 @@ public final class VcnGatewayConnectionConfig {
     /**
      * Retrieves the configured retry intervals.
      *
-     * @see Builder#setRetryIntervalsMs(long[])
+     * @see Builder#setRetryIntervalsMillis(long[])
      */
     @NonNull
-    public long[] getRetryIntervalsMs() {
+    public long[] getRetryIntervalsMillis() {
         return Arrays.copyOf(mRetryIntervalsMs, mRetryIntervalsMs.length);
     }
 
@@ -555,7 +555,7 @@ public final class VcnGatewayConnectionConfig {
          * @see VcnManager for additional discussion on fail-safe mode
          */
         @NonNull
-        public Builder setRetryIntervalsMs(@NonNull long[] retryIntervalsMs) {
+        public Builder setRetryIntervalsMillis(@NonNull long[] retryIntervalsMs) {
             validateRetryInterval(retryIntervalsMs);
 
             mRetryIntervalsMs = retryIntervalsMs;

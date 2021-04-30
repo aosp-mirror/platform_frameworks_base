@@ -129,8 +129,15 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 Intent intent = new Intent(mContext, WalletActivity.class)
                         .setAction(Intent.ACTION_VIEW)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mActivityStarter.startActivity(intent, true /* dismissShade */,
-                        animationController);
+                if (mKeyguardStateController.isUnlocked()) {
+                    mActivityStarter.startActivity(intent, true /* dismissShade */,
+                            animationController);
+                } else {
+                    mHost.collapsePanels();
+                    // Do not use ActivityStarter here because the WalletActivity is required to be
+                    // started without prompting keyguard when the device is locked.
+                    mContext.startActivity(intent);
+                }
             } else {
                 if (mQuickAccessWalletClient.createWalletIntent() == null) {
                     Log.w(TAG, "Could not get intent of the wallet app.");
@@ -147,7 +154,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     protected void handleUpdateState(State state, Object arg) {
         state.label = mLabel;
         state.contentDescription = state.label;
-        state.icon = ResourceIcon.get(R.drawable.ic_qs_wallet);
+        state.icon = ResourceIcon.get(R.drawable.ic_wallet_lockscreen);
         boolean isDeviceLocked = !mKeyguardStateController.isUnlocked();
         if (mQuickAccessWalletClient.isWalletServiceAvailable()) {
             if (mHasCard) {
@@ -219,7 +226,12 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 refreshState();
                 return;
             }
-            mCardViewDrawable = cards.get(0).getCardImage().loadDrawable(mContext);
+            int selectedIndex = response.getSelectedIndex();
+            if (selectedIndex >= cards.size()) {
+                Log.d(TAG, "Selected card index out of bounds.");
+                return;
+            }
+            mCardViewDrawable = cards.get(selectedIndex).getCardImage().loadDrawable(mContext);
             mHasCard = true;
             refreshState();
         }
