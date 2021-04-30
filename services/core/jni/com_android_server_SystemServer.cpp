@@ -66,7 +66,7 @@ static void startStatsHidlService() {
 
     android::sp<IStats> statsHal = new StatsHal();
     const android::status_t err = statsHal->registerAsService();
-    LOG_ALWAYS_FATAL_IF(err != android::OK, "Cannot register HIDL %s: %d", IStats::descriptor, err);
+    ALOGW_IF(err != android::OK, "Cannot register HIDL %s: %d", IStats::descriptor, err);
 }
 
 } // namespace
