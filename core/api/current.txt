@@ -7466,9 +7466,10 @@ package android.app.admin {
     field public static final int LOCK_TASK_FEATURE_SYSTEM_INFO = 1; // 0x1
     field public static final int MAKE_USER_EPHEMERAL = 2; // 0x2
     field public static final String MIME_TYPE_PROVISIONING_NFC = "application/com.android.managedprovisioning";
-    field public static final int NEARBY_STREAMING_DISABLED = 0; // 0x0
-    field public static final int NEARBY_STREAMING_ENABLED = 1; // 0x1
-    field public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 2; // 0x2
+    field public static final int NEARBY_STREAMING_DISABLED = 1; // 0x1
+    field public static final int NEARBY_STREAMING_ENABLED = 2; // 0x2
+    field public static final int NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY = 0; // 0x0
+    field public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 3; // 0x3
     field public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1; // 0x1
     field public static final int PASSWORD_COMPLEXITY_HIGH = 327680; // 0x50000
     field public static final int PASSWORD_COMPLEXITY_LOW = 65536; // 0x10000
