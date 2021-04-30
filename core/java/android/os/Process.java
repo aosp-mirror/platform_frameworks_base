@@ -250,6 +250,12 @@ public class Process {
     public static final int EXT_OBB_RW_GID = 1079;
 
     /**
+     * Defines the UID/GID for the Uwb service process.
+     * @hide
+     */
+    public static final int UWB_UID = 1083;
+
+    /**
      * GID that corresponds to the INTERNET permission.
      * Must match the value of AID_INET.
      * @hide
