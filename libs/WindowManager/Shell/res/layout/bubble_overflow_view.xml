@@ -32,12 +32,14 @@
         android:id="@+id/bubble_view_name"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
         android:textSize="13sp"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:lines="2"
         android:ellipsize="end"
         android:layout_gravity="center"
         android:paddingTop="@dimen/bubble_overflow_text_padding"
+        android:paddingEnd="@dimen/bubble_overflow_text_padding"
+        android:paddingStart="@dimen/bubble_overflow_text_padding"
         android:gravity="center"/>
 </LinearLayout>
