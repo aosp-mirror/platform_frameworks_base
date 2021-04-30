@@ -181,6 +181,9 @@
     <!-- Radius for notifications corners without adjacent notifications -->
     <dimen name="notification_corner_radius">28dp</dimen>
 
+    <!-- Distance over which notification corner animations run, near the shelf while scrolling. -->
+    <dimen name="notification_corner_animation_distance">48dp</dimen>
+
     <!-- Radius for notifications corners with adjacent notifications -->
     <dimen name="notification_corner_radius_small">4dp</dimen>
 

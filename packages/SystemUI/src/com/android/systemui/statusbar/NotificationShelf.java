@@ -84,7 +84,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private int mCutoutHeight;
     private int mGapHeight;
     private int mIndexOfFirstViewInShelf = -1;
-
+    private float mCornerAnimationDistance;
     private NotificationShelfController mController;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
@@ -104,6 +104,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setClipToPadding(false);
         mShelfIcons.setIsStaticLayout(false);
         setBottomRoundness(1.0f, false /* animate */);
+        setTopRoundness(1f, false /* animate */);
 
         // Setting this to first in section to get the clipping to the top roundness correct. This
         // value determines the way we are clipping to the top roundness of the overall shade
@@ -134,6 +135,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
         mHiddenShelfIconSize = res.getDimensionPixelOffset(R.dimen.hidden_shelf_icon_size);
         mGapHeight = res.getDimensionPixelSize(R.dimen.qs_notification_padding);
+        mCornerAnimationDistance = res.getDimensionPixelSize(
+                R.dimen.notification_corner_animation_distance);
 
         mShelfIcons.setInNotificationIconShelf(true);
         if (!mShowNotificationShelf) {
@@ -256,7 +259,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             boolean aboveShelf = ViewState.getFinalTranslationZ(child) > baseZHeight
                     || child.isPinned();
             boolean isLastChild = child == lastChild;
-            float rowTranslationY = child.getTranslationY();
+            final float viewStart = child.getTranslationY();
 
             final float inShelfAmount = updateShelfTransformation(i, child, scrollingFast,
                     expandingAnimated, isLastChild);
@@ -278,7 +281,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 ExpandableNotificationRow expandableRow = (ExpandableNotificationRow) child;
                 numViewsInShelf += inShelfAmount;
                 int ownColorUntinted = expandableRow.getBackgroundColorWithoutTint();
-                if (rowTranslationY >= shelfStart && mNotGoneIndex == -1) {
+                if (viewStart >= shelfStart && mNotGoneIndex == -1) {
                     mNotGoneIndex = notGoneIndex;
                     setTintColor(previousColor);
                     setOverrideTintColor(colorTwoBefore, transitionAmount);
@@ -317,26 +320,44 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 notGoneIndex++;
             }
 
+            final float viewEnd = viewStart + child.getActualHeight();
+            final float cornerAnimationDistance = mCornerAnimationDistance
+                    * mAmbientState.getExpansionFraction();
+            final float cornerAnimationTop = shelfStart - cornerAnimationDistance;
+
             if (child instanceof ActivatableNotificationView) {
                 ActivatableNotificationView anv =
                         (ActivatableNotificationView) child;
-                if (anv.isFirstInSection() && previousAnv != null
-                        && previousAnv.isLastInSection()) {
-                    // If the top of the shelf is between the view before a gap and the view after a
-                    // gap then we need to adjust the shelf's top roundness.
-                    float distanceToGapBottom = child.getTranslationY() - getTranslationY();
-                    float distanceToGapTop = getTranslationY()
-                            - (previousAnv.getTranslationY() + previousAnv.getActualHeight());
-                    if (distanceToGapTop > 0) {
-                        // We interpolate our top roundness so that it's fully rounded if we're at
-                        // the bottom of the gap, and not rounded at all if we're at the top of the
-                        // gap (directly up against the bottom of previousAnv)
-                        // Then we apply the same roundness to the bottom of previousAnv so that the
-                        // corners join together as the shelf approaches previousAnv.
-                        firstElementRoundness = (float) Math.min(1.0,
-                                distanceToGapTop / mGapHeight);
-                        previousAnv.setBottomRoundness(firstElementRoundness,
-                                false /* don't animate */);
+
+                if (viewStart < shelfStart
+                        && !mHostLayoutController.isViewAffectedBySwipe(anv)
+                        && !mAmbientState.isPulsing()
+                        && !mAmbientState.isDozing()) {
+
+                    if (viewEnd >= cornerAnimationTop) {
+                        // Round bottom corners within animation bounds
+                        final float changeFraction = MathUtils.saturate(
+                                (viewEnd - cornerAnimationTop) / cornerAnimationDistance);
+                        final float roundness = anv.isLastInSection() ? 1f : changeFraction * 1f;
+                        anv.setBottomRoundness(roundness, false);
+
+                    } else if (viewEnd < cornerAnimationTop) {
+                        // Fast scroll skips frames and leaves corners with unfinished rounding.
+                        // Reset top and bottom corners outside of animation bounds.
+                        anv.setBottomRoundness(anv.isLastInSection() ? 1f : 0f, false);
+                    }
+
+                    if (viewStart >= cornerAnimationTop) {
+                        // Round top corners within animation bounds
+                        final float changeFraction = MathUtils.saturate(
+                                (viewStart - cornerAnimationTop) / cornerAnimationDistance);
+                        final float roundness = anv.isFirstInSection() ? 1f : changeFraction * 1f;
+                        anv.setTopRoundness(roundness, false);
+
+                    } else if (viewStart < cornerAnimationTop) {
+                        // Fast scroll skips frames and leaves corners with unfinished rounding.
+                        // Reset top and bottom corners outside of animation bounds.
+                        anv.setTopRoundness(anv.isFirstInSection() ? 1f : 0f, false);
                     }
                 }
                 previousAnv = anv;
@@ -394,7 +415,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private void setFirstElementRoundness(float firstElementRoundness) {
         if (mFirstElementRoundness != firstElementRoundness) {
             mFirstElementRoundness = firstElementRoundness;
-            setTopRoundness(firstElementRoundness, false /* animate */);
         }
     }
 
