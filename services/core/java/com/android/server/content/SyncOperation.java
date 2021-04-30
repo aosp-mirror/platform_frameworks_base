@@ -258,6 +258,7 @@ public class SyncOperation {
         jobInfoExtras.putLong("expectedRuntime", expectedRuntime);
         jobInfoExtras.putInt("retries", retries);
         jobInfoExtras.putInt("syncExemptionFlag", syncExemptionFlag);
+        jobInfoExtras.putBoolean("ejDowngradedToRegular", scheduleEjAsRegularJob);
         return jobInfoExtras;
     }
 
@@ -325,6 +326,7 @@ public class SyncOperation {
         op.jobId = jobExtras.getInt("jobId");
         op.expectedRuntime = jobExtras.getLong("expectedRuntime");
         op.retries = jobExtras.getInt("retries");
+        op.scheduleEjAsRegularJob = jobExtras.getBoolean("ejDowngradedToRegular");
         return op;
     }
 
