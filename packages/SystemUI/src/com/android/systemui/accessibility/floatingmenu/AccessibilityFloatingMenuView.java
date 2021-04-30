@@ -24,6 +24,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
@@ -105,6 +106,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private float mRadius;
     private float mPercentageY = LOCATION_Y_PERCENTAGE;
     private float mSquareScaledTouchSlop;
+    private final Configuration mLastConfiguration;
     private final RecyclerView mListView;
     private final AccessibilityTargetAdapter mAdapter;
     private float mFadeOutValue;
@@ -201,6 +203,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 fadeOut();
             }
         });
+
+        mLastConfiguration = new Configuration(getResources().getConfiguration());
 
         updateDimensions();
         initListView();
@@ -368,7 +372,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
         mTargets.clear();
         mTargets.addAll(newTargets);
-        mAdapter.notifyDataSetChanged();
+        onEnabledFeaturesChanged();
 
         updateRadiusWith(mSizeType, mRadiusType, mTargets.size());
         updateScrollModeWith(hasExceededMaxLayoutHeight());
@@ -414,6 +418,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         mFadeOutAnimator.cancel();
         mFadeOutAnimator.setFloatValues(1.0f, mFadeOutValue);
         setAlpha(mIsFadeEffectEnabled ? mFadeOutValue : /* completely opaque */ 1.0f);
+    }
+
+    void onEnabledFeaturesChanged() {
+        mAdapter.notifyDataSetChanged();
     }
 
     @VisibleForTesting
@@ -601,13 +609,17 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         params.gravity = Gravity.START | Gravity.TOP;
         params.x = getMaxWindowX();
         params.y = (int) (getMaxWindowY() * mPercentageY);
-
+        updateAccessibilityTitle(params);
         return params;
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        final int diff = newConfig.diff(mLastConfiguration);
+        if ((diff & ActivityInfo.CONFIG_LOCALE) != 0) {
+            updateAccessibilityTitle(mCurrentLayoutParams);
+        }
 
         updateDimensions();
         updateListView();
@@ -616,6 +628,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         updateStrokeWith(newConfig.uiMode, mAlignment);
         updateLocationWith(mAlignment, mPercentageY);
         updateScrollModeWith(hasExceededMaxLayoutHeight());
+
+        mLastConfiguration.setTo(newConfig);
     }
 
     @VisibleForTesting
@@ -722,6 +736,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         final int insetLeft = (side == Alignment.LEFT) ? layerInset : 0;
         final int insetRight = (side == Alignment.RIGHT) ? layerInset : 0;
         setInset(insetLeft, insetRight);
+    }
+
+    private void updateAccessibilityTitle(WindowManager.LayoutParams params) {
+        params.accessibilityTitle = getResources().getString(
+                com.android.internal.R.string.accessibility_select_shortcut_menu_title);
     }
 
     private void setInset(int left, int right) {
