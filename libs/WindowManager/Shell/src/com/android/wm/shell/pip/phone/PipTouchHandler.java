@@ -25,6 +25,7 @@ import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_CLOSE;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_FULL;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_NONE;
+import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_NONE;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -881,7 +882,7 @@ public class PipTouchHandler {
                             && mPipBoundsState.getBounds().height()
                             < mPipBoundsState.getMaxSize().y;
                     if (mMenuController.isMenuVisible()) {
-                        mMenuController.hideMenu(false /* animate */, false /* resize */);
+                        mMenuController.hideMenu(ANIM_TYPE_NONE, false /* resize */);
                     }
                     if (toExpand) {
                         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
