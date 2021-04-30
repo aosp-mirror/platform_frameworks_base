@@ -18,8 +18,10 @@ package com.android.server.pm.verify.domain;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.pm.Signature;
 import android.content.pm.verify.domain.DomainVerificationState;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -77,7 +79,8 @@ public class DomainVerificationPersistence {
             @NonNull DomainVerificationStateMap<DomainVerificationPkgState> attached,
             @NonNull ArrayMap<String, DomainVerificationPkgState> pending,
             @NonNull ArrayMap<String, DomainVerificationPkgState> restored,
-            @Nullable Function<String, String> pkgNameToSignature) throws IOException {
+            @UserIdInt int userId, @Nullable Function<String, String> pkgNameToSignature)
+            throws IOException {
         try (SettingsXml.Serializer serializer = SettingsXml.serializer(xmlSerializer)) {
             try (SettingsXml.WriteSection ignored = serializer.startSection(
                     TAG_DOMAIN_VERIFICATIONS)) {
@@ -98,26 +101,27 @@ public class DomainVerificationPersistence {
                 }
 
                 try (SettingsXml.WriteSection activeSection = serializer.startSection(TAG_ACTIVE)) {
-                    writePackageStates(activeSection, active, pkgNameToSignature);
+                    writePackageStates(activeSection, active, userId, pkgNameToSignature);
                 }
 
                 try (SettingsXml.WriteSection restoredSection = serializer.startSection(
                         TAG_RESTORED)) {
-                    writePackageStates(restoredSection, restored.values(), pkgNameToSignature);
+                    writePackageStates(restoredSection, restored.values(), userId,
+                            pkgNameToSignature);
                 }
             }
         }
     }
 
     private static void writePackageStates(@NonNull SettingsXml.WriteSection section,
-            @NonNull Collection<DomainVerificationPkgState> states,
+            @NonNull Collection<DomainVerificationPkgState> states, int userId,
             @Nullable Function<String, String> pkgNameToSignature) throws IOException {
         if (states.isEmpty()) {
             return;
         }
 
         for (DomainVerificationPkgState state : states) {
-            writePkgStateToXml(section, state, pkgNameToSignature);
+            writePkgStateToXml(section, state, userId, pkgNameToSignature);
         }
     }
 
@@ -211,7 +215,7 @@ public class DomainVerificationPersistence {
     }
 
     private static void writePkgStateToXml(@NonNull SettingsXml.WriteSection parentSection,
-            @NonNull DomainVerificationPkgState pkgState,
+            @NonNull DomainVerificationPkgState pkgState, @UserIdInt int userId,
             @Nullable Function<String, String> pkgNameToSignature) throws IOException {
         String packageName = pkgState.getPackageName();
         String signature = pkgNameToSignature == null
@@ -231,11 +235,12 @@ public class DomainVerificationPersistence {
                                      pkgState.isHasAutoVerifyDomains())
                              .attribute(ATTR_SIGNATURE, signature)) {
             writeStateMap(parentSection, pkgState.getStateMap());
-            writeUserStates(parentSection, pkgState.getUserStates());
+            writeUserStates(parentSection, userId, pkgState.getUserStates());
         }
     }
 
     private static void writeUserStates(@NonNull SettingsXml.WriteSection parentSection,
+            @UserIdInt int userId,
             @NonNull SparseArray<DomainVerificationInternalUserState> states) throws IOException {
         int size = states.size();
         if (size == 0) {
@@ -243,8 +248,15 @@ public class DomainVerificationPersistence {
         }
 
         try (SettingsXml.WriteSection section = parentSection.startSection(TAG_USER_STATES)) {
-            for (int index = 0; index < size; index++) {
-                writeUserStateToXml(section, states.valueAt(index));
+            if (userId == UserHandle.USER_ALL) {
+                for (int index = 0; index < size; index++) {
+                    writeUserStateToXml(section, states.valueAt(index));
+                }
+            } else {
+                DomainVerificationInternalUserState userState = states.get(userId);
+                if (userState != null) {
+                    writeUserStateToXml(section, userState);
+                }
             }
         }
     }
@@ -278,7 +290,7 @@ public class DomainVerificationPersistence {
             return null;
         }
 
-        boolean allowLinkHandling = section.getBoolean(ATTR_ALLOW_LINK_HANDLING, true);
+        boolean allowLinkHandling = section.getBoolean(ATTR_ALLOW_LINK_HANDLING, false);
         ArraySet<String> enabledHosts = new ArraySet<>();
 
         SettingsXml.ChildSection child = section.children();
