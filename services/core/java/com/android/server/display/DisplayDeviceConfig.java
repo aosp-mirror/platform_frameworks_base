@@ -104,6 +104,7 @@ public class DisplayDeviceConfig {
     private float mBrightnessRampSlowIncrease = Float.NaN;
     private Spline mBrightnessToBacklightSpline;
     private Spline mBacklightToBrightnessSpline;
+    private Spline mBacklightToNitsSpline;
     private List<String> mQuirks;
     private boolean mIsHighBrightnessModeEnabled = false;
     private HighBrightnessModeData mHbmData;
@@ -219,6 +220,20 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * Calculates the nits value for the specified backlight value if a mapping exists.
+     *
+     * @return The mapped nits or 0 if no mapping exits.
+     */
+    public float getNitsFromBacklight(float backlight) {
+        if (mBacklightToNitsSpline == null) {
+            Slog.wtf(TAG, "requesting nits when no mapping exists.");
+            return -1;
+        }
+        backlight = Math.max(backlight, mBacklightMinimum);
+        return mBacklightToNitsSpline.interpolate(backlight);
+    }
+
+    /**
      * Return an array of equal length to backlight and nits, that covers the entire system
      * brightness range of 0.0-1.0.
      *
@@ -255,6 +270,13 @@ public class DisplayDeviceConfig {
 
     SensorIdentifier getAmbientLightSensor() {
         return mAmbientLightSensor;
+    }
+
+    /**
+     * @return true if a nits to backlight mapping is defined in this config, false otherwise.
+     */
+    public boolean hasNitsMapping() {
+        return mBacklightToNitsSpline != null;
     }
 
     /**
@@ -584,6 +606,7 @@ public class DisplayDeviceConfig {
         }
         mBrightnessToBacklightSpline = Spline.createSpline(mBrightness, mBacklight);
         mBacklightToBrightnessSpline = Spline.createSpline(mBacklight, mBrightness);
+        mBacklightToNitsSpline = Spline.createSpline(mBacklight, mNits);
     }
 
     private void loadQuirks(DisplayConfiguration config) {

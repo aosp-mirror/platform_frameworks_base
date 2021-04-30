@@ -33,7 +33,8 @@ public final class BrightnessInfo implements Parcelable {
 
     @IntDef(prefix = {"HIGH_BRIGHTNESS_MODE_"}, value = {
             HIGH_BRIGHTNESS_MODE_OFF,
-            HIGH_BRIGHTNESS_MODE_SUNLIGHT
+            HIGH_BRIGHTNESS_MODE_SUNLIGHT,
+            HIGH_BRIGHTNESS_MODE_HDR
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface HighBrightnessMode {}
@@ -49,6 +50,12 @@ public final class BrightnessInfo implements Parcelable {
      * currently accessible to the user.
      */
     public static final int HIGH_BRIGHTNESS_MODE_SUNLIGHT = 1;
+
+    /**
+     * High brightness mode is ON due to high ambient light (sunlight). The high brightness range is
+     * currently accessible to the user.
+     */
+    public static final int HIGH_BRIGHTNESS_MODE_HDR = 2;
 
     /** Brightness */
     public final float brightness;
@@ -71,6 +78,21 @@ public final class BrightnessInfo implements Parcelable {
         this.brightnessMinimum = brightnessMinimum;
         this.brightnessMaximum = brightnessMaximum;
         this.highBrightnessMode = highBrightnessMode;
+    }
+
+    /**
+     * @return User-friendly string for specified {@link HighBrightnessMode} parameter.
+     */
+    public static String hbmToString(@HighBrightnessMode int highBrightnessMode) {
+        switch (highBrightnessMode) {
+            case HIGH_BRIGHTNESS_MODE_OFF:
+                return "off";
+            case HIGH_BRIGHTNESS_MODE_HDR:
+                return "hdr";
+            case HIGH_BRIGHTNESS_MODE_SUNLIGHT:
+                return "sunlight";
+        }
+        return "invalid";
     }
 
     @Override
