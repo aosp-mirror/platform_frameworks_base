@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.bubbles.animation;
 
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -142,6 +141,7 @@ public class ExpandedAnimationController
         updateResources();
         mExpandedViewPadding = expandedViewPadding;
         mOnBubbleAnimatedOutAction = onBubbleAnimatedOutAction;
+        mCollapsePoint = mPositioner.getDefaultStartPosition();
     }
 
     /**
@@ -528,17 +528,34 @@ public class ExpandedAnimationController
             startOrUpdatePathAnimation(true /* expanding */);
         } else if (mAnimatingCollapse) {
             startOrUpdatePathAnimation(false /* expanding */);
+        } else if (mPositioner.showBubblesVertically()) {
+            child.setTranslationY(getBubbleXOrYForOrientation(index));
+            if (!mPreparingToCollapse) {
+                // Only animate if we're not collapsing as that animation will handle placing the
+                // new bubble in the stacked position.
+                Rect availableRect = mPositioner.getAvailableRect();
+                boolean onLeft = mCollapsePoint != null
+                        && mCollapsePoint.x < (availableRect.width() / 2f);
+                float fromX = onLeft
+                        ? -mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR
+                        : availableRect.right + mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR;
+                float toX = onLeft
+                        ? availableRect.left + mExpandedViewPadding
+                        : availableRect.right - mBubbleSizePx - mExpandedViewPadding;
+                animationForChild(child)
+                        .translationX(fromX, toX)
+                        .start();
+                updateBubblePositions();
+            }
         } else {
             child.setTranslationX(getBubbleXOrYForOrientation(index));
-
-            // If we're preparing to collapse, don't start animations since the collapse animation
-            // will take over and animate the new bubble into the correct (stacked) position.
             if (!mPreparingToCollapse) {
+                // Only animate if we're not collapsing as that animation will handle placing the
+                // new bubble in the stacked position.
+                float toY = getExpandedY();
+                float fromY = getExpandedY() - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR;
                 animationForChild(child)
-                        .translationY(
-                                getExpandedY()
-                                        - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR, /* from */
-                                getExpandedY() /* to */)
+                        .translationY(fromY, toY)
                         .start();
                 updateBubblePositions();
             }
@@ -617,15 +634,16 @@ public class ExpandedAnimationController
         }
     }
 
+    // TODO - could move to method on bubblePositioner if mSpaceBetweenBubbles gets moved
     /**
      * When bubbles are expanded in portrait, they display at the top of the screen in a horizontal
-     * row. When in landscape, they show at the left or right side in a vertical row. This method
-     * accounts for screen orientation and will return an x or y value for the position of the
-     * bubble in the row.
+     * row. When in landscape or on a large screen, they show at the left or right side in a
+     * vertical row. This method accounts for screen orientation and will return an x or y value
+     * for the position of the bubble in the row.
      *
      * @param index Bubble index in row.
-     * @return the y position of the bubble if {@link Configuration#ORIENTATION_LANDSCAPE} and the
-     * x position if {@link Configuration#ORIENTATION_PORTRAIT}.
+     * @return the y position of the bubble if showing vertically and the x position if showing
+     * horizontally.
      */
     public float getBubbleXOrYForOrientation(int index) {
         if (mLayout == null) {
