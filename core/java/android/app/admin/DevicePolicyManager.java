@@ -1678,23 +1678,30 @@ public class DevicePolicyManager {
     })
     public @interface PasswordComplexity {}
 
+    /**
+     * Indicates that nearby streaming is not controlled by policy, which means nearby streaming is
+     * allowed.
+     */
+    public static final int NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY = 0;
+
     /** Indicates that nearby streaming is disabled. */
-    public static final int NEARBY_STREAMING_DISABLED = 0;
+    public static final int NEARBY_STREAMING_DISABLED = 1;
 
     /** Indicates that nearby streaming is enabled. */
-    public static final int NEARBY_STREAMING_ENABLED = 1;
+    public static final int NEARBY_STREAMING_ENABLED = 2;
 
     /**
      * Indicates that nearby streaming is enabled only to devices offering a comparable level of
      * security, with the same authenticated managed account.
      */
-    public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 2;
+    public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 3;
 
     /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"NEARBY_STREAMING_"}, value = {
+        NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY,
         NEARBY_STREAMING_DISABLED,
         NEARBY_STREAMING_ENABLED,
         NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY,
@@ -7199,15 +7206,20 @@ public class DevicePolicyManager {
 
     /**
      * Returns the current runtime nearby notification streaming policy set by the device or profile
-     * owner. The default is {@link #NEARBY_STREAMING_DISABLED}.
+     * owner.
      */
     public @NearbyStreamingPolicy int getNearbyNotificationStreamingPolicy() {
+        return getNearbyNotificationStreamingPolicy(myUserId());
+    }
+
+    /** @hide per-user version */
+    public @NearbyStreamingPolicy int getNearbyNotificationStreamingPolicy(int userId) {
         throwIfParentInstance("getNearbyNotificationStreamingPolicy");
         if (mService == null) {
-            return NEARBY_STREAMING_DISABLED;
+            return NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
         }
         try {
-            return mService.getNearbyNotificationStreamingPolicy();
+            return mService.getNearbyNotificationStreamingPolicy(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -7235,15 +7247,19 @@ public class DevicePolicyManager {
 
     /**
      * Returns the current runtime nearby app streaming policy set by the device or profile owner.
-     * The default is {@link #NEARBY_STREAMING_DISABLED}.
      */
     public @NearbyStreamingPolicy int getNearbyAppStreamingPolicy() {
+        return getNearbyAppStreamingPolicy(myUserId());
+    }
+
+    /** @hide per-user version */
+    public @NearbyStreamingPolicy int getNearbyAppStreamingPolicy(int userId) {
         throwIfParentInstance("getNearbyAppStreamingPolicy");
         if (mService == null) {
-            return NEARBY_STREAMING_DISABLED;
+            return NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
         }
         try {
-            return mService.getNearbyAppStreamingPolicy();
+            return mService.getNearbyAppStreamingPolicy(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
