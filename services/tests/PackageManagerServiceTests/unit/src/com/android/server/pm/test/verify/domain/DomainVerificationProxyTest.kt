@@ -466,6 +466,44 @@ class DomainVerificationProxyTest {
         }
     }
 
+    @Test
+    fun nonNullComponentName() {
+        val connection = mockConnection()
+        DomainVerificationProxy.makeProxy<Connection>(
+            componentTwo,
+            null,
+            context,
+            manager,
+            collector,
+            connection
+        ).run {
+            assertThat(componentName).isEqualTo(componentTwo)
+        }
+
+        DomainVerificationProxy.makeProxy<Connection>(
+            null,
+            componentThree,
+            context,
+            manager,
+            collector,
+            connection
+        ).run {
+            assertThat(componentName).isEqualTo(componentThree)
+        }
+
+        DomainVerificationProxy.makeProxy<Connection>(
+            componentTwo,
+            componentThree,
+            context,
+            manager,
+            collector,
+            connection
+        ).run {
+            // Higher version takes precedence
+            assertThat(componentName).isEqualTo(componentThree)
+        }
+    }
+
     private fun mockConnection(block: Connection.() -> Unit = {}) =
         mockThrowOnUnmocked<Connection> {
             whenever(isCallerPackage(TEST_CALLING_UID_ACCEPT, TEST_PKG_NAME_ONE)) { true }
