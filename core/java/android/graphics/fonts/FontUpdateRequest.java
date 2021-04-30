@@ -147,7 +147,7 @@ public final class FontUpdateRequest implements Parcelable {
         public static Font readFromXml(XmlPullParser parser) throws IOException {
             String psName = parser.getAttributeValue(null, ATTR_POSTSCRIPT_NAME);
             if (psName == null) {
-                throw new IOException("name attribute is missing font tag.");
+                throw new IOException("name attribute is missing in font tag.");
             }
             int index = getAttributeValueInt(parser, ATTR_INDEX, 0);
             int weight = getAttributeValueInt(parser, ATTR_WEIGHT, FontStyle.FONT_WEIGHT_NORMAL);
@@ -210,7 +210,7 @@ public final class FontUpdateRequest implements Parcelable {
         private static final String ATTR_NAME = "name";
         private static final String TAG_FONT = "font";
 
-        private final @Nullable String mName;
+        private final @NonNull String mName;
         private final @NonNull List<Font> mFonts;
 
         public Family(String name, List<Font> fonts) {
@@ -281,6 +281,9 @@ public final class FontUpdateRequest implements Parcelable {
                 throw new IOException("Unexpected parser state: must be START_TAG with family");
             }
             String name = parser.getAttributeValue(null, ATTR_NAME);
+            if (name == null) {
+                throw new IOException("name attribute is missing in family tag.");
+            }
             int type = 0;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_FONT)) {
