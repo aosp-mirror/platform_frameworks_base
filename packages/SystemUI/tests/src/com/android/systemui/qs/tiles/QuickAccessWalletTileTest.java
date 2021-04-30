@@ -207,7 +207,25 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHandleClick_hasCards_startWalletActivity() {
+    public void testHandleClick_hasCards_deviceLocked_startWalletActivity() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+        setUpWalletCard(/* hasCard= */ true);
+
+        mTile.handleClick(null /* view */);
+        mTestableLooper.processAllMessages();
+
+        verify(mSpiedContext).startActivity(mIntentCaptor.capture());
+
+        Intent nextStartedIntent = mIntentCaptor.getValue();
+        String walletClassName = "com.android.systemui.wallet.ui.WalletActivity";
+
+        assertNotNull(nextStartedIntent);
+        assertThat(nextStartedIntent.getComponent().getClassName()).isEqualTo(walletClassName);
+    }
+
+    @Test
+    public void testHandleClick_hasCards_deviceUnlocked_startWalletActivity() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
         setUpWalletCard(/* hasCard= */ true);
 
         mTile.handleClick(null /* view */);
@@ -226,7 +244,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     @Test
     public void testHandleUpdateState_updateLabelAndIcon() {
         QSTile.State state = new QSTile.State();
-        QSTile.Icon icon = QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_wallet);
+        QSTile.Icon icon = QSTileImpl.ResourceIcon.get(R.drawable.ic_wallet_lockscreen);
 
         mTile.handleUpdateState(state, null);
 

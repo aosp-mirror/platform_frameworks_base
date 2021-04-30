@@ -292,7 +292,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                     mSupervisor.mRootWindowContainer.resolveActivityType(root, options, task);
             display.forAllTaskDisplayAreas(displayArea -> {
                 final Task launchRoot = displayArea.getLaunchRootTask(
-                        resolvedMode, activityType, null /* ActivityOptions */);
+                        resolvedMode, activityType, null /* ActivityOptions */,
+                        null /* sourceTask*/, 0 /* launchFlags */);
                 if (launchRoot == null) {
                     return false;
                 }
@@ -611,7 +612,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
     private boolean shouldLaunchUnresizableAppInFreeform(ActivityRecord activity,
             TaskDisplayArea displayArea) {
-        if (!mSupervisor.mService.mSupportsNonResizableMultiWindow || activity.isResizeable()) {
+        if (!activity.supportsFreeform() || activity.isResizeable()) {
             return false;
         }
 

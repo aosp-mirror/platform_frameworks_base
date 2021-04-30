@@ -1820,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"કહુ"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"કાકુ2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"અજાણ્યું પોર્ટ્રેટ"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"અજાણ્યું લેન્ડસ્કેપ"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"રદ થઈ"</string>
@@ -1865,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"બૅટરી સેવર ઘેરી થીમની સુવિધા ચાલુ કરે છે અને બૅકગ્રાઉન્ડમાં થતી પ્રવૃત્તિ, કેટલીક વિઝ્યુઅલ ઇફેક્ટ અને કેટલીક સુવિધાઓને મર્યાદિત કે બંધ કરે છે.\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"બૅટરી સેવર ઘેરી થીમની સુવિધા ચાલુ કરે છે અને બૅકગ્રાઉન્ડમાં થતી પ્રવૃત્તિ, કેટલીક વિઝ્યુઅલ ઇફેક્ટ અને કેટલીક સુવિધાઓને મર્યાદિત કે બંધ કરે છે."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપને બૅકગ્રાઉન્ડમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ચાલુ કરો"</string>
@@ -2295,4 +2292,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ઍપ્લિકેશનની બ્રાંડિંગ છબી"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"ઍક્સેસના સેટિંગ ચેક કરો"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> તમારી સ્ક્રીન જોઈ અને નિયંત્રિત કરી શકે છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

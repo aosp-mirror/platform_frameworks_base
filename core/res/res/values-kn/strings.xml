@@ -1773,28 +1773,17 @@
     <string name="mediasize_na_monarch" msgid="4396943937986136896">"ಮೊನಾರ್ಕ್‌"</string>
     <string name="mediasize_na_quarto" msgid="2119101847712239885">"ಕ್ವಾರ್ಟೊ"</string>
     <string name="mediasize_na_foolscap" msgid="5011612828564394648">"Foolscap"</string>
-    <!-- no translation found for mediasize_na_ansi_c (3104916921818289618) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_d (254005964819282724) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_e (4424174989686785675) -->
-    <skip />
-    <!-- no translation found for mediasize_na_ansi_f (146980362213260987) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_a (5280681822380032361) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_b (2113344093437297427) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_c (971002546186856623) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_d (6450996075335049806) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e (6782708486949266519) -->
-    <skip />
-    <!-- no translation found for mediasize_na_arch_e1 (4707138568738504275) -->
-    <skip />
-    <!-- no translation found for mediasize_na_super_b (6964127155618393178) -->
-    <skip />
+    <string name="mediasize_na_ansi_c" msgid="3104916921818289618">"ANSI C"</string>
+    <string name="mediasize_na_ansi_d" msgid="254005964819282724">"ANSI D"</string>
+    <string name="mediasize_na_ansi_e" msgid="4424174989686785675">"ANSI E"</string>
+    <string name="mediasize_na_ansi_f" msgid="146980362213260987">"ANSI F"</string>
+    <string name="mediasize_na_arch_a" msgid="5280681822380032361">"Arch A"</string>
+    <string name="mediasize_na_arch_b" msgid="2113344093437297427">"Arch B"</string>
+    <string name="mediasize_na_arch_c" msgid="971002546186856623">"Arch C"</string>
+    <string name="mediasize_na_arch_d" msgid="6450996075335049806">"Arch D"</string>
+    <string name="mediasize_na_arch_e" msgid="6782708486949266519">"Arch E"</string>
+    <string name="mediasize_na_arch_e1" msgid="4707138568738504275">"Arch E1"</string>
+    <string name="mediasize_na_super_b" msgid="6964127155618393178">"Super B"</string>
     <string name="mediasize_chinese_roc_8k" msgid="411670106572707544">"ROC 8K"</string>
     <string name="mediasize_chinese_roc_16k" msgid="7496706798725321898">"ROC 16K"</string>
     <string name="mediasize_chinese_prc_1" msgid="946949835711037253">"PRC 1"</string>
@@ -2096,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ಈ ಅಧಿಸೂಚನೆಗೆ ಸೈಲೆಂಟ್‌ಗೆ ಹಿಂಬಡ್ತಿ ನೀಡಲಾಗಿದೆ. ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ಈ ಅಧಿಸೂಚನೆಗೆ ಮೇಲಿನ ಸ್ಥಾನವನ್ನು ನೀಡಲಾಗಿದೆ. ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ಈ ಅಧಿಸೂಚನೆಗೆ ಕೆಳಗಿನ ಸ್ಥಾನವನ್ನು ನೀಡಲಾಗಿದೆ. ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"ವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"ಸೂಚಿಸಲಾದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಪ್ರತ್ಯುತ್ತರಗಳನ್ನು ಈಗ ವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳಿಂದ ಒದಗಿಸಲಾಗಿದೆ. Android ಅಡಾಪ್ಟಿವ್ ಅಧಿಸೂಚನೆಗಳು ಇನ್ನು ಮುಂದೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ಸರಿ"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"ವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು Android 12 ರಲ್ಲಿ ಆಂಡ್ರಾಯ್ಡ್ ಅಡಾಪ್ಟಿವ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಬದಲಾಯಿಸಿವೆ. ಈ ವೈಶಿಷ್ಟ್ಯವು ಸೂಚಿಸಿದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಪ್ರತ್ಯುತ್ತರಗಳನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಯೋಜಿಸುತ್ತದೆ.\n\nವರ್ಧಿತ ಅಧಿಸೂಚನೆಗಳು ಸಂಪರ್ಕ ಹೆಸರುಗಳು ಮತ್ತು ಸಂದೇಶಗಳಂತಹ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆ ವಿಷಯವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ಈ ವೈಶಿಷ್ಟ್ಯವು ಫೋನ್ ಕರೆಗಳಿಗೆ ಉತ್ತರಿಸುವುದು ಮತ್ತು \'ಅಡಚಣೆ ಮಾಡಬೇಡಿ\' ಅನ್ನು ನಿಯಂತ್ರಿಸುವಂತಹ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಜಾಗೊಳಿಸಬಹುದು ಅಥವಾ ಪ್ರತಿಕ್ರಿಯಿಸಬಹುದು."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ದೈನಂದಿನ ಸ್ಥಿತಿಯ ಮಾಹಿತಿಯ ಅಧಿಸೂಚನೆ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ಚಾರ್ಜ್‌ಗೆ ಮೊದಲೆ ಬ್ಯಾಟರಿ ಮುಗಿದು ಬಿಡಬಹುದು"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ಬ್ಯಾಟರಿ ಅವಧಿ ಹೆಚ್ಚಿಸಲು ಬ್ಯಾಟರಿ ಸೇವರ್ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
@@ -2303,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ಅಪ್ಲಿಕೇಶನ್ ಬ್ರ್ಯಾಂಡಿಂಗ್ ಚಿತ್ರ"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"ಪ್ರವೇಶ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಅನ್ನು ವೀಕ್ಷಿಸಬಹುದು ಮತ್ತು ನಿಯಂತ್ರಿಸಬಹುದು. ಪರಿಶೀಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

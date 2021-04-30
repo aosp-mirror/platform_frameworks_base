@@ -19,28 +19,28 @@ package android.hardware.input;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.os.IInputConstants.INVALID_BATTERY_CAPACITY;
 
-import android.hardware.Battery;
+import android.hardware.BatteryState;
 
 /**
  * Battery implementation for input devices.
  *
  * @hide
  */
-public final class InputDeviceBattery extends Battery {
-    private static final float NULL_BATTERY_CAPACITY = -1.0f;
+public final class InputDeviceBatteryState extends BatteryState {
+    private static final float NULL_BATTERY_CAPACITY = Float.NaN;
 
     private final InputManager mInputManager;
     private final int mDeviceId;
     private final boolean mHasBattery;
 
-    InputDeviceBattery(InputManager inputManager, int deviceId, boolean hasBattery) {
+    InputDeviceBatteryState(InputManager inputManager, int deviceId, boolean hasBattery) {
         mInputManager = inputManager;
         mDeviceId = deviceId;
         mHasBattery = hasBattery;
     }
 
     @Override
-    public boolean hasBattery() {
+    public boolean isPresent() {
         return mHasBattery;
     }
 

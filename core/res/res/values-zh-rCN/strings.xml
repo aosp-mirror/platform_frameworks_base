@@ -1820,8 +1820,7 @@
     <string name="mediasize_japanese_kahu" msgid="7290232592648122042">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="7477551750461028312">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
-    <!-- no translation found for mediasize_japanese_l (1326765321473431817) -->
-    <skip />
+    <string name="mediasize_japanese_l" msgid="1326765321473431817">"大"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"未知（纵向）"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"未知（横向）"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"已取消"</string>
@@ -1865,10 +1864,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由您的管理员删除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"确定"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (750683025714899363) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (5693741424234005958) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="750683025714899363">"在省电模式下，系统会启用深色主题，并限制或关闭后台活动、部分视觉效果和某些功能。\n\n"<annotation id="url">"了解详情"</annotation></string>
+    <string name="battery_saver_description" msgid="5693741424234005958">"在省电模式下，系统会启用深色主题，并限制或关闭后台活动、部分视觉效果和某些功能。"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"为了减少流量消耗，流量节省程序会阻止某些应用在后台收发数据。您当前使用的应用可以收发数据，但频率可能会降低。举例而言，这可能意味着图片只有在您点按之后才会显示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要开启流量节省程序吗？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"开启"</string>
@@ -2088,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"系统已将此通知的重要性降低为“静音”。点按即可提供反馈。"</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"系统已提升此通知的重要性。点按即可提供反馈。"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"系统已降低此通知的重要性。点按即可提供反馈。"</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"增强型通知功能"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"建议的操作和回复目前由增强型通知功能提供。系统不再支持 Android 自适应通知功能。"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"确定"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"关闭"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"了解详情"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"在 Android 12 中，增强型通知功能取代了 Android 自适应通知功能。增强型通知功能可以显示建议的操作和回复，并可将通知整理得井井有条。\n\n增强型通知功能可以访问通知内容，包括联系人名称和消息等个人信息。该功能还可以关闭或响应通知，例如接听来电以及控制勿扰模式。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式信息通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"电池电量可能会在您平时的充电时间之前耗尽"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已启用省电模式以延长电池续航时间"</string>
@@ -2295,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"应用品牌图片"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"查看权限设置"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g>可以查看和控制您的屏幕。点按即可查看。"</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

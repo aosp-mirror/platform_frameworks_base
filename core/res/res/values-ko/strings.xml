@@ -2085,17 +2085,12 @@
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"이 알림의 중요도가 무음으로 하향되었습니다. 의견을 보내려면 탭하세요."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"이전에 이 알림의 중요도는 더 높았습니다. 의견을 보내려면 탭하세요."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"이전에 이 알림의 중요도는 더 낮았습니다. 의견을 보내려면 탭하세요."</string>
-    <!-- no translation found for nas_upgrade_notification_title (8436359459300146555) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_content (5157550369837103337) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_enable_action (3046406808378726874) -->
-    <skip />
-    <!-- no translation found for nas_upgrade_notification_disable_action (3794833210043497982) -->
-    <skip />
+    <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"개선된 알림"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"이제 개선된 알림을 통해 추천 작업과 답장이 제공됩니다. Android 적응형 알림은 더 이상 지원되지 않습니다."</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"확인"</string>
+    <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"사용 중지"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"자세히 알아보기"</string>
-    <!-- no translation found for nas_upgrade_notification_learn_more_content (2353549817159426430) -->
-    <skip />
+    <string name="nas_upgrade_notification_learn_more_content" msgid="2353549817159426430">"Android 12에서는 Android 적응형 알림이 개선된 알림으로 대체됩니다. 이 기능은 추천 작업과 답장을 표시하고 알림을 정리해 줍니다.\n\n개선된 알림은 연락처 이름과 메시지 등 개인 정보가 포함된 알림 내용에 액세스할 수 있습니다. 이 기능은 전화 받기와 방해 금지 모드 제어와 같이 알림을 닫거나 알림을 처리할 수도 있습니다."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"루틴 모드 정보 알림"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"배터리 수명을 연장하기 위해 절전 모드가 활성화되었습니다."</string>
@@ -2292,4 +2287,8 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"애플리케이션 브랜드 이미지"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"접근성 설정 확인"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> 서비스가 내 화면을 보고 제어할 수 있습니다. 검토하려면 탭하세요."</string>
+    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
+    <skip />
+    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
+    <skip />
 </resources>

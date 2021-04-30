@@ -9035,7 +9035,7 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getType();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public android.os.ParcelUuid[] getUuids();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setAlias(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPairingConfirmation(boolean);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setPairingConfirmation(boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean setPin(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_ACL_CONNECTED = "android.bluetooth.device.action.ACL_CONNECTED";
@@ -17136,11 +17136,11 @@ package android.graphics.text {
 
 package android.hardware {
 
-  public abstract class Battery {
-    ctor public Battery();
+  public abstract class BatteryState {
+    ctor public BatteryState();
     method @FloatRange(from=-1.0F, to=1.0f) public abstract float getCapacity();
     method public abstract int getStatus();
-    method public abstract boolean hasBattery();
+    method public abstract boolean isPresent();
     field public static final int STATUS_CHARGING = 2; // 0x2
     field public static final int STATUS_DISCHARGING = 3; // 0x3
     field public static final int STATUS_FULL = 5; // 0x5
@@ -18991,7 +18991,6 @@ package android.hardware.lights {
   }
 
   public abstract static class LightsManager.LightsSession implements java.lang.AutoCloseable {
-    ctor public LightsManager.LightsSession();
     method public abstract void close();
     method public abstract void requestLights(@NonNull android.hardware.lights.LightsRequest);
   }
@@ -27110,7 +27109,7 @@ package android.net.vcn {
     method @NonNull public int[] getExposedCapabilities();
     method @NonNull public String getGatewayConnectionName();
     method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
-    method @NonNull public long[] getRetryIntervalsMs();
+    method @NonNull public long[] getRetryIntervalsMillis();
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
@@ -27119,7 +27118,7 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
-    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMs(@NonNull long[]);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMillis(@NonNull long[]);
   }
 
   public class VcnManager {
@@ -41990,7 +41989,6 @@ package android.telephony {
     method @IntRange(from=1, to=261) public int getBand();
     method @IntRange(from=1) public int getCellBandwidthDownlinkKhz();
     method @IntRange(from=1) public int getCellBandwidthUplinkKhz();
-    method @Deprecated public int getChannelNumber();
     method public int getConnectionStatus();
     method @IntRange(from=0) public int getDownlinkChannelNumber();
     method @IntRange(from=0) public int getDownlinkFrequencyKhz();
@@ -47131,7 +47129,7 @@ package android.view {
 
   public final class InputDevice implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public android.hardware.Battery getBattery();
+    method @NonNull public android.hardware.BatteryState getBatteryState();
     method public int getControllerNumber();
     method public String getDescriptor();
     method public static android.view.InputDevice getDevice(int);

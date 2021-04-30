@@ -672,6 +672,16 @@ public class QSPanel extends LinearLayout implements Tunable {
         switchSecurityFooter();
     }
 
+    protected void setPageMargin(int pageMargin) {
+        if (mRegularTileLayout instanceof PagedTileLayout) {
+            ((PagedTileLayout) mRegularTileLayout).setPageMargin(pageMargin);
+        }
+        if (mHorizontalTileLayout != mRegularTileLayout
+                && mHorizontalTileLayout instanceof PagedTileLayout) {
+            ((PagedTileLayout) mHorizontalTileLayout).setPageMargin(pageMargin);
+        }
+    }
+
     void setUsingHorizontalLayout(boolean horizontal, ViewGroup mediaHostView, boolean force,
             UiEventLogger uiEventLogger) {
         if (horizontal != mUsingHorizontalLayout || force) {

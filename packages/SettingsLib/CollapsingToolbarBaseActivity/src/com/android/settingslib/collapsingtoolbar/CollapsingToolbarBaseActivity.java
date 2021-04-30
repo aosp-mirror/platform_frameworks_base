@@ -26,6 +26,7 @@ import android.widget.Toolbar;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.resources.TextAppearanceConfig;
 
 /**
  * A base Activity that has a collapsing toolbar layout is used for the activities intending to
@@ -39,7 +40,8 @@ public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        // Force loading font synchronously for collapsing toolbar layout
+        TextAppearanceConfig.setShouldLoadFontSynchronously(true);
         super.setContentView(R.layout.collapsing_toolbar_base_layout);
         mCollapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
 
