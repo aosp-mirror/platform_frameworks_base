@@ -45,6 +45,8 @@
 #define ENCODING_MPEGH_BL_L4 24
 #define ENCODING_MPEGH_LC_L3 25
 #define ENCODING_MPEGH_LC_L4 26
+#define ENCODING_DTS_UHD 27
+#define ENCODING_DRA 28
 
 #define ENCODING_INVALID    0
 #define ENCODING_DEFAULT    1
@@ -110,6 +112,10 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_MPEGH_LC_L3;
     case ENCODING_MPEGH_LC_L4:
         return AUDIO_FORMAT_MPEGH_LC_L4;
+    case ENCODING_DTS_UHD:
+        return AUDIO_FORMAT_DTS_UHD;
+    case ENCODING_DRA:
+        return AUDIO_FORMAT_DRA;
     default:
         return AUDIO_FORMAT_INVALID;
     }
@@ -179,6 +185,10 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
         return ENCODING_MPEGH_LC_L3;
     case AUDIO_FORMAT_MPEGH_LC_L4:
         return ENCODING_MPEGH_LC_L4;
+    case AUDIO_FORMAT_DTS_UHD:
+        return ENCODING_DTS_UHD;
+    case AUDIO_FORMAT_DRA:
+        return ENCODING_DRA;
     case AUDIO_FORMAT_DEFAULT:
         return ENCODING_DEFAULT;
     default:
