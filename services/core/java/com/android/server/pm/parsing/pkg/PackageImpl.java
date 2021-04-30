@@ -177,6 +177,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     // Derived fields
     private int mBaseAppInfoFlags;
     private int mBaseAppInfoPrivateFlags;
+    private int mBaseAppInfoPrivateFlagsExt;
     private String mBaseAppDataCredentialProtectedDirForSystemUser;
     private String mBaseAppDataDeviceProtectedDirForSystemUser;
 
@@ -204,6 +205,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     private void assignDerivedFields() {
         mBaseAppInfoFlags = PackageInfoUtils.appInfoFlags(this, null);
         mBaseAppInfoPrivateFlags = PackageInfoUtils.appInfoPrivateFlags(this, null);
+        mBaseAppInfoPrivateFlagsExt = PackageInfoUtils.appInfoPrivateFlagsExt(this, null);
         String baseAppDataDir = Environment.getDataDirectoryPath(getVolumeUuid()) + File.separator;
         String systemUserSuffix = File.separator + UserHandle.USER_SYSTEM + File.separator;
         mBaseAppDataCredentialProtectedDirForSystemUser = TextUtils.safeIntern(
@@ -515,6 +517,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         ApplicationInfo appInfo = super.toAppInfoWithoutStateWithoutFlags();
         appInfo.flags = mBaseAppInfoFlags;
         appInfo.privateFlags = mBaseAppInfoPrivateFlags;
+        appInfo.privateFlagsExt = mBaseAppInfoPrivateFlagsExt;
         appInfo.nativeLibraryDir = nativeLibraryDir;
         appInfo.nativeLibraryRootDir = nativeLibraryRootDir;
         appInfo.nativeLibraryRootRequiresIsa = nativeLibraryRootRequiresIsa;

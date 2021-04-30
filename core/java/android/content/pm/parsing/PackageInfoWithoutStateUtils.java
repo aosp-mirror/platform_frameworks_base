@@ -802,6 +802,15 @@ public class PackageInfoWithoutStateUtils {
         return privateFlags;
     }
 
+    /** @see ApplicationInfo#privateFlagsExt */
+    public static int appInfoPrivateFlagsExt(ParsingPackageRead pkg) {
+        // @formatter:off
+        int privateFlagsExt =
+                flag(pkg.isProfileable(), ApplicationInfo.PRIVATE_FLAG_EXT_PROFILEABLE);
+        // @formatter:on
+        return privateFlagsExt;
+    }
+
     private static boolean checkUseInstalled(ParsingPackageRead pkg, PackageUserState state,
             @PackageManager.PackageInfoFlags int flags) {
         // If available for the target user

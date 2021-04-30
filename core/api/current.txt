@@ -11921,6 +11921,7 @@ package android.content.pm {
     method public int getGwpAsanMode();
     method public int getMemtagMode();
     method public int getNativeHeapZeroInitialized();
+    method public boolean isProfileable();
     method public boolean isProfileableByShell();
     method public boolean isResourceOverlay();
     method public boolean isVirtualPreload();
