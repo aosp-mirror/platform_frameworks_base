@@ -44,12 +44,13 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     private fun startIntentWithAnimation(
         controller: ActivityLaunchAnimator.Controller? = this.controller,
+        animate: Boolean = true,
         intentStarter: (RemoteAnimationAdapter?) -> Int
     ) {
         // We start in a new thread so that we can ensure that the callbacks are called in the main
         // thread.
         thread {
-            activityLaunchAnimator.startIntentWithAnimation(controller, intentStarter)
+            activityLaunchAnimator.startIntentWithAnimation(controller, animate, intentStarter)
         }.join()
     }
 
@@ -88,6 +89,16 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     fun doesNotAnimateIfActivityIsAlreadyOpen() {
         val willAnimateCaptor = ArgumentCaptor.forClass(Boolean::class.java)
         startIntentWithAnimation { ActivityManager.START_DELIVERED_TO_TOP }
+
+        waitForIdleSync()
+        verify(controller).onIntentStarted(willAnimateCaptor.capture())
+        assertFalse(willAnimateCaptor.value)
+    }
+
+    @Test
+    fun doesNotAnimateIfAnimateIsFalse() {
+        val willAnimateCaptor = ArgumentCaptor.forClass(Boolean::class.java)
+        startIntentWithAnimation(animate = false) { ActivityManager.START_SUCCESS }
 
         waitForIdleSync()
         verify(controller).onIntentStarted(willAnimateCaptor.capture())
