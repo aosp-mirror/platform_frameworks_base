@@ -264,7 +264,7 @@ TEST(ProguardRulesTest, IncludedLayoutRulesAreConditional) {
       </View>)");
   foo_layout->file.name = test::ParseNameOrDie("com.foo:layout/foo");
 
-  XmlReferenceLinker xml_linker;
+  XmlReferenceLinker xml_linker(nullptr);
   ASSERT_TRUE(xml_linker.Consume(context.get(), bar_layout.get()));
   ASSERT_TRUE(xml_linker.Consume(context.get(), foo_layout.get()));
 

@@ -25,6 +25,12 @@ import java.util.Objects;
 /**
  * Class that provides methods to create search ui session clients.
  *
+ * Usage: <pre> {@code
+ *    mSearchUiManager = context.getSystemService(SearchUiManager.class);
+ *    mSearchSession.createSearchSession(searchContext)
+ *
+ * }</pre>
+ *
  * @hide
  */
 @SystemApi

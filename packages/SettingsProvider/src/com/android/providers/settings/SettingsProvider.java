@@ -3401,7 +3401,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 201;
+            private static final int SETTINGS_VERSION = 202;
 
             private final int mUserId;
 
@@ -4957,6 +4957,22 @@ public class SettingsProvider extends ContentProvider {
                     // version 199.
                     getGlobalSettingsLocked().deleteSettingLocked("notification_bubbles");
                     currentVersion = 201;
+                }
+
+                if (currentVersion == 201) {
+                    // Version 201: Set the default value for Secure Settings:
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting oneHandedModeActivated = secureSettings.getSettingLocked(
+                            Secure.ONE_HANDED_MODE_ACTIVATED);
+                    if (oneHandedModeActivated.isNull()) {
+                        final boolean defOneHandedModeActivated = getContext().getResources()
+                                .getBoolean(R.bool.def_one_handed_mode_activated);
+                        secureSettings.insertSettingLocked(
+                                Secure.ONE_HANDED_MODE_ACTIVATED,
+                                defOneHandedModeActivated ? "1" : "0", null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 202;
                 }
 
                 // vXXX: Add new settings above this point.

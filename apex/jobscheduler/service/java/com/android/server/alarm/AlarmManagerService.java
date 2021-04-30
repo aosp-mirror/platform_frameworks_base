@@ -43,6 +43,11 @@ import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_COMPAT;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_NOT_APPLICABLE;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_PERMISSION;
 import static com.android.server.alarm.Alarm.REQUESTER_POLICY_INDEX;
+import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_ALARM_CANCELLED;
+import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_DATA_CLEARED;
+import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_EXACT_PERMISSION_REVOKED;
+import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_PI_CANCELLED;
+import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_UNDEFINED;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -116,6 +121,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.LocalLog;
+import com.android.internal.util.RingBuffer;
 import com.android.internal.util.StatLogger;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AppStateTracker;
@@ -160,6 +166,7 @@ import java.util.function.Predicate;
 public class AlarmManagerService extends SystemService {
     private static final int RTC_WAKEUP_MASK = 1 << RTC_WAKEUP;
     private static final int ELAPSED_REALTIME_WAKEUP_MASK = 1 << ELAPSED_REALTIME_WAKEUP;
+    private static final int REMOVAL_HISTORY_SIZE_PER_UID = 10;
     static final int TIME_CHANGED_MASK = 1 << 16;
     static final int IS_WAKEUP_MASK = RTC_WAKEUP_MASK | ELAPSED_REALTIME_WAKEUP_MASK;
 
@@ -198,12 +205,11 @@ public class AlarmManagerService extends SystemService {
     final LocalLog mLog = new LocalLog(TAG);
 
     AppOpsManager mAppOps;
-    IAppOpsService mAppOpsService;
     DeviceIdleInternal mLocalDeviceIdleController;
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
     private PackageManagerInternal mPackageManagerInternal;
-    private PermissionManagerServiceInternal mLocalPermissionManager;
+    private volatile PermissionManagerServiceInternal mLocalPermissionManager;
 
     final Object mLock = new Object();
 
@@ -238,6 +244,7 @@ public class AlarmManagerService extends SystemService {
     AppWakeupHistory mAppWakeupHistory;
     AppWakeupHistory mAllowWhileIdleHistory;
     private final SparseLongArray mLastPriorityAlarmDispatch = new SparseLongArray();
+    private final SparseArray<RingBuffer<RemovedAlarm>> mRemovalHistory = new SparseArray<>();
     ClockReceiver mClockReceiver;
     final DeliveryTracker mDeliveryTracker = new DeliveryTracker();
     IBinder.DeathRecipient mListenerDeathRecipient;
@@ -389,6 +396,57 @@ public class AlarmManagerService extends SystemService {
                 pw.println();
             }
             pw.decreaseIndent();
+        }
+    }
+
+    static class RemovedAlarm {
+        static final int REMOVE_REASON_UNDEFINED = 0;
+        static final int REMOVE_REASON_ALARM_CANCELLED = 1;
+        static final int REMOVE_REASON_EXACT_PERMISSION_REVOKED = 2;
+        static final int REMOVE_REASON_DATA_CLEARED = 3;
+        static final int REMOVE_REASON_PI_CANCELLED = 4;
+
+        final String mTag;
+        final long mWhenRemovedElapsed;
+        final long mWhenRemovedRtc;
+        final int mRemoveReason;
+
+        RemovedAlarm(Alarm a, int removeReason, long nowRtc, long nowElapsed) {
+            mTag = a.statsTag;
+            mRemoveReason = removeReason;
+            mWhenRemovedRtc = nowRtc;
+            mWhenRemovedElapsed = nowElapsed;
+        }
+
+        static final boolean isLoggable(int reason) {
+            // We don't want to log meaningless reasons. This also gives a way for callers to
+            // opt out of logging, e.g. when replacing an alarm.
+            return reason != REMOVE_REASON_UNDEFINED;
+        }
+
+        static final String removeReasonToString(int reason) {
+            switch (reason) {
+                case REMOVE_REASON_ALARM_CANCELLED:
+                    return "alarm_cancelled";
+                case REMOVE_REASON_EXACT_PERMISSION_REVOKED:
+                    return "exact_alarm_permission_revoked";
+                case REMOVE_REASON_DATA_CLEARED:
+                    return "data_cleared";
+                case REMOVE_REASON_PI_CANCELLED:
+                    return "pi_cancelled";
+                default:
+                    return "unknown:" + reason;
+            }
+        }
+
+        void dump(IndentingPrintWriter pw, long nowElapsed, SimpleDateFormat sdf) {
+            pw.print("[tag", mTag);
+            pw.print("reason", removeReasonToString(mRemoveReason));
+            pw.print("elapsed=");
+            TimeUtils.formatDuration(mWhenRemovedElapsed, nowElapsed, pw);
+            pw.print(" rtc=");
+            pw.print(sdf.format(new Date(mWhenRemovedRtc)));
+            pw.println("]");
         }
     }
 
@@ -1447,7 +1505,7 @@ public class AlarmManagerService extends SystemService {
     @Override
     public void onStart() {
         mInjector.init();
-        mMetricsHelper = new MetricsHelper(getContext());
+        mMetricsHelper = new MetricsHelper(getContext(), mLock);
 
         mListenerDeathRecipient = new IBinder.DeathRecipient() {
             @Override
@@ -1571,39 +1629,13 @@ public class AlarmManagerService extends SystemService {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             synchronized (mLock) {
                 mConstants.start();
+
                 mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
-                mAppOpsService = mInjector.getAppOpsService();
-                try {
-                    mAppOpsService.startWatchingMode(AppOpsManager.OP_SCHEDULE_EXACT_ALARM, null,
-                            new IAppOpsCallback.Stub() {
-                                @Override
-                                public void opChanged(int op, int uid, String packageName)
-                                        throws RemoteException {
-                                    if (op != AppOpsManager.OP_SCHEDULE_EXACT_ALARM) {
-                                        return;
-                                    }
-                                    if (!hasScheduleExactAlarmInternal(packageName, uid)) {
-                                        mHandler.obtainMessage(AlarmHandler.REMOVE_EXACT_ALARMS,
-                                                uid, 0, packageName).sendToTarget();
-                                    }
-                                }
-                            });
-                } catch (RemoteException e) {
-                }
-                mMetricsHelper.registerPuller(mAlarmStore);
 
                 mLocalDeviceIdleController =
                         LocalServices.getService(DeviceIdleInternal.class);
                 mUsageStatsManagerInternal =
                         LocalServices.getService(UsageStatsManagerInternal.class);
-
-                mLocalPermissionManager = LocalServices.getService(
-                        PermissionManagerServiceInternal.class);
-                refreshExactAlarmCandidates();
-
-                AppStandbyInternal appStandbyInternal =
-                        LocalServices.getService(AppStandbyInternal.class);
-                appStandbyInternal.addListener(new AppStandbyTracker());
 
                 mAppStateTracker =
                         (AppStateTrackerImpl) LocalServices.getService(AppStateTracker.class);
@@ -1612,6 +1644,34 @@ public class AlarmManagerService extends SystemService {
                 mClockReceiver.scheduleTimeTickEvent();
                 mClockReceiver.scheduleDateChangedEvent();
             }
+            IAppOpsService iAppOpsService = mInjector.getAppOpsService();
+            try {
+                iAppOpsService.startWatchingMode(AppOpsManager.OP_SCHEDULE_EXACT_ALARM, null,
+                        new IAppOpsCallback.Stub() {
+                            @Override
+                            public void opChanged(int op, int uid, String packageName)
+                                    throws RemoteException {
+                                if (op != AppOpsManager.OP_SCHEDULE_EXACT_ALARM) {
+                                    return;
+                                }
+                                if (!hasScheduleExactAlarmInternal(packageName, uid)) {
+                                    mHandler.obtainMessage(AlarmHandler.REMOVE_EXACT_ALARMS,
+                                            uid, 0, packageName).sendToTarget();
+                                }
+                            }
+                        });
+            } catch (RemoteException e) {
+            }
+
+            mLocalPermissionManager = LocalServices.getService(
+                    PermissionManagerServiceInternal.class);
+            refreshExactAlarmCandidates();
+
+            AppStandbyInternal appStandbyInternal =
+                    LocalServices.getService(AppStandbyInternal.class);
+            appStandbyInternal.addListener(new AppStandbyTracker());
+
+            mMetricsHelper.registerPuller(() -> mAlarmStore);
         }
     }
 
@@ -1691,7 +1751,7 @@ public class AlarmManagerService extends SystemService {
 
     void removeImpl(PendingIntent operation, IAlarmListener listener) {
         synchronized (mLock) {
-            removeLocked(operation, listener);
+            removeLocked(operation, listener, REMOVE_REASON_UNDEFINED);
         }
     }
 
@@ -1812,7 +1872,7 @@ public class AlarmManagerService extends SystemService {
                     + " -- package not allowed to start");
             return;
         }
-        removeLocked(operation, directReceiver);
+        removeLocked(operation, directReceiver, REMOVE_REASON_UNDEFINED);
         incrementAlarmCount(a.uid);
         setImplLocked(a);
         MetricsHelper.pushAlarmScheduled(a);
@@ -2106,7 +2166,7 @@ public class AlarmManagerService extends SystemService {
         @Override
         public void removeAlarmsForUid(int uid) {
             synchronized (mLock) {
-                removeLocked(uid);
+                removeLocked(uid, REMOVE_REASON_DATA_CLEARED);
             }
         }
 
@@ -2342,7 +2402,7 @@ public class AlarmManagerService extends SystemService {
                 return;
             }
             synchronized (mLock) {
-                removeLocked(operation, listener);
+                removeLocked(operation, listener, REMOVE_REASON_ALARM_CANCELLED);
             }
         }
 
@@ -2688,6 +2748,7 @@ public class AlarmManagerService extends SystemService {
 
             pw.println("Allow while idle history:");
             mAllowWhileIdleHistory.dump(pw, nowELAPSED);
+            pw.println();
 
             if (mLastPriorityAlarmDispatch.size() > 0) {
                 pw.println("Last priority alarm dispatches:");
@@ -2700,6 +2761,23 @@ public class AlarmManagerService extends SystemService {
                     pw.println();
                 }
                 pw.decreaseIndent();
+            }
+
+            if (mRemovalHistory.size() > 0) {
+                pw.println("Removal history: ");
+                pw.increaseIndent();
+                for (int i = 0; i < mRemovalHistory.size(); i++) {
+                    UserHandle.formatUid(pw, mRemovalHistory.keyAt(i));
+                    pw.println(":");
+                    pw.increaseIndent();
+                    final RemovedAlarm[] historyForUid = mRemovalHistory.valueAt(i).toArray();
+                    for (final RemovedAlarm removedAlarm : historyForUid) {
+                        removedAlarm.dump(pw, nowELAPSED, sdf);
+                    }
+                    pw.decreaseIndent();
+                }
+                pw.decreaseIndent();
+                pw.println();
             }
 
             if (mLog.dump(pw, "Recent problems:")) {
@@ -3239,7 +3317,7 @@ public class AlarmManagerService extends SystemService {
             }
             return !hasScheduleExactAlarmInternal(a.packageName, a.uid);
         };
-        removeAlarmsInternalLocked(whichAlarms);
+        removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_EXACT_PERMISSION_REVOKED);
     }
 
     /**
@@ -3247,7 +3325,6 @@ public class AlarmManagerService extends SystemService {
      * that the app is no longer eligible to use.
      *
      * This is not expected to get called frequently.
-     * TODO (b/179541791): Add revocation history to dumpsys.
      */
     void removeExactAlarmsOnPermissionRevokedLocked(int uid, String packageName) {
         Slog.w(TAG, "Package " + packageName + ", uid " + uid + " lost SCHEDULE_EXACT_ALARM!");
@@ -3263,26 +3340,22 @@ public class AlarmManagerService extends SystemService {
             }
             return false;
         };
-        removeAlarmsInternalLocked(whichAlarms);
+        removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_EXACT_PERMISSION_REVOKED);
     }
 
-    private void removeAlarmsInternalLocked(Predicate<Alarm> whichAlarms) {
+    private void removeAlarmsInternalLocked(Predicate<Alarm> whichAlarms, int reason) {
+        final long nowRtc = mInjector.getCurrentTimeMillis();
+        final long nowElapsed = mInjector.getElapsedRealtime();
+
         final ArrayList<Alarm> removedAlarms = mAlarmStore.remove(whichAlarms);
-        final boolean didRemove = !removedAlarms.isEmpty();
-        if (didRemove) {
-            for (final Alarm removed : removedAlarms) {
-                decrementAlarmCount(removed.uid, 1);
-            }
-        }
+        final boolean removedFromStore = !removedAlarms.isEmpty();
 
         for (int i = mPendingBackgroundAlarms.size() - 1; i >= 0; i--) {
             final ArrayList<Alarm> alarmsForUid = mPendingBackgroundAlarms.valueAt(i);
             for (int j = alarmsForUid.size() - 1; j >= 0; j--) {
                 final Alarm alarm = alarmsForUid.get(j);
                 if (whichAlarms.test(alarm)) {
-                    // Don't set didRemove, since this doesn't impact the scheduled alarms.
-                    alarmsForUid.remove(j);
-                    decrementAlarmCount(alarm.uid, 1);
+                    removedAlarms.add(alarmsForUid.remove(j));
                 }
             }
             if (alarmsForUid.size() == 0) {
@@ -3292,13 +3365,24 @@ public class AlarmManagerService extends SystemService {
         for (int i = mPendingNonWakeupAlarms.size() - 1; i >= 0; i--) {
             final Alarm a = mPendingNonWakeupAlarms.get(i);
             if (whichAlarms.test(a)) {
-                // Don't set didRemove, since this doesn't impact the scheduled alarms.
-                mPendingNonWakeupAlarms.remove(i);
-                decrementAlarmCount(a.uid, 1);
+                removedAlarms.add(mPendingNonWakeupAlarms.remove(i));
             }
         }
 
-        if (didRemove) {
+        for (final Alarm removed : removedAlarms) {
+            decrementAlarmCount(removed.uid, 1);
+            if (!RemovedAlarm.isLoggable(reason)) {
+                continue;
+            }
+            RingBuffer<RemovedAlarm> bufferForUid = mRemovalHistory.get(removed.uid);
+            if (bufferForUid == null) {
+                bufferForUid = new RingBuffer<>(RemovedAlarm.class, REMOVAL_HISTORY_SIZE_PER_UID);
+                mRemovalHistory.put(removed.uid, bufferForUid);
+            }
+            bufferForUid.append(new RemovedAlarm(removed, reason, nowRtc, nowElapsed));
+        }
+
+        if (removedFromStore) {
             boolean idleUntilUpdated = false;
             if (mPendingIdleUntil != null && whichAlarms.test(mPendingIdleUntil)) {
                 mPendingIdleUntil = null;
@@ -3320,7 +3404,7 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
-    void removeLocked(PendingIntent operation, IAlarmListener directReceiver) {
+    void removeLocked(PendingIntent operation, IAlarmListener directReceiver, int reason) {
         if (operation == null && directReceiver == null) {
             if (localLOGV) {
                 Slog.w(TAG, "requested remove() of null operation",
@@ -3328,15 +3412,15 @@ public class AlarmManagerService extends SystemService {
             }
             return;
         }
-        removeAlarmsInternalLocked(a -> a.matches(operation, directReceiver));
+        removeAlarmsInternalLocked(a -> a.matches(operation, directReceiver), reason);
     }
 
-    void removeLocked(final int uid) {
+    void removeLocked(final int uid, int reason) {
         if (uid == Process.SYSTEM_UID) {
             // If a force-stop occurs for a system-uid package, ignore it.
             return;
         }
-        removeAlarmsInternalLocked(a -> a.uid == uid);
+        removeAlarmsInternalLocked(a -> a.uid == uid, reason);
     }
 
     void removeLocked(final String packageName) {
@@ -3347,7 +3431,7 @@ public class AlarmManagerService extends SystemService {
             }
             return;
         }
-        removeAlarmsInternalLocked(a -> a.matches(packageName));
+        removeAlarmsInternalLocked(a -> a.matches(packageName), REMOVE_REASON_UNDEFINED);
     }
 
     // Only called for ephemeral apps
@@ -3358,7 +3442,7 @@ public class AlarmManagerService extends SystemService {
         }
         final Predicate<Alarm> whichAlarms = (a) -> (a.uid == uid
                 && mActivityManagerInternal.isAppStartModeDisabled(uid, a.packageName));
-        removeAlarmsInternalLocked(whichAlarms);
+        removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_UNDEFINED);
     }
 
     void removeUserLocked(int userHandle) {
@@ -3368,11 +3452,16 @@ public class AlarmManagerService extends SystemService {
         }
         final Predicate<Alarm> whichAlarms =
                 (Alarm a) -> UserHandle.getUserId(a.uid) == userHandle;
-        removeAlarmsInternalLocked(whichAlarms);
+        removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_UNDEFINED);
 
         for (int i = mLastPriorityAlarmDispatch.size() - 1; i >= 0; i--) {
             if (UserHandle.getUserId(mLastPriorityAlarmDispatch.keyAt(i)) == userHandle) {
                 mLastPriorityAlarmDispatch.removeAt(i);
+            }
+        }
+        for (int i = mRemovalHistory.size() - 1; i >= 0; i--) {
+            if (UserHandle.getUserId(mRemovalHistory.keyAt(i)) == userHandle) {
+                mRemovalHistory.removeAt(i);
             }
         }
     }
@@ -4018,7 +4107,7 @@ public class AlarmManagerService extends SystemService {
                 case REMOVE_FOR_CANCELED:
                     final PendingIntent operation = (PendingIntent) msg.obj;
                     synchronized (mLock) {
-                        removeLocked(operation, null);
+                        removeLocked(operation, null, REMOVE_REASON_PI_CANCELLED);
                     }
                     break;
 
@@ -4198,6 +4287,7 @@ public class AlarmManagerService extends SystemService {
                         return;
                     case Intent.ACTION_UID_REMOVED:
                         mLastPriorityAlarmDispatch.delete(uid);
+                        mRemovalHistory.delete(uid);
                         return;
                     case Intent.ACTION_PACKAGE_REMOVED:
                         if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
@@ -4227,7 +4317,7 @@ public class AlarmManagerService extends SystemService {
                             // package-removed and package-restarted case
                             mAppWakeupHistory.removeForPackage(pkg, UserHandle.getUserId(uid));
                             mAllowWhileIdleHistory.removeForPackage(pkg, UserHandle.getUserId(uid));
-                            removeLocked(uid);
+                            removeLocked(uid, REMOVE_REASON_UNDEFINED);
                         } else {
                             // external-applications-unavailable case
                             removeLocked(pkg);

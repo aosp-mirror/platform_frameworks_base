@@ -6285,11 +6285,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 || needEditableForNotification) {
             createEditorIfNeeded();
             mEditor.forgetUndoRedo();
+            mEditor.scheduleRestartInputForSetText();
             Editable t = mEditableFactory.newEditable(text);
             text = t;
             setFilters(t, mFilters);
-            InputMethodManager imm = getInputMethodManager();
-            if (imm != null) imm.restartInput(this);
         } else if (precomputed != null) {
             if (mTextDir == null) {
                 mTextDir = getTextDirectionHeuristic();
@@ -6408,8 +6407,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             notifyListeningManagersAfterTextChanged();
         }
 
-        // SelectionModifierCursorController depends on textCanBeSelected, which depends on text
-        if (mEditor != null) mEditor.prepareCursorControllers();
+        if (mEditor != null) {
+            // SelectionModifierCursorController depends on textCanBeSelected, which depends on text
+            mEditor.prepareCursorControllers();
+
+            mEditor.maybeFireScheduledRestartInputForSetText();
+        }
     }
 
     /**

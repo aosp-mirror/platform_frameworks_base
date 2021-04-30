@@ -29,6 +29,7 @@ import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UpdateEngine;
 import android.os.UpdateEngineCallback;
 import android.os.UserHandle;
@@ -79,7 +80,7 @@ public final class ProfcollectForwardingService extends SystemService {
      */
     public static boolean enabled() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT, "enabled",
-            false);
+            false) || SystemProperties.getBoolean("persist.profcollectd.enabled_override", false);
     }
 
     @Override

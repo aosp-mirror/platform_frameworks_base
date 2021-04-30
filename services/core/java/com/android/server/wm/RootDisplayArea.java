@@ -37,7 +37,7 @@ import java.util.Map;
  * of the whole logical display, or a {@link DisplayAreaGroup} as the root of a partition of the
  * logical display.
  */
-class RootDisplayArea extends DisplayArea<DisplayArea> {
+class RootDisplayArea extends DisplayArea.Dimmable {
 
     /** {@link Feature} that are supported in this {@link DisplayArea} hierarchy. */
     List<DisplayAreaPolicyBuilder.Feature> mFeatures;

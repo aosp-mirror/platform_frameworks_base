@@ -27,6 +27,7 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -153,6 +154,21 @@ public class AnimatableClockView extends TextView {
     void setColors(int dozingColor, int lockScreenColor) {
         mDozingColor = dozingColor;
         mLockScreenColor = lockScreenColor;
+    }
+
+    void animateDisappear() {
+        if (mTextAnimator == null) {
+            return;
+        }
+
+        setTextStyle(
+                0 /* weight */,
+                -1 /* text size, no update */,
+                null /* color, no update */,
+                true /* animate */,
+                KeyguardBypassController.BYPASS_FADE_DURATION /* duration */,
+                0 /* delay */,
+                null /* onAnimationEnd */);
     }
 
     void animateCharge(boolean isDozing) {

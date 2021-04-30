@@ -365,4 +365,22 @@ TEST(ReferenceLinkerTest, ReferenceSymbolFromOtherSplit) {
   EXPECT_THAT(s, IsNull());
 }
 
+TEST(ReferenceLinkerTest, MacroFailToFindDefinition) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddReference("com.app.test:string/foo", ResourceId(0x7f020000), "com.app.test:macro/bar")
+          .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder()
+          .SetCompilationPackage("com.app.test")
+          .SetPackageId(0x7f)
+          .SetNameManglerPolicy(NameManglerPolicy{"com.app.test"})
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .Build();
+
+  ReferenceLinker linker;
+  ASSERT_FALSE(linker.Consume(context.get(), table.get()));
+}
+
 }  // namespace aapt

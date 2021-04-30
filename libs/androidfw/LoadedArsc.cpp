@@ -70,9 +70,6 @@ struct TypeSpecBuilder {
 
 }  // namespace
 
-LoadedPackage::LoadedPackage() = default;
-LoadedPackage::~LoadedPackage() = default;
-
 // Precondition: The header passed in has already been verified, so reading any fields and trusting
 // the ResChunk_header is safe.
 static bool VerifyResTableType(incfs::map_ptr<ResTable_type> header) {

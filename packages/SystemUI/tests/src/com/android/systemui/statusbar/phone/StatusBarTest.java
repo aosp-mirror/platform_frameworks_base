@@ -146,7 +146,6 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
@@ -269,7 +268,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private OngoingCallController mOngoingCallController;
     @Mock private SystemStatusAnimationScheduler mAnimationScheduler;
     @Mock private PrivacyDotViewController mDotViewController;
-    @Mock private TunerService mTunerService;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private IWallpaperManager mWallpaperManager;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
@@ -440,7 +438,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mOngoingCallController,
                 mAnimationScheduler,
                 mDotViewController,
-                mTunerService,
                 mFeatureFlags,
                 mKeyguardUnlockAnimationController);
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),

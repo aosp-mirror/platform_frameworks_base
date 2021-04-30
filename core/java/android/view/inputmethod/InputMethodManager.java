@@ -2259,7 +2259,8 @@ public final class InputMethodManager {
             if (servedView == null || servedView.getWindowToken() != windowToken) {
                 return false;
             }
-            showSoftInput(servedView, 0 /* flags */, null /* resultReceiver */);
+            showSoftInput(servedView, 0 /* flags */, null /* resultReceiver */,
+                    SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API);
             return true;
         }
     }

@@ -317,6 +317,7 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
+    field public static final int durationBetweenRequestsMillis;
     field public static final int hotwordDetectionService;
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
@@ -325,7 +326,6 @@ package android {
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
     field public static final int sdkVersion = 16844304; // 0x1010610
     field public static final int supportsAmbientMode = 16844173; // 0x101058d
-    field public static final int throttleDurationMillis;
     field public static final int userRestriction = 16844164; // 0x1010584
   }
 
@@ -1448,11 +1448,12 @@ package android.app.prediction {
 package android.app.search {
 
   public final class Query implements android.os.Parcelable {
-    ctor public Query(@NonNull String, long, @Nullable android.os.Bundle);
+    ctor public Query(@NonNull String, long, @NonNull android.os.Bundle);
+    ctor public Query(@NonNull String, long);
     method public int describeContents();
-    method @Nullable public android.os.Bundle getExtras();
+    method @NonNull public android.os.Bundle getExtras();
     method @NonNull public String getInput();
-    method @NonNull public long getTimestamp();
+    method public long getTimestampMillis();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.search.Query> CREATOR;
   }
@@ -1485,9 +1486,10 @@ package android.app.search {
   }
 
   public final class SearchContext implements android.os.Parcelable {
-    ctor public SearchContext(int, int, @Nullable android.os.Bundle);
+    ctor public SearchContext(int, int);
+    ctor public SearchContext(int, int, @NonNull android.os.Bundle);
     method public int describeContents();
-    method @Nullable public android.os.Bundle getExtras();
+    method @NonNull public android.os.Bundle getExtras();
     method @Nullable public String getPackageName();
     method @NonNull public int getResultTypes();
     method @NonNull public int getTimeoutMillis();
@@ -1497,7 +1499,6 @@ package android.app.search {
 
   public final class SearchSession implements java.lang.AutoCloseable {
     method public void close();
-    method public void destroy();
     method protected void finalize();
     method public void notifyEvent(@NonNull android.app.search.Query, @NonNull android.app.search.SearchTargetEvent);
     method @Nullable public void query(@NonNull android.app.search.Query, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.search.SearchTarget>>);
@@ -1512,7 +1513,7 @@ package android.app.search {
   public final class SearchTarget implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.appwidget.AppWidgetProviderInfo getAppWidgetProviderInfo();
-    method @Nullable public android.os.Bundle getExtras();
+    method @NonNull public android.os.Bundle getExtras();
     method @NonNull public String getId();
     method @NonNull public String getLayoutType();
     method @NonNull public String getPackageName();
@@ -1526,13 +1527,17 @@ package android.app.search {
     method public boolean shouldHide();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.search.SearchTarget> CREATOR;
+    field public static final int RESULT_TYPE_APPLICATION = 1; // 0x1
+    field public static final int RESULT_TYPE_SHORTCUT = 2; // 0x2
+    field public static final int RESULT_TYPE_SLICE = 4; // 0x4
+    field public static final int RESULT_TYPE_WIDGETS = 8; // 0x8
   }
 
   public static final class SearchTarget.Builder {
     ctor public SearchTarget.Builder(int, @NonNull String, @NonNull String);
     method @NonNull public android.app.search.SearchTarget build();
     method @NonNull public android.app.search.SearchTarget.Builder setAppWidgetProviderInfo(@NonNull android.appwidget.AppWidgetProviderInfo);
-    method @NonNull public android.app.search.SearchTarget.Builder setExtras(@Nullable android.os.Bundle);
+    method @NonNull public android.app.search.SearchTarget.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.app.search.SearchTarget.Builder setPackageName(@NonNull String);
     method @NonNull public android.app.search.SearchTarget.Builder setParentId(@NonNull String);
     method @NonNull public android.app.search.SearchTarget.Builder setScore(float);
@@ -1925,16 +1930,16 @@ package android.bluetooth {
   }
 
   public final class BluetoothAdapter {
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean addOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean addOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean disableBLE();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean enableBLE();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean enableNoAutoConnect();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void generateLocalOobData(int, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OobDataCallback);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public long getDiscoveryEndMillis();
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public void generateLocalOobData(int, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OobDataCallback);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public long getDiscoveryEndMillis();
     method public boolean isBleScanAlwaysAvailable();
     method public boolean isLeEnabled();
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean removeActiveDevice(int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean removeOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean removeOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean setActiveDevice(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_BLE_STATE_CHANGED = "android.bluetooth.adapter.action.BLE_STATE_CHANGED";
     field public static final String ACTION_REQUEST_BLE_SCAN_ALWAYS_AVAILABLE = "android.bluetooth.adapter.action.REQUEST_BLE_SCAN_ALWAYS_AVAILABLE";
@@ -1952,24 +1957,24 @@ package android.bluetooth {
 
   public static interface BluetoothAdapter.OobDataCallback {
     method public void onError(int);
-    method public void onOobData(int, @Nullable android.bluetooth.OobData);
+    method public void onOobData(int, @NonNull android.bluetooth.OobData);
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean canBondWithoutDialog();
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean canBondWithoutDialog();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean cancelBondProcess();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean createBondOutOfBand(int, @Nullable android.bluetooth.OobData, @Nullable android.bluetooth.OobData);
-    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public byte[] getMetadata(int);
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public byte[] getMetadata(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getSimAccessPermission();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean isConnected();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean isEncrypted();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInSilenceMode();
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean isInSilenceMode();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean removeBond();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMessageAccessPermission(int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMetadata(int, @NonNull byte[]);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPhonebookAccessPermission(int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setSilenceMode(boolean);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setSimAccessPermission(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setMessageAccessPermission(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setMetadata(int, @NonNull byte[]);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setPhonebookAccessPermission(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setSilenceMode(boolean);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setSimAccessPermission(int);
     field public static final int ACCESS_ALLOWED = 1; // 0x1
     field public static final int ACCESS_REJECTED = 2; // 0x2
     field public static final int ACCESS_UNKNOWN = 0; // 0x0
@@ -2135,8 +2140,6 @@ package android.bluetooth {
   }
 
   public final class OobData implements android.os.Parcelable {
-    method @NonNull public static android.bluetooth.OobData.ClassicBuilder createClassicBuilder(@NonNull byte[], @NonNull byte[], @NonNull byte[]);
-    method @NonNull public static android.bluetooth.OobData.LeBuilder createLeBuilder(@NonNull byte[], @NonNull byte[], int);
     method @NonNull public byte[] getClassOfDevice();
     method @NonNull public byte[] getClassicLength();
     method @NonNull public byte[] getConfirmationHash();
@@ -2169,6 +2172,7 @@ package android.bluetooth {
   }
 
   public static final class OobData.ClassicBuilder {
+    ctor public OobData.ClassicBuilder(@NonNull byte[], @NonNull byte[], @NonNull byte[]);
     method @NonNull public android.bluetooth.OobData build();
     method @NonNull public android.bluetooth.OobData.ClassicBuilder setClassOfDevice(@NonNull byte[]);
     method @NonNull public android.bluetooth.OobData.ClassicBuilder setDeviceName(@NonNull byte[]);
@@ -2176,6 +2180,7 @@ package android.bluetooth {
   }
 
   public static final class OobData.LeBuilder {
+    ctor public OobData.LeBuilder(@NonNull byte[], @NonNull byte[], int);
     method @NonNull public android.bluetooth.OobData build();
     method @NonNull public android.bluetooth.OobData.LeBuilder setDeviceName(@NonNull byte[]);
     method @NonNull public android.bluetooth.OobData.LeBuilder setLeFlags(int);
@@ -2752,6 +2757,7 @@ package android.content.pm {
     field public static final int FLAG_PERMISSION_REVIEW_REQUIRED = 64; // 0x40
     field public static final int FLAG_PERMISSION_REVOKED_COMPAT = 8; // 0x8
     field @Deprecated public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
+    field public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED = 128; // 0x80
     field public static final int FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY = 524288; // 0x80000
     field public static final int FLAG_PERMISSION_SYSTEM_FIXED = 16; // 0x10
     field public static final int FLAG_PERMISSION_USER_FIXED = 2; // 0x2
@@ -9867,7 +9873,7 @@ package android.service.displayhash {
   public final class DisplayHashParams implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.util.Size getBufferSize();
-    method public boolean isUseGrayscale();
+    method public boolean isGrayscaleBuffer();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.displayhash.DisplayHashParams> CREATOR;
   }
@@ -9876,7 +9882,7 @@ package android.service.displayhash {
     ctor public DisplayHashParams.Builder();
     method @NonNull public android.service.displayhash.DisplayHashParams build();
     method @NonNull public android.service.displayhash.DisplayHashParams.Builder setBufferSize(int, int);
-    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setUseGrayscale(boolean);
+    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setGrayscaleBuffer(boolean);
   }
 
   public abstract class DisplayHashingService extends android.app.Service {
@@ -10260,10 +10266,10 @@ package android.service.search {
   public abstract class SearchUiService extends android.app.Service {
     ctor public SearchUiService();
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public void onCreateSearchSession(@NonNull android.app.search.SearchContext, @NonNull android.app.search.SearchSessionId);
     method @MainThread public abstract void onDestroy(@NonNull android.app.search.SearchSessionId);
     method @MainThread public abstract void onNotifyEvent(@NonNull android.app.search.SearchSessionId, @NonNull android.app.search.Query, @NonNull android.app.search.SearchTargetEvent);
     method @MainThread public abstract void onQuery(@NonNull android.app.search.SearchSessionId, @NonNull android.app.search.Query, @NonNull java.util.function.Consumer<java.util.List<android.app.search.SearchTarget>>);
+    method public void onSearchSessionCreated(@NonNull android.app.search.SearchContext, @NonNull android.app.search.SearchSessionId);
   }
 
 }

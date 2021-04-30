@@ -35,6 +35,7 @@ import com.android.systemui.qs.tileimpl.HeightOverrideable;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.wm.shell.animation.Interpolators;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -374,11 +375,14 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             // Make brightness appear static position and alpha in through second half.
             View brightness = mQsPanelController.getBrightnessView();
             if (brightness != null) {
-                firstPageBuilder.addFloat(brightness, "translationY", heightDiff, 0);
+                firstPageBuilder.addFloat(brightness, "translationY",
+                        brightness.getMeasuredHeight() * 0.5f, 0);
                 mBrightnessAnimator = new TouchAnimator.Builder()
                         .addFloat(brightness, "alpha", 0, 1)
-                        .setStartDelay(.5f)
+                        .addFloat(brightness, "scaleY", 0.3f, 1)
+                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                         .build();
+                brightness.setPivotY(0);
                 mAllViews.add(brightness);
             } else {
                 mBrightnessAnimator = null;
@@ -476,9 +480,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             mFirstPageAnimator.setPosition(position);
             mFirstPageDelayedAnimator.setPosition(position);
             mTranslationYAnimator.setPosition(position);
-            if (mBrightnessAnimator != null) {
-                mBrightnessAnimator.setPosition(position);
-            }
             if (mQQSTileHeightAnimator != null) {
                 mQQSTileHeightAnimator.setPosition(position);
             }
@@ -491,6 +492,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         }
         if (mAllowFancy) {
             mAllPagesDelayedAnimator.setPosition(position);
+            if (mBrightnessAnimator != null) {
+                mBrightnessAnimator.setPosition(position);
+            }
         }
     }
 
@@ -527,6 +531,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             v.setAlpha(1);
             v.setTranslationX(0);
             v.setTranslationY(0);
+            v.setScaleY(1f);
             if (v instanceof SideLabelTileLayout) {
                 ((SideLabelTileLayout) v).setClipChildren(false);
                 ((SideLabelTileLayout) v).setClipToPadding(false);

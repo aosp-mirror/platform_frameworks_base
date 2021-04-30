@@ -451,13 +451,14 @@ public class UiTranslationController {
             int[] supportedFormats = getSupportedFormatsLocked();
             ArrayList<ViewRootImpl> roots =
                     WindowManagerGlobal.getInstance().getRootViews(mActivity.getActivityToken());
+            TranslationCapability capability =
+                    getTranslationCapability(translator.getTranslationContext());
             mActivity.runOnUiThread(() -> {
                 // traverse the hierarchy to collect ViewTranslationRequests
                 for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
                     View rootView = roots.get(rootNum).getView();
-                    // TODO(b/183589662): call getTranslationCapabilities() for capability
-                    rootView.dispatchRequestTranslation(viewIds, supportedFormats, /* capability */
-                            null, requests);
+                    rootView.dispatchRequestTranslation(viewIds, supportedFormats, capability,
+                            requests);
                 }
                 mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
                         UiTranslationController::sendTranslationRequest,
@@ -485,6 +486,15 @@ public class UiTranslationController {
     private int[] getSupportedFormatsLocked() {
         // We only support text now
         return new int[] {TranslationSpec.DATA_FORMAT_TEXT};
+    }
+
+    private TranslationCapability getTranslationCapability(TranslationContext translationContext) {
+        // We only support text to text capability now, we will query real status from service when
+        // we support more translation capabilities.
+        return new TranslationCapability(TranslationCapability.STATE_ON_DEVICE,
+                translationContext.getSourceSpec(),
+                translationContext.getTargetSpec(), /* uiTranslationEnabled= */ true,
+                /* supportedTranslationFlags= */ 0);
     }
 
     private void findViewsTraversalByAutofillIds(IntArray sourceViewIds) {
