@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.RuntimeShader;
@@ -48,6 +49,7 @@ public class RippleActivity extends Activity {
     static class RippleView extends View {
         static final int DURATION = 1000;
         static final int MAX_RADIUS = 250;
+        private final int mColor = Color.RED;
 
         private boolean mToggle = false;
         ArrayList<RenderNodeAnimator> mRunningAnimations = new ArrayList<RenderNodeAnimator>();
@@ -104,7 +106,7 @@ public class RippleActivity extends Activity {
 
             Paint p = new Paint();
             p.setAntiAlias(true);
-            p.setColor(0xFFFF0000);
+            p.setColor(mColor);
             mPaint = CanvasProperty.createPaint(p);
 
             mRuntimeShader = new RuntimeShader(sSkSL, false);
@@ -118,7 +120,7 @@ public class RippleActivity extends Activity {
             if (canvas.isHardwareAccelerated()) {
                 RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
                 recordingCanvas.drawRipple(mX, mY, mRadius, mPaint, mProgress, mNoisePhase,
-                        mRuntimeShader);
+                        mColor, mRuntimeShader);
             }
         }
 
