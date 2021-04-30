@@ -26,7 +26,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,8 +50,6 @@ import java.util.function.Consumer;
  * Container view for showing aged out bubbles.
  */
 public class BubbleOverflowContainerView extends LinearLayout {
-    static final String EXTRA_BUBBLE_CONTROLLER = "bubble_controller";
-
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleOverflowActivity" : TAG_BUBBLES;
 
     private LinearLayout mEmptyState;
@@ -64,18 +61,16 @@ public class BubbleOverflowContainerView extends LinearLayout {
     private RecyclerView mRecyclerView;
     private List<Bubble> mOverflowBubbles = new ArrayList<>();
 
-    private class NoScrollGridLayoutManager extends GridLayoutManager {
-        NoScrollGridLayoutManager(Context context, int columns) {
+    private class OverflowGridLayoutManager extends GridLayoutManager {
+        OverflowGridLayoutManager(Context context, int columns) {
             super(context, columns);
         }
-        @Override
-        public boolean canScrollVertically() {
-            if (getResources().getConfiguration().orientation
-                    == Configuration.ORIENTATION_LANDSCAPE) {
-                return super.canScrollVertically();
-            }
-            return false;
-        }
+
+//        @Override
+//        public boolean canScrollVertically() {
+//            // TODO (b/162006693): this should be based on items in the list & available height
+//            return true;
+//        }
 
         @Override
         public int getColumnCountForAccessibility(RecyclerView.Recycler recycler,
@@ -137,47 +132,24 @@ public class BubbleOverflowContainerView extends LinearLayout {
         Resources res = getResources();
         final int columns = res.getInteger(R.integer.bubbles_overflow_columns);
         mRecyclerView.setLayoutManager(
-                new NoScrollGridLayoutManager(getContext(), columns));
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getContext().getDisplay().getMetrics(displayMetrics);
-
-        final int overflowPadding = res.getDimensionPixelSize(R.dimen.bubble_overflow_padding);
-        final int recyclerViewWidth = displayMetrics.widthPixels - (overflowPadding * 2);
-        final int viewWidth = recyclerViewWidth / columns;
-
-        final int maxOverflowBubbles = res.getInteger(R.integer.bubbles_max_overflow);
-        final int rows = (int) Math.ceil((double) maxOverflowBubbles / columns);
-        final int recyclerViewHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height)
-                - res.getDimensionPixelSize(R.dimen.bubble_overflow_padding);
-        final int viewHeight = recyclerViewHeight / rows;
-
+                new OverflowGridLayoutManager(getContext(), columns));
         mAdapter = new BubbleOverflowAdapter(getContext(), mOverflowBubbles,
                 mController::promoteBubbleFromOverflow,
-                mController.getPositioner(),
-                viewWidth, viewHeight);
+                mController.getPositioner());
         mRecyclerView.setAdapter(mAdapter);
 
         mOverflowBubbles.clear();
         mOverflowBubbles.addAll(mController.getOverflowBubbles());
         mAdapter.notifyDataSetChanged();
 
-        // Currently BubbleExpandedView.mExpandedViewContainer is WRAP_CONTENT so use the same
-        // width we would use for the recycler view
-        LayoutParams lp = (LayoutParams) mEmptyState.getLayoutParams();
-        lp.width = recyclerViewWidth;
-        updateEmptyStateVisibility();
-
         mController.setOverflowListener(mDataListener);
+        updateEmptyStateVisibility();
         updateTheme();
     }
 
     void updateEmptyStateVisibility() {
-        if (mOverflowBubbles.isEmpty()) {
-            mEmptyState.setVisibility(View.VISIBLE);
-        } else {
-            mEmptyState.setVisibility(View.GONE);
-        }
+        mEmptyState.setVisibility(mOverflowBubbles.isEmpty() ? View.VISIBLE : View.GONE);
+        mRecyclerView.setVisibility(mOverflowBubbles.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     /**
@@ -258,20 +230,15 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
     private Consumer<Bubble> mPromoteBubbleFromOverflow;
     private BubblePositioner mPositioner;
     private List<Bubble> mBubbles;
-    private int mWidth;
-    private int mHeight;
 
     BubbleOverflowAdapter(Context context,
             List<Bubble> list,
             Consumer<Bubble> promoteBubble,
-            BubblePositioner positioner,
-            int width, int height) {
+            BubblePositioner positioner) {
         mContext = context;
         mBubbles = list;
         mPromoteBubbleFromOverflow = promoteBubble;
         mPositioner = positioner;
-        mWidth = width;
-        mHeight = height;
     }
 
     @Override
@@ -284,8 +251,6 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.width = mWidth;
-        params.height = mHeight;
         overflowView.setLayoutParams(params);
 
         // Ensure name has enough contrast.
