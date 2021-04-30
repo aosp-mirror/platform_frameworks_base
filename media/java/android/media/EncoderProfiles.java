@@ -181,7 +181,7 @@ public final class EncoderProfiles
         /**
          * The video encoder profile being used for the video track.
          * <p>
-         * This value is 0 if there is no profile defined for the video codec.
+         * This value is negative if there is no profile defined for the video codec.
          *
          * @see MediaRecorder#setVideoEncodingProfileLevel
          * @see MediaFormat#KEY_PROFILE
@@ -293,7 +293,7 @@ public final class EncoderProfiles
         /**
          * The audio encoder profile being used for the audio track
          * <p>
-         * This value is 0 if there is no profile defined for the audio codec.
+         * This value is negative if there is no profile defined for the audio codec.
          * @see MediaFormat#KEY_PROFILE
          */
         public int getProfile() {
