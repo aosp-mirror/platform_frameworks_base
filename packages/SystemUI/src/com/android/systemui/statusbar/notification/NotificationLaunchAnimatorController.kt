@@ -6,6 +6,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController
 import kotlin.math.ceil
 import kotlin.math.max
@@ -14,7 +15,8 @@ import kotlin.math.max
 class NotificationLaunchAnimatorControllerProvider(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,
-    private val depthController: NotificationShadeDepthController
+    private val depthController: NotificationShadeDepthController,
+    private val headsUpManager: HeadsUpManagerPhone
 ) {
     fun getAnimatorController(
         notification: ExpandableNotificationRow
@@ -23,7 +25,8 @@ class NotificationLaunchAnimatorControllerProvider(
             notificationShadeWindowViewController,
             notificationListContainer,
             depthController,
-            notification
+            notification,
+            headsUpManager
         )
     }
 }
@@ -37,8 +40,11 @@ class NotificationLaunchAnimatorController(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,
     private val depthController: NotificationShadeDepthController,
-    private val notification: ExpandableNotificationRow
+    private val notification: ExpandableNotificationRow,
+    private val headsUpManager: HeadsUpManagerPhone
 ) : ActivityLaunchAnimator.Controller {
+    private val notificationKey = notification.entry.sbn.key
+
     override fun getRootView(): View = notification.rootView
 
     override fun createAnimatorState(): ActivityLaunchAnimator.State {
@@ -76,12 +82,25 @@ class NotificationLaunchAnimatorController(
 
     override fun onIntentStarted(willAnimate: Boolean) {
         notificationShadeWindowViewController.setExpandAnimationRunning(willAnimate)
+
+        if (!willAnimate) {
+            removeHun(animate = true)
+        }
+    }
+
+    private fun removeHun(animate: Boolean) {
+        if (!headsUpManager.isAlerting(notificationKey)) {
+            return
+        }
+
+        headsUpManager.removeNotification(notificationKey, true /* releaseImmediately */, animate)
     }
 
     override fun onLaunchAnimationCancelled() {
         // TODO(b/184121838): Should we call InteractionJankMonitor.cancel if the animation started
         // here?
         notificationShadeWindowViewController.setExpandAnimationRunning(false)
+        removeHun(animate = true)
     }
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
@@ -99,6 +118,7 @@ class NotificationLaunchAnimatorController(
         notificationShadeWindowViewController.setExpandAnimationRunning(false)
         notificationListContainer.setExpandingNotification(null)
         applyParams(null)
+        removeHun(animate = false)
     }
 
     private fun applyParams(params: ExpandAnimationParameters?) {
