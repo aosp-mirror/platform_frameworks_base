@@ -22,6 +22,8 @@ import static androidx.dynamicanimation.animation.SpringForce.STIFFNESS_MEDIUM;
 
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
+import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_DISMISS;
+import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_NONE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -336,7 +338,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
         cancelPhysicsAnimation();
-        mMenuController.hideMenu(false /* animate */, false /* resize */);
+        mMenuController.hideMenu(ANIM_TYPE_NONE, false /* resize */);
         mPipTaskOrganizer.exitPip(skipAnimation ? 0 : LEAVE_PIP_DURATION);
     }
 
@@ -349,7 +351,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             Log.d(TAG, "removePip: callers=\n" + Debug.getCallers(5, "    "));
         }
         cancelPhysicsAnimation();
-        mMenuController.hideMenu(true /* animate*/, false /* resize */);
+        mMenuController.hideMenu(ANIM_TYPE_DISMISS, false /* resize */);
         mPipTaskOrganizer.removePip();
     }
 
