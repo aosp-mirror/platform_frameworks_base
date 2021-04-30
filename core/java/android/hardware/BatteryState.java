@@ -24,9 +24,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * The Battery class is a representation of a single battery on a device.
+ * The BatteryState class is a representation of a single battery on a device.
  */
-public abstract class Battery {
+public abstract class BatteryState {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "STATUS_" }, value = {
@@ -55,7 +55,7 @@ public abstract class Battery {
      *
      * @return True if the hardware has a battery, else false.
      */
-    public abstract boolean hasBattery();
+    public abstract boolean isPresent();
 
     /**
      * Get the battery status.
@@ -66,7 +66,7 @@ public abstract class Battery {
 
     /**
      * Get remaining battery capacity as float percentage [0.0f, 1.0f] of total capacity
-     * Returns -1 when battery capacity can't be read.
+     * Returns NaN when battery capacity can't be read.
      *
      * @return the battery capacity.
      */

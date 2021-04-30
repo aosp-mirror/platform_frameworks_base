@@ -408,6 +408,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 mPipOptional.ifPresent(
                         pip -> pip.setPinnedStackAnimationType(
                                 PipAnimationController.ANIM_TYPE_ALPHA));
+                mHandler.post(() -> notifySwipeToHomeFinishedInternal());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -886,6 +887,12 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
+    public void notifySwipeToHomeFinishedInternal() {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onSwipeToHomeFinished();
+        }
+    }
+
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
             if (mOverviewProxy != null) {
@@ -962,6 +969,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     public interface OverviewProxyListener {
         default void onConnectionChanged(boolean isConnected) {}
         default void onQuickStepStarted() {}
+        default void onSwipeToHomeFinished() {}
         default void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {}
         default void onOverviewShown(boolean fromHome) {}
         default void onQuickScrubStarted() {}

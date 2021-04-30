@@ -253,6 +253,8 @@ public abstract class DpmTestBase {
 
         doReturn(new String[] {admin.getPackageName()}).when(mServices.ipackageManager)
             .getPackagesForUid(eq(packageUid));
+        doReturn(new String[] {admin.getPackageName()}).when(mServices.packageManager)
+                .getPackagesForUid(eq(packageUid));
         // Set up getPackageInfo().
         markPackageAsInstalled(admin.getPackageName(), ai, UserHandle.getUserId(packageUid));
     }

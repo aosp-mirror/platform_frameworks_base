@@ -525,6 +525,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private NotificationShelfController mNotificationShelfController;
     private int mScrimCornerRadius;
     private int mScreenCornerRadius;
+    private int mNotificationScrimPadding;
 
     private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final Executor mUiExecutor;
@@ -812,6 +813,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 R.dimen.notification_scrim_corner_radius);
         mScreenCornerRadius = mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.rounded_corner_radius);
+        mNotificationScrimPadding = mResources.getDimensionPixelSize(
+                R.dimen.notification_side_paddings);
     }
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
@@ -2043,28 +2046,37 @@ public class NotificationPanelViewController extends PanelViewController {
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         int qsPanelBottomY = calculateQsBottomPosition(qsExpansionFraction);
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
-        setNotificationBounds(qsExpansionFraction, qsPanelBottomY);
         mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
     }
 
+    private Runnable mOnStackYChanged = () -> {
+        if (mQs != null) {
+            setNotificationBounds();
+        }
+    };
+
     /**
      * Updates scrim bounds, QS clipping, and KSV clipping as well based on the bounds of the shade
      * and QS state.
-     *
-     * @param qsFraction QS expansion fraction, from getQsExpansionFraction().
-     * @param qsPanelBottomY Absolute y position of the bottom of QS as it's being pulled.
      */
-    private void setNotificationBounds(float qsFraction, int qsPanelBottomY) {
+    private void setNotificationBounds() {
         int top = 0;
         int bottom = 0;
         int left = 0;
         int right = 0;
-        boolean visible = qsFraction > 0 || qsPanelBottomY > 0;
+
+        final int qsPanelBottomY = calculateQsBottomPosition(getQsExpansionFraction());
+        final boolean visible = (getQsExpansionFraction() > 0 || qsPanelBottomY > 0)
+                && !mShouldUseSplitNotificationShade;
+        final float notificationTop = mAmbientState.getStackY()
+                - mNotificationScrimPadding
+                - mAmbientState.getScrollY();
+        setQsExpansionEnabled(mAmbientState.getScrollY() == 0);
+
         int radius = mScrimCornerRadius;
         if (visible || !mShouldUseSplitNotificationShade) {
             if (!mShouldUseSplitNotificationShade) {
-                float notificationTop = mAmbientState.getStackY() - mQsNotificationTopPadding;
                 top = (int) Math.min(qsPanelBottomY, notificationTop);
                 bottom = getView().getBottom();
                 left = getView().getLeft();
@@ -2079,11 +2091,11 @@ public class NotificationPanelViewController extends PanelViewController {
             }
         }
 
+        // Fancy clipping for quick settings
+        if (mQs != null) {
+            mQs.setFancyClipping(top, bottom, radius, visible);
+        }
         if (!mShouldUseSplitNotificationShade) {
-            // Fancy clipping for quick settings
-            if (mQs != null) {
-                mQs.setFancyClipping(top, bottom, radius, visible);
-            }
             // The padding on this area is large enough that we can use a cheaper clipping strategy
             mKeyguardStatusAreaClipBounds.set(left, top, right, bottom);
             mKeyguardStatusViewController.setClipBounds(visible
@@ -2244,6 +2256,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 break;
             case FLING_HIDE:
             default:
+                mQs.closeDetail();
                 target = 0;
         }
         if (target == mQsExpansionHeight) {
@@ -3059,6 +3072,7 @@ public class NotificationPanelViewController extends PanelViewController {
             // The expandedHeight is always the full panel Height when bypassing
             expandedHeight = getMaxPanelHeightNonBypass();
         }
+        mNotificationStackScrollLayoutController.setOnStackYChanged(mOnStackYChanged);
         mNotificationStackScrollLayoutController.setExpandedHeight(expandedHeight);
         updateKeyguardBottomAreaAlpha();
         updateBigClockAlpha();

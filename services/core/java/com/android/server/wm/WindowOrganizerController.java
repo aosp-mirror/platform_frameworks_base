@@ -22,6 +22,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
@@ -318,6 +319,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                 throw new IllegalArgumentException(
                                         "Cannot set non-task as launch root: " + wc);
                             }
+                            break;
+                        }
+                        case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: {
+                            final WindowContainer wc = WindowContainer.fromBinder(
+                                    hop.getContainer());
+                            final Task task = wc != null ? wc.asTask() : null;
+                            if (task == null) {
+                                throw new IllegalArgumentException("Cannot set "
+                                        + "non-task as launch root: " + wc);
+                            } else if (!task.mCreatedByOrganizer) {
+                                throw new UnsupportedOperationException("Cannot set "
+                                        + "non-organized task as adjacent flag root: " + wc);
+                            } else if (task.mAdjacentTask == null) {
+                                throw new UnsupportedOperationException("Cannot set "
+                                        + "non-adjacent task as adjacent flag root: " + wc);
+                            }
+
+                            final boolean clearRoot = hop.getToTop();
+                            task.getDisplayArea()
+                                    .setLaunchAdjacentFlagRootTask(clearRoot ? null : task);
                             break;
                         }
                         case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT:

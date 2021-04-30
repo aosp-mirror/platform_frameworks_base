@@ -2312,7 +2312,7 @@ public class InputMethodService extends AbstractInputMethodService {
         if (setVisible) {
             cancelImeSurfaceRemoval();
         }
-        mPrivOps.applyImeVisibility(setVisible
+        mPrivOps.applyImeVisibilityAsync(setVisible
                 ? mCurShowInputToken : mCurHideInputToken, setVisible);
     }
 
@@ -3319,7 +3319,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (mNotifyUserActionSent) {
                 return;
             }
-            mPrivOps.notifyUserAction();
+            mPrivOps.notifyUserActionAsync();
             mNotifyUserActionSent = true;
         }
     }

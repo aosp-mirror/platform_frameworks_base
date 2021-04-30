@@ -60,7 +60,7 @@ public class QSContainerImpl extends FrameLayout {
     private int mFancyClippingBottom;
     private final float[] mFancyClippingRadii = new float[] {0, 0, 0, 0, 0, 0, 0, 0};
     private  final Path mFancyClippingPath = new Path();
-    private int mBackgroundBottom = -1;
+    private int mBackgroundBottom = 0;
     private int mHeightOverride = -1;
     private View mQSDetail;
     private QuickStatusBarHeader mHeader;
@@ -68,11 +68,8 @@ public class QSContainerImpl extends FrameLayout {
     private QSCustomizer mQSCustomizer;
     private NonInterceptingScrollView mQSPanelContainer;
 
-    private View mBackground;
-
     private int mSideMargins;
     private boolean mQsDisabled;
-    private boolean mBackgroundVisible;
     private int mContentPadding = -1;
     private boolean mAnimateBottomOnNextLayout;
     private int mNavBarInset = 0;
@@ -89,7 +86,6 @@ public class QSContainerImpl extends FrameLayout {
         mQSDetail = findViewById(R.id.qs_detail);
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
-        mBackground = findViewById(R.id.quick_settings_background);
         mHeader.getHeaderQsPanel().setMediaVisibilityChangedListener((visible) -> {
             if (mHeader.getHeaderQsPanel().isShown()) {
                 mAnimateBottomOnNextLayout = true;
@@ -111,13 +107,9 @@ public class QSContainerImpl extends FrameLayout {
         // We're saving the bottom separately since otherwise the bottom would be overridden in
         // the layout and the animation wouldn't properly start at the old position.
         mBackgroundBottom = value;
-        mBackground.setBottom(value);
     }
 
     private float getBackgroundBottom() {
-        if (mBackgroundBottom == -1) {
-            return mBackground.getBottom();
-        }
         return mBackgroundBottom;
     }
 
@@ -132,14 +124,6 @@ public class QSContainerImpl extends FrameLayout {
         // Want to receive clicks so missing QQS tiles doesn't cause collapse, but
         // don't want to do anything with them.
         return true;
-    }
-
-    /**
-     * If QS should have a solid or transparent background.
-     */
-    public void setBackgroundVisible(boolean visible) {
-        mBackgroundVisible = visible;
-        updateBackgroundVisibility();
     }
 
     @Override
@@ -208,11 +192,6 @@ public class QSContainerImpl extends FrameLayout {
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
-        updateBackgroundVisibility();
-    }
-
-    private void updateBackgroundVisibility() {
-        mBackground.setVisibility(mQsDisabled || !mBackgroundVisible ? GONE : VISIBLE);
     }
 
     void updateResources(QSPanelController qsPanelController,
@@ -260,7 +239,6 @@ public class QSContainerImpl extends FrameLayout {
         mQSDetail.setBottom(getTop() + scrollBottom);
         int qsDetailBottomMargin = ((MarginLayoutParams) mQSDetail.getLayoutParams()).bottomMargin;
         mQSDetail.setBottom(getTop() + scrollBottom - qsDetailBottomMargin);
-        mBackground.setTop(mQSPanelContainer.getTop());
         updateBackgroundBottom(scrollBottom, animate);
     }
 
@@ -314,6 +292,9 @@ public class QSContainerImpl extends FrameLayout {
             if (view == mQSPanelContainer) {
                 // QS panel lays out some of its content full width
                 qsPanelController.setContentMargins(mContentPadding, mContentPadding);
+                // Set it as double the side margin (to simulate end margin of current page +
+                // start margin of next page).
+                qsPanelController.setPageMargin(2 * mSideMargins);
             } else if (view == mHeader) {
                 // The header contains the QQS panel which needs to have special padding, to
                 // visually align them.

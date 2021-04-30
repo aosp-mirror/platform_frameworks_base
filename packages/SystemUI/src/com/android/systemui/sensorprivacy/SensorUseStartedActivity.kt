@@ -16,8 +16,6 @@
 
 package com.android.systemui.sensorprivacy
 
-import android.app.KeyguardManager
-import android.app.KeyguardManager.KeyguardDismissCallback
 import android.content.DialogInterface
 import android.content.Intent.EXTRA_PACKAGE_NAME
 import android.content.pm.PackageManager
@@ -28,16 +26,15 @@ import android.hardware.SensorPrivacyManager.EXTRA_SENSOR
 import android.os.Bundle
 import android.os.Handler
 import android.text.Html
-import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ImageView
 import com.android.internal.app.AlertActivity
 import com.android.internal.widget.DialogTitle
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController
-
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 
 /**
@@ -48,8 +45,8 @@ import javax.inject.Inject
  */
 class SensorUseStartedActivity @Inject constructor(
     private val sensorPrivacyController: IndividualSensorPrivacyController,
-    private val keyguardManager: KeyguardManager,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor
+    private val keyguardStateController: KeyguardStateController,
+    private val keyguardDismissUtil: KeyguardDismissUtil
 ) : AlertActivity(), DialogInterface.OnClickListener {
 
     companion object {
@@ -180,17 +177,11 @@ class SensorUseStartedActivity @Inject constructor(
     override fun onClick(dialog: DialogInterface?, which: Int) {
         when (which) {
             BUTTON_POSITIVE -> {
-                if (keyguardUpdateMonitor.getUserHasTrust(userId)) {
-                    keyguardManager
-                            .requestDismissKeyguard(this, object : KeyguardDismissCallback() {
-                        override fun onDismissError() {
-                            Log.e(LOG_TAG, "Cannot dismiss keyguard")
-                        }
-
-                        override fun onDismissSucceeded() {
-                            disableSensorPrivacy()
-                        }
-                    })
+                if (keyguardStateController.isMethodSecure && keyguardStateController.isShowing) {
+                    keyguardDismissUtil.executeWhenUnlocked({
+                        disableSensorPrivacy()
+                        false
+                    }, false)
                 } else {
                     disableSensorPrivacy()
                 }

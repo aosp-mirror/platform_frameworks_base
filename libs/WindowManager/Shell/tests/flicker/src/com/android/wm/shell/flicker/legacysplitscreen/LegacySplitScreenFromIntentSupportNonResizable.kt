@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.provider.Settings
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -44,7 +44,6 @@ import org.junit.runners.Parameterized
  * non-resizable in multi window, it should show the non-resizable app in split screen.
  * To run this test: `atest WMShellFlickerTests:LegacySplitScreenFromIntentSupportNonResizable`
  */
-@Postsubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -93,17 +92,21 @@ class LegacySplitScreenFromIntentSupportNonResizable(
                 prevSupportNonResizableInMultiWindow)
     }
 
+    @Presubmit
     @Test
     fun nonResizableAppLayerBecomesVisible() =
             testSpec.layerBecomesVisible(nonResizeableApp.defaultWindowName)
 
+    @Presubmit
     @Test
     fun nonResizableAppWindowBecomesVisible() =
             testSpec.appWindowBecomesVisible(nonResizeableApp.defaultWindowName)
 
+    @Presubmit
     @Test
     fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisible()
 
+    @Presubmit
     @Test
     fun bothAppsWindowsAreVisibleAtEnd() {
         testSpec.assertWmEnd {

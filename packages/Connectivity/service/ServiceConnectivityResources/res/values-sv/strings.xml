@@ -18,7 +18,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="connectivityResourcesAppLabel" msgid="8294935652079168395">"Resurser för systemanslutning"</string>
-    <string name="wifi_available_sign_in" msgid="5254156478006453593">"Logga in på ett Wi-Fi-nätverk"</string>
+    <string name="wifi_available_sign_in" msgid="5254156478006453593">"Logga in på ett wifi-nätverk"</string>
     <string name="network_available_sign_in" msgid="7794369329839408792">"Logga in på nätverket"</string>
     <!-- no translation found for network_available_sign_in_detailed (3643910593681893097) -->
     <skip />
@@ -34,7 +34,7 @@
     <string name="network_switch_metered_toast" msgid="8831325515040986641">"Byte av nätverk från <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> till <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="5454013645032700715">"mobildata"</item>
-    <item msgid="6341719431034774569">"Wi-Fi"</item>
+    <item msgid="6341719431034774569">"Wifi"</item>
     <item msgid="5081440868800877512">"Bluetooth"</item>
     <item msgid="1160736166977503463">"Ethernet"</item>
     <item msgid="7347618872551558605">"VPN"</item>

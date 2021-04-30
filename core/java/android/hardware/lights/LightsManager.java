@@ -113,6 +113,12 @@ public abstract class LightsManager {
         private final IBinder mToken = new Binder();
 
         /**
+         * @hide to prevent subclassing from outside of the framework
+         */
+        public LightsSession() {
+        }
+
+        /**
          * Sends a request to modify the states of multiple lights.
          *
          * @param request the settings for lights that should change

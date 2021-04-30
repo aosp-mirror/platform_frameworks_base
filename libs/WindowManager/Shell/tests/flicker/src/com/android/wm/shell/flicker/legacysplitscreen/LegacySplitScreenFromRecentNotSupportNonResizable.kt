@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.provider.Settings
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -47,7 +47,6 @@ import org.junit.runners.Parameterized
  * not support non-resizable in multi window, it should trigger exit split screen.
  * To run this test: `atest WMShellFlickerTests:LegacySplitScreenFromRecentNotSupportNonResizable`
  */
-@Postsubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -96,25 +95,31 @@ class LegacySplitScreenFromRecentNotSupportNonResizable(
                 prevSupportNonResizableInMultiWindow)
     }
 
+    @Presubmit
     @Test
     fun resizableAppLayerBecomesInvisible() =
             testSpec.layerBecomesInvisible(splitScreenApp.defaultWindowName)
 
+    @Presubmit
     @Test
     fun nonResizableAppLayerBecomesVisible() =
             testSpec.layerBecomesVisible(nonResizeableApp.defaultWindowName)
 
+    @Presubmit
     @Test
     fun resizableAppWindowBecomesInvisible() =
         testSpec.appWindowBecomesInVisible(splitScreenApp.defaultWindowName)
 
+    @Presubmit
     @Test
     fun nonResizableAppWindowBecomesVisible() =
         testSpec.appWindowBecomesVisible(nonResizeableApp.defaultWindowName)
 
+    @Presubmit
     @Test
     fun dockedStackDividerIsInvisibleAtEnd() = testSpec.dockedStackDividerIsInvisible()
 
+    @Presubmit
     @Test
     fun onlyNonResizableAppWindowIsVisibleAtEnd() {
         testSpec.assertWmEnd {

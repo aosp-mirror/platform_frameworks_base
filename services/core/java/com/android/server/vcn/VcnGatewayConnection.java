@@ -1851,7 +1851,7 @@ public class VcnGatewayConnection extends StateMachine {
 
         private long getNextRetryIntervalsMs() {
             final int retryDelayIndex = mFailedAttempts - 1;
-            final long[] retryIntervalsMs = mConnectionConfig.getRetryIntervalsMs();
+            final long[] retryIntervalsMs = mConnectionConfig.getRetryIntervalsMillis();
 
             // Repeatedly use last item in retry timeout list.
             if (retryDelayIndex >= retryIntervalsMs.length) {

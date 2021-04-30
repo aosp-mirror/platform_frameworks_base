@@ -30,17 +30,21 @@ import android.os.SystemClock;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FrameworkStatsLog;
 
+import java.util.function.Supplier;
+
 /**
  * A helper class to write logs to statsd.
  */
 class MetricsHelper {
-    private Context mContext;
+    private final Context mContext;
+    private final Object mLock;
 
-    MetricsHelper(Context context) {
+    MetricsHelper(Context context, Object lock) {
         mContext = context;
+        mLock = lock;
     }
 
-    void registerPuller(AlarmStore alarmStore) {
+    void registerPuller(Supplier<AlarmStore> alarmStoreSupplier) {
         final StatsManager statsManager = mContext.getSystemService(StatsManager.class);
         statsManager.setPullAtomCallback(FrameworkStatsLog.PENDING_ALARM_INFO, null,
                 BackgroundThread.getExecutor(), (atomTag, data) -> {
@@ -48,26 +52,30 @@ class MetricsHelper {
                         throw new UnsupportedOperationException("Unknown tag" + atomTag);
                     }
                     final long now = SystemClock.elapsedRealtime();
-                    data.add(FrameworkStatsLog.buildStatsEvent(atomTag,
-                            alarmStore.size(),
-                            alarmStore.getCount(a -> a.windowLength == 0),
-                            alarmStore.getCount(a -> a.wakeup),
-                            alarmStore.getCount(
-                                    a -> (a.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE) != 0),
-                            alarmStore.getCount(a -> (a.flags & AlarmManager.FLAG_PRIORITIZE) != 0),
-                            alarmStore.getCount(a -> (a.operation != null
-                                    && a.operation.isForegroundService())),
-                            alarmStore.getCount(
-                                    a -> (a.operation != null && a.operation.isActivity())),
-                            alarmStore.getCount(
-                                    a -> (a.operation != null && a.operation.isService())),
-                            alarmStore.getCount(a -> (a.listener != null)),
-                            alarmStore.getCount(
-                                    a -> (a.getRequestedElapsed() > now + INDEFINITE_DELAY)),
-                            alarmStore.getCount(a -> (a.repeatInterval != 0)),
-                            alarmStore.getCount(a -> (a.alarmClock != null))
-                    ));
-                    return StatsManager.PULL_SUCCESS;
+                    synchronized (mLock) {
+                        final AlarmStore alarmStore = alarmStoreSupplier.get();
+                        data.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                                alarmStore.size(),
+                                alarmStore.getCount(a -> a.windowLength == 0),
+                                alarmStore.getCount(a -> a.wakeup),
+                                alarmStore.getCount(
+                                        a -> (a.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE) != 0),
+                                alarmStore.getCount(
+                                        a -> (a.flags & AlarmManager.FLAG_PRIORITIZE) != 0),
+                                alarmStore.getCount(a -> (a.operation != null
+                                        && a.operation.isForegroundService())),
+                                alarmStore.getCount(
+                                        a -> (a.operation != null && a.operation.isActivity())),
+                                alarmStore.getCount(
+                                        a -> (a.operation != null && a.operation.isService())),
+                                alarmStore.getCount(a -> (a.listener != null)),
+                                alarmStore.getCount(
+                                        a -> (a.getRequestedElapsed() > now + INDEFINITE_DELAY)),
+                                alarmStore.getCount(a -> (a.repeatInterval != 0)),
+                                alarmStore.getCount(a -> (a.alarmClock != null))
+                        ));
+                        return StatsManager.PULL_SUCCESS;
+                    }
                 });
     }
 

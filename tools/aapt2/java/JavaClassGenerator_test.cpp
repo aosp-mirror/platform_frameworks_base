@@ -570,4 +570,25 @@ TEST(JavaClassGeneratorTest, SortsDynamicAttributesAfterFrameworkAttributes) {
   EXPECT_THAT(output, HasSubstr("public static final int MyStyleable_dynamic_attr=1;"));
 }
 
+TEST(JavaClassGeneratorTest, SkipMacros) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddValue("android:macro/bar", ResourceId(0x01010000), test::AttributeBuilder().Build())
+          .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder()
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .SetNameManglerPolicy(NameManglerPolicy{"android"})
+          .Build();
+  JavaClassGenerator generator(context.get(), table.get(), {});
+
+  std::string output;
+  StringOutputStream out(&output);
+  EXPECT_TRUE(generator.Generate("android", &out));
+  out.Flush();
+
+  EXPECT_THAT(output, Not(HasSubstr("bar")));
+}
+
 }  // namespace aapt

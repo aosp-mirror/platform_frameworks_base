@@ -3276,7 +3276,7 @@ public final class BluetoothAdapter {
          * @param transport - whether the {@link OobData} is generated for LE or Classic.
          * @param oobData - data generated in the host stack(LE) or controller (Classic)
          */
-        void onOobData(@Transport int transport, @Nullable OobData oobData);
+        void onOobData(@Transport int transport, @NonNull OobData oobData);
 
         /**
          * Provides feedback when things don't go as expected.
@@ -3317,7 +3317,7 @@ public final class BluetoothAdapter {
          *
          * @hide
          */
-        public void onOobData(@Transport int transport, OobData oobData) {
+        public void onOobData(@Transport int transport, @NonNull OobData oobData) {
             mExecutor.execute(new Runnable() {
                 public void run() {
                     mCallback.onOobData(transport, oobData);

@@ -440,6 +440,36 @@ static void SerializeReferenceToPb(const Reference& ref, pb::Reference* pb_ref) 
   if (ref.is_dynamic) {
     pb_ref->mutable_is_dynamic()->set_value(ref.is_dynamic);
   }
+  if (ref.type_flags) {
+    pb_ref->set_type_flags(*ref.type_flags);
+  }
+  pb_ref->set_allow_raw(ref.allow_raw);
+}
+
+static void SerializeMacroToPb(const Macro& ref, pb::MacroBody* pb_macro) {
+  pb_macro->set_raw_string(ref.raw_value);
+
+  auto pb_style_str = pb_macro->mutable_style_string();
+  pb_style_str->set_str(ref.style_string.str);
+  for (const auto& span : ref.style_string.spans) {
+    auto pb_span = pb_style_str->add_spans();
+    pb_span->set_name(span.name);
+    pb_span->set_start_index(span.first_char);
+    pb_span->set_end_index(span.last_char);
+  }
+
+  for (const auto& untranslatable_section : ref.untranslatable_sections) {
+    auto pb_section = pb_macro->add_untranslatable_sections();
+    pb_section->set_start_index(untranslatable_section.start);
+    pb_section->set_end_index(untranslatable_section.end);
+  }
+
+  for (const auto& namespace_decls : ref.alias_namespaces) {
+    auto pb_namespace = pb_macro->add_namespace_stack();
+    pb_namespace->set_prefix(namespace_decls.alias);
+    pb_namespace->set_package_name(namespace_decls.package_name);
+    pb_namespace->set_is_private(namespace_decls.is_private);
+  }
 }
 
 template <typename T>
@@ -641,6 +671,11 @@ class ValueSerializer : public ConstValueVisitor {
       SerializeItemMetaDataToPb(*plural->values[i], pb_entry, src_pool_);
       SerializeItemToPb(*plural->values[i], pb_entry->mutable_item());
     }
+  }
+
+  void Visit(const Macro* macro) override {
+    pb::MacroBody* pb_macro = out_value_->mutable_compound_value()->mutable_macro();
+    SerializeMacroToPb(*macro, pb_macro);
   }
 
   void VisitAny(const Value* unknown) override {
