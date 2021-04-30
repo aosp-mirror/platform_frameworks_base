@@ -16,6 +16,32 @@
 
 package com.android.server.pm.verify.domain.proxy;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.ComponentName;
+
+import java.util.Set;
+
 /** Stub implementation for when the verification agent is unavailable */
 public class DomainVerificationProxyUnavailable implements DomainVerificationProxy {
+
+    @Override
+    public void sendBroadcastForPackages(@NonNull Set<String> packageNames) {
+    }
+
+    @Override
+    public boolean runMessage(int messageCode, Object object) {
+        return false;
+    }
+
+    @Override
+    public boolean isCallerVerifier(int callingUid) {
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public ComponentName getComponentName() {
+        return null;
+    }
 }
