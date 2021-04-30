@@ -1561,7 +1561,7 @@ public class ConnectivityManager {
 
     /**
      * Get the {@link NetworkCapabilities} for the given {@link Network}.  This
-     * will return {@code null} if the network is unknown.
+     * will return {@code null} if the network is unknown or if the |network| argument is null.
      *
      * This will remove any location sensitive data in {@link TransportInfo} embedded in
      * {@link NetworkCapabilities#getTransportInfo()}. Some transport info instances like
