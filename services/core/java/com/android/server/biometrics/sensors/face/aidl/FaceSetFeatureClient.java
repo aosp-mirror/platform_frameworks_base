@@ -18,9 +18,7 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.face.Feature;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.keymaster.HardwareAuthToken;
@@ -77,7 +75,7 @@ public class FaceSetFeatureClient extends HalClientMonitor<ISession> implements 
         try {
             getFreshDaemon()
                     .setFeature(mHardwareAuthToken,
-                    convertFrameworkToAidlFeature(mFeature), mEnabled);
+                    AidlConversionUtils.convertFrameworkToAidlFeature(mFeature), mEnabled);
         } catch (RemoteException | IllegalArgumentException e) {
             Slog.e(TAG, "Unable to set feature: " + mFeature + " to enabled: " + mEnabled, e);
             mCallback.onClientFinished(this, false /* success */);
@@ -97,16 +95,6 @@ public class FaceSetFeatureClient extends HalClientMonitor<ISession> implements 
         }
 
         mCallback.onClientFinished(this, true /* success */);
-    }
-
-    private byte convertFrameworkToAidlFeature(int feature) throws IllegalArgumentException {
-        switch (feature) {
-            case BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION:
-                return Feature.REQUIRE_ATTENTION;
-            default:
-                Slog.e(TAG, "Unsupported feature : " + feature);
-                throw new IllegalArgumentException();
-        }
     }
 
     @Override
