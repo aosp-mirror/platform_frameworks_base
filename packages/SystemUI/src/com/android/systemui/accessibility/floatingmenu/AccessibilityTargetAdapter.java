@@ -24,9 +24,12 @@ import android.view.ViewGroup;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
+import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.systemui.R;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ViewHolder;
@@ -78,9 +81,20 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.mIconView.setBackground(mTargets.get(position).getIcon());
+        final AccessibilityTarget target = mTargets.get(position);
+        holder.mIconView.setBackground(target.getIcon());
         holder.updateIconWidthHeight(mIconWidthHeight);
-        holder.itemView.setOnClickListener((v) -> mTargets.get(position).onSelected());
+        holder.itemView.setOnClickListener((v) -> target.onSelected());
+        holder.itemView.setStateDescription(target.getStateDescription());
+        holder.itemView.setContentDescription(target.getLabel());
+
+        final String clickHint = target.getFragmentType() == AccessibilityFragmentType.TOGGLE
+                ? holder.itemView.getResources().getString(
+                R.string.accessibility_floating_button_action_double_tap_to_toggle)
+                : null;
+        ViewCompat.replaceAccessibilityAction(holder.itemView,
+                AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
+                clickHint, /* command= */ null);
     }
 
     @ItemType
