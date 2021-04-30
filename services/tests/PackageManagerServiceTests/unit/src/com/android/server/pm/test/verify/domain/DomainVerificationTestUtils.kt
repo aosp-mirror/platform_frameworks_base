@@ -30,25 +30,25 @@ internal object DomainVerificationTestUtils {
     fun DomainVerificationManagerInternal.Connection.mockPackageSettings(
         block: (String) -> PackageSetting?
     ) {
-        whenever(withPackageSettings(any())) {
+        whenever(withPackageSettingsSnapshot(any())) {
             (arguments[0] as Consumer<Function<String, PackageSetting?>>).accept { block(it) }
         }
-        whenever(withPackageSettingsReturning<Any>(any())) {
+        whenever(withPackageSettingsSnapshotReturning<Any>(any())) {
             (arguments[0] as FunctionalUtils.ThrowingFunction<Function<String, PackageSetting?>, *>)
                 .apply { block(it) }
         }
-        whenever(withPackageSettingsThrowing<Exception>(any())) {
-            (arguments[0] as DomainVerificationManagerInternal.Connection.ThrowingConsumer<
+        whenever(withPackageSettingsSnapshotThrowing<Exception>(any())) {
+            (arguments[0] as FunctionalUtils.ThrowingCheckedConsumer<
                     Function<String, PackageSetting?>, *>)
                 .accept { block(it) }
         }
-        whenever(withPackageSettingsThrowing2<Exception, Exception>(any())) {
-            (arguments[0] as DomainVerificationManagerInternal.Connection.Throwing2Consumer<
+        whenever(withPackageSettingsSnapshotThrowing2<Exception, Exception>(any())) {
+            (arguments[0] as FunctionalUtils.ThrowingChecked2Consumer<
                     Function<String, PackageSetting?>, *, *>)
                 .accept { block(it) }
         }
-        whenever(withPackageSettingsReturningThrowing<Any, Exception>(any())) {
-            (arguments[0] as DomainVerificationManagerInternal.Connection.ThrowingFunction<
+        whenever(withPackageSettingsSnapshotReturningThrowing<Any, Exception>(any())) {
+            (arguments[0] as FunctionalUtils.ThrowingCheckedFunction<
                     Function<String, PackageSetting?>, *, *>)
                 .apply { block(it) }
         }
