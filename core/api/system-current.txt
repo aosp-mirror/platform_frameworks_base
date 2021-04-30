@@ -10785,10 +10785,6 @@ package android.telecom {
     method public final void addExistingConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.Connection, @NonNull android.telecom.Conference);
   }
 
-  @Deprecated public abstract class DiagnosticCall extends android.telecom.CallDiagnostics {
-    ctor @Deprecated public DiagnosticCall();
-  }
-
   public abstract class InCallService extends android.app.Service {
     method @Deprecated public android.telecom.Phone getPhone();
     method @Deprecated public void onPhoneCreated(android.telecom.Phone);
