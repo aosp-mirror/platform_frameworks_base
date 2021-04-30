@@ -116,7 +116,7 @@ public class SearchResultToProtoConverter {
                 for (int j = 0; j < entry.getSnippetMatchesCount(); j++) {
                     SearchResult.MatchInfo matchInfo =
                             toMatchInfo(entry.getSnippetMatches(j), entry.getPropertyName());
-                    builder.addMatch(matchInfo);
+                    builder.addMatchInfo(matchInfo);
                 }
             }
         }
