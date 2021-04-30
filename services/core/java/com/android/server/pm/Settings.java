@@ -3087,7 +3087,7 @@ public final class Settings implements Watchable, Snappable {
     }
 
     static void removeFilters(@NonNull PreferredIntentResolver pir,
-            @NonNull IntentFilter filter, @NonNull List<PreferredActivity> existing) {
+            @NonNull WatchedIntentFilter filter, @NonNull List<PreferredActivity> existing) {
         if (PackageManagerService.DEBUG_PREFERRED) {
             Slog.i(TAG, existing.size() + " preferred matches for:");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
@@ -3274,7 +3274,7 @@ public final class Settings implements Watchable, Snappable {
             haveNonSys = null;
         }
         if (haveAct && haveNonSys == null) {
-            IntentFilter filter = new IntentFilter();
+            WatchedIntentFilter filter = new WatchedIntentFilter();
             if (intent.getAction() != null) {
                 filter.addAction(intent.getAction());
             }
