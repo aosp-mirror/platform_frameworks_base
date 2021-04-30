@@ -317,7 +317,7 @@ class MediaCarouselController @Inject constructor(
         val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
-        newRecs.bindRecommendation(data, bgColor)
+        newRecs.bindRecommendation(data, fgColor, bgColor)
         MediaPlayerData.addMediaPlayer(key, newRecs)
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers()
