@@ -35,12 +35,12 @@ import android.telephony.ims.stub.SipDelegate;
 public interface DelegateMessageCallback {
 
     /**
-     * Send a new incoming SIP message to the remote application for processing.
+     * Sends a new incoming SIP message to the remote application for processing.
      */
     void onMessageReceived(@NonNull SipMessage message);
 
     /**
-     * Notify the remote application that a previous request to send a SIP message using
+     * Notifies the remote application that a previous request to send a SIP message using
      * {@link SipDelegate#sendMessage} has succeeded.
      *
      * @param viaTransactionId The transaction ID found in the via header field of the
@@ -49,7 +49,7 @@ public interface DelegateMessageCallback {
     void onMessageSent(@NonNull String viaTransactionId);
 
     /**
-     * Notify the remote application that a previous request to send a SIP message using
+     * Notifies the remote application that a previous request to send a SIP message using
      * {@link SipDelegate#sendMessage} has failed.
      *
      * @param viaTransactionId The Transaction ID found in the via header field of the previously
