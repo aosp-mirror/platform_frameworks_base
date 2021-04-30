@@ -180,6 +180,23 @@ public class FontManager {
      */
     public static final int RESULT_ERROR_SIGNATURE_TOO_LARGE = -10005;
 
+    /**
+     * Indicates a failure of opening XML file.
+     *
+     * This error code is only used with the shell command interaction.
+     *
+     * @hide
+     */
+    public static final int RESULT_ERROR_FAILED_TO_OPEN_XML_FILE = -10006;
+
+    /**
+     * Indicates a failure due to invalid XML file.
+     *
+     * This error code is only used with the shell command interaction.
+     *
+     * @hide
+     */
+    public static final int RESULT_ERROR_INVALID_XML = -10007;
 
     private FontManager(@NonNull IFontManager iFontManager) {
         mIFontManager = iFontManager;
