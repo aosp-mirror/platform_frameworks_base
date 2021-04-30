@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.face.Feature;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.os.IBinder;
@@ -82,36 +81,38 @@ public class FaceGetFeatureClient extends HalClientMonitor<ISession> implements 
     }
 
     public void onFeatureGet(boolean success, byte[] features) {
-        HashMap<Integer, Boolean> featureMap = getFeatureMap();
-        int[] featuresToSend = new int[featureMap.size()];
-        boolean[] featureState = new boolean[featureMap.size()];
-
-        // The AIDL get feature api states that the presence of a feature means
-        // it is enabled, while the lack thereof means its disabled.
-        for (int i = 0; i < features.length; i++) {
-            Integer feature = convertAidlToFrameworkFeature(features[i]);
-            if (feature != null) {
-                featureMap.put(feature, true);
-            }
-        }
-
-        int i = 0;
-        for (Map.Entry<Integer, Boolean> entry : featureMap.entrySet()) {
-            featuresToSend[i] = entry.getKey();
-            featureState[i] = entry.getValue();
-            i++;
-        }
-
-        boolean attentionEnabled = featureMap.get(BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION);
-        Slog.d(TAG, "Updating attention value for user: " + mUserId
-                + " to value: " + attentionEnabled);
-        Settings.Secure.putIntForUser(getContext().getContentResolver(),
-                Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
-                attentionEnabled ? 1 : 0, mUserId);
         try {
+            HashMap<Integer, Boolean> featureMap = getFeatureMap();
+            int[] featuresToSend = new int[featureMap.size()];
+            boolean[] featureState = new boolean[featureMap.size()];
+
+            // The AIDL get feature api states that the presence of a feature means
+            // it is enabled, while the lack thereof means its disabled.
+            for (int i = 0; i < features.length; i++) {
+                featureMap.put(AidlConversionUtils.convertAidlToFrameworkFeature(features[i]),
+                        true);
+            }
+
+            int i = 0;
+            for (Map.Entry<Integer, Boolean> entry : featureMap.entrySet()) {
+                featuresToSend[i] = entry.getKey();
+                featureState[i] = entry.getValue();
+                i++;
+            }
+
+            boolean attentionEnabled =
+                    featureMap.get(BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION);
+            Slog.d(TAG, "Updating attention value for user: " + mUserId
+                    + " to value: " + attentionEnabled);
+            Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                    Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
+                    attentionEnabled ? 1 : 0, mUserId);
+
             getListener().onFeatureGet(success, featuresToSend, featureState);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
+        } catch (RemoteException | IllegalArgumentException e) {
+            Slog.e(TAG, "exception", e);
+            mCallback.onClientFinished(this, false /* success */);
+            return;
         }
 
         mCallback.onClientFinished(this, true /* success */);
@@ -121,15 +122,6 @@ public class FaceGetFeatureClient extends HalClientMonitor<ISession> implements 
         HashMap<Integer, Boolean> featureMap = new HashMap<>();
         featureMap.put(BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION, false);
         return featureMap;
-    }
-
-    private Integer convertAidlToFrameworkFeature(byte feature) {
-        switch (feature) {
-            case Feature.REQUIRE_ATTENTION:
-                return new Integer(BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION);
-            default:
-                return null;
-        }
     }
 
     @Override
