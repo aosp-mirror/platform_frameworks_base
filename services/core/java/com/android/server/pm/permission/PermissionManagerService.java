@@ -517,10 +517,24 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+
+        final PermissionGroupInfo permissionGroupInfo;
         synchronized (mLock) {
-            return PackageInfoUtils.generatePermissionGroupInfo(
-                    mRegistry.getPermissionGroup(groupName), flags);
+            final ParsedPermissionGroup permissionGroup = mRegistry.getPermissionGroup(groupName);
+            if (permissionGroup == null) {
+                return null;
+            }
+            permissionGroupInfo = PackageInfoUtils.generatePermissionGroupInfo(permissionGroup,
+                    flags);
         }
+
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (mPackageManagerInt.filterAppAccess(permissionGroupInfo.packageName, callingUid,
+                callingUserId)) {
+            EventLog.writeEvent(0x534e4554, "186113473", callingUid, groupName);
+            return null;
+        }
+        return permissionGroupInfo;
     }
 
 
