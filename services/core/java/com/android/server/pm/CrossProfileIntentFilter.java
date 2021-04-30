@@ -24,6 +24,7 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.XmlUtils;
+import com.android.server.utils.SnapshotCache;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -35,7 +36,7 @@ import java.io.IOException;
  * If an {@link Intent} matches the {@link CrossProfileIntentFilter}, then activities in the user
  * {@link #mTargetUserId} can access it.
  */
-class CrossProfileIntentFilter extends IntentFilter {
+class CrossProfileIntentFilter extends WatchedIntentFilter {
     private static final String ATTR_TARGET_USER_ID = "targetUserId";
     private static final String ATTR_FLAGS = "flags";
     private static final String ATTR_OWNER_PACKAGE = "ownerPackage";
@@ -48,12 +49,41 @@ class CrossProfileIntentFilter extends IntentFilter {
     final String mOwnerPackage; // packageName of the app.
     final int mFlags;
 
+    // The cache for snapshots, so they are not rebuilt if the base object has not
+    // changed.
+    final SnapshotCache<CrossProfileIntentFilter> mSnapshot;
+
+    private SnapshotCache makeCache() {
+        return new SnapshotCache<CrossProfileIntentFilter>(this, this) {
+            @Override
+            public CrossProfileIntentFilter createSnapshot() {
+                CrossProfileIntentFilter s = new CrossProfileIntentFilter(mSource);
+                s.seal();
+                return s;
+            }};
+    }
+
     CrossProfileIntentFilter(IntentFilter filter, String ownerPackage, int targetUserId,
             int flags) {
         super(filter);
         mTargetUserId = targetUserId;
         mOwnerPackage = ownerPackage;
         mFlags = flags;
+        mSnapshot = makeCache();
+    }
+
+    CrossProfileIntentFilter(WatchedIntentFilter filter, String ownerPackage, int targetUserId,
+            int flags) {
+        this(filter.mFilter, ownerPackage, targetUserId, flags);
+    }
+
+    // Copy constructor used only to create a snapshot.
+    private CrossProfileIntentFilter(CrossProfileIntentFilter f) {
+        super(f);
+        mTargetUserId = f.mTargetUserId;
+        mOwnerPackage = f.mOwnerPackage;
+        mFlags = f.mFlags;
+        mSnapshot = new SnapshotCache.Sealed();
     }
 
     public int getTargetUserId() {
@@ -72,6 +102,7 @@ class CrossProfileIntentFilter extends IntentFilter {
         mTargetUserId = parser.getAttributeInt(null, ATTR_TARGET_USER_ID, UserHandle.USER_NULL);
         mOwnerPackage = getStringFromXml(parser, ATTR_OWNER_PACKAGE, "");
         mFlags = parser.getAttributeInt(null, ATTR_FLAGS, 0);
+        mSnapshot = makeCache();
 
         int outerDepth = parser.getDepth();
         String tagName = parser.getName();
@@ -94,7 +125,7 @@ class CrossProfileIntentFilter extends IntentFilter {
             }
         }
         if (tagName.equals(ATTR_FILTER)) {
-            readFromXml(parser);
+            mFilter.readFromXml(parser);
         } else {
             String msg = "Missing element under " + TAG + ": " + ATTR_FILTER +
                     " at " + parser.getPositionDescription();
@@ -103,7 +134,8 @@ class CrossProfileIntentFilter extends IntentFilter {
         }
     }
 
-    String getStringFromXml(TypedXmlPullParser parser, String attribute, String defaultValue) {
+    private String getStringFromXml(TypedXmlPullParser parser, String attribute,
+            String defaultValue) {
         String value = parser.getAttributeValue(null, attribute);
         if (value == null) {
             String msg = "Missing element under " + TAG +": " + attribute + " at " +
@@ -120,7 +152,7 @@ class CrossProfileIntentFilter extends IntentFilter {
         serializer.attributeInt(null, ATTR_FLAGS, mFlags);
         serializer.attribute(null, ATTR_OWNER_PACKAGE, mOwnerPackage);
         serializer.startTag(null, ATTR_FILTER);
-            super.writeToXml(serializer);
+        mFilter.writeToXml(serializer);
         serializer.endTag(null, ATTR_FILTER);
     }
 
@@ -134,5 +166,9 @@ class CrossProfileIntentFilter extends IntentFilter {
         return mTargetUserId == other.mTargetUserId
                 && mOwnerPackage.equals(other.mOwnerPackage)
                 && mFlags == other.mFlags;
+    }
+
+    public CrossProfileIntentFilter snapshot() {
+        return mSnapshot.snapshot();
     }
 }

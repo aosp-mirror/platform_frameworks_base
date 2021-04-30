@@ -19,10 +19,13 @@ package com.android.server;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.server.pm.WatchedIntentFilter;
+import com.android.server.utils.Snappable;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
 import com.android.server.utils.Watcher;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,9 +34,9 @@ import java.util.List;
  * @param <R> The resolver type.
  * {@hide}
  */
-public abstract class WatchedIntentResolver<F, R extends Object>
+public abstract class WatchedIntentResolver<F extends Watchable, R extends Object>
         extends IntentResolver<F, R>
-        implements Watchable {
+        implements Watchable, Snappable {
 
     /**
      * Watchable machinery
@@ -78,6 +81,13 @@ public abstract class WatchedIntentResolver<F, R extends Object>
         mWatchable.dispatchChange(what);
     }
 
+    private final Watcher mWatcher = new Watcher() {
+            @Override
+            public void onChange(@Nullable Watchable what) {
+                dispatchChange(what);
+            }
+        };
+
     /**
      * Notify listeners that this object has changed.
      */
@@ -88,17 +98,20 @@ public abstract class WatchedIntentResolver<F, R extends Object>
     @Override
     public void addFilter(F f) {
         super.addFilter(f);
+        f.registerObserver(mWatcher);
         onChanged();
     }
 
     @Override
     public void removeFilter(F f) {
+        f.unregisterObserver(mWatcher);
         super.removeFilter(f);
         onChanged();
     }
 
     @Override
     protected void removeFilterInternal(F f) {
+        f.unregisterObserver(mWatcher);
         super.removeFilterInternal(f);
         onChanged();
     }
@@ -108,5 +121,18 @@ public abstract class WatchedIntentResolver<F, R extends Object>
     protected void sortResults(List<R> results) {
         super.sortResults(results);
         onChanged();
+    }
+
+    /**
+     * @see IntentResolver#findFilters(IntentFilter)
+     */
+    public ArrayList<F> findFilters(WatchedIntentFilter matching) {
+        return super.findFilters(matching.getIntentFilter());
+    }
+
+    // Make <this> a copy of <orig>.  The presumption is that <this> is empty but all
+    // arrays are cleared out explicitly, just to be sure.
+    protected void copyFrom(WatchedIntentResolver orig) {
+        super.copyFrom(orig);
     }
 }

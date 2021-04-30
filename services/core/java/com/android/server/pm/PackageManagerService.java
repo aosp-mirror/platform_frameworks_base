@@ -3484,8 +3484,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (int i = resultTargetUser.size() - 1; i >= 0; i--) {
                     if ((resultTargetUser.get(i).activityInfo.applicationInfo.flags
                             & ApplicationInfo.FLAG_SUSPENDED) == 0) {
-                        return createForwardingResolveInfoUnchecked(filter, sourceUserId,
-                                targetUserId);
+                        return createForwardingResolveInfoUnchecked(filter.getIntentFilter(),
+                              sourceUserId, targetUserId);
                     }
                 }
             }
@@ -22243,7 +22243,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             || (pa.mPref.mComponent.getPackageName().equals(packageName)
                                     && pa.mPref.mAlways)) {
                         if (outFilters != null) {
-                            outFilters.add(new IntentFilter(pa));
+                            outFilters.add(new IntentFilter(pa.getIntentFilter()));
                         }
                         if (outActivities != null) {
                             outActivities.add(pa.mPref.mComponent);

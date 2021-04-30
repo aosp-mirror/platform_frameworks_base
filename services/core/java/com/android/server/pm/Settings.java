@@ -3015,8 +3015,9 @@ public final class Settings implements Watchable, Snappable {
                         = ps.pkg.getPreferredActivityFilters();
                 for (int i=0; i<intents.size(); i++) {
                     Pair<String, ParsedIntentInfo> pair = intents.get(i);
-                    applyDefaultPreferredActivityLPw(pmInternal, pair.second, new ComponentName(
-                            ps.name, pair.first), userId);
+                    applyDefaultPreferredActivityLPw(pmInternal,
+                            new WatchedIntentFilter(pair.second),
+                            new ComponentName(ps.name, pair.first), userId);
                 }
             }
         }
@@ -3101,8 +3102,8 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    private void applyDefaultPreferredActivityLPw(
-            PackageManagerInternal pmInternal, IntentFilter tmpPa, ComponentName cn, int userId) {
+    private void applyDefaultPreferredActivityLPw(PackageManagerInternal pmInternal,
+            WatchedIntentFilter tmpPa, ComponentName cn, int userId) {
         // The initial preferences only specify the target activity
         // component and intent-filter, not the set of matches.  So we
         // now need to query for the matches to build the correct
