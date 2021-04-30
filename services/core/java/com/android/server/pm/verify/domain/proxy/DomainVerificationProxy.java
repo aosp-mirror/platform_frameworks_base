@@ -31,7 +31,6 @@ import com.android.server.pm.verify.domain.DomainVerificationMessageCodes;
 import java.util.Objects;
 import java.util.Set;
 
-// TODO(b/170321181): Combine the proxy versions for supporting v1 and v2 at once
 public interface DomainVerificationProxy {
 
     String TAG = "DomainVerificationProxy";
@@ -81,8 +80,7 @@ public interface DomainVerificationProxy {
         return new DomainVerificationProxyUnavailable();
     }
 
-    default void sendBroadcastForPackages(@NonNull Set<String> packageNames) {
-    }
+    void sendBroadcastForPackages(@NonNull Set<String> packageNames);
 
     /**
      * Runs a message on the caller's Handler as a result of {@link BaseConnection#schedule(int,
@@ -94,18 +92,12 @@ public interface DomainVerificationProxy {
      * @param messageCode One of the values in {@link DomainVerificationMessageCodes}.
      * @param object      Arbitrary object that was originally included.
      */
-    default boolean runMessage(int messageCode, Object object) {
-        return false;
-    }
+    boolean runMessage(int messageCode, Object object);
 
-    default boolean isCallerVerifier(int callingUid) {
-        return false;
-    }
+    boolean isCallerVerifier(int callingUid);
 
     @Nullable
-    default ComponentName getComponentName() {
-        return null;
-    }
+    ComponentName getComponentName();
 
     interface BaseConnection {
 

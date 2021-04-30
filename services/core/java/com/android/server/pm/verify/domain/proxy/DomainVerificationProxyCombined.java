@@ -17,6 +17,7 @@
 package com.android.server.pm.verify.domain.proxy;
 
 import android.annotation.NonNull;
+import android.content.ComponentName;
 
 import java.util.Set;
 
@@ -50,5 +51,11 @@ class DomainVerificationProxyCombined implements DomainVerificationProxy {
     @Override
     public boolean isCallerVerifier(int callingUid) {
         return mProxyV2.isCallerVerifier(callingUid) || mProxyV1.isCallerVerifier(callingUid);
+    }
+
+    @NonNull
+    @Override
+    public ComponentName getComponentName() {
+        return mProxyV2.getComponentName();
     }
 }
