@@ -649,14 +649,14 @@ public class LocalDisplayAdapterTest {
         // Test as default display
         BacklightAdapter ba = new BacklightAdapter(displayToken, true /*isDefault*/,
                 mSurfaceControlProxy);
-        ba.setBacklight(0.514f);
-        verify(mSurfaceControlProxy).setDisplayBrightness(displayToken, 0.514f);
+        ba.setBacklight(0.514f, 100f, 0.614f, 500f);
+        verify(mSurfaceControlProxy).setDisplayBrightness(displayToken, 0.514f, 100f, 0.614f, 500f);
 
         // Test as not default display
         BacklightAdapter ba2 = new BacklightAdapter(displayToken, false /*isDefault*/,
                 mSurfaceControlProxy);
-        ba2.setBacklight(0.323f);
-        verify(mSurfaceControlProxy).setDisplayBrightness(displayToken, 0.323f);
+        ba2.setBacklight(0.323f, 101f, 0.723f, 601f);
+        verify(mSurfaceControlProxy).setDisplayBrightness(displayToken, 0.323f, 101f, 0.723f, 601f);
     }
 
     @Test
@@ -668,7 +668,7 @@ public class LocalDisplayAdapterTest {
 
         BacklightAdapter ba = new BacklightAdapter(displayToken, true /*isDefault*/,
                 mSurfaceControlProxy);
-        ba.setBacklight(0.123f);
+        ba.setBacklight(1f, 1f, 0.123f, 1f);
         verify(mMockedBacklight).setBrightness(0.123f);
     }
 
@@ -681,7 +681,7 @@ public class LocalDisplayAdapterTest {
 
         BacklightAdapter ba = new BacklightAdapter(displayToken, false /*isDefault*/,
                 mSurfaceControlProxy);
-        ba.setBacklight(0.456f);
+        ba.setBacklight(0.456f, 1f, 1f, 1f);
 
         // Adapter does not forward any brightness in this case.
         verify(mMockedBacklight, never()).setBrightness(anyFloat());

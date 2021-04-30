@@ -738,13 +738,19 @@ class AutomaticBrightnessController {
         float value = mBrightnessMapper.getBrightness(mAmbientLux, mForegroundAppPackageName,
                 mForegroundAppCategory);
         float newScreenAutoBrightness = clampScreenBrightness(value);
+
+        // The min/max range can change for brightness due to HBM. See if the current brightness
+        // value still falls within the current range (which could have changed).
+        final boolean currentBrightnessWithinAllowedRange = BrightnessSynchronizer.floatEquals(
+                mScreenAutoBrightness, clampScreenBrightness(mScreenAutoBrightness));
         // If screenAutoBrightness is set, we should have screen{Brightening,Darkening}Threshold,
         // in which case we ignore the new screen brightness if it doesn't differ enough from the
         // previous one.
         if (!Float.isNaN(mScreenAutoBrightness)
                 && !isManuallySet
                 && newScreenAutoBrightness > mScreenDarkeningThreshold
-                && newScreenAutoBrightness < mScreenBrighteningThreshold) {
+                && newScreenAutoBrightness < mScreenBrighteningThreshold
+                && currentBrightnessWithinAllowedRange) {
             if (mLoggingEnabled) {
                 Slog.d(TAG, "ignoring newScreenAutoBrightness: "
                         + mScreenDarkeningThreshold + " < " + newScreenAutoBrightness
