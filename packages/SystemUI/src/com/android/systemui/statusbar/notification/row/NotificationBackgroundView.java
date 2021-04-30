@@ -84,8 +84,7 @@ public class NotificationBackgroundView extends View {
             int bottom = mActualHeight;
             if (mBottomIsRounded
                     && mBottomAmountClips
-                    && !mExpandAnimationRunning
-                    && !mLastInSection) {
+                    && !mExpandAnimationRunning) {
                 bottom -= mClipBottomAmount;
             }
             int left = 0;
