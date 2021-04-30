@@ -1481,7 +1481,9 @@ public class PackageManagerService extends IPackageManager.Stub
     // Internal interface for permission manager
     private final PermissionManagerServiceInternal mPermissionManager;
 
+    @Watched
     private final ComponentResolver mComponentResolver;
+
     // List of packages names to keep cached, even if they are uninstalled for all users
     private List<String> mKeepUninstalledPackages;
 
@@ -1854,6 +1856,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public final ApplicationInfo androidApplication;
         public final String appPredictionServicePackage;
         public final AppsFilter appsFilter;
+        public final ComponentResolver componentResolver;
         public final PackageManagerService service;
 
         Snapshot(int type) {
@@ -1879,6 +1882,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         : new ApplicationInfo(mAndroidApplication);
                 appPredictionServicePackage = mAppPredictionServicePackage;
                 appsFilter = mAppsFilter.snapshot();
+                componentResolver = mComponentResolver.snapshot();
             } else if (type == Snapshot.LIVE) {
                 settings = mSettings;
                 isolatedOwners = mIsolatedOwners;
@@ -1895,6 +1899,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 androidApplication = mAndroidApplication;
                 appPredictionServicePackage = mAppPredictionServicePackage;
                 appsFilter = mAppsFilter;
+                componentResolver = mComponentResolver;
             } else {
                 throw new IllegalArgumentException();
             }
@@ -2142,6 +2147,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mInstantAppRegistry = args.instantAppRegistry;
             mLocalAndroidApplication = args.androidApplication;
             mAppsFilter = args.appsFilter;
+            mComponentResolver = args.componentResolver;
 
             mAppPredictionServicePackage = args.appPredictionServicePackage;
 
@@ -2152,7 +2158,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mContext = args.service.mContext;
             mInjector = args.service.mInjector;
             mApexManager = args.service.mApexManager;
-            mComponentResolver = args.service.mComponentResolver;
             mInstantAppResolverConnection = args.service.mInstantAppResolverConnection;
             mDefaultAppProvider = args.service.mDefaultAppProvider;
             mDomainVerificationManager = args.service.mDomainVerificationManager;
@@ -6159,6 +6164,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstantAppRegistry.registerObserver(mWatcher);
         mSettings.registerObserver(mWatcher);
         mIsolatedOwners.registerObserver(mWatcher);
+        mComponentResolver.registerObserver(mWatcher);
         // If neither "build" attribute is true then this may be a mockito test, and verification
         // can fail as a false positive.
         Watchable.verifyWatchedAttributes(this, mWatcher, !(mIsEngBuild || mIsUserDebugBuild));
