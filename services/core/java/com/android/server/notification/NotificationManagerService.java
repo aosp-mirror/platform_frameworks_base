@@ -6850,7 +6850,7 @@ public class NotificationManagerService extends SystemService {
                                     .appendPath(record.getKey()).build())
                             .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
                             .putExtra(EXTRA_KEY, record.getKey()),
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     mSystemClock.elapsedRealtime() + record.getNotification().getTimeoutAfter(),
                     pi);
@@ -7712,6 +7712,21 @@ public class NotificationManagerService extends SystemService {
             @NotificationListenerService.NotificationCancelReason int reason,
             int rank, int count, boolean wasPosted, String listenerName) {
         final String canceledKey = r.getKey();
+
+        // Get pending intent used to create alarm, use FLAG_NO_CREATE if PendingIntent
+        // does not already exist, then null will be returned.
+        final PendingIntent pi = PendingIntent.getBroadcast(getContext(),
+                REQUEST_CODE_TIMEOUT,
+                new Intent(ACTION_NOTIFICATION_TIMEOUT)
+                        .setData(new Uri.Builder().scheme(SCHEME_TIMEOUT)
+                                .appendPath(r.getKey()).build())
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
+
+        // Cancel alarm corresponding to pi.
+        if (pi != null) {
+            mAlarmManager.cancel(pi);
+        }
 
         // Record caller.
         recordCallerLocked(r);
