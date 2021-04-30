@@ -1783,6 +1783,24 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
+                withPackageSettingsThrowing2(
+                        @NonNull Throwing2Consumer<Function<String, PackageSetting>, ExceptionOne,
+                                ExceptionTwo> block) throws ExceptionOne, ExceptionTwo {
+            final Computer snapshot = snapshotComputer();
+
+            // This method needs to either lock or not lock consistently throughout the method,
+            // so if the live computer is returned, force a wrapping sync block.
+            if (snapshot == mLiveComputer) {
+                synchronized (mLock) {
+                    block.accept(snapshot::getPackageSetting);
+                }
+            } else {
+                block.accept(snapshot::getPackageSetting);
+            }
+        }
+
+        @Override
         public <Output, ExceptionType extends Exception> Output
                 withPackageSettingsReturningThrowing(@NonNull ThrowingFunction<Function<String,
                 PackageSetting>, Output, ExceptionType> block) throws ExceptionType {
@@ -22460,21 +22478,44 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public byte[] getIntentFilterVerificationBackup(int userId) {
+    public byte[] getDomainVerificationBackup(int userId) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the system may call getIntentFilterVerificationBackup()");
+            throw new SecurityException("Only the system may call getDomainVerificationBackup()");
         }
 
-        // TODO(b/170746586)
-        return null;
+        try {
+            try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+                TypedXmlSerializer serializer = Xml.resolveSerializer(output);
+                mDomainVerificationManager.writeSettings(serializer, true, userId);
+                return output.toByteArray();
+            }
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Unable to write domain verification for backup", e);
+            }
+            return null;
+        }
     }
 
     @Override
-    public void restoreIntentFilterVerification(byte[] backup, int userId) {
+    public void restoreDomainVerification(byte[] backup, int userId) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("Only the system may call restorePreferredActivities()");
         }
-        // TODO(b/170746586)
+
+        try {
+            ByteArrayInputStream input = new ByteArrayInputStream(backup);
+            TypedXmlPullParser parser = Xml.resolvePullParser(input);
+
+            // User ID input isn't necessary here as it assumes the user integers match and that
+            // the only states inside the backup XML are for the target user.
+            mDomainVerificationManager.restoreSettings(parser);
+            input.close();
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Exception restoring domain verification: " + e.getMessage());
+            }
+        }
     }
 
     @Override

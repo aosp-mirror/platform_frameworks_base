@@ -42,6 +42,11 @@ internal object DomainVerificationTestUtils {
                     Function<String, PackageSetting?>, *>)
                 .accept { block(it) }
         }
+        whenever(withPackageSettingsThrowing2<Exception, Exception>(any())) {
+            (arguments[0] as DomainVerificationManagerInternal.Connection.Throwing2Consumer<
+                    Function<String, PackageSetting?>, *, *>)
+                .accept { block(it) }
+        }
         whenever(withPackageSettingsReturningThrowing<Any, Exception>(any())) {
             (arguments[0] as DomainVerificationManagerInternal.Connection.ThrowingFunction<
                     Function<String, PackageSetting?>, *, *>)

@@ -17,6 +17,7 @@
 package com.android.server.pm.test.verify.domain
 
 import android.content.pm.verify.domain.DomainVerificationState
+import android.os.UserHandle
 import android.util.ArrayMap
 import android.util.SparseArray
 import android.util.TypedXmlPullParser
@@ -110,7 +111,8 @@ class DomainVerificationPersistenceTest {
     fun writeAndReadBackNormal() {
         val (attached, pending, restored) = mockWriteValues()
         val file = tempFolder.newFile().writeXml {
-            DomainVerificationPersistence.writeToXml(it, attached, pending, restored, null)
+            DomainVerificationPersistence.writeToXml(it, attached, pending, restored,
+                    UserHandle.USER_ALL, null)
         }
 
         val xml = file.readText()
@@ -128,7 +130,8 @@ class DomainVerificationPersistenceTest {
     fun writeAndReadBackWithSignature() {
         val (attached, pending, restored) = mockWriteValues()
         val file = tempFolder.newFile().writeXml {
-            DomainVerificationPersistence.writeToXml(it, attached, pending, restored) {
+            DomainVerificationPersistence.writeToXml(it, attached, pending, restored,
+                    UserHandle.USER_ALL) {
                 "SIGNATURE_$it"
             }
         }
@@ -156,7 +159,8 @@ class DomainVerificationPersistenceTest {
     fun writeStateSignatureIfFunctionReturnsNull() {
         val (attached, pending, restored) = mockWriteValues  { "SIGNATURE_$it" }
         val file = tempFolder.newFile().writeXml {
-            DomainVerificationPersistence.writeToXml(it, attached, pending, restored) { null }
+            DomainVerificationPersistence.writeToXml(it, attached, pending, restored,
+                    UserHandle.USER_ALL) { null }
         }
 
         val (readActive, readRestored) = file.readXml {
@@ -254,7 +258,7 @@ class DomainVerificationPersistenceTest {
                         >
                         <state/>
                         <user-states>
-                            <user-state userId="1" allowLinkHandling="false">
+                            <user-state userId="1">
                                 <enabled-hosts>
                                     <host name="example-user1.com"/>
                                     <host name="example-user1.org"/>

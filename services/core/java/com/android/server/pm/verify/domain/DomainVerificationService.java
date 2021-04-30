@@ -129,10 +129,10 @@ public class DomainVerificationService extends SystemService
     private final PlatformCompat mPlatformCompat;
 
     @NonNull
-    private final DomainVerificationSettings mSettings;
+    private final DomainVerificationCollector mCollector;
 
     @NonNull
-    private final DomainVerificationCollector mCollector;
+    private final DomainVerificationSettings mSettings;
 
     @NonNull
     private final DomainVerificationEnforcer mEnforcer;
@@ -159,8 +159,8 @@ public class DomainVerificationService extends SystemService
         super(context);
         mSystemConfig = systemConfig;
         mPlatformCompat = platformCompat;
-        mSettings = new DomainVerificationSettings();
         mCollector = new DomainVerificationCollector(platformCompat, systemConfig);
+        mSettings = new DomainVerificationSettings(mCollector);
         mEnforcer = new DomainVerificationEnforcer(context);
         mDebug = new DomainVerificationDebug(mCollector);
         mShell = new DomainVerificationShell(this);
@@ -1045,21 +1045,29 @@ public class DomainVerificationService extends SystemService
     }
 
     @Override
-    public void writeSettings(@NonNull TypedXmlSerializer serializer) throws IOException {
+    public void writeSettings(@NonNull TypedXmlSerializer serializer, boolean includeSignatures,
+            @UserIdInt int userId)
+            throws IOException {
         mConnection.withPackageSettingsThrowing(pkgSettings -> {
             synchronized (mLock) {
-                mSettings.writeSettings(serializer, mAttachedPkgStates, pkgName -> {
-                    PackageSetting pkgSetting = pkgSettings.apply(pkgName);
-                    if (pkgSetting == null) {
-                        // If querying for a user restored package that isn't installed on the
-                        // device yet, there will be no signature to write out. In that case,
-                        // it's expected that this returns null and it falls back to the restored
-                        // state's stored signature if it exists.
-                        return null;
-                    }
+                Function<String, String> pkgNameToSignature = null;
+                if (includeSignatures) {
+                    pkgNameToSignature = pkgName -> {
+                        PackageSetting pkgSetting = pkgSettings.apply(pkgName);
+                        if (pkgSetting == null) {
+                            // If querying for a user restored package that isn't installed on the
+                            // device yet, there will be no signature to write out. In that case,
+                            // it's expected that this returns null and it falls back to the
+                            // restored state's stored signature if it exists.
+                            return null;
+                        }
 
-                    return PackageUtils.computeSignaturesSha256Digest(pkgSetting.getSignatures());
-                });
+                        return PackageUtils.computeSignaturesSha256Digest(
+                                pkgSetting.getSignatures());
+                    };
+                }
+
+                mSettings.writeSettings(serializer, mAttachedPkgStates, userId, pkgNameToSignature);
             }
         });
 
@@ -1067,11 +1075,14 @@ public class DomainVerificationService extends SystemService
     }
 
     @Override
-    public void readSettings(@NonNull TypedXmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        synchronized (mLock) {
-            mSettings.readSettings(parser, mAttachedPkgStates);
-        }
+    public void readSettings(@NonNull TypedXmlPullParser parser) throws IOException,
+            XmlPullParserException {
+        mConnection.<IOException, XmlPullParserException>withPackageSettingsThrowing2(
+                pkgSettings -> {
+                    synchronized (mLock) {
+                        mSettings.readSettings(parser, mAttachedPkgStates, pkgSettings);
+                    }
+                });
     }
 
     @Override
@@ -1083,9 +1094,12 @@ public class DomainVerificationService extends SystemService
     @Override
     public void restoreSettings(@NonNull TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
-        synchronized (mLock) {
-            mSettings.restoreSettings(parser, mAttachedPkgStates);
-        }
+        mConnection.<IOException, XmlPullParserException>withPackageSettingsThrowing2(
+                pkgSettings -> {
+                    synchronized (mLock) {
+                        mSettings.restoreSettings(parser, mAttachedPkgStates, pkgSettings);
+                    }
+                });
     }
 
     @Override
@@ -2028,6 +2042,15 @@ public class DomainVerificationService extends SystemService
                 throws ExceptionType {
             enforceLocking();
             mConnection.withPackageSettingsThrowing(block);
+        }
+
+        @Override
+        public <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
+                withPackageSettingsThrowing2(
+                        @NonNull Throwing2Consumer<Function<String, PackageSetting>, ExceptionOne,
+                                ExceptionTwo> block) throws ExceptionOne, ExceptionTwo {
+            enforceLocking();
+            mConnection.withPackageSettingsThrowing2(block);
         }
 
         @Override
