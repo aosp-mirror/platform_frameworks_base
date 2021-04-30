@@ -2472,8 +2472,10 @@ public class ParsingPackageUtils {
             ParsingPackage pkg, Resources res, XmlResourceParser parser) {
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestProfileable);
         try {
-            return input.success(pkg.setProfileableByShell(pkg.isProfileableByShell()
-                    || bool(false, R.styleable.AndroidManifestProfileable_shell, sa)));
+            ParsingPackage newPkg = pkg.setProfileableByShell(pkg.isProfileableByShell()
+                    || bool(false, R.styleable.AndroidManifestProfileable_shell, sa));
+            return input.success(newPkg.setProfileable(newPkg.isProfileable()
+                    && bool(true, R.styleable.AndroidManifestProfileable_enabled, sa)));
         } finally {
             sa.recycle();
         }
