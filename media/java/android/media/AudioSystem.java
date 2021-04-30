@@ -424,6 +424,8 @@ public class AudioSystem
                 return "AUDIO_FORMAT_MAT_2_0"; // (MAT | MAT_SUB_2_0)
             case /* AUDIO_FORMAT_MAT_2_1           */ 0x24000003:
                 return "AUDIO_FORMAT_MAT_2_1"; // (MAT | MAT_SUB_2_1)
+            case /* AUDIO_FORMAT_DTS_UHD */           0x2E000000:
+                return "AUDIO_FORMAT_DTS_UHD";
             default:
                 return "AUDIO_FORMAT_(" + audioFormat + ")";
         }
