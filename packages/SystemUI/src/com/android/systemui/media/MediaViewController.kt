@@ -466,8 +466,8 @@ class MediaViewController @Inject constructor(
             collapsedLayout.load(context, R.xml.media_collapsed)
             expandedLayout.load(context, R.xml.media_expanded)
         } else {
-            collapsedLayout.load(context, R.xml.media_recommendation)
-            expandedLayout.load(context, R.xml.media_recommendation)
+            collapsedLayout.load(context, R.xml.media_recommendation_collapsed)
+            expandedLayout.load(context, R.xml.media_recommendation_expanded)
         }
         refreshState()
     }
