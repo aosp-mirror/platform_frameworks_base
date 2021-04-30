@@ -395,6 +395,15 @@ static long elapsedMcs(Duration start, Duration end) {
     return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 }
 
+static uint64_t elapsedUsSinceMonoTs(uint64_t monoTsUs) {
+    timespec now;
+    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
+        return 0;
+    }
+    uint64_t nowUs = now.tv_sec * 1000000LL + now.tv_nsec / 1000;
+    return nowUs - monoTsUs;
+}
+
 void IncrementalService::onDump(int fd) {
     dprintf(fd, "Incremental is %s\n", incfs::enabled() ? "ENABLED" : "DISABLED");
     dprintf(fd, "Incremental dir: %s\n", mIncrementalDir.c_str());
@@ -460,6 +469,25 @@ void IncrementalService::onDump(int fd) {
                         incfsMetrics.value().readsFailedTimedOut);
             } else {
                 dprintf(fd, "      Metrics not available. Errno: %d\n", errno);
+            }
+            dprintf(fd, "    }\n");
+
+            const auto lastReadError = mIncFs->getLastReadError(ifs->control);
+            const auto errorNo = errno;
+            dprintf(fd, "    lastReadError: {\n");
+            if (lastReadError) {
+                if (lastReadError->timestampUs == 0) {
+                    dprintf(fd, "      No read errors.\n");
+                } else {
+                    dprintf(fd, "      fileId: %s\n",
+                            IncFsWrapper::toString(lastReadError->id).c_str());
+                    dprintf(fd, "      time: %llu microseconds ago\n",
+                            (unsigned long long)elapsedUsSinceMonoTs(lastReadError->timestampUs));
+                    dprintf(fd, "      blockIndex: %d\n", lastReadError->block);
+                    dprintf(fd, "      errno: %d\n", lastReadError->errorNo);
+                }
+            } else {
+                dprintf(fd, "      Info not available. Errno: %d\n", errorNo);
             }
             dprintf(fd, "    }\n");
         }

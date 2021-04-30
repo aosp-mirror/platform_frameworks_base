@@ -265,6 +265,9 @@ public:
     std::optional<Metrics> getMetrics(std::string_view sysfsName) const final {
         return incfs::getMetrics(sysfsName);
     }
+    std::optional<LastReadError> getLastReadError(const Control& control) const final {
+        return incfs::getLastReadError(control);
+    }
 };
 
 static JNIEnv* getOrAttachJniEnv(JavaVM* jvm);
