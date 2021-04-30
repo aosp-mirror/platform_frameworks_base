@@ -315,8 +315,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
 
     @Test
     public void testNoViewsFirstOrLastInSectionWhenSecondSectionEmpty() {
-        Assert.assertFalse(mFirst.isFirstInSection());
-        Assert.assertFalse(mFirst.isLastInSection());
+        Assert.assertTrue(mFirst.isFirstInSection());
+        Assert.assertTrue(mFirst.isLastInSection());
     }
 
     @Test
@@ -325,8 +325,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(null, null),
                 createSection(mSecond, mSecond)
         });
-        Assert.assertFalse(mSecond.isFirstInSection());
-        Assert.assertFalse(mSecond.isLastInSection());
+        Assert.assertTrue(mSecond.isFirstInSection());
+        Assert.assertTrue(mSecond.isLastInSection());
     }
 
     @Test
@@ -335,10 +335,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mFirst, mFirst),
                 createSection(mSecond, mSecond)
         });
-        Assert.assertFalse(mFirst.isFirstInSection());
+        Assert.assertTrue(mFirst.isFirstInSection());
         Assert.assertTrue(mFirst.isLastInSection());
         Assert.assertTrue(mSecond.isFirstInSection());
-        Assert.assertFalse(mSecond.isLastInSection());
+        Assert.assertTrue(mSecond.isLastInSection());
     }
 
     private NotificationSection createSection(ExpandableNotificationRow first,
