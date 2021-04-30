@@ -97,7 +97,7 @@ public class KeyguardPatternView extends KeyguardInputView
         mLockPatternView = findViewById(R.id.lockPatternView);
 
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
-        mContainer = findViewById(R.id.container);
+        mContainer = findViewById(R.id.pattern_container);
     }
 
     @Override
