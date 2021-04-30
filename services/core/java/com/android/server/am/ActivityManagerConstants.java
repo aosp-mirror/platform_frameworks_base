@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
 
 import android.app.ActivityThread;
@@ -27,6 +30,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerExemptionManager;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
@@ -139,6 +143,11 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_FG_TO_BG_FGS_GRACE_DURATION = 5 * 1000;
     private static final int DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS = 10 * 1000;
     private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
+    /**
+     * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
+     */
+    private static final int
+            DEFAULT_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR = 1;
 
     // Flag stored in the DeviceConfig API.
     /**
@@ -209,6 +218,13 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final String KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME =
             "deferred_fgs_notification_exclusion_time";
+
+    /**
+     * Default value for mPushMessagingOverQuotaBehavior if not explicitly set in
+     * Settings.Global.
+     */
+    private static final String KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR =
+            "push_messaging_over_quota_behavior";
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -413,6 +429,13 @@ final class ActivityManagerConstants extends ContentObserver {
     // before another FGS notifiction from that app can be deferred.
     volatile long mFgsNotificationDeferralExclusionTime = 2 * 60 * 1000L;
 
+    /**
+     * When server pushing message is over the quote, select one of the temp allow list type as
+     * defined in {@link PowerExemptionManager.TempAllowListType}
+     */
+    volatile @PowerExemptionManager.TempAllowListType int mPushMessagingOverQuotaBehavior =
+            DEFAULT_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR;
+
     /*
      * At boot time, broadcast receiver ACTION_BOOT_COMPLETED, ACTION_LOCKED_BOOT_COMPLETED and
      * ACTION_PRE_BOOT_COMPLETED are temp allowlisted to start FGS for a duration of time in
@@ -604,6 +627,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME:
                                 updateFgsNotificationDeferralExclusionTime();
+                                break;
+                            case KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR:
+                                updatePushMessagingOverQuotaBehavior();
                                 break;
                             case KEY_OOMADJ_UPDATE_POLICY:
                                 updateOomAdjUpdatePolicy();
@@ -909,6 +935,19 @@ final class ActivityManagerConstants extends ContentObserver {
                 /*default value*/ 2 * 60 * 1000L);
     }
 
+    private void updatePushMessagingOverQuotaBehavior() {
+        mPushMessagingOverQuotaBehavior = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR,
+                DEFAULT_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR);
+        if (mPushMessagingOverQuotaBehavior < TEMPORARY_ALLOW_LIST_TYPE_NONE
+                || mPushMessagingOverQuotaBehavior
+                > TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED) {
+            mPushMessagingOverQuotaBehavior =
+                    DEFAULT_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR;
+        }
+    }
+
     private void updateOomAdjUpdatePolicy() {
         OOMADJ_UPDATE_QUICK = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1166,6 +1205,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mFgsStartRestrictionCheckCallerTargetSdk);
         pw.print("  "); pw.print(KEY_FGS_ATOM_SAMPLE_RATE);
         pw.print("="); pw.println(mDefaultFgsAtomSampleRate);
+        pw.print("  "); pw.print(KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR);
+        pw.print("="); pw.println(mPushMessagingOverQuotaBehavior);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
