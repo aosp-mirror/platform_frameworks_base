@@ -63,6 +63,7 @@ FilterClient::~FilterClient() {
     mAvSharedHandle = NULL;
     mAvSharedMemSize = 0;
     mIsMediaFilter = false;
+    mIsPassthroughFilter = false;
     mFilterMQ = NULL;
     mFilterMQEventFlag = NULL;
 }
@@ -84,7 +85,7 @@ int FilterClient::read(int8_t* buffer, int size) {
 SharedHandleInfo FilterClient::getAvSharedHandleInfo() {
     handleAvShareMemory();
     SharedHandleInfo info{
-        .sharedHandle = mIsMediaFilter ? mAvSharedHandle : NULL,
+        .sharedHandle = (mIsMediaFilter && !mIsPassthroughFilter) ? mAvSharedHandle : NULL,
         .size = mAvSharedMemSize,
     };
 
@@ -92,13 +93,24 @@ SharedHandleInfo FilterClient::getAvSharedHandleInfo() {
 }
 
 Result FilterClient::configure(DemuxFilterSettings configure) {
+    Result res;
+    checkIsPassthroughFilter(configure);
+
     if (mTunerFilter != NULL) {
         Status s = mTunerFilter->configure(getAidlFilterSettings(configure));
-        return ClientHelper::getServiceSpecificErrorCode(s);
+        res = ClientHelper::getServiceSpecificErrorCode(s);
+        if (res == Result::SUCCESS) {
+            getAvSharedHandleInfo();
+        }
+        return res;
     }
 
     if (mFilter != NULL) {
-        return mFilter->configure(configure);
+        res = mFilter->configure(configure);
+        if (res == Result::SUCCESS) {
+            getAvSharedHandleInfo();
+        }
+        return res;
     }
 
     return Result::INVALID_STATE;
@@ -983,11 +995,34 @@ void FilterClient::checkIsMediaFilter(DemuxFilterType type) {
     mIsMediaFilter = false;
 }
 
+void FilterClient::checkIsPassthroughFilter(DemuxFilterSettings configure) {
+    if (!mIsMediaFilter) {
+        mIsPassthroughFilter = false;
+        return;
+    }
+
+    if (configure.getDiscriminator() == DemuxFilterSettings::hidl_discriminator::ts) {
+        if (configure.ts().filterSettings.av().isPassthrough) {
+            mIsPassthroughFilter = true;
+            return;
+        }
+    }
+
+    if (configure.getDiscriminator() == DemuxFilterSettings::hidl_discriminator::mmtp) {
+        if (configure.mmtp().filterSettings.av().isPassthrough) {
+            mIsPassthroughFilter = true;
+            return;
+        }
+    }
+
+    mIsPassthroughFilter = false;
+}
+
 void FilterClient::handleAvShareMemory() {
     if (mAvSharedHandle != NULL) {
         return;
     }
-    if (mTunerFilter != NULL && mIsMediaFilter) {
+    if (mTunerFilter != NULL && mIsMediaFilter && !mIsPassthroughFilter) {
         TunerFilterSharedHandleInfo aidlHandleInfo;
         Status s = mTunerFilter->getAvSharedHandleInfo(&aidlHandleInfo);
         if (ClientHelper::getServiceSpecificErrorCode(s) == Result::SUCCESS) {
@@ -997,7 +1032,7 @@ void FilterClient::handleAvShareMemory() {
         return;
     }
 
-    if (mFilter_1_1 != NULL && mIsMediaFilter) {
+    if (mFilter_1_1 != NULL && mIsMediaFilter && !mIsPassthroughFilter) {
         mFilter_1_1->getAvSharedHandle([&](Result r, hidl_handle avMemory, uint64_t avMemSize) {
             if (r == Result::SUCCESS) {
                 mAvSharedHandle = native_handle_clone(avMemory.getNativeHandle());
