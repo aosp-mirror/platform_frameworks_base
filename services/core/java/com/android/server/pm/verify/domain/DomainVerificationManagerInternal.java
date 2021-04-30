@@ -234,8 +234,8 @@ public interface DomainVerificationManagerInternal {
      * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
      * lock. This should never be called from within the domain verification classes themselves.
      * <p>
-     * This will NOT call {@link #writeSettings(TypedXmlSerializer)}. That must be handled by the
-     * caller.
+     * This will NOT call {@link #writeSettings(TypedXmlSerializer, boolean, int)}. That must be
+     * handled by the caller.
      */
     void addPackage(@NonNull PackageSetting newPkgSetting);
 
@@ -249,20 +249,27 @@ public interface DomainVerificationManagerInternal {
      * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
      * lock. This should never be called from within the domain verification classes themselves.
      * <p>
-     * This will NOT call {@link #writeSettings(TypedXmlSerializer)}. That must be handled by the
-     * caller.
+     * This will NOT call {@link #writeSettings(TypedXmlSerializer, boolean, int)}. That must be
+     * handled by the caller.
      */
     void migrateState(@NonNull PackageSetting oldPkgSetting, @NonNull PackageSetting newPkgSetting);
 
     /**
      * Serializes the entire internal state. This is equivalent to a full backup of the existing
      * verification state. This write includes legacy state, as a sibling tag the modern state.
+     *
+     * @param includeSignatures Whether to include the package signatures in the output, mainly
+     *                          used for backing up the user settings and ensuring they're
+     *                          re-attached to the same package.
+     * @param userId The user to write out. Supports {@link UserHandle#USER_ALL} if all users
+     *               should be written.
      */
-    void writeSettings(@NonNull TypedXmlSerializer serializer) throws IOException;
+    void writeSettings(@NonNull TypedXmlSerializer serializer, boolean includeSignatures,
+            @UserIdInt int userId) throws IOException;
 
     /**
      * Read back a list of {@link DomainVerificationPkgState}s previously written by {@link
-     * #writeSettings(TypedXmlSerializer)}. Assumes that the
+     * #writeSettings(TypedXmlSerializer, boolean, int)}. Assumes that the
      * {@link DomainVerificationPersistence#TAG_DOMAIN_VERIFICATIONS} tag has already been entered.
      * <p>
      * This is expected to only be used to re-attach states for packages already known to be on the
@@ -298,7 +305,7 @@ public interface DomainVerificationManagerInternal {
 
     /**
      * Restore a list of {@link DomainVerificationPkgState}s previously written by {@link
-     * #writeSettings(TypedXmlSerializer)}. Assumes that the
+     * #writeSettings(TypedXmlSerializer, boolean, int)}. Assumes that the
      * {@link DomainVerificationPersistence#TAG_DOMAIN_VERIFICATIONS}
      * tag has already been entered.
      * <p>
@@ -403,7 +410,7 @@ public interface DomainVerificationManagerInternal {
 
         /**
          * Notify that a settings change has been made and that eventually
-         * {@link #writeSettings(TypedXmlSerializer)} should be invoked by the parent.
+         * {@link #writeSettings(TypedXmlSerializer, boolean, int)} should be invoked by the parent.
          */
         void scheduleWriteSettings();
 
@@ -447,6 +454,15 @@ public interface DomainVerificationManagerInternal {
                 throws ExceptionType;
 
         /**
+         * Variant which throws 2 exceptions.
+         * @see #withPackageSettings(Consumer)
+         */
+        <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
+                withPackageSettingsThrowing2(
+                        @NonNull Throwing2Consumer<Function<String, PackageSetting>, ExceptionOne,
+                                ExceptionTwo> block) throws ExceptionOne, ExceptionTwo;
+
+        /**
          * Variant which returns a value to the caller and throws.
          * @see #withPackageSettings(Consumer)
          */
@@ -459,6 +475,11 @@ public interface DomainVerificationManagerInternal {
 
         interface ThrowingConsumer<Input, ExceptionType extends Exception> {
             void accept(Input input) throws ExceptionType;
+        }
+
+        interface Throwing2Consumer<Input, ExceptionOne extends Exception,
+                ExceptionTwo extends Exception> {
+            void accept(Input input) throws ExceptionOne, ExceptionTwo;
         }
 
         interface ThrowingFunction<Input, Output, ExceptionType extends Exception> {
