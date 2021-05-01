@@ -34,16 +34,23 @@ import android.os.ShellCommand;
 import android.text.FontConfig;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.Xml;
 
 import com.android.internal.util.DumpUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -92,6 +99,9 @@ public class FontManagerShellCommand extends ShellCommand {
         w.println();
         w.println("update [font file path] [signature file path]");
         w.println("    Update installed font files with new font file.");
+        w.println();
+        w.println("update-family [family definition XML path]");
+        w.println("    Update font families with the new definitions.");
         w.println();
         w.println("clear");
         w.println("    Remove all installed font files and reset to the initial state.");
@@ -371,6 +381,73 @@ public class FontManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int updateFamily(ShellCommand shell) throws SystemFontException {
+        String xmlPath = shell.getNextArg();
+        if (xmlPath == null) {
+            throw new SystemFontException(
+                    FontManager.RESULT_ERROR_INVALID_SHELL_ARGUMENT,
+                    "XML file path argument is required.");
+        }
+
+        List<FontUpdateRequest> requests;
+        try (ParcelFileDescriptor xmlFd = shell.openFileForSystem(xmlPath, "r")) {
+            requests = parseFontFamilyUpdateXml(new FileInputStream(xmlFd.getFileDescriptor()));
+        } catch (IOException e) {
+            throw new SystemFontException(
+                    FontManager.RESULT_ERROR_FAILED_TO_OPEN_XML_FILE,
+                    "Failed to open XML file.", e);
+        }
+        mService.update(-1, requests);
+        shell.getOutPrintWriter().println("Success");
+        return 0;
+    }
+
+    /**
+     * Parses XML representing {@link android.graphics.fonts.FontFamilyUpdateRequest}.
+     *
+     * <p>The format is like:
+     * <pre>{@code
+     *   <fontFamilyUpdateRequest>
+     *       <family name="family-name">
+     *           <font name="postScriptName"/>
+     *       </family>
+     *   </fontFamilyUpdateRequest>
+     * }</pre>
+     */
+    private static List<FontUpdateRequest> parseFontFamilyUpdateXml(InputStream inputStream)
+            throws SystemFontException {
+        try {
+            TypedXmlPullParser parser = Xml.resolvePullParser(inputStream);
+            List<FontUpdateRequest> requests = new ArrayList<>();
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                if (type != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                final int depth = parser.getDepth();
+                final String tag = parser.getName();
+                if (depth == 1) {
+                    if (!"fontFamilyUpdateRequest".equals(tag)) {
+                        throw new SystemFontException(FontManager.RESULT_ERROR_INVALID_XML,
+                                "Expected <fontFamilyUpdateRequest> but got: " + tag);
+                    }
+                } else if (depth == 2) {
+                    // TODO: Support including FontFileUpdateRequest
+                    if ("family".equals(tag)) {
+                        requests.add(new FontUpdateRequest(
+                                FontUpdateRequest.Family.readFromXml(parser)));
+                    } else {
+                        throw new SystemFontException(FontManager.RESULT_ERROR_INVALID_XML,
+                                "Expected <family> but got: " + tag);
+                    }
+                }
+            }
+            return requests;
+        } catch (IOException | XmlPullParserException e) {
+            throw new SystemFontException(0, "Failed to parse xml", e);
+        }
+    }
+
     private int clear(ShellCommand shell) throws SystemFontException {
         mService.clearUpdates();
         shell.getOutPrintWriter().println("Success");
@@ -409,6 +486,8 @@ public class FontManagerShellCommand extends ShellCommand {
                     return dump(shell);
                 case "update":
                     return update(shell);
+                case "update-family":
+                    return updateFamily(shell);
                 case "clear":
                     return clear(shell);
                 case "restart":
