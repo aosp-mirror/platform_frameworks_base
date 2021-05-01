@@ -4046,9 +4046,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void reportActivityView(IInputMethodClient parentClient, int childDisplayId,
-            float[] matrixValues, IVoidResultCallback resultCallback) {
-        CallbackUtils.onResult(resultCallback, () -> {
+    public void reportActivityViewAsync(IInputMethodClient parentClient, int childDisplayId,
+            float[] matrixValues) {
+        try {
             final DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(childDisplayId);
             if (displayInfo == null) {
                 throw new IllegalArgumentException(
@@ -4127,7 +4127,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     displayId = info.mParentClient.selfReportedDisplayId;
                 }
             }
-        });
+        } catch (Throwable t) {
+            if (parentClient != null) {
+                try {
+                    parentClient.throwExceptionFromSystem(t.toString());
+                } catch (RemoteException e) {
+                }
+            }
+        }
     }
 
     @Override
