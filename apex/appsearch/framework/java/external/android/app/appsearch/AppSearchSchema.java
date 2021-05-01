@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.appsearch.exceptions.IllegalSchemaException;
 import android.app.appsearch.util.BundleUtil;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.util.ArraySet;
 
@@ -747,6 +748,31 @@ public final class AppSearchSchema {
             }
 
             /**
+             * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
+             * @hide
+             */
+            @Deprecated
+            @UnsupportedAppUsage
+            public Builder(@NonNull String propertyName) {
+                mBundle.putString(NAME_FIELD, propertyName);
+                mBundle.putInt(DATA_TYPE_FIELD, DATA_TYPE_DOCUMENT);
+                mBundle.putInt(CARDINALITY_FIELD, CARDINALITY_OPTIONAL);
+                mBundle.putBoolean(INDEX_NESTED_PROPERTIES_FIELD, false);
+            }
+
+            /**
+             * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
+             * @hide
+             */
+            @Deprecated
+            @UnsupportedAppUsage
+            @NonNull
+            public Builder setSchemaType(@NonNull String schemaType) {
+                mBundle.putString(SCHEMA_TYPE_FIELD, schemaType);
+                return this;
+            }
+
+            /**
              * The cardinality of the property (whether it is optional, required or repeated).
              *
              * <p>If this method is not called, the default cardinality is {@link
@@ -775,6 +801,18 @@ public final class AppSearchSchema {
                 Preconditions.checkState(!mBuilt, "Builder has already been used");
                 mBundle.putBoolean(INDEX_NESTED_PROPERTIES_FIELD, indexNestedProperties);
                 return this;
+            }
+
+            /**
+             * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
+             * @hide
+             */
+            @Deprecated
+            @UnsupportedAppUsage
+            @NonNull
+            public DocumentPropertyConfig.Builder setIndexNestedProperties(
+                    boolean indexNestedProperties) {
+                return setShouldIndexNestedProperties(indexNestedProperties);
             }
 
             /**
