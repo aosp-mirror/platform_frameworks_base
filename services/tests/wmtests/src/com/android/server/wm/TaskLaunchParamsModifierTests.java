@@ -504,7 +504,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     public void testRecalculateFreeformInitialBoundsWithOverrideDisplayArea_unresizableApp() {
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
 
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
@@ -730,7 +730,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     public void testForceMaximizesUnresizeableApp() {
-        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
@@ -753,7 +753,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     public void testLaunchesPortraitSizeCompatOnFreeformLandscapeDisplayWithFreeformSizeCompat() {
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
@@ -781,7 +781,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     public void testLaunchesLandscapeSizeCompatOnFreeformLandscapeDisplayWithFreeformSizeCompat() {
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
         final ActivityOptions options = ActivityOptions.makeBasic();
@@ -797,7 +797,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     public void testLaunchesPortraitUnresizableOnFreeformDisplayWithFreeformSizeCompat() {
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
         final ActivityOptions options = ActivityOptions.makeBasic();

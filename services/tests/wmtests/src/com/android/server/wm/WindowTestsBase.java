@@ -804,6 +804,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private WindowProcessController mWpc;
         private Bundle mIntentExtras;
         private boolean mOnTop = false;
+        private ActivityInfo.WindowLayout mWindowLayout;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -924,6 +925,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        ActivityBuilder setWindowLayout(ActivityInfo.WindowLayout windowLayout) {
+            mWindowLayout = windowLayout;
+            return this;
+        }
+
         ActivityRecord build() {
             SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);
             try {
@@ -939,16 +945,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 final int id = sCurrentActivityId++;
                 mComponent = ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
                         DEFAULT_COMPONENT_CLASS_NAME + id);
-            }
-
-            if (mCreateTask) {
-                mTask = new TaskBuilder(mService.mTaskSupervisor)
-                        .setComponent(mComponent)
-                        .setParentTask(mParentTask).build();
-            } else if (mTask == null && mParentTask != null && DisplayContent.alwaysCreateRootTask(
-                    mParentTask.getWindowingMode(), mParentTask.getActivityType())) {
-                // The parent task can be the task root.
-                mTask = mParentTask;
             }
 
             Intent intent = new Intent();
@@ -976,6 +972,20 @@ class WindowTestsBase extends SystemServiceTestsBase {
             aInfo.screenOrientation = mScreenOrientation;
             aInfo.configChanges |= mConfigChanges;
             aInfo.taskAffinity = mAffinity;
+            aInfo.windowLayout = mWindowLayout;
+
+            if (mCreateTask) {
+                mTask = new TaskBuilder(mService.mTaskSupervisor)
+                        .setComponent(mComponent)
+                        // Apply the root activity info and intent
+                        .setActivityInfo(aInfo)
+                        .setIntent(intent)
+                        .setParentTask(mParentTask).build();
+            } else if (mTask == null && mParentTask != null && DisplayContent.alwaysCreateRootTask(
+                    mParentTask.getWindowingMode(), mParentTask.getActivityType())) {
+                // The parent task can be the task root.
+                mTask = mParentTask;
+            }
 
             ActivityOptions options = null;
             if (mLaunchTaskBehind) {
