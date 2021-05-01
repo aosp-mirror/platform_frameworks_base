@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -67,9 +68,9 @@ import dagger.Lazy;
 public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
     private static final float DISABLED_ALPHA = 0.38f;
-    private static final String EXTRAS_MEDIA_SOURCE_LOGO = "media_source_logo";
     private static final String EXTRAS_MEDIA_SOURCE_PACKAGE_NAME = "package_name";
-    private static final int MEDIA_RECOMMENDATION_MAX_NUM = 4;
+    private static final int MEDIA_RECOMMENDATION_ITEMS_PER_ROW = 3;
+    private static final int MEDIA_RECOMMENDATION_MAX_NUM = 6;
 
     private static final Intent SETTINGS_INTENT = new Intent(ACTION_MEDIA_CONTROLS_SETTINGS);
 
@@ -456,10 +457,16 @@ public class MediaControlPanel {
     }
 
     /** Bind this recommendation view based on the data given. */
-    public void bindRecommendation(@NonNull SmartspaceTarget target, @NonNull int backgroundColor) {
+    public void bindRecommendation(
+            @NonNull SmartspaceTarget target,
+            @NonNull int primaryColor,
+            @NonNull int backgroundColor) {
         if (mRecommendationViewHolder == null) {
             return;
         }
+
+        mRecommendationViewHolder.getCardIcon().setColorFilter(primaryColor);
+        mRecommendationViewHolder.getCardText().setTextColor(primaryColor);
 
         mRecommendationViewHolder.getRecommendations()
                 .setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
@@ -506,6 +513,8 @@ public class MediaControlPanel {
             // Set up media source app's logo.
             ImageView mediaSourceLogoImageView = mediaLogoItems.get(i);
             mediaSourceLogoImageView.setImageDrawable(icon);
+            // TODO(b/186699032): Tint the app logo using the accent color.
+            mediaSourceLogoImageView.setColorFilter(backgroundColor, PorterDuff.Mode.XOR);
 
             // Set up media item cover.
             ImageView mediaCoverImageView = mediaCoverItems.get(i);
@@ -516,14 +525,17 @@ public class MediaControlPanel {
                     mediaCoverImageView,
                     recommendation,
                     target.getSmartspaceTargetId(),
-                    view -> mMediaDataManagerLazy
-                            .get()
-                            .dismissSmartspaceRecommendation(0L /* delay */));
+                    null);
 
+            if (i < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
+                setVisibleAndAlpha(collapsedSet, mediaCoverItemsResIds.get(i), true);
+                setVisibleAndAlpha(collapsedSet, mediaLogoItemsResIds.get(i), true);
+            } else {
+                setVisibleAndAlpha(collapsedSet, mediaCoverItemsResIds.get(i), false);
+                setVisibleAndAlpha(collapsedSet, mediaLogoItemsResIds.get(i), false);
+            }
             setVisibleAndAlpha(expandedSet, mediaCoverItemsResIds.get(i), true);
             setVisibleAndAlpha(expandedSet, mediaLogoItemsResIds.get(i), true);
-            setVisibleAndAlpha(collapsedSet, mediaCoverItemsResIds.get(i), true);
-            setVisibleAndAlpha(collapsedSet, mediaLogoItemsResIds.get(i), true);
         }
 
         // Set up long press to show guts setting panel.

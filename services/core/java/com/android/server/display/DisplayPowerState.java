@@ -62,6 +62,7 @@ final class DisplayPowerState {
 
     private int mScreenState;
     private float mScreenBrightness;
+    private float mSdrScreenBrightness;
     private boolean mScreenReady;
     private boolean mScreenUpdatePending;
 
@@ -92,6 +93,7 @@ final class DisplayPowerState {
         mScreenState = displayState;
         mScreenBrightness = (displayState != Display.STATE_OFF) ? PowerManager.BRIGHTNESS_MAX
                 : PowerManager.BRIGHTNESS_OFF_FLOAT;
+        mSdrScreenBrightness = mScreenBrightness;
         scheduleScreenUpdate();
 
         mColorFadePrepared = false;
@@ -126,6 +128,19 @@ final class DisplayPowerState {
                 }
             };
 
+    public static final FloatProperty<DisplayPowerState> SCREEN_SDR_BRIGHTNESS_FLOAT =
+            new FloatProperty<DisplayPowerState>("sdrScreenBrightnessFloat") {
+                @Override
+                public void setValue(DisplayPowerState object, float value) {
+                    object.setSdrScreenBrightness(value);
+                }
+
+                @Override
+                public Float get(DisplayPowerState object) {
+                    return object.getSdrScreenBrightness();
+                }
+            };
+
     /**
      * Sets whether the screen is on, off, or dozing.
      */
@@ -149,12 +164,38 @@ final class DisplayPowerState {
     }
 
     /**
+     * Sets the display's SDR brightness.
+     *
+     * @param brightness The brightness, ranges from 0.0f (minimum / off) to 1.0f (brightest).
+     */
+    public void setSdrScreenBrightness(float brightness) {
+        if (!BrightnessSynchronizer.floatEquals(mSdrScreenBrightness, brightness)) {
+            if (DEBUG) {
+                Slog.d(TAG, "setSdrScreenBrightness: brightness=" + brightness);
+            }
+
+            mSdrScreenBrightness = brightness;
+            if (mScreenState != Display.STATE_OFF) {
+                mScreenReady = false;
+                scheduleScreenUpdate();
+            }
+        }
+    }
+
+    /**
+     * Gets the screen SDR brightness.
+     */
+    public float getSdrScreenBrightness() {
+        return mSdrScreenBrightness;
+    }
+
+    /**
      * Sets the display brightness.
      *
      * @param brightness The brightness, ranges from 0.0f (minimum / off) to 1.0f (brightest).
      */
     public void setScreenBrightness(float brightness) {
-        if (mScreenBrightness != brightness) {
+        if (!BrightnessSynchronizer.floatEquals(mScreenBrightness, brightness)) {
             if (DEBUG) {
                 Slog.d(TAG, "setScreenBrightness: brightness=" + brightness);
             }
@@ -286,6 +327,7 @@ final class DisplayPowerState {
         pw.println("  mStopped=" + mStopped);
         pw.println("  mScreenState=" + Display.stateToString(mScreenState));
         pw.println("  mScreenBrightness=" + mScreenBrightness);
+        pw.println("  mSdrScreenBrightness=" + mSdrScreenBrightness);
         pw.println("  mScreenReady=" + mScreenReady);
         pw.println("  mScreenUpdatePending=" + mScreenUpdatePending);
         pw.println("  mColorFadePrepared=" + mColorFadePrepared);
@@ -332,7 +374,10 @@ final class DisplayPowerState {
 
             float brightnessState = mScreenState != Display.STATE_OFF
                     && mColorFadeLevel > 0f ? mScreenBrightness : PowerManager.BRIGHTNESS_OFF_FLOAT;
-            if (mPhotonicModulator.setState(mScreenState, brightnessState)) {
+            float sdrBrightnessState = mScreenState != Display.STATE_OFF
+                    && mColorFadeLevel > 0f
+                            ? mSdrScreenBrightness : PowerManager.BRIGHTNESS_OFF_FLOAT;
+            if (mPhotonicModulator.setState(mScreenState, brightnessState, sdrBrightnessState)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Screen ready");
                 }
@@ -373,8 +418,10 @@ final class DisplayPowerState {
 
         private int mPendingState = INITIAL_SCREEN_STATE;
         private float mPendingBacklight = INITIAL_BACKLIGHT_FLOAT;
+        private float mPendingSdrBacklight = INITIAL_BACKLIGHT_FLOAT;
         private int mActualState = INITIAL_SCREEN_STATE;
         private float mActualBacklight = INITIAL_BACKLIGHT_FLOAT;
+        private float mActualSdrBacklight = INITIAL_BACKLIGHT_FLOAT;
         private boolean mStateChangeInProgress;
         private boolean mBacklightChangeInProgress;
 
@@ -382,11 +429,13 @@ final class DisplayPowerState {
             super("PhotonicModulator");
         }
 
-        public boolean setState(int state, float brightnessState) {
+        public boolean setState(int state, float brightnessState, float sdrBrightnessState) {
             synchronized (mLock) {
                 boolean stateChanged = state != mPendingState;
-                boolean backlightChanged = !BrightnessSynchronizer.floatEquals(
-                        brightnessState, mPendingBacklight);
+                boolean backlightChanged =
+                        !BrightnessSynchronizer.floatEquals(brightnessState, mPendingBacklight)
+                        || !BrightnessSynchronizer.floatEquals(
+                                sdrBrightnessState, mPendingSdrBacklight);
                 if (stateChanged || backlightChanged) {
                     if (DEBUG) {
                         Slog.d(TAG, "Requesting new screen state: state="
@@ -395,6 +444,7 @@ final class DisplayPowerState {
 
                     mPendingState = state;
                     mPendingBacklight = brightnessState;
+                    mPendingSdrBacklight = sdrBrightnessState;
                     boolean changeInProgress = mStateChangeInProgress || mBacklightChangeInProgress;
                     mStateChangeInProgress = stateChanged || mStateChangeInProgress;
                     mBacklightChangeInProgress = backlightChanged || mBacklightChangeInProgress;
@@ -413,8 +463,10 @@ final class DisplayPowerState {
                 pw.println("Photonic Modulator State:");
                 pw.println("  mPendingState=" + Display.stateToString(mPendingState));
                 pw.println("  mPendingBacklight=" + mPendingBacklight);
+                pw.println("  mPendingSdrBacklight=" + mPendingSdrBacklight);
                 pw.println("  mActualState=" + Display.stateToString(mActualState));
                 pw.println("  mActualBacklight=" + mActualBacklight);
+                pw.println("  mActualSdrBacklight=" + mActualSdrBacklight);
                 pw.println("  mStateChangeInProgress=" + mStateChangeInProgress);
                 pw.println("  mBacklightChangeInProgress=" + mBacklightChangeInProgress);
             }
@@ -427,13 +479,17 @@ final class DisplayPowerState {
                 final int state;
                 final boolean stateChanged;
                 final float brightnessState;
+                final float sdrBrightnessState;
                 final boolean backlightChanged;
                 synchronized (mLock) {
                     state = mPendingState;
                     stateChanged = (state != mActualState);
                     brightnessState = mPendingBacklight;
-                    backlightChanged = !BrightnessSynchronizer.floatEquals(
-                            brightnessState, mActualBacklight);
+                    sdrBrightnessState = mPendingSdrBacklight;
+                    backlightChanged =
+                            !BrightnessSynchronizer.floatEquals(brightnessState, mActualBacklight)
+                            || !BrightnessSynchronizer.floatEquals(
+                                    sdrBrightnessState, mActualSdrBacklight);
                     if (!stateChanged) {
                         // State changed applied, notify outer class.
                         postScreenUpdateThreadSafe();
@@ -454,14 +510,17 @@ final class DisplayPowerState {
                     }
                     mActualState = state;
                     mActualBacklight = brightnessState;
+                    mActualSdrBacklight = sdrBrightnessState;
                 }
 
                 // Apply pending change.
                 if (DEBUG) {
                     Slog.d(TAG, "Updating screen state: id=" + mDisplayId +  ", state="
-                            + Display.stateToString(state) + ", backlight=" + brightnessState);
+                            + Display.stateToString(state) + ", backlight=" + brightnessState
+                            + ", sdrBacklight=" + sdrBrightnessState);
                 }
-                mBlanker.requestDisplayState(mDisplayId, state, brightnessState);
+                mBlanker.requestDisplayState(mDisplayId, state, brightnessState,
+                        sdrBrightnessState);
             }
         }
     }

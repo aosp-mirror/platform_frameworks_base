@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.time.SystemClock
 import java.io.FileDescriptor
 import java.io.IOException
 import java.io.PrintWriter
@@ -108,7 +109,8 @@ class MediaDataManager(
     private val activityStarter: ActivityStarter,
     private val smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
     private var useMediaResumption: Boolean,
-    private val useQsMediaPlayer: Boolean
+    private val useQsMediaPlayer: Boolean,
+    private val systemClock: SystemClock
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     companion object {
@@ -164,12 +166,13 @@ class MediaDataManager(
         mediaDataCombineLatest: MediaDataCombineLatest,
         mediaDataFilter: MediaDataFilter,
         activityStarter: ActivityStarter,
-        smartspaceMediaDataProvider: SmartspaceMediaDataProvider
+        smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
+        clock: SystemClock
     ) : this(context, backgroundExecutor, foregroundExecutor, mediaControllerFactory,
             broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
             mediaSessionBasedFilter, mediaDeviceManager, mediaDataCombineLatest, mediaDataFilter,
             activityStarter, smartspaceMediaDataProvider, Utils.useMediaResumption(context),
-            Utils.useQsMediaPlayer(context))
+            Utils.useQsMediaPlayer(context), clock)
 
     private val appChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -474,7 +477,7 @@ class MediaDataManager(
         }
 
         val mediaAction = getResumeMediaAction(resumeAction)
-        val lastActive = System.currentTimeMillis()
+        val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
             onMediaDataLoaded(packageName, null, MediaData(userId, true, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
@@ -597,7 +600,7 @@ class MediaDataManager(
         val isLocalSession = mediaController.playbackInfo?.playbackType ==
             MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL
         val isPlaying = mediaController.playbackState?.let { isPlayingState(it.state) } ?: null
-        val lastActive = System.currentTimeMillis()
+        val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true

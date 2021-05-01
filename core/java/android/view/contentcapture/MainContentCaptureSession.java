@@ -583,9 +583,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         // NOTE: we must save a reference to the current mEvents and then set it to to null,
         // otherwise clearing it would clear it in the receiving side if the service is also local.
         final List<ContentCaptureEvent> events = mEvents == null
-                ? Collections.emptyList()
-                : mEvents;
-        mEvents = null;
+                ? Collections.EMPTY_LIST
+                : new ArrayList<>(mEvents);
+        mEvents.clear();
         mLastComposingSpan.clear();
         return new ParceledListSlice<>(events);
     }

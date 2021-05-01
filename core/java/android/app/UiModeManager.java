@@ -713,7 +713,7 @@ public class UiModeManager {
      */
     @SystemApi
     @TestApi
-    public static final int PROJECTION_TYPE_ALL = 0xffff;
+    public static final int PROJECTION_TYPE_ALL = -1;  // All bits on
 
     /** @hide */
     @IntDef(prefix = {"PROJECTION_TYPE_"}, value = {

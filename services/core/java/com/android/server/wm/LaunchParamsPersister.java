@@ -232,6 +232,9 @@ class LaunchParamsPersister {
 
     void saveTask(Task task, DisplayContent display) {
         final ComponentName name = task.realActivity;
+        if (name == null) {
+            return;
+        }
         final int userId = task.mUserId;
         PersistableLaunchParams params;
         ArrayMap<ComponentName, PersistableLaunchParams> map = mLaunchParamsMap.get(userId);
@@ -381,11 +384,13 @@ class LaunchParamsPersister {
 
     private class PackageListObserver implements PackageManagerInternal.PackageListObserver {
         @Override
-        public void onPackageAdded(String packageName, int uid) { }
+        public void onPackageAdded(String packageName, int uid) {}
 
         @Override
         public void onPackageRemoved(String packageName, int uid) {
-            removeRecordForPackage(packageName);
+            synchronized (mSupervisor.mService.getGlobalLock()) {
+                removeRecordForPackage(packageName);
+            }
         }
     }
 

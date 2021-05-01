@@ -26,17 +26,22 @@ import android.hardware.biometrics.face.Cell;
 import android.hardware.biometrics.face.EnrollmentFrame;
 import android.hardware.biometrics.face.EnrollmentStage;
 import android.hardware.biometrics.face.Error;
+import android.hardware.biometrics.face.Feature;
 import android.hardware.face.FaceAuthenticationFrame;
 import android.hardware.face.FaceDataFrame;
 import android.hardware.face.FaceEnrollCell;
 import android.hardware.face.FaceEnrollFrame;
 import android.hardware.face.FaceEnrollStages;
 import android.hardware.face.FaceEnrollStages.FaceEnrollStage;
+import android.util.Slog;
 
 /**
  * Utilities for converting from hardware to framework-defined AIDL models.
  */
 final class AidlConversionUtils {
+
+    private static final String TAG = "AidlConversionUtils";
+
     // Prevent instantiation.
     private AidlConversionUtils() {
     }
@@ -173,5 +178,29 @@ final class AidlConversionUtils {
     @Nullable
     public static FaceEnrollCell toFrameworkCell(@Nullable Cell cell) {
         return cell == null ? null : new FaceEnrollCell(cell.x, cell.y, cell.z);
+    }
+
+    public static byte convertFrameworkToAidlFeature(int feature) throws IllegalArgumentException {
+        switch (feature) {
+            case BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION:
+                return Feature.REQUIRE_ATTENTION;
+            case BiometricFaceConstants.FEATURE_REQUIRE_REQUIRE_DIVERSITY:
+                return Feature.REQUIRE_DIVERSE_POSES;
+            default:
+                Slog.e(TAG, "Unsupported feature : " + feature);
+                throw new IllegalArgumentException();
+        }
+    }
+
+    public static int convertAidlToFrameworkFeature(byte feature) throws IllegalArgumentException {
+        switch (feature) {
+            case Feature.REQUIRE_ATTENTION:
+                return BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION;
+            case Feature.REQUIRE_DIVERSE_POSES:
+                return BiometricFaceConstants.FEATURE_REQUIRE_REQUIRE_DIVERSITY;
+            default:
+                Slog.e(TAG, "Unsupported feature : " + feature);
+                throw new IllegalArgumentException();
+        }
     }
 }

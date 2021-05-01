@@ -241,7 +241,6 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -800,7 +799,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             PrivacyDotViewController dotViewController,
-            TunerService tunerService,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         super(context);
@@ -885,15 +883,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAnimationScheduler = animationScheduler;
         mDotViewController = dotViewController;
         mFeatureFlags = featureFlags;
-
-        tunerService.addTunable(
-                (key, newValue) -> {
-                    if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)) {
-                        updateLightRevealScrimVisibility();
-                    }
-                },
-                Settings.Secure.DOZE_ALWAYS_ON
-        );
 
         mExpansionChangedListeners = new ArrayList<>();
 
@@ -1038,6 +1027,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationShadeWindowViewController,
                 mNotificationPanelViewController,
                 mAmbientIndicationContainer);
+        mDozeParameters.addCallback(this::updateLightRevealScrimVisibility);
 
         mConfigurationController.addCallback(this);
 
@@ -1422,7 +1412,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),
-                mNotificationShadeDepthControllerLazy.get()
+                mNotificationShadeDepthControllerLazy.get(),
+                mHeadsUpManager
         );
 
         // TODO: inject this.
@@ -2795,7 +2786,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 intent, mLockscreenUserManager.getCurrentUserId());
 
         ActivityLaunchAnimator.Controller animController = null;
-        if (animationController != null && areLaunchAnimationsEnabled()) {
+        if (animationController != null) {
             animController = dismissShade ? new StatusBarLaunchAnimatorController(
                     animationController, this, true /* isLaunchForActivity */)
                     : animationController;
@@ -2811,46 +2802,48 @@ public class StatusBar extends SystemUI implements DemoMode,
             intent.setFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.addFlags(flags);
-            int[] result = new int[] { ActivityManager.START_CANCELED };
+            int[] result = new int[]{ActivityManager.START_CANCELED};
 
-            mActivityLaunchAnimator.startIntentWithAnimation(animCallbackForLambda, (adapter) -> {
-                ActivityOptions options = new ActivityOptions(
-                        getActivityOptions(mDisplayId, adapter));
-                options.setDisallowEnterPictureInPictureWhileLaunching(
-                        disallowEnterPictureInPictureWhileLaunching);
-                if (CameraIntents.isInsecureCameraIntent(intent)) {
-                    // Normally an activity will set it's requested rotation
-                    // animation on its window. However when launching an activity
-                    // causes the orientation to change this is too late. In these cases
-                    // the default animation is used. This doesn't look good for
-                    // the camera (as it rotates the camera contents out of sync
-                    // with physical reality). So, we ask the WindowManager to
-                    // force the crossfade animation if an orientation change
-                    // happens to occur during the launch.
-                    options.setRotationAnimationHint(
-                            WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
-                }
-                if (intent.getAction() == Settings.Panel.ACTION_VOLUME) {
-                    // Settings Panel is implemented as activity(not a dialog), so
-                    // underlying app is paused and may enter picture-in-picture mode
-                    // as a result.
-                    // So we need to disable picture-in-picture mode here
-                    // if it is volume panel.
-                    options.setDisallowEnterPictureInPictureWhileLaunching(true);
-                }
+            mActivityLaunchAnimator.startIntentWithAnimation(animCallbackForLambda,
+                    areLaunchAnimationsEnabled(), (adapter) -> {
+                        ActivityOptions options = new ActivityOptions(
+                                getActivityOptions(mDisplayId, adapter));
+                        options.setDisallowEnterPictureInPictureWhileLaunching(
+                                disallowEnterPictureInPictureWhileLaunching);
+                        if (CameraIntents.isInsecureCameraIntent(intent)) {
+                            // Normally an activity will set it's requested rotation
+                            // animation on its window. However when launching an activity
+                            // causes the orientation to change this is too late. In these cases
+                            // the default animation is used. This doesn't look good for
+                            // the camera (as it rotates the camera contents out of sync
+                            // with physical reality). So, we ask the WindowManager to
+                            // force the crossfade animation if an orientation change
+                            // happens to occur during the launch.
+                            options.setRotationAnimationHint(
+                                    WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
+                        }
+                        if (intent.getAction() == Settings.Panel.ACTION_VOLUME) {
+                            // Settings Panel is implemented as activity(not a dialog), so
+                            // underlying app is paused and may enter picture-in-picture mode
+                            // as a result.
+                            // So we need to disable picture-in-picture mode here
+                            // if it is volume panel.
+                            options.setDisallowEnterPictureInPictureWhileLaunching(true);
+                        }
 
-                try {
-                    result[0] = ActivityTaskManager.getService().startActivityAsUser(
-                            null, mContext.getBasePackageName(), mContext.getAttributionTag(),
-                            intent,
-                            intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                            null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,
-                            options.toBundle(), UserHandle.CURRENT.getIdentifier());
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Unable to start activity", e);
-                }
-                return result[0];
-            });
+                        try {
+                            result[0] = ActivityTaskManager.getService().startActivityAsUser(
+                                    null, mContext.getBasePackageName(),
+                                    mContext.getAttributionTag(),
+                                    intent,
+                                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,
+                                    options.toBundle(), UserHandle.CURRENT.getIdentifier());
+                        } catch (RemoteException e) {
+                            Log.w(TAG, "Unable to start activity", e);
+                        }
+                        return result[0];
+                    });
 
             if (callback != null) {
                 callback.onActivityStarted(result[0]);
@@ -4569,19 +4562,17 @@ public class StatusBar extends SystemUI implements DemoMode,
                 && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
 
-        boolean animate = animationController != null && areLaunchAnimationsEnabled();
-        boolean collapse = !animate;
+        boolean collapse = animationController == null;
         executeActionDismissingKeyguard(() -> {
             try {
                 // We wrap animationCallback with a StatusBarLaunchAnimatorController so that the
                 // shade is collapsed after the animation (or when it is cancelled, aborted, etc).
                 ActivityLaunchAnimator.Controller controller =
-                        animate ? new StatusBarLaunchAnimatorController(animationController, this,
-                                intent.isActivity())
-                                : null;
+                        animationController != null ? new StatusBarLaunchAnimatorController(
+                                animationController, this, intent.isActivity()) : null;
 
                 mActivityLaunchAnimator.startPendingIntentWithAnimation(
-                        controller,
+                        controller, areLaunchAnimationsEnabled(),
                         (animationAdapter) -> intent.sendAndReturnResult(null, 0, null, null, null,
                                 null, getActivityOptions(mDisplayId, animationAdapter)));
             } catch (PendingIntent.CanceledException e) {

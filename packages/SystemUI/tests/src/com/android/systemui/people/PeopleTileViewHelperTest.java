@@ -76,6 +76,14 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
     private static final String NAME = "username";
     private static final UserHandle USER = new UserHandle(0);
     private static final String SENDER = "sender";
+
+    private static final CharSequence EMOJI_BR_FLAG = "\ud83c\udde7\ud83c\uddf7";
+    private static final CharSequence EMOJI_BEAR = "\ud83d\udc3b";
+    private static final CharSequence EMOJI_THUMBS_UP_BROWN_SKIN = "\uD83D\uDC4D\uD83C\uDFFD";
+    private static final CharSequence EMOJI_JOY = "\uD83D\uDE02";
+    private static final CharSequence EMOJI_FAMILY =
+            "\ud83d\udc69\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc67";
+
     private static final PeopleSpaceTile PERSON_TILE_WITHOUT_NOTIFICATION =
             new PeopleSpaceTile
                     .Builder(SHORTCUT_ID_1, NAME, ICON, new Intent())
@@ -701,92 +709,149 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
 
 
     @Test
-    public void testGetBackgroundTextFromMessageNoPunctuation() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage("test");
+    public void testGetDoublePunctuationNoPunctuation() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation("test");
 
         assertThat(backgroundText).isNull();
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageSingleExclamation() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage("test!");
+    public void testGetDoublePunctuationSingleExclamation() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation("test!");
 
         assertThat(backgroundText).isNull();
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageSingleQuestion() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage("?test");
+    public void testGetDoublePunctuationSingleQuestion() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation("?test");
 
         assertThat(backgroundText).isNull();
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageSeparatedMarks() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage("test! right!");
+    public void testGetDoublePunctuationSeparatedMarks() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation("test! right!");
 
         assertThat(backgroundText).isNull();
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageDoubleExclamation() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage("!!test");
+    public void testGetDoublePunctuationDoubleExclamation() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation("!!test");
 
         assertThat(backgroundText).isEqualTo("!");
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageDoubleQuestion() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage("test??");
+    public void testGetDoublePunctuationDoubleQuestion() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation("test??");
 
         assertThat(backgroundText).isEqualTo("?");
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageMixed() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage("test?!");
+    public void testGetDoublePunctuationMixed() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation("test?!");
 
         assertThat(backgroundText).isEqualTo("!?");
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageMixedInTheMiddle() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage(
+    public void testGetDoublePunctuationMixedInTheMiddle() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation(
                 "test!? in the middle");
 
         assertThat(backgroundText).isEqualTo("!?");
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageMixedDifferentOrder() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage(
+    public void testGetDoublePunctuationMixedDifferentOrder() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation(
                 "test!? in the middle");
 
         assertThat(backgroundText).isEqualTo("!?");
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageMultiple() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage(
+    public void testGetDoublePunctuationMultiple() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation(
                 "test!?!!? in the middle");
 
         assertThat(backgroundText).isEqualTo("!?");
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageQuestionFirst() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage(
+    public void testGetDoublePunctuationQuestionFirst() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation(
                 "test?? in the middle!!");
 
         assertThat(backgroundText).isEqualTo("?");
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageExclamationFirst() {
-        String backgroundText = mPeopleTileViewHelper.getBackgroundTextFromMessage(
+    public void testGetDoublePunctuationExclamationFirst() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoublePunctuation(
                 "test!! in the middle??");
 
         assertThat(backgroundText).isEqualTo("!");
+    }
+
+    @Test
+    public void testGetDoubleEmojisNoEmojis() {
+        CharSequence backgroundText = mPeopleTileViewHelper
+                .getDoubleEmoji("This string has no emojis.");
+        assertThat(backgroundText).isNull();
+    }
+
+    @Test
+    public void testGetDoubleEmojisSingleEmoji() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoubleEmoji(
+                "This string has one emoji " + EMOJI_JOY + " in the middle.");
+        assertThat(backgroundText).isNull();
+    }
+
+    @Test
+    public void testGetDoubleEmojisSingleEmojiThenTwoEmojis() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoubleEmoji(
+                "This string has one emoji " + EMOJI_JOY + " in the middle, then two "
+                        + EMOJI_BEAR + EMOJI_BEAR);
+        assertEquals(backgroundText, EMOJI_BEAR);
+    }
+
+    @Test
+    public void testGetDoubleEmojisTwoEmojisWithModifier() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoubleEmoji(
+                "Yes! " + EMOJI_THUMBS_UP_BROWN_SKIN + EMOJI_THUMBS_UP_BROWN_SKIN + " Sure.");
+        assertEquals(backgroundText, EMOJI_THUMBS_UP_BROWN_SKIN);
+    }
+
+    @Test
+    public void testGetDoubleEmojisTwoFlagEmojis() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoubleEmoji(
+                "Let's travel to " + EMOJI_BR_FLAG + EMOJI_BR_FLAG + " next year.");
+        assertEquals(backgroundText, EMOJI_BR_FLAG);
+    }
+
+    @Test
+    public void testGetDoubleEmojiTwoBears() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoubleEmoji(
+                EMOJI_BEAR.toString() + EMOJI_BEAR.toString() + "bears!");
+        assertEquals(backgroundText, EMOJI_BEAR);
+    }
+
+    @Test
+    public void testGetDoubleEmojiTwoEmojisTwice() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoubleEmoji(
+                "Two sets of two emojis: " + EMOJI_FAMILY + EMOJI_FAMILY + EMOJI_BEAR + EMOJI_BEAR);
+        assertEquals(backgroundText, EMOJI_FAMILY);
+    }
+
+    @Test
+    public void testGetDoubleEmojiTwoEmojisSeparated() {
+        CharSequence backgroundText = mPeopleTileViewHelper.getDoubleEmoji(
+                "Two emojis " + EMOJI_BEAR + " separated " + EMOJI_BEAR + ".");
+        assertThat(backgroundText).isNull();
     }
 
     private int getSizeInDp(int dimenResourceId) {

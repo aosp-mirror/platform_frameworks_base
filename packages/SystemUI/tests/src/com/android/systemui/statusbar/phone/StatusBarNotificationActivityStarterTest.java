@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -73,6 +74,7 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -184,6 +186,14 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mOnUserInteractionCallback.getGroupSummaryToDismiss(mNotificationRow.getEntry()))
                 .thenReturn(null);
 
+        HeadsUpManagerPhone headsUpManager = mock(HeadsUpManagerPhone.class);
+        NotificationLaunchAnimatorControllerProvider notificationAnimationProvider =
+                new NotificationLaunchAnimatorControllerProvider(
+                        mock(NotificationShadeWindowViewController.class), mock(
+                        NotificationListContainer.class),
+                        mock(NotificationShadeDepthController.class),
+                        headsUpManager);
+
         mNotificationActivityStarter =
                 new StatusBarNotificationActivityStarter.Builder(
                         getContext(),
@@ -192,7 +202,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mUiBgExecutor,
                         mEntryManager,
                         mNotifPipeline,
-                        mock(HeadsUpManagerPhone.class),
+                        headsUpManager,
                         mActivityStarter,
                         mClickNotifier,
                         mock(StatusBarStateController.class),
@@ -220,8 +230,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         .setNotificationPanelViewController(
                                 mock(NotificationPanelViewController.class))
                         .setActivityLaunchAnimator(mActivityLaunchAnimator)
-                        .setNotificationAnimatorControllerProvider(
-                                mock(NotificationLaunchAnimatorControllerProvider.class))
+                        .setNotificationAnimatorControllerProvider(notificationAnimationProvider)
                         .build();
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg
@@ -259,7 +268,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mShadeController, atLeastOnce()).collapsePanel();
 
-        verify(mActivityLaunchAnimator).startPendingIntentWithAnimation(eq(null), any());
+        verify(mActivityLaunchAnimator).startPendingIntentWithAnimation(any(),
+                eq(false) /* animate */, any());
 
         verify(mAssistManager).hideAssist();
 

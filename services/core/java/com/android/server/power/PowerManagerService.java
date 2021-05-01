@@ -102,6 +102,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
@@ -1830,6 +1831,7 @@ public final class PowerManagerService extends SystemService
             setWakefulnessLocked(groupId, WAKEFULNESS_AWAKE, eventTime, uid, reason, opUid,
                     opPackageName, details);
             mDisplayGroupPowerStateMapper.setLastPowerOnTimeLocked(groupId, eventTime);
+            mDisplayGroupPowerStateMapper.setPoweringOnLocked(groupId, true);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
@@ -2926,16 +2928,13 @@ public final class PowerManagerService extends SystemService
     private void scheduleSandmanLocked() {
         if (!mSandmanScheduled) {
             mSandmanScheduled = true;
-            Message msg = mHandler.obtainMessage(MSG_SANDMAN);
-            msg.setAsynchronous(true);
-            mHandler.sendMessage(msg);
-        }
-    }
-
-    private void handleSandman() {
-        for (int id : mDisplayGroupPowerStateMapper.getDisplayGroupIdsLocked()) {
-            if (mDisplayGroupPowerStateMapper.isSandmanSupported(id)) {
-                handleSandman(id);
+            for (int id : mDisplayGroupPowerStateMapper.getDisplayGroupIdsLocked()) {
+                if (mDisplayGroupPowerStateMapper.isSandmanSupported(id)) {
+                    Message msg = mHandler.obtainMessage(MSG_SANDMAN);
+                    msg.arg1 = id;
+                    msg.setAsynchronous(true);
+                    mHandler.sendMessage(msg);
+                }
             }
         }
     }
@@ -2953,6 +2952,11 @@ public final class PowerManagerService extends SystemService
         final int wakefulness;
         synchronized (mLock) {
             mSandmanScheduled = false;
+            final int[] ids = mDisplayGroupPowerStateMapper.getDisplayGroupIdsLocked();
+            if (!ArrayUtils.contains(ids, groupId)) {
+                // Group has been removed.
+                return;
+            }
             // TODO (b/175764708): Support per-display doze.
             wakefulness = getWakefulnessLocked();
             if ((wakefulness == WAKEFULNESS_DREAMING || wakefulness == WAKEFULNESS_DOZING) &&
@@ -2986,6 +2990,12 @@ public final class PowerManagerService extends SystemService
 
         // Update dream state.
         synchronized (mLock) {
+            final int[] ids = mDisplayGroupPowerStateMapper.getDisplayGroupIdsLocked();
+            if (!ArrayUtils.contains(ids, groupId)) {
+                // Group has been removed.
+                return;
+            }
+
             // Remember the initial battery level when the dream started.
             if (startDreaming && isDreaming) {
                 mBatteryLevelWhenDreamStarted = mBatteryLevel;
@@ -3192,9 +3202,12 @@ public final class PowerManagerService extends SystemService
 
                 final boolean displayReadyStateChanged =
                         mDisplayGroupPowerStateMapper.setDisplayGroupReadyLocked(groupId, ready);
-                if (ready && displayReadyStateChanged
+                final boolean poweringOn =
+                        mDisplayGroupPowerStateMapper.isPoweringOnLocked(groupId);
+                if (ready && displayReadyStateChanged && poweringOn
                         && mDisplayGroupPowerStateMapper.getWakefulnessLocked(
                         groupId) == WAKEFULNESS_AWAKE) {
+                    mDisplayGroupPowerStateMapper.setPoweringOnLocked(groupId, false);
                     Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, groupId);
                     final int latencyMs = (int) (mClock.uptimeMillis()
                             - mDisplayGroupPowerStateMapper.getLastPowerOnTimeLocked(groupId));
@@ -4770,7 +4783,7 @@ public final class PowerManagerService extends SystemService
                     handleUserActivityTimeout();
                     break;
                 case MSG_SANDMAN:
-                    handleSandman();
+                    handleSandman(msg.arg1);
                     break;
                 case MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT:
                     handleScreenBrightnessBoostTimeout();

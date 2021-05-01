@@ -3021,7 +3021,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int handleStartTransitionForKeyguardLw(boolean keyguardGoingAway, long duration) {
         final int res = applyKeyguardOcclusionChange();
         if (res != 0) return res;
-        if (!WindowManagerService.sEnableRemoteKeyguardAnimation && keyguardGoingAway) {
+        if (!WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation && keyguardGoingAway) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
             startKeyguardExitAnimation(SystemClock.uptimeMillis(), duration);
         }
@@ -5153,7 +5153,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             .compose();
                 }
                 // fallback for devices without composition support
-                return VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+                return VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
 
             default:
                 return null;

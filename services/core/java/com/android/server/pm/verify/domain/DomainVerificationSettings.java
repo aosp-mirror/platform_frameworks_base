@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.verify.domain.DomainVerificationState;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -29,6 +28,8 @@ import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.PackageSetting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
@@ -36,9 +37,14 @@ import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
 import java.util.function.Function;
 
 class DomainVerificationSettings {
+
+    @NonNull
+    private final DomainVerificationCollector mCollector;
 
     /**
      * States read from disk that have yet to attach to a package, but are expected to, generally in
@@ -67,24 +73,35 @@ class DomainVerificationSettings {
      */
     private final Object mLock = new Object();
 
+    public DomainVerificationSettings(@NonNull DomainVerificationCollector collector) {
+        mCollector = collector;
+    }
 
     public void writeSettings(@NonNull TypedXmlSerializer xmlSerializer,
             @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState,
-            @NonNull Function<String, String> pkgSignatureFunction) throws IOException {
+            @NonNull Function<String, String> pkgSignatureFunction) {
+
+    }
+
+    public void writeSettings(@NonNull TypedXmlSerializer xmlSerializer,
+            @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState,
+            @UserIdInt int userId, @NonNull Function<String, String> pkgSignatureFunction)
+            throws IOException {
         synchronized (mLock) {
             DomainVerificationPersistence.writeToXml(xmlSerializer, liveState,
-                    mPendingPkgStates, mRestoredPkgStates, pkgSignatureFunction);
+                    mPendingPkgStates, mRestoredPkgStates, userId, pkgSignatureFunction);
         }
     }
 
     /**
      * Parses a previously stored set of states and merges them with {@param liveState}, directly
      * mutating the values. This is intended for reading settings written by {@link
-     * #writeSettings(TypedXmlSerializer, DomainVerificationStateMap, Function)} on the same device
-     * setup.
+     * #writeSettings(TypedXmlSerializer, DomainVerificationStateMap, int, Function)} on the same
+     * device setup.
      */
     public void readSettings(@NonNull TypedXmlPullParser parser,
-            @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState)
+            @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction)
             throws IOException, XmlPullParserException {
         DomainVerificationPersistence.ReadResult result =
                 DomainVerificationPersistence.readFromXml(parser);
@@ -101,7 +118,7 @@ class DomainVerificationSettings {
                     // This branch should never be possible. Settings should be read from disk
                     // before any states are attached. But just in case, handle it.
                     if (!existingState.getId().equals(pkgState.getId())) {
-                        mergePkgState(existingState, pkgState);
+                        mergePkgState(existingState, pkgState, pkgSettingFunction);
                     }
                 } else {
                     mPendingPkgStates.put(pkgName, pkgState);
@@ -121,7 +138,8 @@ class DomainVerificationSettings {
      * mutating the values. This is intended for restoration across device setups.
      */
     public void restoreSettings(@NonNull TypedXmlPullParser parser,
-            @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState)
+            @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction)
             throws IOException, XmlPullParserException {
         // TODO(b/170746586): Restoration assumes user IDs match, which is probably not the case on
         //  a new device.
@@ -148,7 +166,7 @@ class DomainVerificationSettings {
                 }
 
                 if (existingState != null) {
-                    mergePkgState(existingState, newState);
+                    mergePkgState(existingState, newState, pkgSettingFunction);
                 } else {
                     // If there's no existing state, that means the new state has to be transformed
                     // in preparation for attaching to brand new package that may eventually be
@@ -190,31 +208,34 @@ class DomainVerificationSettings {
      * specific error codes are fresher than the restored state. Essentially state is only restored
      * to grant additional verifications to an app.
      * <p>
-     * For user selection state, presence in either state will be considered an enabled host. NOTE:
-     * only {@link UserHandle#USER_SYSTEM} is merged. There is no restore path in place for
-     * multiple users.
-     * <p>
-     * TODO(b/170746586): Figure out the restore path for multiple users
-     * <p>
-     * This will mutate {@param oldState} to contain the merged state.
+     * For user selection state, presence in either state will be considered an enabled host. This
+     * assumes that all user IDs on the device match. If this isn't the case, then restore may set
+     * unexpected values.
+     *
+     * NOTE: This will mutate {@param oldState} to contain the merged state.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    public static void mergePkgState(@NonNull DomainVerificationPkgState oldState,
-            @NonNull DomainVerificationPkgState newState) {
+    public void mergePkgState(@NonNull DomainVerificationPkgState oldState,
+            @NonNull DomainVerificationPkgState newState,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
+        PackageSetting pkgSetting = pkgSettingFunction.apply(oldState.getPackageName());
+        AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
+        Set<String> validDomains = pkg == null
+                ? Collections.emptySet() : mCollector.collectValidAutoVerifyDomains(pkg);
+
         ArrayMap<String, Integer> oldStateMap = oldState.getStateMap();
         ArrayMap<String, Integer> newStateMap = newState.getStateMap();
         int size = newStateMap.size();
         for (int index = 0; index < size; index++) {
             String domain = newStateMap.keyAt(index);
             Integer newStateCode = newStateMap.valueAt(index);
-            Integer oldStateCodeInteger = oldStateMap.get(domain);
-            if (oldStateCodeInteger == null) {
+            if (!validDomains.contains(domain)) {
                 // Cannot add domains to an app
                 continue;
             }
 
-            int oldStateCode = oldStateCodeInteger;
-            if (oldStateCode == DomainVerificationState.STATE_NO_RESPONSE) {
+            Integer oldStateCode = oldStateMap.get(domain);
+            if (oldStateCode == null || oldStateCode == DomainVerificationState.STATE_NO_RESPONSE) {
                 if (newStateCode == DomainVerificationState.STATE_SUCCESS
                         || newStateCode == DomainVerificationState.STATE_RESTORED) {
                     oldStateMap.put(domain, DomainVerificationState.STATE_RESTORED);
@@ -228,21 +249,21 @@ class DomainVerificationSettings {
         SparseArray<DomainVerificationInternalUserState> newSelectionStates =
                 newState.getUserStates();
 
-        DomainVerificationInternalUserState newUserState =
-                newSelectionStates.get(UserHandle.USER_SYSTEM);
-        if (newUserState != null) {
-            ArraySet<String> newEnabledHosts = newUserState.getEnabledHosts();
-            DomainVerificationInternalUserState oldUserState =
-                    oldSelectionStates.get(UserHandle.USER_SYSTEM);
-
-            boolean linkHandlingAllowed = newUserState.isLinkHandlingAllowed();
-            if (oldUserState == null) {
-                oldUserState = new DomainVerificationInternalUserState(UserHandle.USER_SYSTEM,
-                        newEnabledHosts, linkHandlingAllowed);
-                oldSelectionStates.put(UserHandle.USER_SYSTEM, oldUserState);
-            } else {
-                oldUserState.addHosts(newEnabledHosts)
-                        .setLinkHandlingAllowed(linkHandlingAllowed);
+        final int userStateSize = newSelectionStates.size();
+        for (int index = 0; index < userStateSize; index++) {
+            int userId = newSelectionStates.keyAt(index);
+            DomainVerificationInternalUserState newUserState = newSelectionStates.valueAt(index);
+            if (newUserState != null) {
+                ArraySet<String> newEnabledHosts = newUserState.getEnabledHosts();
+                DomainVerificationInternalUserState oldUserState = oldSelectionStates.get(userId);
+                boolean linkHandlingAllowed = newUserState.isLinkHandlingAllowed();
+                if (oldUserState == null) {
+                    oldSelectionStates.put(userId, new DomainVerificationInternalUserState(userId,
+                            newEnabledHosts, linkHandlingAllowed));
+                } else {
+                    oldUserState.addHosts(newEnabledHosts)
+                            .setLinkHandlingAllowed(linkHandlingAllowed);
+                }
             }
         }
     }

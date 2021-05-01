@@ -21,6 +21,7 @@ import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLI
 
 import static org.junit.Assert.assertEquals;
 
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.test.TestLooper;
@@ -55,6 +56,7 @@ public class HighBrightnessModeControllerTest {
     private OffsettableClock mClock;
     private TestLooper mTestLooper;
     private Handler mHandler;
+    private Binder mDisplayToken;
 
     private static final HighBrightnessModeData DEFAULT_HBM_DATA =
             new HighBrightnessModeData(MINIMUM_LUX, TRANSITION_POINT, TIME_WINDOW_MILLIS,
@@ -64,6 +66,7 @@ public class HighBrightnessModeControllerTest {
     public void setUp() {
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
+        mDisplayToken = null;
         mHandler = new Handler(mTestLooper.getLooper(), new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
@@ -79,14 +82,14 @@ public class HighBrightnessModeControllerTest {
     @Test
     public void testNoHbmData() {
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
-                mClock::now, mHandler, DEFAULT_MIN, DEFAULT_MAX, null, () -> {});
+                mClock::now, mHandler, mDisplayToken, DEFAULT_MIN, DEFAULT_MAX, null, () -> {});
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
     }
 
     @Test
     public void testNoHbmData_Enabled() {
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
-                mClock::now, mHandler, DEFAULT_MIN, DEFAULT_MAX, null, () -> {});
+                mClock::now, mHandler, mDisplayToken, DEFAULT_MIN, DEFAULT_MAX, null, () -> {});
         hbmc.setAutoBrightnessEnabled(true);
         hbmc.onAmbientLuxChange(MINIMUM_LUX - 1); // below allowed range
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
@@ -264,8 +267,8 @@ public class HighBrightnessModeControllerTest {
 
     // Creates instance with standard initialization values.
     private HighBrightnessModeController createDefaultHbm() {
-        return new HighBrightnessModeController(mClock::now, mHandler, DEFAULT_MIN, DEFAULT_MAX,
-                DEFAULT_HBM_DATA, () -> {});
+        return new HighBrightnessModeController(mClock::now, mHandler, mDisplayToken, DEFAULT_MIN,
+                DEFAULT_MAX, DEFAULT_HBM_DATA, () -> {});
     }
 
     private void advanceTime(long timeMs) {

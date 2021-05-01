@@ -48,6 +48,7 @@ class FingerprintRevokeChallengeClient extends RevokeChallengeClient<ISession> {
             getFreshDaemon().revokeChallenge(mChallenge);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to revokeChallenge", e);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 

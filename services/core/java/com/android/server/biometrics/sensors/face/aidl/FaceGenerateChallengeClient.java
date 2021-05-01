@@ -45,6 +45,7 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<ISessio
             getFreshDaemon().generateChallenge();
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to generateChallenge", e);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 

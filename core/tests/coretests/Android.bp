@@ -52,7 +52,8 @@ android_test {
         "truth-prebuilt",
         "print-test-util-lib",
         "testng",
-        "servicestests-utils"
+        "servicestests-utils",
+        "AppSearchTestUtils",
     ],
 
     libs: [
@@ -66,7 +67,7 @@ android_test {
         "framework-res",
     ],
     jni_libs: [
-         "libpowermanagertest_jni",
+        "libpowermanagertest_jni",
     ],
 
     platform_apis: true,

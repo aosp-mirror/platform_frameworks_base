@@ -606,6 +606,10 @@ public class ClipboardService extends SystemService {
                 description.setTimestamp(System.currentTimeMillis());
             }
         }
+        sendClipChangedBroadcast(clipboard);
+    }
+
+    private void sendClipChangedBroadcast(PerUserClipboard clipboard) {
         final long ident = Binder.clearCallingIdentity();
         final int n = clipboard.primaryClipListeners.beginBroadcast();
         try {
@@ -615,7 +619,7 @@ public class ClipboardService extends SystemService {
                             clipboard.primaryClipListeners.getBroadcastCookie(i);
 
                     if (clipboardAccessAllowed(AppOpsManager.OP_READ_CLIPBOARD, li.mPackageName,
-                                li.mUid, UserHandle.getUserId(li.mUid))) {
+                            li.mUid, UserHandle.getUserId(li.mUid))) {
                         clipboard.primaryClipListeners.getBroadcastItem(i)
                                 .dispatchPrimaryClipChanged();
                     }
@@ -632,7 +636,8 @@ public class ClipboardService extends SystemService {
 
     @GuardedBy("mLock")
     private void startClassificationLocked(@NonNull ClipData clip, @UserIdInt int userId) {
-        if (clip.getItemCount() == 0) {
+        CharSequence text = (clip.getItemCount() == 0) ? null : clip.getItemAt(0).getText();
+        if (TextUtils.isEmpty(text) || text.length() > mMaxClassificationLength) {
             clip.getDescription().setClassificationStatus(
                     ClipDescription.CLASSIFICATION_NOT_PERFORMED);
             return;
@@ -650,20 +655,17 @@ public class ClipboardService extends SystemService {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-        CharSequence text = clip.getItemAt(0).getText();
-        if (TextUtils.isEmpty(text) || text.length() > mMaxClassificationLength
-                || text.length() > classifier.getMaxGenerateLinksTextLength()) {
+        if (text.length() > classifier.getMaxGenerateLinksTextLength()) {
             clip.getDescription().setClassificationStatus(
                     ClipDescription.CLASSIFICATION_NOT_PERFORMED);
             return;
         }
-        getClipboardLocked(userId).mTextClassifier = classifier;
-        mWorkerHandler.post(() -> doClassification(text, clip, classifier));
+        mWorkerHandler.post(() -> doClassification(text, clip, classifier, userId));
     }
 
     @WorkerThread
     private void doClassification(
-            CharSequence text, ClipData clip, TextClassifier classifier) {
+            CharSequence text, ClipData clip, TextClassifier classifier, @UserIdInt int userId) {
         TextLinks.Request request = new TextLinks.Request.Builder(text).build();
         TextLinks links = classifier.generateLinks(request);
 
@@ -680,11 +682,51 @@ public class ClipboardService extends SystemService {
         }
 
         synchronized (mLock) {
-            clip.getDescription().setConfidenceScores(confidences);
-            if (!links.getLinks().isEmpty()) {
-                clip.getItemAt(0).setTextLinks(links);
+            PerUserClipboard clipboard = getClipboardLocked(userId);
+            if (clipboard.primaryClip == clip) {
+                applyClassificationAndSendBroadcastLocked(
+                        clipboard, confidences, links, classifier);
+
+                // Also apply to related profiles if needed
+                List<UserInfo> related = getRelatedProfiles(userId);
+                if (related != null) {
+                    int size = related.size();
+                    for (int i = 0; i < size; i++) {
+                        int id = related.get(i).id;
+                        if (id != userId) {
+                            final boolean canCopyIntoProfile = !hasRestriction(
+                                    UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, id);
+                            if (canCopyIntoProfile) {
+                                PerUserClipboard relatedClipboard = getClipboardLocked(id);
+                                if (hasTextLocked(relatedClipboard, text)) {
+                                    applyClassificationAndSendBroadcastLocked(
+                                            relatedClipboard, confidences, links, classifier);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    private void applyClassificationAndSendBroadcastLocked(
+            PerUserClipboard clipboard, ArrayMap<String, Float> confidences, TextLinks links,
+            TextClassifier classifier) {
+        clipboard.mTextClassifier = classifier;
+        clipboard.primaryClip.getDescription().setConfidenceScores(confidences);
+        if (!links.getLinks().isEmpty()) {
+            clipboard.primaryClip.getItemAt(0).setTextLinks(links);
+        }
+        sendClipChangedBroadcast(clipboard);
+    }
+
+    @GuardedBy("mLock")
+    private boolean hasTextLocked(PerUserClipboard clipboard, @NonNull CharSequence text) {
+        return clipboard.primaryClip != null
+                && clipboard.primaryClip.getItemCount() > 0
+                && text.equals(clipboard.primaryClip.getItemAt(0).getText());
     }
 
     private boolean isDeviceLocked(@UserIdInt int userId) {

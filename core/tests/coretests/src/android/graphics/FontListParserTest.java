@@ -325,6 +325,6 @@ public final class FontListParserTest {
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(buffer, "UTF-8");
         parser.nextTag();
-        return FontListParser.readFamily(parser, "", null);
+        return FontListParser.readFamily(parser, "", null, true);
     }
 }

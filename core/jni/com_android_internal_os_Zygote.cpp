@@ -338,6 +338,7 @@ enum RuntimeFlags : uint32_t {
     GWP_ASAN_LEVEL_LOTTERY = 1 << 21,
     GWP_ASAN_LEVEL_ALWAYS = 2 << 21,
     NATIVE_HEAP_ZERO_INIT = 1 << 23,
+    PROFILEABLE = 1 << 24,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {
@@ -825,7 +826,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   PrepareDir(user_source, 0710, user_id ? AID_ROOT : AID_SHELL,
              multiuser_get_uid(user_id, AID_EVERYBODY), fail_fn);
 
-  bool isAppDataIsolationEnabled = GetBoolProperty(kVoldAppDataIsolation, false);
+  bool isAppDataIsolationEnabled = GetBoolProperty(kVoldAppDataIsolation, true);
 
   if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH) {
       const std::string pass_through_source = StringPrintf("/mnt/pass_through/%d", user_id);

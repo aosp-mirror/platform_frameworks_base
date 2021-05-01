@@ -341,7 +341,6 @@ interface SmartActionInflater {
             activityStarter.startPendingIntentDismissingKeyguard(action.actionIntent, entry.row) {
                 smartReplyController
                     .smartActionClicked(entry, actionIndex, action, smartActions.fromAssistant)
-                headsUpManager.removeNotification(entry.key, true /* releaseImmediately */)
             }
         }
 }

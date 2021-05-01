@@ -421,18 +421,41 @@ public class WindowManagerService extends IWindowManager.Stub
             SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
 
     /**
+     * Use WMShell for app transition.
+     */
+    public static final String ENABLE_SHELL_TRANSITIONS = "persist.debug.shell_transit";
+
+    /**
+     * @see #ENABLE_SHELL_TRANSITIONS
+     */
+    public static final boolean sEnableShellTransitions =
+            SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, false);
+
+    /**
      * Run Keyguard animation as remote animation in System UI instead of local animation in
      * the server process.
+     *
+     * 0: Runs all keyguard animation as local animation
+     * 1: Only runs keyguard going away animation as remote animation
+     * 2: Runs all keyguard animation as remote animation
      */
     private static final String ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY =
             "persist.wm.enable_remote_keyguard_animation";
 
+    private static final int sEnableRemoteKeyguardAnimation =
+            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 1);
+
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
      */
-    public static boolean sEnableRemoteKeyguardAnimation =
-            SystemProperties.getBoolean(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, false);
+    public static final boolean sEnableRemoteKeyguardGoingAwayAnimation = !sEnableShellTransitions
+            && sEnableRemoteKeyguardAnimation >= 1;
 
+    /**
+     * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
+     */
+    public static final boolean sEnableRemoteKeyguardOccludeAnimation = !sEnableShellTransitions
+            && sEnableRemoteKeyguardAnimation >= 2;
 
     /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
@@ -8120,6 +8143,16 @@ public class WindowManagerService extends IWindowManager.Stub
         if (touchedWindow == null || !touchedWindow.canReceiveKeys(true /* fromUserTouch */)) {
             // If the window that received the input event cannot receive keys, don't move the
             // display it's on to the top since that window won't be able to get focus anyway.
+            return;
+        }
+
+        if (mRecentsAnimationController != null
+                && mRecentsAnimationController.getTargetAppMainWindow() == touchedWindow) {
+            // If there is an active recents animation and touched window is the target, then ignore
+            // the touch. The target already handles touches using its own input monitor and we
+            // don't want to trigger any lifecycle changes from focusing another window.
+            // TODO(b/186770026): We should remove this once we support multiple resumed activities
+            //                    while in overview
             return;
         }
 

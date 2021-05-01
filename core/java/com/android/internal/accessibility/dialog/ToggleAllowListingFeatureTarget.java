@@ -48,11 +48,15 @@ class ToggleAllowListingFeatureTarget extends AccessibilityTarget {
         final boolean isEditMenuMode =
                 shortcutMenuMode == ShortcutMenuMode.EDIT;
         holder.mStatusView.setVisibility(isEditMenuMode ? View.GONE : View.VISIBLE);
+        holder.mStatusView.setText(getStateDescription());
+    }
 
+    @Override
+    public CharSequence getStateDescription() {
         final int statusResId = isFeatureEnabled()
                 ? R.string.accessibility_shortcut_menu_item_status_on
                 : R.string.accessibility_shortcut_menu_item_status_off;
-        holder.mStatusView.setText(getContext().getString(statusResId));
+        return getContext().getString(statusResId);
     }
 
     private boolean isFeatureEnabled() {
