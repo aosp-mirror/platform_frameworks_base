@@ -396,6 +396,15 @@ public class Vcn extends Handler {
                     continue;
                 }
 
+                // This should never happen, by virtue of checking for the above check for
+                // pre-existing VcnGatewayConnections that satisfy a given request, but if state
+                // that affects the satsifying of requests changes, this is theoretically possible.
+                if (mVcnGatewayConnections.containsKey(gatewayConnectionConfig)) {
+                    Slog.wtf(getLogTag(), "Attempted to bring up VcnGatewayConnection for config "
+                            + "with existing VcnGatewayConnection");
+                    return;
+                }
+
                 final VcnGatewayConnection vcnGatewayConnection =
                         mDeps.newVcnGatewayConnection(
                                 mVcnContext,
@@ -467,6 +476,9 @@ public class Vcn extends Handler {
                     }
                 }
             }
+
+            // Trigger re-evaluation of all requests; mobile data state impacts supported caps.
+            mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
         }
     }
 
