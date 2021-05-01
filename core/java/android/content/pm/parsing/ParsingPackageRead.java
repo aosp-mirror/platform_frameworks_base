@@ -453,6 +453,9 @@ public interface ParsingPackageRead extends Parcelable {
     /** @see ApplicationInfo#PRIVATE_FLAG_PROFILEABLE_BY_SHELL */
     boolean isProfileableByShell();
 
+    /** @see ApplicationInfo#PRIVATE_FLAG_EXT_PROFILEABLE */
+    boolean isProfileable();
+
     /** @see ApplicationInfo#PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE */
     boolean isRequestLegacyExternalStorage();
 

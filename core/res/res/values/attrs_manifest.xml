@@ -3432,5 +3432,9 @@
         <!-- Flag indicating whether the application can be profiled by the shell user,
              even when running on a device that is running in user mode. -->
         <attr name="shell" format="boolean" />
+        <!-- Flag indicating whether the application can be profiled by system services, but not
+             necessarily via shell tools (for which also android:shell="true" must be set). If
+             false, the application cannot be profiled at all. Defaults to true. -->
+        <attr name="enabled" format="boolean" />
     </declare-styleable>
 </resources>

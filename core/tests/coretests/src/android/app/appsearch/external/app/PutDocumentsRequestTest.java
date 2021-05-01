@@ -19,6 +19,8 @@ package android.app.appsearch;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.android.server.appsearch.testing.AppSearchEmail;
+
 import com.google.common.collect.ImmutableSet;
 
 import org.junit.Test;

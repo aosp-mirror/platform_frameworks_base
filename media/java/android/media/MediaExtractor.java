@@ -774,7 +774,7 @@ public final class MediaExtractor {
      */
     public void setLogSessionId(@NonNull LogSessionId logSessionId) {
         mLogSessionId = Objects.requireNonNull(logSessionId);
-        native_setPlaybackId(logSessionId.getStringId());
+        native_setLogSessionId(logSessionId.getStringId());
     }
 
     /**
@@ -802,7 +802,7 @@ public final class MediaExtractor {
         return bundle;
     }
 
-    private native void native_setPlaybackId(String playbackId);
+    private native void native_setLogSessionId(String logSessionId);
     private native PersistableBundle native_getMetrics();
 
     private static native final void native_init();

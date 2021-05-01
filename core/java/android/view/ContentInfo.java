@@ -25,6 +25,8 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Pair;
 import android.view.inputmethod.InputContentInfo;
 
@@ -39,7 +41,7 @@ import java.util.function.Predicate;
 /**
  * Holds all the relevant data for a request to {@link View#performReceiveContent}.
  */
-public final class ContentInfo {
+public final class ContentInfo implements Parcelable {
 
     /**
      * Specifies the UI through which content is being inserted. Future versions of Android may
@@ -420,4 +422,75 @@ public final class ContentInfo {
             return new ContentInfo(this);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /**
+     * Writes this object into the given parcel.
+     *
+     * @param dest  The parcel to write into.
+     * @param flags The flags to use for parceling.
+     */
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        mClip.writeToParcel(dest, flags);
+        dest.writeInt(mSource);
+        dest.writeInt(mFlags);
+        Uri.writeToParcel(dest, mLinkUri);
+        dest.writeBundle(mExtras);
+        if (mInputContentInfo == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            mInputContentInfo.writeToParcel(dest, flags);
+        }
+        if (mDragAndDropPermissions == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            mDragAndDropPermissions.writeToParcel(dest, flags);
+        }
+    }
+
+    /**
+     * Creates {@link ContentInfo} instances from parcels.
+     */
+    @NonNull
+    public static final Parcelable.Creator<ContentInfo> CREATOR =
+            new Parcelable.Creator<ContentInfo>() {
+        @Override
+        public ContentInfo createFromParcel(Parcel parcel) {
+            ClipData clip = ClipData.CREATOR.createFromParcel(parcel);
+            int source = parcel.readInt();
+            int flags = parcel.readInt();
+            Uri linkUri = Uri.CREATOR.createFromParcel(parcel);
+            Bundle extras = parcel.readBundle();
+            InputContentInfo inputContentInfo = null;
+            if (parcel.readInt() != 0) {
+                inputContentInfo = InputContentInfo.CREATOR.createFromParcel(parcel);
+            }
+            DragAndDropPermissions dragAndDropPermissions = null;
+            if (parcel.readInt() != 0) {
+                dragAndDropPermissions = DragAndDropPermissions.CREATOR.createFromParcel(parcel);
+            }
+            return new ContentInfo.Builder(clip, source)
+                    .setFlags(flags)
+                    .setLinkUri(linkUri)
+                    .setExtras(extras)
+                    .setInputContentInfo(inputContentInfo)
+                    .setDragAndDropPermissions(dragAndDropPermissions)
+                    .build();
+        }
+
+        @Override
+        public ContentInfo[] newArray(int size) {
+            return new ContentInfo[size];
+        }
+    };
 }

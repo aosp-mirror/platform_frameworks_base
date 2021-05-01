@@ -22,12 +22,12 @@ namespace android {
 namespace uirenderer {
 
 AnimatedImageThread& AnimatedImageThread::getInstance() {
-    [[clang::no_destroy]] static sp<AnimatedImageThread> sInstance = []() {
+    static sp<AnimatedImageThread> sInstance = []() {
         sp<AnimatedImageThread> thread = sp<AnimatedImageThread>::make();
         thread->start("AnimatedImageThread");
         return thread;
     }();
-    return *sInstance.get();
+    return *sInstance;
 }
 
 AnimatedImageThread::AnimatedImageThread() {

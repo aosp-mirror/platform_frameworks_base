@@ -583,4 +583,9 @@ public abstract class ActivityManagerInternal {
      * Is the FGS started from an uid temporarily allowed to have while-in-use permission?
      */
     public abstract boolean isTempAllowlistedForFgsWhileInUse(int uid);
+
+    /**
+     * Return the temp allowlist type when server push messaging is over the quota.
+     */
+    public abstract @TempAllowListType int getPushMessagingOverQuotaBehavior();
 }

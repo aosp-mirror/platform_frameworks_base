@@ -1237,9 +1237,17 @@ public class AppOpsManager {
     public static final int OP_ACTIVITY_RECOGNITION_SOURCE =
             AppProtoEnums.APP_OP_ACTIVITY_RECOGNITION_SOURCE;
 
+    /**
+     * Incoming phone audio is being recorded
+     *
+     * @hide
+     */
+    public static final int OP_RECORD_INCOMING_PHONE_AUDIO =
+            AppProtoEnums.APP_OP_RECORD_INCOMING_PHONE_AUDIO;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 115;
+    public static final int _NUM_OP = 116;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1669,6 +1677,12 @@ public class AppOpsManager {
     public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE =
             "android:activity_recognition_source";
 
+    /**
+     * @hide
+     */
+    public static final String OPSTR_RECORD_INCOMING_PHONE_AUDIO =
+            "android:record_incoming_phone_audio";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1882,6 +1896,7 @@ public class AppOpsManager {
             OP_UWB_RANGING,                     // OP_UWB_RANGING
             OP_ACTIVITY_RECOGNITION_SOURCE,     // OP_ACTIVITY_RECOGNITION_SOURCE
             OP_BLUETOOTH_ADVERTISE,             // OP_BLUETOOTH_ADVERTISE
+            OP_RECORD_INCOMING_PHONE_AUDIO,     // OP_RECORD_INCOMING_PHONE_AUDIO
     };
 
     /**
@@ -2003,6 +2018,7 @@ public class AppOpsManager {
             OPSTR_UWB_RANGING,
             OPSTR_ACTIVITY_RECOGNITION_SOURCE,
             OPSTR_BLUETOOTH_ADVERTISE,
+            OPSTR_RECORD_INCOMING_PHONE_AUDIO,
     };
 
     /**
@@ -2125,6 +2141,7 @@ public class AppOpsManager {
             "UWB_RANGING",
             "ACTIVITY_RECOGNITION_SOURCE",
             "BLUETOOTH_ADVERTISE",
+            "RECORD_INCOMING_PHONE_AUDIO",
     };
 
     /**
@@ -2248,6 +2265,7 @@ public class AppOpsManager {
             Manifest.permission.UWB_RANGING,
             null, // no permission for OP_ACTIVITY_RECOGNITION_SOURCE,
             Manifest.permission.BLUETOOTH_ADVERTISE,
+            null, // no permission for OP_RECORD_INCOMING_PHONE_AUDIO,
     };
 
     /**
@@ -2371,6 +2389,7 @@ public class AppOpsManager {
             null, // UWB_RANGING
             null, // ACTIVITY_RECOGNITION_SOURCE
             null, // BLUETOOTH_ADVERTISE
+            null, // RECORD_INCOMING_PHONE_AUDIO
     };
 
     /**
@@ -2493,6 +2512,7 @@ public class AppOpsManager {
             null, // UWB_RANGING
             null, // ACTIVITY_RECOGNITION_SOURCE
             null, // BLUETOOTH_ADVERTISE
+            null, // RECORD_INCOMING_PHONE_AUDIO
     };
 
     /**
@@ -2614,6 +2634,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // UWB_RANGING
             AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION_SOURCE
             AppOpsManager.MODE_ALLOWED, // BLUETOOTH_ADVERTISE
+            AppOpsManager.MODE_ALLOWED, // RECORD_INCOMING_PHONE_AUDIO
     };
 
     /**
@@ -2739,6 +2760,7 @@ public class AppOpsManager {
             false, // UWB_RANGING
             false, // ACTIVITY_RECOGNITION_SOURCE
             false, // BLUETOOTH_ADVERTISE
+            false, // RECORD_INCOMING_PHONE_AUDIO
     };
 
     /**

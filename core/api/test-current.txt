@@ -391,7 +391,7 @@ package android.app {
     method public boolean isUiModeLocked();
     method @RequiresPermission(value=android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION, conditional=true) public boolean releaseProjection(int);
     method @RequiresPermission(value=android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION, conditional=true) public boolean requestProjection(int);
-    field public static final int PROJECTION_TYPE_ALL = 65535; // 0xffff
+    field public static final int PROJECTION_TYPE_ALL = -1; // 0xffffffff
     field public static final int PROJECTION_TYPE_AUTOMOTIVE = 1; // 0x1
     field public static final int PROJECTION_TYPE_NONE = 0; // 0x0
   }
@@ -2683,7 +2683,7 @@ package android.view {
     field public static final int CALLBACK_ANIMATION = 1; // 0x1
   }
 
-  public final class ContentInfo {
+  public final class ContentInfo implements android.os.Parcelable {
     method @NonNull public android.util.Pair<android.view.ContentInfo,android.view.ContentInfo> partition(@NonNull java.util.function.Predicate<android.content.ClipData.Item>);
     method public void releasePermissions();
   }

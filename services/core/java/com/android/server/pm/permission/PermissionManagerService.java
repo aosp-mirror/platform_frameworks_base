@@ -499,13 +499,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return ParceledListSlice.emptyList();
         }
+
+        final List<PermissionGroupInfo> out = new ArrayList<>();
         synchronized (mLock) {
-            final List<PermissionGroupInfo> out = new ArrayList<>();
             for (ParsedPermissionGroup pg : mRegistry.getPermissionGroups()) {
                 out.add(PackageInfoUtils.generatePermissionGroupInfo(pg, flags));
             }
-            return new ParceledListSlice<>(out);
         }
+
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        out.removeIf(it -> mPackageManagerInt.filterAppAccess(it.packageName, callingUid,
+                callingUserId));
+        return new ParceledListSlice<>(out);
     }
 
 
@@ -517,10 +522,24 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+
+        final PermissionGroupInfo permissionGroupInfo;
         synchronized (mLock) {
-            return PackageInfoUtils.generatePermissionGroupInfo(
-                    mRegistry.getPermissionGroup(groupName), flags);
+            final ParsedPermissionGroup permissionGroup = mRegistry.getPermissionGroup(groupName);
+            if (permissionGroup == null) {
+                return null;
+            }
+            permissionGroupInfo = PackageInfoUtils.generatePermissionGroupInfo(permissionGroup,
+                    flags);
         }
+
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (mPackageManagerInt.filterAppAccess(permissionGroupInfo.packageName, callingUid,
+                callingUserId)) {
+            EventLog.writeEvent(0x534e4554, "186113473", callingUid, groupName);
+            return null;
+        }
+        return permissionGroupInfo;
     }
 
 
@@ -532,16 +551,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+
         final AndroidPackage opPackage = mPackageManagerInt.getPackage(opPackageName);
         final int targetSdkVersion = getPermissionInfoCallingTargetSdkVersion(opPackage,
                 callingUid);
+        final PermissionInfo permissionInfo;
         synchronized (mLock) {
             final Permission bp = mRegistry.getPermission(permName);
             if (bp == null) {
                 return null;
             }
-            return bp.generatePermissionInfo(flags, targetSdkVersion);
+            permissionInfo = bp.generatePermissionInfo(flags, targetSdkVersion);
         }
+
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (mPackageManagerInt.filterAppAccess(permissionInfo.packageName, callingUid,
+                callingUserId)) {
+            EventLog.writeEvent(0x534e4554, "183122164", callingUid, permName);
+            return null;
+        }
+        return permissionInfo;
     }
 
     private int getPermissionInfoCallingTargetSdkVersion(@Nullable AndroidPackage pkg, int uid) {
@@ -565,18 +594,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+
+        final List<PermissionInfo> out = new ArrayList<>(10);
         synchronized (mLock) {
             if (groupName != null && mRegistry.getPermissionGroup(groupName) == null) {
                 return null;
             }
-            final ArrayList<PermissionInfo> out = new ArrayList<PermissionInfo>(10);
             for (Permission bp : mRegistry.getPermissions()) {
                 if (Objects.equals(bp.getGroup(), groupName)) {
                     out.add(bp.generatePermissionInfo(flags));
                 }
             }
-            return new ParceledListSlice<>(out);
         }
+
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        out.removeIf(it -> mPackageManagerInt.filterAppAccess(it.packageName, callingUid,
+                callingUserId));
+        return new ParceledListSlice<>(out);
     }
 
     @Override
@@ -2142,23 +2176,30 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         final int callingUid = Binder.getCallingUid();
-        final int userId = UserHandle.getUserId(newPackage.getUid());
-        int numRequestedPermissions = newPackage.getRequestedPermissions().size();
-        for (int i = 0; i < numRequestedPermissions; i++) {
-            PermissionInfo permInfo = getPermissionInfo(newPackage.getRequestedPermissions().get(i),
-                    newPackage.getPackageName(), 0);
-            if (permInfo == null || !STORAGE_PERMISSIONS.contains(permInfo.name)) {
-                continue;
+        for (int userId: getAllUserIds()) {
+            int numRequestedPermissions = newPackage.getRequestedPermissions().size();
+            for (int i = 0; i < numRequestedPermissions; i++) {
+                PermissionInfo permInfo = getPermissionInfo(
+                        newPackage.getRequestedPermissions().get(i),
+                        newPackage.getPackageName(), 0);
+                if (permInfo == null || !STORAGE_PERMISSIONS.contains(permInfo.name)) {
+                    continue;
+                }
+
+                EventLog.writeEvent(0x534e4554, "171430330", newPackage.getUid(),
+                        "Revoking permission " + permInfo.name + " from package "
+                                + newPackage.getPackageName() + " as either the sdk downgraded "
+                                + downgradedSdk + " or newly requested legacy full storage "
+                                + newlyRequestsLegacy);
+
+                try {
+                    revokeRuntimePermissionInternal(newPackage.getPackageName(), permInfo.name,
+                            false, callingUid, userId, null, mDefaultPermissionCallback);
+                } catch (IllegalStateException | SecurityException e) {
+                    Log.e(TAG, "unable to revoke " + permInfo.name + " for "
+                            + newPackage.getPackageName() + " user " + userId, e);
+                }
             }
-
-            EventLog.writeEvent(0x534e4554, "171430330", newPackage.getUid(),
-                    "Revoking permission " + permInfo.name + " from package "
-                            + newPackage.getPackageName() + " as either the sdk downgraded "
-                            + downgradedSdk + " or newly requested legacy full storage "
-                            + newlyRequestsLegacy);
-
-            revokeRuntimePermissionInternal(newPackage.getPackageName(), permInfo.name,
-                    false, callingUid, userId, null, mDefaultPermissionCallback);
         }
 
     }

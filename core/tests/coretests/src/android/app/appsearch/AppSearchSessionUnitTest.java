@@ -25,6 +25,8 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.server.appsearch.testing.AppSearchEmail;
+
 import org.junit.Before;
 import org.junit.Test;
 

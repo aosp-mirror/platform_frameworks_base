@@ -2729,6 +2729,8 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half">Move to edge and hide</string>
     <!-- Action in accessibility menu to move the accessibility floating button out the edge and show. [CHAR LIMIT=36]-->
     <string name="accessibility_floating_button_action_move_out_edge_and_show">Move out edge and show</string>
+    <!-- Action in accessibility menu to toggle on/off the accessibility feature. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_action_double_tap_to_toggle">toggle</string>
 
     <!-- Device Controls strings -->
     <!-- Device Controls empty state, title [CHAR LIMIT=30] -->
@@ -2836,6 +2838,9 @@
     <string name="controls_media_resume">Resume</string>
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
     <string name="controls_media_settings_button">Settings</string>
+
+    <!-- Title for Smartspace recommendation card within media controls [CHAR_LIMIT=50] -->
+    <string name="controls_media_smartspace_rec_title">Play</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>

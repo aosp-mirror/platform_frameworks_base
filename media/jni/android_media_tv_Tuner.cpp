@@ -1737,8 +1737,6 @@ jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
         fId = static_cast<uint64_t>(id);
     }
 
-    filterClient->getAvSharedHandleInfo();
-
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jobject filterObj =
             env->NewObject(

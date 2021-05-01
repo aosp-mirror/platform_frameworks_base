@@ -559,6 +559,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final int SHELL_UID = Process.SHELL_UID;
     private static final int SE_UID = Process.SE_UID;
     private static final int NETWORKSTACK_UID = Process.NETWORK_STACK_UID;
+    private static final int UWB_UID = Process.UWB_UID;
 
     static final int SCAN_NO_DEX = 1 << 0;
     static final int SCAN_UPDATE_SIGNATURE = 1 << 1;
@@ -1731,73 +1732,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManagerService.this.getPackage(packageName);
         }
 
-        @NonNull
-        @Override
-        public void withPackageSettings(@NonNull Consumer<Function<String, PackageSetting>> block) {
-            final Computer snapshot = snapshotComputer();
-
-            // This method needs to either lock or not lock consistently throughout the method,
-            // so if the live computer is returned, force a wrapping sync block.
-            if (snapshot == mLiveComputer) {
-                synchronized (mLock) {
-                    block.accept(snapshot::getPackageSetting);
-                }
-            } else {
-                block.accept(snapshot::getPackageSetting);
-            }
-        }
-
-        @Override
-        public <Output> Output withPackageSettingsReturning(
-                @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageSetting>, Output>
-                        block) {
-            final Computer snapshot = snapshotComputer();
-
-            // This method needs to either lock or not lock consistently throughout the method,
-            // so if the live computer is returned, force a wrapping sync block.
-            if (snapshot == mLiveComputer) {
-                synchronized (mLock) {
-                    return block.apply(snapshot::getPackageSetting);
-                }
-            } else {
-                return block.apply(snapshot::getPackageSetting);
-            }
-        }
-
-        @Override
-        public <ExceptionType extends Exception> void withPackageSettingsThrowing(
-                @NonNull ThrowingConsumer<Function<String, PackageSetting>, ExceptionType> block)
-                throws ExceptionType {
-            final Computer snapshot = snapshotComputer();
-
-            // This method needs to either lock or not lock consistently throughout the method,
-            // so if the live computer is returned, force a wrapping sync block.
-            if (snapshot == mLiveComputer) {
-                synchronized (mLock) {
-                    block.accept(snapshot::getPackageSetting);
-                }
-            } else {
-                block.accept(snapshot::getPackageSetting);
-            }
-        }
-
-        @Override
-        public <Output, ExceptionType extends Exception> Output
-                withPackageSettingsReturningThrowing(@NonNull ThrowingFunction<Function<String,
-                PackageSetting>, Output, ExceptionType> block) throws ExceptionType {
-            final Computer snapshot = snapshotComputer();
-
-            // This method needs to either lock or not lock consistently throughout the method,
-            // so if the live computer is returned, force a wrapping sync block.
-            if (snapshot == mLiveComputer) {
-                synchronized (mLock) {
-                    return block.apply(snapshot::getPackageSetting);
-                }
-            } else {
-                return block.apply(snapshot::getPackageSetting);
-            }
-        }
-
         @Override
         public boolean filterAppAccess(String packageName, int callingUid, int userId) {
             return mPmInternal.filterAppAccess(packageName, callingUid, userId);
@@ -1812,6 +1746,44 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean doesUserExist(@UserIdInt int userId) {
             return mUserManager.exists(userId);
         }
+
+        @Override
+        public void withPackageSettingsSnapshot(
+                @NonNull Consumer<Function<String, PackageSetting>> block) {
+            mPmInternal.withPackageSettingsSnapshot(block);
+        }
+
+        @Override
+        public <Output> Output withPackageSettingsSnapshotReturning(
+                @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageSetting>, Output>
+                        block) {
+            return mPmInternal.withPackageSettingsSnapshotReturning(block);
+        }
+
+        @Override
+        public <ExceptionType extends Exception> void withPackageSettingsSnapshotThrowing(
+                @NonNull FunctionalUtils.ThrowingCheckedConsumer<Function<String, PackageSetting>,
+                        ExceptionType> block) throws ExceptionType {
+            mPmInternal.withPackageSettingsSnapshotThrowing(block);
+        }
+
+        @Override
+        public <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
+                withPackageSettingsSnapshotThrowing2(
+                        @NonNull FunctionalUtils.ThrowingChecked2Consumer<
+                                Function<String, PackageSetting>, ExceptionOne, ExceptionTwo> block)
+                throws ExceptionOne, ExceptionTwo {
+            mPmInternal.withPackageSettingsSnapshotThrowing2(block);
+        }
+
+        @Override
+        public <Output, ExceptionType extends Exception> Output
+                withPackageSettingsSnapshotReturningThrowing(
+                        @NonNull FunctionalUtils.ThrowingCheckedFunction<
+                                Function<String, PackageSetting>, Output, ExceptionType> block)
+                throws ExceptionType {
+            return mPmInternal.withPackageSettingsSnapshotReturningThrowing(block);
+        }
     }
 
     /**
@@ -1825,7 +1797,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private final Watcher mWatcher = new Watcher() {
             @Override
-            public void onChange(@Nullable Watchable what) {
+                       public void onChange(@Nullable Watchable what) {
                 PackageManagerService.this.onChange(what);
             }
         };
@@ -6334,6 +6306,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mSettings.addSharedUserLPw("android.uid.se", SE_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.networkstack", NETWORKSTACK_UID,
+                ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.uwb", UWB_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         t.traceEnd();
 
@@ -22457,21 +22431,44 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public byte[] getIntentFilterVerificationBackup(int userId) {
+    public byte[] getDomainVerificationBackup(int userId) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the system may call getIntentFilterVerificationBackup()");
+            throw new SecurityException("Only the system may call getDomainVerificationBackup()");
         }
 
-        // TODO(b/170746586)
-        return null;
+        try {
+            try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+                TypedXmlSerializer serializer = Xml.resolveSerializer(output);
+                mDomainVerificationManager.writeSettings(serializer, true, userId);
+                return output.toByteArray();
+            }
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Unable to write domain verification for backup", e);
+            }
+            return null;
+        }
     }
 
     @Override
-    public void restoreIntentFilterVerification(byte[] backup, int userId) {
+    public void restoreDomainVerification(byte[] backup, int userId) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("Only the system may call restorePreferredActivities()");
         }
-        // TODO(b/170746586)
+
+        try {
+            ByteArrayInputStream input = new ByteArrayInputStream(backup);
+            TypedXmlPullParser parser = Xml.resolvePullParser(input);
+
+            // User ID input isn't necessary here as it assumes the user integers match and that
+            // the only states inside the backup XML are for the target user.
+            mDomainVerificationManager.restoreSettings(parser);
+            input.close();
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Exception restoring domain verification: " + e.getMessage());
+            }
+        }
     }
 
     @Override
@@ -27264,6 +27261,94 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void deleteOatArtifactsOfPackage(String packageName) {
             PackageManagerService.this.deleteOatArtifactsOfPackage(packageName);
+        }
+
+        @Override
+        public void withPackageSettingsSnapshot(
+                @NonNull Consumer<Function<String, PackageSetting>> block) {
+            final Computer snapshot = snapshotComputer();
+
+            // This method needs to either lock or not lock consistently throughout the method,
+            // so if the live computer is returned, force a wrapping sync block.
+            if (snapshot == mLiveComputer) {
+                synchronized (mLock) {
+                    block.accept(snapshot::getPackageSetting);
+                }
+            } else {
+                block.accept(snapshot::getPackageSetting);
+            }
+        }
+
+        @Override
+        public <Output> Output withPackageSettingsSnapshotReturning(
+                @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageSetting>, Output>
+                        block) {
+            final Computer snapshot = snapshotComputer();
+
+            // This method needs to either lock or not lock consistently throughout the method,
+            // so if the live computer is returned, force a wrapping sync block.
+            if (snapshot == mLiveComputer) {
+                synchronized (mLock) {
+                    return block.apply(snapshot::getPackageSetting);
+                }
+            } else {
+                return block.apply(snapshot::getPackageSetting);
+            }
+        }
+
+        @Override
+        public <ExceptionType extends Exception> void withPackageSettingsSnapshotThrowing(
+                @NonNull FunctionalUtils.ThrowingCheckedConsumer<Function<String, PackageSetting>,
+                        ExceptionType> block) throws ExceptionType {
+            final Computer snapshot = snapshotComputer();
+
+            // This method needs to either lock or not lock consistently throughout the method,
+            // so if the live computer is returned, force a wrapping sync block.
+            if (snapshot == mLiveComputer) {
+                synchronized (mLock) {
+                    block.accept(snapshot::getPackageSetting);
+                }
+            } else {
+                block.accept(snapshot::getPackageSetting);
+            }
+        }
+
+        @Override
+        public <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
+                withPackageSettingsSnapshotThrowing2(
+                        @NonNull FunctionalUtils.ThrowingChecked2Consumer<
+                                Function<String, PackageSetting>, ExceptionOne, ExceptionTwo> block)
+                throws ExceptionOne, ExceptionTwo {
+            final Computer snapshot = snapshotComputer();
+
+            // This method needs to either lock or not lock consistently throughout the method,
+            // so if the live computer is returned, force a wrapping sync block.
+            if (snapshot == mLiveComputer) {
+                synchronized (mLock) {
+                    block.accept(snapshot::getPackageSetting);
+                }
+            } else {
+                block.accept(snapshot::getPackageSetting);
+            }
+        }
+
+        @Override
+        public <Output, ExceptionType extends Exception> Output
+                withPackageSettingsSnapshotReturningThrowing(
+                        @NonNull FunctionalUtils.ThrowingCheckedFunction<
+                                Function<String, PackageSetting>, Output, ExceptionType> block)
+                throws ExceptionType {
+            final Computer snapshot = snapshotComputer();
+
+            // This method needs to either lock or not lock consistently throughout the method,
+            // so if the live computer is returned, force a wrapping sync block.
+            if (snapshot == mLiveComputer) {
+                synchronized (mLock) {
+                    return block.apply(snapshot::getPackageSetting);
+                }
+            } else {
+                return block.apply(snapshot::getPackageSetting);
+            }
         }
     }
 

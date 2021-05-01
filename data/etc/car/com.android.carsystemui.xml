@@ -21,5 +21,7 @@
         <permission name="android.car.permission.CAR_ENROLL_TRUST"/>
         <permission name="android.car.permission.CAR_POWER"/>
         <permission name="android.car.permission.CONTROL_CAR_CLIMATE"/>
+        <permission name="android.car.permission.CONTROL_CAR_EVS_ACTIVITY"/>
+        <permission name="android.car.permission.MONITOR_CAR_EVS_STATUS"/>
     </privapp-permissions>
 </permissions>
