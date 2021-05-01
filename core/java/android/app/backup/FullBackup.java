@@ -23,6 +23,7 @@ import android.annotation.StringDef;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -107,6 +108,7 @@ public class FullBackup {
      * {@code android:fullBackupContent} are ignored during D2D transfers.
      */
     @ChangeId
+    @Overridable
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     private static final long IGNORE_FULL_BACKUP_CONTENT_IN_D2D = 180523564L;
 
