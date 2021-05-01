@@ -2002,10 +2002,17 @@ static jboolean android_media_MediaDrm_requiresSecureDecoder(
         return JNI_FALSE;
     }
 
+    bool required = false;
+    status_t err = OK;
     if (securityLevel == DrmPlugin::kSecurityLevelMax) {
-        return drm->requiresSecureDecoder(mimeType.c_str());
+        err = drm->requiresSecureDecoder(mimeType.c_str(), &required);
+    } else {
+        err = drm->requiresSecureDecoder(mimeType.c_str(), securityLevel, &required);
     }
-    return drm->requiresSecureDecoder(mimeType.c_str(), securityLevel);
+    if (throwExceptionAsNecessary(env, drm, err, "Failed to query secure decoder requirement")) {
+        return false;
+    }
+    return required;
 }
 
 static void android_media_MediaDrm_setPlaybackId(

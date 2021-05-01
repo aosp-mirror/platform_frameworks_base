@@ -1831,6 +1831,7 @@ public final class PowerManagerService extends SystemService
             setWakefulnessLocked(groupId, WAKEFULNESS_AWAKE, eventTime, uid, reason, opUid,
                     opPackageName, details);
             mDisplayGroupPowerStateMapper.setLastPowerOnTimeLocked(groupId, eventTime);
+            mDisplayGroupPowerStateMapper.setPoweringOnLocked(groupId, true);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
@@ -3201,9 +3202,12 @@ public final class PowerManagerService extends SystemService
 
                 final boolean displayReadyStateChanged =
                         mDisplayGroupPowerStateMapper.setDisplayGroupReadyLocked(groupId, ready);
-                if (ready && displayReadyStateChanged
+                final boolean poweringOn =
+                        mDisplayGroupPowerStateMapper.isPoweringOnLocked(groupId);
+                if (ready && displayReadyStateChanged && poweringOn
                         && mDisplayGroupPowerStateMapper.getWakefulnessLocked(
                         groupId) == WAKEFULNESS_AWAKE) {
+                    mDisplayGroupPowerStateMapper.setPoweringOnLocked(groupId, false);
                     Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, groupId);
                     final int latencyMs = (int) (mClock.uptimeMillis()
                             - mDisplayGroupPowerStateMapper.getLastPowerOnTimeLocked(groupId));

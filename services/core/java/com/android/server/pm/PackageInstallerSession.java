@@ -3881,14 +3881,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 @Override
                 public void onHealthStatus(int storageId, int status) {
                     if (mDestroyed || mDataLoaderFinished) {
-                        // App's installed.
-                        switch (status) {
-                            case IStorageHealthListener.HEALTH_STATUS_UNHEALTHY:
-                                if (systemDataLoader) {
-                                    onSystemDataLoaderUnrecoverable();
-                                }
-                                return;
-                        }
                         return;
                     }
 

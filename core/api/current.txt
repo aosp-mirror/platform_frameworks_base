@@ -7466,9 +7466,10 @@ package android.app.admin {
     field public static final int LOCK_TASK_FEATURE_SYSTEM_INFO = 1; // 0x1
     field public static final int MAKE_USER_EPHEMERAL = 2; // 0x2
     field public static final String MIME_TYPE_PROVISIONING_NFC = "application/com.android.managedprovisioning";
-    field public static final int NEARBY_STREAMING_DISABLED = 0; // 0x0
-    field public static final int NEARBY_STREAMING_ENABLED = 1; // 0x1
-    field public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 2; // 0x2
+    field public static final int NEARBY_STREAMING_DISABLED = 1; // 0x1
+    field public static final int NEARBY_STREAMING_ENABLED = 2; // 0x2
+    field public static final int NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY = 0; // 0x0
+    field public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 3; // 0x3
     field public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1; // 0x1
     field public static final int PASSWORD_COMPLEXITY_HIGH = 327680; // 0x50000
     field public static final int PASSWORD_COMPLEXITY_LOW = 65536; // 0x10000
@@ -11920,6 +11921,7 @@ package android.content.pm {
     method public int getGwpAsanMode();
     method public int getMemtagMode();
     method public int getNativeHeapZeroInitialized();
+    method public boolean isProfileable();
     method public boolean isProfileableByShell();
     method public boolean isResourceOverlay();
     method public boolean isVirtualPreload();
@@ -46815,12 +46817,15 @@ package android.view {
     method public void onActionViewExpanded();
   }
 
-  public final class ContentInfo {
+  public final class ContentInfo implements android.os.Parcelable {
+    method public int describeContents();
     method @NonNull public android.content.ClipData getClip();
     method @Nullable public android.os.Bundle getExtras();
     method public int getFlags();
     method @Nullable public android.net.Uri getLinkUri();
     method public int getSource();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.ContentInfo> CREATOR;
     field public static final int FLAG_CONVERT_TO_PLAIN_TEXT = 1; // 0x1
     field public static final int SOURCE_APP = 0; // 0x0
     field public static final int SOURCE_AUTOFILL = 4; // 0x4

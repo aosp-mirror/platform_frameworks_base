@@ -45,8 +45,10 @@ public class FingerprintRevokeChallengeClient
     protected void startHalOperation() {
         try {
             getFreshDaemon().postEnroll();
+            mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "revokeChallenge/postEnroll failed", e);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

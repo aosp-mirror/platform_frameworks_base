@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageSettingsSnapshotProvider;
 import android.content.pm.ResolveInfo;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
@@ -36,7 +37,6 @@ import android.util.Pair;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
-import com.android.internal.util.FunctionalUtils;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.Settings;
@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface DomainVerificationManagerInternal {
@@ -234,8 +233,8 @@ public interface DomainVerificationManagerInternal {
      * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
      * lock. This should never be called from within the domain verification classes themselves.
      * <p>
-     * This will NOT call {@link #writeSettings(TypedXmlSerializer)}. That must be handled by the
-     * caller.
+     * This will NOT call {@link #writeSettings(TypedXmlSerializer, boolean, int)}. That must be
+     * handled by the caller.
      */
     void addPackage(@NonNull PackageSetting newPkgSetting);
 
@@ -249,20 +248,27 @@ public interface DomainVerificationManagerInternal {
      * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
      * lock. This should never be called from within the domain verification classes themselves.
      * <p>
-     * This will NOT call {@link #writeSettings(TypedXmlSerializer)}. That must be handled by the
-     * caller.
+     * This will NOT call {@link #writeSettings(TypedXmlSerializer, boolean, int)}. That must be
+     * handled by the caller.
      */
     void migrateState(@NonNull PackageSetting oldPkgSetting, @NonNull PackageSetting newPkgSetting);
 
     /**
      * Serializes the entire internal state. This is equivalent to a full backup of the existing
      * verification state. This write includes legacy state, as a sibling tag the modern state.
+     *
+     * @param includeSignatures Whether to include the package signatures in the output, mainly
+     *                          used for backing up the user settings and ensuring they're
+     *                          re-attached to the same package.
+     * @param userId The user to write out. Supports {@link UserHandle#USER_ALL} if all users
+     *               should be written.
      */
-    void writeSettings(@NonNull TypedXmlSerializer serializer) throws IOException;
+    void writeSettings(@NonNull TypedXmlSerializer serializer, boolean includeSignatures,
+            @UserIdInt int userId) throws IOException;
 
     /**
      * Read back a list of {@link DomainVerificationPkgState}s previously written by {@link
-     * #writeSettings(TypedXmlSerializer)}. Assumes that the
+     * #writeSettings(TypedXmlSerializer, boolean, int)}. Assumes that the
      * {@link DomainVerificationPersistence#TAG_DOMAIN_VERIFICATIONS} tag has already been entered.
      * <p>
      * This is expected to only be used to re-attach states for packages already known to be on the
@@ -298,7 +304,7 @@ public interface DomainVerificationManagerInternal {
 
     /**
      * Restore a list of {@link DomainVerificationPkgState}s previously written by {@link
-     * #writeSettings(TypedXmlSerializer)}. Assumes that the
+     * #writeSettings(TypedXmlSerializer, boolean, int)}. Assumes that the
      * {@link DomainVerificationPersistence#TAG_DOMAIN_VERIFICATIONS}
      * tag has already been entered.
      * <p>
@@ -399,11 +405,12 @@ public interface DomainVerificationManagerInternal {
             @NonNull Set<String> domains, int state) throws NameNotFoundException;
 
 
-    interface Connection extends DomainVerificationEnforcer.Callback {
+    interface Connection extends DomainVerificationEnforcer.Callback,
+            PackageSettingsSnapshotProvider {
 
         /**
          * Notify that a settings change has been made and that eventually
-         * {@link #writeSettings(TypedXmlSerializer)} should be invoked by the parent.
+         * {@link #writeSettings(TypedXmlSerializer, boolean, int)} should be invoked by the parent.
          */
         void scheduleWriteSettings();
 
@@ -423,46 +430,7 @@ public interface DomainVerificationManagerInternal {
          */
         void schedule(int code, @Nullable Object object);
 
-        /**
-         * Run a function block that requires access to {@link PackageSetting} data. This will
-         * ensure the {@link PackageManagerService} is taken before
-         * {@link DomainVerificationManagerInternal}'s lock is taken to avoid deadlock.
-         */
-        void withPackageSettings(@NonNull Consumer<Function<String, PackageSetting>> block);
-
-        /**
-         * Variant which returns a value to the caller.
-         * @see #withPackageSettings(Consumer)
-         */
-        <Output> Output withPackageSettingsReturning(
-                @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageSetting>, Output>
-                        block);
-
-        /**
-         * Variant which throws.
-         * @see #withPackageSettings(Consumer)
-         */
-        <ExceptionType extends Exception> void withPackageSettingsThrowing(
-                @NonNull ThrowingConsumer<Function<String, PackageSetting>, ExceptionType> block)
-                throws ExceptionType;
-
-        /**
-         * Variant which returns a value to the caller and throws.
-         * @see #withPackageSettings(Consumer)
-         */
-        <Output, ExceptionType extends Exception> Output withPackageSettingsReturningThrowing(
-                @NonNull ThrowingFunction<Function<String, PackageSetting>, Output, ExceptionType>
-                        block) throws ExceptionType;
-
         @UserIdInt
         int[] getAllUserIds();
-
-        interface ThrowingConsumer<Input, ExceptionType extends Exception> {
-            void accept(Input input) throws ExceptionType;
-        }
-
-        interface ThrowingFunction<Input, Output, ExceptionType extends Exception> {
-            Output apply(Input input) throws ExceptionType;
-        }
     }
 }

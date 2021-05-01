@@ -67,6 +67,7 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE, mLayoutInflater)
         `when`(mLayoutInflater.inflate(anyInt(), any(ViewGroup::class.java), anyBoolean()))
                 .thenReturn(mInflatedUserDetailItemView)
+        `when`(mParent.context).thenReturn(mContext)
         adapter = UserDetailView.Adapter(mContext, mUserSwitcherController, uiEventLogger,
                 falsingManagerFake)
         mPicture = UserIcons.convertToBitmap(mContext.getDrawable(R.drawable.ic_avatar_user))

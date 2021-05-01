@@ -151,7 +151,9 @@ class PrivacyItemController @Inject constructor(
                 return
             }
             val userId = UserHandle.getUserId(uid)
-            if (userId in currentUserIds) {
+            if (userId in currentUserIds ||
+                    code == AppOpsManager.OP_PHONE_CALL_MICROPHONE ||
+                    code == AppOpsManager.OP_PHONE_CALL_CAMERA) {
                 logger.logUpdatedItemFromAppOps(code, uid, packageName, active)
                 update(false)
             }

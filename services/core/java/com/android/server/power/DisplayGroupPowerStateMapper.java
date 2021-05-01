@@ -141,6 +141,14 @@ public class DisplayGroupPowerStateMapper {
         return mDisplayGroupInfos.get(groupId).lastPowerOnTime;
     }
 
+    void setPoweringOnLocked(int groupId, boolean poweringOn) {
+        mDisplayGroupInfos.get(groupId).poweringOn = poweringOn;
+    }
+
+    boolean isPoweringOnLocked(int groupId) {
+        return mDisplayGroupInfos.get(groupId).poweringOn;
+    }
+
     /**
      * Returns the amalgamated wakefulness of all {@link DisplayGroup DisplayGroups}.
      *
@@ -300,6 +308,7 @@ public class DisplayGroupPowerStateMapper {
         public int wakefulness;
         public boolean ready;
         public long lastPowerOnTime;
+        boolean poweringOn;
         public boolean sandmanSummoned;
         public long lastUserActivityTime;
         public long lastUserActivityTimeNoChangeLights;

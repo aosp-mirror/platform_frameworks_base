@@ -22,6 +22,8 @@ import static androidx.dynamicanimation.animation.SpringForce.STIFFNESS_MEDIUM;
 
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
+import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_DISMISS;
+import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_NONE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -336,7 +338,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
         cancelPhysicsAnimation();
-        mMenuController.hideMenu(false /* animate */, false /* resize */);
+        mMenuController.hideMenu(ANIM_TYPE_NONE, false /* resize */);
         mPipTaskOrganizer.exitPip(skipAnimation ? 0 : LEAVE_PIP_DURATION);
     }
 
@@ -349,7 +351,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             Log.d(TAG, "removePip: callers=\n" + Debug.getCallers(5, "    "));
         }
         cancelPhysicsAnimation();
-        mMenuController.hideMenu(true /* animate*/, false /* resize */);
+        mMenuController.hideMenu(ANIM_TYPE_DISMISS, false /* resize */);
         mPipTaskOrganizer.removePip();
     }
 
@@ -406,11 +408,14 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 .flingThenSpring(
                         FloatProperties.RECT_Y, velocityY, mFlingConfigY, mSpringConfig);
 
+        final Rect insetBounds = mPipBoundsState.getDisplayLayout().stableInsets();
         final float leftEdge = isStash
                 ? mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width()
+                + insetBounds.left
                 : mPipBoundsState.getMovementBounds().left;
         final float rightEdge = isStash
                 ?  mPipBoundsState.getDisplayBounds().right - mPipBoundsState.getStashOffset()
+                - insetBounds.right
                 : mPipBoundsState.getMovementBounds().right;
 
         final float xEndValue = velocityX < 0 ? leftEdge : rightEdge;
@@ -483,7 +488,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
         mSnapAlgorithm.applySnapFraction(normalBounds, normalMovementBounds, savedSnapFraction,
                 mPipBoundsState.getStashedState(), mPipBoundsState.getStashOffset(),
-                mPipBoundsState.getDisplayBounds());
+                mPipBoundsState.getDisplayBounds(),
+                mPipBoundsState.getDisplayLayout().stableInsets());
 
         if (immediate) {
             movePip(normalBounds);
@@ -529,10 +535,13 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mFlingConfigY = new PhysicsAnimator.FlingConfig(DEFAULT_FRICTION,
                 mPipBoundsState.getMovementBounds().top,
                 mPipBoundsState.getMovementBounds().bottom);
+        final Rect insetBounds = mPipBoundsState.getDisplayLayout().stableInsets();
         mStashConfigX = new PhysicsAnimator.FlingConfig(
                 DEFAULT_FRICTION,
-                mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width(),
-                mPipBoundsState.getDisplayBounds().right - mPipBoundsState.getStashOffset());
+                mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width()
+                        + insetBounds.left,
+                mPipBoundsState.getDisplayBounds().right - mPipBoundsState.getStashOffset()
+                        - insetBounds.right);
     }
 
     private void startBoundsAnimator(float toX, float toY) {

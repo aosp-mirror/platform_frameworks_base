@@ -70,9 +70,16 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
                 }
             };
 
+    private final ContentObserver mEnabledA11yServicesContentObserver =
+            new ContentObserver(mHandler) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    mMenuView.onEnabledFeaturesChanged();
+                }
+            };
+
     public AccessibilityFloatingMenu(Context context) {
-        mContext = context;
-        mMenuView = new AccessibilityFloatingMenuView(context);
+        this(context, new AccessibilityFloatingMenuView(context));
     }
 
     @VisibleForTesting
@@ -153,11 +160,17 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY),
                 /* notifyForDescendants */ false, mFadeOutContentObserver,
                 UserHandle.USER_CURRENT);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES),
+                /* notifyForDescendants */ false,
+                mEnabledA11yServicesContentObserver, UserHandle.USER_CURRENT);
     }
 
     private void unregisterContentObservers() {
         mContext.getContentResolver().unregisterContentObserver(mContentObserver);
         mContext.getContentResolver().unregisterContentObserver(mSizeContentObserver);
         mContext.getContentResolver().unregisterContentObserver(mFadeOutContentObserver);
+        mContext.getContentResolver().unregisterContentObserver(
+                mEnabledA11yServicesContentObserver);
     }
 }

@@ -857,14 +857,15 @@ public final class UpdatableFontDirTest {
                 mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
         dir.loadFontFileMap();
 
+        List<FontUpdateRequest> requests = Arrays.asList(
+                newFontUpdateRequest("test.ttf,1,test", GOOD_SIGNATURE),
+                newAddFontFamilyRequest("<family lang='en'>"
+                        + "  <font>test.ttf</font>"
+                        + "</family>"));
         try {
-            dir.update(Arrays.asList(
-                    newFontUpdateRequest("test.ttf,1,test", GOOD_SIGNATURE),
-                    newAddFontFamilyRequest("<family lang='en'>"
-                            + "  <font>test.ttf</font>"
-                            + "</family>")));
+            dir.update(requests);
             fail("Expect NullPointerException");
-        } catch (FontManagerService.SystemFontException e) {
+        } catch (NullPointerException e) {
             // Expect
         }
     }
