@@ -1433,7 +1433,10 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Specify that this job should be delayed by the provided amount of time.
+         * Specify that this job should be delayed by the provided amount of time. The job may not
+         * run the instant the delay has elapsed. JobScheduler will start the job at an
+         * indeterminate time after the delay has elapsed.
+         * <p>
          * Because it doesn't make sense setting this property on a periodic job, doing so will
          * throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
@@ -1449,9 +1452,11 @@ public class JobInfo implements Parcelable {
 
         /**
          * Set deadline which is the maximum scheduling latency. The job will be run by this
-         * deadline even if other requirements are not met. Because it doesn't make sense setting
-         * this property on a periodic job, doing so will throw an
-         * {@link java.lang.IllegalArgumentException} when
+         * deadline even if other requirements (including a delay set through
+         * {@link #setMinimumLatency(long)}) are not met.
+         * <p>
+         * Because it doesn't make sense setting this property on a periodic job, doing so will
+         * throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
          * @see JobInfo#getMaxExecutionDelayMillis()
          */
@@ -1465,6 +1470,7 @@ public class JobInfo implements Parcelable {
          * Set up the back-off/retry policy.
          * This defaults to some respectable values: {30 seconds, Exponential}. We cap back-off at
          * 5hrs.
+         * <p>
          * Note that trying to set a backoff criteria for a job with
          * {@link #setRequiresDeviceIdle(boolean)} will throw an exception when you call build().
          * This is because back-off typically does not make sense for these types of jobs. See

@@ -67,6 +67,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private static final int NO_DISPLAY_MODE_ID = 0;
 
+    private static final float NITS_INVALID = -1;
+
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
     private final Injector mInjector;
@@ -190,6 +192,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mState = Display.STATE_UNKNOWN;
         // This is only set in the runnable returned from requestDisplayStateLocked.
         private float mBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        private float mSdrBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         private int mDefaultModeId;
         private int mDefaultModeGroup;
         private int mActiveModeId;
@@ -644,13 +647,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public Runnable requestDisplayStateLocked(final int state, final float brightnessState) {
+        public Runnable requestDisplayStateLocked(final int state, final float brightnessState,
+                final float sdrBrightnessState) {
             // Assume that the brightness is off if the display is being turned off.
             assert state != Display.STATE_OFF || BrightnessSynchronizer.floatEquals(
                     brightnessState, PowerManager.BRIGHTNESS_OFF_FLOAT);
             final boolean stateChanged = (mState != state);
-            final boolean brightnessChanged = (!BrightnessSynchronizer.floatEquals(
-                    mBrightnessState, brightnessState));
+            final boolean brightnessChanged =
+                    !(BrightnessSynchronizer.floatEquals(mBrightnessState, brightnessState)
+                    && BrightnessSynchronizer.floatEquals(mSdrBrightnessState, sdrBrightnessState));
             if (stateChanged || brightnessChanged) {
                 final long physicalDisplayId = mPhysicalDisplayId;
                 final IBinder token = getDisplayTokenLocked();
@@ -702,8 +707,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                         // Apply brightness changes given that we are in a non-suspended state.
                         if (brightnessChanged || vrModeChange) {
-                            setDisplayBrightness(brightnessState);
+                            setDisplayBrightness(brightnessState, sdrBrightnessState);
                             mBrightnessState = brightnessState;
+                            mSdrBrightnessState = sdrBrightnessState;
                         }
 
                         // Enter the final desired state, possibly suspended.
@@ -764,8 +770,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         }
                     }
 
-                    private void setDisplayBrightness(float brightness) {
-                        // Ensure brightnessState is valid, before processing and sending to
+                    private void setDisplayBrightness(float brightness, float sdrBrightness) {
+                        // Ensure brightnessState is valid before processing and sending to
                         // surface control
                         if (Float.isNaN(brightness)) {
                             return;
@@ -774,17 +780,31 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         if (DEBUG) {
                             Slog.d(TAG, "setDisplayBrightness("
                                     + "id=" + physicalDisplayId
-                                    + ", brightness=" + brightness + ")");
+                                    + ", brightness=" + brightness
+                                    + ", sdrBrightness=" + sdrBrightness + ")");
                         }
 
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayBrightness("
-                                + "id=" + physicalDisplayId + ", brightness=" + brightness + ")");
+                                + "id=" + physicalDisplayId + ", brightness=" + brightness
+                                + ", sdrBrightness=" + sdrBrightness + ")");
                         try {
-                            float backlight = brightnessToBacklight(brightness);
-                            mBacklightAdapter.setBacklight(backlight);
+                            final float backlight = brightnessToBacklight(brightness);
+                            float nits = NITS_INVALID;
+                            float sdrBacklight = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+                            float sdrNits = NITS_INVALID;
+                            if (getDisplayDeviceConfig().hasNitsMapping()
+                                    && sdrBrightness != PowerManager.BRIGHTNESS_INVALID_FLOAT) {
+                                nits = backlightToNits(backlight);
+                                sdrBacklight = brightnessToBacklight(sdrBrightness);
+                                sdrNits = backlightToNits(sdrBacklight);
+                            }
+                            mBacklightAdapter.setBacklight(sdrBacklight, sdrNits, backlight, nits);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
                                     "ScreenBrightness",
                                     BrightnessSynchronizer.brightnessFloatToInt(brightness));
+                            Trace.traceCounter(Trace.TRACE_TAG_POWER,
+                                    "SdrScreenBrightness",
+                                    BrightnessSynchronizer.brightnessFloatToInt(sdrBrightness));
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
@@ -792,6 +812,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                     private float brightnessToBacklight(float brightness) {
                         return getDisplayDeviceConfig().getBacklightFromBrightness(brightness);
+                    }
+
+                    private float backlightToNits(float backlight) {
+                        return getDisplayDeviceConfig().getNitsFromBacklight(backlight);
                     }
                 };
             }
@@ -1242,6 +1266,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         public boolean setDisplayBrightness(IBinder displayToken, float brightness) {
             return SurfaceControl.setDisplayBrightness(displayToken, brightness);
         }
+
+        public boolean setDisplayBrightness(IBinder displayToken, float sdrBacklight,
+                float sdrNits, float displayBacklight, float displayNits) {
+            return SurfaceControl.setDisplayBrightness(displayToken, sdrBacklight, sdrNits,
+                    displayBacklight, displayNits);
+        }
+
     }
 
     static class BacklightAdapter {
@@ -1273,9 +1304,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         // Set backlight within min and max backlight values
-        void setBacklight(float backlight) {
+        void setBacklight(float sdrBacklight, float sdrNits, float backlight, float nits) {
             if (mUseSurfaceControlBrightness || mForceSurfaceControl) {
-                mSurfaceControlProxy.setDisplayBrightness(mDisplayToken, backlight);
+                if (sdrBacklight == PowerManager.BRIGHTNESS_INVALID_FLOAT) {
+                    mSurfaceControlProxy.setDisplayBrightness(mDisplayToken, backlight);
+                } else {
+                    mSurfaceControlProxy.setDisplayBrightness(mDisplayToken, sdrBacklight, sdrNits,
+                            backlight, nits);
+                }
             } else if (mBacklight != null) {
                 mBacklight.setBrightness(backlight);
             }

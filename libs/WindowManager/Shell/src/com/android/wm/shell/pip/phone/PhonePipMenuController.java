@@ -18,6 +18,8 @@ package com.android.wm.shell.pip.phone;
 
 import static android.view.WindowManager.SHELL_ROOT_LAYER_PIP;
 
+import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_HIDE;
+
 import android.annotation.Nullable;
 import android.app.RemoteAction;
 import android.content.Context;
@@ -397,26 +399,26 @@ public class PhonePipMenuController implements PipMenuController {
      * Hides the menu view.
      */
     public void hideMenu() {
-        hideMenu(true /* animate */, true /* resize */);
+        hideMenu(ANIM_TYPE_HIDE, true /* resize */);
     }
 
     /**
      * Hides the menu view.
      *
-     * @param animate whether to animate the menu fadeout
+     * @param animationType the animation type to use upon hiding the menu
      * @param resize whether or not to resize the PiP with the state change
      */
-    public void hideMenu(boolean animate, boolean resize) {
+    public void hideMenu(@PipMenuView.AnimationType int animationType, boolean resize) {
         final boolean isMenuVisible = isMenuVisible();
         if (DEBUG) {
             Log.d(TAG, "hideMenu() state=" + mMenuState
                     + " isMenuVisible=" + isMenuVisible
-                    + " animate=" + animate
+                    + " animationType=" + animationType
                     + " resize=" + resize
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
         if (isMenuVisible) {
-            mPipMenuView.hideMenu(animate, resize);
+            mPipMenuView.hideMenu(resize, animationType);
         }
     }
 

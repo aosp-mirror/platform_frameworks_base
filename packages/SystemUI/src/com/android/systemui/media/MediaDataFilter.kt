@@ -25,6 +25,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.util.time.SystemClock
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -36,7 +37,8 @@ private const val DEBUG = true
  * Maximum age of a media control to re-activate on smartspace signal. If there is no media control
  * available within this time window, smartspace recommendations will be shown instead.
  */
-private val SMARTSPACE_MAX_AGE = SystemProperties
+@VisibleForTesting
+internal val SMARTSPACE_MAX_AGE = SystemProperties
         .getLong("debug.sysui.smartspace_max_age", TimeUnit.HOURS.toMillis(3))
 
 /**
@@ -51,7 +53,8 @@ class MediaDataFilter @Inject constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     private val mediaResumeListener: MediaResumeListener,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
-    @Main private val executor: Executor
+    @Main private val executor: Executor,
+    private val systemClock: SystemClock
 ) : MediaDataManager.Listener {
     private val userTracker: CurrentUserTracker
     private val _listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
@@ -100,7 +103,7 @@ class MediaDataFilter @Inject constructor(
         hasSmartspace = true
 
         // Before forwarding the smartspace target, first check if we have recently inactive media
-        val now = System.currentTimeMillis()
+        val now = systemClock.elapsedRealtime()
         val sorted = userEntries.toSortedMap(compareBy {
             userEntries.get(it)?.lastActive ?: -1
         })

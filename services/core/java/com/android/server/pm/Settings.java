@@ -2339,7 +2339,8 @@ public final class Settings implements Watchable, Snappable {
                 }
             }
 
-            mDomainVerificationManager.writeSettings(serializer);
+            mDomainVerificationManager.writeSettings(serializer, false /* includeSignatures */,
+                    UserHandle.USER_ALL);
 
             mKeySetManagerService.writeKeySetManagerServiceLPr(serializer);
 
@@ -2559,6 +2560,9 @@ public final class Settings implements Watchable, Snappable {
                 // gids       - supplementary gids this app launches with
                 // profileableFromShellFlag  - 0 or 1 if the package is profileable from shell.
                 // longVersionCode - integer version of the package.
+                // profileable - 0 or 1 if the package is profileable by the platform.
+                // packageInstaller - the package that installed this app, or @system, @product or
+                //                    @null.
                 //
                 // NOTE: We prefer not to expose all ApplicationInfo flags for now.
                 //
@@ -2589,6 +2593,19 @@ public final class Settings implements Watchable, Snappable {
                 sb.append(pkg.pkg.isProfileableByShell() ? "1" : "0");
                 sb.append(" ");
                 sb.append(pkg.pkg.getLongVersionCode());
+                sb.append(" ");
+                sb.append(pkg.pkg.isProfileable() ? "1" : "0");
+                sb.append(" ");
+                if (pkg.isSystem()) {
+                    sb.append("@system");
+                } else if (pkg.isProduct()) {
+                    sb.append("@product");
+                } else if (pkg.installSource.installerPackageName != null
+                           && !pkg.installSource.installerPackageName.isEmpty()) {
+                    sb.append(pkg.installSource.installerPackageName);
+                } else {
+                    sb.append("@null");
+                }
                 sb.append("\n");
                 writer.append(sb);
             }
@@ -2913,13 +2930,7 @@ public final class Settings implements Watchable, Snappable {
             }
 
             str.close();
-
-        } catch (XmlPullParserException e) {
-            mReadMessages.append("Error reading: " + e.toString());
-            PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
-            Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
-
-        } catch (java.io.IOException e) {
+        } catch (IOException | XmlPullParserException e) {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
             Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);

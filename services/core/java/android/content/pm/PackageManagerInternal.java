@@ -60,7 +60,7 @@ import java.util.function.Consumer;
  *
  * @hide Only for use within the system server.
  */
-public abstract class PackageManagerInternal {
+public abstract class PackageManagerInternal implements PackageSettingsSnapshotProvider {
     @IntDef(prefix = "PACKAGE_", value = {
             PACKAGE_SYSTEM,
             PACKAGE_SETUP_WIZARD,
@@ -795,6 +795,9 @@ public abstract class PackageManagerInternal {
      * Perform the given action for each package.
      * Note that packages lock will be held while performing the actions.
      *
+     * If the caller does not need all packages, prefer the potentially non-locking
+     * {@link #withPackageSettingsSnapshot(Consumer)}.
+     *
      * @param actionLocked action to be performed
      */
     public abstract void forEachPackage(Consumer<AndroidPackage> actionLocked);
@@ -802,6 +805,9 @@ public abstract class PackageManagerInternal {
     /**
      * Perform the given action for each {@link PackageSetting}.
      * Note that packages lock will be held while performing the actions.
+     *
+     * If the caller does not need all packages, prefer the potentially non-locking
+     * {@link #withPackageSettingsSnapshot(Consumer)}.
      *
      * @param actionLocked action to be performed
      */

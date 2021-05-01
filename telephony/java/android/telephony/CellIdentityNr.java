@@ -233,7 +233,7 @@ public final class CellIdentityNr extends CellIdentity {
     }
 
     /**
-     * @return Mobile Network Code in string fomrat, or {@code null} if unknown.
+     * @return Mobile Network Code in string format, or {@code null} if unknown.
      */
     @Nullable
     public String getMncString() {

@@ -241,6 +241,7 @@ private:
     Result getFilterMq();
     int copyData(int8_t* buffer, int size);
     void checkIsMediaFilter(DemuxFilterType type);
+    void checkIsPassthroughFilter(DemuxFilterSettings configure);
     void handleAvShareMemory();
     void closeAvSharedMemory();
 
@@ -270,6 +271,7 @@ private:
     native_handle_t* mAvSharedHandle;
     uint64_t mAvSharedMemSize;
     bool mIsMediaFilter;
+    bool mIsPassthroughFilter;
 };
 }  // namespace android
 

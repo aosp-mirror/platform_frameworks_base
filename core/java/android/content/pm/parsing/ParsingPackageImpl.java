@@ -463,6 +463,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
                 FORCE_QUERYABLE,
                 CROSS_PROFILE,
                 ENABLED,
+                DISALLOW_PROFILING,
         })
         public @interface Values {}
         private static final long EXTERNAL_STORAGE = 1L;
@@ -510,6 +511,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         private static final long FORCE_QUERYABLE = 1L << 42;
         private static final long CROSS_PROFILE = 1L << 43;
         private static final long ENABLED = 1L << 44;
+        private static final long DISALLOW_PROFILING = 1L << 45;
     }
 
     private ParsingPackageImpl setBoolean(@Booleans.Values long flag, boolean value) {
@@ -1008,6 +1010,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         ApplicationInfo appInfo = toAppInfoWithoutStateWithoutFlags();
         appInfo.flags = PackageInfoWithoutStateUtils.appInfoFlags(this);
         appInfo.privateFlags = PackageInfoWithoutStateUtils.appInfoPrivateFlags(this);
+        appInfo.privateFlagsExt = PackageInfoWithoutStateUtils.appInfoPrivateFlagsExt(this);
         return appInfo;
     }
 
@@ -2088,7 +2091,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public boolean isProfileableByShell() {
-        return getBoolean(Booleans.PROFILEABLE_BY_SHELL);
+        return isProfileable() && getBoolean(Booleans.PROFILEABLE_BY_SHELL);
+    }
+
+    @Override
+    public boolean isProfileable() {
+        return !getBoolean(Booleans.DISALLOW_PROFILING);
     }
 
     @Override
@@ -2544,6 +2552,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl setProfileableByShell(boolean value) {
         return setBoolean(Booleans.PROFILEABLE_BY_SHELL, value);
+    }
+
+    @Override
+    public ParsingPackageImpl setProfileable(boolean value) {
+        return setBoolean(Booleans.DISALLOW_PROFILING, !value);
     }
 
     @Override

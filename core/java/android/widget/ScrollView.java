@@ -49,6 +49,7 @@ import android.view.animation.AnimationUtils;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 
@@ -95,20 +96,24 @@ public class ScrollView extends FrameLayout {
      *
      * Even though this field is practically final, we cannot make it final because there are apps
      * setting it via reflection and they need to keep working until they target Q.
+     * @hide
      */
     @NonNull
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768600)
-    private EdgeEffect mEdgeGlowTop;
+    @VisibleForTesting
+    public EdgeEffect mEdgeGlowTop;
 
     /**
      * Tracks the state of the bottom edge glow.
      *
      * Even though this field is practically final, we cannot make it final because there are apps
      * setting it via reflection and they need to keep working until they target Q.
+     * @hide
      */
     @NonNull
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123769386)
-    private EdgeEffect mEdgeGlowBottom;
+    @VisibleForTesting
+    public EdgeEffect mEdgeGlowBottom;
 
     /**
      * Position of the last motion event.
@@ -1791,9 +1796,15 @@ public class ScrollView extends FrameLayout {
         final boolean canFling = (mScrollY > 0 || velocityY > 0) &&
                 (mScrollY < getScrollRange() || velocityY < 0);
         if (!dispatchNestedPreFling(0, velocityY)) {
-            dispatchNestedFling(0, velocityY, canFling);
+            final boolean consumed = dispatchNestedFling(0, velocityY, canFling);
             if (canFling) {
                 fling(velocityY);
+            } else if (!consumed) {
+                if (!mEdgeGlowTop.isFinished()) {
+                    mEdgeGlowTop.onAbsorb(-velocityY);
+                } else if (!mEdgeGlowBottom.isFinished()) {
+                    mEdgeGlowBottom.onAbsorb(velocityY);
+                }
             }
         }
     }

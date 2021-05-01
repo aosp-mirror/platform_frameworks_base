@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package android.app.appsearch;
+package com.android.server.appsearch.testing;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.AppSearchSchema.PropertyConfig;
 import android.app.appsearch.AppSearchSchema.StringPropertyConfig;
+import android.app.appsearch.GenericDocument;
 
 /**
  * Encapsulates a {@link GenericDocument} that represent an email.
  *
  * <p>This class is a higher level implement of {@link GenericDocument}.
- *
- * @hide
  */
 public class AppSearchEmail extends GenericDocument {
     /** The name of the schema type for {@link AppSearchEmail} documents. */
@@ -151,9 +151,9 @@ public class AppSearchEmail extends GenericDocument {
     }
 
     /** The builder class for {@link AppSearchEmail}. */
-    public static class Builder extends GenericDocument.Builder<AppSearchEmail.Builder> {
+    public static class Builder extends GenericDocument.Builder<Builder> {
         /**
-         * Creates a new {@link AppSearchEmail.Builder}
+         * Creates a new {@link Builder}
          *
          * @param namespace The namespace of the Email.
          * @param id The ID of the Email.
@@ -164,42 +164,42 @@ public class AppSearchEmail extends GenericDocument {
 
         /** Sets the from address of {@link AppSearchEmail} */
         @NonNull
-        public AppSearchEmail.Builder setFrom(@NonNull String from) {
+        public Builder setFrom(@NonNull String from) {
             setPropertyString(KEY_FROM, from);
             return this;
         }
 
         /** Sets the destination address of {@link AppSearchEmail} */
         @NonNull
-        public AppSearchEmail.Builder setTo(@NonNull String... to) {
+        public Builder setTo(@NonNull String... to) {
             setPropertyString(KEY_TO, to);
             return this;
         }
 
         /** Sets the CC list of {@link AppSearchEmail} */
         @NonNull
-        public AppSearchEmail.Builder setCc(@NonNull String... cc) {
+        public Builder setCc(@NonNull String... cc) {
             setPropertyString(KEY_CC, cc);
             return this;
         }
 
         /** Sets the BCC list of {@link AppSearchEmail} */
         @NonNull
-        public AppSearchEmail.Builder setBcc(@NonNull String... bcc) {
+        public Builder setBcc(@NonNull String... bcc) {
             setPropertyString(KEY_BCC, bcc);
             return this;
         }
 
         /** Sets the subject of {@link AppSearchEmail} */
         @NonNull
-        public AppSearchEmail.Builder setSubject(@NonNull String subject) {
+        public Builder setSubject(@NonNull String subject) {
             setPropertyString(KEY_SUBJECT, subject);
             return this;
         }
 
         /** Sets the body of {@link AppSearchEmail} */
         @NonNull
-        public AppSearchEmail.Builder setBody(@NonNull String body) {
+        public Builder setBody(@NonNull String body) {
             setPropertyString(KEY_BODY, body);
             return this;
         }

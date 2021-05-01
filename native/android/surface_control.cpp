@@ -438,27 +438,44 @@ void ASurfaceTransaction_setGeometry(ASurfaceTransaction* aSurfaceTransaction,
                                      const ARect& destination, int32_t transform) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
+    CHECK_VALID_RECT(source);
     CHECK_VALID_RECT(destination);
-
-    Rect sourceRect = static_cast<const Rect&>(source);
-    // Adjust the source so its top and left are not negative
-    sourceRect.left = std::max(sourceRect.left, 0);
-    sourceRect.top = std::max(sourceRect.top, 0);
-    LOG_ALWAYS_FATAL_IF(sourceRect.isEmpty(), "invalid arg passed as source argument");
 
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
+    Rect sourceRect = static_cast<const Rect&>(source);
+    Rect destRect = static_cast<const Rect&>(destination);
+    // Adjust the source so its top and left are not negative
+    sourceRect.left = std::max(sourceRect.left, 0);
+    sourceRect.top = std::max(sourceRect.top, 0);
+
+    if (!sourceRect.isValid()) {
+        sourceRect.makeInvalid();
+    }
     transaction->setBufferCrop(surfaceControl, sourceRect);
 
-    float dsdx = (destination.right - destination.left) /
-            static_cast<float>(sourceRect.right - sourceRect.left);
-    float dsdy = (destination.bottom - destination.top) /
-            static_cast<float>(sourceRect.bottom - sourceRect.top);
+    int destW = destRect.width();
+    int destH = destRect.height();
+    if (destRect.left < 0) {
+        destRect.left = 0;
+        destRect.right = destW;
+    }
+    if (destRect.top < 0) {
+        destRect.top = 0;
+        destRect.bottom = destH;
+    }
 
-    transaction->setPosition(surfaceControl, destination.left - (sourceRect.left * dsdx),
-                             destination.top - (sourceRect.top * dsdy));
-    transaction->setMatrix(surfaceControl, dsdx, 0, 0, dsdy);
+    if (!sourceRect.isEmpty()) {
+        float sx = destW / static_cast<float>(sourceRect.width());
+        float sy = destH / static_cast<float>(sourceRect.height());
+        transaction->setPosition(surfaceControl, destRect.left - (sourceRect.left * sx),
+                                 destRect.top - (sourceRect.top * sy));
+        transaction->setMatrix(surfaceControl, sx, 0, 0, sy);
+    } else {
+        transaction->setPosition(surfaceControl, destRect.left, destRect.top);
+    }
+
     transaction->setTransform(surfaceControl, transform);
     bool transformToInverseDisplay = (NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY & transform) ==
             NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY;
