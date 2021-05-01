@@ -127,7 +127,7 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
                     .setSetting(supportsNonResizableMultiWindow);
             mWm.mSettingsObserver.onChange(false, supportsNonResizableMultiWindowUri);
 
-            assertEquals(mWm.mAtmService.mSupportsNonResizableMultiWindow,
+            assertEquals(mWm.mAtmService.mDevEnableNonResizableMultiWindow,
                     supportsNonResizableMultiWindow);
         }
     }
