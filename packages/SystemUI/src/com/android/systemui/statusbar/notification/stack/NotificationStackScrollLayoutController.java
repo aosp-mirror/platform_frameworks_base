@@ -740,6 +740,10 @@ public class NotificationStackScrollLayoutController {
         return true;
     }
 
+    public boolean isViewAffectedBySwipe(ExpandableView expandableView) {
+        return mNotificationRoundnessManager.isViewAffectedBySwipe(expandableView);
+    }
+
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
         mView.addOnExpandedHeightChangedListener(listener);
     }

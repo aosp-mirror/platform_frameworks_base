@@ -51,7 +51,8 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
-import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.INVALID_UID;
@@ -14603,15 +14604,20 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     void tempAllowlistUidLocked(int targetUid, long duration, @ReasonCode int reasonCode,
-            String reason, int type, int callingUid) {
+            String reason, @TempAllowListType int type, int callingUid) {
         synchronized (mProcLock) {
+            // The temp allowlist type could change according to the reasonCode.
+            type = mLocalDeviceIdleController.getTempAllowListType(reasonCode, type);
+            if (type == TEMPORARY_ALLOW_LIST_TYPE_NONE) {
+                return;
+            }
             mPendingTempAllowlist.put(targetUid,
                     new PendingTempAllowlist(targetUid, duration, reasonCode, reason, type,
                             callingUid));
             setUidTempAllowlistStateLSP(targetUid, true);
             mUiHandler.obtainMessage(PUSH_TEMP_ALLOWLIST_UI_MSG).sendToTarget();
 
-            if (type == TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+            if (type == TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
                 mFgsStartTempAllowList.add(targetUid, duration,
                         new FgsTempAllowListItem(duration, reasonCode, reason, callingUid));
             }
@@ -15285,7 +15291,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (mProcLock) {
                     mDeviceIdleTempAllowlist = appids;
                     if (adding) {
-                        if (type == TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+                        if (type == TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
                             mFgsStartTempAllowList.add(changingUid, durationMs,
                                     new FgsTempAllowListItem(durationMs, reasonCode, reason,
                                     callingUid));
@@ -16150,6 +16156,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 @NonNull String packageName) {
             synchronized (ActivityManagerService.this) {
                 return mServices.canAllowWhileInUsePermissionInFgsLocked(pid, uid, packageName);
+            }
+        }
+
+        @Override
+        public @TempAllowListType int getPushMessagingOverQuotaBehavior() {
+            synchronized (ActivityManagerService.this) {
+                return mConstants.mPushMessagingOverQuotaBehavior;
             }
         }
     }

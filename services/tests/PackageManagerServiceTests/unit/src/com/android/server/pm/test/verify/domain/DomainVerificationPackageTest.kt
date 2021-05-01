@@ -22,6 +22,7 @@ import android.content.pm.PackageUserState
 import android.content.pm.Signature
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_MODIFIABLE_VERIFIED
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_NO_RESPONSE
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_SUCCESS
@@ -48,6 +49,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 class DomainVerificationPackageTest {
@@ -295,11 +298,95 @@ class DomainVerificationPackageTest {
 
         service.addPackage(pkg1)
 
+        assertAddPackageActivePendingRestoredState(service)
+    }
+
+    @Test
+    fun addPackagePendingStripInvalidDomains() {
+        val xml = addPackagePendingOrRestoredWithInvalidDomains()
+        val service = makeService(pkg1, pkg2)
+        xml.byteInputStream().use {
+            service.readSettings(Xml.resolvePullParser(it))
+        }
+
+        service.addPackage(pkg1)
+
+        val userState = service.getUserState(pkg1.getName())
+        assertThat(userState.packageName).isEqualTo(pkg1.getName())
+        assertThat(userState.identifier).isEqualTo(pkg1.domainSetId)
+        assertThat(userState.isLinkHandlingAllowed).isEqualTo(false)
+        assertThat(userState.user.identifier).isEqualTo(USER_ID)
+        assertThat(userState.hostToStateMap).containsExactlyEntriesIn(mapOf(
+                DOMAIN_1 to DOMAIN_STATE_VERIFIED,
+                DOMAIN_2 to DOMAIN_STATE_SELECTED,
+        ))
+
+        assertAddPackageActivePendingRestoredState(service)
+    }
+
+    @Test
+    fun addPackageRestoredStripInvalidDomains() {
+        val xml = addPackagePendingOrRestoredWithInvalidDomains()
+        val service = makeService(pkg1, pkg2)
+        xml.byteInputStream().use {
+            service.restoreSettings(Xml.resolvePullParser(it))
+        }
+
+        service.addPackage(pkg1)
+
+        assertAddPackageActivePendingRestoredState(service, expectRestore = true)
+    }
+
+    /**
+     * Shared string that contains invalid [DOMAIN_3] and [DOMAIN_4] which should be stripped from
+     * the final state.
+     */
+    private fun addPackagePendingOrRestoredWithInvalidDomains(): String =
+        // language=XML
+        """
+            <?xml?>
+            <domain-verifications>
+                <active>
+                    <package-state
+                        packageName="${pkg1.getName()}"
+                        id="${pkg1.domainSetId}"
+                        signature="$DIGEST_ONE"
+                        >
+                        <state>
+                            <domain name="$DOMAIN_1" state="$STATE_SUCCESS"/>
+                            <domain name="$DOMAIN_3" state="$STATE_SUCCESS"/>
+                        </state>
+                        <user-states>
+                            <user-state userId="$USER_ID" allowLinkHandling="false">
+                                <enabled-hosts>
+                                    <host name="$DOMAIN_2"/>
+                                    <host name="$DOMAIN_4"/>
+                                </enabled-hosts>
+                            </user-state>
+                            <user-state userId="${USER_ID + 10}" allowLinkHandling="true">
+                                <enabled-hosts>
+                                    <host name="$DOMAIN_4"/>
+                                </enabled-hosts>
+                            </user-state>
+                        </user-states>
+                    </package-state>
+                </active>
+            </domain-verifications>
+        """.trimIndent()
+
+    /**
+     * Shared method to assert the same output when testing adding pkg1.
+     */
+    private fun assertAddPackageActivePendingRestoredState(
+            service: DomainVerificationService,
+            expectRestore: Boolean = false
+    ) {
         val info = service.getInfo(pkg1.getName())
         assertThat(info.packageName).isEqualTo(pkg1.getName())
         assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
         assertThat(info.hostToStateMap).containsExactlyEntriesIn(mapOf(
-                DOMAIN_1 to STATE_SUCCESS,
+                // To share the majority of code, special case restoration to check a different int
+                DOMAIN_1 to if (expectRestore) STATE_MODIFIABLE_VERIFIED else STATE_SUCCESS,
                 DOMAIN_2 to STATE_NO_RESPONSE,
         ))
 
@@ -315,6 +402,23 @@ class DomainVerificationPackageTest {
 
         assertThat(service.queryValidVerificationPackageNames())
                 .containsExactly(pkg1.getName())
+
+        // Re-enable link handling to check that the 3/4 domains were stripped
+        service.setDomainVerificationLinkHandlingAllowed(pkg1.getName(), true, USER_ID)
+
+        assertThat(service.getOwnersForDomain(DOMAIN_1, USER_ID))
+                .containsExactly(DomainOwner(PKG_ONE, false))
+
+        assertThat(service.getOwnersForDomain(DOMAIN_2, USER_ID))
+                .containsExactly(DomainOwner(PKG_ONE, true))
+
+        assertThat(service.getOwnersForDomain(DOMAIN_2, USER_ID + 10)).isEmpty()
+
+        listOf(DOMAIN_3, DOMAIN_4).forEach { domain ->
+            listOf(USER_ID, USER_ID + 10).forEach {  userId ->
+                assertThat(service.getOwnersForDomain(domain, userId)).isEmpty()
+            }
+        }
     }
 
     @Test
@@ -513,12 +617,141 @@ class DomainVerificationPackageTest {
         assertThat(service.queryValidVerificationPackageNames()).containsExactly(pkgName)
     }
 
+    @Test
+    fun backupAndRestore() {
+        // This test acts as a proxy for true user restore through PackageManager,
+        // as that's much harder to test for real.
+
+        val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, SIGNATURE_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, SIGNATURE_TWO,
+            listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3))
+        val serviceBefore = makeService(pkg1, pkg2)
+        serviceBefore.addPackage(pkg1)
+        serviceBefore.addPackage(pkg2)
+
+        serviceBefore.setStatus(pkg1.domainSetId, setOf(DOMAIN_1), STATE_SUCCESS)
+        serviceBefore.setDomainVerificationLinkHandlingAllowed(pkg1.getName(), false, 10)
+        serviceBefore.setUserSelection(pkg2.domainSetId, setOf(DOMAIN_2), true, 0)
+        serviceBefore.setUserSelection(pkg2.domainSetId, setOf(DOMAIN_3), true, 10)
+
+        fun assertExpectedState(service: DomainVerificationService) {
+            service.assertState(
+                pkg1, userId = 0, hostToStateMap = mapOf(
+                    DOMAIN_1 to DOMAIN_STATE_VERIFIED,
+                    DOMAIN_2 to DOMAIN_STATE_NONE,
+                )
+            )
+
+            service.assertState(
+                pkg1, userId = 10, linkHandingAllowed = false, hostToStateMap = mapOf(
+                    DOMAIN_1 to DOMAIN_STATE_VERIFIED,
+                    DOMAIN_2 to DOMAIN_STATE_NONE,
+                )
+            )
+
+            service.assertState(
+                pkg2, userId = 0, hostToStateMap = mapOf(
+                    DOMAIN_1 to DOMAIN_STATE_NONE,
+                    DOMAIN_2 to DOMAIN_STATE_SELECTED,
+                    DOMAIN_3 to DOMAIN_STATE_NONE
+                )
+            )
+
+            service.assertState(
+                pkg2, userId = 10, hostToStateMap = mapOf(
+                    DOMAIN_1 to DOMAIN_STATE_NONE,
+                    DOMAIN_2 to DOMAIN_STATE_NONE,
+                    DOMAIN_3 to DOMAIN_STATE_SELECTED,
+                )
+            )
+        }
+
+        assertExpectedState(serviceBefore)
+
+        val backupUser0 = ByteArrayOutputStream().use {
+            serviceBefore.writeSettings(Xml.resolveSerializer(it), true, 0)
+            it.toByteArray()
+        }
+
+        val backupUser1 = ByteArrayOutputStream().use {
+            serviceBefore.writeSettings(Xml.resolveSerializer(it), true, 10)
+            it.toByteArray()
+        }
+
+        val serviceAfter = makeService(pkg1, pkg2)
+        serviceAfter.addPackage(pkg1)
+        serviceAfter.addPackage(pkg2)
+
+        // Check the state is default before the restoration applies
+        listOf(0, 10).forEach {
+            serviceAfter.assertState(
+                pkg1, userId = it, hostToStateMap = mapOf(
+                    DOMAIN_1 to DOMAIN_STATE_NONE,
+                    DOMAIN_2 to DOMAIN_STATE_NONE,
+                )
+            )
+        }
+
+        listOf(0, 10).forEach {
+            serviceAfter.assertState(
+                pkg2, userId = it, hostToStateMap = mapOf(
+                    DOMAIN_1 to DOMAIN_STATE_NONE,
+                    DOMAIN_2 to DOMAIN_STATE_NONE,
+                    DOMAIN_3 to DOMAIN_STATE_NONE,
+                )
+            )
+        }
+
+        ByteArrayInputStream(backupUser1).use {
+            serviceAfter.restoreSettings(Xml.resolvePullParser(it))
+        }
+
+        // Assert user 1 was restored
+        serviceAfter.assertState(
+            pkg1, userId = 10, linkHandingAllowed = false, hostToStateMap = mapOf(
+                DOMAIN_1 to DOMAIN_STATE_VERIFIED,
+                DOMAIN_2 to DOMAIN_STATE_NONE,
+            )
+        )
+
+        serviceAfter.assertState(
+            pkg2, userId = 10, hostToStateMap = mapOf(
+                DOMAIN_1 to DOMAIN_STATE_NONE,
+                DOMAIN_2 to DOMAIN_STATE_NONE,
+                DOMAIN_3 to DOMAIN_STATE_SELECTED,
+            )
+        )
+
+        // User 0 has domain verified (since that's not user-specific)
+        serviceAfter.assertState(
+            pkg1, userId = 0, hostToStateMap = mapOf(
+                DOMAIN_1 to DOMAIN_STATE_VERIFIED,
+                DOMAIN_2 to DOMAIN_STATE_NONE,
+            )
+        )
+
+        // But user 0 is missing any user selected state
+        serviceAfter.assertState(
+            pkg2, userId = 0, hostToStateMap = mapOf(
+                DOMAIN_1 to DOMAIN_STATE_NONE,
+                DOMAIN_2 to DOMAIN_STATE_NONE,
+                DOMAIN_3 to DOMAIN_STATE_NONE,
+            )
+        )
+
+        ByteArrayInputStream(backupUser0).use {
+            serviceAfter.restoreSettings(Xml.resolvePullParser(it))
+        }
+
+        assertExpectedState(serviceAfter)
+    }
+
     private fun DomainVerificationService.getInfo(pkgName: String) =
             getDomainVerificationInfo(pkgName)
                     .also { assertThat(it).isNotNull() }!!
 
-    private fun DomainVerificationService.getUserState(pkgName: String) =
-            getDomainVerificationUserState(pkgName, USER_ID)
+    private fun DomainVerificationService.getUserState(pkgName: String, userId: Int = USER_ID) =
+            getDomainVerificationUserState(pkgName, userId)
                     .also { assertThat(it).isNotNull() }!!
 
     private fun makeService(
@@ -548,7 +781,7 @@ class DomainVerificationPackageTest {
             setConnection(mockThrowOnUnmocked {
                 whenever(filterAppAccess(anyString(), anyInt(), anyInt())) { false }
                 whenever(doesUserExist(0)) { true }
-                whenever(doesUserExist(1)) { true }
+                whenever(doesUserExist(10)) { true }
                 whenever(scheduleWriteSettings())
 
                 // Need to provide an internal UID so some permission checks are ignored
@@ -600,8 +833,24 @@ class DomainVerificationPackageTest {
         whenever(this.domainSetId) { domainSetId }
         whenever(getInstantApp(anyInt())) { false }
         whenever(firstInstallTime) { 0L }
-        whenever(readUserState(USER_ID)) { PackageUserState() }
+        whenever(readUserState(0)) { PackageUserState() }
+        whenever(readUserState(10)) { PackageUserState() }
         whenever(signatures) { arrayOf(Signature(signature)) }
         whenever(isSystem) { isSystemApp }
+    }
+
+    private fun DomainVerificationService.assertState(
+        pkg: PackageSetting,
+        userId: Int,
+        linkHandingAllowed: Boolean = true,
+        hostToStateMap: Map<String, Int>
+    ) {
+        getUserState(pkg.getName(), userId).apply {
+            assertThat(this.packageName).isEqualTo(pkg.getName())
+            assertThat(this.identifier).isEqualTo(pkg.domainSetId)
+            assertThat(this.isLinkHandlingAllowed).isEqualTo(linkHandingAllowed)
+            assertThat(this.user.identifier).isEqualTo(userId)
+            assertThat(this.hostToStateMap).containsExactlyEntriesIn(hostToStateMap)
+        }
     }
 }

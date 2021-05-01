@@ -55,6 +55,7 @@ public class FingerprintGenerateChallengeClient
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "preEnroll failed", e);
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 }

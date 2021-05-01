@@ -213,6 +213,17 @@ public class BundleUtilTest {
                 .isNotEqualTo(BundleUtil.deepHashCode(inputs[1]));
     }
 
+    @Test
+    public void testDeepCopy() {
+        Bundle input = createThoroughBundle();
+        Bundle output = BundleUtil.deepCopy(input);
+        assertThat(input).isNotSameInstanceAs(output);
+        assertThat(BundleUtil.deepEquals(input, output)).isTrue();
+
+        output.getIntegerArrayList("integerArrayList").add(5);
+        assertThat(BundleUtil.deepEquals(input, output)).isFalse();
+    }
+
     private static Bundle createThoroughBundle() {
         Bundle toy1 = new Bundle();
         toy1.putString("a", "a");

@@ -787,15 +787,16 @@
     <style name="TextAppearance.ControlSetup">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textColor">@color/control_primary_text</item>
-        <item name="android:singleLine">true</item>
     </style>
 
     <style name="TextAppearance.ControlSetup.Title">
         <item name="android:textSize">@dimen/controls_setup_title</item>
+        <item name="android:singleLine">true</item>
     </style>
 
     <style name="TextAppearance.ControlSetup.Subtitle">
         <item name="android:textSize">@dimen/controls_setup_subtitle</item>
+        <item name="android:maxLines">2</item>
     </style>
 
     <!-- The attributes used for title (textAppearanceLarge) and message (textAppearanceMedium)

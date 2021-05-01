@@ -74,13 +74,17 @@ public interface OnReceiveContentListener {
      * preserve the common behavior for inserting text. See the class javadoc for a sample
      * implementation.
      *
-     * <p>If implementing handling for text: if the view has a selection, the selection should
-     * be overwritten by the passed-in content; if there's no selection, the passed-in content
-     * should be inserted at the current cursor position.
-     *
-     * <p>If implementing handling for non-text content (e.g. images): the content may be
-     * inserted inline, or it may be added as an attachment (could potentially be shown in a
-     * completely separate view).
+     * <p>Handling different content
+     * <ul>
+     *     <li>Text. If the {@link ContentInfo#getSource() source} is
+     *     {@link ContentInfo#SOURCE_AUTOFILL autofill}, the view's content should be fully
+     *     replaced by the passed-in text. For sources other than autofill, the passed-in text
+     *     should overwrite the current selection or be inserted at the current cursor position
+     *     if there is no selection.
+     *     <li>Non-text content (e.g. images). The content may be inserted inline if the widget
+     *     supports this, or it may be added as an attachment (could potentially be shown in a
+     *     completely separate view).
+     * </ul>
      *
      * @param view The view where the content insertion was requested.
      * @param payload The content to insert and related metadata.

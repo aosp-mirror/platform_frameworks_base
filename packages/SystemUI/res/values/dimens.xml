@@ -181,6 +181,9 @@
     <!-- Radius for notifications corners without adjacent notifications -->
     <dimen name="notification_corner_radius">28dp</dimen>
 
+    <!-- Distance over which notification corner animations run, near the shelf while scrolling. -->
+    <dimen name="notification_corner_animation_distance">48dp</dimen>
+
     <!-- Radius for notifications corners with adjacent notifications -->
     <dimen name="notification_corner_radius_small">4dp</dimen>
 
@@ -1237,7 +1240,7 @@
     <!-- Icon size of Ongoing App Ops chip -->
     <dimen name="ongoing_appops_chip_icon_size">16dp</dimen>
     <!-- Radius of Ongoing App Ops chip corners -->
-    <dimen name="ongoing_appops_chip_bg_corner_radius">16dp</dimen>
+    <dimen name="ongoing_appops_chip_bg_corner_radius">28dp</dimen>
 
     <dimen name="ongoing_appops_dialog_side_margins">@dimen/notification_shade_content_margin_horizontal</dimen>
 
@@ -1276,8 +1279,10 @@
     <dimen name="qs_media_disabled_seekbar_vertical_padding">36dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
-    <dimen name="qs_aa_media_rec_album_size">80dp</dimen>
-    <dimen name="qs_aa_media_rec_icon_size">20dp</dimen>
+    <dimen name="qs_aa_media_rec_header_icon_padding">10dp</dimen>
+    <dimen name="qs_aa_media_rec_header_icon_size">18dp</dimen>
+    <dimen name="qs_aa_media_rec_album_size">72dp</dimen>
+    <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
 
     <!-- Window magnification -->
     <dimen name="magnification_border_drag_size">35dp</dimen>
