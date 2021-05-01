@@ -46817,12 +46817,15 @@ package android.view {
     method public void onActionViewExpanded();
   }
 
-  public final class ContentInfo {
+  public final class ContentInfo implements android.os.Parcelable {
+    method public int describeContents();
     method @NonNull public android.content.ClipData getClip();
     method @Nullable public android.os.Bundle getExtras();
     method public int getFlags();
     method @Nullable public android.net.Uri getLinkUri();
     method public int getSource();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.ContentInfo> CREATOR;
     field public static final int FLAG_CONVERT_TO_PLAIN_TEXT = 1; // 0x1
     field public static final int SOURCE_APP = 0; // 0x0
     field public static final int SOURCE_AUTOFILL = 4; // 0x4
