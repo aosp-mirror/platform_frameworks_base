@@ -3517,6 +3517,41 @@
     <!-- True if the device supports split screen as a form of multi-window. -->
     <bool name="config_supportsSplitScreenMultiWindow">true</bool>
 
+    <!-- Whether the device supports non-resizable activity in multi windowing modes.
+         -1: The device doesn't support non-resizable in multi windowing modes.
+          0: The device supports non-resizable in multi windowing modes only if this is a large
+             screen (smallest width >= {@link config_largeScreenSmallestScreenWidthDp}).
+          1: The device always supports non-resizable in multi windowing modes.
+    -->
+    <integer name="config_supportsNonResizableMultiWindow">0</integer>
+
+    <!-- Whether the device checks the activity min width/height to determine if it can be shown in
+         multi windowing modes.
+         -1: The device ignores the activity min width/height when determining if it can be shown in
+             multi windowing modes.
+          0: If this is a small screen (smallest width <
+             {@link config_largeScreenSmallestScreenWidthDp}), the device compares the activity min
+             width/height with the min multi windowing modes dimensions the device supports to
+             determine if the activity can be shown in multi windowing modes
+          1: The device always compare the activity min width/height with the min multi windowing
+             modes dimensions {@link config_minPercentageMultiWindowSupportWidth} the device
+             supports to determine if the activity can be shown in multi windowing modes.
+    -->
+    <integer name="config_respectsActivityMinWidthHeightMultiWindow">0</integer>
+
+    <!-- This value is only used when the device checks activity min width/height to determine if it
+         can be shown in multi windowing modes.
+         If the activity min width/height is greater than this percentage of the display smallest
+         width, it will not be allowed to be shown in multi windowing modes.
+         The value should be between [0 - 1].
+    -->
+    <item name="config_minPercentageMultiWindowSupportWidth" format="float" type="dimen">0.3</item>
+
+    <!-- If the display smallest screen width is greater or equal to this value, we will treat it
+         as a large screen device, which will have some multi window features enabled by default.
+    -->
+    <integer name="config_largeScreenSmallestScreenWidthDp">600</integer>
+
     <!-- True if the device supports running activities on secondary displays. -->
     <bool name="config_supportsMultiDisplay">true</bool>
 

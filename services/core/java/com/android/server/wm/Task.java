@@ -1994,7 +1994,25 @@ class Task extends WindowContainer<WindowContainer> {
 
     boolean supportsMultiWindow() {
         return mAtmService.mSupportsMultiWindow
-                && (isResizeable() || mAtmService.mSupportsNonResizableMultiWindow);
+                && (isResizeable() || mAtmService.mDevEnableNonResizableMultiWindow);
+    }
+
+    // TODO(b/176061101) replace supportsMultiWindow() after fixing tests.
+    boolean supportsMultiWindow2() {
+        if (!mAtmService.mSupportsMultiWindow) {
+            return false;
+        }
+        final TaskDisplayArea tda = getDisplayArea();
+        if (tda == null) {
+            return false;
+        }
+
+        if (!isResizeable() && !tda.supportsNonResizableMultiWindow()) {
+            // Not support non-resizable in multi window.
+            return false;
+        }
+
+        return tda.supportsActivityMinWidthHeightMultiWindow(mMinWidth, mMinHeight);
     }
 
     /**
