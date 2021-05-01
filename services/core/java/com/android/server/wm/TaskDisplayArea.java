@@ -1660,6 +1660,62 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         return windowingMode;
     }
 
+    /**
+     * Whether we can show non-resizable activities in multi window below this
+     * {@link TaskDisplayArea}
+     */
+    boolean supportsNonResizableMultiWindow() {
+        final int configSupportsNonResizableMultiWindow =
+                mAtmService.mSupportsNonResizableMultiWindow;
+        if (mAtmService.mDevEnableNonResizableMultiWindow
+                || configSupportsNonResizableMultiWindow == 1) {
+            // Device override to support.
+            return true;
+        }
+        if (configSupportsNonResizableMultiWindow == -1) {
+            // Device override to not support.
+            return false;
+        }
+        // Support on large screen.
+        return isLargeEnoughForMultiWindow();
+    }
+
+    /**
+     * Whether we can show activity requesting the given min width/height in multi window below
+     * this {@link TaskDisplayArea}.
+     */
+    boolean supportsActivityMinWidthHeightMultiWindow(int minWidth, int minHeight) {
+        final int configRespectsActivityMinWidthHeightMultiWindow =
+                mAtmService.mRespectsActivityMinWidthHeightMultiWindow;
+        if (minWidth <= 0 && minHeight <= 0) {
+            // No request min width/height.
+            return true;
+        }
+        if (configRespectsActivityMinWidthHeightMultiWindow == -1) {
+            // Device override to ignore min width/height.
+            return true;
+        }
+        if (configRespectsActivityMinWidthHeightMultiWindow == 0
+                && isLargeEnoughForMultiWindow()) {
+            // Ignore min width/height on large screen.
+            return true;
+        }
+        // Check if the request min width/height is supported in multi window.
+        final int maxSupportMinDimensions = (int) (mAtmService.mMinPercentageMultiWindowSupportWidth
+                * getConfiguration().smallestScreenWidthDp
+                * mDisplayContent.getDisplayMetrics().density);
+        return minWidth <= maxSupportMinDimensions && minHeight <= maxSupportMinDimensions;
+    }
+
+    /**
+     * Whether this is large enough to support non-resizable, and activities with min width/height
+     * in multi window.
+     */
+    private boolean isLargeEnoughForMultiWindow() {
+        return getConfiguration().smallestScreenWidthDp
+                >= mAtmService.mLargeScreenSmallestScreenWidthDp;
+    }
+
     boolean isTopRootTask(Task rootTask) {
         return rootTask == getTopRootTask();
     }
