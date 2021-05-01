@@ -82,7 +82,7 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         /**
          * When on the lockscreen, use the FalsingManager to help detect errant touches
          */
-        void setFalsingManager(FalsingManager falsingManager);
+        void setFalsingManager(com.android.systemui.plugins.FalsingManager falsingManager);
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */
