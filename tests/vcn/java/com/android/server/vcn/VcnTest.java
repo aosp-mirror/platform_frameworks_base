@@ -388,8 +388,9 @@ public class VcnTest {
         final ContentObserver contentObserver = captor.getValue();
 
         // Start VcnGatewayConnections
+        final NetworkRequestListener requestListener = verifyAndGetRequestListener();
         mVcn.setMobileDataEnabled(startingToggleState);
-        triggerVcnRequestListeners(verifyAndGetRequestListener());
+        triggerVcnRequestListeners(requestListener);
         final Map<VcnGatewayConnectionConfig, VcnGatewayConnection> gateways =
                 mVcn.getVcnGatewayConnectionConfigMap();
 
@@ -411,6 +412,9 @@ public class VcnTest {
             }
         }
 
+        if (startingToggleState != endingToggleState) {
+            verify(mVcnNetworkProvider).resendAllRequests(requestListener);
+        }
         assertEquals(endingToggleState, mVcn.isMobileDataEnabled());
     }
 
