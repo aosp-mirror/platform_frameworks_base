@@ -3106,10 +3106,7 @@ public final class InputMethodManager {
                 matrixValues = new float[9];
                 matrix.getValues(matrixValues);
             }
-            final Completable.Void value = Completable.createVoid();
-            mService.reportActivityView(
-                    mClient, childDisplayId, matrixValues, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            mService.reportActivityViewAsync(mClient, childDisplayId, matrixValues);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
