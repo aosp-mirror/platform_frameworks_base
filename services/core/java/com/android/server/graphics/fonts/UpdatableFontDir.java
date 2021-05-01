@@ -24,6 +24,7 @@ import android.graphics.fonts.FontManager;
 import android.graphics.fonts.FontUpdateRequest;
 import android.graphics.fonts.SystemFonts;
 import android.os.FileUtils;
+import android.os.LocaleList;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.FontConfig;
@@ -524,7 +525,7 @@ final class UpdatableFontDir {
                     font.getFontStyle(), font.getIndex(), font.getFontVariationSettings(), null));
         }
         return new FontConfig.FontFamily(resolvedFonts, fontFamily.getName(),
-                null, FontConfig.FontFamily.VARIANT_DEFAULT);
+                LocaleList.getEmptyLocaleList(), FontConfig.FontFamily.VARIANT_DEFAULT);
     }
 
     Map<String, File> getPostScriptMap() {
