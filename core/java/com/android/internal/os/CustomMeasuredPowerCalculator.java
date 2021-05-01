@@ -20,7 +20,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 import android.util.SparseArray;
 
@@ -47,15 +46,6 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
         final double[] customMeasuredPowerMah = calculateMeasuredEnergiesMah(
                 batteryStats.getCustomConsumerMeasuredBatteryConsumptionUC());
         if (customMeasuredPowerMah != null) {
-            final SystemBatteryConsumer.Builder systemBatteryConsumerBuilder =
-                    builder.getOrCreateSystemBatteryConsumerBuilder(
-                            SystemBatteryConsumer.DRAIN_TYPE_CUSTOM);
-            for (int i = 0; i < customMeasuredPowerMah.length; i++) {
-                systemBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
-                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i,
-                        customMeasuredPowerMah[i]);
-            }
-
             final AggregateBatteryConsumer.Builder deviceBatteryConsumerBuilder =
                     builder.getAggregateBatteryConsumerBuilder(
                             BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
