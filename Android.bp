@@ -67,6 +67,7 @@ filegroup {
     name: "framework-non-updatable-sources",
     srcs: [
         // Java/AIDL sources under frameworks/base
+        ":framework-annotations",
         ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
@@ -338,46 +339,6 @@ java_library {
 platform_compat_config {
     name: "framework-platform-compat-config",
     src: ":framework-minus-apex",
-}
-
-filegroup {
-    name: "framework-annotations",
-    srcs: [
-        "core/java/android/annotation/AnyThread.java",
-        "core/java/android/annotation/AppIdInt.java",
-        "core/java/android/annotation/BytesLong.java",
-        "core/java/android/annotation/CallbackExecutor.java",
-        "core/java/android/annotation/CallSuper.java",
-        "core/java/android/annotation/CheckResult.java",
-        "core/java/android/annotation/CurrentTimeMillisLong.java",
-        "core/java/android/annotation/CurrentTimeSecondsLong.java",
-        "core/java/android/annotation/DrawableRes.java",
-        "core/java/android/annotation/DurationMillisLong.java",
-        "core/java/android/annotation/Hide.java",
-        "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/IntRange.java",
-        "core/java/android/annotation/LongDef.java",
-        "core/java/android/annotation/MainThread.java",
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/RequiresPermission.java",
-        "core/java/android/annotation/SdkConstant.java",
-        "core/java/android/annotation/StringDef.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/SystemService.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/android/annotation/UserIdInt.java",
-        "core/java/android/annotation/WorkerThread.java",
-        "core/java/com/android/internal/annotations/GuardedBy.java",
-        "core/java/com/android/internal/annotations/Immutable.java",
-        "core/java/com/android/internal/annotations/VisibleForTesting.java",
-    ],
-}
-
-java_library {
-    name: "framework-annotations-lib",
-    srcs: [":framework-annotations"],
-    sdk_version: "core_current",
 }
 
 filegroup {
