@@ -1864,10 +1864,9 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void reportActivityView(IInputMethodClient parentClient, int childDisplayId,
-                float[] matrixValues, IVoidResultCallback resultCallback) {
+        public void reportActivityViewAsync(IInputMethodClient parentClient, int childDisplayId,
+                float[] matrixValues) {
             reportNotSupported();
-            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread

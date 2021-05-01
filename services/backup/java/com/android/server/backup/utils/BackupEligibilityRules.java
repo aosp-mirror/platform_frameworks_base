@@ -28,6 +28,7 @@ import android.app.backup.BackupTransport;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.app.compat.CompatChanges;
+import android.compat.annotation.Overridable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -76,6 +77,7 @@ public class BackupEligibilityRules {
      * (device-to-device) migrations.
      */
     @ChangeId
+    @Overridable
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     static final long IGNORE_ALLOW_BACKUP_IN_D2D = 183147249L;
 
