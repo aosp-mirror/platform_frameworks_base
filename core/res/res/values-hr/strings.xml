@@ -2016,7 +2016,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"IPAK OTVORI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Otkrivena je štetna aplikacija"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> želi prikazivati isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"Uređivanje"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"Uredi"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Uređaj će vibrirati za pozive i obavijesti"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Zvučni signal poziva i obavijesti bit će isključen"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Promjene sustava"</string>

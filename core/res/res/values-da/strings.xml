@@ -1649,7 +1649,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Deaktiver genvej"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Brug genvej"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ombytning af farver"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Korriger farve"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Farvekorrigering"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Lydstyrkeknapperne blev holdt nede. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> er aktiveret."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Lydstyrkeknapperne blev holdt nede. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> er deaktiveret."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Hold begge lydstyrkeknapper nede i tre sekunder for at bruge <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
