@@ -4367,6 +4367,14 @@ public class CarrierConfigManager {
     public static final String KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL =
             "display_no_data_notification_on_permanent_failure_bool";
 
+    /**
+     * Determine whether unthrottle data retry when tracking area code (TAC/LAC) from cell changes
+     *
+     * @hide
+     */
+    public static final String KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL =
+            "unthrottle_data_retry_when_tac_changes_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -4934,6 +4942,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_ENABLE_2G, false);
         sDefaults.putBoolean(KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL, false);
+        sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
     }
 
     /**
