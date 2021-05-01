@@ -1648,7 +1648,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Дайын"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Төте жолды өшіру"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Төте жолды пайдалану"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Түстер инверсиясы"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Түс инверсиясы"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Түсті түзету"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Пайдаланушы дыбыс деңгейі пернелерін басып ұстап тұрды. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қосулы."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Дыбыс деңгейі пернелерін басып тұрған соң, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өшірілді."</string>

@@ -2049,7 +2049,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"VSEENO ODPRI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zaznana je bila škodljiva aplikacija"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati izreze aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"Urejanje"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"Uredi"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibriranje bo vklopljeno za klice in obvestila"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Zvonjenje bo izklopljeno za klice in obvestila"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistemske spremembe"</string>

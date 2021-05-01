@@ -238,7 +238,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"स्क्रिन बन्द"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"बन्द गर्नुहोस्"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"पावर"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"पुनः सुरु गर्नुहोस्"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"रिस्टार्ट गर्नुहोस्"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"आपत्‌कालीन"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"बग रिपोर्ट"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"सत्रको अन्त्य गर्नुहोस्"</string>

@@ -1492,7 +1492,7 @@
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"Готово"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Очистка единого хранилища…"</string>
-    <string name="share" msgid="4157615043345227321">"Отправить"</string>
+    <string name="share" msgid="4157615043345227321">"Поделиться"</string>
     <string name="find" msgid="5015737188624767706">"Найти"</string>
     <string name="websearch" msgid="5624340204512793290">"Веб-поиск"</string>
     <string name="find_next" msgid="5341217051549648153">"Cлед."</string>
@@ -2049,7 +2049,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ОТКРЫТЬ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Обнаружено вредоносное приложение"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Приложение \"<xliff:g id="APP_0">%1$s</xliff:g>\" запрашивает разрешение на показ фрагментов приложения \"<xliff:g id="APP_2">%2$s</xliff:g>\"."</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"Редактировать"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"Изменить"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Для звонков и уведомлений включен вибросигнал."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Для звонков и уведомлений отключен звук."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Системные изменения"</string>

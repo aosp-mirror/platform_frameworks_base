@@ -457,7 +457,7 @@
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Durch den Administrator verwaltet"</string>
     <string name="disabled" msgid="8017887509554714950">"Deaktiviert"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Zugelassen"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"Nicht zulässig"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"Nicht zugelassen"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Installieren unbekannter Apps"</string>
     <string name="home" msgid="973834627243661438">"Startseite \"Einstellungen\""</string>
   <string-array name="battery_labels">
