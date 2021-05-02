@@ -2287,8 +2287,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Representasyon ng brand ng application"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Tingnan ang mga setting ng pag-access"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"Makikita at makokontrol ng <xliff:g id="SERVICE_NAME">%s</xliff:g> ang iyong screen. I-tap para suriin."</string>
-    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
-    <skip />
-    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
-    <skip />
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Naisalin ang <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Naisalin ang mensahe sa <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> mula sa <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
 </resources>
