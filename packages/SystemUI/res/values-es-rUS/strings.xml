@@ -92,19 +92,15 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturar más"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Descartar captura de pantalla"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Vista previa de la captura de pantalla"</string>
-    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
-    <skip />
-    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
-    <skip />
-    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
-    <skip />
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Límite superior: <xliff:g id="PERCENT">%1$d</xliff:g> por ciento"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Límite inferior: <xliff:g id="PERCENT">%1$d</xliff:g> por ciento"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Límite izquierdo: <xliff:g id="PERCENT">%1$d</xliff:g> por ciento"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Límite derecho: <xliff:g id="PERCENT">%1$d</xliff:g> por ciento"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Grabadora de pantalla"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Procesando grabación pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación constante para una sesión de grabación de pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"¿Comenzar a grabar?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la grabación, el sistema de Android puede capturar la información sensible que aparezca en la pantalla o que se reproduzca en el dispositivo. Se incluyen contraseñas, información de pago, fotos, mensajes y audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la grabación, el sistema Android puede capturar la información sensible que aparezca en la pantalla o que se reproduzca en el dispositivo. Se incluyen contraseñas, información de pago, fotos, mensajes y audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabar audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio del dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sonidos del dispositivo, como música, llamadas y tonos"</string>
@@ -141,6 +137,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Teléfono"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Asistente voz"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloquear"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloqueado"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Esperando huella dactilar"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Desbloquear sin utilizar la huella dactilar"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Escaneando rostro"</string>
@@ -225,7 +222,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Activar datos móviles"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Desactivados"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Conexión Bluetooth"</string>
-    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modo avión"</string>
+    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modo de avión"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN activada"</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"Sin tarjeta SIM"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Abrir detalles de la batería"</string>
@@ -346,7 +343,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Audífonos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Activando…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Brillo"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotación automática"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Girar automáticamente"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Girar la pantalla automáticamente"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"Modo de <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Rotación bloqueada"</string>
@@ -669,10 +666,8 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
-    <skip />
-    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
-    <skip />
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostrar todo"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Desbloquear para pagar"</string>
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Listo"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Configurar pago"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
@@ -790,7 +785,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"opciones para posponer notificaciones"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Recuérdame"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"Configuración"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"DESHACER"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"Deshacer"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Posponer <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d horas</item>
@@ -830,6 +825,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insertar"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Bloqueo numérico"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Teclado numérico <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Quitar archivo adjunto"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sistema"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Pantalla principal"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Recientes"</string>
@@ -1005,11 +1001,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Hay aplicaciones que están usando tu <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" y "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> está usando <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> usó <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> recientemente"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(empresarial)"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"La app de <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> lo está usando"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"La app de <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> lo usó recientemente"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(trabajo)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Llamada telefónica"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(a través de <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(a través de <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"cámara"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ubicación"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"micrófono"</string>
@@ -1048,6 +1044,8 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Mover abajo a la derecha"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Mover fuera de borde y ocultar"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Mover fuera de borde y mostrar"</string>
+    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"Controles de dispositivos"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Agrega controles para los dispositivos conectados"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurar controles de dispositivos"</string>
@@ -1089,11 +1087,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Desliza el dedo para ver más elementos"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendaciones"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Contenido multimedia"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"Oculta la sesión actual."</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"No se puede ocultar la sesión actual."</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"¿Quieres ocultar esta sesión multimedia?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"No se puede ocultar la sesión multimedia actual."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Descartar"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reanudar"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Configuración"</string>
+    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo. Verifica la app"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Hubo un error. Reintentando…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"No se encontró"</string>
@@ -1126,11 +1126,11 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"Hace menos de <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Hace más de <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Cumpleaños"</string>
-    <string name="birthday_status_content_description" msgid="7677415209545817153">"Es el cumpleaños de <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"Es el cumpleaños de <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Cumpleaños pronto"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"Pronto será el cumpleaños de <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"Pronto será el cumpleaños de <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Aniversario"</string>
-    <string name="anniversary_status_content_description" msgid="6214503393960662875">"Es el aniversario de <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"Es el aniversario de <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="location_status" msgid="1294990572202541812">"Comparte ubicación"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> está compartiendo su ubicación"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Nueva historia"</string>
@@ -1150,4 +1150,9 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema al leer el medidor de batería"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Presiona para obtener más información"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"No se estableció alarma"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor de huellas dactilares"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Se inhabilitó el sensor de huellas dactilares"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autenticar"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"ingresar al dispositivo"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Usa la huella dactilar para abrir"</string>
 </resources>

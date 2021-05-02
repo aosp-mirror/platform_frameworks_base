@@ -555,7 +555,50 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     boolean mSupportsPictureInPicture;
     boolean mSupportsMultiDisplay;
     boolean mForceResizableActivities;
-    volatile boolean mSupportsNonResizableMultiWindow;
+
+    /** Development option to enable non resizable in multi window. */
+    // TODO(b/176061101) change the default value to false.
+    boolean mDevEnableNonResizableMultiWindow;
+
+    /**
+     * Whether the device supports non-resizable in multi windowing modes.
+     * -1: The device doesn't support non-resizable in multi windowing modes.
+     *  0: The device supports non-resizable in multi windowing modes only if this is a large
+     *     screen (smallest width >= {@link #mLargeScreenSmallestScreenWidthDp}).
+     *  1: The device always supports non-resizable in multi windowing modes.
+     */
+    int mSupportsNonResizableMultiWindow;
+
+    /**
+     * Whether the device checks activity min width/height to determine if it can be shown in multi
+     * windowing modes.
+     * -1: The device ignores activity min width/height when determining if it can be shown in multi
+     *     windowing modes.
+     *  0: If it is a small screen (smallest width < {@link #mLargeScreenSmallestScreenWidthDp}),
+     *     the device compares the activity min width/height with the min multi windowing modes
+     *     dimensions {@link #mMinPercentageMultiWindowSupportWidth} the device supports to
+     *     determine whether the activity can be shown in multi windowing modes
+     *  1: The device always compare the activity min width/height with the min multi windowing
+     *     modes dimensions {@link #mMinPercentageMultiWindowSupportWidth} the device supports to
+     *     determine whether it can be shown in multi windowing modes.
+     */
+    int mRespectsActivityMinWidthHeightMultiWindow;
+
+    /**
+     * This value is only used when the device checks activity min width/height to determine if it
+     * can be shown in multi windowing modes.
+     * If the activity min width/height is greater than this percentage of the display smallest
+     * width, it will not be allowed to be shown in multi windowing modes.
+     * The value should be between [0 - 1].
+     */
+    float mMinPercentageMultiWindowSupportWidth;
+
+    /**
+     * If the display {@link Configuration#smallestScreenWidthDp} is greater or equal to this value,
+     * we will treat it as a large screen device, which will have some multi window features enabled
+     * by default.
+     */
+    int mLargeScreenSmallestScreenWidthDp;
 
     final List<ActivityTaskManagerInternal.ScreenObserver> mScreenObservers = new ArrayList<>();
 
@@ -787,8 +830,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
         final boolean forceResizable = Settings.Global.getInt(
                 resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
-        final boolean supportsNonResizableMultiWindow = Settings.Global.getInt(
+        final boolean devEnableNonResizableMultiWindow = Settings.Global.getInt(
                 resolver, DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 1) != 0;
+        final int supportsNonResizableMultiWindow = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_supportsNonResizableMultiWindow);
+        final int respectsActivityMinWidthHeightMultiWindow = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_respectsActivityMinWidthHeightMultiWindow);
+        final float minPercentageMultiWindowSupportWidth = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_minPercentageMultiWindowSupportWidth);
+        final int largeScreenSmallestScreenWidthDp = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_largeScreenSmallestScreenWidthDp);
 
         // Transfer any global setting for forcing RTL layout, into a System Property
         DisplayProperties.debug_force_rtl(forceRtl);
@@ -802,7 +853,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         synchronized (mGlobalLock) {
             mForceResizableActivities = forceResizable;
+            mDevEnableNonResizableMultiWindow = devEnableNonResizableMultiWindow;
             mSupportsNonResizableMultiWindow = supportsNonResizableMultiWindow;
+            mRespectsActivityMinWidthHeightMultiWindow = respectsActivityMinWidthHeightMultiWindow;
+            mMinPercentageMultiWindowSupportWidth = minPercentageMultiWindowSupportWidth;
+            mLargeScreenSmallestScreenWidthDp = largeScreenSmallestScreenWidthDp;
             final boolean multiWindowFormEnabled = freeformWindowManagement
                     || supportsSplitScreenMultiWindow
                     || supportsPictureInPicture
