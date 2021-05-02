@@ -1193,13 +1193,13 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 splitPrimaryRootTask.mRemoteToken.toWindowContainerToken(), true /* onTop */);
 
         // Can't reparent non-resizable to split screen
-        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         mAtm.mWindowOrganizerController.applyTransaction(wct);
 
         assertEquals(rootTask, activity.getRootTask());
 
         // Allow reparent non-resizable to split screen
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         mAtm.mWindowOrganizerController.applyTransaction(wct);
 
         assertEquals(splitPrimaryRootTask, activity.getRootTask());

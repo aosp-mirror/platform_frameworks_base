@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"允许"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"不允许使用 USB 调试功能"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"目前已登录此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为主要用户的帐号。"</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"要允许通过此网络上进行无线调试吗？"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"要允许通过此网络进行无线调试吗？"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"网络名称 (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWLAN 地址 (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"始终允许通过此网络进行调试"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"允许"</string>
@@ -92,14 +92,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"截取更多内容"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"关闭屏幕截图"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"屏幕截图预览"</string>
-    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
-    <skip />
-    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
-    <skip />
-    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
-    <skip />
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"顶部边界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"底部边界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"左侧边界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"右侧边界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"屏幕录制器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在处理屏幕录制视频"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持续显示屏幕录制会话通知"</string>
@@ -141,6 +137,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"电话"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"语音助理"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"解锁"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"设备已锁定"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"正在等待提供指纹"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"不使用指纹解锁"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"正在扫描面孔"</string>
@@ -550,7 +547,7 @@
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"资料监控"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"网络监控"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
-    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"网络日志"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"网络日志记录"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA 证书"</string>
     <string name="disable_vpn" msgid="482685974985502922">"关闭VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"断开VPN连接"</string>
@@ -562,8 +559,8 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"您所在的单位已在此设备上安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"您所在的单位已为您的工作资料安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"此设备上已安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"您的管理员已开启网络日志功能（该功能会监控您设备上的流量）。"</string>
-    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"您的管理员已开启网络日志功能，该功能会监控您的工作资料的流量，而不会监控个人资料的流量。"</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"您的管理员已开启网络日志记录功能（该功能会监控您设备上的流量）。"</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"您的管理员已开启网络日志记录功能，该功能会监控您的工作资料的流量，但不会监控您个人资料的流量。"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"您已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”（该应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"您已连接到“<xliff:g id="VPN_APP_0">%1$s</xliff:g>”和“<xliff:g id="VPN_APP_1">%2$s</xliff:g>”（这两个应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"您的工作资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”（该应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
@@ -578,7 +575,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"打开 VPN 设置"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"打开可信凭据列表"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"您的管理员已开启网络日志功能，该功能会监控您设备上的流量。\n\n如需更多信息，请与您的管理员联系。"</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"您的管理员已开启网络日志记录功能，该功能会监控您设备上的流量。\n\n如需更多信息，请与您的管理员联系。"</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"您已授权应用设置 VPN 连接。\n\n该应用可以监控您的设备和网络活动，包括收发电子邮件、使用应用和浏览网站。"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"您的工作资料由“<xliff:g id="ORGANIZATION">%1$s</xliff:g>”管理。\n\n您的管理员能够监控您的网络活动，其中包括收发电子邮件、使用应用和访问网站。\n\n如需更多信息，请与您的管理员联系。\n\n此外，您还连接到了 VPN，它同样可以监控您的网络活动。"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"此设备由您的家长管理。您的家长可以查看和管理相关信息，例如您使用的应用、您的位置信息和设备使用时间。"</string>
@@ -609,7 +606,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"应用已固定"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”和“概览”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”和“主屏幕”即可取消固定屏幕。"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"这会使此屏幕固定显示，直到您取消固定为止。向上滑动并按住即可取消固定。"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"此屏幕会固定显示，直到您取消固定为止。向上滑动并按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“概览”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“主屏幕”即可取消固定屏幕。"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"可访问个人数据（例如通讯录和电子邮件内容）。"</string>
@@ -669,10 +666,8 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"以太网"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"闹钟"</string>
     <string name="wallet_title" msgid="5369767670735827105">"电子钱包"</string>
-    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
-    <skip />
-    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
-    <skip />
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"全部显示"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"解锁设备才能付款"</string>
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"已可使用"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"设置付款方式"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"解锁设备即可使用"</string>
@@ -790,7 +785,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知延后选项"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"提醒我"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"设置"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"撤消"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"撤消"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"已延后 <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d 小时</item>
@@ -830,6 +825,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"数字键盘 <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"移除附件"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"系统"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"主屏幕"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"最近"</string>
@@ -1005,11 +1001,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"有多个应用正在使用您的<xliff:g id="TYPES_LIST">%s</xliff:g>。"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"、 "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 和 "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>正在使用<xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>最近曾使用<xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"（企业版）"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"“<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>”正在使用"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"“<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>”最近使用过"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"（工作）"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"电话"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"（通过<xliff:g id="ATTRIBUTION">%s</xliff:g>）"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"（通过“<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>”）"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"相机"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"位置信息"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"麦克风"</string>
@@ -1048,8 +1044,10 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"移至右下角"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"移至边缘并隐藏"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"移至边缘以外并显示"</string>
+    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"设备控制器"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"为您所连接的设备添加控件"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"为您所连接的设备添加控制器"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"设置设备控件"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"按住电源按钮即可访问您的控件"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"选择要添加控制器的应用"</string>
@@ -1065,15 +1063,15 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"取消收藏"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移至位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控件"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"选择要从电源菜单访问的控件"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控件"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控件"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"选择要从电源菜单访问的控制器"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控制器"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控制器"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"未保存更改"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"查看其他应用"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"无法加载控件。请查看<xliff:g id="APP">%s</xliff:g>应用，确保应用设置没有更改。"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"找不到兼容的控件"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"添加到设备控件"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"添加到设备控制器"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"添加"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"来自<xliff:g id="APP">%s</xliff:g>的建议"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"控件已更新"</string>
@@ -1089,11 +1087,15 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"滑动可查看更多结构"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"正在加载推荐内容"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"媒体"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"隐藏当前会话。"</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"无法隐藏当前会话。"</string>
+    <!-- no translation found for controls_media_close_session (1193000643003066508) -->
+    <skip />
+    <!-- no translation found for controls_media_active_session (3146882316024153337) -->
+    <skip />
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"关闭"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"继续播放"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"设置"</string>
+    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"无效，请检查应用"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"出现错误，正在重试…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"未找到"</string>
@@ -1104,8 +1106,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"出现错误，请重试"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"正在进行"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"按住电源按钮即可查看新控件"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"添加控件"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"修改控件"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"添加控制器"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"修改控制器"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"添加输出设备"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"群组"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"已选择 1 个设备"</string>
@@ -1126,11 +1128,11 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"最近 <xliff:g id="DURATION">%1$s</xliff:g>内"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"超过 <xliff:g id="DURATION">%1$s</xliff:g>前"</string>
     <string name="birthday_status" msgid="2596961629465396761">"生日"</string>
-    <string name="birthday_status_content_description" msgid="7677415209545817153">"今天是<xliff:g id="NAME">%1$s</xliff:g>的生日"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"今天是<xliff:g id="NAME">%1$s</xliff:g>的生日"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"生日快到了"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"<xliff:g id="NAME">%1$s</xliff:g>的生日快到了"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g>的生日快到了"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"周年纪念日"</string>
-    <string name="anniversary_status_content_description" msgid="6214503393960662875">"今天是<xliff:g id="NAME">%1$s</xliff:g>的周年纪念日"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"今天是<xliff:g id="NAME">%1$s</xliff:g>的诞辰纪念日"</string>
     <string name="location_status" msgid="1294990572202541812">"正在分享位置信息"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g>正在分享位置信息"</string>
     <string name="new_story_status" msgid="9012195158584846525">"新故事"</string>
@@ -1150,4 +1152,10 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"读取电池计量器时出现问题"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"点按即可了解详情"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"未设置闹钟"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"指纹传感器"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"指纹传感器已停用"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"身份验证"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"进入设备"</string>
+    <!-- no translation found for keyguard_try_fingerprint (2825130772993061165) -->
+    <skip />
 </resources>

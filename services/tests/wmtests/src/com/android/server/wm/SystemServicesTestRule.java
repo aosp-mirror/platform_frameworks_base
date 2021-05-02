@@ -483,6 +483,11 @@ public class SystemServicesTestRule implements TestRule {
             mSupportsSplitScreenMultiWindow = true;
             mSupportsFreeformWindowManagement = true;
             mSupportsPictureInPicture = true;
+            mDevEnableNonResizableMultiWindow = false;
+            mMinPercentageMultiWindowSupportWidth = 0.3f;
+            mLargeScreenSmallestScreenWidthDp = 600;
+            mSupportsNonResizableMultiWindow = 0;
+            mRespectsActivityMinWidthHeightMultiWindow = 0;
 
             doReturn(mock(IPackageManager.class)).when(this).getPackageManager();
             // allow background activity starts by default

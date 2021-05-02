@@ -1552,7 +1552,7 @@ public class SizeCompatTests extends WindowTestsBase {
     @Test
     public void testSupportsNonResizableInSplitScreen_letterboxForDifferentOrientation() {
         // Support non resizable in multi window
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         setUpDisplaySizeWithApp(1000, 2800);
         final TestSplitOrganizer organizer =
                 new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
@@ -1607,7 +1607,7 @@ public class SizeCompatTests extends WindowTestsBase {
     @Test
     public void testSupportsNonResizableInSplitScreen_fillTaskForSameOrientation() {
         // Support non resizable in multi window
-        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mDevEnableNonResizableMultiWindow = true;
         setUpDisplaySizeWithApp(1000, 2800);
         final TestSplitOrganizer organizer =
                 new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
