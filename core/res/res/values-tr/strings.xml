@@ -2287,8 +2287,6 @@
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Uygulama marka imajı"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"Erişim ayarlarını kontrol edin"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g>, ekranınızı görüntüleyip kontrol edebilir. İncelemek için dokunun."</string>
-    <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
-    <skip />
-    <!-- no translation found for ui_translation_accessibility_translation_finished (3057830947610088465) -->
-    <skip />
+    <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Çevrildi."</string>
+    <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mesajın, <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>-<xliff:g id="TO_LANGUAGE">%2$s</xliff:g> çevirisi yapıldı."</string>
 </resources>
