@@ -87,19 +87,15 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Pokušajte ponovo snimiti ekran"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Nije moguće sačuvati snimak ekrana"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ova aplikacija ili vaša organizacija ne dozvoljavaju snimanje ekrana"</string>
-    <string name="screenshot_edit_label" msgid="8754981973544133050">"Uredi"</string>
+    <string name="screenshot_edit_label" msgid="8754981973544133050">"Uredite"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Uredite snimak ekrana"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Snimite više"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Odbacite snimak ekrana"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pregled snimka ekrana"</string>
-    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
-    <skip />
-    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
-    <skip />
-    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
-    <skip />
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Gornja granica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Donja granica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Lijeva granica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Desna granica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Snimač ekrana"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrađivanje snimka ekrana"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obavještenje za sesiju snimanja ekrana je u toku"</string>
@@ -141,6 +137,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefon"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Glasovna pomoć"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Otključaj"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"Uređaj je zaključan"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Čeka se otisak prsta"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Otključaj bez korištenja otiska prsta"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skeniranje lica"</string>
@@ -619,7 +616,7 @@
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Zakačena aplikacija može otvoriti druge aplikacije."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Dodirnite i držite dugmad Nazad i Pregled da otkačite ovu aplikaciju"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Dodirnite i držite dugmad Nazad i Početni ekran da otkačite ovu aplikaciju"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Prevucite prema gore i zadržite da otkačite ovu aplikaciju"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Prevucite prema gore i zadržite da otkačite aplikaciju"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Razumijem"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, hvala"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacija je zakačena"</string>
@@ -672,10 +669,8 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Novčanik"</string>
-    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
-    <skip />
-    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
-    <skip />
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži sve"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Otključaj za plaćanje"</string>
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Spremno"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Postavite način plaćanja"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Otključajte da koristite"</string>
@@ -739,7 +734,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Zadano"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatski"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez zvuka ili vibracije"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Bez zvuka ili vibracije i pojavljuje se pri dnu odjeljka za razgovor"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Bez zvuka ili vibracije i pojavljuje se pri dnu odjeljka razgovora"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Može zvoniti ili vibrirati na osnovu postavki vašeg telefona"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Može zvoniti ili vibrirati na osnovu postavki vašeg telefona. Razgovori iz oblačića u aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g> kao zadana opcija."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Privlači vašu pažnju pomoću plutajuće prečice do ovog sadržaja."</string>
@@ -793,7 +788,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"opcije za odgodu obavještenja"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Podsjeti me"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"Postavke"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"OPOZOVI"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"Poništi"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Odgođeno za <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="one">%d sat</item>
@@ -835,6 +830,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Tipka za umetanje"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Tipka Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Numerička tastatura <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Uklonite prilog"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sistem"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Početak"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Nedavno"</string>
@@ -1010,11 +1006,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacije koriste <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"Aplikacija <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> koristi aplikaciju <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"Aplikacija <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> je nedavno koristila aplikaciju <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(preduzeće)"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Koristi aplikacija <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Nedavno je koristila aplikacija <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(posao)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonski poziv"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(putem aplikacije <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(putem aplikacije <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"kameru"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"lokaciju"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
@@ -1053,6 +1049,8 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Pomjeranje dolje desno"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Pomjeranje do ivice i sakrivanje"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Pomjeranje izvan ivice i prikaz"</string>
+    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"Kontrole uređaja"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodajte kontrole za povezane uređaje"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Postavite kontrole uređaja"</string>
@@ -1095,11 +1093,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Prevucite da vidite više"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Učitavanje preporuka"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Mediji"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"Sakrijte trenutnu sesiju."</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"Nije moguće sakriti trenutnu sesiju."</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"Sakriti ovu sesiju medija?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Trenutna sesija medija se ne može sakriti."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odbaci"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Postavke"</string>
+    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, vidite aplikaciju"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Greška, ponovni pokušaj…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
@@ -1132,11 +1132,11 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"Prije manje od <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Prije više od <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Rođendan"</string>
-    <string name="birthday_status_content_description" msgid="7677415209545817153">"<xliff:g id="NAME">%1$s</xliff:g> slavi rođendan"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> slavi rođendan"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Rođendan je uskoro"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"<xliff:g id="NAME">%1$s</xliff:g> uskoro slavi rođendan"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g> uskoro slavi rođendan"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Godišnjica"</string>
-    <string name="anniversary_status_content_description" msgid="6214503393960662875">"<xliff:g id="NAME">%1$s</xliff:g> slavi godišnjicu"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"<xliff:g id="NAME">%1$s</xliff:g> slavi godišnjicu"</string>
     <string name="location_status" msgid="1294990572202541812">"Dijeljenje lokacije"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> dijeli lokaciju"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Nova priča"</string>
@@ -1156,4 +1156,9 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Došlo je do problema prilikom očitavanja mjerača stanja baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nije postavljen alarm"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Senzor za otisak prsta"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Senzor za otisak prsta je onemogućen"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentificiranje"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"pristup uređaju"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Otvorite pomoću otiska prsta"</string>
 </resources>
