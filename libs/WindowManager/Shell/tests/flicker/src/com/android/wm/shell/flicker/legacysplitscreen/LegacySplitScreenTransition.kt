@@ -32,7 +32,11 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.getDevEnableNonResizableMultiWindow
+import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setDevEnableNonResizableMultiWindow
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestParameter) {
@@ -44,6 +48,21 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
     protected val nonResizeableApp = SplitScreenHelper.getNonResizeable(instrumentation)
     protected val LAUNCHER_PACKAGE_NAME = LauncherStrategyFactory.getInstance(instrumentation)
         .launcherStrategy.supportedLauncherPackage
+    private var prevDevEnableNonResizableMultiWindow = 0
+
+    @Before
+    open fun setup() {
+        prevDevEnableNonResizableMultiWindow = getDevEnableNonResizableMultiWindow(context)
+        if (prevDevEnableNonResizableMultiWindow != 0) {
+            // Turn off the development option
+            setDevEnableNonResizableMultiWindow(context, 0)
+        }
+    }
+
+    @After
+    open fun teardown() {
+        setDevEnableNonResizableMultiWindow(context, prevDevEnableNonResizableMultiWindow)
+    }
 
     /**
      * List of windows that are ignored when verifying that visible elements appear on 2

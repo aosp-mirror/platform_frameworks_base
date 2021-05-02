@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.apppairs
 
 import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
-import android.provider.Settings
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -27,6 +26,8 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
+import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
+import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSupportsNonResizableMultiWindow
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -49,7 +50,6 @@ import org.junit.runners.Parameterized
 class AppPairsTestSupportPairNonResizeableApps(
     testSpec: FlickerTestParameter
 ) : AppPairsTransition(testSpec) {
-    var prevSupportNonResizableInMultiWindow = 0
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
@@ -64,21 +64,15 @@ class AppPairsTestSupportPairNonResizeableApps(
         }
 
     @Before
-    fun setup() {
-        prevSupportNonResizableInMultiWindow = Settings.Global.getInt(context.contentResolver,
-                Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW)
-        if (prevSupportNonResizableInMultiWindow == 0) {
-            // Support non-resizable in multi window
-            Settings.Global.putInt(context.contentResolver,
-                    Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 1)
-        }
+    override fun setup() {
+        super.setup()
+        setSupportsNonResizableMultiWindow(instrumentation, 1)
     }
 
     @After
-    fun teardown() {
-        Settings.Global.putInt(context.contentResolver,
-                Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
-                prevSupportNonResizableInMultiWindow)
+    override fun teardown() {
+        super.teardown()
+        resetMultiWindowConfig(instrumentation)
     }
 
     @FlakyTest

@@ -1684,7 +1684,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         // Leave the task in its current root task or a fullscreen root task if it isn't
         // resizeable and the preferred root task is in multi-window mode.
-        if (inMultiWindowMode && !task.supportsMultiWindow()) {
+        if (inMultiWindowMode
+                && !task.supportsMultiWindowInDisplayArea(rootTask.getDisplayArea())) {
             Slog.w(TAG, "Can not move unresizeable task=" + task + " to multi-window root task="
                     + rootTask + " Moving to a fullscreen root task instead.");
             if (prevRootTask != null) {

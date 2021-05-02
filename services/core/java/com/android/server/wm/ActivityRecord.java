@@ -2485,39 +2485,52 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * @return whether this activity supports split-screen multi-window and can be put in the docked
-     *         root task.
+     * @return whether this activity supports split-screen multi-window and can be put in
+     *         split-screen.
      */
     @Override
     public boolean supportsSplitScreenWindowingMode() {
-        // An activity can not be docked even if it is considered resizeable because it only
-        // supports picture-in-picture mode but has a non-resizeable resizeMode
+        return supportsSplitScreenWindowingModeInDisplayArea(getDisplayArea());
+    }
+
+    /**
+     * @return whether this activity supports split-screen multi-window and can be put in
+     *         split-screen if it is in the given {@link TaskDisplayArea}.
+     */
+    boolean supportsSplitScreenWindowingModeInDisplayArea(@Nullable TaskDisplayArea tda) {
         return super.supportsSplitScreenWindowingMode()
-                && mAtmService.mSupportsSplitScreenMultiWindow && supportsMultiWindow();
+                && mAtmService.mSupportsSplitScreenMultiWindow
+                && supportsMultiWindowInDisplayArea(tda);
+    }
+
+    boolean supportsFreeform() {
+        return supportsFreeformInDisplayArea(getDisplayArea());
     }
 
     /**
      * @return whether this activity supports freeform multi-window and can be put in the freeform
-     *         root task.
+     *         windowing mode if it is in the given {@link TaskDisplayArea}.
      */
-    boolean supportsFreeform() {
-        return mAtmService.mSupportsFreeformWindowManagement && supportsMultiWindow();
+    boolean supportsFreeformInDisplayArea(@Nullable TaskDisplayArea tda) {
+        return mAtmService.mSupportsFreeformWindowManagement
+                && supportsMultiWindowInDisplayArea(tda);
+    }
+
+    boolean supportsMultiWindow() {
+        return supportsMultiWindowInDisplayArea(getDisplayArea());
     }
 
     /**
-     * @return whether this activity supports multi-window.
+     * @return whether this activity supports multi-window if it is in the given
+     *         {@link TaskDisplayArea}.
      */
-    boolean supportsMultiWindow() {
-        return mAtmService.mSupportsMultiWindow && !isActivityTypeHome()
-                && (isResizeable() || mAtmService.mDevEnableNonResizableMultiWindow);
-    }
-
-    // TODO(b/176061101) replace supportsMultiWindow() after fixing tests.
-    boolean supportsMultiWindow2() {
+    boolean supportsMultiWindowInDisplayArea(@Nullable TaskDisplayArea tda) {
+        if (isActivityTypeHome()) {
+            return false;
+        }
         if (!mAtmService.mSupportsMultiWindow) {
             return false;
         }
-        final TaskDisplayArea tda = getDisplayArea();
         if (tda == null) {
             return false;
         }

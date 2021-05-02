@@ -2016,19 +2016,28 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
                 .build();
 
-        // Non-resizable
+        // Not allow non-resizable
         mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = false;
         assertFalse(activity.supportsSplitScreenWindowingMode());
 
         // Force resizable
         mAtm.mForceResizableActivities = true;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsSplitScreenWindowingMode());
 
-        // Allow non-resizable
+        // Use development option to allow non-resizable
         mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = true;
+        assertTrue(activity.supportsSplitScreenWindowingMode());
+
+        // Always allow non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = 1;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsSplitScreenWindowingMode());
     }
 
@@ -2040,19 +2049,28 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
                 .build();
 
-        // Non-resizable
+        // Not allow non-resizable
         mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = false;
         assertFalse(activity.supportsFreeform());
 
         // Force resizable
         mAtm.mForceResizableActivities = true;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsFreeform());
 
-        // Allow non-resizable
+        // Use development option to allow non-resizable
         mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = -1;
         mAtm.mDevEnableNonResizableMultiWindow = true;
+        assertTrue(activity.supportsFreeform());
+
+        // Always allow non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = 1;
+        mAtm.mDevEnableNonResizableMultiWindow = false;
         assertTrue(activity.supportsFreeform());
     }
 

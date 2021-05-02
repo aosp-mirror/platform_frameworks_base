@@ -3046,7 +3046,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // There is a 1-to-1 relationship between root task and task when not in
         // primary split-windowing mode.
         if (task.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                && r.supportsSplitScreenWindowingMode()
+                && r.supportsSplitScreenWindowingModeInDisplayArea(task.getDisplayArea())
                 && (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                 || windowingMode == WINDOWING_MODE_UNDEFINED)) {
             return true;
