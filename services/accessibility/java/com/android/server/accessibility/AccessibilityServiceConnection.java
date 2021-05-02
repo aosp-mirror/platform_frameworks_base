@@ -20,6 +20,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -53,10 +54,7 @@ import java.util.Set;
  */
 class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnection {
     private static final String LOG_TAG = "AccessibilityServiceConnection";
-    private static final String TRACE_A11Y_SERVICE_CONNECTION =
-            LOG_TAG + ".IAccessibilityServiceConnection";
-    private static final String TRACE_A11Y_SERVICE_CLIENT =
-            LOG_TAG + ".IAccessibilityServiceClient";
+
     /*
      Holding a weak reference so there isn't a loop of references. AccessibilityUserState keeps
      lists of bound and binding services. These are freed on user changes, but just in case it
@@ -137,8 +135,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public void disableSelf() {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".disableSelf");
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("disableSelf", "");
         }
         synchronized (mLock) {
             AccessibilityUserState userState = mUserStateWeakReference.get();
@@ -218,9 +216,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             return;
         }
         try {
-            if (mTrace.isA11yTracingEnabled()) {
-                mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".init", this + ", " + mId + ", "
-                        + mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
+            if (svcClientTracingEnabled()) {
+                logTraceSvcClient("init",
+                        this + "," + mId + "," + mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
             }
             serviceInterface.init(this, mId, mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
         } catch (RemoteException re) {
@@ -264,9 +262,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public boolean setSoftKeyboardShowMode(int showMode) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setSoftKeyboardShowMode",
-                    "showMode=" + showMode);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("setSoftKeyboardShowMode", "showMode=" + showMode);
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
@@ -280,8 +277,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public int getSoftKeyboardShowMode() {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".getSoftKeyboardShowMode");
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("getSoftKeyboardShowMode", "");
         }
         final AccessibilityUserState userState = mUserStateWeakReference.get();
         return (userState != null) ? userState.getSoftKeyboardShowModeLocked() : 0;
@@ -289,9 +286,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public boolean switchToInputMethod(String imeId) {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".switchToInputMethod",
-                    "imeId=" + imeId);
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("switchToInputMethod", "imeId=" + imeId);
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
@@ -311,8 +307,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public boolean isAccessibilityButtonAvailable() {
-        if (mTrace.isA11yTracingEnabled()) {
-            mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".isAccessibilityButtonAvailable");
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("isAccessibilityButtonAvailable", "");
         }
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
@@ -373,9 +369,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
         if (serviceInterface != null) {
             try {
-                if (mTrace.isA11yTracingEnabled()) {
-                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT
-                            + ".onFingerprintCapturingGesturesChanged", String.valueOf(active));
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient(
+                            "onFingerprintCapturingGesturesChanged", String.valueOf(active));
                 }
                 mServiceInterface.onFingerprintCapturingGesturesChanged(active);
             } catch (RemoteException e) {
@@ -394,9 +390,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
         if (serviceInterface != null) {
             try {
-                if (mTrace.isA11yTracingEnabled()) {
-                    mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onFingerprintGesture",
-                            String.valueOf(gesture));
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("onFingerprintGesture", String.valueOf(gesture));
                 }
                 mServiceInterface.onFingerprintGesture(gesture);
             } catch (RemoteException e) {
@@ -410,15 +405,17 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (mSecurityPolicy.canPerformGestures(this)) {
                 MotionEventInjector motionEventInjector =
                         mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
+                if (wmTracingEnabled()) {
+                    logTraceWM("isTouchOrFaketouchDevice", "");
+                }
                 if (motionEventInjector != null
                         && mWindowManagerService.isTouchOrFaketouchDevice()) {
                     motionEventInjector.injectEvents(
                             gestureSteps.getList(), mServiceInterface, sequence, displayId);
                 } else {
                     try {
-                        if (mTrace.isA11yTracingEnabled()) {
-                            mTrace.logTrace(TRACE_A11Y_SERVICE_CLIENT + ".onPerformGestureResult",
-                                    sequence + ", false");
+                        if (svcClientTracingEnabled()) {
+                            logTraceSvcClient("onPerformGestureResult", sequence + ", false");
                         }
                         mServiceInterface.onPerformGestureResult(sequence, false);
                     } catch (RemoteException re) {
