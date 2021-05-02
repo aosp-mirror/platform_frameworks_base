@@ -1869,6 +1869,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public void setTranslation(float translationX) {
+        invalidate();
         if (isBlockingHelperShowingAndTranslationFinished()) {
             mGuts.setTranslationX(translationX);
             return;
