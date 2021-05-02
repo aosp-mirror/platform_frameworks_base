@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -37,6 +40,7 @@ import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -306,6 +310,133 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         mAtm.updateSleepIfNeededLocked();
 
         assertTopNonSleeping.accept(homeActivity);
+    }
+
+    @Test
+    public void testSupportsMultiWindow_resizable() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(RESIZE_MODE_RESIZEABLE)
+                .build();
+        final Task task = activity.getTask();
+
+        assertTrue(activity.supportsMultiWindow2());
+        assertTrue(task.supportsMultiWindow2());
+    }
+
+    @Test
+    public void testSupportsMultiWindow_nonResizable() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
+                .build();
+        final Task task = activity.getTask();
+        final TaskDisplayArea tda = task.getDisplayArea();
+
+        // Device config as not support.
+        mAtm.mSupportsNonResizableMultiWindow = -1;
+
+        assertFalse(activity.supportsMultiWindow2());
+        assertFalse(task.supportsMultiWindow2());
+
+        // Device config as always support.
+        mAtm.mSupportsNonResizableMultiWindow = 1;
+
+        assertTrue(activity.supportsMultiWindow2());
+        assertTrue(task.supportsMultiWindow2());
+
+        // The default config is relying on the screen size.
+        mAtm.mSupportsNonResizableMultiWindow = 0;
+
+        // Supports on large screen.
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp;
+
+        assertTrue(activity.supportsMultiWindow2());
+        assertTrue(task.supportsMultiWindow2());
+
+        // Not supports on small screen.
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+
+        assertFalse(activity.supportsMultiWindow2());
+        assertFalse(task.supportsMultiWindow2());
+    }
+
+    @Test
+    public void testSupportsMultiWindow_activityMinWidthHeight_largerThanSupport() {
+        final float density = mContext.getResources().getDisplayMetrics().density;
+        final ActivityInfo.WindowLayout windowLayout =
+                new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
+                        // This is larger than the min dimensions device support in multi window,
+                        // the activity will not be supported in multi window if the device respects
+                        /* minWidth= */(int) (mAtm.mLargeScreenSmallestScreenWidthDp * density),
+                        /* minHeight= */(int) (mAtm.mLargeScreenSmallestScreenWidthDp * density));
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setWindowLayout(windowLayout)
+                .setResizeMode(RESIZE_MODE_RESIZEABLE)
+                .build();
+        final Task task = activity.getTask();
+        final TaskDisplayArea tda = task.getDisplayArea();
+
+        // Ignore the activity min width/height for determine multi window eligibility.
+        mAtm.mRespectsActivityMinWidthHeightMultiWindow = -1;
+
+        assertTrue(activity.supportsMultiWindow2());
+        assertTrue(task.supportsMultiWindow2());
+
+        // Always check the activity min width/height.
+        mAtm.mRespectsActivityMinWidthHeightMultiWindow = 1;
+
+        assertFalse(activity.supportsMultiWindow2());
+        assertFalse(task.supportsMultiWindow2());
+
+        // The default config is relying on the screen size.
+        mAtm.mRespectsActivityMinWidthHeightMultiWindow = 0;
+
+        // Ignore on large screen.
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp;
+
+        assertTrue(activity.supportsMultiWindow2());
+        assertTrue(task.supportsMultiWindow2());
+
+        // Check on small screen.
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+
+        assertFalse(activity.supportsMultiWindow2());
+        assertFalse(task.supportsMultiWindow2());
+    }
+
+    @Test
+    public void testSupportsMultiWindow_activityMinWidthHeight_smallerThanSupport() {
+        // This is smaller than the min dimensions device support in multi window,
+        // the activity will be supported in multi window
+        final float density = mContext.getResources().getDisplayMetrics().density;
+        final int supportedDimensions = (int) ((mAtm.mLargeScreenSmallestScreenWidthDp - 1)
+                * mAtm.mMinPercentageMultiWindowSupportWidth * density);
+        final ActivityInfo.WindowLayout windowLayout =
+                new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
+                        /* minWidth= */supportedDimensions,
+                        /* minHeight= */supportedDimensions);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setWindowLayout(windowLayout)
+                .setResizeMode(RESIZE_MODE_RESIZEABLE)
+                .build();
+        final Task task = activity.getTask();
+        final TaskDisplayArea tda = task.getDisplayArea();
+        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+
+        // Always check the activity min width/height.
+        mAtm.mSupportsNonResizableMultiWindow = 1;
+
+        assertTrue(activity.supportsMultiWindow2());
+        assertTrue(task.supportsMultiWindow2());
+
+        // The default config is relying on the screen size. Check for small screen
+        mAtm.mSupportsNonResizableMultiWindow = 0;
+
+        assertTrue(activity.supportsMultiWindow2());
+        assertTrue(task.supportsMultiWindow2());
     }
 }
 

@@ -800,7 +800,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT);
         private final Uri mForceResizableUri = Settings.Global.getUriFor(
                 DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
-        private final Uri mSupportsNonResizableMultiWindowUri = Settings.Global.getUriFor(
+        private final Uri mDevEnableNonResizableMultiWindowUri = Settings.Global.getUriFor(
                 DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW);
         private final Uri mRenderShadowsInCompositorUri = Settings.Global.getUriFor(
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR);
@@ -826,7 +826,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mFreeformWindowUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mForceResizableUri, false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(mSupportsNonResizableMultiWindowUri, false, this,
+            resolver.registerContentObserver(mDevEnableNonResizableMultiWindowUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mRenderShadowsInCompositorUri, false, this,
                     UserHandle.USER_ALL);
@@ -865,8 +865,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            if (mSupportsNonResizableMultiWindowUri.equals(uri)) {
-                updateSupportsNonResizableMultiWindow();
+            if (mDevEnableNonResizableMultiWindowUri.equals(uri)) {
+                updateDevEnableNonResizableMultiWindow();
                 return;
             }
 
@@ -962,12 +962,12 @@ public class WindowManagerService extends IWindowManager.Stub
             mAtmService.mForceResizableActivities = forceResizable;
         }
 
-        void updateSupportsNonResizableMultiWindow() {
+        void updateDevEnableNonResizableMultiWindow() {
             ContentResolver resolver = mContext.getContentResolver();
-            final boolean supportsNonResizableMultiWindow = Settings.Global.getInt(resolver,
+            final boolean devEnableNonResizableMultiWindow = Settings.Global.getInt(resolver,
                     DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 1) != 0;
 
-            mAtmService.mSupportsNonResizableMultiWindow = supportsNonResizableMultiWindow;
+            mAtmService.mDevEnableNonResizableMultiWindow = devEnableNonResizableMultiWindow;
         }
 
         void updateDisplaySettingsLocation() {
