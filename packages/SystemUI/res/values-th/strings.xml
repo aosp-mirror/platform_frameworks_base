@@ -92,14 +92,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"จับภาพได้มากขึ้น"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ปิดภาพหน้าจอ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ตัวอย่างภาพหน้าจอ"</string>
-    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
-    <skip />
-    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
-    <skip />
-    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
-    <skip />
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ขอบเขตด้านบน <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ขอบเขตด้านล่าง <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ขอบเขตด้านซ้าย <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ขอบเขตด้านขวา <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมบันทึกหน้าจอ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
@@ -141,6 +137,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"โทรศัพท์"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ตัวช่วยเสียง"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"ปลดล็อก"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"อุปกรณ์ถูกล็อก"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"กำลังรอลายนิ้วมือ"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"ปลดล็อกโดยไม่ต้องใช้ลายนิ้วมือ"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"กำลังสแกนใบหน้า"</string>
@@ -328,7 +325,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"ขณะนี้หน้าจอล็อกอยู่ในแนวนอน"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"ขณะนี้หน้าจอล็อกอยู่ในแนวตั้ง"</string>
     <string name="dessert_case" msgid="9104973640704357717">"ชั้นแสดงของหวาน"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาจอภาพ"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาหน้าจอ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"อีเทอร์เน็ต"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"แตะไอคอนค้างไว้เพื่อดูตัวเลือกอื่นๆ"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ห้ามรบกวน"</string>
@@ -609,11 +606,11 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"ปักหมุดแอปอยู่"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"วิธีนี้ช่วยให้เห็นแอปบนหน้าจอตลอดจนกว่าจะเลิกตรึง เลื่อนขึ้นค้างไว้เพื่อเลิกตรึง"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"วิธีนี้ช่วยให้เห็นแอปบนหน้าจอตลอดจนกว่าจะเลิกปักหมุด เลื่อนขึ้นค้างไว้เพื่อเลิกปักหมุด"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"อาจมีการเข้าถึงข้อมูลส่วนตัว (เช่น รายชื่อติดต่อและเนื้อหาในอีเมล)"</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"แอปที่ตรึงไว้อาจเปิดแอปอื่นๆ"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"แอปที่ปักหมุดไว้อาจเปิดแอปอื่นๆ"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"หากต้องการเลิกปักหมุดแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"ภาพรวม\" ค้างไว้"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"หากต้องการเลิกปักหมุดแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"หน้าแรก\" ค้างไว้"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"หากต้องการเลิกปักหมุดแอปนี้ ให้เลื่อนขึ้นค้างไว้"</string>
@@ -669,10 +666,8 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"อีเทอร์เน็ต"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"การปลุก"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
-    <skip />
-    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
-    <skip />
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"แสดงทั้งหมด"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ปลดล็อกเพื่อชำระเงิน"</string>
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"พร้อม"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ตั้งค่าการชำระเงิน"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ปลดล็อกเพื่อใช้"</string>
@@ -790,7 +785,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ตัวเลือกการเลื่อนการแจ้งเตือน"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"เตือนฉัน"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"การตั้งค่า"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"เลิกทำ"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"เลิกทำ"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"ปิดเสียงเตือนชั่วคราวไว้เป็นเวลา <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d ชั่วโมง</item>
@@ -830,6 +825,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"แทรก"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"แผงตัวเลข <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"นำไฟล์แนบออก"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"ระบบ"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"หน้าแรก"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"ล่าสุด"</string>
@@ -1005,11 +1001,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"หลายแอปพลิเคชันใช้<xliff:g id="TYPES_LIST">%s</xliff:g>ของคุณอยู่"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" และ "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> กำลังใช้<xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ใช้<xliff:g id="APP_OPP_NAME">%2$s</xliff:g>เมื่อเร็วๆ นี้"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(องค์กร)"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"ใช้อยู่โดย <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"ใช้ล่าสุดโดย <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(ที่ทำงาน)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"การโทร"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(ผ่านทาง <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(ผ่านทาง <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"กล้องถ่ายรูป"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ตำแหน่ง"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"ไมโครโฟน"</string>
@@ -1048,6 +1044,8 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ย้ายไปด้านขาวล่าง"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ย้ายไปที่ขอบและซ่อน"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ย้ายออกจากขอบและแสดง"</string>
+    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"ระบบควบคุมอุปกรณ์"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"เพิ่มตัวควบคุมของอุปกรณ์ที่เชื่อมต่อ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ตั้งค่าระบบควบคุมอุปกรณ์"</string>
@@ -1089,11 +1087,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"เลื่อนเพื่อดูเพิ่มเติม"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"กำลังโหลดคำแนะนำ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"สื่อ"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"ซ่อนเซสชันปัจจุบัน"</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"ซ่อนเซสชันปัจจุบันไม่ได้"</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"ซ่อนเซสชันสื่อนี้ไหม"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"ซ่อนเซสชันสื่อในปัจจุบันไม่ได้"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ปิด"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"เล่นต่อ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"การตั้งค่า"</string>
+    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"ไม่มีการใช้งาน โปรดตรวจสอบแอป"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"มีข้อผิดพลาด กำลังลองอีกครั้ง…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ไม่พบ"</string>
@@ -1126,11 +1126,11 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"ไม่ถึง <xliff:g id="DURATION">%1$s</xliff:g>ที่ผ่านมา"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"นานกว่า <xliff:g id="DURATION">%1$s</xliff:g>ที่ผ่านมา"</string>
     <string name="birthday_status" msgid="2596961629465396761">"วันเกิด"</string>
-    <string name="birthday_status_content_description" msgid="7677415209545817153">"วันนี้เป็นวันเกิดของ <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"วันนี้เป็นวันเกิดของ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"ใกล้ถึงวันเกิดแล้ว"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"ใกล้ถึงวันเกิดของ <xliff:g id="NAME">%1$s</xliff:g> แล้ว"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"ใกล้ถึงวันเกิดของ <xliff:g id="NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"วันครบรอบ"</string>
-    <string name="anniversary_status_content_description" msgid="6214503393960662875">"วันนี้เป็นวันครบรอบของ <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"วันนี้เป็นวันครบรอบของ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="location_status" msgid="1294990572202541812">"กำลังแชร์ตำแหน่ง"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> กำลังแชร์ตำแหน่ง"</string>
     <string name="new_story_status" msgid="9012195158584846525">"เรื่องราวใหม่"</string>
@@ -1150,4 +1150,9 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"พบปัญหาในการอ่านเครื่องวัดแบตเตอรี่"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"แตะดูข้อมูลเพิ่มเติม"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ไม่มีการตั้งปลุก"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"เซ็นเซอร์ลายนิ้วมือ"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"เซ็นเซอร์ลายนิ้วมือถูกปิดใช้"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ตรวจสอบสิทธิ์"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"เข้าถึงอุปกรณ์"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ใช้ลายนิ้วมือเพื่อเปิด"</string>
 </resources>
