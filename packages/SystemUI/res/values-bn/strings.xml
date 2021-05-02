@@ -92,14 +92,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"আরও বেশি ক্যাপচার করুন"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"স্ক্রিনশট বাতিল করুন"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"স্ক্রিনশটের প্রিভিউ"</string>
-    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
-    <skip />
-    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
-    <skip />
-    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
-    <skip />
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"উপরের প্রান্ত থেকে <xliff:g id="PERCENT">%1$d</xliff:g> শতাংশ"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"নিচের প্রান্ত থেকে <xliff:g id="PERCENT">%1$d</xliff:g> শতাংশ"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"বাঁ প্রান্ত থেকে <xliff:g id="PERCENT">%1$d</xliff:g> শতাংশ"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ডান প্রান্ত থেকে <xliff:g id="PERCENT">%1$d</xliff:g> percent"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"স্ক্রিন রেকর্ডার"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"স্ক্রিন রেকর্ডিং প্রসেস হচ্ছে"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"স্ক্রিন রেকর্ডিং সেশন চলার বিজ্ঞপ্তি"</string>
@@ -141,6 +137,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ফোন"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ভয়েস সহায়তা"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"আনলক করুন"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"ডিভাইস লক করা আছে"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"আঙ্গুলের ছাপের জন্য অপেক্ষা করা হচ্ছে"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"আপনার আঙ্গুলের ছাপ ব্যবহার না করেই আনলক করুন"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ফেস স্ক্যান করা হচ্ছে"</string>
@@ -355,14 +352,10 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"ইনপুট পদ্ধতি"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"লোকেশন"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"লোকেশন বন্ধ করা আছে"</string>
-    <!-- no translation found for quick_settings_camera_label (5612076679385269339) -->
-    <skip />
-    <!-- no translation found for quick_settings_mic_label (8392773746295266375) -->
-    <skip />
-    <!-- no translation found for quick_settings_camera_mic_available (1453719768420394314) -->
-    <skip />
-    <!-- no translation found for quick_settings_camera_mic_blocked (4710884905006788281) -->
-    <skip />
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"ক্যামেরা অ্যাক্সেস"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"মাইক্রোফোন অ্যাক্সেস"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"উপলভ্য"</string>
+    <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ব্লক করা হয়েছে"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"মিডিয়া ডিভাইস"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"শুধুমাত্র জরুরি কল"</string>
@@ -434,18 +427,12 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"স্ক্রিন রেকর্ড"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"শুরু করুন"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"বন্ধ করুন"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_title (563796653825944944) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_title (8807639852654305227) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_dialog_title (4316471859905020023) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (1624701280680913717) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (4704948062372435963) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_mic_camera_dialog_content (3577642558418404919) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ডিভাইসের মাইক্রোফোন আনব্লক করতে চান?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ডিভাইসের ক্যামেরা আনব্লক করতে চান?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ডিভাইসের ক্যামেরা এবং মাইক্রোফোন আনব্লক করতে চান?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"এটার জন্য মাইক্রোফোনের অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার মাইক্রোফোন ব্যবহার করার অনুমতি দেওয়া হয়েছে।"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"এটার জন্য ক্যামেরার অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার ক্যামেরা ব্যবহারের অনুমতি দেওয়া হয়েছে।"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"এটার জন্য ক্যামেরা অথবা মাইক্রোফোনের অ্যাক্সেস সেই সব অ্যাপ এবং পরিষেবার জন্য আনব্লক হয়ে যাবে, যাতে আপনার ক্যামেরা অথবা মাইক্রোফোন ব্যবহারের অনুমতি দেওয়া হয়েছে।"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ডিভাইস"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"অন্য অ্যাপে যেতে উপরের দিকে সোয়াইপ করুন"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"একটি অ্যাপ ছেড়ে দ্রুত অন্য অ্যাপে যেতে ডান দিকে টেনে আনুন"</string>
@@ -679,10 +666,8 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ইথারনেট"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"অ্যালার্ম"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
-    <skip />
-    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
-    <skip />
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"সবকটি দেখুন"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"পেমেন্ট করতে ডিভাইস আনলক করুন"</string>
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"রেডি"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"পেমেন্ট সেট আপ করুন"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ব্যবহার করতে আনলক করুন"</string>
@@ -800,7 +785,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"বিজ্ঞপ্তি মনে করিয়ে দেওয়ার বিকল্পগুলি"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"আমাকে মনে করিয়ে দিও"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"সেটিংস"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"পূর্বাবস্থায় ফিরুন"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"আগের অবস্থায় ফিরুন"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> পরে আবার মনে করানো হবে"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="one">%d ঘণ্টা</item>
@@ -840,6 +825,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"ঢোকান"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"সংখ্যা লক"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"সংখ্যাপ্যাড <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"অ্যাটাচমেন্ট সরান"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"সিস্টেম"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"হোম"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"সাম্প্রতিকগুলি"</string>
@@ -1015,11 +1001,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"অ্যাপ্লিকেশনগুলি আপনার <xliff:g id="TYPES_LIST">%s</xliff:g> ব্যবহার করছে।"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" এবং "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> এখন <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> ব্যবহার করছে"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> সম্প্রতি <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> ব্যবহার করেছে"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"এন্টারপ্রাইজ"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> অ্যাপে ব্যবহার করা হচ্ছে"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> অ্যাপে সম্প্রতি ব্যবহার করা হয়েছে"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(অফিস)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"ফোন কল"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g>-এর মাধ্যমে)"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>-এর সাহায্যে)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"ক্যামেরা"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"লোকেশন"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"মাইক্রোফোন"</string>
@@ -1058,6 +1044,8 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"নিচে ডান দিকে সরান"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"প্রান্তে যান ও আড়াল করুন"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"প্রান্ত থেকে সরান এবং দেখুন"</string>
+    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"ডিভাইস কন্ট্রোল"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"আপনার কানেক্ট করা ডিভাইসের জন্য কন্ট্রোল যোগ করুন"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ডিভাইস কন্ট্রোল সেট-আপ করুন"</string>
@@ -1099,11 +1087,15 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"আরও দেখতে সোয়াইপ করুন"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"সাজেশন লোড করা হচ্ছে"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"মিডিয়া"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"বর্তমান সেশন লুকান।"</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"বর্তমান সেশন লুকানো যাবে না।"</string>
+    <!-- no translation found for controls_media_close_session (1193000643003066508) -->
+    <skip />
+    <!-- no translation found for controls_media_active_session (3146882316024153337) -->
+    <skip />
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"খারিজ করুন"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"আবার চালু করুন"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"সেটিংস"</string>
+    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"বন্ধ আছে, অ্যাপ চেক করুন"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"সমস্যা, আবার চেষ্টা করা হচ্ছে…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"খুঁজে পাওয়া যায়নি"</string>
@@ -1136,11 +1128,11 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> থেকে কিছু কম সময় আগে"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> সপ্তাহেরও আগে"</string>
     <string name="birthday_status" msgid="2596961629465396761">"জন্মদিন"</string>
-    <string name="birthday_status_content_description" msgid="7677415209545817153">"<xliff:g id="NAME">%1$s</xliff:g>-এর জন্মদিন"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"এটি হল <xliff:g id="NAME">%1$s</xliff:g>-এর জন্মদিন"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"জন্মদিন শীঘ্রই আসছে"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"<xliff:g id="NAME">%1$s</xliff:g>-এর জন্মদিন খুব শীঘ্র আসছে"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"<xliff:g id="NAME">%1$s</xliff:g>-এর জন্মদিন খুব শীঘ্র আসছে"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"বার্ষিকী"</string>
-    <string name="anniversary_status_content_description" msgid="6214503393960662875">"<xliff:g id="NAME">%1$s</xliff:g>-এর বার্ষিকী"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"এটি হল <xliff:g id="NAME">%1$s</xliff:g>-এর বার্ষিকী"</string>
     <string name="location_status" msgid="1294990572202541812">"লোকেশন শেয়ার করা হচ্ছে"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> লোকেশন শেয়ার করছেন"</string>
     <string name="new_story_status" msgid="9012195158584846525">"নতুন খবর"</string>
@@ -1160,4 +1152,10 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ব্যাটারির মিটারের রিডিং নেওয়ার সময় সমস্যা হয়েছে"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"আরও তথ্যের জন্য ট্যাপ করুন"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"কোনও অ্যালার্ম সেট করা নেই"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"ফিঙ্গারপ্রিন্ট সেন্সর"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"ফিঙ্গারপ্রিন্ট সেন্সর বন্ধ করা আছে"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"যাচাই করিয়ে নিন"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"ডিভাইস আনলক করুন"</string>
+    <!-- no translation found for keyguard_try_fingerprint (2825130772993061165) -->
+    <skip />
 </resources>

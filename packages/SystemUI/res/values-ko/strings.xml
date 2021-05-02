@@ -92,14 +92,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"더 캡처하기"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"스크린샷 닫기"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"스크린샷 미리보기"</string>
-    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
-    <skip />
-    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
-    <skip />
-    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
-    <skip />
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"상단 가장자리 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"하단 가장자리 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"왼쪽 가장자리 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"오른쪽 가장자리 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"화면 녹화"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"화면 녹화 처리 중"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"화면 녹화 세션에 관한 지속적인 알림"</string>
@@ -141,6 +137,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"전화"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"음성 지원"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"잠금 해제"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"기기 잠김"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"지문 대기 중"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"지문을 사용하지 않고 잠금 해제"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"얼굴 스캔 중"</string>
@@ -669,10 +666,8 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"이더넷"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"알람"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
-    <skip />
-    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
-    <skip />
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"모두 표시"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"잠금 해제하여 결제"</string>
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"준비됨"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"결제 설정"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"잠금 해제하여 사용"</string>
@@ -790,7 +785,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"알림 일시 중지 옵션"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"알림 받기"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"설정"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"실행취소"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"실행취소"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> 동안 일시 중지됨"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d시간</item>
@@ -830,6 +825,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"숫자 패드 <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"첨부파일 삭제"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"시스템"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"홈"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"최근"</string>
@@ -1005,11 +1001,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"애플리케이션이 <xliff:g id="TYPES_LIST">%s</xliff:g>을(를) 사용 중입니다."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 및 "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>에서 <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> 사용 중"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>에서 최근에 <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>을(를) 사용함"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(기업용)"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>에서 사용 중"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"최근 <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>에서 사용"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(직장)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"전화 통화"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> 사용)"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> 사용)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"카메라"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"위치"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"마이크"</string>
@@ -1048,6 +1044,8 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"오른쪽 하단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"가장자리로 옮겨서 숨기기"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"가장자리 바깥으로 옮겨서 표시"</string>
+    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"기기 컨트롤"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"연결된 기기의 컨트롤을 추가하세요."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"기기 컨트롤 설정"</string>
@@ -1089,11 +1087,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"자세히 보려면 스와이프하세요."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"추천 제어 기능 로드 중"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"미디어"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"현재 세션을 숨깁니다."</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"현재 세션은 숨길 수 없습니다."</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"이 미디어 세션을 숨기시겠습니까?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"현재 미디어 세션은 숨길 수 없습니다."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"닫기"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"다시 시작"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"설정"</string>
+    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"비활성. 앱을 확인하세요."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"오류 발생, 다시 시도 중…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"찾을 수 없음"</string>
@@ -1126,11 +1126,11 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> 이내"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> 이상 경과"</string>
     <string name="birthday_status" msgid="2596961629465396761">"생일"</string>
-    <string name="birthday_status_content_description" msgid="7677415209545817153">"오늘은 <xliff:g id="NAME">%1$s</xliff:g>님의 생일입니다."</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"오늘은 <xliff:g id="NAME">%1$s</xliff:g>님의 생일입니다."</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"다가오는 생일"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"곧 <xliff:g id="NAME">%1$s</xliff:g>님의 생일입니다."</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"곧 <xliff:g id="NAME">%1$s</xliff:g>님의 생일입니다."</string>
     <string name="anniversary_status" msgid="1790034157507590838">"기념일"</string>
-    <string name="anniversary_status_content_description" msgid="6214503393960662875">"오늘은 <xliff:g id="NAME">%1$s</xliff:g>님의 기념일입니다."</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"오늘은 <xliff:g id="NAME">%1$s</xliff:g>님의 기념일입니다."</string>
     <string name="location_status" msgid="1294990572202541812">"위치 공유 중"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g>님이 위치를 공유하고 있습니다."</string>
     <string name="new_story_status" msgid="9012195158584846525">"새 스토리"</string>
@@ -1150,4 +1150,9 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"배터리 수준을 읽는 중에 문제가 발생함"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"탭하여 자세한 정보를 확인하세요."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"설정된 알람 없음"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"지문 센서"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"지문 센서 사용 중지됨"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"인증"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"기기 입력"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"지문으로 열기"</string>
 </resources>
