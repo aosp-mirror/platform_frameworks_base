@@ -42,6 +42,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -139,6 +140,7 @@ public abstract class PanelViewController {
      */
     private boolean mInstantExpanding;
     private boolean mAnimateAfterExpanding;
+    private boolean mIsFlinging;
 
     PanelBar mBar;
 
@@ -596,6 +598,7 @@ public abstract class PanelViewController {
             notifyExpandingFinished();
             return;
         }
+        mIsFlinging = true;
         mOverExpandedBeforeFling = getOverExpansionAmount() > 0f;
         ValueAnimator animator = createHeightAnimator(target);
         mFlingTarget = target;
@@ -679,6 +682,7 @@ public abstract class PanelViewController {
     }
 
     private void onFlingEnd(boolean cancelled) {
+        mIsFlinging = false;
         setAnimator(null);
         mKeyguardStateController.notifyPanelFlingEnd();
         if (!cancelled) {
@@ -750,6 +754,16 @@ public abstract class PanelViewController {
     public void setExpandedHeightInternal(float h) {
         if (isNaN(h)) {
             Log.wtf(TAG, "ExpandedHeight set to NaN");
+        }
+        if (mAmbientState.isExpansionChanging()
+                && !mIsFlinging  // Fling already uses interpolated height from end of swipe
+                && !mAmbientState.isOnKeyguard()
+                && !mAmbientState.isDozing()
+                && !mAmbientState.isPulsing()) {
+            final float fraction = h / mView.getHeight();
+            final float interpolatedFraction = new PathInterpolator(0.2f, 0.8f, 0.8f, 1f)
+                    .getInterpolation(fraction);
+            h = interpolatedFraction * mView.getHeight();
         }
         maybeOverScrollForShadeFlingOpen(h);
         if (mExpandLatencyTracking && h != 0f) {
