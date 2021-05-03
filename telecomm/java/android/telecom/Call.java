@@ -2543,6 +2543,7 @@ public final class Call {
         } else if (mRttCall != null && parcelableCall.getParcelableRttCall() == null
                 && parcelableCall.getIsRttCallChanged()) {
             isRttChanged = true;
+            mRttCall.close();
             mRttCall = null;
         }
 
