@@ -15831,8 +15831,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (initLocale || !mProcessesReady) {
                         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     }
+                    final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
+                    bOptions.setTemporaryAppAllowlist(mInternal.getBootTimeTempAllowListDuration(),
+                            TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                            PowerExemptionManager.REASON_LOCALE_CHANGED, "");
                     broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
-                            null, OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                            null, OP_NONE, bOptions.toBundle(), false, false, MY_PID, SYSTEM_UID,
                             Binder.getCallingUid(), Binder.getCallingPid(),
                             UserHandle.USER_ALL);
                 }

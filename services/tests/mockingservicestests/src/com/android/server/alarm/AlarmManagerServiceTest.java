@@ -127,9 +127,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
@@ -367,6 +369,7 @@ public class AlarmManagerServiceTest {
                 .mockStatic(MetricsHelper.class)
                 .mockStatic(Settings.Global.class)
                 .mockStatic(ServiceManager.class)
+                .mockStatic(SystemProperties.class)
                 .spyStatic(UserHandle.class)
                 .strictness(Strictness.WARN)
                 .startMocking();
@@ -2534,6 +2537,24 @@ public class AlarmManagerServiceTest {
         mTestTimer.expire();
 
         verify(() -> MetricsHelper.pushAlarmBatchDelivered(10, 5));
+    }
+
+    @Test
+    public void setTimeZoneImpl() {
+        final long durationMs = 20000L;
+        when(mActivityManagerInternal.getBootTimeTempAllowListDuration()).thenReturn(durationMs);
+        mService.setTimeZoneImpl("UTC");
+        final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mMockContext).sendBroadcastAsUser(intentCaptor.capture(), eq(UserHandle.ALL),
+                isNull(), bundleCaptor.capture());
+        assertEquals(Intent.ACTION_TIMEZONE_CHANGED, intentCaptor.getValue().getAction());
+        final BroadcastOptions bOptions = new BroadcastOptions(bundleCaptor.getValue());
+        assertEquals(durationMs, bOptions.getTemporaryAppAllowlistDuration());
+        assertEquals(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                bOptions.getTemporaryAppAllowlistType());
+        assertEquals(PowerExemptionManager.REASON_TIMEZONE_CHANGED,
+                bOptions.getTemporaryAppAllowlistReasonCode());
     }
 
     @After
