@@ -41,21 +41,8 @@ public class ContextualButtonGroup extends ButtonDispatcher {
      * @param button the button added to the group
      */
     public void addButton(@NonNull ContextualButton button) {
-        // By default buttons in the context group are not visible until
-        // {@link #setButtonVisibility()) is called to show one of the buttons
-        button.setVisibility(View.INVISIBLE);
         button.attachToGroup(this);
         mButtonData.add(new ButtonData(button));
-    }
-
-    /**
-     * Removes a contextual button from the group.
-     */
-    public void removeButton(@IdRes int buttonResId) {
-        int index = getContextButtonIndex(buttonResId);
-        if (index != INVALID_INDEX) {
-            mButtonData.remove(index);
-        }
     }
 
     public ContextualButton getContextButton(@IdRes int buttonResId) {
