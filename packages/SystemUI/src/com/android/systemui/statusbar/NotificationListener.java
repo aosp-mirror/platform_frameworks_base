@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.RemoteInputController.processForRemoteInput;
 import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
+import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -34,7 +35,6 @@ import android.util.Log;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
-import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,6 @@ import java.util.List;
 @SuppressLint("OverrideAbstract")
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
-    private static final boolean DEBUG = StatusBar.DEBUG;
 
     private final Context mContext;
     private final NotificationManager mNotificationManager;
