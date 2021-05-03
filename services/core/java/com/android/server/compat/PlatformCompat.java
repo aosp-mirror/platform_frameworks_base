@@ -167,6 +167,28 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         return enabled;
     }
 
+    /**
+     * Called by the package manager to check if a given change is enabled for a given package name
+     * and the target sdk version while the package is in the parsing state.
+     *
+     * <p>Does not perform costly permission check.
+     *
+     * @param changeId the ID of the change in question
+     * @param packageName package name to check for
+     * @param targetSdkVersion target sdk version to check for
+     * @return {@code true} if the change would be enabled for this package name.
+     */
+    public boolean isChangeEnabledInternal(long changeId, String packageName,
+            int targetSdkVersion) {
+        if (mCompatConfig.willChangeBeEnabled(changeId, packageName)) {
+            final ApplicationInfo appInfo = new ApplicationInfo();
+            appInfo.packageName = packageName;
+            appInfo.targetSdkVersion = targetSdkVersion;
+            return isChangeEnabledInternalNoLogging(changeId, appInfo);
+        }
+        return false;
+    }
+
     @Override
     public void setOverrides(CompatibilityChangeConfig overrides, String packageName) {
         checkCompatChangeOverridePermission();
