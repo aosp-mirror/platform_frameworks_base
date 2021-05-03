@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tileimpl
 
+import android.content.Context
 import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
 import android.text.TextUtils
@@ -33,18 +34,18 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
-class QSTileBaseViewTest : SysuiTestCase() {
+class QSTileViewImplTest : SysuiTestCase() {
 
     @Mock
     private lateinit var iconView: QSIconView
 
-    private lateinit var tileView: QSTileBaseView
+    private lateinit var tileView: FakeTileView
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        tileView = QSTileBaseView(context, iconView, false)
+        tileView = FakeTileView(context, iconView, false)
     }
 
     @Test
@@ -54,7 +55,7 @@ class QSTileBaseViewTest : SysuiTestCase() {
         state.state = Tile.STATE_UNAVAILABLE
         state.secondaryLabel = testString
 
-        tileView.handleStateChanged(state)
+        tileView.changeState(state)
 
         assertThat(state.secondaryLabel as CharSequence).isEqualTo(testString)
     }
@@ -66,7 +67,7 @@ class QSTileBaseViewTest : SysuiTestCase() {
         state.state = Tile.STATE_INACTIVE
         state.secondaryLabel = testString
 
-        tileView.handleStateChanged(state)
+        tileView.changeState(state)
 
         assertThat(state.secondaryLabel as CharSequence).isEqualTo(testString)
     }
@@ -78,7 +79,7 @@ class QSTileBaseViewTest : SysuiTestCase() {
         state.state = Tile.STATE_ACTIVE
         state.secondaryLabel = testString
 
-        tileView.handleStateChanged(state)
+        tileView.changeState(state)
 
         assertThat(state.secondaryLabel as CharSequence).isEqualTo(testString)
     }
@@ -89,7 +90,7 @@ class QSTileBaseViewTest : SysuiTestCase() {
         state.state = Tile.STATE_INACTIVE
         state.secondaryLabel = ""
 
-        tileView.handleStateChanged(state)
+        tileView.changeState(state)
 
         assertThat(TextUtils.isEmpty(state.secondaryLabel)).isTrue()
     }
@@ -100,7 +101,7 @@ class QSTileBaseViewTest : SysuiTestCase() {
         state.state = Tile.STATE_ACTIVE
         state.secondaryLabel = ""
 
-        tileView.handleStateChanged(state)
+        tileView.changeState(state)
 
         assertThat(TextUtils.isEmpty(state.secondaryLabel)).isTrue()
     }
@@ -111,7 +112,7 @@ class QSTileBaseViewTest : SysuiTestCase() {
         state.state = Tile.STATE_UNAVAILABLE
         state.secondaryLabel = ""
 
-        tileView.handleStateChanged(state)
+        tileView.changeState(state)
 
         assertThat(state.secondaryLabel as CharSequence).isEqualTo(
             context.getString(R.string.tile_unavailable)
@@ -124,7 +125,7 @@ class QSTileBaseViewTest : SysuiTestCase() {
         state.state = Tile.STATE_INACTIVE
         state.secondaryLabel = ""
 
-        tileView.handleStateChanged(state)
+        tileView.changeState(state)
 
         assertThat(state.secondaryLabel as CharSequence).isEqualTo(
             context.getString(R.string.switch_bar_off)
@@ -137,10 +138,20 @@ class QSTileBaseViewTest : SysuiTestCase() {
         state.state = Tile.STATE_ACTIVE
         state.secondaryLabel = ""
 
-        tileView.handleStateChanged(state)
+        tileView.changeState(state)
 
         assertThat(state.secondaryLabel as CharSequence).isEqualTo(
             context.getString(R.string.switch_bar_on)
         )
+    }
+
+    class FakeTileView(
+        context: Context,
+        icon: QSIconView,
+        collapsed: Boolean
+    ) : QSTileViewImpl(context, icon, collapsed) {
+        fun changeState(state: QSTile.State) {
+            handleStateChanged(state)
+        }
     }
 }

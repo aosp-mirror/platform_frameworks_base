@@ -2187,6 +2187,9 @@
     <!-- The tile in quick settings is unavailable. [CHAR LIMIT=32] -->
     <string name="tile_unavailable">Unavailable</string>
 
+    <!-- The tile in quick settings is disabled by a device administration policy [CHAR LIMIT=32] -->
+    <string name="tile_disabled">Disabled</string>
+
     <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
     <string name="nav_bar">Navigation bar</string>
 

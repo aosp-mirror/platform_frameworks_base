@@ -243,6 +243,6 @@ public class QSFactoryImpl implements QSFactory {
     @Override
     public QSTileView createTileView(Context context, QSTile tile, boolean collapsedView) {
         QSIconView icon = tile.createTileView(context);
-        return new QSTileViewHorizontal(context, icon, collapsedView);
+        return new QSTileViewImpl(context, icon, collapsedView);
     }
 }
