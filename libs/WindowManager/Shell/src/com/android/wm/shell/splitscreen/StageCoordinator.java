@@ -452,6 +452,10 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
             // Make sure the main stage is active.
             mMainStage.activate(getMainStageBounds(), wct);
             mSideStage.setBounds(getSideStageBounds(), wct);
+            // Reorder side stage to the top whenever there's a new child task appeared in side
+            // stage. This is needed to prevent main stage occludes side stage and makes main stage
+            // flipping between fullscreen and multi-window windowing mode.
+            wct.reorder(mSideStage.mRootTaskInfo.token, true);
             mTaskOrganizer.applyTransaction(wct);
         }
     }
