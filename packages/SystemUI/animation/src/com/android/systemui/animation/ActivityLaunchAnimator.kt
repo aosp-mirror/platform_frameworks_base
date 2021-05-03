@@ -17,6 +17,7 @@ import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.view.animation.PathInterpolator
@@ -112,7 +113,7 @@ class ActivityLaunchAnimator(context: Context) {
     @PublishedApi
     internal fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            this.getRootView().context.mainExecutor.execute {
+            this.launchContainer.context.mainExecutor.execute {
                 this.onIntentStarted(willAnimate)
             }
         } else {
@@ -166,15 +167,19 @@ class ActivityLaunchAnimator(context: Context) {
         }
 
         /**
-         * Return the root [View] that contains the view that started the intent and will be
-         * animating together with the window.
+         * The container in which the view that started the intent will be animating together with
+         * the opening window.
          *
-         * This view will be used to:
+         * This will be used to:
          *  - Get the associated [Context].
          *  - Compute whether we are expanding fully above the current window.
          *  - Apply surface transactions in sync with RenderThread.
+         *
+         * This container can be changed to force this [Controller] to animate the expanding view
+         * inside a different location, for instance to ensure correct layering during the
+         * animation.
          */
-        fun getRootView(): View
+        var launchContainer: ViewGroup
 
         /**
          * Return the [State] of the view that will be animated. We will animate from this state to
@@ -272,9 +277,9 @@ class ActivityLaunchAnimator(context: Context) {
 
     @VisibleForTesting
     inner class Runner(private val controller: Controller) : IRemoteAnimationRunner.Stub() {
-        private val rootView = controller.getRootView()
-        @PublishedApi internal val context = rootView.context
-        private val transactionApplier = SyncRtSurfaceTransactionApplier(rootView)
+        private val launchContainer = controller.launchContainer
+        @PublishedApi internal val context = launchContainer.context
+        private val transactionApplier = SyncRtSurfaceTransactionApplier(launchContainer)
         private var animator: ValueAnimator? = null
 
         private var windowCrop = Rect()
@@ -291,11 +296,11 @@ class ActivityLaunchAnimator(context: Context) {
 
         @PublishedApi
         internal fun postTimeout() {
-            rootView.postDelayed(onTimeout, LAUNCH_TIMEOUT)
+            launchContainer.postDelayed(onTimeout, LAUNCH_TIMEOUT)
         }
 
         private fun removeTimeout() {
-            rootView.removeCallbacks(onTimeout)
+            launchContainer.removeCallbacks(onTimeout)
         }
 
         override fun onAnimationStart(
@@ -369,11 +374,11 @@ class ActivityLaunchAnimator(context: Context) {
             val endWidth = endRight - endLeft
 
             // TODO(b/184121838): Ensure that we are launching on the same screen.
-            val rootViewLocation = rootView.locationOnScreen
+            val rootViewLocation = launchContainer.locationOnScreen
             val isExpandingFullyAbove = endTop <= rootViewLocation[1] &&
-                endBottom >= rootViewLocation[1] + rootView.height &&
+                endBottom >= rootViewLocation[1] + launchContainer.height &&
                 endLeft <= rootViewLocation[0] &&
-                endRight >= rootViewLocation[0] + rootView.width
+                endRight >= rootViewLocation[0] + launchContainer.width
 
             // TODO(b/184121838): We should somehow get the top and bottom radius of the window.
             val endRadius = if (isExpandingFullyAbove) {
