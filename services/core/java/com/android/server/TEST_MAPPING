@@ -36,6 +36,15 @@
                 }
             ],
             "file_patterns": ["ClipboardService\\.java"]
+        },
+        {
+            "name": "FrameworksMockingServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.sensorprivacy"
+                }
+            ],
+            "file_patterns": ["SensorPrivacyService\\.java"]
         }
     ],
     "presubmit-large": [
