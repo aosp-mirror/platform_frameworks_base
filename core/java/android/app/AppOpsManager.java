@@ -1894,7 +1894,7 @@ public class AppOpsManager {
             OP_MANAGE_MEDIA,                    // MANAGE_MEDIA
             OP_BLUETOOTH_CONNECT,               // OP_BLUETOOTH_CONNECT
             OP_UWB_RANGING,                     // OP_UWB_RANGING
-            OP_ACTIVITY_RECOGNITION_SOURCE,     // OP_ACTIVITY_RECOGNITION_SOURCE
+            OP_ACTIVITY_RECOGNITION,            // OP_ACTIVITY_RECOGNITION_SOURCE
             OP_BLUETOOTH_ADVERTISE,             // OP_BLUETOOTH_ADVERTISE
             OP_RECORD_INCOMING_PHONE_AUDIO,     // OP_RECORD_INCOMING_PHONE_AUDIO
     };
