@@ -148,6 +148,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.camera.CameraIntents;
@@ -2785,13 +2786,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
                 intent, mLockscreenUserManager.getCurrentUserId());
 
-        ActivityLaunchAnimator.Controller animController = null;
-        if (animationController != null) {
-            animController = dismissShade ? new StatusBarLaunchAnimatorController(
-                    animationController, this, true /* isLaunchForActivity */)
-                    : animationController;
-        }
-        final ActivityLaunchAnimator.Controller animCallbackForLambda = animController;
+        ActivityLaunchAnimator.Controller animController = wrapAnimationController(
+                animationController, dismissShade);
 
         // If we animate, we will dismiss the shade only once the animation is done. This is taken
         // care of by the StatusBarLaunchAnimationController.
@@ -2804,7 +2800,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             intent.addFlags(flags);
             int[] result = new int[]{ActivityManager.START_CANCELED};
 
-            mActivityLaunchAnimator.startIntentWithAnimation(animCallbackForLambda,
+            mActivityLaunchAnimator.startIntentWithAnimation(animController,
                     areLaunchAnimationsEnabled(), (adapter) -> {
                         ActivityOptions options = new ActivityOptions(
                                 getActivityOptions(mDisplayId, adapter));
@@ -2856,6 +2852,46 @@ public class StatusBar extends SystemUI implements DemoMode,
         };
         executeRunnableDismissingKeyguard(runnable, cancelRunnable, dismissShadeDirectly,
                 afterKeyguardGone, true /* deferred */);
+    }
+
+    @Nullable
+    private ActivityLaunchAnimator.Controller wrapAnimationController(
+            @Nullable ActivityLaunchAnimator.Controller animationController, boolean dismissShade) {
+        if (animationController == null) {
+            return null;
+        }
+
+        View rootView = animationController.getLaunchContainer().getRootView();
+        if (rootView == mSuperStatusBarViewFactory.getStatusBarWindowView()) {
+            // We are animating a view in the status bar. We have to make sure that the status bar
+            // window matches the full screen during the animation and that we are expanding the
+            // view below the other status bar text.
+            animationController.setLaunchContainer(
+                    mStatusBarWindowController.getLaunchAnimationContainer());
+
+            return new DelegateLaunchAnimatorController(animationController) {
+                @Override
+                public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
+                    getDelegate().onLaunchAnimationStart(isExpandingFullyAbove);
+                    mStatusBarWindowController.setLaunchAnimationRunning(true);
+                }
+
+                @Override
+                public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
+                    getDelegate().onLaunchAnimationEnd(isExpandingFullyAbove);
+                    mStatusBarWindowController.setLaunchAnimationRunning(false);
+                }
+            };
+        }
+
+        if (dismissShade && rootView == mNotificationShadeWindowView) {
+            // We are animating a view in the shade. We have to make sure that we collapse it when
+            // the animation ends or is cancelled.
+            return new StatusBarLaunchAnimatorController(animationController, this,
+                    true /* isLaunchForActivity */);
+        }
+
+        return animationController;
     }
 
     public void readyForKeyguardDone() {
