@@ -76,5 +76,21 @@ public class CustomMeasuredPowerCalculatorTest {
         assertThat(systemConsumer.getConsumedPowerForCustomComponent(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1))
                 .isWithin(PRECISION).of(55.55555);
+
+        final BatteryConsumer deviceBatteryConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceBatteryConsumer.getConsumedPowerForCustomComponent(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID))
+                .isWithin(PRECISION).of(27.77777);
+        assertThat(deviceBatteryConsumer.getConsumedPowerForCustomComponent(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1))
+                .isWithin(PRECISION).of(55.55555);
+
+        final BatteryConsumer appsBatteryConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(appsBatteryConsumer.getConsumedPowerForCustomComponent(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID))
+                .isWithin(PRECISION).of(27.77777);
+        assertThat(appsBatteryConsumer.getConsumedPowerForCustomComponent(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1))
+                .isWithin(PRECISION).of(55.55555);
     }
 }
