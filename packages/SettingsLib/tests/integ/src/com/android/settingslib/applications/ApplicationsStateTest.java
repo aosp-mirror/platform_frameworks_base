@@ -138,6 +138,34 @@ public class ApplicationsStateTest {
     }
 
     @Test
+    public void testAppsExceptGamesFilterRejectsGame() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_GAME;
+
+        assertThat(ApplicationsState.FILTER_APPS_EXCEPT_GAMES.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
+    public void testAppsExceptGamesFilterAcceptsImage() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_IMAGE;
+
+        assertThat(ApplicationsState.FILTER_APPS_EXCEPT_GAMES.filterApp(mEntry)).isTrue();
+    }
+
+    @Test
+    public void testAppsExceptGamesFilterAcceptsVideo() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_VIDEO;
+
+        assertThat(ApplicationsState.FILTER_APPS_EXCEPT_GAMES.filterApp(mEntry)).isTrue();
+    }
+
+    @Test
+    public void testAppsExceptGamesFilterAcceptsAudio() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_AUDIO;
+
+        assertThat(ApplicationsState.FILTER_APPS_EXCEPT_GAMES.filterApp(mEntry)).isTrue();
+    }
+
+    @Test
     public void testDownloadAndLauncherAndInstantAcceptsCorrectApps() {
         // should include instant apps
         mEntry.isHomeApp = false;
