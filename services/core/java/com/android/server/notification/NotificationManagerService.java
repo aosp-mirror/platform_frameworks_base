@@ -106,7 +106,6 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-import static com.android.internal.util.CollectionUtils.emptyIfNull;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -324,7 +323,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
@@ -9428,6 +9426,14 @@ public class NotificationManagerService extends SystemService {
             return mDefaultFromConfig;
         }
 
+        @Override
+        protected void upgradeUserSet() {
+            for (int userId: mApproved.keySet()) {
+                ArraySet<String> userSetServices = mUserSetServices.get(userId);
+                mIsUserChanged.put(userId, (userSetServices != null && userSetServices.size() > 0));
+            }
+        }
+
         public NotificationAssistants(Context context, Object lock, UserProfiles up,
                 IPackageManager pm) {
             super(context, lock, up, pm);
@@ -9602,47 +9608,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         boolean hasUserSet(int userId) {
-            synchronized (mLock) {
-                ArraySet<String> userSetServices = mUserSetServices.get(userId);
-                if (userSetServices == null) {
-                    // Legacy case - no data means user-set, unless no assistant is set
-                    return !mApproved.isEmpty();
-                }
-                Map<Boolean, ArraySet<String>> approvedByType = emptyIfNull(mApproved.get(userId));
-                return userSetServices.containsAll(emptyIfNull(approvedByType.get(true)))
-                        && userSetServices.containsAll(emptyIfNull(approvedByType.get(false)));
-            }
+            Boolean userSet = mIsUserChanged.get(userId);
+            return (userSet != null && userSet);
         }
 
         void setUserSet(int userId, boolean set) {
-            synchronized (mLock) {
-                ArraySet<String> userSetServices = new ArraySet<>();
-                if (set) {
-                    ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
-                    if (approvedByType != null) {
-                        for (int i = 0; i < approvedByType.size(); i++) {
-                            userSetServices.addAll(approvedByType.valueAt(i));
-                        }
-                    }
-                }
-                mUserSetServices.put(userId, userSetServices);
-            }
-        }
-
-        @Override
-        protected void readExtraAttributes(String tag, TypedXmlPullParser parser, int userId)
-                throws IOException {
-            // TODO: this logic looks broken, since it's trying to convert a
-            // list into a boolean; for now we preserve the old parsing behavior
-            // to avoid a performance regression, but someone should investigate
-            final String value = parser.getAttributeValue(null, ATT_USER_SET);
-            final boolean userSet;
-            if (TextUtils.isEmpty(value)) {
-                userSet = false;
-            } else {
-                userSet = Boolean.parseBoolean(value);
-            }
-            setUserSet(userId, userSet);
+            mIsUserChanged.put(userId, set);
         }
 
         private void notifyCapabilitiesChanged(final ManagedServiceInfo info) {
