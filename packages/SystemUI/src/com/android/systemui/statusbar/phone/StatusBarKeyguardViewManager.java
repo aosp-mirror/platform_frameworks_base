@@ -591,6 +591,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         if (mStatusBar.isInLaunchTransition()
                 || mKeyguardStateController.isFlingingToDismissKeyguard()) {
+            final boolean wasFlingingToDismissKeyguard =
+                    mKeyguardStateController.isFlingingToDismissKeyguard();
             mStatusBar.fadeKeyguardAfterLaunchTransition(new Runnable() {
                 @Override
                 public void run() {
@@ -604,6 +606,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 public void run() {
                     mStatusBar.hideKeyguard();
                     mNotificationShadeWindowController.setKeyguardFadingAway(false);
+
+                    if (wasFlingingToDismissKeyguard) {
+                        mStatusBar.finishKeyguardFadingAway();
+                    }
+
                     mViewMediatorCallback.keyguardGone();
                     executeAfterKeyguardGoneAction();
                 }

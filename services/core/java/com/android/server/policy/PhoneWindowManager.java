@@ -3014,7 +3014,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int handleStartTransitionForKeyguardLw(boolean keyguardGoingAway, long duration) {
         final int res = applyKeyguardOcclusionChange();
         if (res != 0) return res;
-        if (!WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation && keyguardGoingAway) {
+        if (!WindowManagerService.sEnableRemoteKeyguardAnimation && keyguardGoingAway) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
             startKeyguardExitAnimation(SystemClock.uptimeMillis(), duration);
         }
