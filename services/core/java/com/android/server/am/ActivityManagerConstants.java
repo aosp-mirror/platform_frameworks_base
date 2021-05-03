@@ -460,7 +460,7 @@ final class ActivityManagerConstants extends ContentObserver {
      *
      * If the value is 0.1, 10% of the installed packages would be sampled.
      */
-    volatile float mDefaultFgsAtomSampleRate = DEFAULT_FGS_ATOM_SAMPLE_RATE;
+    volatile float mFgsAtomSampleRate = DEFAULT_FGS_ATOM_SAMPLE_RATE;
 
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
@@ -985,7 +985,7 @@ final class ActivityManagerConstants extends ContentObserver {
     }
 
     private void updateFgsAtomSamplePercent() {
-        mDefaultFgsAtomSampleRate = DeviceConfig.getFloat(
+        mFgsAtomSampleRate = DeviceConfig.getFloat(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_FGS_ATOM_SAMPLE_RATE,
                 DEFAULT_FGS_ATOM_SAMPLE_RATE);
@@ -1204,7 +1204,7 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_CHECK_CALLER_TARGET_SDK);
         pw.print("="); pw.println(mFgsStartRestrictionCheckCallerTargetSdk);
         pw.print("  "); pw.print(KEY_FGS_ATOM_SAMPLE_RATE);
-        pw.print("="); pw.println(mDefaultFgsAtomSampleRate);
+        pw.print("="); pw.println(mFgsAtomSampleRate);
         pw.print("  "); pw.print(KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR);
         pw.print("="); pw.println(mPushMessagingOverQuotaBehavior);
 
