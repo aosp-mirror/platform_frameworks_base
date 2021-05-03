@@ -4315,11 +4315,21 @@ class Task extends WindowContainer<WindowContainer> {
                 // the screen are opaque.
                 return TASK_VISIBILITY_INVISIBLE;
             }
-            if (isAssistantType && gotRootSplitScreenTask) {
-                // Assistant stack can't be visible behind split-screen. In addition to this not
-                // making sense, it also works around an issue here we boost the z-order of the
-                // assistant window surfaces in window manager whenever it is visible.
-                return TASK_VISIBILITY_INVISIBLE;
+            if (gotRootSplitScreenTask) {
+                if (isAssistantType) {
+                    // Assistant stack can't be visible behind split-screen. In addition to this not
+                    // making sense, it also works around an issue here we boost the z-order of the
+                    // assistant window surfaces in window manager whenever it is visible.
+                    return TASK_VISIBILITY_INVISIBLE;
+                }
+                if (other.isHomeOrRecentsRootTask()) {
+                    // While in split mode, home task will be reparented to the secondary split and
+                    // leaving tasks not supporting split below. Due to
+                    // TaskDisplayArea#assignRootTaskOrdering always adjusts home surface layer to
+                    // the bottom, this makes sure those tasks below home is invisible and won't
+                    // occlude home task unexpectedly.
+                    return TASK_VISIBILITY_INVISIBLE;
+                }
             }
             if (other.mAdjacentTask != null) {
                 if (adjacentTasks.contains(other.mAdjacentTask)) {
