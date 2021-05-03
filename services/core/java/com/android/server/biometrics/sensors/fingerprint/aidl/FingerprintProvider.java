@@ -37,6 +37,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -186,8 +187,9 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         Slog.d(getTag(), "Daemon was null, reconnecting");
 
         mDaemon = IFingerprint.Stub.asInterface(
-                ServiceManager.waitForDeclaredService(IFingerprint.DESCRIPTOR
-                        + "/" + mHalInstanceName));
+                Binder.allowBlocking(
+                        ServiceManager.waitForDeclaredService(
+                                IFingerprint.DESCRIPTOR + "/" + mHalInstanceName)));
         if (mDaemon == null) {
             Slog.e(getTag(), "Unable to get daemon");
             return null;
