@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.NetworkStats;
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
@@ -184,6 +185,16 @@ public class BatteryUsageStatsRule implements TestRule {
 
         mBatteryUsageStats = builder.build();
         return mBatteryUsageStats;
+    }
+
+    public BatteryConsumer getDeviceBatteryConsumer() {
+        return mBatteryUsageStats.getAggregateBatteryConsumer(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+    }
+
+    public BatteryConsumer getAppsBatteryConsumer() {
+        return mBatteryUsageStats.getAggregateBatteryConsumer(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
     }
 
     public UidBatteryConsumer getUidBatteryConsumer(int uid) {
