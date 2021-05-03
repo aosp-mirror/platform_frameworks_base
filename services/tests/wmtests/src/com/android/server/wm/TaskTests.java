@@ -62,7 +62,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 
 import android.app.ActivityManager;
 import android.app.TaskInfo;
@@ -1322,20 +1321,22 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
-    public void testNotifyOrientationChangeCausedByConfigurationChange() {
+    public void testTaskOrientationOnDisplayWindowingModeChange() {
+        // Skip unnecessary operations to speed up the test.
+        mAtm.deferWindowLayout();
         final Task task = getTestTask();
         final ActivityRecord activity = task.getTopMostActivity();
         final DisplayContent display = task.getDisplayContent();
-        display.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mWm.setWindowingMode(display.mDisplayId, WINDOWING_MODE_FREEFORM);
 
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
-        verify(display).onDescendantOrientationChanged(same(task));
-        reset(display);
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, display.getLastOrientation());
 
-        display.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        mWm.setWindowingMode(display.mDisplayId, WINDOWING_MODE_FULLSCREEN);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, task.getOrientation());
-        verify(display).onDescendantOrientationChanged(same(task));
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, display.getLastOrientation());
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, display.getConfiguration().orientation);
     }
 
     private Task getTestTask() {
