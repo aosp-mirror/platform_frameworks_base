@@ -816,6 +816,11 @@ private:
     uint32_t                    mSourceResourceId;
 };
 
+static inline bool operator==(const android::ResXMLParser::ResXMLPosition& lhs,
+                              const android::ResXMLParser::ResXMLPosition& rhs) {
+  return lhs.curNode == rhs.curNode;
+}
+
 class DynamicRefTable;
 
 /**
