@@ -392,6 +392,10 @@
   <java-symbol type="bool" name="config_supportsMultiWindow" />
   <java-symbol type="bool" name="config_supportsSplitScreenMultiWindow" />
   <java-symbol type="bool" name="config_supportsMultiDisplay" />
+  <java-symbol type="integer" name="config_supportsNonResizableMultiWindow" />
+  <java-symbol type="integer" name="config_respectsActivityMinWidthHeightMultiWindow" />
+  <java-symbol type="dimen" name="config_minPercentageMultiWindowSupportWidth" />
+  <java-symbol type="integer" name="config_largeScreenSmallestScreenWidthDp" />
   <java-symbol type="bool" name="config_noHomeScreen" />
   <java-symbol type="bool" name="config_supportsSystemDecorsOnSecondaryDisplays" />
   <java-symbol type="bool" name="config_supportsInsecureLockScreen" />
