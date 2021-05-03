@@ -33,9 +33,10 @@ filegroup {
 
 java_sdk_library {
     name: "framework-appsearch",
-    srcs: [ ":framework-appsearch-sources" ],
+    srcs: [":framework-appsearch-sources"],
     sdk_version: "core_platform", // TODO(b/146218515) should be module_current
     impl_only_libs: ["framework-minus-apex"], // TODO(b/146218515) should be removed
+    libs: ["unsupportedappusage"], // TODO(b/181887768) should be removed
     defaults: ["framework-module-defaults"],
     permitted_packages: ["android.app.appsearch"],
     aidl: {
