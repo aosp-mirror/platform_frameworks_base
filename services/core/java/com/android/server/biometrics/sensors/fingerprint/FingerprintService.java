@@ -811,7 +811,7 @@ public class FingerprintService extends SystemService {
             for (String instance : instances) {
                 final String fqName = IFingerprint.DESCRIPTOR + "/" + instance;
                 final IFingerprint fp = IFingerprint.Stub.asInterface(
-                        ServiceManager.waitForDeclaredService(fqName));
+                        Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
                 if (fp == null) {
                     Slog.e(TAG, "Unable to get declared service: " + fqName);
                     continue;
