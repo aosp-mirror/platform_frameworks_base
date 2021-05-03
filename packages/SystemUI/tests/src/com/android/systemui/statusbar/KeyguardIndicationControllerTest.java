@@ -474,6 +474,22 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void transientIndication_visibleWhenDozing_ignoresFingerprintCancellation() {
+        createController();
+
+        mController.setVisible(true);
+        reset(mRotateTextViewController);
+        mController.getKeyguardCallback().onBiometricError(
+                FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED, "foo",
+                BiometricSourceType.FINGERPRINT);
+        mController.getKeyguardCallback().onBiometricError(
+                FingerprintManager.FINGERPRINT_ERROR_CANCELED, "bar",
+                BiometricSourceType.FINGERPRINT);
+
+        verifyNoTransientMessage();
+    }
+
+    @Test
     public void transientIndication_swipeUpToRetry() {
         createController();
         String message = mContext.getString(R.string.keyguard_retry);
@@ -667,5 +683,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     private void verifyTransientMessage(String message) {
         verify(mRotateTextViewController).showTransient(eq(message), anyBoolean());
+    }
+
+    private void verifyNoTransientMessage() {
+        verify(mRotateTextViewController, never()).showTransient(any(), anyBoolean());
     }
 }
