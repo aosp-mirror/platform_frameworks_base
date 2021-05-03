@@ -400,10 +400,14 @@ public class StackScrollAlgorithm {
         }
 
         if (view instanceof FooterView) {
-            viewState.yTranslation = Math.min(viewState.yTranslation,
-                    ambientState.getStackHeight());
-            // Hide footer if shelf is showing
-            viewState.hidden = algorithmState.firstViewInShelf != null;
+            final boolean isShelfShowing = algorithmState.firstViewInShelf != null;
+
+            final float footerEnd = viewState.yTranslation + view.getIntrinsicHeight();
+            final boolean noSpaceForFooter = footerEnd > ambientState.getStackHeight();
+
+            viewState.hidden = isShelfShowing
+                    || (!ambientState.isExpansionChanging() && noSpaceForFooter);
+
         } else if (view != ambientState.getTrackedHeadsUpRow()) {
             if (ambientState.isExpansionChanging()) {
                 // Show all views. Views below the shelf will later be clipped (essentially hidden)
