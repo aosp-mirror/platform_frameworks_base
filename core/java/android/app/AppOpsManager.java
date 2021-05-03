@@ -4723,8 +4723,8 @@ public class AppOpsManager {
     }
 
     /**
-     * Flag for querying app op history: get only aggregate information and no
-     * discrete accesses.
+     * Flag for querying app op history: get only aggregate information (counts of events) and no
+     * discret accesses information - specific accesses with timestamp.
      *
      * @see #getHistoricalOps(HistoricalOpsRequest, Executor, Consumer)
      *
@@ -4735,8 +4735,8 @@ public class AppOpsManager {
     public static final int HISTORY_FLAG_AGGREGATE = 1 << 0;
 
     /**
-     * Flag for querying app op history: get only discrete information and no
-     * aggregate accesses.
+     * Flag for querying app op history: get only discrete access information (only specific
+     * accesses with timestamps) and no aggregate information (counts over time).
      *
      * @see #getHistoricalOps(HistoricalOpsRequest, Executor, Consumer)
      *
@@ -4747,7 +4747,7 @@ public class AppOpsManager {
     public static final int HISTORY_FLAG_DISCRETE = 1 << 1;
 
     /**
-     * Flag for querying app op history: get all types of historical accesses.
+     * Flag for querying app op history: get all types of historical access information.
      *
      * @see #getHistoricalOps(HistoricalOpsRequest, Executor, Consumer)
      *
