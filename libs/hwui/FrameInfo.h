@@ -68,7 +68,7 @@ extern const std::array<const char*, static_cast<int>(FrameInfoIndex::NumIndexes
 
 namespace FrameInfoFlags {
 enum {
-    WindowLayoutChanged = 1 << 0,
+    WindowVisibilityChanged = 1 << 0,
     RTAnimation = 1 << 1,
     SurfaceCanvas = 1 << 2,
     SkippedFrame = 1 << 3,
