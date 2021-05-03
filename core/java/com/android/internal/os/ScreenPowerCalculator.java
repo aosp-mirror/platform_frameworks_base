@@ -68,6 +68,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
                 rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED, consumptionUC);
 
         double totalAppPower = 0;
+        long totalAppDuration = 0;
 
         // Now deal with each app's UidBatteryConsumer. The results are stored in the
         // BatteryConsumer.POWER_COMPONENT_SCREEN power component, which is considered smeared,
@@ -86,6 +87,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
                             .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
                                     appPowerAndDuration.powerMah, powerModel);
                     totalAppPower += appPowerAndDuration.powerMah;
+                    totalAppDuration += appPowerAndDuration.durationMs;
                 }
                 break;
             case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
@@ -93,7 +95,20 @@ public class ScreenPowerCalculator extends PowerCalculator {
                 smearScreenBatteryDrain(uidBatteryConsumerBuilders, totalPowerAndDuration,
                         rawRealtimeUs);
                 totalAppPower = totalPowerAndDuration.powerMah;
+                totalAppDuration = totalPowerAndDuration.durationMs;
         }
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
+                        Math.max(totalPowerAndDuration.powerMah, totalAppPower), powerModel)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN,
+                        totalPowerAndDuration.durationMs);
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, totalAppPower, powerModel)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN, totalAppDuration);
 
         builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_SCREEN)
                 .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN,

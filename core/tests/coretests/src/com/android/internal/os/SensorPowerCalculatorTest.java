@@ -59,11 +59,11 @@ public class SensorPowerCalculatorTest {
         when(sensorManager.getSensorList(Sensor.TYPE_ALL))
                 .thenReturn(List.of(sensor1, sensor2));
 
-        BatteryStatsImpl.Uid uidStats = mStatsRule.getUidStats(APP_UID);
-        uidStats.noteStartSensor(SENSOR_HANDLE_1, 1000);
-        uidStats.noteStopSensor(SENSOR_HANDLE_1, 2000);
-        uidStats.noteStartSensor(SENSOR_HANDLE_2, 3000);
-        uidStats.noteStopSensor(SENSOR_HANDLE_2, 5000);
+        final BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+        stats.noteStartSensorLocked(APP_UID, SENSOR_HANDLE_1, 1000, 1000);
+        stats.noteStopSensorLocked(APP_UID, SENSOR_HANDLE_1, 2000, 2000);
+        stats.noteStartSensorLocked(APP_UID, SENSOR_HANDLE_2, 3000, 3000);
+        stats.noteStopSensorLocked(APP_UID, SENSOR_HANDLE_2, 5000, 5000);
 
         SensorPowerCalculator calculator = new SensorPowerCalculator(sensorManager);
 
@@ -73,6 +73,14 @@ public class SensorPowerCalculatorTest {
         assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SENSORS))
                 .isEqualTo(3000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS))
+                .isWithin(PRECISION).of(0.5);
+
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS))
+                .isWithin(PRECISION).of(0.5);
+
+        BatteryConsumer appsConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS))
                 .isWithin(PRECISION).of(0.5);
     }
 
