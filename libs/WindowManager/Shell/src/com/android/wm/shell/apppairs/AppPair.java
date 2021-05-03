@@ -182,6 +182,11 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        if (!taskInfo.supportsMultiWindow) {
+            // Dismiss AppPair if the task no longer supports multi window.
+            mController.unpair(mRootTaskInfo.taskId);
+            return;
+        }
         if (taskInfo.taskId == getRootTaskId()) {
             if (mRootTaskInfo.isVisible != taskInfo.isVisible) {
                 mSyncQueue.runInSync(t -> {

@@ -61,6 +61,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         void onStatusChanged(boolean visible, boolean hasChildren);
         void onChildTaskStatusChanged(int taskId, boolean present, boolean visible);
         void onRootTaskVanished();
+        void onNoLongerSupportMultiWindow();
     }
     private final StageListenerCallbacks mCallbacks;
     private final SyncTransactionQueue mSyncQueue;
@@ -113,6 +114,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        if (!taskInfo.supportsMultiWindow) {
+            // Leave split screen if the task no longer supports multi window.
+            mCallbacks.onNoLongerSupportMultiWindow();
+            return;
+        }
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             mRootTaskInfo = taskInfo;
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
