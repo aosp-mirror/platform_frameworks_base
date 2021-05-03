@@ -1477,6 +1477,7 @@
 
     <!-- Wallet activity screen specs -->
     <dimen name="wallet_icon_size">36sp</dimen>
+    <dimen name="wallet_view_header_icon_size">56dp</dimen>
     <dimen name="card_margin">16dp</dimen>
     <dimen name="card_carousel_dot_offset">24dp</dimen>
     <dimen name="card_carousel_dot_unselected_radius">2dp</dimen>

@@ -75,7 +75,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     private final FeatureFlags mFeatureFlags;
 
     @VisibleForTesting Drawable mCardViewDrawable;
-    private boolean mHasCard;
+    private WalletCard mSelectedCard;
 
     @Inject
     public QuickAccessWalletTile(
@@ -125,7 +125,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 view == null ? null : ActivityLaunchAnimator.Controller.fromView(view);
 
         mUiHandler.post(() -> {
-            if (mHasCard) {
+            if (mSelectedCard != null) {
                 Intent intent = new Intent(mContext, WalletActivity.class)
                         .setAction(Intent.ACTION_VIEW)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -157,15 +157,14 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         state.icon = ResourceIcon.get(R.drawable.ic_wallet_lockscreen);
         boolean isDeviceLocked = !mKeyguardStateController.isUnlocked();
         if (mQuickAccessWalletClient.isWalletServiceAvailable()) {
-            if (mHasCard) {
+            if (mSelectedCard != null) {
                 if (isDeviceLocked) {
                     state.state = Tile.STATE_INACTIVE;
                     state.secondaryLabel =
                             mContext.getString(R.string.wallet_secondary_label_device_locked);
                 } else {
                     state.state = Tile.STATE_ACTIVE;
-                    state.secondaryLabel =
-                            mContext.getString(R.string.wallet_secondary_label_active);
+                    state.secondaryLabel = mSelectedCard.getContentDescription();
                 }
             } else {
                 state.state = Tile.STATE_INACTIVE;
@@ -208,7 +207,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height);
         int iconSizePx = mContext.getResources().getDimensionPixelSize(R.dimen.wallet_icon_size);
         GetWalletCardsRequest request =
-                new GetWalletCardsRequest(cardWidth, cardHeight, iconSizePx, /* maxCards= */ 2);
+                new GetWalletCardsRequest(cardWidth, cardHeight, iconSizePx, /* maxCards= */ 1);
         mQuickAccessWalletClient.getWalletCards(mExecutor, request, mCardRetriever);
     }
 
@@ -222,7 +221,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             if (cards.isEmpty()) {
                 Log.d(TAG, "No wallet cards exist.");
                 mCardViewDrawable = null;
-                mHasCard = false;
+                mSelectedCard = null;
                 refreshState();
                 return;
             }
@@ -231,8 +230,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 Log.d(TAG, "Selected card index out of bounds.");
                 return;
             }
-            mCardViewDrawable = cards.get(selectedIndex).getCardImage().loadDrawable(mContext);
-            mHasCard = true;
+            mSelectedCard = cards.get(selectedIndex);
+            mCardViewDrawable = mSelectedCard.getCardImage().loadDrawable(mContext);
             refreshState();
         }
 
@@ -240,7 +239,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         public void onWalletCardRetrievalError(@NonNull GetWalletCardsError error) {
             Log.w(TAG, "Error retrieve wallet cards");
             mCardViewDrawable = null;
-            mHasCard = false;
+            mSelectedCard = null;
             refreshState();
         }
     }

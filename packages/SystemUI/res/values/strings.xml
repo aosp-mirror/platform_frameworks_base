@@ -1656,14 +1656,14 @@
     <string name="wallet_app_button_label">Show all</string>
     <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
     <string name="wallet_action_button_label_unlock">Unlock to pay</string>
-    <!-- Secondary label of the quick access wallet tile if active. [CHAR LIMIT=32] -->
-    <string name="wallet_secondary_label_active">Ready</string>
     <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->
-    <string name="wallet_secondary_label_no_card">Set up payment</string>
+    <string name="wallet_secondary_label_no_card">Not set up</string>
     <!-- Secondary label of the quick access wallet tile if device locked. [CHAR LIMIT=NONE] -->
     <string name="wallet_secondary_label_device_locked">Unlock to use</string>
     <!-- Message shown when an unknown failure occurred when fetching cards. [CHAR LIMIT=NONE] -->
     <string name="wallet_error_generic">There was a problem getting your cards, please try again later</string>
+    <!-- Overflow menu item label to open the lockscreen settings in wallet activity. [CHAR LIMIT=NONE] -->
+    <string name="wallet_lockscreen_settings_label">Lock screen settings</string>
 
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>
