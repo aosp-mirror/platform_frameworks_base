@@ -64,7 +64,7 @@
     <item msgid="2779123106632690576">"مفعّل"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="6603880723315236832">"‏AVRCP 1.5 (تلقائي)"</item>
+    <item msgid="6603880723315236832">"‏AVRCP 1.5 (التلقائي)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
     <item msgid="5896162189744596291">"AVRCP 1.4"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
@@ -76,7 +76,7 @@
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">
-    <item msgid="8786402640610987099">"‏MAP 1.2 (تلقائي)"</item>
+    <item msgid="8786402640610987099">"‏MAP 1.2 (الإعداد الافتراضي)"</item>
     <item msgid="6817922176194686449">"MAP 1.3"</item>
     <item msgid="3423518690032737851">"MAP 1.4"</item>
   </string-array>
