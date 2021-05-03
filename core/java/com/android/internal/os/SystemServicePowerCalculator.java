@@ -87,6 +87,15 @@ public class SystemServicePowerCalculator extends PowerCalculator {
                         systemServicePowerMah * uid.getProportionalSystemServiceUsage());
             }
         }
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES,
+                        systemServicePowerMah);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES,
+                        systemServicePowerMah);
     }
 
     @Override
