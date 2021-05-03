@@ -197,6 +197,7 @@ void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
 
     if (surfaceControl == nullptr) {
         setASurfaceTransactionCallback(nullptr);
+        setPrepareSurfaceControlForWebviewCallback(nullptr);
     }
 
     if (mSurfaceControl != nullptr) {
@@ -916,6 +917,12 @@ bool CanvasContext::mergeTransaction(ASurfaceTransaction* transaction, ASurfaceC
     std::invoke(mASurfaceTransactionCallback, reinterpret_cast<int64_t>(transaction),
                 reinterpret_cast<int64_t>(control), getFrameNumber());
     return true;
+}
+
+void CanvasContext::prepareSurfaceControlForWebview() {
+    if (mPrepareSurfaceControlForWebviewCallback) {
+        std::invoke(mPrepareSurfaceControlForWebviewCallback);
+    }
 }
 
 } /* namespace renderthread */

@@ -96,6 +96,8 @@ typedef void (*AST_delete)(ASurfaceTransaction* transaction);
 typedef void (*AST_apply)(ASurfaceTransaction* transaction);
 typedef void (*AST_setVisibility)(ASurfaceTransaction* transaction,
                                   ASurfaceControl* surface_control, int8_t visibility);
+typedef void (*AST_setZOrder)(ASurfaceTransaction* transaction, ASurfaceControl* surface_control,
+                              int32_t z_order);
 
 struct ASurfaceControlFunctions {
     ASurfaceControlFunctions();
@@ -112,6 +114,7 @@ struct ASurfaceControlFunctions {
     AST_delete transactionDeleteFunc;
     AST_apply transactionApplyFunc;
     AST_setVisibility transactionSetVisibilityFunc;
+    AST_setZOrder transactionSetZOrderFunc;
 };
 
 class ChoreographerSource;
