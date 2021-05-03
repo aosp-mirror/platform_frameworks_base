@@ -269,7 +269,10 @@ auto IncrementalService::IncFsMount::makeStorage(StorageId id) -> StorageMap::it
 
 template <class Func>
 static auto makeCleanup(Func&& f) requires(!std::is_lvalue_reference_v<Func>) {
-    auto deleter = [f = std::move(f)](auto) { f(); };
+    // ok to move a 'forwarding' reference here as lvalues are disabled anyway
+    auto deleter = [f = std::move(f)](auto) { // NOLINT
+        f();
+    };
     // &f is a dangling pointer here, but we actually never use it as deleter moves it in.
     return std::unique_ptr<Func, decltype(deleter)>(&f, std::move(deleter));
 }
@@ -397,6 +400,7 @@ static long elapsedMcs(Duration start, Duration end) {
 
 void IncrementalService::onDump(int fd) {
     dprintf(fd, "Incremental is %s\n", incfs::enabled() ? "ENABLED" : "DISABLED");
+    dprintf(fd, "IncFs features: 0x%x\n", int(mIncFs->features()));
     dprintf(fd, "Incremental dir: %s\n", mIncrementalDir.c_str());
 
     std::unique_lock l(mLock);
@@ -2562,7 +2566,9 @@ std::optional<Milliseconds> IncrementalService::DataLoaderStub::needToBind() {
                      maxBindDelayMs)
                     .count();
     const auto bindDelayJitterRangeMs = bindDelayMs / Constants::bindDelayJitterDivider;
-    const auto bindDelayJitterMs = rand() % (bindDelayJitterRangeMs * 2) - bindDelayJitterRangeMs;
+    // rand() is enough, not worth maintaining a full-blown <rand> object for delay jitter
+    const auto bindDelayJitterMs = rand() % (bindDelayJitterRangeMs * 2) - // NOLINT
+            bindDelayJitterRangeMs;
     mPreviousBindDelay = std::chrono::milliseconds(bindDelayMs + bindDelayJitterMs);
     return mPreviousBindDelay;
 }
