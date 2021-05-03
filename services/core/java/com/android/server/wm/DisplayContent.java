@@ -6313,9 +6313,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     DisplayArea findAreaForWindowType(int windowType, Bundle options,
             boolean ownerCanManageAppToken, boolean roundedCornerOverlay) {
-        // TODO(b/159767464): figure out how to find an appropriate TDA.
         if (windowType >= FIRST_APPLICATION_WINDOW && windowType <= LAST_APPLICATION_WINDOW) {
-            return getDefaultTaskDisplayArea();
+            return mDisplayAreaPolicy.getTaskDisplayArea(options);
         }
         // Return IME container here because it could be in one of sub RootDisplayAreas depending on
         // the focused edit text. Also, the RootDisplayArea choosing strategy is implemented by

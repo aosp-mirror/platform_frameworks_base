@@ -3649,6 +3649,18 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1874559932": {
+      "message": "The TaskDisplayArea with %s does not exist.",
+      "level": "WARN",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/DisplayAreaPolicyBuilder.java"
+    },
+    "1884961873": {
+      "message": "Sleep still need to stop %d activities",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/Task.java"
+    },
     "1891501279": {
       "message": "cancelAnimation(): reason=%s",
       "level": "DEBUG",

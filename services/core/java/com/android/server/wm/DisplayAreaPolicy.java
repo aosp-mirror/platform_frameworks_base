@@ -36,6 +36,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
 import static com.android.server.wm.DisplayAreaPolicyBuilder.HierarchyBuilder;
 
+import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -87,6 +88,9 @@ public abstract class DisplayAreaPolicy {
      * @return the default/fallback {@link TaskDisplayArea} on the display.
      */
     public abstract TaskDisplayArea getDefaultTaskDisplayArea();
+
+    /** Returns the {@link TaskDisplayArea} specified by launch options. */
+    public abstract TaskDisplayArea getTaskDisplayArea(@Nullable Bundle options);
 
     /** Provider for platform-default display area policy. */
     static final class DefaultProvider implements DisplayAreaPolicy.Provider {
