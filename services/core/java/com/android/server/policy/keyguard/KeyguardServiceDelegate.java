@@ -263,8 +263,7 @@ public class KeyguardServiceDelegate {
      */
     @Deprecated
     public void setOccluded(boolean isOccluded, boolean animate) {
-        if (!WindowManagerService.sEnableRemoteKeyguardOccludeAnimation
-                && mKeyguardService != null) {
+        if (!WindowManagerService.sEnableRemoteKeyguardAnimation && mKeyguardService != null) {
             if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ") animate=" + animate);
             mKeyguardService.setOccluded(isOccluded, animate);
         }
@@ -404,8 +403,7 @@ public class KeyguardServiceDelegate {
     }
 
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
-        if (!WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
-                && mKeyguardService != null) {
+        if (!WindowManagerService.sEnableRemoteKeyguardAnimation && mKeyguardService != null) {
             mKeyguardService.startKeyguardExitAnimation(startTime, fadeoutDuration);
         }
     }
