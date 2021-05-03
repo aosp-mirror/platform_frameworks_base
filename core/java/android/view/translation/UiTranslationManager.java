@@ -338,7 +338,7 @@ public final class UiTranslationManager {
                     mCallback.onStarted(mSourceLocale, mTargetLocale);
                     break;
                 case STATE_UI_TRANSLATION_RESUMED:
-                    mCallback.onStarted(mSourceLocale, mTargetLocale);
+                    mCallback.onResumed(mSourceLocale, mTargetLocale);
                     break;
                 case STATE_UI_TRANSLATION_PAUSED:
                     mCallback.onPaused();
