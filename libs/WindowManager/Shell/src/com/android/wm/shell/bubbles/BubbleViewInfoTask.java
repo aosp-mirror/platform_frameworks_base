@@ -126,7 +126,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         ShortcutInfo shortcutInfo;
         String appName;
         Bitmap bubbleBitmap;
-        Drawable badgeDrawable;
+        Bitmap badgeBitmap;
         int dotColor;
         Path dotPath;
         Bubble.FlyoutMessage flyoutMessage;
@@ -188,7 +188,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
             BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon,
                     b.isImportantConversation());
-            info.badgeDrawable = badgedIcon;
+            info.badgeBitmap = badgeBitmapInfo.icon;
             info.bubbleBitmap = iconFactory.createBadgedIconBitmap(bubbleDrawable,
                     null /* user */,
                     true /* shrinkNonAdaptiveIcons */).icon;

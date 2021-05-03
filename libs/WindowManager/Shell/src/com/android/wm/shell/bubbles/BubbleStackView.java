@@ -2487,7 +2487,7 @@ public class BubbleStackView extends FrameLayout
         // name and icon.
         if (show && mBubbleData.hasBubbleInStackWithKey(mExpandedBubble.getKey())) {
             final Bubble bubble = mBubbleData.getBubbleInStackWithKey(mExpandedBubble.getKey());
-            mManageSettingsIcon.setImageDrawable(bubble.getAppBadge());
+            mManageSettingsIcon.setImageBitmap(bubble.getAppBadge());
             mManageSettingsText.setText(getResources().getString(
                     R.string.bubbles_app_settings, bubble.getAppName()));
         }
