@@ -104,6 +104,20 @@ public class WifiPowerCalculatorTest {
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
         assertThat(systemConsumer.getPowerConsumedByApps())
                 .isWithin(PRECISION).of(0.466333);
+
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
+                .isEqualTo(4002);
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
+                .isWithin(PRECISION).of(0.86666);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+
+        BatteryConsumer appsConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
+                .isWithin(PRECISION).of(0.866666);
+        assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
 
     @Test
@@ -136,6 +150,20 @@ public class WifiPowerCalculatorTest {
                 .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
         assertThat(systemConsumer.getPowerConsumedByApps())
                 .isWithin(PRECISION).of(0.14946);
+
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
+                .isEqualTo(4002);
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
+                .isWithin(PRECISION).of(0.27777);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+
+        BatteryConsumer appsConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
+                .isWithin(PRECISION).of(0.277777);
+        assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
     }
 
     /** Sets up batterystats object with prepopulated network & timer data for Timer-model tests. */

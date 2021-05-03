@@ -183,9 +183,12 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
             } else {
                 mDetailsView.setVisibility(View.GONE);
             }
-            mIconView.setImageDrawable(
-                    batteryConsumerInfo.iconInfo.loadIcon(getPackageManager()));
-
+            if (batteryConsumerInfo.iconInfo != null) {
+                mIconView.setImageDrawable(
+                        batteryConsumerInfo.iconInfo.loadIcon(getPackageManager()));
+            } else {
+                mIconView.setImageResource(R.drawable.gm_device_24);
+            }
             if (batteryConsumerInfo.packages != null) {
                 mPackagesView.setText(batteryConsumerInfo.packages);
                 mPackagesView.setVisibility(View.VISIBLE);

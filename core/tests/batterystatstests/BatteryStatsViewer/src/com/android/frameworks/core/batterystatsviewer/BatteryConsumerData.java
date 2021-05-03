@@ -63,7 +63,7 @@ public class BatteryConsumerData {
         }
 
         mBatteryConsumerInfo = BatteryConsumerInfoHelper.makeBatteryConsumerInfo(
-                context.getPackageManager(), requestedBatteryConsumer);
+                requestedBatteryConsumer, batteryConsumerId, context.getPackageManager());
 
         double[] totalPowerByComponentMah = new double[BatteryConsumer.POWER_COMPONENT_COUNT];
         double[] totalModeledPowerByComponentMah =
@@ -119,11 +119,20 @@ public class BatteryConsumerData {
 
     private BatteryConsumer getRequestedBatteryConsumer(BatteryUsageStats batteryUsageStats,
             String batteryConsumerId) {
+        for (int scope = 0;
+                scope < BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT;
+                scope++) {
+            if (batteryConsumerId(scope).equals(batteryConsumerId)) {
+                return batteryUsageStats.getAggregateBatteryConsumer(scope);
+            }
+        }
+
         for (BatteryConsumer consumer : batteryUsageStats.getUidBatteryConsumers()) {
             if (batteryConsumerId(consumer).equals(batteryConsumerId)) {
                 return consumer;
             }
         }
+
         for (BatteryConsumer consumer : batteryUsageStats.getSystemBatteryConsumers()) {
             if (batteryConsumerId(consumer).equals(batteryConsumerId)) {
                 return consumer;
@@ -208,5 +217,10 @@ public class BatteryConsumerData {
         } else {
             return "";
         }
+    }
+
+    public static String batteryConsumerId(
+            @BatteryUsageStats.AggregateBatteryConsumerScope int scope) {
+        return "SYS|" + scope;
     }
 }

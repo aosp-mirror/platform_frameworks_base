@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.util.Range;
 import android.util.SparseArray;
@@ -23,15 +24,53 @@ import android.util.SparseArray;
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Contains a snapshot of battery attribution data, on a per-subsystem and per-UID basis.
+ * <p>
+ * The totals for the entire device are returned as AggregateBatteryConsumers, which can be
+ * obtained by calling {@link #getAggregateBatteryConsumer(int)}.
+ * <p>
+ * Power attributed to individual apps is returned as UidBatteryConsumers, see
+ * {@link #getUidBatteryConsumers()}.
  *
  * @hide
  */
 public final class BatteryUsageStats implements Parcelable {
+
+    /**
+     * Scope of battery stats included in a BatteryConsumer: the entire device, just
+     * the apps, etc.
+     *
+     * @hide
+     */
+    @IntDef(prefix = {"AGGREGATE_BATTERY_CONSUMER_SCOPE_"}, value = {
+            AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE,
+            AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public static @interface AggregateBatteryConsumerScope {
+    }
+
+    /**
+     * Power consumption by the entire device, since last charge.  The power usage in this
+     * scope includes both the power attributed to apps and the power unattributed to any
+     * apps.
+     */
+    public static final int AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE = 0;
+
+    /**
+     * Aggregated power consumed by all applications, combined, since last charge. This is
+     * the sum of power reported in UidBatteryConsumers.
+     */
+    public static final int AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS = 1;
+
+    public static final int AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT = 2;
+
     private final double mConsumedPower;
     private final int mDischargePercentage;
     private final long mStatsStartTimestampMs;
@@ -43,6 +82,7 @@ public final class BatteryUsageStats implements Parcelable {
     private final List<UidBatteryConsumer> mUidBatteryConsumers;
     private final List<SystemBatteryConsumer> mSystemBatteryConsumers;
     private final List<UserBatteryConsumer> mUserBatteryConsumers;
+    private final AggregateBatteryConsumer[] mAggregateBatteryConsumers;
     private final Parcel mHistoryBuffer;
     private final List<BatteryStats.HistoryTag> mHistoryTagPool;
 
@@ -56,6 +96,12 @@ public final class BatteryUsageStats implements Parcelable {
         mBatteryTimeRemainingMs = builder.mBatteryTimeRemainingMs;
         mChargeTimeRemainingMs = builder.mChargeTimeRemainingMs;
         mCustomPowerComponentNames = builder.mCustomPowerComponentNames;
+
+        mAggregateBatteryConsumers =
+                new AggregateBatteryConsumer[AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT];
+        for (int i = 0; i < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; i++) {
+            mAggregateBatteryConsumers[i] = builder.mAggregateBatteryConsumersBuilders[i].build();
+        }
 
         double totalPower = 0;
 
@@ -143,6 +189,14 @@ public final class BatteryUsageStats implements Parcelable {
         return mConsumedPower;
     }
 
+    /**
+     * Returns a battery consumer for the specified battery consumer type.
+     */
+    public BatteryConsumer getAggregateBatteryConsumer(
+            @AggregateBatteryConsumerScope int scope) {
+        return mAggregateBatteryConsumers[scope];
+    }
+
     @NonNull
     public List<UidBatteryConsumer> getUidBatteryConsumers() {
         return mUidBatteryConsumers;
@@ -185,6 +239,13 @@ public final class BatteryUsageStats implements Parcelable {
         mBatteryTimeRemainingMs = source.readLong();
         mChargeTimeRemainingMs = source.readLong();
         mCustomPowerComponentNames = source.readStringArray();
+        mAggregateBatteryConsumers =
+                new AggregateBatteryConsumer[AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT];
+        for (int i = 0; i < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; i++) {
+            mAggregateBatteryConsumers[i] =
+                    AggregateBatteryConsumer.CREATOR.createFromParcel(source);
+            mAggregateBatteryConsumers[i].setCustomPowerComponentNames(mCustomPowerComponentNames);
+        }
         int uidCount = source.readInt();
         mUidBatteryConsumers = new ArrayList<>(uidCount);
         for (int i = 0; i < uidCount; i++) {
@@ -244,6 +305,9 @@ public final class BatteryUsageStats implements Parcelable {
         dest.writeLong(mBatteryTimeRemainingMs);
         dest.writeLong(mChargeTimeRemainingMs);
         dest.writeStringArray(mCustomPowerComponentNames);
+        for (int i = 0; i < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; i++) {
+            mAggregateBatteryConsumers[i].writeToParcel(dest, flags);
+        }
         dest.writeInt(mUidBatteryConsumers.size());
         for (int i = mUidBatteryConsumers.size() - 1; i >= 0; i--) {
             mUidBatteryConsumers.get(i).writeToParcel(dest, flags);
@@ -299,6 +363,8 @@ public final class BatteryUsageStats implements Parcelable {
         private double mDischargedPowerUpperBoundMah;
         private long mBatteryTimeRemainingMs = -1;
         private long mChargeTimeRemainingMs = -1;
+        private final AggregateBatteryConsumer.Builder[] mAggregateBatteryConsumersBuilders =
+                new AggregateBatteryConsumer.Builder[AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT];
         private final SparseArray<UidBatteryConsumer.Builder> mUidBatteryConsumerBuilders =
                 new SparseArray<>();
         private final SparseArray<SystemBatteryConsumer.Builder> mSystemBatteryConsumerBuilders =
@@ -315,6 +381,10 @@ public final class BatteryUsageStats implements Parcelable {
         public Builder(@NonNull String[] customPowerComponentNames,  boolean includePowerModels) {
             mCustomPowerComponentNames = customPowerComponentNames;
             mIncludePowerModels = includePowerModels;
+            for (int i = 0; i < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; i++) {
+                mAggregateBatteryConsumersBuilders[i] = new AggregateBatteryConsumer.Builder(
+                        customPowerComponentNames, includePowerModels);
+            }
         }
 
         /**
@@ -386,7 +456,17 @@ public final class BatteryUsageStats implements Parcelable {
         }
 
         /**
-         * Creates or returns a exiting UidBatteryConsumer, which represents battery attribution
+         * Creates or returns an AggregateBatteryConsumer builder, which represents aggregate
+         * battery consumption data for the specified scope.
+         */
+        @NonNull
+        public AggregateBatteryConsumer.Builder getAggregateBatteryConsumerBuilder(
+                @AggregateBatteryConsumerScope int scope) {
+            return mAggregateBatteryConsumersBuilders[scope];
+        }
+
+        /**
+         * Creates or returns a UidBatteryConsumer, which represents battery attribution
          * data for an individual UID.
          */
         @NonNull
@@ -403,7 +483,7 @@ public final class BatteryUsageStats implements Parcelable {
         }
 
         /**
-         * Creates or returns a exiting SystemBatteryConsumer, which represents battery attribution
+         * Creates or returns a SystemBatteryConsumer, which represents battery attribution
          * data for a specific drain type.
          */
         @NonNull
@@ -419,7 +499,7 @@ public final class BatteryUsageStats implements Parcelable {
         }
 
         /**
-         * Creates or returns a exiting UserBatteryConsumer, which represents battery attribution
+         * Creates or returns a UserBatteryConsumer, which represents battery attribution
          * data for an individual {@link UserHandle}.
          */
         @NonNull

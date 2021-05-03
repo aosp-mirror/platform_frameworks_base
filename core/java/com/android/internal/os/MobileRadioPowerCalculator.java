@@ -113,6 +113,20 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
                             total.remainingPowerMah + total.totalAppPowerMah,
                             powerModel)
                     .setPowerConsumedByApps(total.totalAppPowerMah);
+
+            builder.getAggregateBatteryConsumerBuilder(
+                    BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                    .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                            total.durationMs)
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                            total.remainingPowerMah + total.totalAppPowerMah, powerModel);
+
+            builder.getAggregateBatteryConsumerBuilder(
+                    BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                    .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                            total.durationMs)
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                            total.totalAppPowerMah, powerModel);
         }
     }
 
