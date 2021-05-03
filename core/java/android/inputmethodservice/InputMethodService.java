@@ -1323,6 +1323,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
         mWindow.getWindow().getAttributes().setFitInsetsTypes(statusBars() | navigationBars());
         mWindow.getWindow().getAttributes().setFitInsetsSides(Side.all() & ~Side.BOTTOM);
+        mWindow.getWindow().getAttributes().receiveInsetsIgnoringZOrder = true;
 
         // Automotive devices may request the navigation bar to be hidden when the IME shows up
         // (controlled via config_automotiveHideNavBarForKeyboard) in order to maximize the visible
