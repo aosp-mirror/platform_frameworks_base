@@ -276,7 +276,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback {
 
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + "States: ");
+        pw.println(TAG);
         pw.print(innerPrefix + "mAllowGesture=");
         pw.println(mAllowGesture);
         pw.print(innerPrefix + "mIsEnabled=");

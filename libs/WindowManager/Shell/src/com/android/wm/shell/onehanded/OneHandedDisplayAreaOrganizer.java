@@ -323,7 +323,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
 
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + "states: ");
+        pw.println(TAG);
         pw.print(innerPrefix + "mDisplayLayout.rotation()=");
         pw.println(mDisplayLayout.rotation());
         pw.print(innerPrefix + "mDisplayAreaTokenMap=");

@@ -630,7 +630,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     public void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + "States: ");
+        pw.println();
+        pw.println(TAG);
         pw.print(innerPrefix + "mOffSetFraction=");
         pw.println(mOffSetFraction);
         pw.print(innerPrefix + "mLockedDisabled=");

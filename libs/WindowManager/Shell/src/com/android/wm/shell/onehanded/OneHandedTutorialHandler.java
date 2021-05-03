@@ -219,7 +219,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
 
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + " states: ");
+        pw.println(TAG);
         pw.print(innerPrefix + "mTriggerState=");
         pw.println(mTriggerState);
         pw.print(innerPrefix + "mDisplayBounds=");
