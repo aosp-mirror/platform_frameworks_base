@@ -24,6 +24,7 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.copyOfRange;
 
 import android.annotation.Nullable;
+import android.annotation.UiContext;
 import android.content.Context;
 import android.graphics.Point;
 import android.provider.Settings;
@@ -86,7 +87,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     private final Context mContext;
     private final Point mTempPoint = new Point();
 
-    public WindowMagnificationGestureHandler(Context context,
+    public WindowMagnificationGestureHandler(@UiContext Context context,
             WindowMagnificationManager windowMagnificationMgr,
             Callback callback,
             boolean detectTripleTap, boolean detectShortcutTrigger, int displayId) {
@@ -342,7 +343,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
          */
         private final boolean mDetectTripleTap;
 
-        DetectingState(Context context, boolean detectTripleTap) {
+        DetectingState(@UiContext Context context, boolean detectTripleTap) {
             mDetectTripleTap = detectTripleTap;
             final MultiTap multiTap = new MultiTap(context, mDetectTripleTap ? 3 : 1,
                     mDetectTripleTap
