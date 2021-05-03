@@ -26019,18 +26019,29 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public String[] getNamesForUids(int[] uids) throws RemoteException {
-            if (uids == null || uids.length == 0) {
-                return null;
-            }
-            final String[] names = PackageManagerService.this.getNamesForUids(uids);
-            final String[] results = (names != null) ? names : new String[uids.length];
-            // massage results so they can be parsed by the native binder
-            for (int i = results.length - 1; i >= 0; --i) {
-                if (results[i] == null) {
-                    results[i] = "";
+            String[] names = null;
+            String[] results = null;
+            try {
+                if (uids == null || uids.length == 0) {
+                    return null;
                 }
+                names = PackageManagerService.this.getNamesForUids(uids);
+                results = (names != null) ? names : new String[uids.length];
+                // massage results so they can be parsed by the native binder
+                for (int i = results.length - 1; i >= 0; --i) {
+                    if (results[i] == null) {
+                        results[i] = "";
+                    }
+                }
+                return results;
+            } catch (Throwable t) {
+                // STOPSHIP(186558987): revert addition of try/catch/log
+                Slog.e(TAG, "uids: " + Arrays.toString(uids));
+                Slog.e(TAG, "names: " + Arrays.toString(names));
+                Slog.e(TAG, "results: " + Arrays.toString(results));
+                Slog.e(TAG, "throwing exception", t);
+                throw t;
             }
-            return results;
         }
 
         // NB: this differentiates between preloads and sideloads
