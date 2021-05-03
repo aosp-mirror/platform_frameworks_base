@@ -57,6 +57,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
     @Nullable private Runnable mCancelRunnable;
     private boolean mShowingUdfpsBouncer;
+    private boolean mUdfpsRequested;
     private boolean mQsExpanded;
     private boolean mFaceDetectRunning;
     private boolean mHintShown;
@@ -70,6 +71,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      * {@link KeyguardBouncer#EXPANSION_HIDDEN} (1f)
      */
     private float mInputBouncerHiddenAmount;
+    private boolean mIsBouncerVisible;
 
     protected UdfpsKeyguardViewController(
             @NonNull UdfpsKeyguardView view,
@@ -105,6 +107,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
         mStatusBarStateController.addCallback(mStateListener);
 
+        mUdfpsRequested = false;
         mStatusBarState = mStatusBarStateController.getState();
         mQsExpanded = mKeyguardViewManager.isQsExpanded();
         mKeyguardIsVisible = mKeyguardUpdateMonitor.isKeyguardVisible();
@@ -113,6 +116,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         updatePauseAuth();
 
         mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
+        mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
     }
 
     @Override
@@ -137,11 +141,15 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         pw.println("mShowingUdfpsBouncer=" + mShowingUdfpsBouncer);
         pw.println("mFaceDetectRunning=" + mFaceDetectRunning);
         pw.println("mTransitioningFromHomeToKeyguard=" + mTransitioningFromHome);
-        pw.println("mStatusBarState" + StatusBarState.toShortString(mStatusBarState));
+        pw.println("mStatusBarState=" + StatusBarState.toShortString(mStatusBarState));
         pw.println("mQsExpanded=" + mQsExpanded);
         pw.println("mKeyguardVisible=" + mKeyguardIsVisible);
+        pw.println("mIsBouncerVisible=" + mIsBouncerVisible);
         pw.println("mInputBouncerHiddenAmount=" + mInputBouncerHiddenAmount);
         pw.println("mAlpha=" + mView.getAlpha());
+        pw.println("mUdfpsRequested=" + mUdfpsRequested);
+        pw.println("mView.mUdfpsRequested=" + mView.mUdfpsRequested);
+        pw.println("mView.mUdfpsRequestedColor=" + mView.mUdfpsRequestedColor);
     }
 
     /**
@@ -170,6 +178,12 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      */
     public boolean shouldPauseAuth() {
         if (mShowingUdfpsBouncer) {
+            return false;
+        }
+
+        if (mUdfpsRequested && !mNotificationShadeExpanded
+                && (!mIsBouncerVisible
+                || mInputBouncerHiddenAmount != KeyguardBouncer.EXPANSION_VISIBLE)) {
             return false;
         }
 
@@ -333,6 +347,13 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 }
 
                 @Override
+                public void requestUdfps(boolean request, int color) {
+                    mUdfpsRequested = request;
+                    mView.requestUdfps(request, color);
+                    updatePauseAuth();
+                }
+
+                @Override
                 public boolean isAnimating() {
                     return mView.isAnimating();
                 }
@@ -352,6 +373,12 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 public void setBouncerExpansionChanged(float expansion) {
                     mInputBouncerHiddenAmount = expansion;
                     updateAlpha();
+                    updatePauseAuth();
+                }
+
+                @Override
+                public void onBouncerVisibilityChanged() {
+                    mIsBouncerVisible = mKeyguardViewManager.bouncerIsOrWillBeShowing();
                     updatePauseAuth();
                 }
 

@@ -40,12 +40,14 @@ import com.android.systemui.statusbar.StatusBarState;
 public class UdfpsKeyguardView extends UdfpsAnimationView {
     private final UdfpsKeyguardDrawable mFingerprintDrawable;
     private ImageView mFingerprintView;
-    private int mWallpaperTexColor;
+    private int mWallpaperTextColor;
     private int mStatusBarState;
 
     // used when highlighting fp icon:
     private int mTextColorPrimary;
     private ImageView mBgProtection;
+    boolean mUdfpsRequested;
+    int mUdfpsRequestedColor;
 
     private AnimatorSet mAnimatorSet;
     private int mAlpha; // 0-255
@@ -63,10 +65,11 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
         mBgProtection = findViewById(R.id.udfps_keyguard_fp_bg);
 
-        mWallpaperTexColor = Utils.getColorAttrDefaultColor(mContext,
+        mWallpaperTextColor = Utils.getColorAttrDefaultColor(mContext,
                 R.attr.wallpaperTextColorAccent);
         mTextColorPrimary = Utils.getColorAttrDefaultColor(mContext,
                 android.R.attr.textColorPrimary);
+        mUdfpsRequested = false;
     }
 
     @Override
@@ -90,11 +93,31 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         return true;
     }
 
+    void requestUdfps(boolean request, int color) {
+        if (request) {
+            mUdfpsRequestedColor = color;
+        } else {
+            mUdfpsRequestedColor = -1;
+        }
+        mUdfpsRequested = request;
+        updateColor();
+    }
+
     void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
-        if (!isShadeLocked()) {
-            mFingerprintView.setAlpha(1f);
-            mFingerprintDrawable.setLockScreenColor(mWallpaperTexColor);
+        updateColor();
+    }
+
+    void updateColor() {
+        mFingerprintView.setAlpha(1f);
+        mFingerprintDrawable.setLockScreenColor(getColor());
+    }
+
+    private int getColor() {
+        if (mUdfpsRequested && mUdfpsRequestedColor != -1) {
+            return mUdfpsRequestedColor;
+        } else {
+            return mWallpaperTextColor;
         }
     }
 
@@ -142,7 +165,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         } else {
             // update icon color
             fpIconAnim = new ValueAnimator();
-            fpIconAnim.setIntValues(mWallpaperTexColor, mTextColorPrimary);
+            fpIconAnim.setIntValues(getColor(), mTextColorPrimary);
             fpIconAnim.setEvaluator(new ArgbEvaluator());
             fpIconAnim.addUpdateListener(valueAnimator -> mFingerprintDrawable.setLockScreenColor(
                     (Integer) valueAnimator.getAnimatedValue()));
@@ -170,10 +193,6 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         return mStatusBarState == StatusBarState.SHADE_LOCKED;
     }
 
-    boolean isHome() {
-        return mStatusBarState == StatusBarState.SHADE;
-    }
-
     /**
      * Animates out the bg protection circle behind the fp icon to unhighlight the icon.
      */
@@ -193,7 +212,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         } else {
             // update icon color
             fpIconAnim = new ValueAnimator();
-            fpIconAnim.setIntValues(mTextColorPrimary, mWallpaperTexColor);
+            fpIconAnim.setIntValues(mTextColorPrimary, getColor());
             fpIconAnim.setEvaluator(new ArgbEvaluator());
             fpIconAnim.addUpdateListener(valueAnimator -> mFingerprintDrawable.setLockScreenColor(
                     (Integer) valueAnimator.getAnimatedValue()));
