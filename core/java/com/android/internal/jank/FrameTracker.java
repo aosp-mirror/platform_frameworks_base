@@ -167,6 +167,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                         if (mBeginVsyncId != INVALID_ID) {
                             mSurfaceControlWrapper.addJankStatsListener(
                                     FrameTracker.this, mSurfaceControl);
+                            postTraceStartMarker();
                         }
                     }
                 }
@@ -208,15 +209,9 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     public synchronized void begin() {
         mBeginVsyncId = mChoreographer.getVsyncId() + 1;
         mSession.setTimeStamp(System.nanoTime());
-        mChoreographer.mChoreographer.postCallback(Choreographer.CALLBACK_INPUT, () -> {
-            synchronized (FrameTracker.this) {
-                if (mCancelled || mEndVsyncId != INVALID_ID) {
-                    return;
-                }
-                mTracingStarted = true;
-                Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
-            }
-        }, null);
+        if (mSurfaceControl != null) {
+            postTraceStartMarker();
+        }
         mRendererWrapper.addObserver(mObserver);
         if (DEBUG) {
             Log.d(TAG, "begin: " + mSession.getName() + ", begin=" + mBeginVsyncId);
@@ -227,6 +222,18 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         if (mListener != null) {
             mListener.onCujEvents(mSession, ACTION_SESSION_BEGIN);
         }
+    }
+
+    private void postTraceStartMarker() {
+        mChoreographer.mChoreographer.postCallback(Choreographer.CALLBACK_INPUT, () -> {
+            synchronized (FrameTracker.this) {
+                if (mCancelled || mEndVsyncId != INVALID_ID) {
+                    return;
+                }
+                mTracingStarted = true;
+                Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
+            }
+        }, null);
     }
 
     /**
