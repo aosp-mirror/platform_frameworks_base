@@ -30,6 +30,8 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
@@ -60,9 +62,28 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     private final ArrayMap<String, Long> mSnoozedPackages;
     private final AccessibilityManagerWrapper mAccessibilityMgr;
 
+    private final UiEventLogger mUiEventLogger;
+
+    /**
+     * Enum entry for notification peek logged from this class.
+     */
+    enum NotificationPeekEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Heads-up notification peeked on screen.")
+        NOTIFICATION_PEEK(801);
+
+        private final int mId;
+        NotificationPeekEvent(int id) {
+            mId = id;
+        }
+        @Override public int getId() {
+            return mId;
+        }
+    }
+
     public HeadsUpManager(@NonNull final Context context) {
         mContext = context;
         mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
+        mUiEventLogger = Dependency.get(UiEventLogger.class);
         Resources resources = context.getResources();
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
         mAutoDismissNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
@@ -130,6 +151,11 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         if (entry.isRowPinned() != isPinned) {
             entry.setRowPinned(isPinned);
             updatePinnedMode();
+            if (isPinned && entry.getSbn() != null) {
+                mUiEventLogger.logWithInstanceId(
+                        NotificationPeekEvent.NOTIFICATION_PEEK, entry.getSbn().getUid(),
+                        entry.getSbn().getPackageName(), entry.getSbn().getInstanceId());
+            }
             for (OnHeadsUpChangedListener listener : mListeners) {
                 if (isPinned) {
                     listener.onHeadsUpPinned(entry);
