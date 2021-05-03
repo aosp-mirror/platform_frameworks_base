@@ -30,6 +30,7 @@ import android.app.ActivityManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
 
 import com.android.server.LocalServices;
@@ -57,8 +58,36 @@ public class OomAdjusterTests {
     private ProcessRecord mProcessRecord;
 
     private static final long ZERO = 0L;
-    private static final long USAGE_STATS_INTERACTION = 2 * 60 * 60 * 1000L;
-    private static final long SERVICE_USAGE_INTERACTION = 30 * 60 * 1000;
+    private static final long USAGE_STATS_INTERACTION = 10 * 60 * 1000L;
+    private static final long SERVICE_USAGE_INTERACTION = 60 * 1000;
+
+    static class MyOomAdjuster extends OomAdjuster {
+
+        private final PlatformCompatCache mPlatformCompatCache;
+
+        MyOomAdjuster(ActivityManagerService service, ProcessList processList,
+                ActiveUids activeUids) {
+            super(service, processList, activeUids);
+            mPlatformCompatCache = new MyPlatformCompatCache(new long[]{});
+        }
+
+        static class MyPlatformCompatCache extends PlatformCompatCache {
+
+            MyPlatformCompatCache(long[] compatChanges) {
+                super(compatChanges);
+            }
+
+            @Override
+            boolean isChangeEnabled(long changeId, ApplicationInfo app, boolean defaultValue) {
+                return true;
+            }
+        }
+
+        @Override
+        protected OomAdjuster.PlatformCompatCache getPlatformCompatCache() {
+            return mPlatformCompatCache;
+        }
+    }
 
     @BeforeClass
     public static void setUpOnce() {
@@ -84,7 +113,7 @@ public class OomAdjusterTests {
             final AppProfiler profiler = mock(AppProfiler.class);
             setFieldValue(AppProfiler.class, profiler, "mProfilerLock", new Object());
             setFieldValue(ActivityManagerService.class, sService, "mAppProfiler", profiler);
-            sService.mOomAdjuster = new OomAdjuster(sService, sService.mProcessList, null);
+            sService.mOomAdjuster = new MyOomAdjuster(sService, sService.mProcessList, null);
             LocalServices.addService(UsageStatsManagerInternal.class,
                     mock(UsageStatsManagerInternal.class));
             sService.mUsageStatsService = LocalServices.getService(UsageStatsManagerInternal.class);
@@ -119,8 +148,10 @@ public class OomAdjusterTests {
 
         // Ensure certain services and constants are defined properly
         assertNotNull(sService.mUsageStatsService);
-        assertEquals(USAGE_STATS_INTERACTION, sService.mConstants.USAGE_STATS_INTERACTION_INTERVAL);
-        assertEquals(SERVICE_USAGE_INTERACTION, sService.mConstants.SERVICE_USAGE_INTERACTION_TIME);
+        assertEquals(USAGE_STATS_INTERACTION,
+                sService.mConstants.USAGE_STATS_INTERACTION_INTERVAL_POST_S);
+        assertEquals(SERVICE_USAGE_INTERACTION,
+                sService.mConstants.SERVICE_USAGE_INTERACTION_TIME_POST_S);
     }
 
     @Test
