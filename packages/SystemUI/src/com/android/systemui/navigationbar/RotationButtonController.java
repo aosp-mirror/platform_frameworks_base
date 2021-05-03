@@ -66,10 +66,10 @@ public class RotationButtonController {
     private static final int NUM_ACCEPTED_ROTATION_SUGGESTIONS_FOR_INTRODUCTION = 3;
 
     private final Context mContext;
+    private final RotationButton mRotationButton;
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
     private final ViewRippler mViewRippler = new ViewRippler();
-    private RotationButton mRotationButton;
 
     private int mLastRotationSuggestion;
     private boolean mPendingRotationSuggestion;
@@ -125,21 +125,20 @@ public class RotationButtonController {
     }
 
     RotationButtonController(Context context, @ColorInt int lightIconColor,
-            @ColorInt int darkIconColor) {
+            @ColorInt int darkIconColor, RotationButton rotationButton,
+            Consumer<Boolean> visibilityChangedCallback) {
         mContext = context;
         mLightIconColor = lightIconColor;
         mDarkIconColor = darkIconColor;
+        mRotationButton = rotationButton;
+        mRotationButton.setRotationButtonController(this);
 
         mIsNavigationBarShowing = true;
         mRotationLockController = Dependency.get(RotationLockController.class);
         mAccessibilityManagerWrapper = Dependency.get(AccessibilityManagerWrapper.class);
-        mTaskStackListener = new TaskStackListenerImpl();
-    }
 
-    void setRotationButton(RotationButton rotationButton,
-            Consumer<Boolean> visibilityChangedCallback) {
-        mRotationButton = rotationButton;
-        mRotationButton.setRotationButtonController(this);
+        // Register the task stack listener
+        mTaskStackListener = new TaskStackListenerImpl();
         mRotationButton.setOnClickListener(this::onRotateSuggestionClick);
         mRotationButton.setOnHoverListener(this::onRotateSuggestionHover);
         mRotationButton.setVisibilityChangedCallback(visibilityChangedCallback);
