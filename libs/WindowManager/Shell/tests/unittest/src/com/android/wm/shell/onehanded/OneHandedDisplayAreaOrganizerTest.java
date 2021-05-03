@@ -116,7 +116,9 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mDisplayLayout = new DisplayLayout(mContext, mDisplay);
         mDisplayAreaInfo = new DisplayAreaInfo(mToken, DEFAULT_DISPLAY, FEATURE_ONE_HANDED);
         mDisplayAreaInfo.configuration.orientation = Configuration.ORIENTATION_PORTRAIT;
-        when(mMockAnimationController.getAnimator(any(), any(), any(), any())).thenReturn(null);
+        when(mMockAnimationController.getAnimator(any(), any(), anyFloat(), anyFloat(),
+                any())).thenReturn(
+                null);
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
         when(mMockSurfaceTransactionHelper.translate(any(), any(), anyFloat())).thenReturn(
                 mMockSurfaceTransactionHelper);
@@ -164,7 +166,8 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                         info.getDisplayAreaInfo(),
                         info.getLeash()));
 
-        verify(mMockAnimationController, never()).getAnimator(any(), any(), any(), any());
+        verify(mMockAnimationController, never()).getAnimator(any(), any(), anyFloat(), anyFloat(),
+                any());
     }
 
     @Test
@@ -189,7 +192,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_90,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -200,7 +203,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_270,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -213,7 +216,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_90,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -226,7 +229,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_270,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -239,7 +242,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_0,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -252,7 +255,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_180,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -265,7 +268,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_0,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -278,7 +281,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_180,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -289,8 +292,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_0,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer, never()).resetWindowsOffset(
-                mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer, never()).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
@@ -301,7 +303,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_180,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -314,8 +316,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_180,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer, never()).resetWindowsOffset(
-                mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer, never()).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
@@ -328,7 +329,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_0,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -341,8 +342,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_90,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer, never()).resetWindowsOffset(
-                mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer, never()).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
@@ -355,7 +355,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_270,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -368,8 +368,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_270,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer, never()).resetWindowsOffset(
-                mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer, never()).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
@@ -382,8 +381,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.onRotateDisplay(mContext, Surface.ROTATION_90,
                 mMockWindowContainerTransaction);
 
-        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset(
-                mMockWindowContainerTransaction);
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
         verify(mSpiedDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
@@ -405,5 +403,19 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mSpiedDisplayAreaOrganizer.finishOffset(0, TRANSITION_DIRECTION_EXIT);
 
         assertThat(mSpiedDisplayAreaOrganizer.getLastDisplayBounds()).isEqualTo(testBounds);
+    }
+
+    @Test
+    public void testExit_must_resetWindowsOffset() {
+        mSpiedDisplayAreaOrganizer.finishOffset(0, TRANSITION_DIRECTION_EXIT);
+
+        verify(mSpiedDisplayAreaOrganizer).resetWindowsOffset();
+    }
+
+    @Test
+    public void testTrigger_not_resetWindowsOffset() {
+        mSpiedDisplayAreaOrganizer.finishOffset(0, TRANSITION_DIRECTION_TRIGGER);
+
+        verify(mSpiedDisplayAreaOrganizer, never()).resetWindowsOffset();
     }
 }
