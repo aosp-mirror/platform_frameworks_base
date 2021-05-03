@@ -17,6 +17,7 @@ package com.android.internal.os;
 
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
 
@@ -33,6 +34,24 @@ public class CameraPowerCalculator extends PowerCalculator {
     public CameraPowerCalculator(PowerProfile profile) {
         mPowerEstimator = new UsageBasedPowerEstimator(
                 profile.getAveragePower(PowerProfile.POWER_CAMERA));
+    }
+
+    @Override
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        super.calculate(builder, batteryStats, rawRealtimeUs, rawUptimeUs, query);
+
+        final long durationMs = batteryStats.getCameraOnTime(rawRealtimeUs,
+                BatteryStats.STATS_SINCE_CHARGED) / 1000;
+        final double powerMah = mPowerEstimator.calculatePower(durationMs);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA, durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA, durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah);
     }
 
     @Override

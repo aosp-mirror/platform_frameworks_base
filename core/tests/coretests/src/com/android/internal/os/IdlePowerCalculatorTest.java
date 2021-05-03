@@ -52,5 +52,17 @@ public class IdlePowerCalculatorTest {
                 .isEqualTo(3000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_IDLE))
                 .isWithin(PRECISION).of(0.7);
+
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_IDLE))
+                .isEqualTo(3000);
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_IDLE))
+                .isWithin(PRECISION).of(0.7);
+
+        BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
+        assertThat(appsConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_IDLE))
+                .isEqualTo(0);
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_IDLE))
+                .isWithin(PRECISION).of(0);
     }
 }
