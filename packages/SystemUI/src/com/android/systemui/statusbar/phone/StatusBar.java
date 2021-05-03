@@ -3095,19 +3095,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    void handlePeekToExpandTransistion() {
-        try {
-            // consider the transition from peek to expanded to be a panel open,
-            // but not one that clears notification effects.
-            int notificationLoad = mNotificationsController.getActiveNotificationsCount();
-            mBarService.onPanelRevealed(false, notificationLoad);
-        } catch (RemoteException ex) {
-            // Won't fail unless the world has ended.
-        }
-    }
-
     // Visibility reporting
-
     void handleVisibleToUserChangedImpl(boolean visibleToUser) {
         if (visibleToUser) {
             /* The LEDs are turned off when the notification panel is shown, even just a little bit.
