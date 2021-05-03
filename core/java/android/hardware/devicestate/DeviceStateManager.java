@@ -24,7 +24,10 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Manages the state of the system for devices with user-configurable hardware like a foldable
@@ -169,5 +172,35 @@ public final class DeviceStateManager {
          * @param state the new device state.
          */
         void onStateChanged(int state);
+    }
+
+    /**
+     * Listens to changes in device state and reports the state as folded if the device state
+     * matches the value in the {@link com.android.internal.R.integer.config_foldedDeviceState}
+     * resource.
+     * @hide
+     */
+    public static class FoldStateListener implements DeviceStateCallback {
+        private final int[] mFoldedDeviceStates;
+        private final Consumer<Boolean> mDelegate;
+
+        @Nullable
+        private Boolean lastResult;
+
+        public FoldStateListener(Context context, Consumer<Boolean> listener) {
+            mFoldedDeviceStates = context.getResources().getIntArray(
+                    com.android.internal.R.array.config_foldedDeviceStates);
+            mDelegate = listener;
+        }
+
+        @Override
+        public final void onStateChanged(int state) {
+            final boolean folded = ArrayUtils.contains(mFoldedDeviceStates, state);
+
+            if (lastResult == null || !lastResult.equals(folded)) {
+                lastResult = folded;
+                mDelegate.accept(folded);
+            }
+        }
     }
 }
