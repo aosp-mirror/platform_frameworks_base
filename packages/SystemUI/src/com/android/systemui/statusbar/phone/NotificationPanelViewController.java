@@ -2831,15 +2831,6 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    protected float getPeekHeight() {
-        if (mNotificationStackScrollLayoutController.getNotGoneChildCount() > 0) {
-            return mNotificationStackScrollLayoutController.getPeekHeight();
-        } else {
-            return mQsMinExpansionHeight;
-        }
-    }
-
-    @Override
     protected boolean shouldUseDismissingAnimation() {
         return mBarState != StatusBarState.SHADE && (mKeyguardStateController.canDismissLockScreen()
                 || !isTracking());
