@@ -43,7 +43,7 @@ final class DefaultCrossProfileIntentFilter {
     }
 
     /** The intent filter that's used */
-    public final IntentFilter filter;
+    public final WatchedIntentFilter filter;
 
     /**
      * The flags related to the forwarding, e.g.
@@ -66,7 +66,7 @@ final class DefaultCrossProfileIntentFilter {
      */
     public final boolean letsPersonalDataIntoProfile;
 
-    private DefaultCrossProfileIntentFilter(IntentFilter filter, int flags,
+    private DefaultCrossProfileIntentFilter(WatchedIntentFilter filter, int flags,
             @Direction int direction, boolean letsPersonalDataIntoProfile) {
         this.filter = requireNonNull(filter);
         this.flags = flags;
@@ -75,7 +75,7 @@ final class DefaultCrossProfileIntentFilter {
     }
 
     static final class Builder {
-        private IntentFilter mFilter = new IntentFilter();
+        private WatchedIntentFilter mFilter = new WatchedIntentFilter();
         private int mFlags;
         private @Direction int mDirection;
         private boolean mLetsPersonalDataIntoProfile;
