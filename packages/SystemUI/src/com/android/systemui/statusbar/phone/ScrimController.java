@@ -42,6 +42,7 @@ import com.android.internal.util.function.TriConsumer;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -810,15 +811,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private float getInterpolatedFraction() {
-        float frac = mPanelExpansion;
-        // let's start this 20% of the way down the screen
-        frac = frac * 1.2f - 0.2f;
-        if (frac <= 0) {
-            return 0;
-        } else {
-            // woo, special effects
-            return (float) (1f - 0.5f * (1f - Math.cos(3.14159f * Math.pow(1f - frac, 2f))));
-        }
+        return Interpolators.getNotificationScrimAlpha(mPanelExpansion);
     }
 
     private void setScrimAlpha(ScrimView scrim, float alpha) {

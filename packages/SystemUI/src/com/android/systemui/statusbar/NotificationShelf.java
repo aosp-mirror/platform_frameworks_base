@@ -31,6 +31,7 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -176,7 +177,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
             viewState.height = getIntrinsicHeight();
             viewState.zTranslation = ambientState.getBaseZHeight();
             viewState.clipTopAmount = 0;
-            viewState.alpha = 1f - ambientState.getHideAmount();
+
+            if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
+                viewState.alpha = Interpolators.getNotificationScrimAlpha(
+                        ambientState.getExpansionFraction());
+            } else {
+                viewState.alpha = 1f - ambientState.getHideAmount();
+            }
             viewState.belowSpeedBump = mHostLayoutController.getSpeedBumpIndex() == 0;
             viewState.hideSensitive = false;
             viewState.xTranslation = getTranslationX();
