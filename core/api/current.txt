@@ -1740,6 +1740,7 @@ package android {
     field @Deprecated public static final int secondary_text_light = 17170439; // 0x1060007
     field @Deprecated public static final int secondary_text_light_nodisable = 17170440; // 0x1060008
     field public static final int system_accent1_0;
+    field public static final int system_accent1_10;
     field public static final int system_accent1_100;
     field public static final int system_accent1_1000;
     field public static final int system_accent1_200;
@@ -1752,6 +1753,7 @@ package android {
     field public static final int system_accent1_800;
     field public static final int system_accent1_900;
     field public static final int system_accent2_0;
+    field public static final int system_accent2_10;
     field public static final int system_accent2_100;
     field public static final int system_accent2_1000;
     field public static final int system_accent2_200;
@@ -1764,6 +1766,7 @@ package android {
     field public static final int system_accent2_800;
     field public static final int system_accent2_900;
     field public static final int system_accent3_0;
+    field public static final int system_accent3_10;
     field public static final int system_accent3_100;
     field public static final int system_accent3_1000;
     field public static final int system_accent3_200;
@@ -1776,6 +1779,7 @@ package android {
     field public static final int system_accent3_800;
     field public static final int system_accent3_900;
     field public static final int system_neutral1_0;
+    field public static final int system_neutral1_10;
     field public static final int system_neutral1_100;
     field public static final int system_neutral1_1000;
     field public static final int system_neutral1_200;
@@ -1788,6 +1792,7 @@ package android {
     field public static final int system_neutral1_800;
     field public static final int system_neutral1_900;
     field public static final int system_neutral2_0;
+    field public static final int system_neutral2_10;
     field public static final int system_neutral2_100;
     field public static final int system_neutral2_1000;
     field public static final int system_neutral2_200;
