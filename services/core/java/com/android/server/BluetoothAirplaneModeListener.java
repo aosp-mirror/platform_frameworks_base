@@ -127,7 +127,9 @@ class BluetoothAirplaneModeListener {
             }
             return;
         }
-        mAirplaneHelper.onAirplaneModeChanged(mBluetoothManager);
+        if (mAirplaneHelper != null) {
+            mAirplaneHelper.onAirplaneModeChanged(mBluetoothManager);
+        }
     }
 
     @VisibleForTesting

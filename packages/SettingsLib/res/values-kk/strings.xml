@@ -360,7 +360,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU жөндеу қабаттарын қосу"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"GPU жөндеу қабаттарының жүктелуіне рұқсат ету"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Жеткізушілерді журналға тіркеу"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Қате туралы есепте қызмет көрсетушінің құрылғыға қатысты қосымша ақпаратын қамту. Мұнда жеке ақпарат көрсетілуі, батарея шығыны артуы және/немесе қосымша жад пайдаланылуы мүмкін."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Қате туралы есепте жеткізушінің құрылғыға қатысты қосымша ақпараты қамтылады. Мұнда жеке ақпарат көрсетілуі, батарея шығыны артуы және/немесе қосымша жад пайдаланылуы мүмкін."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Терезе анимациясының өлшемі"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Ауысу анимациясының өлшемі"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Аниматор ұзақтығы"</string>
@@ -447,7 +447,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Зарядталғанға дейін <xliff:g id="TIME">%1$s</xliff:g> қалды"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядталғанға дейін <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Батареяның жұмыс істеу қабілеті оңтайландырылуда"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Батарея жұмысын оңтайландыру"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгісіз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарядталуда"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядталуда"</string>
@@ -497,7 +497,7 @@
     <string name="cancel" msgid="5665114069455378395">"Бас тарту"</string>
     <string name="okay" msgid="949938843324579502">"Жарайды"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Қосу"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Мазаламау\" режимін қосу"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Мазаламау режимін қосу"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Ешқашан"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Маңыздылары ғана"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -547,8 +547,8 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Шектелген профайл жасақтауға дейін қолданбалар мен жеке деректерді қорғау үшін экран бекітпесін тағайындау қажет."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Бекітпе тағайындау"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> пайдаланушысына ауысу"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Қонақты енгізу"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Қонақты өшіру"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Қонақ қосу"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Қонақты жою"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Қонақ"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Құрылғыны әдепкісінше реттеу"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Өшірулі"</string>

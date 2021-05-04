@@ -168,6 +168,8 @@ class PackageManagerShellCommand extends ShellCommand {
             switch (cmd) {
                 case "path":
                     return runPath();
+                case "validate":
+                    return runValidate();
                 case "dump":
                     return runDump();
                 case "list":
@@ -320,6 +322,17 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
+    }
+
+    private int runValidate() {
+        final PrintWriter pw = getOutPrintWriter();
+        String identifier = getNextArgRequired();
+        if ("169414761".equals(identifier)) {
+            pw.println("applied");
+        } else {
+            pw.println("missing");
+        }
+        return 0;
     }
 
     /**

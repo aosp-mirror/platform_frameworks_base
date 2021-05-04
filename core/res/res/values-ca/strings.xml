@@ -524,10 +524,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permet que l\'aplicació conegui el nivell de complexitat del bloqueig de pantalla (alt, mitjà, baix o cap), que indica la llargària i el tipus de bloqueig de pantalla possibles. L\'aplicació també pot suggerir que els usuaris actualitzin el bloqueig de pantalla a un nivell determinat, però els usuaris poden ignorar aquestes recomanacions. Tingues en compte que el bloqueig de pantalla no s\'emmagatzema com a text sense format, de manera que l\'aplicació no coneix la contrasenya exacta."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utilitza maquinari biomètric"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permet que l\'aplicació faci servir maquinari biomètric per a l\'autenticació"</string>
-    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Gestionar el maquinari d\'empremtes dactilars"</string>
+    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Gestionar el maquinari d\'empremtes digitals"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permet que l\'aplicació invoqui mètodes per afegir i suprimir plantilles d\'empremtes dactilars que es puguin fer servir."</string>
-    <string name="permlab_useFingerprint" msgid="1001421069766751922">"Utilitzar el maquinari d\'empremtes dactilars"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permet que l\'aplicació faci servir maquinari d\'empremtes dactilars per a l\'autenticació"</string>
+    <string name="permlab_useFingerprint" msgid="1001421069766751922">"Utilitzar el maquinari d\'empremtes digitals"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permet que l\'aplicació faci servir maquinari d\'empremtes digitals per a l\'autenticació"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar la teva col·lecció de música"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permet que l\'aplicació modifiqui la teva col·lecció de música."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"modificar la teva col·lecció de vídeos"</string>
@@ -552,7 +552,7 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"L\'empremta digital s\'ha autenticat"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Cara autenticada; prem el botó per confirmar"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"El maquinari per a empremtes dactilars no està disponible."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"El maquinari d\'empremtes digitals no està disponible."</string>
     <string name="fingerprint_error_no_space" msgid="6126456006769817485">"L\'empremta digital no es pot desar. Suprimeix-ne una."</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"S\'ha esgotat el temps d\'espera per a l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
@@ -956,7 +956,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Permet que l\'aplicació modifiqui l\'historial del navegador o els marcadors de la tauleta. Això pot permetre que l\'aplicació esborri o modifiqui les dades del navegador. Nota: És possible que aquest permís no s\'apliqui a navegadors de tercers o a altres aplicacions amb capacitats de navegació web."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Permet que l\'aplicació modifiqui l\'historial o les adreces d\'interès que hagis desat al dispositiu Android TV. D\'aquesta manera, l\'aplicació pot esborrar o modificar les dades del navegador. Nota: és possible que aquest permís no s\'apliqui a navegadors de tercers ni a altres aplicacions amb funcions de navegació web."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Permet que l\'aplicació modifiqui l\'historial del navegador o els marcadors del telèfon. Això pot permetre que l\'aplicació esborri o modifiqui les dades del navegador. Nota: És possible que aquest permís no s\'apliqui a navegadors de tercers o a altres aplicacions amb capacitats de navegació web."</string>
-    <string name="permlab_setAlarm" msgid="1158001610254173567">"configuració d\'una alarma"</string>
+    <string name="permlab_setAlarm" msgid="1158001610254173567">"configurar una alarma"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"Permet que l\'aplicació defineixi una alarma en una aplicació de despertador instal·lada. És possible que algunes aplicacions de despertador no incorporin aquesta funció."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"afegeix bústia de veu"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"Permet que l\'aplicació afegeixi missatges a la safata d\'entrada de la bústia de veu."</string>
@@ -996,7 +996,7 @@
       <item quantity="other">Darrers <xliff:g id="COUNT_1">%d</xliff:g> dies</item>
       <item quantity="one">Darrer dia (<xliff:g id="COUNT_0">%d</xliff:g>)</item>
     </plurals>
-    <string name="last_month" msgid="1528906781083518683">"El mes passat"</string>
+    <string name="last_month" msgid="1528906781083518683">"Darrer mes"</string>
     <string name="older" msgid="1645159827884647400">"Més antigues"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"el <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="4336835286453822053">"a les <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -2029,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> i <xliff:g id="COUNT_3">%d</xliff:g> fitxers més</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> i <xliff:g id="COUNT_1">%d</xliff:g> fitxer més</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hi ha cap recomanació de persones amb qui compartir"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hi ha cap suggeriment de persones amb qui compartir"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Llista d\'aplicacions"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Aquesta aplicació no té permís de gravació, però pot capturar àudio a través d\'aquest dispositiu USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Inici"</string>

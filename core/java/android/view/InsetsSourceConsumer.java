@@ -113,13 +113,20 @@ public class InsetsSourceConsumer {
                     InsetsState.typeToString(control.getType()),
                     mController.getHost().getRootViewTitle()));
         }
-        // We are loosing control
         if (mSourceControl == null) {
+            // We are loosing control
             mController.notifyControlRevoked(this);
 
-            // Restore server visibility.
-            mState.getSource(getType()).setVisible(
-                    mController.getLastDispatchedState().getSource(getType()).isVisible());
+            // Check if we need to restore server visibility.
+            final InsetsSource source = mState.getSource(mType);
+            final boolean serverVisibility =
+                    mController.getLastDispatchedState().getSourceOrDefaultVisibility(mType);
+            if (source.isVisible() != serverVisibility) {
+                source.setVisible(serverVisibility);
+                mController.notifyVisibilityChanged();
+            }
+
+            // For updateCompatSysUiVisibility
             applyLocalVisibilityOverride();
         } else {
             // We are gaining control, and need to run an animation since previous state

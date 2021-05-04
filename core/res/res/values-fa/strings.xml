@@ -997,7 +997,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> روز قبل</item>
     </plurals>
     <string name="last_month" msgid="1528906781083518683">"ماه گذشته"</string>
-    <string name="older" msgid="1645159827884647400">"قدیمی تر"</string>
+    <string name="older" msgid="1645159827884647400">"قدیمی‌تر"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"در <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="4336835286453822053">"در <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="3149809685340130039">"در <xliff:g id="YEAR">%s</xliff:g>"</string>
@@ -1423,7 +1423,7 @@
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"شنونده اعلان"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"‏شنونده VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"ارائه‌دهنده وضعیت"</string>
-    <string name="notification_ranker_binding_label" msgid="432708245635563763">"سرویس رتبه‌بندی اعلان"</string>
+    <string name="notification_ranker_binding_label" msgid="432708245635563763">"سرویس رده‌بندی اعلان"</string>
     <string name="vpn_title" msgid="5906991595291514182">"‏VPN فعال شد"</string>
     <string name="vpn_title_long" msgid="6834144390504619998">"‏VPN را <xliff:g id="APP">%s</xliff:g> فعال کرده است"</string>
     <string name="vpn_text" msgid="2275388920267251078">"برای مدیریت شبکه ضربه بزنید."</string>
@@ -1625,7 +1625,7 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ویژگی‌های دسترس‌پذیری روشن شود؟"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"با پایین نگه داشتن هردو کلید میزان صدا به‌مدت چند ثانیه، ویژگی‌های دسترس‌پذیری روشن می‌شود. با این کار نحوه عملکرد دستگاهتان تغییر می‌کند.\n\nویژگی‌های فعلی:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nمی‌توانید ویژگی‌های انتخابی را در «تنظیمات &gt; دسترس‌پذیری» تغییر دهید."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> روشن شود؟"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"سرویس <xliff:g id="SERVICE">%1$s</xliff:g> روشن شود؟"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"با پایین نگه داشتن هردو کلید میزان صدا به‌مدت چند ثانیه، <xliff:g id="SERVICE">%1$s</xliff:g> (یکی از ویژگی‌های دسترس‌پذیری) روشن می‌شود. با این کار نحوه عملکرد دستگاهتان تغییر می‌کند.\n\nمی‌توانید در «تنظیمات &gt; دسترس‌پذیری»،‌این میان‌بر را به ویژگی دیگری تغییر دهید."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"روشن شود"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"روشن نشود"</string>

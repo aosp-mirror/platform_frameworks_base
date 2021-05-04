@@ -77,8 +77,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@null"
-                systemui:intent="intent:#Intent;component=com.android.car.settings/.common.CarSettingActivities$QuickSettingActivity;launchFlags=0x24000000;end"
-            />
+                android:focusedByDefault="true"
+                systemui:intent="intent:#Intent;component=com.android.car.settings/.common.CarSettingActivities$QuickSettingActivity;launchFlags=0x24000000;end"/>
             <com.android.systemui.statusbar.policy.Clock
                 android:id="@+id/clock"
                 android:layout_width="wrap_content"

@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Bateriak bi barra ditu."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Bateriak hiru barra ditu."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Bateria beteta dago."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Bateriaren ehunekoa ezezaguna da."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Ez dago telefono-zenbakirik."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefono-seinaleak barra bat du."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefono-seinaleak bi barra ditu."</string>
@@ -469,8 +470,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="7895986003578341126">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Bizkor kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatu arte)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="245442950133408398">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mantso kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatu arte)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Aldatu erabiltzailea"</string>
-    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Aldatu erabiltzailez. <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> da saioa hasita duena."</string>
-    <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Uneko erabiltzailea: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"Aldatu erabiltzailea. <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> da saioa hasita daukana."</string>
+    <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"Erabiltzailea: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Erakutsi profila"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Gehitu erabiltzailea"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Erabiltzaile berria"</string>
@@ -485,10 +486,10 @@
     <string name="guest_notification_text" msgid="4202692942089571351">"Aplikazioak eta datuak ezabatzeko, kendu gonbidatua"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"KENDU GONBIDATUA"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Amaitu erabiltzailearen saioa"</string>
-    <string name="user_logout_notification_text" msgid="7441286737342997991">"Amaitu uneko erabiltzailearen saioa"</string>
+    <string name="user_logout_notification_text" msgid="7441286737342997991">"Amaitu erabiltzailearen saioa"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"AMAITU ERABILTZAILEAREN SAIOA"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Beste erabiltzaile bat gehitu?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Erabiltzaile bat gehitzen duzunean, horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Erabiltzaile bat gehitzen duzunean, erabiltzaile horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Erabiltzaile-mugara iritsi zara"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Gehienez, <xliff:g id="COUNT">%d</xliff:g> erabiltzaile gehi ditzakezu.</item>
@@ -917,8 +918,8 @@
     <string name="pip_notification_message" msgid="4991831338795022227">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="pip_play" msgid="333995977693142810">"Erreproduzitu"</string>
     <string name="pip_pause" msgid="1139598607050555845">"Pausatu"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Saltatu hurrengora"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Saltatu aurrekora"</string>
+    <string name="pip_skip_to_next" msgid="3864212650579956062">"Joan hurrengora"</string>
+    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Joan aurrekora"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Aldatu tamaina"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Beroegi egoteagatik itzali da"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ohi bezala ari da funtzionatzen telefonoa orain.\nInformazio gehiago lortzeko, sakatu hau."</string>
@@ -973,7 +974,7 @@
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Datu-konexioa desaktibatu nahi duzu?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> erabilita ezingo dituzu erabili datuak edo Internet. Wifi-sare baten bidez soilik konektatu ahal izango zara Internetera."</string>
-    <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"Uneko operadorea"</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"Zure operadorea"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Aplikazio bat baimen-eskaera oztopatzen ari denez, ezarpenek ezin dute egiaztatu erantzuna."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_2">%2$s</xliff:g> aplikazioaren zatiak erakusteko baimena eman nahi diozu <xliff:g id="APP_0">%1$s</xliff:g> aplikazioari?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- <xliff:g id="APP">%1$s</xliff:g> aplikazioaren informazioa irakur dezake."</string>
@@ -1073,8 +1074,8 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pasatu hatza aukera gehiago ikusteko"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Gomendioak kargatzen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia-edukia"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"Ezkutatu uneko saioa."</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"Ezin da ezkutatu uneko saioa."</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"Ezkutatu saioa."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Ezin da ezkutatu saioa."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Baztertu"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Berrekin"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ezarpenak"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (deskonektatuta)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Ezin izan da konektatu. Saiatu berriro."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Parekatu beste gailu batekin"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Arazo bat gertatu da bateria-neurgailua irakurtzean"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Informazio gehiago lortzeko, sakatu hau"</string>
 </resources>

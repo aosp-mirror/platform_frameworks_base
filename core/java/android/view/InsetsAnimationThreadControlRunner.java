@@ -108,6 +108,9 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
         mControl = new InsetsAnimationControlImpl(controls, frame, state, listener,
                 types, mCallbacks, durationMs, interpolator, animationType);
         InsetsAnimationThread.getHandler().post(() -> {
+            if (mControl.isCancelled()) {
+                return;
+            }
             Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW,
                     "InsetsAsyncAnimation: " + WindowInsets.Type.toString(types), types);
             listener.onReady(mControl, types);

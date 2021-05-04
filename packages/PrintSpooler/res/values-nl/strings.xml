@@ -50,7 +50,7 @@
     <string name="search" msgid="5421724265322228497">"Zoeken"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Alle printers"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Service toevoegen"</string>
-    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Zoekvak weergegeven"</string>
+    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Zoekvak wordt getoond"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Zoekvak verborgen"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Printer toevoegen"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"Printer selecteren"</string>
@@ -64,9 +64,9 @@
     <string name="notification_channel_progress" msgid="872788690775721436">"Actieve afdruktaken"</string>
     <string name="notification_channel_failure" msgid="9042250774797916414">"Mislukte afdruktaken"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"Kan bestand niet maken"</string>
-    <string name="print_services_disabled_toast" msgid="9089060734685174685">"Sommige afdrukservices zijn uitgeschakeld"</string>
+    <string name="print_services_disabled_toast" msgid="9089060734685174685">"Sommige afdrukservices zijn uitgezet"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"Printers zoeken"</string>
-    <string name="print_no_print_services" msgid="8561247706423327966">"Geen afdrukservices ingeschakeld"</string>
+    <string name="print_no_print_services" msgid="8561247706423327966">"Geen afdrukservices aangezet"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Geen printers gevonden"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Kan geen printers toevoegen"</string>
     <string name="select_to_add_printers" msgid="3800709038689830974">"Selecteer om printer toe te voegen"</string>

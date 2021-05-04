@@ -583,6 +583,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                         if (mActivityManagerInternal != null
                                 && mActivityManagerInternal.isPendingTopUid(uid)) {
                             return MODE_ALLOWED;
+                        } else if (mActivityManagerInternal != null
+                                && mActivityManagerInternal.isTempAllowlistedForFgsWhileInUse(
+                                        uid)) {
+                            return MODE_ALLOWED;
                         } else if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
                             return MODE_ALLOWED;
                         } else {
@@ -591,6 +595,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                     case OP_RECORD_AUDIO:
                         if (mActivityManagerInternal != null
                                 && mActivityManagerInternal.isPendingTopUid(uid)) {
+                            return MODE_ALLOWED;
+                        } else if (mActivityManagerInternal != null
+                                && mActivityManagerInternal.isTempAllowlistedForFgsWhileInUse(
+                                        uid)) {
                             return MODE_ALLOWED;
                         } else if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
                             return MODE_ALLOWED;

@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Bateria: dwa paski."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Bateria: trzy paski."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Bateria naładowana."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Poziom naładowania baterii jest nieznany."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Brak sygnału telefonu."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefon: jeden pasek."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefon: dwa paski."</string>
@@ -481,7 +482,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Usunąć gościa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Wszystkie aplikacje i dane w tej sesji zostaną usunięte."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Usuń"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Witaj ponownie, gościu!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Witaj ponownie, Gościu!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcesz kontynuować sesję?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Rozpocznij nową"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Tak, kontynuuj"</string>
@@ -1109,4 +1110,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (rozłączono)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Nie udało się połączyć. Spróbuj ponownie."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Sparuj nowe urządzenie"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem z odczytaniem pomiaru wykorzystania baterii"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Kliknij, aby uzyskać więcej informacji"</string>
 </resources>

@@ -1513,6 +1513,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         final int rotation = rotationForActivityInDifferentOrientation(r);
         if (rotation == ROTATION_UNDEFINED) {
+            // The display rotation won't be changed by current top activity. The client side
+            // adjustments of previous rotated activity should be cleared earlier. Otherwise if
+            // the current top is in the same process, it may get the rotated state. The transform
+            // will be cleared later with transition callback to ensure smooth animation.
+            if (hasTopFixedRotationLaunchingApp()) {
+                mFixedRotationLaunchingApp.notifyFixedRotationTransform(false /* enabled */);
+            }
             return false;
         }
         if (!r.getParent().matchParentBounds()) {
@@ -5876,6 +5883,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver showInsets", e);
             }
+        }
+
+        @Override
+        public boolean getImeRequestedVisibility(@InternalInsetsType int type) {
+            return getInsetsStateController().getImeSourceProvider().isImeShowing();
         }
     }
 

@@ -1421,7 +1421,7 @@
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Պաստառ"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Փոխել պաստառը"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Ծանուցման ունկնդիր"</string>
-    <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR ունկնդրիչ"</string>
+    <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR ունկնիր"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Պայմանների մատակարար"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Ծանուցումների դասակարգման ծառայություն"</string>
     <string name="vpn_title" msgid="5906991595291514182">"VPN-ը ակտիվացված է"</string>
@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Մի գործառույթից մյուսին անցնելու համար երեք մատը սահեցրեք վերև և պահեք։"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Խոշորացում"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ներկայիս օգտատերը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Փոխարկվում է <xliff:g id="NAME">%1$s</xliff:g>-ին..."</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Անցում հետևյալ պրոֆիլին՝ <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Ելք <xliff:g id="NAME">%1$s</xliff:g>-ից…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Սեփականատեր"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Սխալ"</string>

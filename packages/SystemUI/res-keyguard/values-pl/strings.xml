@@ -38,7 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Szybkie ładowanie"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wolne ładowanie"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optymalizuję, by utrzymać baterię w dobrym stanie"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optymalizuję, aby utrzymać baterię w dobrym stanie"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"Podłącz ładowarkę."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Naciśnij Menu, aby odblokować."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sieć zablokowana"</string>

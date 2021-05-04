@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"ਬੈਟਰੀ ਦੋ ਬਾਰਸ।"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"ਬੈਟਰੀ ਤਿੰਨ ਬਾਰਸ।"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"ਬੈਟਰੀ ਪੂਰੀ।"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ਬੈਟਰੀ ਪ੍ਰਤੀਸ਼ਤ ਅਗਿਆਤ ਹੈ।"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"ਕੋਈ ਫ਼ੋਨ ਨਹੀਂ।"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"ਫ਼ੋਨ ਇੱਕ ਬਾਰ।"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"ਫ਼ੋਨ ਦੋ ਬਾਰਸ।"</string>
@@ -479,7 +480,7 @@
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ਹਟਾਓ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ਮਹਿਮਾਨ, ਫਿਰ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ਕੀ ਤੁਸੀਂ ਆਪਣਾ ਸੈਸ਼ਨ ਜਾਰੀ ਰੱਖਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
-    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ਸ਼ੁਰੂ ਕਰੋ"</string>
+    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ਹਾਂ, ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"ਮਹਿਮਾਨ ਉਪਭੋਗਤਾ"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟਾਉਣ ਲਈ, ਮਹਿਮਾਨ ਵਰਤੋਂਕਾਰ ਹਟਾਓ"</string>
@@ -707,7 +708,7 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ਸੂਚਨਾਵਾਂ ਬੰਦ ਕਰੋ"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"ਕੀ ਇਸ ਐਪ ਤੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"ਸ਼ਾਂਤ"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"ਪੂਰਵ-ਨਿਰਧਾਰਤ"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"ਬੁਲਬੁਲਾ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਵਿੱਚ ਹੇਠਲੇ ਪਾਸੇ ਦਿਸਦੀਆਂ ਹਨ"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ਡਿਸਕਨੈਕਟ ਹੋਇਆ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ਨਵਾਂ ਡੀਵਾਈਸ ਜੋੜਾਬੱਧ ਕਰੋ"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ਤੁਹਾਡੇ ਬੈਟਰੀ ਮੀਟਰ ਨੂੰ ਪੜ੍ਹਨ ਵਿੱਚ ਸਮੱਸਿਆ ਹੋ ਰਹੀ ਹੈ"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ ਟੈਪ ਕਰੋ"</string>
 </resources>

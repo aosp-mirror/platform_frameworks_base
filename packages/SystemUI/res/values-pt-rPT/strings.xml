@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Duas barras de bateria."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Três barras de bateria."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Bateria carregada."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Percentagem da bateria desconhecida."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Sem telefone."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Uma barra de telefone."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Duas barras de telefone."</string>
@@ -475,9 +476,9 @@
     <string name="user_add_user" msgid="4336657383006913022">"Adicionar utilizador"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novo utilizador"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover o convidado?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todas as aplicações e dados desta sessão serão eliminados."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todas as apps e dados desta sessão serão eliminados."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remover"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo de volta, caro(a) convidado(a)!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo de volta, convidado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Pretende continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Recomeçar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sim, continuar"</string>
@@ -488,7 +489,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Terminar sessão do utilizador atual"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"TERMINAR SESSÃO DO UTILIZADOR"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Adicionar um novo utilizador?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite de utilizadores alcançado"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Pode adicionar até <xliff:g id="COUNT">%d</xliff:g> utilizadores.</item>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (desligado)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Não foi possível ligar. Tente novamente."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Sincronize o novo dispositivo"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Ocorreu um problema ao ler o medidor da bateria"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toque para obter mais informações"</string>
 </resources>

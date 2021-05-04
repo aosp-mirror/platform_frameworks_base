@@ -37,7 +37,6 @@ import android.view.WindowManagerGlobal;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-import android.window.WindowOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.TransactionPool;
@@ -112,10 +111,10 @@ public class WindowManagerProxy {
         mExecutor.execute(mSetTouchableRegionRunnable);
     }
 
-    static void applyResizeSplits(int position, SplitDisplayLayout splitLayout) {
+    void applyResizeSplits(int position, SplitDisplayLayout splitLayout) {
         WindowContainerTransaction t = new WindowContainerTransaction();
         splitLayout.resizeSplits(position, t);
-        WindowOrganizer.applyTransaction(t);
+        applySyncTransaction(t);
     }
 
     private static boolean getHomeAndRecentsTasks(List<ActivityManager.RunningTaskInfo> out,

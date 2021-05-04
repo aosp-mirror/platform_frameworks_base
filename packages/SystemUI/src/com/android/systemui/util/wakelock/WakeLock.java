@@ -33,7 +33,7 @@ public interface WakeLock {
     static final String REASON_WRAP = "wrap";
 
     /**
-     * Default wake-lock timeout, to avoid battery regressions.
+     * Default wake-lock timeout in milliseconds, to avoid battery regressions.
      */
     long DEFAULT_MAX_TIMEOUT = 20000;
 
@@ -104,6 +104,7 @@ public interface WakeLock {
                 if (count == null) {
                     Log.wtf(TAG, "Releasing WakeLock with invalid reason: " + why,
                             new Throwable());
+                    return;
                 } else if (count == 1) {
                     mActiveClients.remove(why);
                 } else {

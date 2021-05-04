@@ -677,6 +677,12 @@ public final class NfcAdapter {
             throw new IllegalArgumentException(
                     "context not associated with any application (using a mock context?)");
         }
+
+        if (getServiceInterface() == null) {
+            // NFC is not available
+            return null;
+        }
+
         /* use getSystemService() for consistency */
         NfcManager manager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
         if (manager == null) {

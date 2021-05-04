@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"ಬ್ಯಾಟರಿ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"ಬ್ಯಾಟರಿ ಮೂರು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"ಬ್ಯಾಟರಿ ಭರ್ತಿಯಾಗಿದೆ."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ಬ್ಯಾಟರಿ ಶೇಕಡಾವಾರು ತಿಳಿದಿಲ್ಲ."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"ಯಾವುದೇ ಫೋನ್ ಇಲ್ಲ."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"ಪೋನ್ ಒಂದು ಪಟ್ಟಿ."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"ಫೋನ್ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
@@ -480,7 +481,7 @@
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ಮತ್ತೆ ಸುಸ್ವಾಗತ, ಅತಿಥಿ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ನಿಮ್ಮ ಸೆಷನ್‌ ಮುಂದುವರಿಸಲು ಇಚ್ಚಿಸುವಿರಾ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ಪ್ರಾರಂಭಿಸಿ"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ಹೌದು, ಮುಂದುವರಿ"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ಹೌದು, ಮುಂದುವರಿಸಿ"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"ಅತಿಥಿ ಬಳಕೆದಾರ"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾ ಅಳಿಸಲು, ಅತಿಥಿ ಬಳಕೆದಾರರನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿದೆ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ಹೊಸ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ನಿಮ್ಮ ಬ್ಯಾಟರಿ ಮೀಟರ್ ಓದುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
 </resources>

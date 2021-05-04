@@ -20,6 +20,7 @@ import static android.Manifest.permission.DELETE_PACKAGES;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
+import static android.Manifest.permission.QUERY_ALL_PACKAGES;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
@@ -28,6 +29,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.ACTION_MAIN;
+import static android.content.Intent.CATEGORY_BROWSABLE;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
@@ -3658,8 +3660,6 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageParser.readConfigUseRoundIcon(mContext.getResources());
 
         mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
-
-        Slog.i(TAG, "Fix for b/169414761 is applied");
     }
 
     /**
@@ -6178,6 +6178,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public List<String> getAllPackages() {
+        // Allow iorapd to call this method.
+        if (Binder.getCallingUid() != Process.IORAPD_UID) {
+            enforceSystemOrRootOrShell("getAllPackages is limited to privileged callers");
+        }
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         synchronized (mLock) {
@@ -6456,14 +6460,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     true /*allowDynamicSplits*/);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
-            final boolean queryMayBeFiltered =
-                    UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID
-                            && !resolveForStart;
-
             final ResolveInfo bestChoice =
                     chooseBestActivity(
                             intent, resolvedType, flags, privateResolveFlags, query, userId,
-                            queryMayBeFiltered);
+                            queryMayBeFiltered(filterCallingUid, resolveForStart));
             final boolean nonBrowserOnly =
                     (privateResolveFlags & PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY) != 0;
             if (nonBrowserOnly && bestChoice != null && bestChoice.handleAllWebDataURI) {
@@ -6473,6 +6473,25 @@ public class PackageManagerService extends IPackageManager.Stub
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
+    }
+
+    /**
+     * Returns whether the query may be filtered to packages which are visible to the caller.
+     * Filtering occurs except in the following cases:
+     * <ul>
+     *     <li>system processes
+     *     <li>applications granted {@link android.Manifest.permission#QUERY_ALL_PACKAGES}
+     *     <li>when querying to start an app
+     * </ul>
+     *
+     * @param filterCallingUid the UID of the calling application
+     * @param queryForStart whether query is to start an app
+     * @return whether filtering may occur
+     */
+    private boolean queryMayBeFiltered(int filterCallingUid, boolean queryForStart) {
+        return UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID
+                && checkUidPermission(QUERY_ALL_PACKAGES, filterCallingUid) != PERMISSION_GRANTED
+                && !queryForStart;
     }
 
     @Override
@@ -6840,7 +6859,7 @@ public class PackageManagerService extends IPackageManager.Stub
             boolean removeMatches, boolean debug, int userId) {
         return findPreferredActivityNotLocked(
                 intent, resolvedType, flags, query, priority, always, removeMatches, debug, userId,
-                UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID);
+                queryMayBeFiltered(Binder.getCallingUid(), /* queryForStart= */ false));
     }
 
     // TODO: handle preferred activities missing while user has amnesia

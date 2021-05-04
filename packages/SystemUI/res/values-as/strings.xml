@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"বেটাৰিৰ দুডাল দণ্ড।"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"বেটাৰিৰ তিনিডাল দণ্ড।"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"বেটাৰি পূৰাকৈ চ্চাৰ্জ হৈছে।"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"বেটাৰীৰ চাৰ্জৰ শতাংশ অজ্ঞাত।"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"ফ\'নত ছিগনেল নাই৷"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"ফ\'ন ছিগনেলৰ এডাল দণ্ড।"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"ফ\'ন ছিগনেলৰ দুডাল দণ্ড।"</string>
@@ -477,7 +478,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"অতিথি আঁতৰাবনে?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই ছেশ্বনৰ সকলো এপ্ আৰু ডেটা মচা হ\'ব।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"আঁতৰাওক"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"আপোনাক পুনৰাই স্বাগতম জনাইছোঁ!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"অতিথি, আপোনাক পুনৰ স্বাগতম!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপুনি আপোনাৰ ছেশ্বন অব্যাহত ৰাখিব বিচাৰেনে?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আকৌ আৰম্ভ কৰক"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হয়, অব্যাহত ৰাখক"</string>
@@ -766,7 +767,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"বেটাৰিৰ ব্যৱহাৰ"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"চ্চাৰ্জ কৰি থকাৰ সময়ত বেটাৰি সঞ্চয়কাৰী উপলব্ধ নহয়।"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"বেটাৰি সঞ্চয়কাৰী"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"বেটাৰী সঞ্চয়কাৰী"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"কাৰ্যদক্ষতা আৰু নেপথ্য ডেটা হ্ৰাস কৰে"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> বুটাম"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"হ\'ম"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (সংযোগ বিচ্ছিন্ন হৈছে)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"সংযোগ কৰিব পৰা নগ’ল। পুনৰ চেষ্টা কৰক।"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"নতুন ডিভাইচ পেয়াৰ কৰক"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"আপোনাৰ বেটাৰী মিটাৰ পঢ়োঁতে সমস্যা হৈছে"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"অধিক তথ্যৰ বাবে টিপক"</string>
 </resources>

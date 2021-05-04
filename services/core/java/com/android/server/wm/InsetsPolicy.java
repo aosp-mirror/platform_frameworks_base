@@ -27,6 +27,7 @@ import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import android.annotation.Nullable;
 import android.app.StatusBarManager;
@@ -128,6 +129,9 @@ class InsetsPolicy {
 
     /** Updates the target which can control system bars. */
     void updateBarControlTarget(@Nullable WindowState focusedWin) {
+        if (focusedWin != null && (focusedWin.mAttrs.type == TYPE_APPLICATION_STARTING)) {
+            return;
+        }
         if (mFocusedWin != focusedWin){
             abortTransient();
         }

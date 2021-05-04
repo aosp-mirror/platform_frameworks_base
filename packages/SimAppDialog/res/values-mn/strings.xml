@@ -19,8 +19,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="8898068901680117589">"Sim аппын харилцах цонх"</string>
     <string name="install_carrier_app_title" msgid="334729104862562585">"Мобайл үйлчилгээг идэвхжүүлэх"</string>
-    <string name="install_carrier_app_description" msgid="4014303558674923797">"Та шинэ СИМ-ээ зөв ажиллуулахын тулд <xliff:g id="ID_1">%1$s</xliff:g> аппыг суулгах хэрэгтэй болно"</string>
-    <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Та шинэ СИМ-ээ зөв ажиллуулахын тулд оператор компанийхаа аппыг суулгах хэрэгтэй болно"</string>
+    <string name="install_carrier_app_description" msgid="4014303558674923797">"Та шинэ SIM-ээ зөв ажиллуулахын тулд <xliff:g id="ID_1">%1$s</xliff:g> аппыг суулгах хэрэгтэй болно"</string>
+    <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Та шинэ SIM-ээ зөв ажиллуулахын тулд оператор компанийхаа аппыг суулгах хэрэгтэй болно"</string>
     <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"Одоо биш"</string>
     <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Апп татах"</string>
 </resources>

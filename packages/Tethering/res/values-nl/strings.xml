@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="tethered_notification_title" msgid="6426563586025792944">"Tethering of hotspot actief"</string>
     <string name="tethered_notification_message" msgid="64800879503420696">"Tik om in te stellen."</string>
-    <string name="disable_tether_notification_title" msgid="3004509127903564191">"Tethering is uitgeschakeld"</string>
+    <string name="disable_tether_notification_title" msgid="3004509127903564191">"Tethering staat uit"</string>
     <string name="disable_tether_notification_message" msgid="6717523799293901476">"Neem contact op met je beheerder voor meer informatie"</string>
     <string name="notification_channel_tethering_status" msgid="2663463891530932727">"Status van hotspot en tethering"</string>
     <string name="no_upstream_notification_title" msgid="1204601824631788482"></string>

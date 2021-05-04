@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"ବ୍ୟାଟେରୀର ଦୁଇଟି ବାର୍‍ ଅଛି।"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"ବ୍ୟାଟେରୀର ତିନୋଟି ବାର୍‍ ଅଛି।"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"ବ୍ୟାଟେରୀ ପୂର୍ଣ୍ଣ‍।"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ବ୍ୟାଟେରୀ ଶତକଡ଼ା ଅଜଣା ଅଟେ।"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"କୌଣସି ଫୋନ୍ ନାହିଁ।"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"ଫୋନର ଗୋଟିଏ ବାର ଅଛି।"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"ଫୋନର ଦୁଇଟି ବାର୍‌ ଅଛି।"</string>
@@ -370,7 +371,7 @@
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"ସେଟିଂସ୍"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"ସମୟ"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"ମୁଁ"</string>
-    <string name="quick_settings_user_title" msgid="8673045967216204537">"ୟୁଜର୍‌"</string>
+    <string name="quick_settings_user_title" msgid="8673045967216204537">"ଉପଯୋଗକର୍ତ୍ତା‌"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"ୱାଇ-ଫାଇ"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"ସଂଯୁକ୍ତ ହୋଇନାହିଁ"</string>
@@ -475,10 +476,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ଅତିଥିଙ୍କୁ କାଢ଼ିଦେବେ?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ଏହି ଅବଧିର ସମସ୍ତ ଆପ୍‌ ଓ ଡାଟା ଡିଲିଟ୍‌ ହୋଇଯିବ।"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ଏହି ସେସନର ସମସ୍ତ ଆପ୍‌ ଓ ଡାଟା ଡିଲିଟ୍‌ ହୋଇଯିବ।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"କାଢ଼ିଦିଅନ୍ତୁ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ପୁଣି ସ୍ୱାଗତ, ଅତିଥି!"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"ଆପଣ ନିଜର ଅବଧି ଜାରି ରଖିବାକୁ ଚାହାନ୍ତି କି?"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"ଆପଣ ନିଜର ସେସନ୍ ଜାରି ରଖିବାକୁ ଚାହାଁନ୍ତି କି?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ହଁ, ଜାରି ରଖନ୍ତୁ"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"ଅତିଥି ୟୁଜର୍‍"</string>
@@ -488,7 +489,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ବର୍ତ୍ତମାନର ୟୁଜରଙ୍କୁ ଲଗଆଉଟ୍‍ କରନ୍ତୁ"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ୟୁଜରଙ୍କୁ ଲଗଆଉଟ୍‍ କରନ୍ତୁ"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"ନୂତନ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରିବେ?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"ଜଣେ ନୂଆ ୟୁଜର୍‍ଙ୍କୁ ଯୋଡ଼ିବାବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ସ୍ଥାନ ସେଟ୍‍ କରିବାକୁ ପଡ଼ିବ। \n \n ଅନ୍ୟ ସମସ୍ତ ୟୁଜର୍‍ଙ୍କ ପାଇଁ ଯେକୌଣସି ୟୁଜର୍‍ ଆପ୍‌ଗୁଡ଼ିକୁ ଅପଡେଟ୍‌ କରିପାରିବେ।"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"ଆପଣ ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କଲେ,ତାଙ୍କୁ ସ୍ପେସ୍ ସେଟ୍ ଅପ୍ କରିବାକୁ ପଡ଼ିବ। \n \n ଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପଗୁଡ଼ିକୁ ଅପଡେଟ୍‌ କରିପାରିବେ।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"ଉପଯୋଗକର୍ତ୍ତା ସୀମାରେ ପହଞ୍ଚିଛି"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">କେବଳ <xliff:g id="COUNT">%d</xliff:g> ଉପଯୋଗକର୍ତ୍ତା ହିଁ ତିଆରି କରିହେବ।</item>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ବିଚ୍ଛିନ୍ନ କରାଯାଇଛି)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ସଂଯୋଗ କରାଯାଇପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ନୂଆ ଡିଭାଇସକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ଆପଣଙ୍କ ବ୍ୟାଟେରୀ ମିଟର୍ ପଢ଼ିବାରେ ସମସ୍ୟା ହେଉଛି"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ଅଧିକ ସୂଚନା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
 </resources>

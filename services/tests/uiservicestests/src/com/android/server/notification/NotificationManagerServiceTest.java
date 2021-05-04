@@ -84,6 +84,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.IActivityManager;
@@ -111,6 +112,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
@@ -171,6 +173,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -178,7 +181,6 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -244,6 +246,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     Resources mResources;
     @Mock
     RankingHandler mRankingHandler;
+    @Mock
+    protected PackageManagerInternal mPackageManagerInternal;
 
     private static final int MAX_POST_DELAY = 1000;
 
@@ -283,6 +287,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     NotificationHistoryManager mHistoryManager;
     @Mock
     StatsManager mStatsManager;
+    @Mock
+    AlarmManager mAlarmManager;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
@@ -424,6 +430,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.addService(DeviceIdleInternal.class, deviceIdleInternal);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, activityManagerInternal);
+        mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
+
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
@@ -497,7 +505,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mGroupHelper, mAm, mAtm, mAppUsageStats,
                 mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mUm, mHistoryManager, mStatsManager,
-                mock(TelephonyManager.class));
+                mock(TelephonyManager.class),
+                mock(ActivityManagerInternal.class));
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);
@@ -829,6 +838,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(3, notifsAfter.length);
 
         return nrSummary;
+    }
+
+    @Test
+    public void testLimitTimeOutBroadcast() {
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setTimeoutAfter(1);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, channel);
+
+        mService.scheduleTimeoutLocked(r);
+        ArgumentCaptor<PendingIntent> captor = ArgumentCaptor.forClass(PendingIntent.class);
+        verify(mAlarmManager).setExactAndAllowWhileIdle(anyInt(), anyLong(), captor.capture());
+        assertEquals(PackageManagerService.PLATFORM_PACKAGE_NAME,
+                captor.getValue().getIntent().getPackage());
     }
 
     @Test
@@ -1185,6 +1214,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
         waitForIdle();
         assertEquals(0, mBinderService.getActiveNotifications(PKG).length);
+    }
+
+    @Test
+    public void testEnqueuedRestrictedNotifications_asSuwApp() throws Exception {
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
+        when(mPackageManagerInternal.getSetupWizardPackageName()).thenReturn(PKG);
+
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0))
+                .thenReturn(true);
+
+        final StatusBarNotification sbn =
+                generateNotificationRecord(mTestNotificationChannel, 0, "", false).getSbn();
+        sbn.getNotification().category = Notification.CATEGORY_CAR_INFORMATION;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testEnqueuedRestrictedNotifications_asSuwApp",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+
+        waitForIdle();
+        assertEquals(1, mBinderService.getActiveNotifications(PKG).length);
     }
 
     @Test

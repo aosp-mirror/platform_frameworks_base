@@ -283,7 +283,7 @@
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"કનેક્ટ કરી શકાયું નથી"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"વાયરલેસ ડિસ્પ્લે પ્રમાણપત્ર માટેના વિકલ્પો બતાવો"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"વાઇ-ફાઇ લોગિંગ સ્તર વધારો, વાઇ-ફાઇ પીકરમાં SSID RSSI દીઠ બતાવો"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"બૅટરીનો ચાર્જ ઝડપથી ઓછો થવાનું ટાળે છે અને નેટવર્કની કાર્યક્ષમતામાં સુધારો કરે છે"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"બૅટરીનો ચાર્જ ઝડપથી ઓછો થવાનું ટાળે છે અને નેટવર્કના કાર્યપ્રદર્શનમાં સુધારો કરે છે"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"આ મોડ ચાલુ કરેલો હશે, ત્યારે MAC રેન્ડમાઇઝેશન ચાલુ કરેલું હોય તેવા નેટવર્ક સાથે આ ડિવાઇસ જોડાશે ત્યારે દર વખતે તેનું MAC ઍડ્રેસ બદલાય તેમ બની શકે છે."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"મીટર કરેલ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"મીટર ન કરેલ"</string>
@@ -389,7 +389,7 @@
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"વાઇબ્રન્ટ (ડિફોલ્ટ)"</item>
     <item msgid="9112200311983078311">"કુદરતી"</item>
-    <item msgid="6564241960833766170">"માનક"</item>
+    <item msgid="6564241960833766170">"સ્ટૅન્ડર્ડ"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
     <item msgid="6828141153199944847">"વધારેલ રંગો"</item>

@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"ಪೀರ್ ವಿನಂತಿಸಿಕೊಂಡ TTY ಮೋಡ್ HCO"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"ಪೀರ್ ವಿನಂತಿಸಿಕೊಂಡ TTY ಮೋಡ್ VCO"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"ಪೀರ್ ವಿನಂತಿಸಿಕೊಂಡ TTY ಮೋಡ್ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"ಧ್ವನಿ"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"ಡೇಟಾ"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"ಫ್ಯಾಕ್ಸ್"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ವೈಶಿಷ್ಟ್ಯಗಳ ನಡುವೆ ಬದಲಿಸಲು, ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ಹಿಗ್ಗಿಸುವಿಕೆ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರು <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> ಗೆ ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>ಗೆ ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರನ್ನು ಲಾಗ್‌ ಔಟ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="owner_name" msgid="8713560351570795743">"ಮಾಲೀಕರು"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ದೋಷ"</string>

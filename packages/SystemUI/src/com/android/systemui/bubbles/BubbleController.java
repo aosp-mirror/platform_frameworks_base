@@ -1386,10 +1386,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                 }
             }
-            mDataRepository.removeBubbles(mCurrentUserId, bubblesToBeRemovedFromRepository);
+            mDataRepository.removeBubbles(bubblesToBeRemovedFromRepository);
 
             if (update.addedBubble != null && mStackView != null) {
-                mDataRepository.addBubble(mCurrentUserId, update.addedBubble);
+                mDataRepository.addBubble(update.addedBubble);
                 mStackView.addBubble(update.addedBubble);
             }
 
@@ -1400,7 +1400,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             // At this point, the correct bubbles are inflated in the stack.
             // Make sure the order in bubble data is reflected in bubble row.
             if (update.orderChanged && mStackView != null) {
-                mDataRepository.addBubbles(mCurrentUserId, update.bubbles);
+                mDataRepository.addBubbles(update.bubbles);
                 mStackView.updateBubbleOrder(update.bubbles);
             }
 

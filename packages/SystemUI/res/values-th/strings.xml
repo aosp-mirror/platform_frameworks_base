@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"แอปหรือองค์กรของคุณไม่อนุญาตให้จับภาพหน้าจอ"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ปิดภาพหน้าจอ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ตัวอย่างภาพหน้าจอ"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมอัดหน้าจอ"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมบันทึกหน้าจอ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"เริ่มบันทึกเลยไหม"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"แบตเตอรี่สองขีด"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"แบตเตอรี่สามขีด"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"แบตเตอรี่เต็ม"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ไม่ทราบเปอร์เซ็นต์แบตเตอรี่"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"ไม่มีสัญญาณโทรศัพท์"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"สัญญาณโทรศัพท์หนึ่งขีด"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"สัญญาณโทรศัพท์สองขีด"</string>
@@ -477,7 +478,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้เข้าร่วมออกไหม"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"นำออก"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับท่านผู้เยี่ยมชมกลับมาอีกครั้ง!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้เข้าร่วมกลับมาอีกครั้ง"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"เริ่มต้นใหม่"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ใช่ ดำเนินการต่อ"</string>
@@ -751,7 +752,7 @@
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"เพิ่มลงในหน้าจอหลัก"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"ส่วนควบคุมการแจ้งเตือน"</string>
-    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ตัวเลือกการปิดเสียงแจ้งเตือนชั่วคราว"</string>
+    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ตัวเลือกการเลื่อนการแจ้งเตือน"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"เตือนฉัน"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"การตั้งค่า"</string>
     <string name="snooze_undo" msgid="60890935148417175">"เลิกทำ"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ยกเลิกการเชื่อมต่อแล้ว)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"เชื่อมต่อไม่ได้ ลองใหม่"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"จับคู่อุปกรณ์ใหม่"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"พบปัญหาในการอ่านเครื่องวัดแบตเตอรี่"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"แตะดูข้อมูลเพิ่มเติม"</string>
 </resources>

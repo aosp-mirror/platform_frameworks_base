@@ -1306,7 +1306,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ਕਨੈਕਟ ਕੀਤਾ ਡੀਵਾਈਸ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ। ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ਐਨਾਲੌਗ  ਆਡੀਓ  ਉਪਸਾਧਨ ਦਾ ਪਤਾ ਲੱਗਿਆ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ਨੱਥੀ ਕੀਤਾ ਡੀਵਾਈਸ ਇਸ ਫ਼ੋਨ ਦੇ ਅਨੁਰੂਪ ਨਹੀਂ ਹੈ। ਹੋਰ ਜਾਣਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ਡੀਬਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ਡੀਬੱਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ਡੀਬੱਗਿੰਗ ਬੰਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ਡੀਬੱਗਿੰਗ ਅਯੋਗ ਬਣਾਉਣ ਲਈ ਚੁਣੋ।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ਵਾਇਰਲੈੱਸ ਡੀਬੱਗਿੰਗ ਨੂੰ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ਨੂੰ ਲਾਗ-ਆਉਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ …"</string>
     <string name="owner_name" msgid="8713560351570795743">"ਮਾਲਕ"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ਅਸ਼ੁੱਧੀ"</string>

@@ -1335,7 +1335,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Omogućen način rada okvira za testiranje"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Izvršite vraćanje na fabričke postavke da onemogućite način rada okvira za testiranje."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serijska konzola omogućena"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Izvedba je otežana. Da onemogućite, provjerite program za učitavanje operativnog sistema."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Performanse su smanjene. Da onemogućite, provjerite program za učitavanje operativnog sistema."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Tečnost ili nečistoće u USB priključku"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB priključak je automatski onemogućen. Dodirnite da saznate više."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB priključak je sada sigurno koristiti"</string>

@@ -205,7 +205,6 @@ public class LocalMediaManager implements BluetoothCallback {
 
     void dispatchDeviceListUpdate() {
         final List<MediaDevice> mediaDevices = new ArrayList<>(mMediaDevices);
-        Collections.sort(mediaDevices, COMPARATOR);
         for (DeviceCallback callback : getCallbacks()) {
             callback.onDeviceListUpdate(mediaDevices);
         }
@@ -465,6 +464,7 @@ public class LocalMediaManager implements BluetoothCallback {
             synchronized (mMediaDevicesLock) {
                 mMediaDevices.clear();
                 mMediaDevices.addAll(devices);
+                Collections.sort(devices, COMPARATOR);
                 // Add disconnected bluetooth devices only when phone output device is available.
                 for (MediaDevice device : devices) {
                     final int type = device.getDeviceType();

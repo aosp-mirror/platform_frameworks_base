@@ -447,7 +447,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> guztiz kargatu arte"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Optimizatzen bateria egoera onean mantentzeko"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Optimizatzen, bateria egoera onean mantentzeko"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ezezaguna"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Kargatzen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Bizkor kargatzen"</string>

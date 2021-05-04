@@ -1265,15 +1265,15 @@
     <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; katta miqdordagi SMS xabarlarini jo‘natmoqda. Ushbu ilovaga xabarlar jo‘natishni davom ettirishga ruxsat berasizmi?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"Ruxsat berish"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Rad etish"</string>
-    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;ga xabar jo‘natishni xohlaydi."</string>
-    <string name="sms_short_code_details" msgid="2723725738333388351">"Bunda, mobil hisobingizdan "<b>"to‘lov olinishi mumkin"</b>"."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Bunda, mobil hisobingizdan to‘lov olinishi mumkin."</b></string>
+    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ilovasi &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; raqamiga xabar yubormoqchi."</string>
+    <string name="sms_short_code_details" msgid="2723725738333388351">"Mobil aloqa hisobingizdan "<b>"pul olinishi mumkin"</b>"."</string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Mobil aloqa hisobingizdan pul olinishi mumkin."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Yuborish"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Bekor qilish"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Tanlovim eslab qolinsin"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Siz buni keyinroq sozlamalar &gt; ilovalar menusidan o‘zgartirishingiz mumkin"</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Doimo ruxsat berilsin"</string>
-    <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Hech qachon ruxsat berilmasin"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Buni keyinroq Sozlamalar &gt; Ilovalar menyusidan o‘zgartirishingiz mumkin"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Doim ruxsat"</string>
+    <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Ruxsat berilmasin"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"SIM karta olib tashlandi"</string>
     <string name="sim_removed_message" msgid="9051174064474904617">"Ishlaydigan SIM kartani qo‘yib, qurilmangizni qaytadan ishga tushirmasangiz, mobayl tarmoq mavjud bo‘lmaydi."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Tayyor"</string>
@@ -1397,7 +1397,7 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Ilovaga batareya quvvatidan xohlagancha foydalanish uchun ruxsat so‘rashga imkon beradi."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Ko‘lamini o‘zgartirish uchun ikki marta bosing"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Vidjet qo‘shilmadi."</string>
-    <string name="ime_action_go" msgid="5536744546326495436">"O‘tish"</string>
+    <string name="ime_action_go" msgid="5536744546326495436">"Tanlash"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"Qidirish"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"Yuborish"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"Keyingisi"</string>
@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Funksiyalarni almashtirish uchun uchta barmoq bilan tepaga suring va ushlab turing."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Kattalashtirish"</string>
     <string name="user_switched" msgid="7249833311585228097">"Joriy foydalanuvchi <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Quyidagi foydalanuvchiga o‘tilmoqda: <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Bunga almashilmoqda: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> hisobidan chiqilmoqda…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Egasi"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Xato"</string>

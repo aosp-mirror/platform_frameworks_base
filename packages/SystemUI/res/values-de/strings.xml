@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Akku - zwei Balken"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Akku - drei Balken"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Akku voll"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Akkustand unbekannt."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Kein Telefon"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefonsignal - ein Balken"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefonsignal - zwei Balken"</string>
@@ -714,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kann klingeln oder vibrieren, abhängig von den Telefoneinstellungen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kann klingeln oder vibrieren, je nach Telefoneinstellungen. Unterhaltungen von <xliff:g id="APP_NAME">%1$s</xliff:g> werden standardmäßig als Bubble angezeigt."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Du wirst mit einer unverankerten Verknüpfung darauf aufmerksam gemacht."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wird oben im Bereich \"Unterhaltungen\" als unverankerte Bubble mit einem Profilbild auf dem Sperrbildschirm angezeigt"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wird oben im Bereich „Unterhaltungen“ als unverankerte Bubble angezeigt und erscheint mit einem Profilbild auf dem Sperrbildschirm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Einstellungen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorität"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> unterstützt keine Funktionen für Unterhaltungen"</string>
@@ -962,7 +963,7 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"WLAN ist deaktiviert"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ist deaktiviert"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"\"Bitte nicht stören\" ist deaktiviert"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"„Bitte nicht stören“ ist deaktiviert"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\"Bitte nicht stören\" wurde von einer automatischen Regel aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\"Bitte nicht stören\" wurde von einer App aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\"Bitte nicht stören\" wurde von einer automatischen Regel oder einer App aktiviert."</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (nicht verbunden)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Verbindung nicht möglich. Versuch es noch einmal."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Neues Gerät koppeln"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem beim Lesen des Akkustands"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Für weitere Informationen tippen"</string>
 </resources>

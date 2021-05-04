@@ -1565,9 +1565,6 @@ public class StatsPullAtomService extends SystemService {
         // Aggregate times for the same uids.
         SparseArray<long[]> aggregated = new SparseArray<>();
         mCpuUidFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
-            // For uids known to be aggregated from many entries allow mutating in place to avoid
-            // many copies. Otherwise, copy before aggregating.
-            boolean mutateInPlace = false;
             if (UserHandle.isIsolated(uid)) {
                 // Skip individual isolated uids because they are recycled and quickly removed from
                 // the underlying data source.
@@ -1575,26 +1572,18 @@ public class StatsPullAtomService extends SystemService {
             } else if (UserHandle.isSharedAppGid(uid)) {
                 // All shared app gids are accounted together.
                 uid = LAST_SHARED_APPLICATION_GID;
-                mutateInPlace = true;
-            } else if (UserHandle.isApp(uid)) {
-                // Apps are accounted under their app id.
+            } else {
+                // Everything else is accounted under their base uid.
                 uid = UserHandle.getAppId(uid);
             }
 
             long[] aggCpuFreqTimeMs = aggregated.get(uid);
-            if (aggCpuFreqTimeMs != null) {
-                if (!mutateInPlace) {
-                    aggCpuFreqTimeMs = Arrays.copyOf(aggCpuFreqTimeMs, cpuFreqTimeMs.length);
-                    aggregated.put(uid, aggCpuFreqTimeMs);
-                }
-                for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
-                    aggCpuFreqTimeMs[freqIndex] += cpuFreqTimeMs[freqIndex];
-                }
-            } else {
-                if (mutateInPlace) {
-                    cpuFreqTimeMs = Arrays.copyOf(cpuFreqTimeMs, cpuFreqTimeMs.length);
-                }
-                aggregated.put(uid, cpuFreqTimeMs);
+            if (aggCpuFreqTimeMs == null) {
+                aggCpuFreqTimeMs = new long[cpuFreqTimeMs.length];
+                aggregated.put(uid, aggCpuFreqTimeMs);
+            }
+            for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
+                aggCpuFreqTimeMs[freqIndex] += cpuFreqTimeMs[freqIndex];
             }
         });
 
@@ -2621,7 +2610,6 @@ public class StatsPullAtomService extends SystemService {
         try {
             // force procstats to flush & combine old files into one store
             long lastHighWaterMark = readProcStatsHighWaterMark(section);
-            List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
 
             ProtoOutputStream[] protoStreams = new ProtoOutputStream[MAX_PROCSTATS_SHARDS];
             for (int i = 0; i < protoStreams.length; i++) {
@@ -2631,7 +2619,7 @@ public class StatsPullAtomService extends SystemService {
             ProcessStats procStats = new ProcessStats(false);
             // Force processStatsService to aggregate all in-storage and in-memory data.
             long highWaterMark = processStatsService.getCommittedStatsMerged(
-                    lastHighWaterMark, section, true, statsFiles, procStats);
+                    lastHighWaterMark, section, true, null, procStats);
             procStats.dumpAggregatedProtoForStatsd(protoStreams, MAX_PROCSTATS_RAW_SHARD_SIZE);
 
             for (int i = 0; i < protoStreams.length; i++) {

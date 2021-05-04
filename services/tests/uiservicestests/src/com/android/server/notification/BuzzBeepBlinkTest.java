@@ -57,6 +57,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
@@ -77,10 +78,12 @@ import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.internal.util.IntPair;
 import com.android.server.UiServiceTestCase;
 import com.android.server.lights.LogicalLight;
+import com.android.server.pm.PackageManagerService;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -407,12 +410,17 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     private void verifyVibrate() {
+        ArgumentCaptor<AudioAttributes> captor = ArgumentCaptor.forClass(AudioAttributes.class);
         verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateOnceMatcher),
-                anyString(), any());
+                anyString(), captor.capture());
+        assertEquals(0, (captor.getValue().getAllFlags()
+                & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
     }
 
     private void verifyVibrate(int times) {
-        verify(mVibrator, times(times)).vibrate(anyInt(), anyString(), any(), anyString(), any());
+        verify(mVibrator, times(times)).vibrate(eq(Process.SYSTEM_UID),
+                eq(PackageManagerService.PLATFORM_PACKAGE_NAME), any(), anyString(),
+                any(AudioAttributes.class));
     }
 
     private void verifyVibrateLooped() {

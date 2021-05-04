@@ -423,8 +423,8 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"允許應用程式存取額外的位置提供者指令。這項設定可能會使應用程式干擾 GPS 或其他位置來源的運作。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"只在前景存取精確位置"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"使用此應用程式時，應用程式可透過定位服務獲取您的精確位置。您的裝置必須開啟定位服務，才能讓應用程式獲取位置。這可能會增加電池用量。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"只在前景存取大概位置"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"使用此應用程式時，應用程式可透過定位服務獲取您的大概位置。您的裝置必須開啟定位服務，才能讓應用程式獲取位置。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"只在前景存取概略位置"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"使用此應用程式時，應用程式可透過定位服務獲取您的概略位置。您的裝置必須開啟定位服務，才能讓應用程式獲取位置。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"在背景存取位置資訊"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"即使您不使用此應用程式，它仍可隨時存取位置。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"更改音效設定"</string>
@@ -1901,7 +1901,7 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"已連線至 <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"輕按即可查看檔案"</string>
     <string name="pin_target" msgid="8036028973110156895">"固定"</string>
-    <string name="pin_specific_target" msgid="7824671240625957415">"將<xliff:g id="LABEL">%1$s</xliff:g>置頂"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"固定「<xliff:g id="LABEL">%1$s</xliff:g>」"</string>
     <string name="unpin_target" msgid="3963318576590204447">"取消固定"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"取消將<xliff:g id="LABEL">%1$s</xliff:g>置頂"</string>
     <string name="app_info" msgid="6113278084877079851">"應用程式資料"</string>

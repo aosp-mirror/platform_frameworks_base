@@ -25,6 +25,7 @@ import static com.android.server.media.MediaKeyDispatcher.isSingleTapOverridden;
 import static com.android.server.media.MediaKeyDispatcher.isTripleTapOverridden;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.INotificationManager;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
@@ -114,6 +115,8 @@ public class MediaSessionService extends SystemService implements Monitor {
             + /* Buffer for delayed delivery of key event */ 50;
     private static final int MULTI_TAP_TIMEOUT = ViewConfiguration.getMultiPressTimeout();
 
+    private static final int TEMP_ALLOW_WHILE_IN_USE_PERMISSION_IN_FGS_DURATION_MS = 10_000;
+
     private final Context mContext;
     private final SessionManagerImpl mSessionManagerImpl;
     private final MessageHandler mHandler = new MessageHandler();
@@ -133,6 +136,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final List<Session2TokensListenerRecord> mSession2TokensListenerRecords =
             new ArrayList<>();
 
+    private ActivityManagerInternal mActivityManagerInternal;
     private KeyguardManager mKeyguardManager;
     private AudioManagerInternal mAudioManagerInternal;
     private ContentResolver mContentResolver;
@@ -168,6 +172,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     public void onStart() {
         publishBinderService(Context.MEDIA_SESSION_SERVICE, mSessionManagerImpl);
         Watchdog.getInstance().addMonitor(this);
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance(mContext);
@@ -491,6 +496,25 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
         throw new IllegalArgumentException("packageName is not owned by the calling process");
+    }
+
+    void tempAllowlistTargetPkgIfPossible(int targetUid, String targetPackage,
+            int callingPid, int callingUid, String callingPackage, String reason) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            enforcePackageName(callingPackage, callingUid);
+            if (targetUid != callingUid
+                    && mActivityManagerInternal.canAllowWhileInUsePermissionInFgs(callingPid,
+                    callingUid, callingPackage)) {
+                Log.d(TAG, "tempAllowlistTargetPkgIfPossible callingPackage:"
+                        + callingPackage + " targetPackage:" + targetPackage
+                        + " reason:" + reason);
+                mActivityManagerInternal.tempAllowWhileInUsePermissionInFgs(targetUid,
+                        TEMP_ALLOW_WHILE_IN_USE_PERMISSION_IN_FGS_DURATION_MS);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**

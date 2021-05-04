@@ -14,15 +14,15 @@
 
 package com.android.systemui.plugins.statusbar;
 
-import com.android.systemui.plugins.annotations.DependsOn;
-import com.android.systemui.plugins.annotations.ProvidesInterface;
-import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
-
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+
+import com.android.systemui.plugins.annotations.DependsOn;
+import com.android.systemui.plugins.annotations.ProvidesInterface;
+import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 
 @ProvidesInterface(version = NotificationSwipeActionHelper.VERSION)
 @DependsOn(target = SnoozeOption.class)
@@ -52,7 +52,8 @@ public interface NotificationSwipeActionHelper {
 
     public boolean isDismissGesture(MotionEvent ev);
 
-    public boolean isFalseGesture(MotionEvent ev);
+    /** Returns true if the gesture should be rejected. */
+    boolean isFalseGesture();
 
     public boolean swipedFarEnough(float translation, float viewSize);
 

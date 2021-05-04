@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"একটি ফিচার থেকে অন্যটিতে যেতে, তিনটি আঙ্গুল দিয়ে উপরের দিকে সোয়াইপ করে ধরে থাকুন।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"বড় করে দেখা"</string>
     <string name="user_switched" msgid="7249833311585228097">"বর্তমান ব্যবহারকারী <xliff:g id="NAME">%1$s</xliff:g>৷"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> নামের ব্যবহারকারীতে যাচ্ছে…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"ব্যবহারকারী পরিবর্তন করে <xliff:g id="NAME">%1$s</xliff:g> করা হচ্ছে…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>কে লগ-আউট করা হচ্ছে..."</string>
     <string name="owner_name" msgid="8713560351570795743">"মালিক"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ত্রুটি"</string>

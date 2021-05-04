@@ -148,6 +148,7 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         clearInvocations(mSensors);
         mTriggers.transitionTo(DozeMachine.State.DOZE_PULSING, DozeMachine.State.DOZE_PULSE_DONE);
+        mTriggers.transitionTo(DozeMachine.State.DOZE_PULSE_DONE, DozeMachine.State.DOZE_AOD);
         waitForSensorManager();
         verify(mSensors).requestTriggerSensor(any(), eq(mTapSensor));
     }

@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"দুই দন্ড ব্যাটারি রয়েছে৷"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"তিন দন্ড ব্যাটারি রয়েছে৷"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"ব্যাটারি পূর্ণ রয়েছে৷"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ব্যাটারি কত শতাংশ আছে তা জানা যায়নি।"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"কোনো ফোনের সংকেত নেই৷"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"এক দন্ড ফোনের সংকেত রয়েছে৷"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"দুই দন্ড ফোনের সংকেত রয়েছে৷"</string>
@@ -475,12 +476,12 @@
     <string name="user_add_user" msgid="4336657383006913022">"ব্যবহারকারী জুড়ুন"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"নতুন ব্যবহারকারী"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"অতিথি সরাবেন?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই সেশনের সব অ্যাপ্লিকেশান ও ডেটা মুছে ফেলা হবে।"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই সেশনের সব অ্যাপ ও ডেটা মুছে ফেলা হবে।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"সরান"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"অতিথি, আপনি ফিরে আসায় আপনাকে স্বাগত!"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপনি কি আপনার সেশনটি অবিরত রাখতে চান?"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপনি কি আপনার সেশনটি চালিয়ে যেতে চান?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আবার শুরু করুন"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হ্যাঁ, অবিরত থাকুন"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হ্যাঁ, চালিয়ে যান"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"অতিথি ব্যবহারকারী"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"অ্যাপ্লিকেশান এবং ডেটা মুছে ফেলার জন্য অতিথি ব্যবহারকারী সরান।"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"অতিথি সরান"</string>
@@ -488,7 +489,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"বর্তমান ব্যবহারকারীকে লগ-আউট করুন"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ব্যবহারকারীকে লগ-আউট করুন"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"নতুন ব্যবহারকারীকে যোগ করবেন?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট-আপ করে নিতে হবে৷\n\nযেকোনো ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ্লিকেশান আপডেট করতে পারবেন৷"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট-আপ করে নিতে হবে৷\n\nযেকোনও ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ আপডেট করতে পারবেন৷"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"আর কোনও প্রোফাইল যোগ করা যাবে না"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">আপনি <xliff:g id="COUNT">%d</xliff:g> জন পর্যন্ত ব্যবহারকারীর প্রোফাইল যোগ করতে পারেন।</item>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (কানেক্ট করা নেই)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"কানেক্ট করা যায়নি। আবার চেষ্টা করুন।"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"নতুন ডিভাইস পেয়ার করুন"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ব্যাটারির মিটারের রিডিং নেওয়ার সময় সমস্যা হয়েছে"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"আরও তথ্যের জন্য ট্যাপ করুন"</string>
 </resources>

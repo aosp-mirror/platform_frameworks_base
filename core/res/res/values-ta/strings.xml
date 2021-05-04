@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"TTY Mode HCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"TTY Mode VCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"TTY Mode OFFஐ இணைச் செயல்பாடு கோரியது"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"குரல்"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"தரவு"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"தொலைநகல்"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
@@ -268,7 +268,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"புதிய அறிவிப்பு"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"விர்ச்சுவல் கீபோர்டு"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"கைமுறை விசைப்பலகை"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"கைமுறை கீபோர்டு"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"பாதுகாப்பு"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"கார் பயன்முறை"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"கணக்கின் நிலை"</string>
@@ -1327,9 +1327,9 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"பகிர்"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"வேண்டாம்"</string>
     <string name="select_input_method" msgid="3971267998568587025">"உள்ளீட்டு முறையைத் தேர்வுசெய்க"</string>
-    <string name="show_ime" msgid="6406112007347443383">"கைமுறை விசைப்பலகை இயக்கத்தில் இருக்கும் போது IMEஐ திரையில் வைத்திரு"</string>
+    <string name="show_ime" msgid="6406112007347443383">"கைமுறை கீபோர்டு இயக்கத்தில் இருக்கும் போது IMEஐ திரையில் வைத்திரு"</string>
     <string name="hardware" msgid="1800597768237606953">"விர்ச்சுவல் கீபோர்டை காட்டு"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"கைமுறை விசைப்பலகையை உள்ளமைக்கவும்"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"கைமுறை கீபோர்டை உள்ளமைக்கவும்"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"மொழியையும் தளவமைப்பையும் தேர்ந்தெடுக்க, தட்டவும்"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -2000,7 +2000,7 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"பேட்டரி சேமிப்பான்"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"பேட்டரி சேமிப்பு"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"பேட்டரி சேமிப்பான் ஆஃப் செய்யப்பட்டுள்ளது"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"மொபைலில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"டேப்லெட்டில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>

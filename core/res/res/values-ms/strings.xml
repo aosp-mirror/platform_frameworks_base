@@ -317,7 +317,7 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"akses data penderia tentang tanda vital anda"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Dapatkan kembali kandungan tetingkap"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Periksa kandungan tetingkap yang berinteraksi dengan anda."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Hidupkan Jelajah melalui Sentuhan"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Hidupkan Teroka melalui Sentuhan"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Item yang diketik akan dituturkan dengan lantang dan skrin boleh dijelajah menggunakan gerak isyarat."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Perhatikan teks yang anda taip"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Termasuk data peribadi seperti nombor kad kredit dan kata laluan."</string>
@@ -987,9 +987,9 @@
     <string name="searchview_description_clear" msgid="1989371719192982900">"Pertanyaan jelas"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"Serah pertanyaan"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Carian suara"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Dayakan Jelajah melalui Sentuhan?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mendayakan Jelajah melalui Sentuhan. Apabila Jelajah melalui Sentuhan didayakan, anda boleh mendengar atau melihat penerangan tentang apa di bawah jari anda atau melakukan gerak isyarat untuk berinteraksi dengan tablet."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mendayakan Jelajah melalui Sentuhan. Apabila Jelajah melalui Sentuhan didayakan, anda boleh mendengar atau melihat penerangan tentang apa di bawah jari anda atau melakukan gerak isyarat untuk berinteraksi dengan telefon."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Dayakan Teroka melalui Sentuhan?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mendayakan Teroka melalui Sentuhan. Apabila Teroka melalui Sentuhan didayakan, anda boleh mendengar atau melihat penerangan tentang apa-apa di bawah jari anda atau melakukan gerak isyarat untuk berinteraksi dengan tablet."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mendayakan Teroka melalui Sentuhan. Apabila Teroka melalui Sentuhan didayakan, anda boleh mendengar atau melihat penerangan tentang apa-apa di bawah jari anda atau melakukan gerak isyarat untuk berinteraksi dengan telefon."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 bulan yang lalu"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Sebelum 1 bulan yang lalu"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">

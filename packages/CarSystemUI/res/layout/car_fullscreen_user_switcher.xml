@@ -14,18 +14,18 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout
+
+<com.android.car.ui.FocusArea
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/fullscreen_user_switcher"
+    android:id="@+id/user_switcher_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/car_user_switcher_background_color">
-
-    <LinearLayout
+    android:gravity="center">
+    <com.android.systemui.car.userswitcher.UserSwitcherContainer
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
+        android:background="@color/car_user_switcher_background_color"
         android:orientation="vertical">
 
         <include
@@ -45,5 +45,5 @@
                 android:layout_marginTop="@dimen/car_user_switcher_margin_top"/>
         </FrameLayout>
 
-    </LinearLayout>
-</FrameLayout>
+    </com.android.systemui.car.userswitcher.UserSwitcherContainer>
+</com.android.car.ui.FocusArea>

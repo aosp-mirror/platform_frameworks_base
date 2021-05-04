@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Dve čiarky batérie."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Tri čiarky batérie."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batéria je nabitá."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Percento batérie nie je známe."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Žiadna telefónna sieť."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Jeden stĺpec signálu telefónnej siete."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Dve čiarky signálu telefónnej siete."</string>
@@ -1109,4 +1110,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (odpojené)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Nepodarilo sa pripojiť. Skúste to znova."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Spárovať nové zariadenie"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Pri čítaní meradla batérie sa vyskytol problém"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Klepnutím si zobrazíte ďalšie informácie"</string>
 </resources>

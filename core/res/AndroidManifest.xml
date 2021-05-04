@@ -115,6 +115,12 @@
     <protected-broadcast android:name="android.app.action.EXIT_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
 
+    <protected-broadcast android:name="android.app.action.USER_ADDED" />
+    <protected-broadcast android:name="android.app.action.USER_REMOVED" />
+    <protected-broadcast android:name="android.app.action.USER_STARTED" />
+    <protected-broadcast android:name="android.app.action.USER_STOPPED" />
+    <protected-broadcast android:name="android.app.action.USER_SWITCHED" />
+
     <protected-broadcast android:name="android.app.action.BUGREPORT_SHARING_DECLINED" />
     <protected-broadcast android:name="android.app.action.BUGREPORT_FAILED" />
     <protected-broadcast android:name="android.app.action.BUGREPORT_SHARE" />
@@ -482,6 +488,8 @@
     <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_FAILED" />
     <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_SUCCEEDED" />
     <protected-broadcast android:name="com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION" />
+    <protected-broadcast android:name="com.android.server.ACTION_PROFILE_OFF_DEADLINE" />
+    <protected-broadcast android:name="com.android.server.ACTION_TURN_PROFILE_ON_NOTIFICATION" />
 
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_ADDED" />
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNLOCKED" />

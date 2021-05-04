@@ -30,6 +30,7 @@ import android.view.ViewConfiguration
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
@@ -106,7 +107,7 @@ constructor(
     private var velocityTracker: VelocityTracker? = null
 
     private val isFalseTouch: Boolean
-        get() = falsingManager.isFalseTouch
+        get() = falsingManager.isFalseTouch(NOTIFICATION_DRAG_DOWN)
     var qsExpanded: Boolean = false
     var pulseExpandAbortListener: Runnable? = null
     var bouncerShowing: Boolean = false

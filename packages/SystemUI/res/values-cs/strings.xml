@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Dvě čárky baterie."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Tři čárky baterie."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Baterie je nabitá."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Procento baterie není známé."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Žádná telefonní síť."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Jedna čárka signálu telefonní sítě."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Dvě čárky signálu telefonní sítě."</string>
@@ -720,7 +721,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu. Konverzace z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> ve výchozím nastavení bublají."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Přitahuje pozornost pomocí plovoucí zkratky k tomuto obsahu."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzací a má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzací, má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>
@@ -1109,4 +1110,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (odpojeno)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Spojení se nezdařilo. Zkuste to znovu."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Spárovat nové zařízení"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problém s načtením měřiče baterie"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Klepnutím zobrazíte další informace"</string>
 </resources>

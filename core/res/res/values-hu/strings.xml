@@ -1785,7 +1785,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2. munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"PIN-kód kérése a rögzítés feloldásához"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"PIN-kód kérése a kitűzés feloldásához"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Feloldási minta kérése a rögzítés feloldásához"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Jelszó kérése a rögzítés feloldásához"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"A rendszergazda által telepítve"</string>

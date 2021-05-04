@@ -618,7 +618,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mEntranceAnimationRunning = false;
             mExitAnimationRunning = false;
             if (!dismissed && !wasMinimizeInteraction) {
-                WindowManagerProxy.applyResizeSplits(snapTarget.position, mSplitLayout);
+                mWindowManagerProxy.applyResizeSplits(snapTarget.position, mSplitLayout);
             }
             if (mCallback != null) {
                 mCallback.onDraggingEnd();
@@ -845,15 +845,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     void enterSplitMode(boolean isHomeStackResizable) {
-        post(() -> {
-            final SurfaceControl sc = getWindowSurfaceControl();
-            if (sc == null) {
-                return;
-            }
-            Transaction t = mTiles.getTransaction();
-            t.show(sc).apply();
-            mTiles.releaseTransaction(t);
-        });
+        setHidden(false);
 
         SnapTarget miniMid =
                 mSplitLayout.getMinimizedSnapAlgorithm(isHomeStackResizable).getMiddleTarget();
@@ -880,16 +872,19 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     void exitSplitMode() {
-        // Reset tile bounds
         final SurfaceControl sc = getWindowSurfaceControl();
         if (sc == null) {
             return;
         }
         Transaction t = mTiles.getTransaction();
-        t.hide(sc).apply();
+        t.hide(sc);
+        mImeController.setDimsHidden(t, true);
+        t.apply();
         mTiles.releaseTransaction(t);
+
+        // Reset tile bounds
         int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
-        WindowManagerProxy.applyResizeSplits(midPos, mSplitLayout);
+        mWindowManagerProxy.applyResizeSplits(midPos, mSplitLayout);
     }
 
     public void setMinimizedDockStack(boolean minimized, long animDuration,

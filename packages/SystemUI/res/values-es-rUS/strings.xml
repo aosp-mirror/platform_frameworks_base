@@ -110,7 +110,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Compartir"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Se canceló la grabación de pantalla"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Se guardó la grabación de pantalla; presiona para verla"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Error al borrar la grabación de pantalla"</string>
+    <string name="screenrecord_delete_error" msgid="2870506119743013588">"No se pudo borrar la grabación de pantalla"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Error al obtener permisos"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Error al iniciar la grabación de pantalla"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opciones de transferencia de archivos por USB"</string>
@@ -128,8 +128,8 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Teléfono"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Asistente voz"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloquear"</string>
-    <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Esperando huella digital"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Desbloquear sin utilizar la huella digital"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Esperando huella dactilar"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Desbloquear sin utilizar la huella dactilar"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Escaneando rostro"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Enviar"</string>
     <string name="accessibility_manage_notification" msgid="582215815790143983">"Administrar notificaciones"</string>
@@ -168,8 +168,8 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Hubo demasiados intentos incorrectos. Se borrará este usuario."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Hubo demasiados intentos incorrectos. Se borrarán este perfil de trabajo y sus datos."</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Descartar"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas digitales"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícono de huella digital"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas dactilares"</string>
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ícono de huella dactilar"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Autenticando tu rostro…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ícono de rostro"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Botón de zoom de compatibilidad"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Dos barras de batería"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Tres barras de batería"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batería completa"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Se desconoce el porcentaje de la batería."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Sin teléfono"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Una barra de teléfono"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Dos barras de teléfono"</string>
@@ -477,7 +478,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Eliminar invitado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Eliminar"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bienvenido nuevamente, invitado."</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"¡Hola de nuevo, invitado!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres retomar la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continuar"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (desconectado)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"No se pudo establecer la conexión. Vuelve a intentarlo."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Vincular dispositivo nuevo"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema al leer el medidor de batería"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Presiona para obtener más información"</string>
 </resources>

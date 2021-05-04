@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="no_upstream_notification_title" msgid="5030042590486713460">"Tethering heeft geen internet"</string>
     <string name="no_upstream_notification_message" msgid="3843613362272973447">"Apparaten kunnen niet worden verbonden"</string>
-    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"Tethering uitschakelen"</string>
-    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"Hotspot of tethering is ingeschakeld"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"Tethering uitzetten"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"Hotspot of tethering staat aan"</string>
     <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"Er kunnen extra kosten voor roaming in rekening worden gebracht."</string>
 </resources>

@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Bateria: dues barres."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Bateria: tres barres."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Bateria carregada."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Es desconeix el percentatge de bateria."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"No hi ha senyal de telèfon."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Senyal de telèfon: una barra"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Senyal de telèfon: dues barres."</string>
@@ -714,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pot sonar o vibrar en funció de la configuració del telèfon"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pot sonar o vibrar en funció de la configuració del telèfon. Les converses de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g> es mostren com a bombolles de manera predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Atrau la teva atenció amb una drecera flotant a aquest contingut."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Es mostra com a bombolla flotant a la part superior de la secció de converses i mostra la foto de perfil a la pantalla de bloqueig"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Es mostra com a bombolla flotant a la part superior de la secció de converses i la foto de perfil apareix a la pantalla de bloqueig"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuració"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet les funcions de converses"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (desconnectat)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"No s\'ha pogut connectar. Torna-ho a provar."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Vincula un dispositiu nou"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Hi ha hagut un problema en llegir el mesurador de la bateria"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toca per obtenir més informació"</string>
 </resources>

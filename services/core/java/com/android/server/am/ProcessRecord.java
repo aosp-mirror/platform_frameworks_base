@@ -59,6 +59,7 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
@@ -162,8 +163,11 @@ class ProcessRecord implements WindowProcessListener {
     int curCapability;          // Current capability flags of this process. For example,
                                 // PROCESS_CAPABILITY_FOREGROUND_LOCATION is one capability.
     int setCapability;          // Last set capability flags.
+    @GuardedBy("mService.mOomAdjuster.mCachedAppOptimizer")
     long lastCompactTime;       // The last time that this process was compacted
+    @GuardedBy("mService.mOomAdjuster.mCachedAppOptimizer")
     int reqCompactAction;       // The most recent compaction action requested for this app.
+    @GuardedBy("mService.mOomAdjuster.mCachedAppOptimizer")
     int lastCompactAction;      // The most recent compaction action performed for this app.
     boolean frozen;             // True when the process is frozen.
     long freezeUnfreezeTime;    // Last time the app was (un)frozen, 0 for never
@@ -352,6 +356,24 @@ class ProcessRecord implements WindowProcessListener {
 
     boolean mReachable; // Whether or not this process is reachable from given process
 
+    /**
+     * The snapshot of {@link #setAdj}, meant to be read by {@link CachedAppOptimizer} only.
+     */
+    @GuardedBy("mService.mOomAdjuster.mCachedAppOptimizer")
+    int mSetAdjForCompact;
+
+    /**
+     * The snapshot of {@link #pid}, meant to be read by {@link CachedAppOptimizer} only.
+     */
+    @GuardedBy("mService.mOomAdjuster.mCachedAppOptimizer")
+    int mPidForCompact;
+
+    /**
+     * This process has been scheduled for a memory compaction.
+     */
+    @GuardedBy("mService.mOomAdjuster.mCachedAppOptimizer")
+    boolean mPendingCompact;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.startUid = startUid;
@@ -447,8 +469,10 @@ class ProcessRecord implements WindowProcessListener {
                 pw.print(" setRaw="); pw.print(setRawAdj);
                 pw.print(" cur="); pw.print(curAdj);
                 pw.print(" set="); pw.println(setAdj);
-        pw.print(prefix); pw.print("lastCompactTime="); pw.print(lastCompactTime);
-                pw.print(" lastCompactAction="); pw.println(lastCompactAction);
+        synchronized (mService.mOomAdjuster.mCachedAppOptimizer) {
+            pw.print(prefix); pw.print("lastCompactTime="); pw.print(lastCompactTime);
+            pw.print(" lastCompactAction="); pw.println(lastCompactAction);
+        }
         pw.print(prefix); pw.print("mCurSchedGroup="); pw.print(mCurSchedGroup);
                 pw.print(" setSchedGroup="); pw.print(setSchedGroup);
                 pw.print(" systemNoUi="); pw.print(systemNoUi);
@@ -672,6 +696,9 @@ class ProcessRecord implements WindowProcessListener {
 
     public void setPid(int _pid) {
         pid = _pid;
+        synchronized (mService.mOomAdjuster.mCachedAppOptimizer) {
+            mPidForCompact = _pid;
+        }
         mWindowProcessController.setPid(pid);
         procStatFile = null;
         shortStringName = null;

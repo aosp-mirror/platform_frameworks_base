@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Baterija dva stupca."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Baterija tri stupca."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Baterija je puna."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Postotak baterije nije poznat."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Nema telefona."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefonski signal jedan stupac."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefonski signal dva stupca."</string>
@@ -967,10 +968,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je isključen"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth je isključen"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"Način Ne ometaj isključen"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Način Ne ometaj uključilo je automatsko pravilo (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Način Ne ometaj uključila je aplikacija (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Način Ne ometaj uključilo je automatsko pravilo ili aplikacija."</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Način Ne uznemiravaj isključen"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Način Ne uznemiravaj uključilo je automatsko pravilo (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Način Ne uznemiravaj uključila je aplikacija (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Način Ne uznemiravaj uključilo je automatsko pravilo ili aplikacija."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"Do <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Zadrži"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Zamijeni"</string>
@@ -1103,4 +1104,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (nije povezano)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Povezivanje nije bilo moguće. Pokušajte ponovo."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Upari novi uređaj"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem s očitavanjem mjerača baterije"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dodirnite za više informacija"</string>
 </resources>

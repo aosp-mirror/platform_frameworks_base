@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"بیٹری کے دو بارز۔"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"بیٹری کے تین بارز۔"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"بیٹری بھری ہے۔"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"بیٹری کی فیصد نامعلوم ہے۔"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"کوئی فون نہیں ہے۔"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"فون کا ایک بار۔"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"فون کے دو بارز۔"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (غیر منسلک ہو گیا)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"منسلک نہیں ہو سکا۔ پھر کوشش کریں۔"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"نئے آلہ کا جوڑا بنائیں"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"آپ کے بیٹری میٹر کو پڑھنے میں دشواری"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"مزید معلومات کے لیے تھپتھپائیں"</string>
 </resources>

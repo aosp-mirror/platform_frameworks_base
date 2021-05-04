@@ -507,9 +507,9 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Дазваляе праграме атрымліваць пакеты, адпраўленыя на ўсе прылады ў сетцы Wi-Fi з дапамогай групавых адрасоў, а не толькі на вашу прыладу Android TV. Праз гэта будзе спажывацца больш энергіі, чым у рэжыме нешматадраснай перадачы."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Дазваляе прыкладанням атрымліваць пакеты, адпраўленыя на ўсе прылады з сеткi Wi-Fi з дапамогай групавых адрасоў, а не толькі на ваш тэлефон. Будзе выкарыстоўвацца больш энергіі, чым у рэжыме нешматадраснай перадачы."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"атрыманне доступу да налад прылады Bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Дазваляе прыкладанням наладжваць лакальны планшэт Bluetooth, выяўляць і падлучаць выдаленыя прылады."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Дазваляе праграме наладжваць лакальны планшэт Bluetooth, выяўляць і спалучаць выдаленыя прылады."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Дазваляе праграме наладжваць канфігурацыю Bluetooth на прыладзе Android TV, а таксама выяўляць аддаленыя прылады і спалучацца з імі."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Дазваляе прыкладанням наладжваць лакальны тэлефон Bluetooth, а таксама знаходзіць выдаленыя прылады i падлучацца да ix."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Дазваляе праграме наладжваць лакальны тэлефон Bluetooth, а таксама знаходзіць выдаленыя прылады i спалучаць ix."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"падключаць да WiMAX i адключаць ад яго"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Дазваляе прыкладанню вызначаць, ці ўключаны WiMAX, і інфармацыю пра любую сетку WiMAX, якая спалучана з iншымi."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"Змяніць стан WiMAX"</string>
@@ -775,7 +775,7 @@
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"Гадавіна"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"Іншае"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"Карыстальніцкая"</string>
-    <string name="emailTypeHome" msgid="1597116303154775999">"Хатні"</string>
+    <string name="emailTypeHome" msgid="1597116303154775999">"Асабістая"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"Працоўная"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"Іншая"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"Мабільны"</string>
@@ -1355,7 +1355,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Тэставы рэжым уключаны"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Каб выключыць тэставы рэжым, скіньце налады да заводскіх значэнняў."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Паслядоўная кансоль уключана"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Паказчык эфектыўнасці змяніўся. Каб выключыць кансоль, праверце загрузчык."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Паказчык прадукцыйнасці змяніўся. Каб выключыць кансоль, праверце загрузчык."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Вадкасць або смецце ў порце USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"Порт USB аўтаматычна адключаны. Каб даведацца больш, націсніце тут."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Порт USB можна выкарыстоўваць"</string>
@@ -1705,7 +1705,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Каб пераключыцца на іншую функцыю, правядзіце ўверх трыма пальцамі і ўтрымлівайце іх на экране."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Павелічэнне"</string>
     <string name="user_switched" msgid="7249833311585228097">"Бягучы карыстальнік <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Пераход да <xliff:g id="NAME">%1$s</xliff:g>..."</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Пераход у рэжым \"<xliff:g id="NAME">%1$s</xliff:g>\"..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> выходзіць з сістэмы…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Уладальнік"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Памылка"</string>

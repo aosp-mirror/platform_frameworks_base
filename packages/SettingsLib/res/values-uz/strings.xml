@@ -154,7 +154,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Foydalanuvchi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Ba’zi birlamchi sozlamalar o‘rnatilgan"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Birlamchi sozlamalar belgilanmagan"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Nutq sintezi sozlamalari"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Matnni nutqqa aylantirish sozlamalari"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Nutq sintezi"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nutq tezligi"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Matnni o‘qish tezligi"</string>
@@ -447,7 +447,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ichida toʻladi"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> ichida toʻladi"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Batareya quvvati muvozanatlanmoqda"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Batareya uchun optimizatsiya"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Noma’lum"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Tezkor quvvat olmoqda"</string>
@@ -548,7 +548,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Qulf o‘rnatish"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Bunga almashish: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Mehmon kiritish"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Mehmon rejimini olib tashlash"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Mehmonni olib tashlash"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Mehmon"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Qurilma standarti"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Yoqilmagan"</string>

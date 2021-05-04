@@ -187,8 +187,8 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public boolean isFalseTouch() {
-        return mInternalFalsingManager.isFalseTouch();
+    public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
+        return mInternalFalsingManager.isFalseTouch(interactionType);
     }
 
     @Override

@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Батерија две цртички."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Батерија три цртички."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Батеријата е полна."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Процентот на батеријата е непознат."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Нема сигнал."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Телефон една цртичка.."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Телефон две цртички."</string>
@@ -512,7 +513,7 @@
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Безгласно"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Известувања"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Избриши ги сите тивки известувања"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Избриши ги сите бесчујни известувања"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Известувањата се паузирани од „Не вознемирувај“"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Започни сега"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Нема известувања"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (исклучен)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Не може да се поврзе. Обидете се повторно."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Спарете нов уред"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Проблем при читањето на мерачот на батеријата"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Допрете за повеќе информации"</string>
 </resources>

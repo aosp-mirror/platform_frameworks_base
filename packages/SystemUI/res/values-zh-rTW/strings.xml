@@ -71,7 +71,7 @@
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"目前登入這部裝置的使用者無法開啟無線偵錯功能。如要使用這項功能，請切換到主要使用者。"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB 連接埠已停用"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"為了避免液體或灰塵導致你的裝置受損，系統已停用 USB 連接埠，因此目前無法偵測任何配件。\n\n系統會在可繼續使用 USB 連接埠時通知你。"</string>
-    <string name="usb_port_enabled" msgid="531823867664717018">"USB 通訊埠已啟用，可偵測充電器和配件"</string>
+    <string name="usb_port_enabled" msgid="531823867664717018">"USB 連接埠已啟用，可偵測充電器和配件"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"啟用 USB 連接埠"</string>
     <string name="learn_more" msgid="4690632085667273811">"瞭解詳情"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"放大為全螢幕"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"電池電量兩格。"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"電池電量三格。"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"電池電量已滿。"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"電池電量不明。"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"沒有電話訊號。"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"電話訊號強度一格。"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"電話訊號強度兩格。"</string>
@@ -419,7 +420,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> 開啟"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> 關閉"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"深色主題"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"省電模式"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"節約耗電量"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"於日落時開啟"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"於日出時關閉"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"開啟時間：<xliff:g id="TIME">%s</xliff:g>"</string>
@@ -766,7 +767,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"電池用量"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"充電時無法使用省電模式"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"省電模式"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"節約耗電量"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"降低效能並限制背景資料傳輸"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> 按鈕"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home 鍵"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (已中斷連線)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"無法連線，請再試一次。"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"配對新裝置"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"讀取電池計量器時發生問題"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"輕觸即可瞭解詳情"</string>
 </resources>
