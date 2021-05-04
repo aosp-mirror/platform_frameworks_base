@@ -30,6 +30,8 @@ import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT;
 import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
 
+import static com.android.systemui.people.PeopleSpaceUtils.STARRED_CONTACT;
+import static com.android.systemui.people.PeopleSpaceUtils.VALID_CONTACT;
 import static com.android.systemui.people.PeopleSpaceUtils.convertDrawableToBitmap;
 import static com.android.systemui.people.PeopleSpaceUtils.getUserId;
 
@@ -39,6 +41,8 @@ import android.app.people.ConversationStatus;
 import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -48,6 +52,7 @@ import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
@@ -57,6 +62,8 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.launcher3.icons.FastBitmapDrawable;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
@@ -142,7 +149,9 @@ public class PeopleTileViewHelper {
     private int mMediumVerticalPadding;
 
     private Context mContext;
+    @Nullable
     private PeopleSpaceTile mTile;
+    private PeopleTileKey mKey;
     private float mDensity;
     private int mAppWidgetId;
     private int mWidth;
@@ -152,10 +161,11 @@ public class PeopleTileViewHelper {
     private Locale mLocale;
     private NumberFormat mIntegerFormat;
 
-    public PeopleTileViewHelper(Context context, PeopleSpaceTile tile,
-            int appWidgetId, Bundle options) {
+    public PeopleTileViewHelper(Context context, @Nullable PeopleSpaceTile tile,
+            int appWidgetId, Bundle options, PeopleTileKey key) {
         mContext = context;
         mTile = tile;
+        mKey = key;
         mAppWidgetId = appWidgetId;
         mDensity = mContext.getResources().getDisplayMetrics().density;
         int display = mContext.getResources().getConfiguration().orientation;
@@ -184,8 +194,19 @@ public class PeopleTileViewHelper {
      * content, then birthdays, then the most recent status, and finally last interaction.
      */
     private RemoteViews getViewForTile() {
-        PeopleTileKey key = new PeopleTileKey(mTile);
-        if (DEBUG) Log.d(TAG, "Creating view for tile key: " + key.toString());
+        if (DEBUG) Log.d(TAG, "Creating view for tile key: " + mKey.toString());
+        if (mTile == null || mTile.isPackageSuspended() || mTile.isUserQuieted()) {
+            if (DEBUG) Log.d(TAG, "Create empty view: " + mTile);
+            return createEmptyView();
+        }
+
+        boolean dndBlockingTileData = isDndBlockingTileData(mTile);
+        if (dndBlockingTileData) {
+            if (DEBUG) Log.d(TAG, "Create DND view: " + mTile.getNotificationPolicyState());
+            // TODO: Create DND view.
+            return createEmptyView();
+        }
+
         if (Objects.equals(mTile.getNotificationCategory(), CATEGORY_MISSED_CALL)) {
             if (DEBUG) Log.d(TAG, "Create missed call view");
             return createMissedCallRemoteViews();
@@ -215,6 +236,58 @@ public class PeopleTileViewHelper {
         }
 
         return createLastInteractionRemoteViews();
+    }
+
+    private boolean isDndBlockingTileData(PeopleSpaceTile tile) {
+        int notificationPolicyState = tile.getNotificationPolicyState();
+        if ((notificationPolicyState & PeopleSpaceTile.SHOW_CONVERSATIONS) != 0) {
+            // Not in DND, or all conversations
+            if (DEBUG) Log.d(TAG, "Tile can show all data: " + tile.getUserName());
+            return false;
+        }
+        if ((notificationPolicyState & PeopleSpaceTile.SHOW_IMPORTANT_CONVERSATIONS) != 0
+                && tile.isImportantConversation()) {
+            if (DEBUG) Log.d(TAG, "Tile can show important: " + tile.getUserName());
+            return false;
+        }
+        if ((notificationPolicyState & PeopleSpaceTile.SHOW_STARRED_CONTACTS) != 0
+                && tile.getContactAffinity() == STARRED_CONTACT) {
+            if (DEBUG) Log.d(TAG, "Tile can show starred: " + tile.getUserName());
+            return false;
+        }
+        if ((notificationPolicyState & PeopleSpaceTile.SHOW_CONTACTS) != 0
+                && (tile.getContactAffinity() == VALID_CONTACT
+                || tile.getContactAffinity() == STARRED_CONTACT)) {
+            if (DEBUG) Log.d(TAG, "Tile can show contacts: " + tile.getUserName());
+            return false;
+        }
+        if (DEBUG) Log.d(TAG, "Tile can show if can bypass DND: " + tile.getUserName());
+        return !tile.canBypassDnd();
+    }
+
+    private RemoteViews createEmptyView() {
+        RemoteViews views = new RemoteViews(mContext.getPackageName(),
+                R.layout.people_tile_empty_layout);
+        Drawable appIcon = getAppBadge(mKey.getPackageName(), mKey.getUserId());
+        Bitmap appIconAsBitmap = convertDrawableToBitmap(appIcon);
+        FastBitmapDrawable drawable = new FastBitmapDrawable(
+                appIconAsBitmap);
+        drawable.setIsDisabled(true);
+        Bitmap convertedBitmap = convertDrawableToBitmap(drawable);
+        views.setImageViewBitmap(R.id.item, convertedBitmap);
+        return views;
+    }
+
+    private Drawable getAppBadge(String packageName, int userId) {
+        Drawable badge = null;
+        try {
+            final ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfoAsUser(
+                    packageName, PackageManager.GET_META_DATA, userId);
+            badge = Utils.getBadgedIcon(mContext, appInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            badge = mContext.getPackageManager().getDefaultActivityIcon();
+        }
+        return badge;
     }
 
     private void setMaxLines(RemoteViews views, boolean showSender) {
@@ -337,6 +410,9 @@ public class PeopleTileViewHelper {
     private RemoteViews setCommonRemoteViewsFields(RemoteViews views,
             int maxAvatarSize) {
         try {
+            if (mTile == null) {
+                return views;
+            }
             boolean isAvailable =
                     mTile.getStatuses() != null && mTile.getStatuses().stream().anyMatch(
                             c -> c.getAvailability() == AVAILABILITY_AVAILABLE);
@@ -367,13 +443,16 @@ public class PeopleTileViewHelper {
                             | Intent.FLAG_ACTIVITY_CLEAR_TASK
                             | Intent.FLAG_ACTIVITY_NO_HISTORY
                             | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, mTile.getId());
+            activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, mKey.getShortcutId());
             activityIntent.putExtra(
-                    PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, mTile.getPackageName());
+                    PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, mKey.getPackageName());
             activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_USER_HANDLE,
-                    mTile.getUserHandle());
-            activityIntent.putExtra(
-                    PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY, mTile.getNotificationKey());
+                    new UserHandle(mKey.getUserId()));
+            if (mTile != null) {
+                activityIntent.putExtra(
+                        PeopleSpaceWidgetProvider.EXTRA_NOTIFICATION_KEY,
+                        mTile.getNotificationKey());
+            }
             views.setOnClickPendingIntent(R.id.item, PendingIntent.getActivity(
                     mContext,
                     mAppWidgetId,
@@ -727,6 +806,9 @@ public class PeopleTileViewHelper {
                         c -> c.getActivity() == ACTIVITY_NEW_STORY);
 
         Icon icon = tile.getUserIcon();
+        if (icon == null) {
+            return null;
+        }
         PeopleStoryIconFactory storyIcon = new PeopleStoryIconFactory(context,
                 context.getPackageManager(),
                 IconDrawableFactory.newInstance(context, false),
