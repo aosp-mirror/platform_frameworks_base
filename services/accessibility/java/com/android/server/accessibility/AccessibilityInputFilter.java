@@ -16,6 +16,9 @@
 
 package com.android.server.accessibility;
 
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+
 import android.annotation.MainThread;
 import android.content.Context;
 import android.graphics.Region;
@@ -557,12 +560,16 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         MagnificationGestureHandler magnificationGestureHandler;
         if (mAms.getMagnificationMode(displayId)
                 == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
-            magnificationGestureHandler = new WindowMagnificationGestureHandler(displayContext,
+            final Context uiContext = displayContext.createWindowContext(
+                    TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, null /* options */);
+            magnificationGestureHandler = new WindowMagnificationGestureHandler(uiContext,
                     mAms.getWindowMagnificationMgr(), mAms.getMagnificationController(),
                     detectControlGestures, triggerable,
                     displayId);
         } else {
-            magnificationGestureHandler = new FullScreenMagnificationGestureHandler(displayContext,
+            final Context uiContext = displayContext.createWindowContext(
+                    TYPE_MAGNIFICATION_OVERLAY, null /* options */);
+            magnificationGestureHandler = new FullScreenMagnificationGestureHandler(uiContext,
                     mAms.getFullScreenMagnificationController(), mAms.getMagnificationController(),
                     detectControlGestures, triggerable,
                     new WindowMagnificationPromptController(displayContext, mUserId), displayId);
