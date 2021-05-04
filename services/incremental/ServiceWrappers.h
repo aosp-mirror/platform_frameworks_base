@@ -51,6 +51,7 @@ public:
     virtual ~VoldServiceWrapper() = default;
     virtual binder::Status mountIncFs(
             const std::string& backingPath, const std::string& targetDir, int32_t flags,
+            const std::string& sysfsName,
             os::incremental::IncrementalFileSystemControlParcel* result) const = 0;
     virtual binder::Status unmountIncFs(const std::string& dir) const = 0;
     virtual binder::Status bindMount(const std::string& sourceDir,
@@ -79,6 +80,7 @@ public:
     using UniqueFd = incfs::UniqueFd;
     using WaitResult = incfs::WaitResult;
     using Features = incfs::Features;
+    using Metrics = incfs::Metrics;
 
     using ExistingMountCallback = android::base::function_ref<
             void(std::string_view root, std::string_view backingDir,
@@ -124,6 +126,7 @@ public:
             const = 0;
     virtual ErrorCode forEachFile(const Control& control, FileCallback cb) const = 0;
     virtual ErrorCode forEachIncompleteFile(const Control& control, FileCallback cb) const = 0;
+    virtual std::optional<Metrics> getMetrics(std::string_view sysfsName) const = 0;
 };
 
 class AppOpsManagerWrapper {
