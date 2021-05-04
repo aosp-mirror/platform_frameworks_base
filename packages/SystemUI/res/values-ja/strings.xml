@@ -92,14 +92,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"キャプチャ範囲を拡大"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"スクリーンショットを閉じます"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"スクリーンショットのプレビュー"</string>
-    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
-    <skip />
-    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
-    <skip />
-    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
-    <skip />
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"上部の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"下部の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"左の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"右の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"スクリーン レコーダー"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"画面の録画を処理しています"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
@@ -141,6 +137,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"電話"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"音声アシスト"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"ロック解除"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"デバイスはロックされています"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"指紋を待っています"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"指紋認証を使用せずにロック解除"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"顔のスキャン"</string>
@@ -612,15 +609,15 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"固定を解除するまで常に表示されます。上にスワイプして長押しすると固定が解除されます。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"固定を解除するまで画面が常に表示されるようになります。[最近] を押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"固定を解除するまで画面が常に表示されるようになります。[ホーム] を押し続けると固定が解除されます。"</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人データ（連絡先やメールの内容など）にアクセスできる可能性があります。"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人データ（連絡先やメールの内容など）にアクセスされる可能性があります。"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"固定したアプリが他のアプリを開く可能性があります。"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"このアプリの固定を解除するには [戻る] ボタンと [最近] ボタンを長押しします"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"このアプリの固定を解除するには [戻る] ボタンと [ホーム] ボタンを長押しします"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"このアプリの固定を解除するには、上にスワイプして長押しします"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"いいえ"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"固定したアプリ"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"固定を解除したアプリ"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"アプリを固定しました"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"アプリの固定を解除しました"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>を非表示にしますか？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"次回、設定でONにすると再表示されます。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"非表示"</string>
@@ -669,10 +666,8 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"イーサネット"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"アラーム"</string>
     <string name="wallet_title" msgid="5369767670735827105">"ウォレット"</string>
-    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
-    <skip />
-    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
-    <skip />
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"すべて表示"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"ロックを解除して支払う"</string>
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"準備完了"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"お支払いの設定"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ロックを解除して使用"</string>
@@ -748,7 +743,7 @@
     <string name="notification_channel_summary_priority" msgid="4592979359953954258">"優先モードが ON の場合でも、常に通知の一番上に表示されます"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="5256226572739882190">"優先度の高い会話"</string>
-    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> は会話機能に対応していません"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>は会話機能に対応していません"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"このグループの通知はここでは設定できません"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
@@ -790,7 +785,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知スヌーズ設定"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"リマインダーの設定"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"設定"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"元に戻す"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"元に戻す"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"スヌーズ: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d時間</item>
@@ -830,6 +825,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"NumLock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"テンキーの <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"添付ファイルを削除"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"システム"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ホーム"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"最近"</string>
@@ -1005,11 +1001,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"アプリは<xliff:g id="TYPES_LIST">%s</xliff:g>を使用しています。"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"、 "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 、 "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> は <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> を使用しています"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> は最近 <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> を使用しました"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"（エンタープライズ版）"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> が使用中"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> が最近使用"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"（仕事）"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"通話"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"（<xliff:g id="ATTRIBUTION">%s</xliff:g> 経由）"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"（<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> 経由）"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"カメラ"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"現在地情報"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"マイク"</string>
@@ -1048,8 +1044,10 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"右下に移動"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"端に移動して非表示"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"端から移動して表示"</string>
+    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"デバイス コントロール"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"接続済みデバイスのコントロールを追加します"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"コネクテッド デバイスのコントロールを追加します"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"デバイス コントロールの設定"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"コントロールにアクセスするには、電源ボタンを長押しします"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"コントロールを追加するアプリの選択"</string>
@@ -1065,7 +1063,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"お気に入りから削除"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ポジション <xliff:g id="NUMBER">%d</xliff:g> に移動"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタン メニューからアクセスするコントロールを選択する"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタンメニューからアクセスするコントロールを選択"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"変更が保存されていません"</string>
@@ -1089,11 +1087,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"スワイプすると他の構造が表示されます"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"候補を読み込んでいます"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"メディア"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"現在のセッションを非表示にします。"</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"現在のセッションは非表示にできません。"</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"このメディア セッションを非表示にしますか？"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"現在のメディア セッションは非表示にできません。"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"閉じる"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"再開"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
+    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"無効: アプリをご確認ください"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"エラー。再試行しています…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"見つかりませんでした"</string>
@@ -1126,11 +1126,11 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>前まで"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>以上前"</string>
     <string name="birthday_status" msgid="2596961629465396761">"誕生日"</string>
-    <string name="birthday_status_content_description" msgid="7677415209545817153">"今日は <xliff:g id="NAME">%1$s</xliff:g> さんのお誕生日です"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"今日は <xliff:g id="NAME">%1$s</xliff:g> さんのお誕生日です"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"もうすぐ誕生日"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"まもなく <xliff:g id="NAME">%1$s</xliff:g> さんのお誕生日です"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"まもなく <xliff:g id="NAME">%1$s</xliff:g> さんのお誕生日です"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"記念日"</string>
-    <string name="anniversary_status_content_description" msgid="6214503393960662875">"今日は <xliff:g id="NAME">%1$s</xliff:g> さんの記念日です"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"今日は <xliff:g id="NAME">%1$s</xliff:g> さんの記念日です"</string>
     <string name="location_status" msgid="1294990572202541812">"現在地を共有中"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> さんが位置情報を共有しています"</string>
     <string name="new_story_status" msgid="9012195158584846525">"新しいストーリー"</string>
@@ -1150,4 +1150,9 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"電池残量の読み込み中に問題が発生しました"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"タップすると詳細が表示されます"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"アラーム未設定"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"指紋認証センサー"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"指紋認証センサーは無効です"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"認証"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"デバイスを入力"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"指紋を使って開いてください"</string>
 </resources>

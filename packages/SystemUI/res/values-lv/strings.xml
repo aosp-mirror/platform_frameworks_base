@@ -92,14 +92,10 @@
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Tvert vairāk"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Nerādīt ekrānuzņēmumu"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekrānuzņēmuma priekšskatījums"</string>
-    <!-- no translation found for screenshot_top_boundary_pct (2520148599096479332) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary_pct (3880821519814946478) -->
-    <skip />
-    <!-- no translation found for screenshot_left_boundary_pct (8502323556112287469) -->
-    <skip />
-    <!-- no translation found for screenshot_right_boundary_pct (1201150713021779321) -->
-    <skip />
+    <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Augšmala: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
+    <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Apakšmala: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
+    <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Kreisā mala: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
+    <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Labā mala: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrāna ierakstītājs"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekrāna ieraksta apstrāde"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Aktīvs paziņojums par ekrāna ierakstīšanas sesiju"</string>
@@ -141,6 +137,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Tālruņa numurs"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Balss palīgs"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Atbloķēt"</string>
+    <string name="accessibility_lock_icon" msgid="661492842417875775">"Ierīce ir bloķēta"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Tiek gaidīts pirksta nospiedums."</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="1811563723195375298">"Atbloķēt, neizmantojot pirksta nospiedumu"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Sejas skenēšana"</string>
@@ -672,10 +669,8 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Tīkls Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Signāls"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Maks"</string>
-    <!-- no translation found for wallet_app_button_label (7123784239111190992) -->
-    <skip />
-    <!-- no translation found for wallet_action_button_label_unlock (8663239748726774487) -->
-    <skip />
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"Rādīt visu"</string>
+    <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Lai maksātu, atbloķējiet ekrānu"</string>
     <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Gatavs"</string>
     <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Maksājuma veida iestatīšana"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lai izmantotu, atbloķējiet ekrānu"</string>
@@ -793,7 +788,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"paziņojumu atlikšanas opcijas"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Atgādināt"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"Iestatījumi"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"ATSAUKT"</string>
+    <string name="snooze_undo" msgid="2738844148845992103">"Atsaukt"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Atlikts: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="zero">%d stundas</item>
@@ -835,6 +830,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Ievietošanas taustiņš"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Ciparslēga taustiņš"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Cipartastatūra <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Noņemt pielikumu"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sistēma"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Sākums"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Pēdējie"</string>
@@ -1010,11 +1006,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Lietojumprogrammas izmanto šādas funkcijas: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" un "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> pašlaik izmanto šādu darbību: <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> nesen izmantoja šādu darbību: <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(uzņēmumiem)"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"Tiek izmantots lietotnē <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"Nesen tika izmantots lietotnē <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(darbs)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Tālruņa zvans"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(izmantojot lietotni <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(izmantojot: <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"atrašanās vieta"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofons"</string>
@@ -1053,6 +1049,8 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Pārvietot apakšpusē pa labi"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Pārvietot uz malu un paslēpt"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Pārvietot no malas un parādīt"</string>
+    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"Ierīču vadīklas"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Pievienojiet vadīklas pievienotajām ierīcēm"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Ierīču vadīklu iestatīšana"</string>
@@ -1095,11 +1093,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Velciet, lai skatītu citus vienumus"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Notiek ieteikumu ielāde"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multivide"</string>
-    <string name="controls_media_close_session" msgid="3957093425905475065">"Paslēpiet pašreizējo sesiju."</string>
-    <string name="controls_media_active_session" msgid="1984383994625845642">"Pašreizējo sesiju nevar paslēpt"</string>
+    <string name="controls_media_close_session" msgid="1193000643003066508">"Vai paslēpt šo multivides sesiju?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Pašreizējo multivides sesiju nevar paslēpt."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Nerādīt"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Atsākt"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Iestatījumi"</string>
+    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktīva, pārbaudiet lietotni"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Radās kļūda. Mēģina vēlreiz…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Netika atrasta"</string>
@@ -1132,11 +1132,11 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"Pirms mazāk nekā: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Pirms vairāk nekā: <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Dzimšanas diena"</string>
-    <string name="birthday_status_content_description" msgid="7677415209545817153">"Ir lietotāja <xliff:g id="NAME">%1$s</xliff:g> dzimšanas diena"</string>
+    <string name="birthday_status_content_description" msgid="682836371128282925">"Ir lietotāja <xliff:g id="NAME">%1$s</xliff:g> dzimšanas diena"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Gaidāma dzimšanas diena"</string>
-    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"Drīz būs lietotāja <xliff:g id="NAME">%1$s</xliff:g> dzimšanas diena"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="2165036816803797148">"Drīz būs lietotāja <xliff:g id="NAME">%1$s</xliff:g> dzimšanas diena"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Gadadiena"</string>
-    <string name="anniversary_status_content_description" msgid="6214503393960662875">"Ir lietotāja <xliff:g id="NAME">%1$s</xliff:g> gadadiena"</string>
+    <string name="anniversary_status_content_description" msgid="8212171790843327442">"Ir lietotāja <xliff:g id="NAME">%1$s</xliff:g> jubileja"</string>
     <string name="location_status" msgid="1294990572202541812">"Tiek kopīgota vieta…"</string>
     <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> kopīgo atrašanās vietu"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Jauns raksts"</string>
@@ -1156,4 +1156,9 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Nevar iegūt informāciju par akumulatora uzlādes līmeni."</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Pieskarieties, lai iegūtu plašāku informāciju."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nav iestatīts signāls"</string>
+    <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Pirksta nospieduma sensors"</string>
+    <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Pirksta nospieduma sensors ir atspējots"</string>
+    <string name="accessibility_authenticate_hint" msgid="798914151813205721">"veiktu autentificēšanu"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"izmantotu ierīci"</string>
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Atvēršanai izmantojiet pirksta nospiedumu"</string>
 </resources>
