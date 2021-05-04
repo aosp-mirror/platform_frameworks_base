@@ -3708,6 +3708,12 @@ public class NotificationPanelViewController extends PanelViewController {
 
         @Override
         public void flingTopOverscroll(float velocity, boolean open) {
+            // in split shade mode we want to expand/collapse QS only when touch happens within QS
+            if (mShouldUseSplitNotificationShade
+                    && (mInitialTouchX < mQsFrame.getX()
+                        || mInitialTouchX > mQsFrame.getX() + mQsFrame.getWidth())) {
+                return;
+            }
             mLastOverscroll = 0f;
             mQsExpansionFromOverscroll = false;
             setQsExpansion(mQsExpansionHeight);
