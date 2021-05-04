@@ -49,9 +49,9 @@ namespace android::os::incremental {
 
 class MockVoldService : public VoldServiceWrapper {
 public:
-    MOCK_CONST_METHOD4(mountIncFs,
+    MOCK_CONST_METHOD5(mountIncFs,
                        binder::Status(const std::string& backingPath, const std::string& targetDir,
-                                      int32_t flags,
+                                      int32_t flags, const std::string& sysfsName,
                                       IncrementalFileSystemControlParcel* _aidl_return));
     MOCK_CONST_METHOD1(unmountIncFs, binder::Status(const std::string& dir));
     MOCK_CONST_METHOD2(bindMount,
@@ -62,16 +62,16 @@ public:
                            bool, bool));
 
     void mountIncFsFails() {
-        ON_CALL(*this, mountIncFs(_, _, _, _))
+        ON_CALL(*this, mountIncFs(_, _, _, _, _))
                 .WillByDefault(
                         Return(binder::Status::fromExceptionCode(1, String8("failed to mount"))));
     }
     void mountIncFsInvalidControlParcel() {
-        ON_CALL(*this, mountIncFs(_, _, _, _))
+        ON_CALL(*this, mountIncFs(_, _, _, _, _))
                 .WillByDefault(Invoke(this, &MockVoldService::getInvalidControlParcel));
     }
     void mountIncFsSuccess() {
-        ON_CALL(*this, mountIncFs(_, _, _, _))
+        ON_CALL(*this, mountIncFs(_, _, _, _, _))
                 .WillByDefault(Invoke(this, &MockVoldService::incFsSuccess));
     }
     void bindMountFails() {
@@ -93,12 +93,14 @@ public:
     }
     binder::Status getInvalidControlParcel(const std::string& imagePath,
                                            const std::string& targetDir, int32_t flags,
+                                           const std::string& sysfsName,
                                            IncrementalFileSystemControlParcel* _aidl_return) {
         _aidl_return = {};
         return binder::Status::ok();
     }
     binder::Status incFsSuccess(const std::string& imagePath, const std::string& targetDir,
-                                int32_t flags, IncrementalFileSystemControlParcel* _aidl_return) {
+                                int32_t flags, const std::string& sysfsName,
+                                IncrementalFileSystemControlParcel* _aidl_return) {
         _aidl_return->pendingReads.reset(base::unique_fd(dup(STDIN_FILENO)));
         _aidl_return->cmd.reset(base::unique_fd(dup(STDIN_FILENO)));
         _aidl_return->log.reset(base::unique_fd(dup(STDIN_FILENO)));
@@ -414,6 +416,7 @@ public:
                                  const std::vector<PerUidReadTimeouts>& perUidReadTimeouts));
     MOCK_CONST_METHOD2(forEachFile, ErrorCode(const Control& control, FileCallback cb));
     MOCK_CONST_METHOD2(forEachIncompleteFile, ErrorCode(const Control& control, FileCallback cb));
+    MOCK_CONST_METHOD1(getMetrics, std::optional<Metrics>(std::string_view path));
 
     MockIncFs() {
         ON_CALL(*this, listExistingMounts(_)).WillByDefault(Return());
