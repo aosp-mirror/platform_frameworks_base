@@ -1,12 +1,24 @@
+<!--
+    Copyright (C) 2021 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="24dp"
-        android:height="24dp"
-        android:viewportWidth="24.0"
-        android:viewportHeight="24.0">
+        android:width="16dp"
+        android:height="16dp"
+        android:viewportWidth="16.0"
+        android:viewportHeight="16.0">
     <path
         android:fillColor="#FF000000"
-        android:pathData="M20.17,14.84l-3.26,-0.65c-0.33,-0.07 -0.67,0.04 -0.9,0.27l-2.62,2.62c-2.75,-1.49 -5.01,-3.75 -6.5,-6.5l2.62,-2.62c0.24,-0.24 0.34,-0.58 0.27,-0.9L9.13,3.8C9.04,3.34 8.63,3 8.15,3H4C3.44,3 2.97,3.47 3,4.03c0.17,2.91 1.04,5.63 2.43,8.01c1.57,2.69 3.81,4.93 6.5,6.5c2.38,1.39 5.1,2.26 8.01,2.43c0.56,0.03 1.03,-0.44 1.03,-1v-4.15C20.97,15.34 20.64,14.93 20.17,14.84z"/>
-    <path
-        android:fillColor="#FF000000"
-        android:pathData="M22,3.41L20.59,2L18.5,4.09L16.41,2L15,3.41l2.09,2.09L15,7.59L16.41,9l2.09,-2.08L20.59,9L22,7.59L19.92,5.5L22,3.41z"/>
+        android:pathData="M6.52,11.37c0.46,0.37 0.94,0.7 1.45,0.99c1.59,0.93 3.4,1.51 5.34,1.62C13.69,14 14,13.69 14,13.31v-2.77c0,-0.32 -0.23,-0.59 -0.53,-0.65l-2.17,-0.43c-0.22,-0.05 -0.45,0.03 -0.6,0.18l-1.75,1.75c-0.52,-0.28 -1.01,-0.61 -1.48,-0.97l7.61,-7.61l-0.95,-0.94L1.87,14.13l0.94,0.94L6.52,11.37L6.52,11.37zM5.59,8.55C5.22,8.08 4.89,7.58 4.61,7.05l1.75,-1.75c0.16,-0.16 0.23,-0.39 0.18,-0.6L6.1,2.53C6.04,2.23 5.77,2 5.45,2H2.68C2.31,2 1.99,2.31 2.01,2.69c0.11,1.94 0.69,3.75 1.62,5.34c0.3,0.51 0.64,1.01 1.01,1.47L5.59,8.55L5.59,8.55z"/>
 </vector>
