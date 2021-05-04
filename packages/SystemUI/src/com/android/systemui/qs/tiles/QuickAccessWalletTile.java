@@ -175,7 +175,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         } else {
             state.state = Tile.STATE_UNAVAILABLE;
         }
-        state.sideViewDrawable = isDeviceLocked ? null : mCardViewDrawable;
+        state.sideViewCustomDrawable = isDeviceLocked ? null : mCardViewDrawable;
     }
 
     @Override

@@ -36,10 +36,17 @@ class CustomizeTileView(
             secondaryLabel.visibility = getVisibilityState(secondaryLabel.text)
         }
 
+    var showSideView = true
+        set(value) {
+            field = value
+            if (!showSideView) sideView.visibility = GONE
+        }
+
     override fun handleStateChanged(state: QSTile.State) {
         super.handleStateChanged(state)
         showRippleEffect = false
         secondaryLabel.visibility = getVisibilityState(state.secondaryLabel)
+        if (!showSideView) sideView.visibility = GONE
     }
 
     private fun getVisibilityState(text: CharSequence?): Int {

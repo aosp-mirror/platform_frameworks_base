@@ -17,9 +17,11 @@
 package com.android.systemui.qs.tileimpl
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
 import android.text.TextUtils
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -38,14 +40,20 @@ class QSTileViewImplTest : SysuiTestCase() {
 
     @Mock
     private lateinit var iconView: QSIconView
+    @Mock
+    private lateinit var customDrawable: Drawable
 
     private lateinit var tileView: FakeTileView
+    private lateinit var customDrawableView: View
+    private lateinit var chevronView: View
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
         tileView = FakeTileView(context, iconView, false)
+        customDrawableView = tileView.requireViewById(R.id.customDrawable)
+        chevronView = tileView.requireViewById(R.id.chevron)
     }
 
     @Test
@@ -143,6 +151,71 @@ class QSTileViewImplTest : SysuiTestCase() {
         assertThat(state.secondaryLabel as CharSequence).isEqualTo(
             context.getString(R.string.switch_bar_on)
         )
+    }
+
+    @Test
+    fun testShowCustomDrawableViewBooleanState() {
+        val state = QSTile.BooleanState()
+        state.sideViewCustomDrawable = customDrawable
+
+        tileView.changeState(state)
+
+        assertThat(customDrawableView.visibility).isEqualTo(View.VISIBLE)
+        assertThat(chevronView.visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun testShowCustomDrawableViewNonBooleanState() {
+        val state = QSTile.State()
+        state.sideViewCustomDrawable = customDrawable
+
+        tileView.changeState(state)
+
+        assertThat(customDrawableView.visibility).isEqualTo(View.VISIBLE)
+        assertThat(chevronView.visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun testShowCustomDrawableViewBooleanStateForceChevron() {
+        val state = QSTile.BooleanState()
+        state.sideViewCustomDrawable = customDrawable
+        state.forceExpandIcon = true
+
+        tileView.changeState(state)
+
+        assertThat(customDrawableView.visibility).isEqualTo(View.VISIBLE)
+        assertThat(chevronView.visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun testShowChevronNonBooleanState() {
+        val state = QSTile.State()
+
+        tileView.changeState(state)
+
+        assertThat(customDrawableView.visibility).isEqualTo(View.GONE)
+        assertThat(chevronView.visibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun testShowChevronBooleanStateForcheShow() {
+        val state = QSTile.BooleanState()
+        state.forceExpandIcon = true
+
+        tileView.changeState(state)
+
+        assertThat(customDrawableView.visibility).isEqualTo(View.GONE)
+        assertThat(chevronView.visibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun testNoImageShown() {
+        val state = QSTile.BooleanState()
+
+        tileView.changeState(state)
+
+        assertThat(customDrawableView.visibility).isEqualTo(View.GONE)
+        assertThat(chevronView.visibility).isEqualTo(View.GONE)
     }
 
     class FakeTileView(

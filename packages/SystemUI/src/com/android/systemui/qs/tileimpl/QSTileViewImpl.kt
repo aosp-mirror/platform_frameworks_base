@@ -72,10 +72,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val colorLabelUnavailable =
             Utils.getColorAttrDefaultColor(context, android.R.attr.textColorTertiary)
 
-    private val sideView = ImageView(context)
     private lateinit var label: TextView
     protected lateinit var secondaryLabel: TextView
     private lateinit var labelContainer: IgnorableChildLinearLayout
+    protected lateinit var sideView: ViewGroup
+    private lateinit var customDrawableView: ImageView
+    private lateinit var chevronView: ImageView
 
     protected var showRippleEffect = true
 
@@ -112,22 +114,15 @@ open class QSTileViewImpl @JvmOverloads constructor(
         addView(_icon, LayoutParams(iconSize, iconSize))
 
         createAndAddLabels()
-
-        sideView.visibility = GONE
-        val sideViewLayoutParams = LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = Gravity.CENTER_VERTICAL
-            marginStart = resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
-        }
-        addView(sideView, sideViewLayoutParams)
-        sideView.adjustViewBounds = true
-        sideView.scaleType = ImageView.ScaleType.FIT_CENTER
+        createAndAddSideView()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
+        updateResources()
+    }
+
+    fun updateResources() {
         FontSizeUtils.updateFontSize(label, R.dimen.qs_tile_text_size)
         FontSizeUtils.updateFontSize(secondaryLabel, R.dimen.qs_tile_text_size)
 
@@ -141,12 +136,23 @@ open class QSTileViewImpl @JvmOverloads constructor(
         val startPadding = resources.getDimensionPixelSize(R.dimen.qs_tile_start_padding)
         setPaddingRelative(startPadding, padding, padding, padding)
 
-        val labelMargin = context.resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
+        val labelMargin = resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
         (labelContainer.layoutParams as MarginLayoutParams).apply {
             marginStart = labelMargin
         }
+
         (sideView.layoutParams as MarginLayoutParams).apply {
             marginStart = labelMargin
+        }
+        (chevronView.layoutParams as MarginLayoutParams).apply {
+            height = iconSize
+            width = iconSize
+        }
+
+        val endMargin = resources.getDimensionPixelSize(R.dimen.qs_drawable_end_margin)
+        (customDrawableView.layoutParams as MarginLayoutParams).apply {
+            height = iconSize
+            marginEnd = endMargin
         }
     }
 
@@ -162,6 +168,14 @@ open class QSTileViewImpl @JvmOverloads constructor(
         label.setTextColor(getLabelColor(0)) // Default state
         secondaryLabel.setTextColor(getSecondaryLabelColor(0))
         addView(labelContainer)
+    }
+
+    private fun createAndAddSideView() {
+        sideView = LayoutInflater.from(context)
+                .inflate(R.layout.qs_tile_side_icon, this, false) as ViewGroup
+        customDrawableView = sideView.requireViewById(R.id.customDrawable)
+        chevronView = sideView.requireViewById(R.id.chevron)
+        addView(sideView)
     }
 
     fun createTileBackground(): Drawable {
@@ -376,20 +390,28 @@ open class QSTileViewImpl @JvmOverloads constructor(
             secondaryLabel.setTextColor(getSecondaryLabelColor(state.state))
         }
 
-        label.isEnabled = !state.disabledByPolicy
-
+        // Right side icon
         loadSideViewDrawableIfNecessary(state)
+        chevronView.imageTintList = ColorStateList.valueOf(getSecondaryLabelColor(state.state))
+
+        label.isEnabled = !state.disabledByPolicy
 
         lastState = state.state
     }
 
     private fun loadSideViewDrawableIfNecessary(state: QSTile.State) {
-        if (state.sideViewDrawable != null) {
-            sideView.setImageDrawable(state.sideViewDrawable)
-            sideView.visibility = View.VISIBLE
+        if (state.sideViewCustomDrawable != null) {
+            customDrawableView.setImageDrawable(state.sideViewCustomDrawable)
+            customDrawableView.visibility = VISIBLE
+            chevronView.visibility = GONE
+        } else if (state !is BooleanState || state.forceExpandIcon) {
+            customDrawableView.setImageDrawable(null)
+            customDrawableView.visibility = GONE
+            chevronView.visibility = VISIBLE
         } else {
-            sideView.setImageDrawable(null)
-            sideView.visibility = GONE
+            customDrawableView.setImageDrawable(null)
+            customDrawableView.visibility = GONE
+            chevronView.visibility = GONE
         }
     }
 
