@@ -319,7 +319,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             final Icon icon = si.getIcon();
             if (icon != null && icon.getType() != Icon.TYPE_BITMAP
-                    && icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
+                    && icon.getType() != Icon.TYPE_ADAPTIVE_BITMAP) {
                 continue;
             }
             if (icon == null && !si.hasIconFile()) {
