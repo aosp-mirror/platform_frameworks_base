@@ -20,6 +20,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
+import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.Utils
@@ -156,6 +157,13 @@ class MediaCarouselController @Inject constructor(
         }
     }
 
+    var visibleToUser: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+            }
+        }
+
     init {
         mediaFrame = inflateMediaCarousel()
         mediaCarousel = mediaFrame.requireViewById(R.id.media_carousel_scroller)
@@ -203,6 +211,9 @@ class MediaCarouselController @Inject constructor(
             override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
                 Log.d(TAG, "My Smartspace media update is here")
                 addSmartspaceMediaRecommendations(key, data)
+                if (visibleToUser) {
+                    logSmartspaceImpression()
+                }
             }
 
             override fun onMediaDataRemoved(key: String) {
@@ -565,6 +576,29 @@ class MediaCarouselController @Inject constructor(
             mediaCarousel.layout(0, 0, width, mediaCarousel.measuredHeight)
             // Update the padding after layout; view widths are used in RTL to calculate scrollX
             mediaCarouselScrollHandler.playerWidthPlusPadding = playerWidthPlusPadding
+        }
+    }
+
+    /**
+     * Log the user impression for media card.
+     */
+    fun logSmartspaceImpression() {
+        MediaPlayerData.players().forEach {
+            // Log every impression of media recommendation card since it will only be shown
+            // for 1 minute after each connection.
+            if (it.recommendationViewHolder?.recommendations?.visibility == View.VISIBLE) {
+                /* ktlint-disable max-line-length */
+                SysUiStatsLog.write(SysUiStatsLog.SMARTSPACE_CARD_REPORTED,
+                        800, // SMARTSPACE_CARD_SEEN
+                        it.getInstanceId(),
+                        SysUiStatsLog.SMART_SPACE_CARD_REPORTED__CARD_TYPE__HEADPHONE_MEDIA_RECOMMENDATIONS,
+                        it.getSurfaceForSmartspaceLogging(),
+                        /* rank */ 0,
+                        /* cardinality */ 1)
+                /* ktlint-disable max-line-length */
+            }
+
+            // TODO(shijieru): add logging for media control card
         }
     }
 }
