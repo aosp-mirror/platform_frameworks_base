@@ -81,6 +81,7 @@ public:
     using WaitResult = incfs::WaitResult;
     using Features = incfs::Features;
     using Metrics = incfs::Metrics;
+    using LastReadError = incfs::LastReadError;
 
     using ExistingMountCallback = android::base::function_ref<
             void(std::string_view root, std::string_view backingDir,
@@ -127,6 +128,7 @@ public:
     virtual ErrorCode forEachFile(const Control& control, FileCallback cb) const = 0;
     virtual ErrorCode forEachIncompleteFile(const Control& control, FileCallback cb) const = 0;
     virtual std::optional<Metrics> getMetrics(std::string_view sysfsName) const = 0;
+    virtual std::optional<LastReadError> getLastReadError(const Control& control) const = 0;
 };
 
 class AppOpsManagerWrapper {
