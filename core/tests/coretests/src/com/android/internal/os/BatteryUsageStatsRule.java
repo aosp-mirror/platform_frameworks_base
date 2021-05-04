@@ -27,7 +27,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
 import android.util.SparseArray;
@@ -201,16 +200,6 @@ public class BatteryUsageStatsRule implements TestRule {
         for (UidBatteryConsumer ubc : mBatteryUsageStats.getUidBatteryConsumers()) {
             if (ubc.getUid() == uid) {
                 return ubc;
-            }
-        }
-        return null;
-    }
-
-    public SystemBatteryConsumer getSystemBatteryConsumer(
-            @SystemBatteryConsumer.DrainType int drainType) {
-        for (SystemBatteryConsumer sbc : mBatteryUsageStats.getSystemBatteryConsumers()) {
-            if (sbc.getDrainType() == drainType) {
-                return sbc;
             }
         }
         return null;

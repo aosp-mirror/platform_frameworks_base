@@ -37,11 +37,14 @@ public class BatteryChargeCalculator extends PowerCalculator {
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        final double dischargedPowerLowerBoundMah =
+                batteryStats.getLowDischargeAmountSinceCharge() * mBatteryCapacity / 100;
+        final double dischargedPowerUpperBoundMah =
+                batteryStats.getHighDischargeAmountSinceCharge() * mBatteryCapacity / 100;
         builder.setDischargePercentage(
                         batteryStats.getDischargeAmount(BatteryStats.STATS_SINCE_CHARGED))
-                .setDischargedPowerRange(
-                        batteryStats.getLowDischargeAmountSinceCharge() * mBatteryCapacity / 100,
-                        batteryStats.getHighDischargeAmountSinceCharge() * mBatteryCapacity / 100);
+                .setDischargedPowerRange(dischargedPowerLowerBoundMah,
+                        dischargedPowerUpperBoundMah);
 
         final long batteryTimeRemainingMs = batteryStats.computeBatteryTimeRemaining(rawRealtimeUs);
         if (batteryTimeRemainingMs != -1) {
@@ -52,6 +55,11 @@ public class BatteryChargeCalculator extends PowerCalculator {
         if (chargeTimeRemainingMs != -1) {
             builder.setChargeTimeRemainingMs(chargeTimeRemainingMs / 1000);
         }
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setConsumedPower(
+                        (dischargedPowerLowerBoundMah + dischargedPowerUpperBoundMah) / 2);
     }
 
     @Override
