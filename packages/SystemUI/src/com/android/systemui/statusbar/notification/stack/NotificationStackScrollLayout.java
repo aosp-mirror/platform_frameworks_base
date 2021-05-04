@@ -1000,7 +1000,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setCurrentScrollVelocity(mScroller.isFinished()
                 ? 0
                 : mScroller.getCurrVelocity());
-        mAmbientState.setScrollY(mOwnScrollY);
         mStackScrollAlgorithm.resetViewStates(mAmbientState, getSpeedBumpIndex());
         if (!isCurrentlyAnimating() && !mNeedsAnimation) {
             applyCurrentState();
@@ -4542,7 +4541,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             // We still want to call the normal scrolled changed for accessibility reasons
             onScrollChanged(mScrollX, ownScrollY, mScrollX, mOwnScrollY);
             mOwnScrollY = ownScrollY;
-            updateChildren();
+            mAmbientState.setScrollY(mOwnScrollY);
             updateOnScrollChange();
             updateStackPosition();
         }
