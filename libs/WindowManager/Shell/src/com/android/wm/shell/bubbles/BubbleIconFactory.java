@@ -101,6 +101,12 @@ public class BubbleIconFactory extends BaseIconFactory {
                     userBadgedBitmap.getHeight(), userBadgedBitmap.getConfig());
             Canvas c = new Canvas(badgeAndRing);
 
+            Paint ringPaint = new Paint();
+            ringPaint.setStyle(Paint.Style.FILL);
+            ringPaint.setColor(importantConversationColor);
+            ringPaint.setAntiAlias(true);
+            c.drawCircle(c.getWidth() / 2, c.getHeight() / 2, c.getWidth() / 2, ringPaint);
+
             final int bitmapTop = (int) ringStrokeWidth;
             final int bitmapLeft = (int) ringStrokeWidth;
             final int bitmapWidth = c.getWidth() - 2 * (int) ringStrokeWidth;
@@ -109,14 +115,6 @@ public class BubbleIconFactory extends BaseIconFactory {
             Bitmap scaledBitmap = Bitmap.createScaledBitmap(userBadgedBitmap, bitmapWidth,
                     bitmapHeight, /* filter */ true);
             c.drawBitmap(scaledBitmap, bitmapTop, bitmapLeft, /* paint */null);
-
-            Paint ringPaint = new Paint();
-            ringPaint.setStyle(Paint.Style.STROKE);
-            ringPaint.setColor(importantConversationColor);
-            ringPaint.setAntiAlias(true);
-            ringPaint.setStrokeWidth(ringStrokeWidth);
-            c.drawCircle(c.getWidth() / 2, c.getHeight() / 2, c.getWidth() / 2 - ringStrokeWidth,
-                    ringPaint);
 
             shadowGenerator.recreateIcon(Bitmap.createBitmap(badgeAndRing), c);
             return createIconBitmap(badgeAndRing);
