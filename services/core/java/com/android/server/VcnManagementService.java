@@ -835,6 +835,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             if (isVcnManagedNetwork) {
                 ncBuilder.removeCapability(
                         NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
+            } else {
+                ncBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
             }
 
             if (isRestrictedCarrierWifi) {
