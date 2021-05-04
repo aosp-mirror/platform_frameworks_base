@@ -156,7 +156,7 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback {
 
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + "states: ");
+        pw.println(TAG);
         pw.print(innerPrefix + "mLastUpdatedBounds=");
         pw.println(mLastUpdatedBounds);
     }

@@ -137,8 +137,8 @@ public final class OneHandedSettingsUtil {
 
     void dump(PrintWriter pw, String prefix, ContentResolver resolver,
             int userId) {
-        final String innerPrefix = prefix + "  ";
-        pw.println(innerPrefix + TAG);
+        final String innerPrefix = "  ";
+        pw.println(TAG);
         pw.print(innerPrefix + "isOneHandedModeEnable=");
         pw.println(getSettingsOneHandedModeEnabled(resolver, userId));
         pw.print(innerPrefix + "oneHandedTimeOut=");
