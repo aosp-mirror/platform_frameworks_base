@@ -37,6 +37,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -260,6 +261,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     // Use #setLongPressPosition to optionally assign positional data with the long press.
     private LongPressListener mLongPressListener;
 
+    private ExpandableNotificationRowDragController mDragController;
+
     private boolean mGroupExpansionChanging;
 
     /**
@@ -331,6 +334,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
             };
     private OnClickListener mOnClickListener;
+    private OnDragSuccessListener mOnDragSuccessListener;
     private boolean mHeadsupDisappearRunning;
     private View mChildAfterViewWhenDismissed;
     private View mGroupParentWhenDismissed;
@@ -1083,6 +1087,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mLongPressListener = longPressListener;
     }
 
+    public void setDragController(ExpandableNotificationRowDragController dragController) {
+        mDragController = dragController;
+    }
+
     @Override
     public void setOnClickListener(@Nullable OnClickListener l) {
         super.setOnClickListener(l);
@@ -1329,6 +1337,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void dismiss(boolean refocusOnDismiss) {
         super.dismiss(refocusOnDismiss);
         setLongPressListener(null);
+        setDragController(null);
         mGroupParentWhenDismissed = mNotificationParent;
         mChildAfterViewWhenDismissed = null;
         mEntry.getIcons().getStatusBarIcon().setDismissed();
@@ -1637,6 +1646,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         onHeightReset();
         requestLayout();
+
+        setTargetPoint(null);
     }
 
     public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
@@ -1725,6 +1736,29 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // Remove views that don't translate
         mTranslateableViews.remove(mChildrenContainerStub);
         mTranslateableViews.remove(mGutsStub);
+    }
+
+    /**
+     * Called once when starting drag motion after opening notification guts,
+     * in case of notification that has {@link android.app.Notification#contentIntent}
+     * and it is to start an activity.
+     */
+    public void doDragCallback(float x, float y) {
+        if (mDragController != null) {
+            setTargetPoint(new Point((int) x, (int) y));
+            mDragController.startDragAndDrop(this);
+        }
+    }
+
+    public void setOnDragSuccessListener(OnDragSuccessListener listener) {
+        mOnDragSuccessListener = listener;
+    }
+
+    /**
+     * Called when a notification is dropped on proper target window.
+     */
+    public void dragAndDropSuccess() {
+        mOnDragSuccessListener.onDragSuccess(getEntry());
     }
 
     private void doLongClickCallback() {
@@ -3255,6 +3289,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
+     * Called when notification drag and drop is finished successfully.
+     */
+    public interface OnDragSuccessListener {
+        /**
+         * @param entry NotificationEntry that succeed to drop on proper target window.
+         */
+        void onDragSuccess(NotificationEntry entry);
+    }
+
+    /**
      * Equivalent to View.OnClickListener with coordinates
      */
     public interface CoordinateOnClickListener {
@@ -3320,5 +3364,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mEntry.mIsSystemNotification = result;
             }
         }
+    }
+
+    private void setTargetPoint(Point p) {
+        mTargetPoint = p;
+    }
+    public Point getTargetPoint() {
+        return mTargetPoint;
     }
 }

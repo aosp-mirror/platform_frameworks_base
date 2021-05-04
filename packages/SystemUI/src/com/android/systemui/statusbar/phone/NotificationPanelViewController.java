@@ -3928,7 +3928,9 @@ public class NotificationPanelViewController extends PanelViewController {
                 if (mStatusBar.isBouncerShowing()) {
                     return true;
                 }
-                if (mBar.panelEnabled() && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
+                if (mBar.panelEnabled()
+                        && !mNotificationStackScrollLayoutController.isLongPressInProgress()
+                        && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
                     mMetricsLogger.count(COUNTER_PANEL_OPEN, 1);
                     mMetricsLogger.count(COUNTER_PANEL_OPEN_PEEK, 1);
                     return true;
@@ -3980,6 +3982,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     return true;
                 }
                 if (mListenForHeadsUp && !mHeadsUpTouchHelper.isTrackingHeadsUp()
+                        && !mNotificationStackScrollLayoutController.isLongPressInProgress()
                         && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
                     mMetricsLogger.count(COUNTER_PANEL_OPEN_PEEK, 1);
                 }
