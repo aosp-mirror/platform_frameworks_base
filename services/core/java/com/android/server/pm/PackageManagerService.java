@@ -5707,8 +5707,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void requestChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Type int optional,
-            @Checksum.Type int required, @Nullable List trustedInstallers,
+            @Checksum.TypeMask int optional,
+            @Checksum.TypeMask int required, @Nullable List trustedInstallers,
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId) {
         requestChecksumsInternal(packageName, includeSplits, optional, required, trustedInstallers,
                 onChecksumsReadyListener, userId, mInjector.getBackgroundExecutor(),
@@ -5716,7 +5716,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void requestChecksumsInternal(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Type int optional, @Checksum.Type int required,
+            @Checksum.TypeMask int optional, @Checksum.TypeMask int required,
             @Nullable List trustedInstallers,
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId,
             @NonNull Executor executor, @NonNull Handler handler) {
@@ -27239,7 +27239,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public void requestChecksums(@NonNull String packageName, boolean includeSplits,
-                @Checksum.Type int optional, @Checksum.Type int required,
+                @Checksum.TypeMask int optional, @Checksum.TypeMask int required,
                 @Nullable List trustedInstallers,
                 @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId,
                 @NonNull Executor executor, @NonNull Handler handler) {
