@@ -433,6 +433,7 @@ public class StackStateAnimator {
                     if (row.isDismissed()) {
                         needsAnimation = false;
                     }
+
                     NotificationEntry entry = row.getEntry();
                     StatusBarIconView icon = entry.getIcons().getStatusBarIcon();
                     final StatusBarIconView centeredIcon = entry.getIcons().getCenteredIcon();
@@ -442,7 +443,8 @@ public class StackStateAnimator {
                     if (icon.getParent() != null) {
                         icon.getLocationOnScreen(mTmpLocation);
                         float iconPosition = mTmpLocation[0] - icon.getTranslationX()
-                                + ViewState.getFinalTranslationX(icon) + icon.getWidth() * 0.25f;
+                                + ViewState.getFinalTranslationX(icon)
+                                + icon.getWidth() * 0.25f;
                         mHostLayout.getLocationOnScreen(mTmpLocation);
                         targetLocation = iconPosition - mTmpLocation[0];
                     }
