@@ -1897,13 +1897,16 @@
     <string name="notification_channel_summary_automatic_demoted">&lt;b>Status:&lt;/b> Ranked Lower</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level summary -->
-    <string name="notification_channel_summary_priority">Always shown at the top of your notifications, even when Priority mode is on</string>
+    <string name="notification_channel_summary_priority_baseline">Shows at the top of conversation notifications and as a profile picture on lock screen</string>
+    <string name="notification_channel_summary_priority_bubble">Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble</string>
+    <string name="notification_channel_summary_priority_dnd">Shows at the top of conversation notifications and as a profile picture on lock screen, interrupts Do Not Disturb</string>
+    <string name="notification_channel_summary_priority_all">Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble, interrupts Do Not Disturb</string>
 
     <!--[CHAR LIMIT=30] Linkable text to Settings app -->
     <string name="notification_conversation_channel_settings">Settings</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level -->
-    <string name="notification_priority_title">Priority conversations</string>
+    <string name="notification_priority_title">Priority</string>
 
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
     <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
@@ -2666,25 +2669,6 @@
 
     <!-- Title of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=25] -->
     <string name="inattentive_sleep_warning_title">Standby</string>
-
-    <!-- Priority conversation onboarding screen -->
-    <!--  title of priority onboarding [CHAR LIMIT=75]  -->
-    <string name="priority_onboarding_title">Conversation set to priority</string>
-    <!--  Text explaining that the following actions are the behaviors of priority conversations.
-    E.g. priority conversations will show at the top of the conversation section [CHAR LIMIT=75]  -->
-    <string name="priority_onboarding_behavior">Priority conversations</string>
-    <!--  Text explaining that priority conversations show at the top of the conversation section [CHAR LIMIT=120]  -->
-    <string name="priority_onboarding_show_at_top_text">These conversations are shown at the top of your list and can always reach you when Priority mode is on</string>
-    <!--  Text explaining that priority conversations show an avatar on the lock screen [CHAR LIMIT=120]  -->
-    <string name="priority_onboarding_show_avatar_text">Profile pictures are shown on the lock screen</string>
-    <!--  Text explaining that priority conversations will appear as a bubble [CHAR LIMIT=120]  -->
-    <string name="priority_onboarding_appear_as_bubble_text">You can easily find these conversations in bubbles on your Home screen</string>
-    <!--  Text explaining that priority conversations can interrupt DnD settings [CHAR LIMIT=120]  -->
-    <string name="priority_onboarding_ignores_dnd_text">Interrupt Do Not Disturb</string>
-    <!--  Title for the affirmative button [CHAR LIMIT=50]  -->
-    <string name="priority_onboarding_done_button_title">Got it</string>
-    <!--  Title for the settings button button [CHAR LIMIT=50]  -->
-    <string name="priority_onboarding_settings_button_title">Settings</string>
 
     <!-- Window Magnification strings -->
     <!-- Title for Magnification Window [CHAR LIMIT=NONE] -->
