@@ -69,18 +69,47 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * This class manages information about recent accesses to ops for
- * permission usage timeline.
+ * This class manages information about recent accesses to ops for permission usage timeline.
  *
- * The timeline history is kept for limited time (initial default is 24 hours) and
- * discarded after that.
+ * The discrete history is kept for limited time (initial default is 24 hours, set in
+ * {@link DiscreteRegistry#sDiscreteHistoryCutoff) and discarded after that.
+ *
+ * Discrete history is quantized to reduce resources footprint. By default quantization is set to
+ * one minute in {@link DiscreteRegistry#sDiscreteHistoryQuantization}. All access times are aligned
+ * to the closest quantized time. All durations (except -1, meaning no duration) are rounded up to
+ * the closest quantized interval.
+ *
+ * When data is queried through API, events are deduplicated and for every time quant there can
+ * be only one {@link AppOpsManager.AttributedOpEntry}. Each entry contains information about
+ * different accesses which happened in specified time quant - across dimensions of
+ * {@link AppOpsManager.UidState} and {@link AppOpsManager.OpFlags}. For each dimension
+ * it is only possible to know if at least one access happened in the time quant.
  *
  * Every time state is saved (default is 30 minutes), memory state is dumped to a
  * new file and memory state is cleared. Files older than time limit are deleted
  * during the process.
  *
  * When request comes in, files are read and requested information is collected
- * and delivered.
+ * and delivered. Information is cached in memory until the next state save (up to 30 minutes), to
+ * avoid reading disk if more API calls come in a quick succession.
+ *
+ * THREADING AND LOCKING:
+ * For in-memory transactions this class relies on {@link DiscreteRegistry#mInMemoryLock}. It is
+ * assumed that the same lock is used for in-memory transactions in {@link AppOpsService},
+ * {@link HistoricalRegistry}, and {@link DiscreteRegistry}.
+ * {@link DiscreteRegistry#recordDiscreteAccess(int, String, int, String, int, int, long, long)}
+ * must only be called while holding this lock.
+ * {@link DiscreteRegistry#mOnDiskLock} is used when disk transactions are performed.
+ * It is very important to release {@link DiscreteRegistry#mInMemoryLock} as soon as possible, as
+ * no AppOps related transactions across the system can be performed while it is held.
+ *
+ * INITIALIZATION: We can initialize persistence only after the system is ready
+ * as we need to check the optional configuration override from the settings
+ * database which is not initialized at the time the app ops service is created. This class
+ * relies on {@link HistoricalRegistry} for controlling that no calls are allowed until then. All
+ * outside calls are going through {@link HistoricalRegistry}, where
+ * {@link HistoricalRegistry#isPersistenceInitializedMLocked()} check is done.
+ *
  */
 
 final class DiscreteRegistry {
