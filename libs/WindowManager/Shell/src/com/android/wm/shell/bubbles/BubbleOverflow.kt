@@ -24,7 +24,6 @@ import android.graphics.Matrix
 import android.graphics.Path
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.InsetDrawable
 import android.util.PathParser
 import android.util.TypedValue
@@ -151,7 +150,7 @@ class BubbleOverflow(
         return dotColor
     }
 
-    override fun getAppBadge(): Drawable? {
+    override fun getAppBadge(): Bitmap? {
         return null
     }
 

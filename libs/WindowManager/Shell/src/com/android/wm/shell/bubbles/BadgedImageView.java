@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.bubbles;
 
+import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.graphics.Paint.DITHER_FLAG;
 import static android.graphics.Paint.FILTER_BITMAP_FLAG;
 
@@ -22,10 +23,10 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.PathParser;
 import android.widget.ImageView;
@@ -75,13 +76,13 @@ public class BadgedImageView extends ImageView {
 
     private BubbleViewProvider mBubble;
     private BubblePositioner mPositioner;
+    private boolean mOnLeft;
 
     private DotRenderer mDotRenderer;
     private DotRenderer.DrawParams mDrawParams;
-    private boolean mOnLeft;
-
     private int mDotColor;
 
+    private Paint mPaint = new Paint(ANTI_ALIAS_FLAG);
     private Rect mTempBounds = new Rect();
 
     public BadgedImageView(Context context) {
@@ -305,7 +306,7 @@ public class BadgedImageView extends ImageView {
     }
 
     void showBadge() {
-        Drawable badge = mBubble.getAppBadge();
+        Bitmap badge = mBubble.getAppBadge();
         if (badge == null) {
             setImageBitmap(mBubble.getBubbleIcon());
             return;
@@ -318,13 +319,13 @@ public class BadgedImageView extends ImageView {
         bubbleCanvas.setBitmap(bubble);
         final int bubbleSize = bubble.getWidth();
         final int badgeSize = (int) (ICON_BADGE_SCALE * bubbleSize);
+        Rect dest = new Rect();
         if (mOnLeft) {
-            badge.setBounds(0, bubbleSize - badgeSize, badgeSize, bubbleSize);
+            dest.set(0, bubbleSize - badgeSize, badgeSize, bubbleSize);
         } else {
-            badge.setBounds(bubbleSize - badgeSize, bubbleSize - badgeSize,
-                    bubbleSize, bubbleSize);
+            dest.set(bubbleSize - badgeSize, bubbleSize - badgeSize, bubbleSize, bubbleSize);
         }
-        badge.draw(bubbleCanvas);
+        bubbleCanvas.drawBitmap(badge, null /* src */, dest, mPaint);
         bubbleCanvas.setBitmap(null);
         setImageBitmap(bubble);
     }
