@@ -24,6 +24,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -51,6 +52,7 @@ public class OneHandedUiEventLoggerTest extends OneHandedTestCase {
     }
 
     @Test
+    @Ignore("b/184813408, go/wm-tests showing test flaky")
     public void testLogEvent() {
         if (mUiEvent != null) {
             assertEquals(1, mUiEventLogger.numLogs());
