@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.appsearch.util.BundleUtil;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -135,6 +136,17 @@ public class GenericDocument {
     @NonNull
     public Bundle getBundle() {
         return mBundle;
+    }
+
+    /**
+     * @deprecated TODO(b/181887768): Exists for dogfood transition; must be removed.
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage
+    @NonNull
+    public String getUri() {
+        return getId();
     }
 
     /** Returns the unique identifier of the {@link GenericDocument}. */

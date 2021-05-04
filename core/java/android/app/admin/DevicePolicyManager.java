@@ -1847,6 +1847,8 @@ public class DevicePolicyManager {
      * Delegation of certificate installation and management. This scope grants access to the
      * {@link #getInstalledCaCerts}, {@link #hasCaCertInstalled}, {@link #installCaCert},
      * {@link #uninstallCaCert}, {@link #uninstallAllUserCaCerts} and {@link #installKeyPair} APIs.
+     * This scope also grants the ability to read identifiers that the delegating device owner or
+     * profile owner can obtain. See {@link #getEnrollmentSpecificId()}.
      */
     public static final String DELEGATION_CERT_INSTALL = "delegation-cert-install";
 
@@ -13620,11 +13622,19 @@ public class DevicePolicyManager {
      * It is available both in a work profile and on a fully-managed device.
      * The identifier would be consistent even if the work profile is removed and enrolled again
      * (to the same organization), or the device is factory reset and re-enrolled.
-
+     *
      * Can only be called by the Profile Owner or Device Owner, if the
      * {@link #setOrganizationId(String)} was previously called.
      * If {@link #setOrganizationId(String)} was not called, then the returned value will be an
      * empty string.
+     *
+     * <p>Note about access to device identifiers: a device owner, a profile owner of an
+     * organization-owned device or the delegated certificate installer (holding the
+     * {@link #DELEGATION_CERT_INSTALL} delegation) on such a device can still obtain hardware
+     * identifiers by calling e.g. {@link android.os.Build#getSerial()}, in addition to using
+     * this method. However, a profile owner on a personal (non organization-owned) device, or the
+     * delegated certificate installer on such a device, cannot obtain hardware identifiers anymore
+     * and must switch to using this method.
      *
      * @return A stable, enrollment-specific identifier.
      * @throws SecurityException if the caller is not a profile owner or device owner.

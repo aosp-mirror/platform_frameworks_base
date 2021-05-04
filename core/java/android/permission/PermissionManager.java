@@ -195,7 +195,7 @@ public final class PermissionManager {
      * @hide Pending API
      */
     @Nullable
-    public List<PermissionInfo> queryPermissionsByGroup(@NonNull String groupName,
+    public List<PermissionInfo> queryPermissionsByGroup(@Nullable String groupName,
             @PackageManager.PermissionInfoFlags int flags) {
         try {
             final ParceledListSlice<PermissionInfo> parceledList =

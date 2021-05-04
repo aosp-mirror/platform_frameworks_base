@@ -133,6 +133,12 @@ public class SystemServicePowerCalculatorTest {
         assertThat(mStatsRule.getUidBatteryConsumer(Process.SYSTEM_UID)
                 .getConsumedPower(BatteryConsumer.POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS))
                 .isWithin(PRECISION).of(-18.888888);
+        assertThat(mStatsRule.getDeviceBatteryConsumer()
+                .getConsumedPower(BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES))
+                .isWithin(PRECISION).of(18.888888);
+        assertThat(mStatsRule.getAppsBatteryConsumer()
+                .getConsumedPower(BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES))
+                .isWithin(PRECISION).of(18.888888);
     }
 
     private static class MockKernelCpuUidFreqTimeReader extends

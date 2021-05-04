@@ -1,6 +1,6 @@
 package com.android.systemui.statusbar.notification
 
-import android.view.View
+import android.view.ViewGroup
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.statusbar.NotificationShadeDepthController
@@ -45,7 +45,11 @@ class NotificationLaunchAnimatorController(
 ) : ActivityLaunchAnimator.Controller {
     private val notificationKey = notification.entry.sbn.key
 
-    override fun getRootView(): View = notification.rootView
+    override var launchContainer: ViewGroup
+        get() = notification.rootView as ViewGroup
+        set(ignored) {
+            // Do nothing. Notifications are always animated inside their rootView.
+        }
 
     override fun createAnimatorState(): ActivityLaunchAnimator.State {
         // If the notification panel is collapsed, the clip may be larger than the height.

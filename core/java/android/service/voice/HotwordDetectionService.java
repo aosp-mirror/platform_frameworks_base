@@ -52,8 +52,20 @@ import java.util.Locale;
 import java.util.function.IntConsumer;
 
 /**
- * Implemented by an application that wants to offer detection for hotword. The system will
- * start the service after calling {@link VoiceInteractionService#setHotwordDetectionConfig}.
+ * Implemented by an application that wants to offer detection for hotword. The service can be used
+ * for both DSP and non-DSP detectors.
+ *
+ * The system will bind an application's {@link VoiceInteractionService} first. When {@link
+ * VoiceInteractionService#createHotwordDetector(PersistableBundle, SharedMemory,
+ * HotwordDetector.Callback)} or {@link VoiceInteractionService#createAlwaysOnHotwordDetector(
+ * String, Locale, PersistableBundle, SharedMemory, AlwaysOnHotwordDetector.Callback)} is called,
+ * the system will bind application's {@link HotwordDetectionService}. Either on a hardware
+ * trigger or on request from the {@link VoiceInteractionService}, the system calls into the
+ * {@link HotwordDetectionService} to request detection. The {@link HotwordDetectionService} then
+ * uses {@link Callback#onDetected(HotwordDetectedResult)} to inform the system that a relevant
+ * keyphrase was detected, or if applicable uses {@link Callback#onRejected(HotwordRejectedResult)}
+ * to inform the system that a keyphrase was not detected. The system then relays this result to
+ * the {@link VoiceInteractionService} through {@link HotwordDetector.Callback}.
  *
  * @hide
  */

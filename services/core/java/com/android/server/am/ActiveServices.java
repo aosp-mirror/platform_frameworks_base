@@ -5934,7 +5934,7 @@ public final class ActiveServices {
      */
     private void logForegroundServiceStateChanged(ServiceRecord r, int state, int durationMs) {
         if (!ActivityManagerUtils.shouldSamplePackageForAtom(
-                r.packageName, mAm.mConstants.mDefaultFgsAtomSampleRate)) {
+                r.packageName, mAm.mConstants.mFgsAtomSampleRate)) {
             return;
         }
         FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,

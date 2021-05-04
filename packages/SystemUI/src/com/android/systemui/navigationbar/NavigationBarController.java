@@ -217,9 +217,6 @@ public class NavigationBarController implements Callbacks,
 
     @Override
     public void onNavigationModeChanged(int mode) {
-        if (mNavMode == mode) {
-            return;
-        }
         final int oldMode = mNavMode;
         mNavMode = mode;
         mHandler.post(() -> {

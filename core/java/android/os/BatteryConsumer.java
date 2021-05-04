@@ -27,7 +27,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-public abstract class BatteryConsumer {
+public class BatteryConsumer {
 
     /**
      * Power usage component, describing the particular part of the system
@@ -72,14 +72,15 @@ public abstract class BatteryConsumer {
     public static final int POWER_COMPONENT_WIFI = 11;
     public static final int POWER_COMPONENT_WAKELOCK = 12;
     public static final int POWER_COMPONENT_MEMORY = 13;
-    public static final int POWER_COMPONENT_PHONE = 13;
-    public static final int POWER_COMPONENT_IDLE = 15;
+    public static final int POWER_COMPONENT_PHONE = 14;
+    public static final int POWER_COMPONENT_AMBIENT_DISPLAY = 15;
+    public static final int POWER_COMPONENT_IDLE = 16;
     // Power that is re-attributed to other battery consumers. For example, for System Server
     // this represents the power attributed to apps requesting system services.
     // The value should be negative or zero.
-    public static final int POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS = 16;
+    public static final int POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS = 17;
 
-    public static final int POWER_COMPONENT_COUNT = 17;
+    public static final int POWER_COMPONENT_COUNT = 18;
 
     public static final int FIRST_CUSTOM_POWER_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_POWER_COMPONENT_ID = 9999;
