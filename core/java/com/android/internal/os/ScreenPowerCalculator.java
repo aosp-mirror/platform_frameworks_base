@@ -20,7 +20,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
@@ -109,13 +108,6 @@ public class ScreenPowerCalculator extends PowerCalculator {
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, totalAppPower, powerModel)
                 .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN, totalAppDuration);
-
-        builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_SCREEN)
-                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN,
-                        totalPowerAndDuration.durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
-                        Math.max(totalPowerAndDuration.powerMah, totalAppPower), powerModel)
-                .setPowerConsumedByApps(totalAppPower);
     }
 
     /**
