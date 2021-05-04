@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.util.Slog;
 
@@ -110,6 +111,15 @@ public class VintfObject {
      */
     @TestApi
     public static native String getSepolicyVersion();
+
+    /**
+     * @return the PLATFORM_SEPOLICY_VERSION build flag available in framework
+     * compatibility matrix.
+     *
+     * @hide
+     */
+    @TestApi
+    public static native @NonNull String getPlatformSepolicyVersion();
 
     /**
      * @return a list of VNDK snapshots supported by the framework, as
