@@ -638,6 +638,12 @@ public abstract class PanelViewController {
             private boolean mCancelled;
 
             @Override
+            public void onAnimationStart(Animator animation) {
+                InteractionJankMonitor.getInstance()
+                        .begin(mView, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            }
+
+            @Override
             public void onAnimationCancel(Animator animation) {
                 mCancelled = true;
             }
@@ -1412,11 +1418,14 @@ public abstract class PanelViewController {
                 case MotionEvent.ACTION_CANCEL:
                     addMovement(event);
                     endMotionEvent(event, x, y, false /* forceCancel */);
-                    InteractionJankMonitor monitor = InteractionJankMonitor.getInstance();
-                    if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                        monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
-                    } else {
-                        monitor.cancel(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                    // mHeightAnimator is null, there is no remaining frame, ends instrumenting.
+                    if (mHeightAnimator == null) {
+                        InteractionJankMonitor monitor = InteractionJankMonitor.getInstance();
+                        if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                            monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                        } else {
+                            monitor.cancel(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                        }
                     }
                     break;
             }
