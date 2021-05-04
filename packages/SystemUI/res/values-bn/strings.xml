@@ -1087,10 +1087,8 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"আরও দেখতে সোয়াইপ করুন"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"সাজেশন লোড করা হচ্ছে"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"মিডিয়া"</string>
-    <!-- no translation found for controls_media_close_session (1193000643003066508) -->
-    <skip />
-    <!-- no translation found for controls_media_active_session (3146882316024153337) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="1193000643003066508">"এই মিডিয়া সেশন লুকিয়ে রাখতে চান?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"বর্তমান মিডিয়া সেশন লুকিয়ে রাখা যাবে না।"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"খারিজ করুন"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"আবার চালু করুন"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"সেটিংস"</string>
@@ -1156,6 +1154,5 @@
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"ফিঙ্গারপ্রিন্ট সেন্সর বন্ধ করা আছে"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"যাচাই করিয়ে নিন"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ডিভাইস আনলক করুন"</string>
-    <!-- no translation found for keyguard_try_fingerprint (2825130772993061165) -->
-    <skip />
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"খুলতে ফিঙ্গারপ্রিন্ট ব্যবহার করুন"</string>
 </resources>
