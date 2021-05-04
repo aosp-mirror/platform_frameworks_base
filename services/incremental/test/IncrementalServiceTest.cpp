@@ -417,6 +417,7 @@ public:
     MOCK_CONST_METHOD2(forEachFile, ErrorCode(const Control& control, FileCallback cb));
     MOCK_CONST_METHOD2(forEachIncompleteFile, ErrorCode(const Control& control, FileCallback cb));
     MOCK_CONST_METHOD1(getMetrics, std::optional<Metrics>(std::string_view path));
+    MOCK_CONST_METHOD1(getLastReadError, std::optional<LastReadError>(const Control& control));
 
     MockIncFs() {
         ON_CALL(*this, listExistingMounts(_)).WillByDefault(Return());
