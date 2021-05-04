@@ -91,8 +91,6 @@ public class OneTouchPlayActionTest {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         mHdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
 
-        setHdmiControlEnabled(hdmiControlEnabled);
-
         when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
                 new PowerManager(mContextSpy, mIPowerManagerMock,
                 mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
@@ -137,6 +135,7 @@ public class OneTouchPlayActionTest {
         Looper looper = mTestLooper.getLooper();
         mHdmiControlService.setIoLooper(looper);
         mHdmiControlService.setHdmiCecConfig(mHdmiCecConfig);
+        setHdmiControlEnabled(hdmiControlEnabled);
         mNativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
