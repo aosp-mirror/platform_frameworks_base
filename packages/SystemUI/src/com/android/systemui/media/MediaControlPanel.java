@@ -104,6 +104,8 @@ public class MediaControlPanel {
     private int mBackgroundColor;
     private int mDevicePadding;
     private int mAlbumArtSize;
+    // Instance id for logging purpose.
+    private int mInstanceId;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
 
     /**
@@ -472,6 +474,7 @@ public class MediaControlPanel {
         mRecommendationViewHolder.getCardIcon().setColorFilter(primaryColor);
         mRecommendationViewHolder.getCardText().setTextColor(primaryColor);
 
+        mInstanceId = target.getSmartspaceTargetId().hashCode();
         mRecommendationViewHolder.getRecommendations()
                 .setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
         mBackgroundColor = backgroundColor;
@@ -530,7 +533,6 @@ public class MediaControlPanel {
             setSmartspaceRecItemOnClickListener(
                     mediaCoverImageView,
                     recommendation,
-                    target.getSmartspaceTargetId(),
                     null);
 
             if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
@@ -649,7 +651,6 @@ public class MediaControlPanel {
     private void setSmartspaceRecItemOnClickListener(
             @NonNull View view,
             @NonNull SmartspaceAction action,
-            @NonNull String targetId,
             @Nullable View.OnClickListener callback) {
         if (view == null || action == null || action.getIntent() == null) {
             Log.e(TAG, "No tap action can be set up");
@@ -660,11 +661,11 @@ public class MediaControlPanel {
             // When media recommendation card is shown, there could be only one card.
             SysUiStatsLog.write(SysUiStatsLog.SMARTSPACE_CARD_REPORTED,
                     760, // SMARTSPACE_CARD_CLICK
-                    targetId.hashCode(),
+                    mInstanceId,
                     SysUiStatsLog
                             .SMART_SPACE_CARD_REPORTED__CARD_TYPE__HEADPHONE_MEDIA_RECOMMENDATIONS,
-                    getSurfaceForSmartspaceLogging(mMediaViewController.getCurrentEndLocation()),
-                    /* rank */ 1,
+                    getSurfaceForSmartspaceLogging(),
+                    /* rank */ 0,
                     /* cardinality */ 1);
 
             if (shouldSmartspaceRecItemOpenInForeground(action)) {
@@ -708,7 +709,12 @@ public class MediaControlPanel {
         return false;
     }
 
-    private int getSurfaceForSmartspaceLogging(int currentEndLocation) {
+    /**
+     * Get the surface given the current end location for MediaViewController
+     * @return surface used for Smartspace logging
+     */
+    protected int getSurfaceForSmartspaceLogging() {
+        int currentEndLocation = mMediaViewController.getCurrentEndLocation();
         if (currentEndLocation == MediaHierarchyManager.LOCATION_QQS
                 || currentEndLocation == MediaHierarchyManager.LOCATION_QS) {
             return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE;
@@ -716,5 +722,9 @@ public class MediaControlPanel {
             return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN;
         }
         return SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DEFAULT_SURFACE;
+    }
+
+    protected int getInstanceId() {
+        return mInstanceId;
     }
 }
