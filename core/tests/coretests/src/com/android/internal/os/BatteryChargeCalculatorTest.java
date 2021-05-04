@@ -60,6 +60,8 @@ public class BatteryChargeCalculatorTest {
 
         BatteryUsageStats batteryUsageStats = mStatsRule.apply(calculator);
 
+        assertThat(batteryUsageStats.getConsumedPower())
+                .isWithin(PRECISION).of(380.0);
         assertThat(batteryUsageStats.getDischargePercentage()).isEqualTo(10);
         assertThat(batteryUsageStats.getDischargedPowerRange().getLower())
                 .isWithin(PRECISION).of(360.0);

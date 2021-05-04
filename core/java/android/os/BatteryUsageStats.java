@@ -71,7 +71,6 @@ public final class BatteryUsageStats implements Parcelable {
 
     public static final int AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT = 2;
 
-    private final double mConsumedPower;
     private final int mDischargePercentage;
     private final long mStatsStartTimestampMs;
     private final double mDischargedPowerLowerBound;
@@ -80,7 +79,6 @@ public final class BatteryUsageStats implements Parcelable {
     private final long mChargeTimeRemainingMs;
     private final String[] mCustomPowerComponentNames;
     private final List<UidBatteryConsumer> mUidBatteryConsumers;
-    private final List<SystemBatteryConsumer> mSystemBatteryConsumers;
     private final List<UserBatteryConsumer> mUserBatteryConsumers;
     private final AggregateBatteryConsumer[] mAggregateBatteryConsumers;
     private final Parcel mHistoryBuffer;
@@ -97,14 +95,7 @@ public final class BatteryUsageStats implements Parcelable {
         mChargeTimeRemainingMs = builder.mChargeTimeRemainingMs;
         mCustomPowerComponentNames = builder.mCustomPowerComponentNames;
 
-        mAggregateBatteryConsumers =
-                new AggregateBatteryConsumer[AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT];
-        for (int i = 0; i < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; i++) {
-            mAggregateBatteryConsumers[i] = builder.mAggregateBatteryConsumersBuilders[i].build();
-        }
-
-        double totalPower = 0;
-
+        double totalPowerMah = 0;
         final int uidBatteryConsumerCount = builder.mUidBatteryConsumerBuilders.size();
         mUidBatteryConsumers = new ArrayList<>(uidBatteryConsumerCount);
         for (int i = 0; i < uidBatteryConsumerCount; i++) {
@@ -112,18 +103,9 @@ public final class BatteryUsageStats implements Parcelable {
                     builder.mUidBatteryConsumerBuilders.valueAt(i);
             if (!uidBatteryConsumerBuilder.isExcludedFromBatteryUsageStats()) {
                 final UidBatteryConsumer consumer = uidBatteryConsumerBuilder.build();
-                totalPower += consumer.getConsumedPower();
+                totalPowerMah += consumer.getConsumedPower();
                 mUidBatteryConsumers.add(consumer);
             }
-        }
-
-        final int systemBatteryConsumerCount = builder.mSystemBatteryConsumerBuilders.size();
-        mSystemBatteryConsumers = new ArrayList<>(systemBatteryConsumerCount);
-        for (int i = 0; i < systemBatteryConsumerCount; i++) {
-            final SystemBatteryConsumer consumer =
-                    builder.mSystemBatteryConsumerBuilders.valueAt(i).build();
-            totalPower += consumer.getConsumedPower() - consumer.getPowerConsumedByApps();
-            mSystemBatteryConsumers.add(consumer);
         }
 
         final int userBatteryConsumerCount = builder.mUserBatteryConsumerBuilders.size();
@@ -131,11 +113,18 @@ public final class BatteryUsageStats implements Parcelable {
         for (int i = 0; i < userBatteryConsumerCount; i++) {
             final UserBatteryConsumer consumer =
                     builder.mUserBatteryConsumerBuilders.valueAt(i).build();
-            totalPower += consumer.getConsumedPower();
+            totalPowerMah += consumer.getConsumedPower();
             mUserBatteryConsumers.add(consumer);
         }
 
-        mConsumedPower = totalPower;
+        builder.getAggregateBatteryConsumerBuilder(AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setConsumedPower(totalPowerMah);
+
+        mAggregateBatteryConsumers =
+                new AggregateBatteryConsumer[AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT];
+        for (int i = 0; i < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; i++) {
+            mAggregateBatteryConsumers[i] = builder.mAggregateBatteryConsumersBuilders[i].build();
+        }
     }
 
     /**
@@ -144,6 +133,15 @@ public final class BatteryUsageStats implements Parcelable {
      */
     public long getStatsStartTimestamp() {
         return mStatsStartTimestampMs;
+    }
+
+    /**
+     * Total amount of battery charge drained since BatteryStats reset (e.g. due to being fully
+     * charged), in mAh
+     */
+    public double getConsumedPower() {
+        return mAggregateBatteryConsumers[AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE]
+                .getConsumedPower();
     }
 
     /**
@@ -182,14 +180,6 @@ public final class BatteryUsageStats implements Parcelable {
     }
 
     /**
-     * Total amount of battery charge drained since BatteryStats reset (e.g. due to being fully
-     * charged), in mAh
-     */
-    public double getConsumedPower() {
-        return mConsumedPower;
-    }
-
-    /**
      * Returns a battery consumer for the specified battery consumer type.
      */
     public BatteryConsumer getAggregateBatteryConsumer(
@@ -200,11 +190,6 @@ public final class BatteryUsageStats implements Parcelable {
     @NonNull
     public List<UidBatteryConsumer> getUidBatteryConsumers() {
         return mUidBatteryConsumers;
-    }
-
-    @NonNull
-    public List<SystemBatteryConsumer> getSystemBatteryConsumers() {
-        return mSystemBatteryConsumers;
     }
 
     @NonNull
@@ -232,7 +217,6 @@ public final class BatteryUsageStats implements Parcelable {
 
     private BatteryUsageStats(@NonNull Parcel source) {
         mStatsStartTimestampMs = source.readLong();
-        mConsumedPower = source.readDouble();
         mDischargePercentage = source.readInt();
         mDischargedPowerLowerBound = source.readDouble();
         mDischargedPowerUpperBound = source.readDouble();
@@ -253,14 +237,6 @@ public final class BatteryUsageStats implements Parcelable {
                     UidBatteryConsumer.CREATOR.createFromParcel(source);
             consumer.setCustomPowerComponentNames(mCustomPowerComponentNames);
             mUidBatteryConsumers.add(consumer);
-        }
-        int sysCount = source.readInt();
-        mSystemBatteryConsumers = new ArrayList<>(sysCount);
-        for (int i = 0; i < sysCount; i++) {
-            final SystemBatteryConsumer consumer =
-                    SystemBatteryConsumer.CREATOR.createFromParcel(source);
-            consumer.setCustomPowerComponentNames(mCustomPowerComponentNames);
-            mSystemBatteryConsumers.add(consumer);
         }
         int userCount = source.readInt();
         mUserBatteryConsumers = new ArrayList<>(userCount);
@@ -298,7 +274,6 @@ public final class BatteryUsageStats implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mStatsStartTimestampMs);
-        dest.writeDouble(mConsumedPower);
         dest.writeInt(mDischargePercentage);
         dest.writeDouble(mDischargedPowerLowerBound);
         dest.writeDouble(mDischargedPowerUpperBound);
@@ -311,10 +286,6 @@ public final class BatteryUsageStats implements Parcelable {
         dest.writeInt(mUidBatteryConsumers.size());
         for (int i = mUidBatteryConsumers.size() - 1; i >= 0; i--) {
             mUidBatteryConsumers.get(i).writeToParcel(dest, flags);
-        }
-        dest.writeInt(mSystemBatteryConsumers.size());
-        for (int i = mSystemBatteryConsumers.size() - 1; i >= 0; i--) {
-            mSystemBatteryConsumers.get(i).writeToParcel(dest, flags);
         }
         dest.writeInt(mUserBatteryConsumers.size());
         for (int i = mUserBatteryConsumers.size() - 1; i >= 0; i--) {
@@ -366,8 +337,6 @@ public final class BatteryUsageStats implements Parcelable {
         private final AggregateBatteryConsumer.Builder[] mAggregateBatteryConsumersBuilders =
                 new AggregateBatteryConsumer.Builder[AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT];
         private final SparseArray<UidBatteryConsumer.Builder> mUidBatteryConsumerBuilders =
-                new SparseArray<>();
-        private final SparseArray<SystemBatteryConsumer.Builder> mSystemBatteryConsumerBuilders =
                 new SparseArray<>();
         private final SparseArray<UserBatteryConsumer.Builder> mUserBatteryConsumerBuilders =
                 new SparseArray<>();
@@ -478,22 +447,6 @@ public final class BatteryUsageStats implements Parcelable {
                 builder = new UidBatteryConsumer.Builder(mCustomPowerComponentNames,
                         mIncludePowerModels, batteryStatsUid);
                 mUidBatteryConsumerBuilders.put(uid, builder);
-            }
-            return builder;
-        }
-
-        /**
-         * Creates or returns a SystemBatteryConsumer, which represents battery attribution
-         * data for a specific drain type.
-         */
-        @NonNull
-        public SystemBatteryConsumer.Builder getOrCreateSystemBatteryConsumerBuilder(
-                @SystemBatteryConsumer.DrainType int drainType) {
-            SystemBatteryConsumer.Builder builder = mSystemBatteryConsumerBuilders.get(drainType);
-            if (builder == null) {
-                builder = new SystemBatteryConsumer.Builder(mCustomPowerComponentNames,
-                        mIncludePowerModels, drainType);
-                mSystemBatteryConsumerBuilders.put(drainType, builder);
             }
             return builder;
         }
