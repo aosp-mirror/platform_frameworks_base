@@ -156,13 +156,13 @@ droidstubs {
     defaults: ["services-stubs-default"],
     check_api: {
         current: {
-            api_file: "api/non-updatable-current.txt",
-            removed_api_file: "api/non-updatable-removed.txt",
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
         },
         api_lint: {
             enabled: true,
             new_since: ":android-non-updatable.api.system-server.latest",
-            baseline_file: "api/non-updatable-lint-baseline.txt",
+            baseline_file: "api/lint-baseline.txt",
         },
     },
     dists: [
