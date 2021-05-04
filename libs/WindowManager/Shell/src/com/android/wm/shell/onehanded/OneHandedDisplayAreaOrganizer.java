@@ -61,6 +61,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
 
     private DisplayLayout mDisplayLayout = new DisplayLayout();
 
+    private float mLastVisualOffset = 0;
     private final Rect mLastVisualDisplayBounds = new Rect();
     private final Rect mDefaultDisplayBounds = new Rect();
     private final OneHandedSettingsUtil mOneHandedSettingsUtil;
@@ -96,8 +97,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
                     mAnimationController.removeAnimator(animator.getToken());
                     if (mAnimationController.isAnimatorsConsumed()) {
-                        resetWindowsOffsetInternal(animator.getTransitionDirection());
-                        finishOffset(animator.getDestinationOffset(),
+                        finishOffset((int) animator.getDestinationOffset(),
                                 animator.getTransitionDirection());
                     }
                 }
@@ -107,8 +107,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
                     mAnimationController.removeAnimator(animator.getToken());
                     if (mAnimationController.isAnimatorsConsumed()) {
-                        resetWindowsOffsetInternal(animator.getTransitionDirection());
-                        finishOffset(animator.getDestinationOffset(),
+                        finishOffset((int) animator.getDestinationOffset(),
                                 animator.getTransitionDirection());
                     }
                 }
@@ -165,16 +164,16 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     @Override
     public void unregisterOrganizer() {
         super.unregisterOrganizer();
-        resetWindowsOffset(null);
+        resetWindowsOffset();
     }
 
     /**
      * Handler for display rotation changes by {@link DisplayLayout}
      *
-     * @param context       Any context
-     * @param toRotation    target rotation of the display (after rotating).
-     * @param wct           A task transaction {@link WindowContainerTransaction} from
-     *                      {@link DisplayChangeController} to populate.
+     * @param context    Any context
+     * @param toRotation target rotation of the display (after rotating).
+     * @param wct        A task transaction {@link WindowContainerTransaction} from
+     *                   {@link DisplayChangeController} to populate.
      */
     public void onRotateDisplay(Context context, int toRotation, WindowContainerTransaction wct) {
         if (mDisplayLayout.rotation() == toRotation) {
@@ -186,7 +185,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             return;
         }
         mDisplayLayout.rotateTo(context.getResources(), toRotation);
-        resetWindowsOffset(wct);
         updateDisplayBounds();
         finishOffset(0, TRANSITION_DIRECTION_EXIT);
     }
@@ -196,38 +194,20 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
      * Directly perform manipulation/offset on the leash.
      */
     public void scheduleOffset(int xOffset, int yOffset) {
-        final Rect toBounds = new Rect(mDefaultDisplayBounds.left,
-                mDefaultDisplayBounds.top + yOffset,
-                mDefaultDisplayBounds.right,
-                mDefaultDisplayBounds.bottom + yOffset);
-        final Rect fromBounds = getLastVisualDisplayBounds();
+        final float fromPos = mLastVisualOffset;
         final int direction = yOffset > 0
                 ? TRANSITION_DIRECTION_TRIGGER
                 : TRANSITION_DIRECTION_EXIT;
-
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
         mDisplayAreaTokenMap.forEach(
                 (token, leash) -> {
-                    animateWindows(token, leash, fromBounds, toBounds, direction,
+                    animateWindows(token, leash, fromPos, yOffset, direction,
                             mEnterExitAnimationDurationMs);
-                    wct.setBounds(token, toBounds);
-                    wct.setAppBounds(token, toBounds);
                 });
-        applyTransaction(wct);
-    }
-
-    private void resetWindowsOffsetInternal(
-            @OneHandedAnimationController.TransitionDirection int td) {
-        if (td == TRANSITION_DIRECTION_TRIGGER) {
-            return;
-        }
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        resetWindowsOffset(wct);
-        applyTransaction(wct);
+        mLastVisualOffset = yOffset;
     }
 
     @VisibleForTesting
-    void resetWindowsOffset(WindowContainerTransaction wct) {
+    void resetWindowsOffset() {
         final SurfaceControl.Transaction tx =
                 mSurfaceControlTransactionFactory.getTransaction();
         mDisplayAreaTokenMap.forEach(
@@ -238,21 +218,20 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                         animator.cancel();
                     }
                     tx.setPosition(leash, 0, 0)
-                            .setWindowCrop(leash, -1/* reset */, -1/* reset */);
-                    // DisplayRotationController will applyTransaction() after finish rotating
-                    if (wct != null) {
-                        wct.setBounds(token, null/* reset */);
-                        wct.setAppBounds(token, null/* reset */);
-                    }
+                            .setWindowCrop(leash, -1, -1)
+                            .setCornerRadius(leash, -1);
                 });
         tx.apply();
+        mLastVisualOffset = 0;
+        mLastVisualDisplayBounds.offsetTo(0, 0);
     }
 
-    private void animateWindows(WindowContainerToken token, SurfaceControl leash, Rect fromBounds,
-            Rect toBounds, @OneHandedAnimationController.TransitionDirection int direction,
+    private void animateWindows(WindowContainerToken token, SurfaceControl leash, float fromPos,
+            float toPos, @OneHandedAnimationController.TransitionDirection int direction,
             int durationMs) {
         final OneHandedAnimationController.OneHandedTransitionAnimator animator =
-                mAnimationController.getAnimator(token, leash, fromBounds, toBounds);
+                mAnimationController.getAnimator(token, leash, fromPos, toPos,
+                        mLastVisualDisplayBounds);
         if (animator != null) {
             animator.setTransitionDirection(direction)
                     .addOneHandedAnimationCallback(mOneHandedAnimationCallback)
@@ -265,10 +244,13 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     }
 
     @VisibleForTesting
-    void finishOffset(int offset,
-            @OneHandedAnimationController.TransitionDirection int direction) {
-        mLastVisualDisplayBounds.offsetTo(0,
-                direction == TRANSITION_DIRECTION_TRIGGER ? offset : 0);
+    void finishOffset(int offset, @OneHandedAnimationController.TransitionDirection int direction) {
+        if (direction == TRANSITION_DIRECTION_EXIT) {
+            // We must do this to ensure reset property for leash when exit one handed mode
+            resetWindowsOffset();
+        }
+        mLastVisualOffset = direction == TRANSITION_DIRECTION_TRIGGER ? offset : 0;
+        mLastVisualDisplayBounds.offsetTo(0, Math.round(mLastVisualOffset));
         for (int i = mTransitionCallbacks.size() - 1; i >= 0; i--) {
             final OneHandedTransitionCallback cb = mTransitionCallbacks.get(i);
             cb.onStartTransition(false /* isTransitioning */);
@@ -285,7 +267,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
      *
      * @return Rect latest finish_offset
      */
-    public Rect getLastVisualDisplayBounds() {
+    private Rect getLastVisualDisplayBounds() {
         return mLastVisualDisplayBounds;
     }
 
@@ -332,5 +314,11 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         pw.println(mDefaultDisplayBounds);
         pw.print(innerPrefix + "mLastVisualDisplayBounds=");
         pw.println(mLastVisualDisplayBounds);
+        pw.print(innerPrefix + "mLastVisualOffset=");
+        pw.println(mLastVisualOffset);
+
+        if (mAnimationController != null) {
+            mAnimationController.dump(pw);
+        }
     }
 }

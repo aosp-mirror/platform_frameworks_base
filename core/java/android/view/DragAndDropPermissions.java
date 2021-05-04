@@ -19,7 +19,6 @@ package android.view;
 import static java.lang.Integer.toHexString;
 
 import android.app.Activity;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -61,24 +60,6 @@ public final class DragAndDropPermissions implements Parcelable {
 
     private static final String TAG = "DragAndDrop";
     private static final boolean DEBUG = false;
-
-    /**
-     * Permissions for a drop can be granted in one of two ways:
-     * <ol>
-     *     <li>An app can explicitly request permissions using
-     *     {@link Activity#requestDragAndDropPermissions(DragEvent)}. In this case permissions are
-     *     revoked automatically when then activity is destroyed. See {@link #take(IBinder)}.
-     *     <li>The platform can request permissions on behalf of the app (e.g. in
-     *     {@link android.widget.Editor}). In this case permissions are revoked automatically when
-     *     the app process terminates. See {@link #takeTransient()}.
-     * </ol>
-     *
-     * <p>In order to implement the second case above, we create a static token object here. This
-     * ensures that the token stays alive for the lifetime of the app process, allowing us to
-     * revoke permissions when the app process terminates using {@link IBinder#linkToDeath} in
-     * {@code DragAndDropPermissionsHandler}.
-     */
-    private static IBinder sAppToken;
 
     private final IDragAndDropPermissions mDragAndDropPermissions;
 
@@ -128,7 +109,9 @@ public final class DragAndDropPermissions implements Parcelable {
     }
 
     /**
-     * Take permissions transiently. Permissions will be revoked when the app process terminates.
+     * Take permissions transiently. Permissions will be tied to this object's lifecycle; if not
+     * released explicitly, they will be released automatically when there are no more references
+     * to this object and it's garbage collected.
      *
      * <p>Note: This API is not exposed to apps.
      *
@@ -138,14 +121,10 @@ public final class DragAndDropPermissions implements Parcelable {
      */
     public boolean takeTransient() {
         try {
-            if (sAppToken == null) {
-                sAppToken = new Binder();
-            }
             if (DEBUG) {
-                Log.d(TAG, this + ": calling takeTransient() with process-bound token: "
-                        + toHexString(sAppToken.hashCode()));
+                Log.d(TAG, this + ": calling takeTransient()");
             }
-            mDragAndDropPermissions.takeTransient(sAppToken);
+            mDragAndDropPermissions.takeTransient();
         } catch (RemoteException e) {
             Log.w(TAG, this + ": takeTransient() failed with a RemoteException", e);
             return false;

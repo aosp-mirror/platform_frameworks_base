@@ -93,6 +93,18 @@ public class BluetoothPowerCalculator extends PowerCalculator {
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
                         Math.max(systemPowerMah, total.powerMah), powerModel)
                 .setPowerConsumedByApps(total.powerMah);
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_BLUETOOTH, systemDurationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                        Math.max(systemPowerMah, total.powerMah), powerModel);
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_BLUETOOTH, total.durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH, total.powerMah,
+                        powerModel);
     }
 
     private void calculateApp(UidBatteryConsumer.Builder app, PowerAndDuration total,

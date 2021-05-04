@@ -864,7 +864,6 @@ public class RippleDrawable extends LayerDrawable {
         boolean shouldExit = mExitingAnimation;
         mRippleActive = false;
         mExitingAnimation = false;
-        getRipplePaint();
         drawContent(canvas);
         drawPatternedBackground(canvas, cx, cy);
         if (shouldAnimate && mRunningAnimations.size() <= MAX_RIPPLES) {
@@ -928,7 +927,7 @@ public class RippleDrawable extends LayerDrawable {
             startBackgroundAnimation();
         }
         if (mBackgroundOpacity == 0) return;
-        Paint p = mRipplePaint;
+        Paint p = getRipplePaint();
         float newOpacity = mBackgroundOpacity;
         final int origAlpha = p.getAlpha();
         final int alpha = Math.min((int) (origAlpha * newOpacity + 0.5f), 255);
@@ -957,7 +956,7 @@ public class RippleDrawable extends LayerDrawable {
     @NonNull
     private RippleAnimationSession.AnimationProperties<Float, Paint> createAnimationProperties(
             float x, float y, float cx, float cy, float w, float h) {
-        Paint p = new Paint(mRipplePaint);
+        Paint p = new Paint(getRipplePaint());
         float radius = getComputedRadius();
         RippleAnimationSession.AnimationProperties<Float, Paint> properties;
         RippleShader shader = new RippleShader();

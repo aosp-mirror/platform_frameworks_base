@@ -790,7 +790,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         try {
                             final float backlight = brightnessToBacklight(brightness);
                             float nits = NITS_INVALID;
-                            float sdrBacklight = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+                            float sdrBacklight = backlight;
                             float sdrNits = NITS_INVALID;
                             if (getDisplayDeviceConfig().hasNitsMapping()
                                     && sdrBrightness != PowerManager.BRIGHTNESS_INVALID_FLOAT) {

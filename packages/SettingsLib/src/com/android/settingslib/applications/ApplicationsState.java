@@ -2027,6 +2027,7 @@ public class ApplicationsState {
                 }
             };
 
+    /* For the Storage Settings which shows category of app types. */
     public static final AppFilter FILTER_OTHER_APPS =
             new AppFilter() {
                 @Override
@@ -2042,6 +2043,23 @@ public class ApplicationsState {
                                         || FILTER_GAMES.filterApp(entry)
                                         || FILTER_MOVIES.filterApp(entry)
                                         || FILTER_PHOTOS.filterApp(entry);
+                    }
+                    return !isCategorized;
+                }
+            };
+
+    /* For the Storage Settings which shows category of file types. */
+    public static final AppFilter FILTER_APPS_EXCEPT_GAMES =
+            new AppFilter() {
+                @Override
+                public void init() {
+                }
+
+                @Override
+                public boolean filterApp(AppEntry entry) {
+                    boolean isCategorized;
+                    synchronized (entry) {
+                        isCategorized = FILTER_GAMES.filterApp(entry);
                     }
                     return !isCategorized;
                 }

@@ -116,6 +116,18 @@ public class MobileRadioPowerCalculatorTest {
                 .isWithin(PRECISION).of(0.8);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(2.2444);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+
+        BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(0.8);
+        assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
 
     @Test
@@ -174,6 +186,18 @@ public class MobileRadioPowerCalculatorTest {
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isWithin(PRECISION).of(1.53934);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(4.31711);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+
+        BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(1.53934);
+        assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
     }
 }

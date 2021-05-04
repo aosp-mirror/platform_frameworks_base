@@ -51,6 +51,7 @@ public class WakelockPowerCalculator extends PowerCalculator {
         double osPowerMah = 0;
         long osDurationMs = 0;
         long totalAppDurationMs = 0;
+        double appPowerMah = 0;
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
@@ -60,6 +61,7 @@ public class WakelockPowerCalculator extends PowerCalculator {
             app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WAKELOCK, result.durationMs)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK, result.powerMah);
             totalAppDurationMs += result.durationMs;
+            appPowerMah += result.powerMah;
 
             if (app.getUid() == Process.ROOT_UID) {
                 osBatteryConsumer = app;
@@ -71,13 +73,24 @@ public class WakelockPowerCalculator extends PowerCalculator {
         // The device has probably been awake for longer than the screen on
         // time and application wake lock time would account for.  Assign
         // this remainder to the OS, if possible.
+        calculateRemaining(result, batteryStats, rawRealtimeUs, rawUptimeUs,
+                BatteryStats.STATS_SINCE_CHARGED, osPowerMah, osDurationMs, totalAppDurationMs);
         if (osBatteryConsumer != null) {
-            calculateRemaining(result, batteryStats, rawRealtimeUs, rawUptimeUs,
-                    BatteryStats.STATS_SINCE_CHARGED, osPowerMah, osDurationMs, totalAppDurationMs);
             osBatteryConsumer.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WAKELOCK,
                     result.durationMs)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK, result.powerMah);
         }
+
+        final long wakeTimeMillis =
+                calculateWakeTimeMillis(batteryStats, rawRealtimeUs, rawUptimeUs);
+        final double powerMah = mPowerEstimator.calculatePower(wakeTimeMillis);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WAKELOCK, wakeTimeMillis)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK, powerMah);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK, appPowerMah);
     }
 
     @Override
@@ -145,8 +158,7 @@ public class WakelockPowerCalculator extends PowerCalculator {
     private void calculateRemaining(PowerAndDuration result, BatteryStats stats, long rawRealtimeUs,
             long rawUptimeUs, int statsType, double osPowerMah, long osDurationMs,
             long totalAppDurationMs) {
-        final long wakeTimeMillis = stats.getBatteryUptime(rawUptimeUs) / 1000
-                - stats.getScreenOnTime(rawRealtimeUs, statsType) / 1000
+        final long wakeTimeMillis = calculateWakeTimeMillis(stats, rawRealtimeUs, rawUptimeUs)
                 - totalAppDurationMs;
         if (wakeTimeMillis > 0) {
             final double power = mPowerEstimator.calculatePower(wakeTimeMillis);
@@ -156,5 +168,13 @@ public class WakelockPowerCalculator extends PowerCalculator {
             result.durationMs = osDurationMs + wakeTimeMillis;
             result.powerMah = osPowerMah + power;
         }
+    }
+
+    private long calculateWakeTimeMillis(BatteryStats batteryStats, long rawRealtimeUs,
+            long rawUptimeUs) {
+        final long batteryUptimeUs = batteryStats.getBatteryUptime(rawUptimeUs);
+        final long screenOnTimeUs =
+                batteryStats.getScreenOnTime(rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
+        return (batteryUptimeUs - screenOnTimeUs) / 1000;
     }
 }

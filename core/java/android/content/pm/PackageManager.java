@@ -4605,7 +4605,7 @@ public abstract class PackageManager {
      * Query for all of the permissions associated with a particular group.
      *
      * @param permissionGroup The fully qualified name (i.e. com.google.permission.LOGIN)
-     *            of the permission group you are interested in. Use null to
+     *            of the permission group you are interested in. Use {@code null} to
      *            find all of the permissions not associated with a group.
      * @param flags Additional option flags to modify the data returned.
      * @return Returns a list of {@link PermissionInfo} containing information
@@ -4615,7 +4615,7 @@ public abstract class PackageManager {
      */
     //@Deprecated
     @NonNull
-    public abstract List<PermissionInfo> queryPermissionsByGroup(@NonNull String permissionGroup,
+    public abstract List<PermissionInfo> queryPermissionsByGroup(@Nullable String permissionGroup,
             @PermissionInfoFlags int flags) throws NameNotFoundException;
 
     /**
