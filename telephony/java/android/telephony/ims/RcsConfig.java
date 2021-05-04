@@ -22,10 +22,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Build;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.provider.Telephony.SimInfo;
 import android.text.TextUtils;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 
 import com.android.telephony.Rlog;
 
@@ -36,7 +36,9 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -44,23 +46,138 @@ import java.util.zip.GZIPOutputStream;
  * RCS config data and methods to process the config
  * @hide
  */
-public final class RcsConfig implements Parcelable {
+public final class RcsConfig {
     private static final String LOG_TAG = "RcsConfig";
     private static final boolean DBG = Build.IS_ENG;
 
-    // Tag for Rcs Volte single registration defined in RCC.07 A.1.6.2
-    private static final String TAG_SINGLE_REGISTRATION = "rcsVolteSingleRegistration";
+    // Tag and attribute defined in RCC.07 A.2
+    private static final String TAG_CHARACTERISTIC = "characteristic";
+    private static final String TAG_PARM = "parm";
+    private static final String ATTRIBUTE_TYPE = "type";
+    private static final String ATTRIBUTE_NAME = "name";
+    private static final String ATTRIBUTE_VALUE = "value";
+    // Keyword for Rcs Volte single registration defined in RCC.07 A.1.6.2
+    private static final String PARM_SINGLE_REGISTRATION = "rcsVolteSingleRegistration";
 
-    private final HashMap<String, String> mValues = new HashMap<>();
+    /**
+     * Characteristic of the RCS provisioning config
+     */
+    public static class Characteristic {
+        private String mType;
+        private final Map<String, String> mParms = new ArrayMap<>();
+        private final Set<Characteristic> mSubs = new ArraySet<>();
+        private final Characteristic mParent;
 
-    private RcsConfig(HashMap<String, String> values) {
-        mValues.putAll(values);
+        private Characteristic(String type, Characteristic parent) {
+            mType = type;
+            mParent = parent;
+        }
+
+        private String getType() {
+            return mType;
+        }
+
+        private Map<String, String> getParms() {
+            return mParms;
+        }
+
+        private Set<Characteristic> getSubs() {
+            return mSubs;
+        }
+
+        private Characteristic getParent() {
+            return mParent;
+        }
+
+        private Characteristic getSubByType(String type) {
+            if (TextUtils.equals(mType, type)) {
+                return this;
+            }
+            Characteristic result = null;
+            for (Characteristic sub : mSubs) {
+                result = sub.getSubByType(type);
+                if (result != null) {
+                    break;
+                }
+            }
+            return result;
+        }
+
+        private boolean hasSubByType(String type) {
+            return getSubByType(type) != null;
+        }
+
+        private String getParmValue(String name) {
+            String value = mParms.get(name);
+            if (value == null) {
+                for (Characteristic sub : mSubs) {
+                    value = sub.getParmValue(name);
+                    if (value != null) {
+                        break;
+                    }
+                }
+            }
+            return value;
+        }
+
+        boolean hasParm(String name) {
+            if (mParms.containsKey(name)) {
+                return true;
+            }
+
+            for (Characteristic sub : mSubs) {
+                if (sub.hasParm(name)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("[" + mType + "]: ");
+            if (DBG) {
+                sb.append(mParms);
+            }
+            for (Characteristic sub : mSubs) {
+                sb.append("\n");
+                sb.append(sub.toString().replace("\n", "\n\t"));
+            }
+            return sb.toString();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Characteristic)) {
+                return false;
+            }
+
+            Characteristic o = (Characteristic) obj;
+
+            return TextUtils.equals(mType, o.mType) && mParms.equals(o.mParms)
+                    && mSubs.equals(o.mSubs);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mType, mParms, mSubs);
+        }
     }
+
+    private final Characteristic mRoot;
+    private Characteristic mCurrent;
+    private final byte[] mData;
 
     public RcsConfig(byte[] data) throws IllegalArgumentException {
         if (data == null || data.length == 0) {
             throw new IllegalArgumentException("Empty data");
         }
+        mRoot = new Characteristic(null, null);
+        mCurrent = mRoot;
+        mData = data;
+        Characteristic current = mRoot;
         ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
         try {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
@@ -69,16 +186,51 @@ public final class RcsConfig implements Parcelable {
             xpp.setInput(inputStream, null);
             int eventType = xpp.getEventType();
             String tag = null;
-            while (eventType != XmlPullParser.END_DOCUMENT) {
+            while (eventType != XmlPullParser.END_DOCUMENT && current != null) {
                 if (eventType == XmlPullParser.START_TAG) {
-                    tag = xpp.getName().trim();
-                } else if (eventType == XmlPullParser.END_TAG) {
-                    tag = null;
-                } else if (eventType == XmlPullParser.TEXT) {
-                    String value = xpp.getText().trim();
-                    if (!TextUtils.isEmpty(tag) && !TextUtils.isEmpty(value)) {
-                        mValues.put(tag, value);
+                    tag = xpp.getName().trim().toLowerCase();
+                    if (TAG_CHARACTERISTIC.equals(tag)) {
+                        int count = xpp.getAttributeCount();
+                        String type = null;
+                        if (count > 0) {
+                            for (int i = 0; i < count; i++) {
+                                String name = xpp.getAttributeName(i).trim().toLowerCase();
+                                if (ATTRIBUTE_TYPE.equals(name)) {
+                                    type = xpp.getAttributeValue(xpp.getAttributeNamespace(i),
+                                            name).trim().toLowerCase();
+                                    break;
+                                }
+                            }
+                        }
+                        Characteristic next = new Characteristic(type, current);
+                        current.getSubs().add(next);
+                        current = next;
+                    } else if (TAG_PARM.equals(tag)) {
+                        int count = xpp.getAttributeCount();
+                        String key = null;
+                        String value = null;
+                        if (count > 1) {
+                            for (int i = 0; i < count; i++) {
+                                String name = xpp.getAttributeName(i).trim().toLowerCase();
+                                if (ATTRIBUTE_NAME.equals(name)) {
+                                    key = xpp.getAttributeValue(xpp.getAttributeNamespace(i),
+                                            name).trim().toLowerCase();
+                                } else if (ATTRIBUTE_VALUE.equals(name)) {
+                                    value = xpp.getAttributeValue(xpp.getAttributeNamespace(i),
+                                            name).trim();
+                                }
+                            }
+                        }
+                        if (key != null && value != null) {
+                            current.getParms().put(key, value);
+                        }
                     }
+                } else if (eventType == XmlPullParser.END_TAG) {
+                    tag = xpp.getName().trim().toLowerCase();
+                    if (TAG_CHARACTERISTIC.equals(tag)) {
+                        current = current.getParent();
+                    }
+                    tag = null;
                 }
                 eventType = xpp.next();
             }
@@ -102,7 +254,8 @@ public final class RcsConfig implements Parcelable {
      * @return Returns the config value if it exists, or defaultVal.
      */
     public @Nullable String getString(@NonNull String tag, @Nullable String defaultVal) {
-        return mValues.containsKey(tag) ? mValues.get(tag) : defaultVal;
+        String value = mCurrent.getParmValue(tag.trim().toLowerCase());
+        return value != null ?  value : defaultVal;
     }
 
     /**
@@ -115,7 +268,7 @@ public final class RcsConfig implements Parcelable {
      */
     public int getInteger(@NonNull String tag, int defaultVal) {
         try {
-            return Integer.parseInt(mValues.get(tag));
+            return Integer.parseInt(getString(tag, null));
         } catch (NumberFormatException e) {
             logd("error to getInteger for " + tag + " due to " + e);
         }
@@ -131,10 +284,8 @@ public final class RcsConfig implements Parcelable {
      * @return Returns the config value if it exists, or defaultVal.
      */
     public boolean getBoolean(@NonNull String tag, boolean defaultVal) {
-        if (!mValues.containsKey(tag)) {
-            return defaultVal;
-        }
-        return Boolean.parseBoolean(mValues.get(tag));
+        String value = getString(tag, null);
+        return value != null ? Boolean.parseBoolean(value) : defaultVal;
     }
 
     /**
@@ -145,15 +296,70 @@ public final class RcsConfig implements Parcelable {
      * @return Returns true if it exists, or false.
      */
     public boolean hasConfig(@NonNull String tag) {
-        return mValues.containsKey(tag);
+        return mCurrent.hasParm(tag.trim().toLowerCase());
+    }
+
+    /**
+     * Return the Characteristic with the given type
+     */
+    public @Nullable Characteristic getCharacteristic(@NonNull String type) {
+        return mCurrent.getSubByType(type.trim().toLowerCase());
+    }
+
+    /**
+     * Check whether the Characteristic with the given type exists
+     */
+    public boolean hasCharacteristic(@NonNull String type) {
+        return mCurrent.getSubByType(type.trim().toLowerCase()) != null;
+    }
+
+    /**
+     * Set current Characteristic to given Characteristic
+     */
+    public void setCurrentCharacteristic(@NonNull Characteristic current) {
+        if (current != null) {
+            mCurrent = current;
+        }
+    }
+
+    /**
+     * Move current Characteristic to parent layer
+     */
+    public boolean moveToParent() {
+        if (mCurrent.getParent() == null) {
+            return false;
+        }
+        mCurrent = mCurrent.getParent();
+        return true;
+    }
+
+    /**
+     * Move current Characteristic to the root
+     */
+    public void moveToRoot() {
+        mCurrent = mRoot;
+    }
+
+    /**
+     * Return root Characteristic
+     */
+    public @NonNull Characteristic getRoot() {
+        return mRoot;
+    }
+
+    /**
+     * Return current Characteristic
+     */
+    public @NonNull Characteristic getCurrentCharacteristic() {
+        return mCurrent;
     }
 
     /**
      * Check whether Rcs Volte single registration is supported by the config.
      */
     public boolean isRcsVolteSingleRegistrationSupported() {
-        return getBoolean(TAG_SINGLE_REGISTRATION, false)
-                || getInteger(TAG_SINGLE_REGISTRATION, 0) != 0;
+        return getBoolean(PARM_SINGLE_REGISTRATION, false)
+                || getInteger(PARM_SINGLE_REGISTRATION, 0) != 0;
     }
 
     @Override
@@ -161,12 +367,10 @@ public final class RcsConfig implements Parcelable {
         final StringBuilder sb = new StringBuilder();
         sb.append("[RCS Config]");
         if (DBG) {
-            mValues.forEach((t, v) -> {
-                sb.append("\n");
-                sb.append(t);
-                sb.append(" : ");
-                sb.append(v);
-            });
+            sb.append("=== Root ===\n");
+            sb.append(mRoot);
+            sb.append("=== Current ===\n");
+            sb.append(mCurrent);
         }
         return sb.toString();
     }
@@ -179,12 +383,12 @@ public final class RcsConfig implements Parcelable {
 
         RcsConfig other = (RcsConfig) obj;
 
-        return mValues.equals(other.mValues);
+        return mRoot.equals(other.mRoot) && mCurrent.equals(other.mCurrent);
     }
 
     @Override
     public int hashCode() {
-        return mValues.hashCode();
+        return Objects.hash(mRoot, mCurrent);
     }
 
     /**
@@ -273,38 +477,6 @@ public final class RcsConfig implements Parcelable {
             }
         }
         return isCompressed ? data : decompressGzip(data);
-    }
-
-    /**
-     * {@link Parcelable#writeToParcel}
-     */
-    public void writeToParcel(@NonNull Parcel out, int flags) {
-        out.writeMap(mValues);
-    }
-
-    /**
-     * {@link Parcelable.Creator}
-     *
-     */
-    public static final @NonNull Parcelable.Creator<RcsConfig>
-            CREATOR = new Creator<RcsConfig>() {
-                @Override
-                public RcsConfig createFromParcel(Parcel in) {
-                    HashMap<String, String> values = in.readHashMap(null);
-                    return values == null ? null : new RcsConfig(values);
-                }
-
-                @Override
-                public RcsConfig[] newArray(int size) {
-                    return new RcsConfig[size];
-                }
-            };
-
-    /**
-     * {@link Parcelable#describeContents}
-     */
-    public int describeContents() {
-        return 0;
     }
 
     private static void logd(String msg) {
