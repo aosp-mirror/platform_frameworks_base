@@ -132,6 +132,12 @@ class ManifestExtractor {
     /** Adds an element to the list of children of the element. */
     void AddChild(std::unique_ptr<Element>& child) { children_.push_back(std::move(child)); }
 
+    template <typename Predicate>
+    void Filter(Predicate&& func) {
+      children_.erase(std::remove_if(children_.begin(), children_.end(),
+                                     [&](const auto& e) { return func(e.get()); }));
+    }
+
     /** Retrieves the list of children of the element. */
     const std::vector<std::unique_ptr<Element>>& children() const {
       return children_;
@@ -1962,6 +1968,21 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
 
   // Extract badging information
   auto root = Visit(element);
+
+  // Filter out all "uses-sdk" tags besides the very last tag. The android runtime only uses the
+  // attribute values from the last defined tag.
+  std::vector<UsesSdkBadging*> filtered_uses_sdk_tags;
+  for (const auto& child : root->children()) {
+    if (auto uses_sdk = ElementCast<UsesSdkBadging>(child.get())) {
+      filtered_uses_sdk_tags.emplace_back(uses_sdk);
+    }
+  }
+  filtered_uses_sdk_tags.pop_back();
+
+  root->Filter([&](const ManifestExtractor::Element* e) {
+    return std::find(filtered_uses_sdk_tags.begin(), filtered_uses_sdk_tags.end(), e) !=
+           filtered_uses_sdk_tags.end();
+  });
 
   // Print the elements in order seen
   Print(root.get(), printer);
