@@ -1133,7 +1133,7 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * @param handler to use for postponed calculations.
      */
     public abstract void requestChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Type int optional, @Checksum.Type int required,
+            @Checksum.TypeMask int optional, @Checksum.TypeMask int required,
             @Nullable List trustedInstallers,
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId,
             @NonNull Executor executor, @NonNull Handler handler);
