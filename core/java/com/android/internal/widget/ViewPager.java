@@ -387,28 +387,6 @@ public class ViewPager extends ViewGroup {
     }
 
     /**
-     * Returns the {@link EdgeEffect#getType()} for the edge effects.
-     * @return the {@link EdgeEffect#getType()} for the edge effects.
-     * @attr ref android.R.styleable#EdgeEffect_edgeEffectType
-     */
-    @EdgeEffect.EdgeEffectType
-    public int getEdgeEffectType() {
-        // Both left and right edge have the same edge effect type
-        return mLeftEdge.getType();
-    }
-
-    /**
-     * Sets the {@link EdgeEffect#setType(int)} for the edge effects.
-     * @param type The edge effect type to use for the edge effects.
-     * @attr ref android.R.styleable#EdgeEffect_edgeEffectType
-     */
-    public void setEdgeEffectType(@EdgeEffect.EdgeEffectType int type) {
-        mLeftEdge.setType(type);
-        mRightEdge.setType(type);
-        invalidate();
-    }
-
-    /**
      * Set a PagerAdapter that will supply views for this pager as needed.
      *
      * @param adapter Adapter to use
