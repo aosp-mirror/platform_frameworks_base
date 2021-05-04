@@ -55,6 +55,7 @@ import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.util.animation.TransitionLayout;
 
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -69,6 +70,9 @@ public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
     private static final float DISABLED_ALPHA = 0.38f;
     private static final String EXTRAS_MEDIA_SOURCE_PACKAGE_NAME = "package_name";
+    private static final String EXTRAS_SMARTSPACE_INTENT =
+            "com.google.android.apps.gsa.smartspace.extra.SMARTSPACE_INTENT";
+    private static final String KEY_SMARTSPACE_OPEN_IN_FOREGROUND = "KEY_OPEN_IN_FOREGROUND";
     private static final int MEDIA_RECOMMENDATION_ITEMS_PER_ROW = 3;
     private static final int MEDIA_RECOMMENDATION_MAX_NUM = 6;
 
@@ -653,14 +657,45 @@ public class MediaControlPanel {
                     /* rank */ 1,
                     /* cardinality */ 1);
 
-            mActivityStarter.postStartActivityDismissingKeyguard(
-                    action.getIntent(),
-                    0 /* delay */,
-                    buildLaunchAnimatorController(mRecommendationViewHolder.getRecommendations()));
+            if (shouldSmartspaceRecItemOpenInForeground(action)) {
+                // Request to unlock the device if the activity needs to be opened in foreground.
+                mActivityStarter.postStartActivityDismissingKeyguard(
+                        action.getIntent(),
+                        0 /* delay */,
+                        buildLaunchAnimatorController(
+                                mRecommendationViewHolder.getRecommendations()));
+            } else {
+                // Otherwise, open the activity in background directly.
+                view.getContext().startActivity(action.getIntent());
+            }
+
             if (callback != null) {
                 callback.onClick(v);
             }
         });
+    }
+
+    /** Returns if the Smartspace action will open the activity in foreground. */
+    private boolean shouldSmartspaceRecItemOpenInForeground(SmartspaceAction action) {
+        if (action == null || action.getIntent() == null
+                || action.getIntent().getExtras() == null) {
+            return false;
+        }
+
+        String intentString = action.getIntent().getExtras().getString(EXTRAS_SMARTSPACE_INTENT);
+        if (intentString == null) {
+            return false;
+        }
+
+        try {
+            Intent wrapperIntent = Intent.parseUri(intentString, Intent.URI_INTENT_SCHEME);
+            return wrapperIntent.getBooleanExtra(KEY_SMARTSPACE_OPEN_IN_FOREGROUND, false);
+        } catch (URISyntaxException e) {
+            Log.wtf(TAG, "Failed to create intent from URI: " + intentString);
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     private int getSurfaceForSmartspaceLogging(int currentEndLocation) {
