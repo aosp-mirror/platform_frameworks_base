@@ -192,6 +192,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             | SUPPRESSED_EFFECT_LIGHTS
             | SUPPRESSED_EFFECT_PEEK
             | SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+    private static final long SBN_POST_TIME = 567L;
 
     private ShortcutInfo mShortcutInfo;
     private NotificationEntry mNotificationEntry;
@@ -632,6 +633,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         Bundle bundle = mBundleArgumentCaptor.getValue();
         PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
         assertThat(tile.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tile.getLastInteractionTimestamp()).isEqualTo(SBN_POST_TIME);
         assertThat(tile.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT_1);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
@@ -1010,6 +1012,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setSbn(sbn)
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
+        long timestampBeforeNotificationClear = System.currentTimeMillis();
         NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn, 0);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
@@ -1018,12 +1021,13 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         Bundle bundle = mBundleArgumentCaptor.getValue();
         PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
         assertThat(tile.getNotificationKey()).isEqualTo(null);
+        assertThat(tile.getLastInteractionTimestamp()).isLessThan(
+                timestampBeforeNotificationClear);
         assertThat(tile.getNotificationContent()).isEqualTo(null);
         assertThat(tile.getNotificationDataUri()).isEqualTo(null);
         verify(mAppWidgetManager, times(2)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
-
 
     @Test
     public void testAddThenReconfigureWidgetsUpdatesStorageCacheAndListeners()
@@ -1596,6 +1600,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setNotification(notification)
                 .setPkg(TEST_PACKAGE_A)
                 .setUid(0)
+                .setPostTime(SBN_POST_TIME)
                 .setUser(new UserHandle(0))
                 .build();
     }
