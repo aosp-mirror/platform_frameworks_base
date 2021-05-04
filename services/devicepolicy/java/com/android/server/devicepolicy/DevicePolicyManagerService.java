@@ -7244,6 +7244,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        checkAllUsersAreAffiliatedWithDevice();
         mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getConnectivityManager().setGlobalProxy(proxyInfo));
     }
@@ -15736,6 +15737,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        checkAllUsersAreAffiliatedWithDevice();
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_GLOBAL_PRIVATE_DNS);
 
         switch (mode) {
