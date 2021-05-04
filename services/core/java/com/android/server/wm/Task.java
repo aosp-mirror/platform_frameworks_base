@@ -2258,7 +2258,6 @@ class Task extends WindowContainer<WindowContainer> {
         mTmpPrevBounds.set(getBounds());
         final boolean wasInMultiWindowMode = inMultiWindowMode();
         final boolean wasInPictureInPicture = inPinnedWindowingMode();
-        final int oldOrientation = getOrientation();
         super.onConfigurationChanged(newParentConfig);
         // Only need to update surface size here since the super method will handle updating
         // surface position.
@@ -2299,11 +2298,6 @@ class Task extends WindowContainer<WindowContainer> {
             // If the display orientation change is done, let the corresponding task organizer take
             // back the control of this task.
             mForceNotOrganized = false;
-        }
-
-        // Report orientation change such as changing from freeform to fullscreen.
-        if (oldOrientation != getOrientation()) {
-            onDescendantOrientationChanged(this);
         }
 
         saveLaunchingStateIfNeeded();
