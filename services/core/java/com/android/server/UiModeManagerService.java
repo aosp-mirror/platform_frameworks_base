@@ -33,7 +33,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
-import android.app.IOnProjectionStateChangeListener;
+import android.app.IOnProjectionStateChangedListener;
 import android.app.IUiModeManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -181,7 +181,7 @@ final class UiModeManagerService extends SystemService {
     private SparseArray<List<ProjectionHolder>> mProjectionHolders;
     @GuardedBy("mLock")
     @Nullable
-    private SparseArray<RemoteCallbackList<IOnProjectionStateChangeListener>> mProjectionListeners;
+    private SparseArray<RemoteCallbackList<IOnProjectionStateChangedListener>> mProjectionListeners;
 
     public UiModeManagerService(Context context) {
         this(context, /* setupWizardComplete= */ false, /* tm= */ null, new Injector());
@@ -993,11 +993,11 @@ final class UiModeManagerService extends SystemService {
             }
         }
 
-        public void addOnProjectionStateChangeListener(IOnProjectionStateChangeListener listener,
+        public void addOnProjectionStateChangedListener(IOnProjectionStateChangedListener listener,
                 @UiModeManager.ProjectionType int projectionType) {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PROJECTION_STATE,
-                    "registerProjectionStateListener");
+                    "addOnProjectionStateChangedListener");
             if (projectionType == PROJECTION_TYPE_NONE) {
                 return;
             }
@@ -1027,11 +1027,11 @@ final class UiModeManagerService extends SystemService {
         }
 
 
-        public void removeOnProjectionStateChangeListener(
-                IOnProjectionStateChangeListener listener) {
+        public void removeOnProjectionStateChangedListener(
+                IOnProjectionStateChangedListener listener) {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PROJECTION_STATE,
-                    "unregisterProjectionStateListener");
+                    "removeOnProjectionStateChangedListener");
             synchronized (mLock) {
                 if (mProjectionListeners != null) {
                     for (int i = 0; i < mProjectionListeners.size(); ++i) {
@@ -1191,7 +1191,7 @@ final class UiModeManagerService extends SystemService {
             // Every listener that is affected must be called back with all the state they are
             // listening for.
             if ((changedProjectionType & listenerProjectionType) != 0) {
-                RemoteCallbackList<IOnProjectionStateChangeListener> listeners =
+                RemoteCallbackList<IOnProjectionStateChangedListener> listeners =
                         mProjectionListeners.valueAt(i);
                 List<String> packageNames = new ArrayList<>();
                 @UiModeManager.ProjectionType int activeProjectionTypes =
