@@ -629,6 +629,8 @@ public class NotificationManagerService extends SystemService {
     static class Archive {
         final SparseArray<Boolean> mEnabled;
         final int mBufferSize;
+        final Object mBufferLock = new Object();
+        @GuardedBy("mBufferLock")
         final LinkedList<Pair<StatusBarNotification, Integer>> mBuffer;
 
         public Archive(int size) {
@@ -651,14 +653,16 @@ public class NotificationManagerService extends SystemService {
             if (!mEnabled.get(sbn.getNormalizedUserId(), false)) {
                 return;
             }
-            if (mBuffer.size() == mBufferSize) {
-                mBuffer.removeFirst();
-            }
+            synchronized (mBufferLock) {
+                if (mBuffer.size() == mBufferSize) {
+                    mBuffer.removeFirst();
+                }
 
-            // We don't want to store the heavy bits of the notification in the archive,
-            // but other clients in the system process might be using the object, so we
-            // store a (lightened) copy.
-            mBuffer.addLast(new Pair<>(sbn.cloneLight(), reason));
+                // We don't want to store the heavy bits of the notification in the archive,
+                // but other clients in the system process might be using the object, so we
+                // store a (lightened) copy.
+                mBuffer.addLast(new Pair<>(sbn.cloneLight(), reason));
+            }
         }
 
         public Iterator<Pair<StatusBarNotification, Integer>> descendingIterator() {
@@ -666,27 +670,31 @@ public class NotificationManagerService extends SystemService {
         }
 
         public StatusBarNotification[] getArray(int count, boolean includeSnoozed) {
-            if (count == 0) count = mBufferSize;
-            List<StatusBarNotification> a = new ArrayList();
-            Iterator<Pair<StatusBarNotification, Integer>> iter = descendingIterator();
-            int i=0;
-            while (iter.hasNext() && i < count) {
-                Pair<StatusBarNotification, Integer> pair = iter.next();
-                if (pair.second != REASON_SNOOZED || includeSnoozed) {
-                    i++;
-                    a.add(pair.first);
+            synchronized (mBufferLock) {
+                if (count == 0) count = mBufferSize;
+                List<StatusBarNotification> a = new ArrayList();
+                Iterator<Pair<StatusBarNotification, Integer>> iter = descendingIterator();
+                int i = 0;
+                while (iter.hasNext() && i < count) {
+                    Pair<StatusBarNotification, Integer> pair = iter.next();
+                    if (pair.second != REASON_SNOOZED || includeSnoozed) {
+                        i++;
+                        a.add(pair.first);
+                    }
                 }
+                return a.toArray(new StatusBarNotification[a.size()]);
             }
-            return  a.toArray(new StatusBarNotification[a.size()]);
         }
 
         public void updateHistoryEnabled(@UserIdInt int userId, boolean enabled) {
             mEnabled.put(userId, enabled);
 
             if (!enabled) {
-                for (int i = mBuffer.size() - 1; i >= 0; i--) {
-                    if (userId == mBuffer.get(i).first.getNormalizedUserId()) {
-                        mBuffer.remove(i);
+                synchronized (mBufferLock) {
+                    for (int i = mBuffer.size() - 1; i >= 0; i--) {
+                        if (userId == mBuffer.get(i).first.getNormalizedUserId()) {
+                            mBuffer.remove(i);
+                        }
                     }
                 }
             }
@@ -695,15 +703,18 @@ public class NotificationManagerService extends SystemService {
         // Remove notifications with the specified user & channel ID.
         public void removeChannelNotifications(String pkg, @UserIdInt int userId,
                 String channelId) {
-            Iterator<Pair<StatusBarNotification, Integer>> bufferIter = mBuffer.iterator();
-            while (bufferIter.hasNext()) {
-                final Pair<StatusBarNotification, Integer> pair = bufferIter.next();
-                if (pair.first != null
-                        && userId == pair.first.getNormalizedUserId()
-                        && pkg != null && pkg.equals(pair.first.getPackageName())
-                        && pair.first.getNotification() != null
-                        && Objects.equals(channelId, pair.first.getNotification().getChannelId())) {
-                    bufferIter.remove();
+            synchronized (mBufferLock) {
+                Iterator<Pair<StatusBarNotification, Integer>> bufferIter = descendingIterator();
+                while (bufferIter.hasNext()) {
+                    final Pair<StatusBarNotification, Integer> pair = bufferIter.next();
+                    if (pair.first != null
+                            && userId == pair.first.getNormalizedUserId()
+                            && pkg != null && pkg.equals(pair.first.getPackageName())
+                            && pair.first.getNotification() != null
+                            && Objects.equals(channelId,
+                            pair.first.getNotification().getChannelId())) {
+                        bufferIter.remove();
+                    }
                 }
             }
         }
