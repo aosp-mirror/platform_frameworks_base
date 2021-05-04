@@ -2439,18 +2439,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public int getPeekHeight() {
-        final ExpandableView firstChild = getFirstChildNotGone();
-        final int firstChildMinHeight = firstChild != null ? firstChild.getCollapsedHeight()
-                : mCollapsedSize;
-        int shelfHeight = 0;
-        if (getLastVisibleSection() != null && mShelf.getVisibility() != GONE) {
-            shelfHeight = mShelf.getIntrinsicHeight();
-        }
-        return mIntrinsicPadding + firstChildMinHeight + shelfHeight;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private int clampPadding(int desiredPadding) {
         return Math.max(desiredPadding, mIntrinsicPadding);
     }
