@@ -3064,7 +3064,6 @@
     <public name="hotwordDetectionService" />
     <public name="previewLayout" />
     <public name="clipToOutline" />
-    <public name="edgeEffectType" />
     <public name="knownCerts" />
     <public name="windowBackgroundBlurRadius"/>
     <public name="windowSplashScreenBackground"/>
