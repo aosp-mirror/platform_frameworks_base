@@ -21,16 +21,15 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-java_test_host {
+android_test {
     name: "UpdatableSystemFontTest",
     srcs: ["src/**/*.java"],
-    libs: [
-        "tradefed",
-        "compatibility-tradefed",
-        "compatibility-host-util",
-    ],
+    libs: ["android.test.runner"],
     static_libs: [
-        "frameworks-base-hostutils",
+        "androidx.test.ext.junit",
+        "compatibility-device-util-axt",
+        "platform-test-annotations",
+        "truth-prebuilt",
     ],
     test_suites: [
         "general-tests",
@@ -47,4 +46,5 @@ java_test_host {
         ":UpdatableSystemFontTestNotoColorEmojiVPlus2Ttf",
         ":UpdatableSystemFontTestNotoColorEmojiVPlus2TtfFsvSig",
     ],
+    sdk_version: "test_current",
 }
