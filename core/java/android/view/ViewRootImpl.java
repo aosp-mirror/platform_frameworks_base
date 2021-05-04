@@ -2764,7 +2764,9 @@ public final class ViewRootImpl implements ViewParent,
                         // to resume them
                         mDirty.set(0, 0, mWidth, mHeight);
                     }
-                    mViewFrameInfo.flags |= FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED;
+                }
+                if (mFirst || viewVisibilityChanged) {
+                    mViewFrameInfo.flags |= FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED;
                 }
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
                 final boolean freeformResizing = (relayoutResult
