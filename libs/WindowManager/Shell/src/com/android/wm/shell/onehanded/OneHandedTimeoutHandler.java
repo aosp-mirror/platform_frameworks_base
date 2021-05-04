@@ -18,8 +18,6 @@ package com.android.wm.shell.onehanded;
 
 import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
 
-import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
@@ -122,7 +120,7 @@ public class OneHandedTimeoutHandler {
 
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + "states: ");
+        pw.println(TAG);
         pw.print(innerPrefix + "sTimeout=");
         pw.println(mTimeout);
         pw.print(innerPrefix + "sListeners=");
