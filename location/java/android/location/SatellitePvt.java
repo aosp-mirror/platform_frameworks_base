@@ -28,6 +28,19 @@ import android.os.Parcelable;
  * same signal transmission time {@link GnssMeasurement#getReceivedSvTimeNanos()}.
  *
  * <p>The position and velocity must be in ECEF coordinates.
+ *
+ * <p>If {@link GnssMeasurement#getSatellitePvt()} is derived from Broadcast ephemeris, then the
+ * position is already w.r.t. the antenna phase center. However, if
+ * {@link GnssMeasurement#getSatellitePvt()} is derived from other modeled orbits, such as
+ * long-term orbits, or precise orbits, then the orbits may have been computed w.r.t.
+ * the satellite center of mass, and then GNSS vendors are expected to correct for the effect
+ * on different phase centers (can differ by meters) of different GNSS signals (e.g. L1, L5)
+ * on the reported satellite position. Accordingly, we might observe a different satellite
+ * position reported for L1 GnssMeasurement struct compared to L5 GnssMeasurement struct.
+ *
+ * <p>If {@link GnssMeasurement#getReceivedSvTimeNanos()} is not fully decoded,
+ * {@link GnssMeasurement#getSatellitePvt()} could still be reported and
+ * {@link GnssMeasurement#getReceivedSvTimeUncertaintyNanos()} would be used to provide confidence.
  * @hide
  */
 @SystemApi
@@ -203,7 +216,7 @@ public final class SatellitePvt implements Parcelable {
         /**
          * Returns the signal in Space User Range Error Rate (URE Rate) (meters per second).
          *
-         * It covers satellite velocity error and Satellite clock drift
+         * <p>It covers satellite velocity error and Satellite clock drift
          * projected to the pseudorange rate measurements.
          */
         @FloatRange(from = 0.0f, fromInclusive = false)
@@ -272,6 +285,14 @@ public final class SatellitePvt implements Parcelable {
         /**
          * Returns the satellite hardware code bias of the reported code type w.r.t
          * ionosphere-free measurement in meters.
+         *
+         * <p>When broadcast ephemeris is used, this is the offset caused
+         * by the satellite hardware delays at different frequencies;
+         * e.g. in IS-GPS-705D, this term is described in Section
+         * 20.3.3.3.1.2.1.
+         *
+         * <p>For GPS this term is ~10ns, and affects the satellite position
+         * computation by less than a millimeter.
          */
         @FloatRange()
         public double getHardwareCodeBiasMeters() {
@@ -282,6 +303,17 @@ public final class SatellitePvt implements Parcelable {
          * Returns the satellite time correction for ionospheric-free signal measurement
          * (meters). The satellite clock correction for the given signal type
          * = satTimeCorrectionMeters - satHardwareCodeBiasMeters.
+         *
+         * <p>When broadcast ephemeris is used, this is the offset modeled in the
+         * clock terms broadcast over the air by the satellites;
+         * e.g. in IS-GPS-200H, Section 20.3.3.3.3.1, this term is
+         * ∆tsv = af0 + af1(t - toc) + af2(t - toc)^2 + ∆tr.
+         *
+         * <p>If another source of ephemeris is used for SatellitePvt, then the
+         * equivalent value of satTimeCorrection must be provided.
+         *
+         * <p>For GPS this term is ~1ms, and affects the satellite position
+         * computation by ~1m.
          */
         @FloatRange()
         public double getTimeCorrectionMeters() {
