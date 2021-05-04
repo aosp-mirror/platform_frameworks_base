@@ -5513,6 +5513,10 @@ public class DevicePolicyManager {
      * This method requires the caller to be the device owner.
      * <p>
      * This proxy is only a recommendation and it is possible that some apps will ignore it.
+     * <p>
+     * Note: The device owner won't be able to set a global HTTP proxy if there are unaffiliated
+     * secondary users or profiles on the device. It's recommended that affiliation ids are set for
+     * new users as soon as possible after provisioning via {@link #setAffiliationIds}.
      *
      * @see ProxyInfo
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -12791,6 +12795,11 @@ public class DevicePolicyManager {
      * <p>In this mode, the DNS subsystem will attempt a TLS handshake to the network-supplied
      * resolver prior to attempting name resolution in cleartext.
      *
+     * <p>Note: The device owner won't be able to set the global private DNS mode if there are
+     * unaffiliated secondary users or profiles on the device. It's recommended that affiliation
+     * ids are set for new users as soon as possible after provisioning via
+     * {@link #setAffiliationIds}.
+     *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      *
      * @return {@code PRIVATE_DNS_SET_NO_ERROR} if the mode was set successfully, or
@@ -12825,6 +12834,11 @@ public class DevicePolicyManager {
      * must be reachable both from within and outside the VPN. Otherwise, the device may lose
      * the ability to resolve hostnames as system traffic to the resolver may not go through the
      * VPN.
+     *
+     * <p>Note: The device owner won't be able to set the global private DNS mode if there are
+     * unaffiliated secondary users or profiles on the device. It's recommended that affiliation
+     * ids are set for new users as soon as possible after provisioning via
+     * {@link #setAffiliationIds}.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @param privateDnsHost The hostname of a server that implements DNS over TLS (RFC7858).
