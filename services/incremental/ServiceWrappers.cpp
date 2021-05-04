@@ -43,8 +43,9 @@ public:
     ~RealVoldService() = default;
     binder::Status mountIncFs(
             const std::string& backingPath, const std::string& targetDir, int32_t flags,
+            const std::string& sysfsName,
             os::incremental::IncrementalFileSystemControlParcel* _aidl_return) const final {
-        return mInterface->mountIncFs(backingPath, targetDir, flags, _aidl_return);
+        return mInterface->mountIncFs(backingPath, targetDir, flags, sysfsName, _aidl_return);
     }
     binder::Status unmountIncFs(const std::string& dir) const final {
         return mInterface->unmountIncFs(dir);
@@ -260,6 +261,9 @@ public:
         return incfs::forEachIncompleteFile(control, [&](auto& control, FileId id) {
             return cb(control, id);
         });
+    }
+    std::optional<Metrics> getMetrics(std::string_view sysfsName) const final {
+        return incfs::getMetrics(sysfsName);
     }
 };
 
