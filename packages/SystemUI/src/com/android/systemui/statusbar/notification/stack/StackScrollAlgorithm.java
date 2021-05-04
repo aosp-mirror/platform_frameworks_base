@@ -42,6 +42,8 @@ import java.util.List;
  */
 public class StackScrollAlgorithm {
 
+    public static final float START_FRACTION = 0.3f;
+
     private static final String LOG_TAG = "StackScrollAlgorithm";
     private final ViewGroup mHostView;
 
@@ -442,7 +444,8 @@ public class StackScrollAlgorithm {
                     maxViewHeight = algorithmState.viewHeightBeforeShelf;
                 }
             }
-            viewState.height = (int) MathUtils.lerp(0, maxViewHeight, expansionFraction);
+            viewState.height = (int) MathUtils.lerp(maxViewHeight * START_FRACTION, maxViewHeight,
+                    expansionFraction);
         }
 
         currentYPosition += viewState.height + expansionFraction * mPaddingBetweenElements;
