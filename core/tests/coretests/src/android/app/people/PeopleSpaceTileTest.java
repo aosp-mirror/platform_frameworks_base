@@ -16,6 +16,9 @@
 
 package android.app.people;
 
+import static android.app.people.PeopleSpaceTile.SHOW_CONVERSATIONS;
+import static android.app.people.PeopleSpaceTile.SHOW_IMPORTANT_CONVERSATIONS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
@@ -178,6 +181,71 @@ public class PeopleSpaceTileTest {
     }
 
     @Test
+    public void testUserQuieted() {
+        PeopleSpaceTile tile = new PeopleSpaceTile.Builder(
+                new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).build();
+        assertFalse(tile.isUserQuieted());
+
+        tile = new PeopleSpaceTile
+                .Builder(new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps)
+                .setIsUserQuieted(true)
+                .build();
+        assertTrue(tile.isUserQuieted());
+    }
+
+    @Test
+    public void testCanBypassDnd() {
+        PeopleSpaceTile tile = new PeopleSpaceTile.Builder(
+                new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).build();
+        assertFalse(tile.canBypassDnd());
+
+        tile = new PeopleSpaceTile
+                .Builder(new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps)
+                .setCanBypassDnd(true)
+                .build();
+        assertTrue(tile.canBypassDnd());
+    }
+
+    @Test
+    public void testNotificationPolicyState() {
+        PeopleSpaceTile tile = new PeopleSpaceTile.Builder(
+                new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).build();
+        assertThat(tile.getNotificationPolicyState()).isEqualTo(SHOW_CONVERSATIONS);
+
+        tile = new PeopleSpaceTile
+                .Builder(new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps)
+                .setNotificationPolicyState(SHOW_IMPORTANT_CONVERSATIONS)
+                .build();
+        assertThat(tile.getNotificationPolicyState()).isEqualTo(SHOW_IMPORTANT_CONVERSATIONS);
+    }
+
+    @Test
+    public void testPackageSuspended() {
+        PeopleSpaceTile tile = new PeopleSpaceTile.Builder(
+                new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).build();
+        assertFalse(tile.isPackageSuspended());
+
+        tile = new PeopleSpaceTile
+                .Builder(new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps)
+                .setIsPackageSuspended(true)
+                .build();
+        assertTrue(tile.isPackageSuspended());
+    }
+
+    @Test
+    public void testContactAffinity() {
+        PeopleSpaceTile tile = new PeopleSpaceTile.Builder(
+                new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).build();
+        assertThat(tile.getContactAffinity()).isEqualTo(0f);
+
+        tile = new PeopleSpaceTile
+                .Builder(new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps)
+                .setContactAffinity(1f)
+                .build();
+        assertThat(tile.getContactAffinity()).isEqualTo(1f);
+    }
+
+    @Test
     public void testStatuses() {
         PeopleSpaceTile tile = new PeopleSpaceTile.Builder(
                 new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).build();
@@ -238,6 +306,11 @@ public class PeopleSpaceTileTest {
                 .setNotificationDataUri(Uri.parse("data"))
                 .setMessagesCount(2)
                 .setIntent(new Intent())
+                .setIsUserQuieted(true)
+                .setCanBypassDnd(false)
+                .setNotificationPolicyState(SHOW_IMPORTANT_CONVERSATIONS)
+                .setIsPackageSuspended(true)
+                .setContactAffinity(1f)
                 .build();
 
         Parcel parcel = Parcel.obtain();
@@ -261,6 +334,12 @@ public class PeopleSpaceTileTest {
         assertThat(readTile.getNotificationDataUri()).isEqualTo(tile.getNotificationDataUri());
         assertThat(readTile.getMessagesCount()).isEqualTo(tile.getMessagesCount());
         assertThat(readTile.getIntent().toString()).isEqualTo(tile.getIntent().toString());
+        assertThat(readTile.isUserQuieted()).isEqualTo(tile.isUserQuieted());
+        assertThat(readTile.canBypassDnd()).isEqualTo(tile.canBypassDnd());
+        assertThat(readTile.getNotificationPolicyState()).isEqualTo(
+                tile.getNotificationPolicyState());
+        assertThat(readTile.isPackageSuspended()).isEqualTo(tile.isPackageSuspended());
+        assertThat(readTile.getContactAffinity()).isEqualTo(tile.getContactAffinity());
     }
 
     @Test
