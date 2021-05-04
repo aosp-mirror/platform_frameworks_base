@@ -490,8 +490,10 @@ public class MediaControlPanel {
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         int mediaRecommendationNum = Math.min(mediaRecommendationList.size(),
                 MEDIA_RECOMMENDATION_MAX_NUM);
-        for (int i = 0; i < mediaRecommendationNum; i++) {
-            SmartspaceAction recommendation = mediaRecommendationList.get(i);
+        for (int itemIndex = 0, uiComponentIndex = 0;
+                itemIndex < mediaRecommendationNum && uiComponentIndex < mediaRecommendationNum;
+                itemIndex++) {
+            SmartspaceAction recommendation = mediaRecommendationList.get(itemIndex);
             if (recommendation.getIcon() == null) {
                 Log.w(TAG, "No media cover is provided. Skipping this item...");
                 continue;
@@ -515,13 +517,13 @@ public class MediaControlPanel {
             }
 
             // Set up media source app's logo.
-            ImageView mediaSourceLogoImageView = mediaLogoItems.get(i);
+            ImageView mediaSourceLogoImageView = mediaLogoItems.get(uiComponentIndex);
             mediaSourceLogoImageView.setImageDrawable(icon);
             // TODO(b/186699032): Tint the app logo using the accent color.
             mediaSourceLogoImageView.setColorFilter(backgroundColor, PorterDuff.Mode.XOR);
 
             // Set up media item cover.
-            ImageView mediaCoverImageView = mediaCoverItems.get(i);
+            ImageView mediaCoverImageView = mediaCoverItems.get(uiComponentIndex);
             mediaCoverImageView.setImageIcon(recommendation.getIcon());
 
             // Set up the click listener if applicable.
@@ -531,15 +533,23 @@ public class MediaControlPanel {
                     target.getSmartspaceTargetId(),
                     null);
 
-            if (i < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
-                setVisibleAndAlpha(collapsedSet, mediaCoverItemsResIds.get(i), true);
-                setVisibleAndAlpha(collapsedSet, mediaLogoItemsResIds.get(i), true);
+            if (uiComponentIndex < MEDIA_RECOMMENDATION_ITEMS_PER_ROW) {
+                setVisibleAndAlpha(collapsedSet,
+                        mediaCoverItemsResIds.get(uiComponentIndex), true);
+                setVisibleAndAlpha(collapsedSet,
+                        mediaLogoItemsResIds.get(uiComponentIndex), true);
             } else {
-                setVisibleAndAlpha(collapsedSet, mediaCoverItemsResIds.get(i), false);
-                setVisibleAndAlpha(collapsedSet, mediaLogoItemsResIds.get(i), false);
+                setVisibleAndAlpha(collapsedSet,
+                        mediaCoverItemsResIds.get(uiComponentIndex), false);
+                setVisibleAndAlpha(collapsedSet,
+                        mediaLogoItemsResIds.get(uiComponentIndex), false);
             }
-            setVisibleAndAlpha(expandedSet, mediaCoverItemsResIds.get(i), true);
-            setVisibleAndAlpha(expandedSet, mediaLogoItemsResIds.get(i), true);
+            setVisibleAndAlpha(expandedSet,
+                    mediaCoverItemsResIds.get(uiComponentIndex), true);
+            setVisibleAndAlpha(expandedSet,
+                    mediaLogoItemsResIds.get(uiComponentIndex), true);
+
+            uiComponentIndex++;
         }
 
         // Set up long press to show guts setting panel.
