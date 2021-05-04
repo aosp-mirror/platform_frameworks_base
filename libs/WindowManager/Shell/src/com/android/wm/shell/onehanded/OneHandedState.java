@@ -90,7 +90,7 @@ public class OneHandedState {
     /** Dumps internal state. */
     public void dump(PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + "states: ");
+        pw.println(TAG);
         pw.println(innerPrefix + "sCurrentState=" + sCurrentState);
     }
 }
