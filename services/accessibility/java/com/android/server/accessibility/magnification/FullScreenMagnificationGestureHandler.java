@@ -34,6 +34,7 @@ import static java.util.Arrays.copyOfRange;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UiContext;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -139,7 +140,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     private PointerCoords[] mTempPointerCoords;
     private PointerProperties[] mTempPointerProperties;
 
-    public FullScreenMagnificationGestureHandler(Context context,
+    public FullScreenMagnificationGestureHandler(@UiContext Context context,
             FullScreenMagnificationController fullScreenMagnificationController,
             Callback callback,
             boolean detectTripleTap,
