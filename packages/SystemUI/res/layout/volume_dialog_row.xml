@@ -57,6 +57,7 @@
                 android:thumb="@null"
                 android:splitTrack="false"
                 android:progressDrawable="@drawable/volume_row_seekbar"
+                android:layoutDirection="ltr"
                 android:rotation="270" />
         </FrameLayout>
 
