@@ -16,6 +16,8 @@
 
 package com.android.updatablesystemfont;
 
+import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assume.assumeTrue;
@@ -24,9 +26,13 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import android.app.UiAutomation;
 import android.content.Context;
+import android.graphics.fonts.FontFamilyUpdateRequest;
+import android.graphics.fonts.FontFileUpdateRequest;
+import android.graphics.fonts.FontManager;
 import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.RootPermissionTest;
 import android.security.FileIntegrityManager;
+import android.text.FontConfig;
 import android.util.Log;
 import android.util.Pair;
 
@@ -35,22 +41,24 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.StreamUtil;
+import com.android.compatibility.common.util.SystemUtil;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
- * Tests if fonts can be updated by 'cmd font'.
+ * Tests if fonts can be updated by {@link FontManager} API.
  */
 @RootPermissionTest
 @RunWith(AndroidJUnit4.class)
@@ -59,11 +67,8 @@ public class UpdatableSystemFontTest {
     private static final String TAG = "UpdatableSystemFontTest";
     private static final String SYSTEM_FONTS_DIR = "/system/fonts/";
     private static final String DATA_FONTS_DIR = "/data/fonts/files/";
-
     private static final String CERT_PATH = "/data/local/tmp/UpdatableSystemFontTestCert.der";
-
-    private static final Pattern PATTERN_FONT = Pattern.compile("path = ([^, \n]*)");
-    private static final String NOTO_COLOR_EMOJI_TTF = "NotoColorEmoji.ttf";
+    private static final String NOTO_COLOR_EMOJI_POSTSCRIPT_NAME = "NotoColorEmoji";
 
     private static final String ORIGINAL_NOTO_COLOR_EMOJI_TTF =
             "/data/local/tmp/NotoColorEmoji.ttf";
@@ -90,11 +95,8 @@ public class UpdatableSystemFontTest {
             EMOJI_RENDERING_TEST_APP_ID + "/.EmojiRenderingTestActivity";
     private static final long ACTIVITY_TIMEOUT_MILLIS = SECONDS.toMillis(10);
 
-    private interface ThrowingSupplier<T> {
-        T get() throws Exception;
-    }
-
     private String mKeyId;
+    private FontManager mFontManager;
 
     @Before
     public void setUp() throws Exception {
@@ -104,6 +106,7 @@ public class UpdatableSystemFontTest {
         assumeTrue(fim != null);
         assumeTrue(fim.isApkVeritySupported());
         mKeyId = insertCert(CERT_PATH);
+        mFontManager = context.getSystemService(FontManager.class);
         expectCommandToSucceed("cmd font clear");
     }
 
@@ -117,9 +120,10 @@ public class UpdatableSystemFontTest {
 
     @Test
     public void updateFont() throws Exception {
-        expectCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
-        String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        assertThat(updateFontFile(
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_SUCCESS);
+        String fontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(fontPath).startsWith(DATA_FONTS_DIR);
         // The updated font should be readable and unmodifiable.
         expectCommandToSucceed("dd status=none if=" + fontPath + " of=/dev/null");
@@ -128,12 +132,14 @@ public class UpdatableSystemFontTest {
 
     @Test
     public void updateFont_twice() throws Exception {
-        expectCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
-        String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
-        expectCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG));
-        String fontPath2 = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        assertThat(updateFontFile(
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_SUCCESS);
+        String fontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
+        assertThat(updateFontFile(
+                TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_SUCCESS);
+        String fontPath2 = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(fontPath2).startsWith(DATA_FONTS_DIR);
         assertThat(fontPath2).isNotEqualTo(fontPath);
         // The new file should be readable.
@@ -145,16 +151,19 @@ public class UpdatableSystemFontTest {
     @Test
     public void updateFont_allowSameVersion() throws Exception {
         // Update original font to the same version
-        expectCommandToSucceed(String.format("cmd font update %s %s",
-                ORIGINAL_NOTO_COLOR_EMOJI_TTF, ORIGINAL_NOTO_COLOR_EMOJI_TTF_FSV_SIG));
-        String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
-        expectCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
-        String fontPath2 = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        assertThat(updateFontFile(
+                ORIGINAL_NOTO_COLOR_EMOJI_TTF, ORIGINAL_NOTO_COLOR_EMOJI_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_SUCCESS);
+        String fontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
+        assertThat(updateFontFile(
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_SUCCESS);
+        String fontPath2 = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         // Update updated font to the same version
-        expectCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
-        String fontPath3 = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        assertThat(updateFontFile(
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_SUCCESS);
+        String fontPath3 = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(fontPath).startsWith(DATA_FONTS_DIR);
         assertThat(fontPath2).isNotEqualTo(fontPath);
         assertThat(fontPath2).startsWith(DATA_FONTS_DIR);
@@ -164,58 +173,65 @@ public class UpdatableSystemFontTest {
 
     @Test
     public void updateFont_invalidCert() throws Exception {
-        expectCommandToFail(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG));
+        assertThat(updateFontFile(
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_ERROR_VERIFICATION_FAILURE);
     }
 
     @Test
     public void updateFont_downgradeFromSystem() throws Exception {
-        expectCommandToFail(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_V0_TTF, TEST_NOTO_COLOR_EMOJI_V0_TTF_FSV_SIG));
+        assertThat(updateFontFile(
+                TEST_NOTO_COLOR_EMOJI_V0_TTF, TEST_NOTO_COLOR_EMOJI_V0_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_ERROR_DOWNGRADING);
     }
 
     @Test
     public void updateFont_downgradeFromData() throws Exception {
-        expectCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG));
-        expectCommandToFail(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
+        assertThat(updateFontFile(
+                TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_SUCCESS);
+        assertThat(updateFontFile(
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_ERROR_DOWNGRADING);
     }
 
     @Test
     public void launchApp() throws Exception {
-        String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        String fontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(fontPath).startsWith(SYSTEM_FONTS_DIR);
         startActivity(EMOJI_RENDERING_TEST_APP_ID, EMOJI_RENDERING_TEST_ACTIVITY);
-        waitUntil(ACTIVITY_TIMEOUT_MILLIS, () ->
-                isFileOpenedBy(fontPath, EMOJI_RENDERING_TEST_APP_ID));
+        SystemUtil.eventually(
+                () -> assertThat(isFileOpenedBy(fontPath, EMOJI_RENDERING_TEST_APP_ID)).isTrue(),
+                ACTIVITY_TIMEOUT_MILLIS);
     }
 
     @Test
     public void launchApp_afterUpdateFont() throws Exception {
-        String originalFontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        String originalFontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(originalFontPath).startsWith(SYSTEM_FONTS_DIR);
-        expectCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
-        String updatedFontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        assertThat(updateFontFile(
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                .isEqualTo(FontManager.RESULT_SUCCESS);
+        String updatedFontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(updatedFontPath).startsWith(DATA_FONTS_DIR);
         startActivity(EMOJI_RENDERING_TEST_APP_ID, EMOJI_RENDERING_TEST_ACTIVITY);
         // The original font should NOT be opened by the app.
-        waitUntil(ACTIVITY_TIMEOUT_MILLIS, () ->
-                isFileOpenedBy(updatedFontPath, EMOJI_RENDERING_TEST_APP_ID)
-                        && !isFileOpenedBy(originalFontPath, EMOJI_RENDERING_TEST_APP_ID));
+        SystemUtil.eventually(() -> {
+            assertThat(isFileOpenedBy(updatedFontPath, EMOJI_RENDERING_TEST_APP_ID)).isTrue();
+            assertThat(isFileOpenedBy(originalFontPath, EMOJI_RENDERING_TEST_APP_ID)).isFalse();
+        }, ACTIVITY_TIMEOUT_MILLIS);
     }
 
     @Test
     public void reboot() throws Exception {
         expectCommandToSucceed(String.format("cmd font update %s %s",
                 TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
-        String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        String fontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(fontPath).startsWith(DATA_FONTS_DIR);
 
         // Emulate reboot by 'cmd font restart'.
         expectCommandToSucceed("cmd font restart");
-        String fontPathAfterReboot = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        String fontPathAfterReboot = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(fontPathAfterReboot).isEqualTo(fontPath);
     }
 
@@ -231,24 +247,36 @@ public class UpdatableSystemFontTest {
         return keyId;
     }
 
-    private static String getFontPath(String fontFileName) throws Exception {
-        // TODO: add a dedicated command for testing.
-        String lines = expectCommandToSucceed("cmd font dump");
-        for (String line : lines.split("\n")) {
-            Matcher m = PATTERN_FONT.matcher(line);
-            if (m.find() && m.group(1).endsWith(fontFileName)) {
-                return m.group(1);
-            }
+    private int updateFontFile(String fontPath, String signaturePath) throws IOException {
+        byte[] signature = Files.readAllBytes(Paths.get(signaturePath));
+        try (ParcelFileDescriptor fd =
+                ParcelFileDescriptor.open(new File(fontPath), MODE_READ_ONLY)) {
+            return SystemUtil.runWithShellPermissionIdentity(() -> {
+                FontConfig fontConfig = mFontManager.getFontConfig();
+                return mFontManager.updateFontFamily(
+                        new FontFamilyUpdateRequest.Builder()
+                                .addFontFileUpdateRequest(new FontFileUpdateRequest(fd, signature))
+                                .build(),
+                        fontConfig.getConfigVersion());
+            });
         }
-        throw new AssertionError("Font not found: " + fontFileName);
+    }
+
+    private String getFontPath(String psName) {
+        return SystemUtil.runWithShellPermissionIdentity(() -> {
+            FontConfig fontConfig = mFontManager.getFontConfig();
+            for (FontConfig.FontFamily family : fontConfig.getFontFamilies()) {
+                for (FontConfig.Font font : family.getFontList()) {
+                    if (psName.equals(font.getPostScriptName())) {
+                        return font.getFile().getAbsolutePath();
+                    }
+                }
+            }
+            throw new AssertionError("Font not found: " + psName);
+        });
     }
 
     private static void startActivity(String appId, String activityId) throws Exception {
-        // Make sure that the app is installed and enabled.
-        waitUntil(ACTIVITY_TIMEOUT_MILLIS, () -> {
-            String packageInfo = expectCommandToSucceed("pm list packages -e " + appId);
-            return !packageInfo.isEmpty();
-        });
         expectCommandToSucceed("am force-stop " + appId);
         expectCommandToSucceed("am start-activity -n " + activityId);
     }
@@ -298,21 +326,6 @@ public class UpdatableSystemFontTest {
             Log.i(TAG, "stderr =  " + stderr);
             return new Pair<>(stdout, stderr);
         }
-    }
-
-    private static void waitUntil(long timeoutMillis, ThrowingSupplier<Boolean> func) {
-        long untilMillis = System.currentTimeMillis() + timeoutMillis;
-        do {
-            try {
-                if (func.get()) return;
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new AssertionError("Interrupted", e);
-            } catch (Exception e) {
-                throw new AssertionError("Unexpected exception", e);
-            }
-        } while (System.currentTimeMillis() < untilMillis);
-        throw new AssertionError("Timed out");
     }
 
     private static boolean isFileOpenedBy(String path, String appId) throws Exception {
