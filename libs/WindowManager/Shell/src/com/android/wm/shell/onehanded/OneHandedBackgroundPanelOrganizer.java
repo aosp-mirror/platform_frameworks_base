@@ -203,7 +203,7 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
 
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + "states: ");
+        pw.println(TAG);
         pw.print(innerPrefix + "mIsShowing=");
         pw.println(mIsShowing);
         pw.print(innerPrefix + "mBkgBounds=");
