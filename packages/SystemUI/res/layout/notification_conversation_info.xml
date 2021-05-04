@@ -254,7 +254,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/notification_importance_button_description_top_margin"
                     android:visibility="gone"
-                    android:text="@string/notification_channel_summary_priority"
                     android:clickable="false"
                     android:focusable="false"
                     android:ellipsize="end"

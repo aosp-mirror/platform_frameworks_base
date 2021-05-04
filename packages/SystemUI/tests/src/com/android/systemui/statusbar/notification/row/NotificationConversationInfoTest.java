@@ -21,6 +21,8 @@ import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_ANYONE;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CONVERSATIONS;
 import static android.print.PrintManager.PRINT_SPOOLER_PACKAGE_NAME;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -150,9 +152,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     private ShadeController mShadeController;
     @Mock
     private ConversationIconFactory mIconFactory;
-    @Mock(answer = Answers.RETURNS_SELF)
-    private PriorityOnboardingDialogController.Builder mBuilder;
-    private Provider<PriorityOnboardingDialogController.Builder> mBuilderProvider = () -> mBuilder;
     @Mock
     private Notification.BubbleMetadata mBubbleMetadata;
     private Handler mTestHandler;
@@ -236,8 +235,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         when(mMockINotificationManager.getConsolidatedNotificationPolicy())
                 .thenReturn(mock(NotificationManager.Policy.class));
 
-        when(mBuilder.build()).thenReturn(mock(PriorityOnboardingDialogController.class));
-
         when(mPeopleSpaceWidgetManager.requestPinAppWidget(any(), any())).thenReturn(true);
     }
 
@@ -258,7 +255,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -285,7 +281,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -340,7 +335,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -368,7 +362,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -395,7 +388,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -433,7 +425,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -464,7 +455,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -493,7 +483,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -523,7 +512,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 false,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -551,7 +539,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -582,7 +569,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -616,7 +602,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -626,6 +611,110 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         assertThat(((TextView) view.findViewById(R.id.default_summary)).getText()).isEqualTo(
                 mContext.getString(R.string.notification_channel_summary_default_with_bubbles,
                         "App Name"));
+        assertThat(((TextView) mNotificationInfo.findViewById(R.id.priority_summary)).getText())
+                .isEqualTo(mContext.getString(
+                        R.string.notification_channel_summary_priority_bubble));
+    }
+
+    @Test
+    public void testBindNotification_priorityDnd() throws Exception {
+        NotificationManager.Policy policy = new NotificationManager.Policy(
+                PRIORITY_CATEGORY_CONVERSATIONS, 0, 0, 0, CONVERSATION_SENDERS_ANYONE);
+        when(mMockINotificationManager.getConsolidatedNotificationPolicy())
+                .thenReturn(policy);
+        when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
+        mConversationChannel.setImportance(IMPORTANCE_HIGH);
+        mConversationChannel.setImportantConversation(false);
+        mConversationChannel.setAllowBubbles(false);
+        mNotificationInfo.bindNotification(
+                -1,
+                mShortcutManager,
+                mMockPackageManager,
+                mPeopleSpaceWidgetManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                null,
+                null,
+                null,
+                mIconFactory,
+                mContext,
+                true,
+                mTestHandler,
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
+        assertThat(((TextView) mNotificationInfo.findViewById(R.id.priority_summary)).getText())
+                .isEqualTo(mContext.getString(
+                        R.string.notification_channel_summary_priority_dnd));
+    }
+
+    @Test
+    public void testBindNotification_priorityBaseline() throws Exception {
+        when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
+        mConversationChannel.setImportance(IMPORTANCE_HIGH);
+        mConversationChannel.setImportantConversation(false);
+        mConversationChannel.setAllowBubbles(false);
+        mNotificationInfo.bindNotification(
+                -1,
+                mShortcutManager,
+                mMockPackageManager,
+                mPeopleSpaceWidgetManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                null,
+                null,
+                null,
+                mIconFactory,
+                mContext,
+                true,
+                mTestHandler,
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
+        assertThat(((TextView) mNotificationInfo.findViewById(R.id.priority_summary)).getText())
+                .isEqualTo(mContext.getString(
+                        R.string.notification_channel_summary_priority_baseline));
+    }
+
+    @Test
+    public void testBindNotification_priorityDndAndBubble() throws Exception {
+        NotificationManager.Policy policy = new NotificationManager.Policy(
+                PRIORITY_CATEGORY_CONVERSATIONS, 0, 0, 0, CONVERSATION_SENDERS_ANYONE);
+        when(mMockINotificationManager.getConsolidatedNotificationPolicy())
+                .thenReturn(policy);
+
+        when(mMockINotificationManager.getBubblePreferenceForPackage(anyString(), anyInt()))
+                .thenReturn(BUBBLE_PREFERENCE_ALL);
+        when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
+        mConversationChannel.setImportance(IMPORTANCE_HIGH);
+        mConversationChannel.setImportantConversation(false);
+        mConversationChannel.setAllowBubbles(true);
+        mNotificationInfo.bindNotification(
+                -1,
+                mShortcutManager,
+                mMockPackageManager,
+                mPeopleSpaceWidgetManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                mBubbleMetadata,
+                null,
+                null,
+                mIconFactory,
+                mContext,
+                true,
+                mTestHandler,
+                mTestHandler, null, Optional.of(mBubblesManager),
+                mShadeController);
+        assertThat(((TextView) mNotificationInfo.findViewById(R.id.priority_summary)).getText())
+                .isEqualTo(mContext.getString(
+                        R.string.notification_channel_summary_priority_all));
     }
 
     @Test
@@ -649,7 +738,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -696,7 +784,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -742,7 +829,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -789,7 +875,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -829,7 +914,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -868,7 +952,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -911,7 +994,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -944,7 +1026,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -976,7 +1057,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -1015,7 +1095,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -1054,7 +1133,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -1092,7 +1170,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -1129,7 +1206,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -1157,7 +1233,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -1168,97 +1243,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSelectPriorityPresentsOnboarding_firstTime() {
-        // GIVEN pref is false
-        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, false);
-
-        // GIVEN the priority onboarding screen is present
-        PriorityOnboardingDialogController.Builder b =
-                mock(PriorityOnboardingDialogController.Builder.class, Answers.RETURNS_SELF);
-        PriorityOnboardingDialogController controller =
-                mock(PriorityOnboardingDialogController.class);
-        when(b.build()).thenReturn(controller);
-
-        // GIVEN the user is changing conversation settings
-        mNotificationInfo.bindNotification(
-                -1,
-                mShortcutManager,
-                mMockPackageManager,
-                mPeopleSpaceWidgetManager,
-                mMockINotificationManager,
-                mOnUserInteractionCallback,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mEntry,
-                mBubbleMetadata,
-                null,
-                null,
-                mIconFactory,
-                mContext,
-                () -> b,
-                true,
-                mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager),
-                mShadeController);
-
-        // WHEN user clicks "priority"
-        mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
-        verify(controller, never()).show();
-
-        // and then done
-        mNotificationInfo.findViewById(R.id.done).performClick();
-
-        // THEN the user is presented with the priority onboarding screen
-        verify(controller, atLeastOnce()).show();
-    }
-
-    @Test
-    public void testSelectPriorityDoesNotShowOnboarding_secondTime() {
-        //WHEN pref is true
-        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true);
-
-        PriorityOnboardingDialogController.Builder b =
-                mock(PriorityOnboardingDialogController.Builder.class, Answers.RETURNS_SELF);
-        PriorityOnboardingDialogController controller =
-                mock(PriorityOnboardingDialogController.class);
-        when(b.build()).thenReturn(controller);
-
-        mNotificationInfo.bindNotification(
-                -1,
-                mShortcutManager,
-                mMockPackageManager,
-                mPeopleSpaceWidgetManager,
-                mMockINotificationManager,
-                mOnUserInteractionCallback,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mEntry,
-                mBubbleMetadata,
-                null,
-                null,
-                mIconFactory,
-                mContext,
-                () -> b,
-                true,
-                mTestHandler,
-                mTestHandler, null, Optional.of(mBubblesManager),
-                mShadeController);
-
-        // WHEN user clicks "priority"
-        mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
-        verify(controller, never()).show();
-
-        // and then done
-        mNotificationInfo.findViewById(R.id.done).performClick();
-
-        // THEN the user is presented with the priority onboarding screen
-        verify(controller, never()).show();
-    }
-
-    @Test
     public void testSelectPriorityRequestsPinPeopleTile() {
-        //WHEN pref is true and channel is default importance
-        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true);
+        //WHEN channel is default importance
         mNotificationChannel.setImportantConversation(false);
         mNotificationInfo.bindNotification(
                 -1,
@@ -1275,7 +1261,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -1293,9 +1278,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
 
     @Test
     public void testSelectDefaultDoesNotRequestPinPeopleTile() {
-        //WHEN pref is true
-        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true);
-
         mNotificationInfo.bindNotification(
                 -1,
                 mShortcutManager,
@@ -1311,7 +1293,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),
@@ -1329,8 +1310,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
 
     @Test
     public void testSelectPriority_AlreadyPriority_DoesNotRequestPinPeopleTile() {
-        //WHEN pref is true and channel is priority
-        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING_IN_S, true);
         mConversationChannel.setOriginalImportance(IMPORTANCE_HIGH);
         mConversationChannel.setImportance(IMPORTANCE_HIGH);
         mConversationChannel.setImportantConversation(true);
@@ -1350,7 +1329,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 mIconFactory,
                 mContext,
-                mBuilderProvider,
                 true,
                 mTestHandler,
                 mTestHandler, null, Optional.of(mBubblesManager),

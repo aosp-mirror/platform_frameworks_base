@@ -69,7 +69,6 @@ import com.android.systemui.statusbar.notification.logging.NotificationPanelLogg
 import com.android.systemui.statusbar.notification.row.ChannelEditorDialogController;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
-import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogController;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -141,7 +140,6 @@ public interface NotificationsModule {
             ShortcutManager shortcutManager,
             ChannelEditorDialogController channelEditorDialogController,
             UserContextProvider contextTracker,
-            Provider<PriorityOnboardingDialogController.Builder> builderProvider,
             AssistantFeedbackController assistantFeedbackController,
             Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
@@ -161,7 +159,6 @@ public interface NotificationsModule {
                 shortcutManager,
                 channelEditorDialogController,
                 contextTracker,
-                builderProvider,
                 assistantFeedbackController,
                 bubblesManagerOptional,
                 uiEventLogger,
