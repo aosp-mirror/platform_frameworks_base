@@ -31,7 +31,6 @@ import com.android.systemui.plugins.FalsingPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.sensors.ThresholdSensor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -186,7 +185,7 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public void onProximityEvent(ThresholdSensor.ThresholdSensorEvent proximityEvent) {
+    public void onProximityEvent(ProximityEvent proximityEvent) {
         mInternalFalsingManager.onProximityEvent(proximityEvent);
     }
 
