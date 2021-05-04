@@ -39,4 +39,69 @@ public class AppOpsManager {
             String attributionTag, String message) {
         throw new UnsupportedOperationException();
     }
+
+    public int noteOpNoThrow(String op, int uid, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int noteOpNoThrow(int op, int uid, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int startOp(int op) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int startOp(int op, int uid, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int startOp(int op, int uid, String packageName, boolean startIfModeDefault) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int startOp(String op, int uid, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int startOpNoThrow(String op, int uid, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int startOpNoThrow(int op, int uid, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int startOpNoThrow(int op, int uid, String packageName, boolean startIfModeDefault) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int noteProxyOp(String op, String proxiedPackageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int noteProxyOp(int op, String proxiedPackageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int noteProxyOpNoThrow(String op, String proxiedPackageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int noteProxyOpNoThrow(String op, String proxiedPackageName,
+            int proxiedUid) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void finishOp(int op) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void finishOp(String op, int uid, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void finishOp(int op, int uid, String packageName) {
+        throw new UnsupportedOperationException();
+    }
 }
