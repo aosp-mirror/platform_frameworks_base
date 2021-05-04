@@ -28,21 +28,26 @@ import java.util.List;
  * Estimates the battery discharge amounts.
  */
 public class BatteryChargeCalculator extends PowerCalculator {
-    private final double mBatteryCapacity;
-
-    public BatteryChargeCalculator(PowerProfile powerProfile) {
-        mBatteryCapacity = powerProfile.getBatteryCapacity();
-    }
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
-        final double dischargedPowerLowerBoundMah =
-                batteryStats.getLowDischargeAmountSinceCharge() * mBatteryCapacity / 100;
-        final double dischargedPowerUpperBoundMah =
-                batteryStats.getHighDischargeAmountSinceCharge() * mBatteryCapacity / 100;
         builder.setDischargePercentage(
-                        batteryStats.getDischargeAmount(BatteryStats.STATS_SINCE_CHARGED))
+                batteryStats.getDischargeAmount(BatteryStats.STATS_SINCE_CHARGED));
+
+        int batteryCapacityMah = batteryStats.getLearnedBatteryCapacity() / 1000;
+        if (batteryCapacityMah <= 0) {
+            batteryCapacityMah = batteryStats.getMinLearnedBatteryCapacity() / 1000;
+            if (batteryCapacityMah <= 0) {
+                batteryCapacityMah = batteryStats.getEstimatedBatteryCapacity();
+            }
+        }
+        final double dischargedPowerLowerBoundMah =
+                batteryStats.getLowDischargeAmountSinceCharge() * batteryCapacityMah / 100.0;
+        final double dischargedPowerUpperBoundMah =
+                batteryStats.getHighDischargeAmountSinceCharge() * batteryCapacityMah / 100.0;
+        builder.setDischargePercentage(
+                batteryStats.getDischargeAmount(BatteryStats.STATS_SINCE_CHARGED))
                 .setDischargedPowerRange(dischargedPowerLowerBoundMah,
                         dischargedPowerUpperBoundMah);
 
