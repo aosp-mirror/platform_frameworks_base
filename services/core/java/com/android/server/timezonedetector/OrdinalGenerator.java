@@ -15,9 +15,12 @@
  */
 package com.android.server.timezonedetector;
 
+import android.annotation.NonNull;
 import android.util.ArraySet;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * A helper class that turns a set of objects into ordinal values, i.e. each object is offered
@@ -30,11 +33,19 @@ import java.util.List;
 class OrdinalGenerator<T> {
     private final ArraySet<T> mKnownIds = new ArraySet<>();
 
+    private final @NonNull Function<T, T> mCanonicalizationFunction;
+
+    OrdinalGenerator(@NonNull Function<T, T> canonicalizationFunction) {
+        mCanonicalizationFunction = Objects.requireNonNull(canonicalizationFunction);
+    }
+
     int ordinal(T object) {
-        int ordinal = mKnownIds.indexOf(object);
+        T canonical = mCanonicalizationFunction.apply(object);
+
+        int ordinal = mKnownIds.indexOf(canonical);
         if (ordinal < 0) {
             ordinal = mKnownIds.size();
-            mKnownIds.add(object);
+            mKnownIds.add(canonical);
         }
         return ordinal;
     }
