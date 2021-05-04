@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.IRecentsAnimationController;
 import android.view.SurfaceControl;
@@ -108,10 +109,11 @@ public class RemoteTransitionCompat implements Parcelable {
             public void startAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishedCallback) {
+                final ArrayMap<SurfaceControl, SurfaceControl> leashMap = new ArrayMap<>();
                 final RemoteAnimationTargetCompat[] apps =
-                        RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */);
+                        RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */, t, leashMap);
                 final RemoteAnimationTargetCompat[] wallpapers =
-                        RemoteAnimationTargetCompat.wrap(info, true /* wallpapers */);
+                        RemoteAnimationTargetCompat.wrap(info, true /* wallpapers */, t, leashMap);
                 // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
                 mToken = transition;
                 // This transition is for opening recents, so recents is on-top. We want to draw
@@ -120,7 +122,8 @@ public class RemoteTransitionCompat implements Parcelable {
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change change = info.getChanges().get(i);
                     if (change.getMode() == TRANSIT_CLOSE || change.getMode() == TRANSIT_TO_BACK) {
-                        t.setLayer(change.getLeash(), info.getChanges().size() * 3 - i);
+                        t.setLayer(leashMap.get(change.getLeash()),
+                                info.getChanges().size() * 3 - i);
                         if (change.getTaskInfo() != null) {
                             pausingTask = change.getTaskInfo().token;
                         }
@@ -131,7 +134,8 @@ public class RemoteTransitionCompat implements Parcelable {
                     t.setAlpha(wallpapers[i].leash.mSurfaceControl, 1);
                 }
                 t.apply();
-                mRecentsSession.setup(controller, info, finishedCallback, pausingTask);
+                mRecentsSession.setup(controller, info, finishedCallback, pausingTask,
+                        leashMap);
                 recents.onAnimationStart(mRecentsSession, apps, wallpapers, new Rect(0, 0, 0, 0),
                         new Rect());
             }
@@ -173,9 +177,11 @@ public class RemoteTransitionCompat implements Parcelable {
         private WindowContainerToken mPausingTask = null;
         private TransitionInfo mInfo = null;
         private SurfaceControl mOpeningLeash = null;
+        private ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = null;
 
         void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
-                IRemoteTransitionFinishedCallback finishCB, WindowContainerToken pausingTask) {
+                IRemoteTransitionFinishedCallback finishCB, WindowContainerToken pausingTask,
+                ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
             if (mInfo != null) {
                 throw new IllegalStateException("Trying to run a new recents animation while"
                         + " recents is already active.");
@@ -184,6 +190,7 @@ public class RemoteTransitionCompat implements Parcelable {
             mInfo = info;
             mFinishCB = finishCB;
             mPausingTask = pausingTask;
+            mLeashMap = leashMap;
         }
 
         @SuppressLint("NewApi")
@@ -211,11 +218,14 @@ public class RemoteTransitionCompat implements Parcelable {
             }
             // We are receiving a new opening task, so convert to onTaskAppeared.
             final int layer = mInfo.getChanges().size() * 3;
-            t.reparent(mOpeningLeash, mInfo.getRootLeash());
-            t.setLayer(mOpeningLeash, layer);
-            t.hide(mOpeningLeash);
+            final RemoteAnimationTargetCompat target = new RemoteAnimationTargetCompat(
+                    openingTask, layer, mInfo, t);
+            mLeashMap.put(mOpeningLeash, target.leash.mSurfaceControl);
+            t.reparent(target.leash.mSurfaceControl, mInfo.getRootLeash());
+            t.setLayer(target.leash.mSurfaceControl, layer);
+            t.hide(target.leash.mSurfaceControl);
             t.apply();
-            recents.onTaskAppeared(new RemoteAnimationTargetCompat(openingTask, layer));
+            recents.onTaskAppeared(target);
             return true;
         }
 
@@ -272,6 +282,12 @@ public class RemoteTransitionCompat implements Parcelable {
             }
             // Release surface references now. This is apparently to free GPU
             // memory while doing quick operations (eg. during CTS).
+            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            for (int i = 0; i < mLeashMap.size(); ++i) {
+                if (mLeashMap.keyAt(i) == mLeashMap.valueAt(i)) continue;
+                t.remove(mLeashMap.valueAt(i));
+            }
+            t.apply();
             for (int i = 0; i < mInfo.getChanges().size(); ++i) {
                 mInfo.getChanges().get(i).getLeash().release();
             }
@@ -281,6 +297,7 @@ public class RemoteTransitionCompat implements Parcelable {
             mPausingTask = null;
             mInfo = null;
             mOpeningLeash = null;
+            mLeashMap = null;
         }
 
         @Override public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {

@@ -17,11 +17,21 @@
 package com.android.systemui.shared.system;
 
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
+import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
+import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.ArrayMap;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -97,10 +107,94 @@ public class RemoteAnimationTargetCompat {
         }
     }
 
-    public RemoteAnimationTargetCompat(TransitionInfo.Change change, int order) {
+
+    /**
+     * Almost a copy of Transitions#setupStartState.
+     * TODO: remove when there is proper cross-process transaction sync.
+     */
+    @SuppressLint("NewApi")
+    private static void setupLeash(@NonNull SurfaceControl leash,
+            @NonNull TransitionInfo.Change change, int layer,
+            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t) {
+        boolean isOpening = info.getType() == TRANSIT_OPEN || info.getType() == TRANSIT_TO_FRONT;
+        // Put animating stuff above this line and put static stuff below it.
+        int zSplitLine = info.getChanges().size();
+        // changes should be ordered top-to-bottom in z
+        final int mode = change.getMode();
+
+        // Don't move anything that isn't independent within its parents
+        if (!TransitionInfo.isIndependent(change, info)) {
+            if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT || mode == TRANSIT_CHANGE) {
+                t.show(leash);
+                t.setPosition(leash, change.getEndRelOffset().x, change.getEndRelOffset().y);
+            }
+            return;
+        }
+
+        boolean hasParent = change.getParent() != null;
+
+        if (!hasParent) {
+            t.reparent(leash, info.getRootLeash());
+            t.setPosition(leash, change.getStartAbsBounds().left - info.getRootOffset().x,
+                    change.getStartAbsBounds().top - info.getRootOffset().y);
+        }
+        t.show(leash);
+        // Put all the OPEN/SHOW on top
+        if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
+            if (isOpening) {
+                t.setLayer(leash, zSplitLine + info.getChanges().size() - layer);
+                if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) == 0) {
+                    // if transferred, it should be left visible.
+                    t.setAlpha(leash, 0.f);
+                }
+            } else {
+                // put on bottom and leave it visible
+                t.setLayer(leash, zSplitLine - layer);
+            }
+        } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
+            if (isOpening) {
+                // put on bottom and leave visible
+                t.setLayer(leash, zSplitLine - layer);
+            } else {
+                // put on top
+                t.setLayer(leash, zSplitLine + info.getChanges().size() - layer);
+            }
+        } else { // CHANGE
+            t.setLayer(leash, zSplitLine + info.getChanges().size() - layer);
+        }
+    }
+
+    @SuppressLint("NewApi")
+    private static SurfaceControl createLeash(TransitionInfo info, TransitionInfo.Change change,
+            int order, SurfaceControl.Transaction t) {
+        // TODO: once we can properly sync transactions across process, then get rid of this leash.
+        if (change.getParent() != null && (change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+            // Special case for wallpaper atm. Normally these are left alone; but, a quirk of
+            // making leashes means we have to handle them specially.
+            return change.getLeash();
+        }
+        SurfaceControl leashSurface = new SurfaceControl.Builder()
+                .setName(change.getLeash().toString() + "_transition-leash")
+                .setContainerLayer().setParent(change.getParent() == null ? info.getRootLeash()
+                        : info.getChange(change.getParent()).getLeash()).build();
+        // Copied Transitions setup code (which expects bottom-to-top order, so we swap here)
+        setupLeash(leashSurface, change, info.getChanges().size() - order, info, t);
+        t.reparent(change.getLeash(), leashSurface);
+        t.setAlpha(change.getLeash(), 1.0f);
+        t.show(change.getLeash());
+        t.setPosition(change.getLeash(), 0, 0);
+        t.setLayer(change.getLeash(), 0);
+        return leashSurface;
+    }
+
+    public RemoteAnimationTargetCompat(TransitionInfo.Change change, int order,
+            TransitionInfo info, SurfaceControl.Transaction t) {
         taskId = change.getTaskInfo() != null ? change.getTaskInfo().taskId : -1;
         mode = newModeToLegacyMode(change.getMode());
-        leash = new SurfaceControlCompat(change.getLeash());
+
+        // TODO: once we can properly sync transactions across process, then get rid of this leash.
+        leash = new SurfaceControlCompat(createLeash(info, change, order, t));
+
         isTranslucent = (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0
                 || (change.getFlags() & TransitionInfo.FLAG_SHOW_WALLPAPER) != 0;
         clipRect = null;
@@ -139,15 +233,21 @@ public class RemoteAnimationTargetCompat {
      *
      * @param wallpapers If true, this will return wallpaper targets; otherwise it returns
      *                   non-wallpaper targets.
+     * @param leashMap Temporary map of change leash -> launcher leash. Is an output, so should be
+     *                 populated by this function. If null, it is ignored.
      */
-    public static RemoteAnimationTargetCompat[] wrap(TransitionInfo info, boolean wallpapers) {
+    public static RemoteAnimationTargetCompat[] wrap(TransitionInfo info, boolean wallpapers,
+            SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
         final ArrayList<RemoteAnimationTargetCompat> out = new ArrayList<>();
         for (int i = 0; i < info.getChanges().size(); i++) {
             boolean changeIsWallpaper =
                     (info.getChanges().get(i).getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0;
             if (wallpapers != changeIsWallpaper) continue;
             out.add(new RemoteAnimationTargetCompat(info.getChanges().get(i),
-                    info.getChanges().size() - i));
+                    info.getChanges().size() - i, info, t));
+            if (leashMap == null) continue;
+            leashMap.put(info.getChanges().get(i).getLeash(),
+                    out.get(out.size() - 1).leash.mSurfaceControl);
         }
         return out.toArray(new RemoteAnimationTargetCompat[out.size()]);
     }

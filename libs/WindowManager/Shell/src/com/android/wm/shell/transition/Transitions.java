@@ -22,6 +22,7 @@ import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
@@ -226,18 +227,11 @@ public class Transitions implements RemoteCallable<Transitions> {
     }
 
     /**
-     * Reparents all participants into a shared parent and orders them based on: the global transit
-     * type, their transit mode, and their destination z-order.
+     * Sets up visibility/alpha/transforms to resemble the starting state of an animation.
      */
     private static void setupStartState(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
         boolean isOpening = isOpeningType(info.getType());
-        if (info.getRootLeash().isValid()) {
-            t.show(info.getRootLeash());
-        }
-        // Put animating stuff above this line and put static stuff below it.
-        int zSplitLine = info.getChanges().size();
-        // changes should be ordered top-to-bottom in z
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             final SurfaceControl leash = change.getLeash();
@@ -254,6 +248,52 @@ public class Transitions implements RemoteCallable<Transitions> {
                 continue;
             }
 
+            if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
+                t.show(leash);
+                t.setMatrix(leash, 1, 0, 0, 1);
+                if (isOpening
+                        // If this is a transferred starting window, we want it immediately visible.
+                        && (change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) == 0) {
+                    t.setAlpha(leash, 0.f);
+                    // fix alpha in finish transaction in case the animator itself no-ops.
+                    finishT.setAlpha(leash, 1.f);
+                }
+            } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
+                // Wallpaper is a bit of an anomaly: it's visibility is tied to other WindowStates.
+                // As a result, we actually can't hide it's WindowToken because there may not be a
+                // transition associated with it becoming visible again. Fortunately, since it is
+                // always z-ordered to the back, we don't have to worry about it flickering to the
+                // front during reparenting, so the hide here isn't necessary for it.
+                if ((change.getFlags() & FLAG_IS_WALLPAPER) == 0) {
+                    finishT.hide(leash);
+                }
+            }
+        }
+    }
+
+    /**
+     * Reparents all participants into a shared parent and orders them based on: the global transit
+     * type, their transit mode, and their destination z-order.
+     */
+    private static void setupAnimHierarchy(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
+        boolean isOpening = isOpeningType(info.getType());
+        if (info.getRootLeash().isValid()) {
+            t.show(info.getRootLeash());
+        }
+        // Put animating stuff above this line and put static stuff below it.
+        int zSplitLine = info.getChanges().size();
+        // changes should be ordered top-to-bottom in z
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            final SurfaceControl leash = change.getLeash();
+            final int mode = info.getChanges().get(i).getMode();
+
+            // Don't reparent anything that isn't independent within its parents
+            if (!TransitionInfo.isIndependent(change, info)) {
+                continue;
+            }
+
             boolean hasParent = change.getParent() != null;
 
             if (!hasParent) {
@@ -263,24 +303,12 @@ public class Transitions implements RemoteCallable<Transitions> {
             }
             // Put all the OPEN/SHOW on top
             if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
-                t.show(leash);
-                t.setMatrix(leash, 1, 0, 0, 1);
                 if (isOpening) {
-                    // put on top with 0 alpha
+                    // put on top
                     t.setLayer(leash, zSplitLine + info.getChanges().size() - i);
-                    if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-                        // This received a transferred starting window, so make it immediately
-                        // visible.
-                        t.setAlpha(leash, 1.f);
-                    } else {
-                        t.setAlpha(leash, 0.f);
-                        // fix alpha in finish transaction in case the animator itself no-ops.
-                        finishT.setAlpha(leash, 1.f);
-                    }
                 } else {
-                    // put on bottom and leave it visible
+                    // put on bottom
                     t.setLayer(leash, zSplitLine - i);
-                    t.setAlpha(leash, 1.f);
                 }
             } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
                 if (isOpening) {
@@ -290,7 +318,7 @@ public class Transitions implements RemoteCallable<Transitions> {
                     // put on top
                     t.setLayer(leash, zSplitLine + info.getChanges().size() - i);
                 }
-            } else { // CHANGE
+            } else { // CHANGE or other
                 t.setLayer(leash, zSplitLine + info.getChanges().size() - i);
             }
         }
@@ -329,6 +357,8 @@ public class Transitions implements RemoteCallable<Transitions> {
         active.mInfo = info;
         active.mStartT = t;
         active.mFinishT = finishT;
+        setupStartState(active.mInfo, active.mStartT, active.mFinishT);
+
         if (activeIdx > 0) {
             // This is now playing at the same time as an existing animation, so try merging it.
             attemptMergeTransition(mActiveTransitions.get(0), active);
@@ -357,7 +387,7 @@ public class Transitions implements RemoteCallable<Transitions> {
     }
 
     void playTransition(@NonNull ActiveTransition active) {
-        setupStartState(active.mInfo, active.mStartT, active.mFinishT);
+        setupAnimHierarchy(active.mInfo, active.mStartT, active.mFinishT);
 
         // If a handler already chose to run this animation, try delegating to it first.
         if (active.mHandler != null) {

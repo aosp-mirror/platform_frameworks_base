@@ -28,6 +28,7 @@ import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import android.annotation.SuppressLint;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
@@ -158,10 +159,11 @@ public class RemoteAnimationAdapterCompat {
             public void startAnimation(IBinder token, TransitionInfo info,
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishCallback) {
+                final ArrayMap<SurfaceControl, SurfaceControl> leashMap = new ArrayMap<>();
                 final RemoteAnimationTargetCompat[] appsCompat =
-                        RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */);
+                        RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */, t, leashMap);
                 final RemoteAnimationTargetCompat[] wallpapersCompat =
-                        RemoteAnimationTargetCompat.wrap(info, true /* wallpapers */);
+                        RemoteAnimationTargetCompat.wrap(info, true /* wallpapers */, t, leashMap);
                 // TODO(bc-unlock): Build wrapped object for non-apps target.
                 final RemoteAnimationTargetCompat[] nonAppsCompat =
                         new RemoteAnimationTargetCompat[0];
@@ -211,7 +213,7 @@ public class RemoteAnimationAdapterCompat {
                     // Need to "boost" the closing things since that's what launcher expects.
                     for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                         final TransitionInfo.Change change = info.getChanges().get(i);
-                        final SurfaceControl leash = change.getLeash();
+                        final SurfaceControl leash = leashMap.get(change.getLeash());
                         final int mode = info.getChanges().get(i).getMode();
                         // Only deal with independent layers
                         if (!TransitionInfo.isIndependent(change, info)) continue;
@@ -227,14 +229,14 @@ public class RemoteAnimationAdapterCompat {
                     }
                 } else {
                     if (launcherTask != null) {
-                        counterLauncher.addChild(t, launcherTask.getLeash());
+                        counterLauncher.addChild(t, leashMap.get(launcherTask.getLeash()));
                     }
                     if (wallpaper != null && rotateDelta != 0 && wallpaper.getParent() != null) {
                         counterWallpaper.setup(t, info.getChange(wallpaper.getParent()).getLeash(),
                                 rotateDelta, displayW, displayH);
                         if (counterWallpaper.mSurface != null) {
                             t.setLayer(counterWallpaper.mSurface, -1);
-                            counterWallpaper.addChild(t, wallpaper.getLeash());
+                            counterWallpaper.addChild(t, leashMap.get(wallpaper.getLeash()));
                         }
                     }
                 }
@@ -252,6 +254,12 @@ public class RemoteAnimationAdapterCompat {
                             for (int i = 0; i < info.getChanges().size(); ++i) {
                                 info.getChanges().get(i).getLeash().release();
                             }
+                            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                            for (int i = 0; i < leashMap.size(); ++i) {
+                                if (leashMap.keyAt(i) == leashMap.valueAt(i)) continue;
+                                t.remove(leashMap.valueAt(i));
+                            }
+                            t.apply();
                             finishCallback.onTransitionFinished(null /* wct */);
                         } catch (RemoteException e) {
                             Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"

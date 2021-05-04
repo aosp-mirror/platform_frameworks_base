@@ -68,8 +68,8 @@ public class RemoteTransitionTest extends SysuiTestCase {
                 .addChange(TRANSIT_CLOSE, 0 /* flags */)
                 .addChange(TRANSIT_OPEN, FLAG_IS_WALLPAPER).build();
         // Check non-wallpaper extraction
-        RemoteAnimationTargetCompat[] wrapped =
-                RemoteAnimationTargetCompat.wrap(combined, false /* wallpapers */);
+        RemoteAnimationTargetCompat[] wrapped = RemoteAnimationTargetCompat.wrap(combined,
+                false /* wallpapers */, mock(SurfaceControl.Transaction.class), null /* leashes */);
         assertEquals(2, wrapped.length);
         int changeLayer = -1;
         int closeLayer = -1;
@@ -86,8 +86,8 @@ public class RemoteTransitionTest extends SysuiTestCase {
         assertTrue(closeLayer < changeLayer);
 
         // Check wallpaper extraction
-        RemoteAnimationTargetCompat[] wallps =
-                RemoteAnimationTargetCompat.wrap(combined, true /* wallpapers */);
+        RemoteAnimationTargetCompat[] wallps = RemoteAnimationTargetCompat.wrap(combined,
+                true /* wallpapers */, mock(SurfaceControl.Transaction.class), null /* leashes */);
         assertEquals(1, wallps.length);
         assertTrue(wallps[0].prefixOrderIndex < closeLayer);
         assertEquals(MODE_OPENING, wallps[0].mode);
@@ -95,16 +95,15 @@ public class RemoteTransitionTest extends SysuiTestCase {
 
     @Test
     public void testLegacyTargetWrapper() {
+        TransitionInfo tinfo = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_CHANGE, FLAG_TRANSLUCENT).build();
+        final TransitionInfo.Change change = tinfo.getChanges().get(0);
         final Rect endBounds = new Rect(40, 60, 140, 200);
-        final TransitionInfo.Change change =
-                new TransitionInfo.Change(null /* token */, null /* leash */);
         change.setTaskInfo(createTaskInfo(1 /* taskId */, ACTIVITY_TYPE_HOME));
-        change.setMode(TRANSIT_CHANGE);
         change.setEndAbsBounds(endBounds);
         change.setEndRelOffset(0, 0);
-        change.setFlags(FLAG_TRANSLUCENT);
-        final RemoteAnimationTargetCompat wrapped =
-                new RemoteAnimationTargetCompat(change, 0 /* order */);
+        final RemoteAnimationTargetCompat wrapped = new RemoteAnimationTargetCompat(change,
+                0 /* order */, tinfo, mock(SurfaceControl.Transaction.class));
         assertEquals(ACTIVITY_TYPE_HOME, wrapped.activityType);
         assertEquals(new Rect(0, 0, 100, 140), wrapped.localBounds);
         assertEquals(endBounds, wrapped.screenSpaceBounds);
@@ -122,7 +121,7 @@ public class RemoteTransitionTest extends SysuiTestCase {
         TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
                 @TransitionInfo.ChangeFlags int flags) {
             final TransitionInfo.Change change =
-                    new TransitionInfo.Change(null /* token */, null /* leash */);
+                    new TransitionInfo.Change(null /* token */, createMockSurface(true));
             change.setMode(mode);
             change.setFlags(flags);
             mInfo.addChange(change);
@@ -138,6 +137,7 @@ public class RemoteTransitionTest extends SysuiTestCase {
         SurfaceControl sc = mock(SurfaceControl.class);
         if (valid) {
             doReturn(true).when(sc).isValid();
+            doReturn("TestSurface").when(sc).toString();
         }
         return sc;
     }
