@@ -16,9 +16,12 @@
 
 package com.android.frameworks.core.batterystatsviewer;
 
+import static com.android.frameworks.core.batterystatsviewer.BatteryConsumerData.batteryConsumerId;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.BatteryConsumer;
+import android.os.BatteryUsageStats;
 import android.os.Process;
 import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
@@ -41,10 +44,11 @@ class BatteryConsumerInfoHelper {
     }
 
     @NonNull
-    public static BatteryConsumerInfo makeBatteryConsumerInfo(PackageManager packageManager,
-            @NonNull BatteryConsumer batteryConsumer) {
+    public static BatteryConsumerInfo makeBatteryConsumerInfo(
+            @NonNull BatteryConsumer batteryConsumer, String batteryConsumerId,
+            PackageManager packageManager) {
         BatteryConsumerInfo info = new BatteryConsumerInfo();
-        info.id = BatteryConsumerData.batteryConsumerId(batteryConsumer);
+        info.id = batteryConsumerId;
         info.powerMah = batteryConsumer.getConsumedPower();
 
         if (batteryConsumer instanceof UidBatteryConsumer) {
@@ -100,6 +104,15 @@ class BatteryConsumerInfoHelper {
                     info.packages = sb;
                 }
             }
+            // Default the app icon to System Server. This includes root, dex2oat and other UIDs.
+            if (info.iconInfo == null) {
+                try {
+                    info.iconInfo =
+                            packageManager.getApplicationInfo(SYSTEM_SERVER_PACKAGE_NAME, 0);
+                } catch (PackageManager.NameNotFoundException nameNotFoundException) {
+                    // Won't happen
+                }
+            }
         } else if (batteryConsumer instanceof SystemBatteryConsumer) {
             final SystemBatteryConsumer systemBatteryConsumer =
                     (SystemBatteryConsumer) batteryConsumer;
@@ -108,17 +121,26 @@ class BatteryConsumerInfoHelper {
                     drainType);
             info.label = name.charAt(0) + name.substring(1).toLowerCase().replace('_', ' ');
             info.isSystemBatteryConsumer = true;
-        }
-
-        // Default the app icon to System Server. This includes root, dex2oat and other UIDs.
-        if (info.iconInfo == null) {
             try {
                 info.iconInfo =
                         packageManager.getApplicationInfo(SYSTEM_SERVER_PACKAGE_NAME, 0);
             } catch (PackageManager.NameNotFoundException nameNotFoundException) {
                 // Won't happen
             }
+        } else {
+            for (int scope = 0;
+                    scope < BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT;
+                    scope++) {
+                if (batteryConsumerId(scope).equals(batteryConsumerId)) {
+                    final String name = DebugUtils.constantToString(BatteryUsageStats.class,
+                            "AGGREGATE_BATTERY_CONSUMER_SCOPE_", scope)
+                            .replace('_', ' ');
+                    info.label = name;
+                    break;
+                }
+            }
         }
+
         return info;
     }
 }

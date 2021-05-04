@@ -2468,7 +2468,7 @@ public final class SurfaceControl implements Parcelable {
         if (Float.isNaN(sdrBrightness) || sdrBrightness > 1.0f
                 || (sdrBrightness < 0.0f && sdrBrightness != -1.0f)) {
             throw new IllegalArgumentException("sdrBrightness must be a number between 0.0f "
-                    + "and 1.0f, or -1 to turn the backlight off: " + displayBrightness);
+                    + "and 1.0f, or -1 to turn the backlight off: " + sdrBrightness);
         }
         return nativeSetDisplayBrightness(displayToken, sdrBrightness, sdrBrightnessNits,
                 displayBrightness, displayBrightnessNits);

@@ -12713,7 +12713,8 @@ public class PackageManagerService extends IPackageManager.Stub
             Map<String, AndroidPackage> availablePackages)
             throws PackageManagerException {
         final ArrayList<SharedLibraryInfo> sharedLibraryInfos = collectSharedLibraryInfos(
-                pkgSetting.pkg, availablePackages, mSharedLibraries, null);
+                pkgSetting.pkg, availablePackages, mSharedLibraries, null /* newLibraries */,
+                mInjector.getCompatibility());
         executeSharedLibrariesUpdateLPr(pkg, pkgSetting, changingLib, changingLibSetting,
                 sharedLibraryInfos, mUserManager.getUserIds());
     }
@@ -12721,8 +12722,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private static ArrayList<SharedLibraryInfo> collectSharedLibraryInfos(AndroidPackage pkg,
             Map<String, AndroidPackage> availablePackages,
             @NonNull final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> existingLibraries,
-            @Nullable final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> newLibraries)
-            throws PackageManagerException {
+            @Nullable final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> newLibraries,
+            PlatformCompat platformCompat) throws PackageManagerException {
         if (pkg == null) {
             return null;
         }
@@ -12746,9 +12747,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     null, null, pkg.getPackageName(), false, pkg.getTargetSdkVersion(),
                     usesLibraryInfos, availablePackages, existingLibraries, newLibraries);
         }
-        // TODO(b/160928779) gate this behavior using ENFORCE_NATIVE_SHARED_LIBRARY_DEPENDENCIES
-        if (pkg.getTargetSdkVersion() > 30) {
-            if (!pkg.getUsesNativeLibraries().isEmpty() && pkg.getTargetSdkVersion() > 30) {
+        if (platformCompat.isChangeEnabledInternal(ENFORCE_NATIVE_SHARED_LIBRARY_DEPENDENCIES,
+                pkg.getPackageName(), pkg.getTargetSdkVersion())) {
+            if (!pkg.getUsesNativeLibraries().isEmpty()) {
                 usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesNativeLibraries(), null,
                         null, pkg.getPackageName(), true, pkg.getTargetSdkVersion(),
                         usesLibraryInfos, availablePackages, existingLibraries, newLibraries);
@@ -18876,7 +18877,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 result.get(installPackageName).collectedSharedLibraryInfos =
                         collectSharedLibraryInfos(scanResult.request.parsedPackage,
                                 combinedPackages, request.sharedLibrarySource,
-                                incomingSharedLibraries);
+                                incomingSharedLibraries, injector.getCompatibility());
 
             } catch (PackageManagerException e) {
                 throw new ReconcileFailure(e.error, e.getMessage());

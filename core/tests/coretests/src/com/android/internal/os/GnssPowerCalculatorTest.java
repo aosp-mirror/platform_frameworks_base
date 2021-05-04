@@ -62,6 +62,18 @@ public class GnssPowerCalculatorTest {
                 .isWithin(PRECISION).of(0.1);
         assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_GNSS))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isWithin(PRECISION).of(0.1);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+
+        BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isWithin(PRECISION).of(0.1);
+        assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
 
     @Test
@@ -96,6 +108,18 @@ public class GnssPowerCalculatorTest {
         assertThat(consumer2.getConsumedPower(BatteryConsumer.POWER_COMPONENT_GNSS))
                 .isWithin(PRECISION).of(5.55555);
         assertThat(consumer2.getPowerModel(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isWithin(PRECISION).of(8.333333);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+
+        BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isWithin(PRECISION).of(8.333333);
+        assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_GNSS))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
     }
 }

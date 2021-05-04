@@ -29,6 +29,7 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
@@ -51,6 +52,7 @@ public class StatusBarWindowController {
     private final State mCurrentState = new State();
 
     private ViewGroup mStatusBarView;
+    private ViewGroup mLaunchAnimationContainer;
     private WindowManager.LayoutParams mLp;
     private final WindowManager.LayoutParams mLpChanged;
 
@@ -62,6 +64,8 @@ public class StatusBarWindowController {
         mWindowManager = windowManager;
         mSuperStatusBarViewFactory = superStatusBarViewFactory;
         mStatusBarView = mSuperStatusBarViewFactory.getStatusBarWindowView();
+        mLaunchAnimationContainer = mStatusBarView.findViewById(
+                R.id.status_bar_launch_animation_container);
         mLpChanged = new WindowManager.LayoutParams();
         mResources = resources;
 
@@ -124,13 +128,38 @@ public class StatusBarWindowController {
         apply(mCurrentState);
     }
 
-    private void applyHeight() {
-        mLpChanged.height = mBarHeight;
+    /**
+     * Return the container in which we should run launch animations started from the status bar and
+     * expanding into the opening window.
+     *
+     * @see #setLaunchAnimationRunning
+     */
+    public ViewGroup getLaunchAnimationContainer() {
+        return mLaunchAnimationContainer;
+    }
+
+    /**
+     * Set whether a launch animation is currently running. If true, this will ensure that the
+     * window matches its parent height so that the animation is not clipped by the normal status
+     * bar height.
+     */
+    public void setLaunchAnimationRunning(boolean isLaunchAnimationRunning) {
+        if (isLaunchAnimationRunning == mCurrentState.mIsLaunchAnimationRunning) {
+            return;
+        }
+
+        mCurrentState.mIsLaunchAnimationRunning = isLaunchAnimationRunning;
+        apply(mCurrentState);
+    }
+
+    private void applyHeight(State state) {
+        mLpChanged.height =
+                state.mIsLaunchAnimationRunning ? ViewGroup.LayoutParams.MATCH_PARENT : mBarHeight;
     }
 
     private void apply(State state) {
         applyForceStatusBarVisibleFlag(state);
-        applyHeight();
+        applyHeight(state);
         if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
         }
@@ -138,10 +167,11 @@ public class StatusBarWindowController {
 
     private static class State {
         boolean mForceStatusBarVisible;
+        boolean mIsLaunchAnimationRunning;
     }
 
     private void applyForceStatusBarVisibleFlag(State state) {
-        if (state.mForceStatusBarVisible) {
+        if (state.mForceStatusBarVisible || state.mIsLaunchAnimationRunning) {
             mLpChanged.privateFlags |= PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
         } else {
             mLpChanged.privateFlags &= ~PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;

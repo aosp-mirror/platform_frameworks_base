@@ -192,7 +192,7 @@ public final class SearchResult {
             return this;
         }
 
-        /** @deprecated this method exists only for dogfooder transition and must be removed */
+        /** @deprecated This method exists only for dogfooder transition and must be removed. */
         @Deprecated
         @NonNull
         public Builder addMatch(@NonNull MatchInfo matchInfo) {
