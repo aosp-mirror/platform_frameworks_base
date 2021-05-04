@@ -154,18 +154,18 @@ struct BaseItem : public Item {
 // A reference can be symbolic (with the name set to a valid resource name) or be
 // numeric (the id is set to a valid resource ID).
 struct Reference : public TransformableItem<Reference, BaseItem<Reference>> {
-  enum class Type {
+  enum class Type : uint8_t {
     kResource,
     kAttribute,
   };
 
   Maybe<ResourceName> name;
   Maybe<ResourceId> id;
+  std::optional<uint32_t> type_flags;
   Reference::Type reference_type;
   bool private_reference = false;
   bool is_dynamic = false;
-  std::optional<uint32_t> type_flags;
-  bool allow_raw;
+  bool allow_raw = false;
 
   Reference();
   explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);
