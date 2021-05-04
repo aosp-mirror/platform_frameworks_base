@@ -38,7 +38,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 
@@ -57,7 +56,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private StatusBarStateController mStatusBarStateController;
     private OngoingCallController mOngoingCallController;
     private SystemStatusAnimationScheduler mAnimationScheduler;
-    private PrivacyDotViewController mDotViewController;
+    private StatusBarLocationPublisher mLocationPublisher;
 
     public CollapsedStatusBarFragmentTest() {
         super(CollapsedStatusBarFragment.class);
@@ -224,12 +223,12 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         mOngoingCallController = mock(OngoingCallController.class);
         mAnimationScheduler = mock(SystemStatusAnimationScheduler.class);
-        mDotViewController = mock(PrivacyDotViewController.class);
+        mLocationPublisher = mock(StatusBarLocationPublisher.class);
         setUpNotificationIconAreaController();
         return new CollapsedStatusBarFragment(
                 mOngoingCallController,
                 mAnimationScheduler,
-                mDotViewController,
+                mLocationPublisher,
                 mMockNotificationAreaController);
     }
 
