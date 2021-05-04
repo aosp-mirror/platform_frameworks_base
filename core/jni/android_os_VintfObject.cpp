@@ -37,11 +37,13 @@ static jmethodID gLongValueOf;
 
 namespace android {
 
+using vintf::CompatibilityMatrix;
 using vintf::HalManifest;
 using vintf::Level;
 using vintf::SchemaType;
 using vintf::to_string;
 using vintf::toXml;
+using vintf::Version;
 using vintf::VintfObject;
 using vintf::Vndk;
 
@@ -119,6 +121,28 @@ static jstring android_os_VintfObject_getSepolicyVersion(JNIEnv* env, jclass) {
     return env->NewStringUTF(cString.c_str());
 }
 
+static jstring android_os_VintfObject_getPlatformSepolicyVersion(JNIEnv* env, jclass) {
+    std::shared_ptr<const CompatibilityMatrix> matrix =
+            VintfObject::GetFrameworkCompatibilityMatrix();
+    if (matrix == nullptr || matrix->type() != SchemaType::FRAMEWORK) {
+        jniThrowRuntimeException(env, "Cannot get framework compatibility matrix");
+        return nullptr;
+    }
+
+    auto versions = matrix->getSepolicyVersions();
+    if (versions.empty()) {
+        jniThrowRuntimeException(env,
+                                 "sepolicy_version in framework compatibility matrix is empty");
+        return nullptr;
+    }
+
+    Version latest;
+    for (const auto& range : versions) {
+        latest = std::max(latest, range.maxVer());
+    }
+    return env->NewStringUTF(to_string(latest).c_str());
+}
+
 static jobject android_os_VintfObject_getVndkSnapshots(JNIEnv* env, jclass) {
     std::shared_ptr<const HalManifest> manifest = VintfObject::GetFrameworkHalManifest();
     if (manifest == nullptr || manifest->type() != SchemaType::FRAMEWORK) {
@@ -145,12 +169,17 @@ static jobject android_os_VintfObject_getTargetFrameworkCompatibilityMatrixVersi
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gVintfObjectMethods[] = {
-    {"report", "()[Ljava/lang/String;", (void*)android_os_VintfObject_report},
-    {"verifyWithoutAvb", "()I", (void*)android_os_VintfObject_verifyWithoutAvb},
-    {"getHalNamesAndVersions", "()[Ljava/lang/String;", (void*)android_os_VintfObject_getHalNamesAndVersions},
-    {"getSepolicyVersion", "()Ljava/lang/String;", (void*)android_os_VintfObject_getSepolicyVersion},
-    {"getVndkSnapshots", "()Ljava/util/Map;", (void*)android_os_VintfObject_getVndkSnapshots},
-    {"getTargetFrameworkCompatibilityMatrixVersion", "()Ljava/lang/Long;", (void*)android_os_VintfObject_getTargetFrameworkCompatibilityMatrixVersion},
+        {"report", "()[Ljava/lang/String;", (void*)android_os_VintfObject_report},
+        {"verifyWithoutAvb", "()I", (void*)android_os_VintfObject_verifyWithoutAvb},
+        {"getHalNamesAndVersions", "()[Ljava/lang/String;",
+         (void*)android_os_VintfObject_getHalNamesAndVersions},
+        {"getSepolicyVersion", "()Ljava/lang/String;",
+         (void*)android_os_VintfObject_getSepolicyVersion},
+        {"getPlatformSepolicyVersion", "()Ljava/lang/String;",
+         (void*)android_os_VintfObject_getPlatformSepolicyVersion},
+        {"getVndkSnapshots", "()Ljava/util/Map;", (void*)android_os_VintfObject_getVndkSnapshots},
+        {"getTargetFrameworkCompatibilityMatrixVersion", "()Ljava/lang/Long;",
+         (void*)android_os_VintfObject_getTargetFrameworkCompatibilityMatrixVersion},
 };
 
 const char* const kVintfObjectPathName = "android/os/VintfObject";
