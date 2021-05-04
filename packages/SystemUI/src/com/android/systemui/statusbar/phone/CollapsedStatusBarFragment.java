@@ -43,7 +43,6 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
@@ -92,7 +91,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private CommandQueue mCommandQueue;
     private OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
-    private final PrivacyDotViewController mDotViewController;
+    private final StatusBarLocationPublisher mLocationPublisher;
     private NotificationIconAreaController mNotificationIconAreaController;
 
     private List<String> mBlockedIcons = new ArrayList<>();
@@ -120,12 +119,12 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public CollapsedStatusBarFragment(
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
-            PrivacyDotViewController dotViewController,
+            StatusBarLocationPublisher locationPublisher,
             NotificationIconAreaController notificationIconAreaController
     ) {
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
-        mDotViewController = dotViewController;
+        mLocationPublisher = locationPublisher;
         mNotificationIconAreaController = notificationIconAreaController;
     }
 
@@ -540,7 +539,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         int leftMargin = left - mStatusBar.getLeft();
         int rightMargin = mStatusBar.getRight() - right;
 
-        mDotViewController.setStatusBarMargins(leftMargin, rightMargin);
+        mLocationPublisher.updateStatusBarMargin(leftMargin, rightMargin);
     }
 
     // Listen for view end changes of PhoneStatusBarView and publish that to the privacy dot
