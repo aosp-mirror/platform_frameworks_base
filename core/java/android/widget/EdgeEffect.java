@@ -442,7 +442,6 @@ public class EdgeEffect {
         if (mEdgeEffectType == TYPE_STRETCH) {
             mState = STATE_RECEDE;
             mVelocity = velocity * ON_ABSORB_VELOCITY_ADJUSTMENT;
-            mDistance = 0;
             mStartTime = AnimationUtils.currentAnimationTimeMillis();
         } else {
             mState = STATE_ABSORB;
