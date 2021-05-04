@@ -207,11 +207,12 @@ public class QSContainerImpl extends FrameLayout {
                 mContext.getResources().getDimensionPixelSize(R.dimen.qs_container_bottom_padding)
         );
 
-        mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
+        int sideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
         int padding = getResources().getDimensionPixelSize(
                 R.dimen.notification_shade_content_margin_horizontal);
-        boolean marginsChanged = padding != mContentPadding;
+        boolean marginsChanged = padding != mContentPadding || sideMargins != mSideMargins;
         mContentPadding = padding;
+        mSideMargins = sideMargins;
         if (marginsChanged) {
             updatePaddingsAndMargins(qsPanelController, quickStatusBarHeaderController);
         }
