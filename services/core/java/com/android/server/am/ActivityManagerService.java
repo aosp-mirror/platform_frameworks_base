@@ -10272,11 +10272,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (lines > 0) {
                     sb.append("\n");
 
-                    // Merge several logcat streams, and take the last N lines
                     InputStreamReader input = null;
                     try {
                         java.lang.Process logcat = new ProcessBuilder(
-                                "/system/bin/timeout", "-k", "15s", "10s",
+                                // Time out after 10s, but kill logcat with SEGV
+                                // so we can investigate why it didn't finish.
+                                "/system/bin/timeout", "-s", "SEGV", "10s",
+                                // Merge several logcat streams, and take the last N lines.
                                 "/system/bin/logcat", "-v", "threadtime", "-b", "events", "-b", "system",
                                 "-b", "main", "-b", "crash", "-t", String.valueOf(lines))
                                         .redirectErrorStream(true).start();
