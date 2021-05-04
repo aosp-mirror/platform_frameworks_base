@@ -114,7 +114,7 @@ public class QuickStatusBarHeader extends FrameLayout {
         mDatePrivacyView = findViewById(R.id.quick_status_bar_date_privacy);
         mClockIconsView = findViewById(R.id.quick_qs_status_icons);
         mQSCarriers = findViewById(R.id.carrier_group);
-        mContainer = findViewById(R.id.container);
+        mContainer = findViewById(R.id.qs_container);
         mIconContainer = findViewById(R.id.statusIcons);
         mPrivacyChip = findViewById(R.id.privacy_chip);
         mDateView = findViewById(R.id.date);
