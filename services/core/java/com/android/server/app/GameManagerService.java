@@ -56,6 +56,7 @@ import android.os.ShellCallback;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
@@ -180,9 +181,14 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     break;
                 }
                 case POPULATE_GAME_MODE_SETTINGS: {
+                    // Scan all game packages and re-enforce the configured compat mode overrides
+                    // as the DeviceConfig may have be wiped/since last reboot and we can't risk
+                    // having overrides configured for packages that no longer have any DeviceConfig
+                    // and thus any way to escape compat mode.
                     removeMessages(POPULATE_GAME_MODE_SETTINGS, msg.obj);
-                    loadDeviceConfigLocked();
-                    break;
+                    final int userId = (int) msg.obj;
+                    final String[] packageNames = getInstalledGamePackageNames(userId);
+                    updateConfigsForUser(userId, packageNames);
                 }
             }
         }
@@ -198,28 +204,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         @Override
         public void onPropertiesChanged(Properties properties) {
-            synchronized (mDeviceConfigLock) {
-                for (final String packageName : properties.getKeyset()) {
-                    try {
-                        // Check if the package is installed before caching it.
-                        mPackageManager.getPackageInfo(packageName, 0);
-                        final GamePackageConfiguration config =
-                                GamePackageConfiguration.fromProperties(packageName, properties);
-                        if (config.isValid()) {
-                            putConfig(config);
-                        } else {
-                            // This means that we received a bad config, or the config was deleted.
-                            Slog.i(TAG, "Removing config for: " + packageName);
-                            mConfigs.remove(packageName);
-                            disableCompatScale(packageName);
-                        }
-                    } catch (PackageManager.NameNotFoundException e) {
-                        if (DEBUG) {
-                            Slog.v(TAG, "Package name not found", e);
-                        }
-                    }
-                }
-            }
+            final String[] packageNames = properties.getKeyset().toArray(new String[0]);
+            updateConfigsForUser(mContext.getUserId(), packageNames);
         }
 
         @Override
@@ -228,80 +214,166 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
-    private static class GameModeConfiguration {
-        public static final String TAG = "GameManagerService_GameModeConfiguration";
-        public static final String MODE_KEY = "mode";
-        public static final String SCALING_KEY = "downscaleFactor";
-
-        private final @GameMode int mGameMode;
-        private final String mScaling;
-
-        private GameModeConfiguration(@NonNull int gameMode,
-                @NonNull String scaling) {
-            mGameMode = gameMode;
-            mScaling = scaling;
-        }
-
-        public static GameModeConfiguration fromKeyValueListParser(KeyValueListParser parser) {
-            return new GameModeConfiguration(
-                    parser.getInt(MODE_KEY, GameManager.GAME_MODE_UNSUPPORTED),
-                    parser.getString(SCALING_KEY, "1.0")
-            );
-        }
-
-        public int getGameMode() {
-            return mGameMode;
-        }
-
-        public String getScaling() {
-            return mScaling;
-        }
-
-        public boolean isValid() {
-            return (mGameMode == GameManager.GAME_MODE_PERFORMANCE
-                    || mGameMode == GameManager.GAME_MODE_BATTERY) && getCompatChangeId() != 0;
-        }
-
-        public String toString() {
-            return "[Game Mode:" + mGameMode + ",Scaling:" + mScaling + "]";
-        }
-
-        public long getCompatChangeId() {
-            switch (mScaling) {
-                case "0.5":
-                    return DOWNSCALE_50;
-                case "0.6":
-                    return DOWNSCALE_60;
-                case "0.7":
-                    return DOWNSCALE_70;
-                case "0.8":
-                    return DOWNSCALE_80;
-                case "0.9":
-                    return DOWNSCALE_90;
-            }
-            return 0;
-        }
-    }
-
-    private static class GamePackageConfiguration {
+    /**
+     * GamePackageConfiguration manages all game mode config details for its associated package.
+     */
+    @VisibleForTesting
+    public class GamePackageConfiguration {
         public static final String TAG = "GameManagerService_GamePackageConfiguration";
+
+        /**
+         * Metadata that can be included in the app manifest to allow/disallow any window manager
+         * downscaling interventions. Default value is TRUE.
+         */
+        public static final String METADATA_WM_ALLOW_DOWNSCALE =
+                "com.android.graphics.intervention.wm.allowDownscale";
+
+        /**
+         * Metadata that needs to be included in the app manifest to OPT-IN to PERFORMANCE mode.
+         * This means the app will assume full responsibility for the experience provided by this
+         * mode and the system will enable no window manager downscaling.
+         * Default value is FALSE
+         */
+        public static final String METADATA_PERFORMANCE_MODE_ENABLE =
+                "com.android.app.gamemode.performance.enabled";
+
+        /**
+         * Metadata that needs to be included in the app manifest to OPT-IN to BATTERY mode.
+         * This means the app will assume full responsibility for the experience provided by this
+         * mode and the system will enable no window manager downscaling.
+         * Default value is FALSE
+         */
+        public static final String METADATA_BATTERY_MODE_ENABLE =
+                "com.android.app.gamemode.battery.enabled";
 
         private final String mPackageName;
         private final ArrayMap<Integer, GameModeConfiguration> mModeConfigs;
+        private boolean mPerfModeOptedIn;
+        private boolean mBatteryModeOptedIn;
+        private boolean mAllowDownscale;
 
-        private GamePackageConfiguration(String packageName) {
+        GamePackageConfiguration(String packageName, int userId) {
             mPackageName = packageName;
             mModeConfigs = new ArrayMap<>();
+            try {
+                final ApplicationInfo ai = mPackageManager.getApplicationInfoAsUser(packageName,
+                        PackageManager.GET_META_DATA, userId);
+                if (ai.metaData != null) {
+                    mPerfModeOptedIn = ai.metaData.getBoolean(METADATA_PERFORMANCE_MODE_ENABLE);
+                    mBatteryModeOptedIn = ai.metaData.getBoolean(METADATA_BATTERY_MODE_ENABLE);
+                    mAllowDownscale = ai.metaData.getBoolean(METADATA_WM_ALLOW_DOWNSCALE, true);
+                } else {
+                    mPerfModeOptedIn = false;
+                    mBatteryModeOptedIn = false;
+                    mAllowDownscale = true;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.e(TAG, "Failed to get package metadata", e);
+            }
+            final String configString = DeviceConfig.getProperty(
+                    DeviceConfig.NAMESPACE_GAME_OVERLAY, packageName);
+            if (configString != null) {
+                final String[] gameModeConfigStrings = configString.split(":");
+                for (String gameModeConfigString : gameModeConfigStrings) {
+                    try {
+                        final KeyValueListParser parser = new KeyValueListParser(',');
+                        parser.setString(gameModeConfigString);
+                        addModeConfig(new GameModeConfiguration(parser));
+                    } catch (IllegalArgumentException e) {
+                        Slog.e(TAG, "Invalid config string");
+                    }
+                }
+            }
+        }
+
+        /**
+         * GameModeConfiguration contains all the values for all the interventions associated with
+         * a game mode.
+         */
+        @VisibleForTesting
+        public class GameModeConfiguration {
+            public static final String TAG = "GameManagerService_GameModeConfiguration";
+            public static final String MODE_KEY = "mode";
+            public static final String SCALING_KEY = "downscaleFactor";
+            public static final String DEFAULT_SCALING = "1.0";
+
+            private final @GameMode int mGameMode;
+            private final String mScaling;
+
+            GameModeConfiguration(KeyValueListParser parser) {
+                mGameMode = parser.getInt(MODE_KEY, GameManager.GAME_MODE_UNSUPPORTED);
+                mScaling = !mAllowDownscale || isGameModeOptedIn(mGameMode)
+                        ? DEFAULT_SCALING : parser.getString(SCALING_KEY, DEFAULT_SCALING);
+            }
+
+            public int getGameMode() {
+                return mGameMode;
+            }
+
+            public String getScaling() {
+                return mScaling;
+            }
+
+            public boolean isValid() {
+                return (mGameMode == GameManager.GAME_MODE_PERFORMANCE
+                        || mGameMode == GameManager.GAME_MODE_BATTERY)
+                        && (!mAllowDownscale || getCompatChangeId() != 0);
+            }
+
+            /**
+             * @hide
+             */
+            public String toString() {
+                return "[Game Mode:" + mGameMode + ",Scaling:" + mScaling + "]";
+            }
+
+            /**
+             * Get the corresponding compat change id for the current scaling string.
+             */
+            public long getCompatChangeId() {
+                switch (mScaling) {
+                    case "0.5":
+                        return DOWNSCALE_50;
+                    case "0.6":
+                        return DOWNSCALE_60;
+                    case "0.7":
+                        return DOWNSCALE_70;
+                    case "0.8":
+                        return DOWNSCALE_80;
+                    case "0.9":
+                        return DOWNSCALE_90;
+                }
+                return 0;
+            }
         }
 
         public String getPackageName() {
             return mPackageName;
         }
 
+        /**
+         * Gets whether a package has opted into a game mode via its manifest.
+         *
+         * @return True if the app package has specified in its metadata either:
+         * "com.android.app.gamemode.performance.enabled" or
+         * "com.android.app.gamemode.battery.enabled" with a value of "true"
+         */
+        public boolean isGameModeOptedIn(@GameMode int gameMode) {
+            return (mBatteryModeOptedIn && gameMode == GameManager.GAME_MODE_BATTERY)
+                    || (mPerfModeOptedIn && gameMode == GameManager.GAME_MODE_PERFORMANCE);
+        }
+
         public @GameMode int[] getAvailableGameModes() {
-            if (mModeConfigs.keySet().size() > 0) {
-                return mModeConfigs.keySet().stream()
-                            .mapToInt(Integer::intValue).toArray();
+            ArraySet<Integer> modeSet = new ArraySet<>(mModeConfigs.keySet());
+            if (mBatteryModeOptedIn) {
+                modeSet.add(GameManager.GAME_MODE_BATTERY);
+            }
+            if (mPerfModeOptedIn) {
+                modeSet.add(GameManager.GAME_MODE_PERFORMANCE);
+            }
+            if (modeSet.size() > 0) {
+                modeSet.add(GameManager.GAME_MODE_STANDARD);
+                return modeSet.stream().mapToInt(Integer::intValue).toArray();
             }
             return new int[]{GameManager.GAME_MODE_UNSUPPORTED};
         }
@@ -327,30 +399,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
         }
 
-        /**
-         * Create a new instance from a package name and DeviceConfig.Properties instance
-         */
-        public static GamePackageConfiguration fromProperties(String key,
-                Properties properties) {
-            final GamePackageConfiguration packageConfig = new GamePackageConfiguration(key);
-            final String configString = properties.getString(key, "");
-            final String[] gameModeConfigStrings = configString.split(":");
-            for (String gameModeConfigString : gameModeConfigStrings) {
-                try {
-                    final KeyValueListParser parser = new KeyValueListParser(',');
-                    parser.setString(gameModeConfigString);
-                    final GameModeConfiguration config =
-                            GameModeConfiguration.fromKeyValueListParser(parser);
-                    packageConfig.addModeConfig(config);
-                } catch (IllegalArgumentException e) {
-                    Slog.e(TAG, "Invalid config string");
-                }
-            }
-            return packageConfig;
-        }
-
         public boolean isValid() {
-            return mModeConfigs.size() > 0;
+            return mModeConfigs.size() > 0 || mBatteryModeOptedIn || mPerfModeOptedIn;
         }
 
         public String toString() {
@@ -534,8 +584,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
     @VisibleForTesting
     void onBootCompleted() {
         Slog.d(TAG, "onBootCompleted");
-        final Message msg = mHandler.obtainMessage(POPULATE_GAME_MODE_SETTINGS);
-        mHandler.sendMessage(msg);
     }
 
     void onUserStarting(int userId) {
@@ -549,6 +597,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
             mSettings.put(userId, userSettings);
             userSettings.readPersistentDataLocked();
         }
+        final Message msg = mHandler.obtainMessage(POPULATE_GAME_MODE_SETTINGS);
+        msg.obj = userId;
+        mHandler.sendMessage(msg);
     }
 
     void onUserStopping(int userId) {
@@ -562,24 +613,14 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
-    void loadDeviceConfigLocked() {
-        final List<PackageInfo> packages = mPackageManager.getInstalledPackages(0);
-        final String[] packageNames = packages.stream().map(e -> e.packageName)
-                .toArray(String[]::new);
-        synchronized (mDeviceConfigLock) {
-            final Properties properties = DeviceConfig.getProperties(
-                    DeviceConfig.NAMESPACE_GAME_OVERLAY, packageNames);
-            for (String key : properties.getKeyset()) {
-                final GamePackageConfiguration config =
-                        GamePackageConfiguration.fromProperties(key, properties);
-                putConfig(config);
-            }
-        }
-    }
-
-    private void disableCompatScale(String packageName) {
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public void disableCompatScale(String packageName) {
         final long uid = Binder.clearCallingIdentity();
         try {
+            Slog.i(TAG, "Disabling downscale for " + packageName);
             final ArrayMap<Long, PackageOverride> overrides = new ArrayMap<>();
             overrides.put(DOWNSCALED, COMPAT_DISABLED);
             final CompatibilityOverrideConfig changeConfig = new CompatibilityOverrideConfig(
@@ -597,6 +638,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private void enableCompatScale(String packageName, long scaleId) {
         final long uid = Binder.clearCallingIdentity();
         try {
+            Slog.i(TAG, "Enabling downscale: " + scaleId + " for " + packageName);
             final ArrayMap<Long, PackageOverride> overrides = new ArrayMap<>();
             overrides.put(DOWNSCALED, COMPAT_ENABLED);
             overrides.put(DOWNSCALE_50, COMPAT_DISABLED);
@@ -622,21 +664,25 @@ public final class GameManagerService extends IGameManagerService.Stub {
             if (gameMode == GameManager.GAME_MODE_STANDARD
                     || gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
                 disableCompatScale(packageName);
-                Slog.v(TAG, "Disabling downscale");
+                return;
+            }
+            final GamePackageConfiguration packageConfig = mConfigs.get(packageName);
+            if (packageConfig == null) {
+                disableCompatScale(packageName);
+                Slog.v(TAG, "Package configuration not found for " + packageName);
                 return;
             }
             if (DEBUG) {
                 Slog.v(TAG, dumpDeviceConfigs());
             }
-            final GamePackageConfiguration packageConfig = mConfigs.get(packageName);
-            if (packageConfig == null) {
-                Slog.w(TAG, "Package configuration not found for " + packageName);
+            if (packageConfig.isGameModeOptedIn(gameMode)) {
+                disableCompatScale(packageName);
                 return;
             }
-            final GameModeConfiguration modeConfig = packageConfig.getGameModeConfiguration(
-                    gameMode);
+            final GamePackageConfiguration.GameModeConfiguration modeConfig =
+                    packageConfig.getGameModeConfiguration(gameMode);
             if (modeConfig == null) {
-                Slog.w(TAG, "Game mode " + gameMode + " not found for " + packageName);
+                Slog.i(TAG, "Game mode " + gameMode + " not found for " + packageName);
                 return;
             }
             long scaleId = modeConfig.getCompatChangeId();
@@ -645,21 +691,62 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         + packageName);
                 return;
             }
-            Slog.i(TAG, "Enabling downscale: " + scaleId + " for " + packageName);
+
             enableCompatScale(packageName, scaleId);
         }
     }
 
-    private void putConfig(GamePackageConfiguration config) {
-        if (config.isValid()) {
-            if (DEBUG) {
-                Slog.i(TAG, "Adding config: " + config.toString());
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public void updateConfigsForUser(int userId, String ...packageNames) {
+        try {
+            synchronized (mDeviceConfigLock) {
+                for (String packageName : packageNames) {
+                    GamePackageConfiguration config =
+                            new GamePackageConfiguration(packageName, userId);
+                    if (config.isValid()) {
+                        if (DEBUG) {
+                            Slog.i(TAG, "Adding config: " + config.toString());
+                        }
+                        mConfigs.put(packageName, config);
+                    } else {
+                        Slog.w(TAG, "Invalid package config for "
+                                + config.getPackageName() + ":" + config.toString());
+                        mConfigs.remove(packageName);
+                    }
+                }
             }
-            mConfigs.put(config.getPackageName(), config);
-        } else {
-            Slog.w(TAG, "Invalid package config for "
-                    + config.getPackageName() + ":" + config.toString());
+            for (String packageName : packageNames) {
+                synchronized (mLock) {
+                    if (mSettings.containsKey(userId)) {
+                        GameManagerSettings userSettings = mSettings.get(userId);
+                        updateCompatModeDownscale(packageName,
+                                userSettings.getGameModeLocked(packageName));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to update compat modes for user: " + userId);
         }
+    }
+
+    private String[] getInstalledGamePackageNames(int userId) {
+        final List<PackageInfo> packages =
+                mPackageManager.getInstalledPackagesAsUser(0, userId);
+        return packages.stream().filter(e -> e.applicationInfo != null && e.applicationInfo.category
+                        == ApplicationInfo.CATEGORY_GAME)
+                .map(e -> e.packageName)
+                .toArray(String[]::new);
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public GamePackageConfiguration getConfig(String packageName) {
+        return mConfigs.get(packageName);
     }
 
     private void registerPackageReceiver() {
@@ -677,16 +764,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     switch (intent.getAction()) {
                         case ACTION_PACKAGE_ADDED:
                         case ACTION_PACKAGE_CHANGED:
-                            synchronized (mDeviceConfigLock) {
-                                Properties properties = DeviceConfig.getProperties(
-                                        DeviceConfig.NAMESPACE_GAME_OVERLAY, packageName);
-                                for (String key : properties.getKeyset()) {
-                                    GamePackageConfiguration config =
-                                            GamePackageConfiguration.fromProperties(key,
-                                                    properties);
-                                    putConfig(config);
-                                }
-                            }
+                            updateConfigsForUser(mContext.getUserId(), packageName);
                             break;
                         case ACTION_PACKAGE_REMOVED:
                             disableCompatScale(packageName);
