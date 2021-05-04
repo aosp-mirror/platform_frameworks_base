@@ -38,6 +38,7 @@ java_sdk_library {
     ],
     libs: [
         "framework",
+        "framework-annotations-lib",
         "app-compat-annotations",
         "unsupportedappusage",
     ],
