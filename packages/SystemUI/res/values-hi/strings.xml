@@ -1044,8 +1044,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"सबसे नीचे दाईं ओर ले जाएं"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"एज पर ले जाएं और छिपाएं"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"एज से निकालें और दिखाएं"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"टॉगल करें"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"डिवाइस कंट्रोल"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"कनेक्ट किए गए डिवाइस के लिए कंट्रोल जोड़ें"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिवाइस कंट्रोल सेट अप करें"</string>
@@ -1092,8 +1091,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"खारिज करें"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"फिर से शुरू करें"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"चलाएं"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"काम नहीं कर रहा, ऐप जांचें"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"कोई गड़बड़ी हुई, फिर से कोशिश की जा रही है…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"कंट्रोल नहीं है"</string>
@@ -1153,6 +1151,6 @@
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"फ़िंगरप्रिंट सेंसर"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"फ़िंगरप्रिंट सेंसर बंद है"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"पुष्टि करें"</string>
-    <string name="accessibility_enter_hint" msgid="2617864063504824834">"डिवाइस अनलॉक करें"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"डिवाइस की होम स्क्रीन पर जाएं"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"खोलने के लिए, फ़िंगरप्रिंट का इस्तेमाल करें"</string>
 </resources>

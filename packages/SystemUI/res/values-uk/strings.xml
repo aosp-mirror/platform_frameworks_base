@@ -1165,6 +1165,6 @@
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Сканер відбитків пальців"</string>
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Сканер відбитків пальців вимкнено"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"пройти автентифікацію"</string>
-    <string name="accessibility_enter_hint" msgid="2617864063504824834">"виконати вхід на пристрої"</string>
+    <string name="accessibility_enter_hint" msgid="2617864063504824834">"відкрити пристрій"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Щоб відкрити, використайте відбиток пальця"</string>
 </resources>

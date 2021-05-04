@@ -1044,8 +1044,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Hamba phansi ngakwesokudla"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Hamba onqenqemeni ufihle"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Phuma onqenqemeni ubonise"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"guqula"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Izilawuli zezinsiza"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Engeza izilawuli zedivayisi yakho exhunyiwe"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Setha izilawuli zezinsiza"</string>
@@ -1092,8 +1091,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Cashisa"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Qalisa kabusha"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Izilungiselelo"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Dlala"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Akusebenzi, hlola uhlelo lokusebenza"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Iphutha, iyazama futhi…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ayitholakali"</string>
