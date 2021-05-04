@@ -395,7 +395,6 @@ public class BubbleExpandedView extends LinearLayout {
         mPointerView.setBackground(mCurrentPointer);
     }
 
-
     private String getBubbleKey() {
         return mBubble != null ? mBubble.getKey() : "null";
     }
@@ -519,15 +518,10 @@ public class BubbleExpandedView extends LinearLayout {
                     + " bubble=" + getBubbleKey());
         }
         mIsContentVisible = visibility;
-
-        final float alpha = visibility ? 1f : 0f;
-
-        mPointerView.setAlpha(alpha);
         if (mTaskView != null && !mIsAlphaAnimating) {
-            mTaskView.setAlpha(alpha);
+            mTaskView.setAlpha(visibility ? 1f : 0f);
         }
     }
-
 
     @Nullable
     TaskView getTaskView() {
@@ -673,26 +667,48 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     /**
-     * Set the position that the tip of the triangle should point to.
+     * Sets the position of the pointer.
+     *
+     * When bubbles are showing "vertically" they display along the left / right sides of the
+     * screen with the expanded view beside them.
+     *
+     * If they aren't showing vertically they're positioned along the top of the screen with the
+     * expanded view below them.
+     *
+     * @param bubblePosition the x position of the bubble if showing on top, the y position of
+     *                       the bubble if showing vertically.
+     * @param onLeft whether the stack was on the left side of the screen when expanded.
      */
-    public void setPointerPosition(float x, float y, boolean isLandscape, boolean onLeft) {
+    public void setPointerPosition(float bubblePosition, boolean onLeft) {
         // Pointer gets drawn in the padding
-        int paddingLeft = (isLandscape && onLeft) ? mPointerHeight : 0;
-        int paddingRight = (isLandscape && !onLeft) ? mPointerHeight : 0;
-        int paddingTop = isLandscape ? 0 : mExpandedViewPadding;
+        final boolean showVertically = mPositioner.showBubblesVertically();
+        final int paddingLeft = (showVertically && onLeft) ? mPointerHeight : 0;
+        final int paddingRight = (showVertically && !onLeft) ? mPointerHeight : 0;
+        final int paddingTop = showVertically ? 0 : mExpandedViewPadding;
         setPadding(paddingLeft, paddingTop, paddingRight, 0);
 
-        if (isLandscape) {
-            // TODO: why setY vs setTranslationY ? linearlayout?
-            mPointerView.setY(y - (mPointerWidth / 2f));
-            mPointerView.setTranslationX(onLeft ? -mPointerHeight : x - mExpandedViewPadding);
-        } else {
-            mPointerView.setTranslationY(0f);
-            mPointerView.setTranslationX(x - mExpandedViewPadding - (mPointerWidth / 2f));
-        }
-        mCurrentPointer = isLandscape ? onLeft ? mLeftPointer : mRightPointer : mTopPointer;
-        updatePointerView();
-        mPointerView.setVisibility(VISIBLE);
+        final float expandedViewY = mPositioner.getExpandedViewY();
+        final float bubbleSize = mPositioner.getBubbleBitmapSize();
+        final float bubbleCenter = showVertically
+                ? bubblePosition + (bubbleSize / 2f) - expandedViewY
+                : bubblePosition + (bubbleSize / 2f);
+        // Post because we need the width of the view
+        post(() -> {
+            float pointerY;
+            float pointerX;
+            if (showVertically) {
+                pointerY = bubbleCenter - (mPointerWidth / 2f);
+                pointerX = onLeft ? -mPointerHeight : getWidth() - mPaddingRight;
+            } else {
+                pointerY = 0;
+                pointerX = bubbleCenter - mPaddingLeft - (mPointerWidth / 2f);
+            }
+            mPointerView.setTranslationY(pointerY);
+            mPointerView.setTranslationX(pointerX);
+            mCurrentPointer = showVertically ? onLeft ? mLeftPointer : mRightPointer : mTopPointer;
+            updatePointerView();
+            mPointerView.setVisibility(VISIBLE);
+        });
     }
 
     /**
