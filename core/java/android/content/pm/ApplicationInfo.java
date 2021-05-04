@@ -2141,22 +2141,57 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /**
-     * @return
-     * <ul>
-     * <li>{@code true} if this app requested raw external storage access
-     * <li>{@code false} if this app requests to disable raw external storage access.
-     * <li>{@code null} if the app didn't specify
-     * {@link android.R.styleable#AndroidManifestApplication_requestRawExternalStorageAccess}
-     * in its manifest file.
-     * </ul>
-     *
+     * Use default value for
+     * {@link android.R.styleable#AndroidManifestApplication_requestRawExternalStorageAccess}.
+     */
+    public static final int RAW_EXTERNAL_STORAGE_ACCESS_DEFAULT = 0;
+
+    /**
+     * Raw external storage was requested by this app.
+     */
+    public static final int RAW_EXTERNAL_STORAGE_ACCESS_REQUESTED = 1;
+
+    /**
+     * Raw external storage was not requested by this app.
+     */
+    public static final int RAW_EXTERNAL_STORAGE_ACCESS_NOT_REQUESTED = 2;
+
+    /**
+     * These constants need to match the value of
+     * {@link android.R.styleable#AndroidManifestApplication_requestRawExternalStorageAccess}.
+     * in application manifest.
      * @hide
      */
-    @SuppressWarnings("AutoBoxing")
-    @SystemApi
-    @Nullable
-    public Boolean hasRequestRawExternalStorageAccess() {
-        return requestRawExternalStorageAccess;
+    @IntDef(prefix = {"RAW_EXTERNAL_STORAGE_"}, value = {
+            RAW_EXTERNAL_STORAGE_ACCESS_DEFAULT,
+            RAW_EXTERNAL_STORAGE_ACCESS_REQUESTED,
+            RAW_EXTERNAL_STORAGE_ACCESS_NOT_REQUESTED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RawExternalStorage {}
+
+    /**
+     * @return
+     * <ul>
+     * <li>{@link ApplicationInfo#RAW_EXTERNAL_STORAGE_ACCESS_DEFAULT} if app didn't specify
+     * {@link android.R.styleable#AndroidManifestApplication_requestRawExternalStorageAccess}
+     * attribute in the manifest.
+     * <li>{@link ApplicationInfo#RAW_EXTERNAL_STORAGE_ACCESS_REQUESTED} if this app requested raw
+     * external storage access.
+     * <li>{@link ApplicationInfo#RAW_EXTERNAL_STORAGE_ACCESS_NOT_REQUESTED} if this app requests to
+     * disable raw external storage access
+     * </ul
+     * <p>
+     * Note that this doesn't give any hints on whether the app gets raw external storage access or
+     * not. Also, apps may get raw external storage access by default in some cases, see
+     * {@link android.R.styleable#AndroidManifestApplication_requestRawExternalStorageAccess}.
+     */
+    public @RawExternalStorage int getRequestRawExternalStorageAccess() {
+        if (requestRawExternalStorageAccess == null) {
+            return RAW_EXTERNAL_STORAGE_ACCESS_DEFAULT;
+        }
+        return requestRawExternalStorageAccess ? RAW_EXTERNAL_STORAGE_ACCESS_REQUESTED
+                : RAW_EXTERNAL_STORAGE_ACCESS_NOT_REQUESTED;
     }
 
     /**
