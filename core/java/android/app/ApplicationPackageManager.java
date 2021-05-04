@@ -891,7 +891,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public void requestChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Type int required, @NonNull List<Certificate> trustedInstallers,
+            @Checksum.TypeMask int required, @NonNull List<Certificate> trustedInstallers,
             @NonNull OnChecksumsReadyListener onChecksumsReadyListener)
             throws CertificateEncodingException, NameNotFoundException {
         Objects.requireNonNull(packageName);
