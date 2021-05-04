@@ -2073,20 +2073,18 @@ public class NotificationPanelViewController extends PanelViewController {
         setQsExpansionEnabled(mAmbientState.getScrollY() == 0);
 
         int radius = mScrimCornerRadius;
-        if (visible || !mShouldUseSplitNotificationShade) {
-            if (!mShouldUseSplitNotificationShade) {
-                top = (int) Math.min(qsPanelBottomY, notificationTop);
-                bottom = getView().getBottom();
-                left = getView().getLeft();
-                right = getView().getRight();
-                radius = (int) MathUtils.lerp(mScreenCornerRadius, mScrimCornerRadius,
-                        Math.min(top / (float) mScrimCornerRadius, 1f));
-            } else {
-                top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
-                bottom = mNotificationStackScrollLayoutController.getHeight();
-                left = mNotificationStackScrollLayoutController.getLeft();
-                right = mNotificationStackScrollLayoutController.getRight();
-            }
+        if (!mShouldUseSplitNotificationShade) {
+            top = (int) Math.min(qsPanelBottomY, notificationTop);
+            bottom = getView().getBottom();
+            left = getView().getLeft();
+            right = getView().getRight();
+            radius = (int) MathUtils.lerp(mScreenCornerRadius, mScrimCornerRadius,
+                    Math.min(top / (float) mScrimCornerRadius, 1f));
+        } else if (qsPanelBottomY > 0) { // so bounds are empty on lockscreen
+            top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
+            bottom = mNotificationStackScrollLayoutController.getHeight();
+            left = mNotificationStackScrollLayoutController.getLeft();
+            right = mNotificationStackScrollLayoutController.getRight();
         }
 
         // Fancy clipping for quick settings
