@@ -23078,15 +23078,16 @@ public class PackageManagerService extends IPackageManager.Stub
         if (UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return;
         }
+        final String[] callerPackageNames = getPackagesForUid(callingUid);
+        if (!ArrayUtils.contains(callerPackageNames, pkg)) {
+            throw new SecurityException("Calling uid " + callingUid
+                    + " does not own package " + pkg);
+        }
         final int callingUserId = UserHandle.getUserId(callingUid);
         PackageInfo pi = getPackageInfo(pkg, 0, callingUserId);
         if (pi == null) {
             throw new IllegalArgumentException("Unknown package " + pkg + " on user "
                     + callingUserId);
-        }
-        if (!UserHandle.isSameApp(pi.applicationInfo.uid, callingUid)) {
-            throw new SecurityException("Calling uid " + callingUid
-                    + " does not own package " + pkg);
         }
     }
 
@@ -27771,7 +27772,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public List<String> getMimeGroup(String packageName, String mimeGroup) {
-            return PackageManagerService.this.getMimeGroup(packageName, mimeGroup);
+            return PackageManagerService.this.getMimeGroupInternal(packageName, mimeGroup);
         }
 
         @Override
@@ -28397,9 +28398,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void setMimeGroup(String packageName, String mimeGroup, List<String> mimeTypes) {
-        boolean changed = mSettings.getPackageLPr(packageName)
-                .setMimeGroup(mimeGroup, mimeTypes);
-
+        enforceOwnerRights(packageName, Binder.getCallingUid());
+        final boolean changed;
+        synchronized (mLock) {
+            changed = mSettings.getPackageLPr(packageName).setMimeGroup(mimeGroup, mimeTypes);
+        }
         if (changed) {
             applyMimeGroupChanges(packageName, mimeGroup);
         }
@@ -28407,7 +28410,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public List<String> getMimeGroup(String packageName, String mimeGroup) {
-        return mSettings.getPackageLPr(packageName).getMimeGroup(mimeGroup);
+        enforceOwnerRights(packageName, Binder.getCallingUid());
+        return getMimeGroupInternal(packageName, mimeGroup);
+    }
+
+    private List<String> getMimeGroupInternal(String packageName, String mimeGroup) {
+        synchronized (mLock) {
+            return mSettings.getPackageLPr(packageName).getMimeGroup(mimeGroup);
+        }
     }
 
     @Override
