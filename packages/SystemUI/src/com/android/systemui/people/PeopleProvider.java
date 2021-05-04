@@ -30,12 +30,15 @@ import android.widget.RemoteViews;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.shared.system.PeopleProviderUtils;
 
+import javax.inject.Inject;
+
 /** API that returns a People Tile preview. */
 public class PeopleProvider extends ContentProvider {
     private static final String TAG = "PeopleProvider";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
     private static final String EMPTY_STRING = "";
 
+    @Inject
     PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
 
     @Override
@@ -76,7 +79,8 @@ public class PeopleProvider extends ContentProvider {
         }
 
         if (mPeopleSpaceWidgetManager == null) {
-            mPeopleSpaceWidgetManager = new PeopleSpaceWidgetManager(getContext());
+            Log.e(TAG, "Could not initialize people widget manager");
+            return null;
         }
         RemoteViews view =
                 mPeopleSpaceWidgetManager.getPreview(shortcutId, userHandle, packageName, extras);

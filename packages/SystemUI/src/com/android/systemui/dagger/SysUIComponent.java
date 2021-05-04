@@ -23,6 +23,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
+import com.android.systemui.people.PeopleProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.wm.shell.ShellCommandHandler;
@@ -156,4 +157,9 @@ public interface SysUIComponent {
      * Member injection into the supplied argument.
      */
     void inject(ClockOptionsProvider clockOptionsProvider);
+
+    /**
+     * Member injection into the supplied argument.
+     */
+    void inject(PeopleProvider peopleProvider);
 }
