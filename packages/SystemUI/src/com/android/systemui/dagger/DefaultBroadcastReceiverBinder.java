@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 
 import com.android.systemui.media.dialog.MediaOutputDialogReceiver;
 import com.android.systemui.people.widget.PeopleSpaceWidgetPinnedReceiver;
+import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 import com.android.systemui.screenshot.ActionProxyReceiver;
 import com.android.systemui.screenshot.DeleteScreenshotReceiver;
 import com.android.systemui.screenshot.SmartActionsReceiver;
@@ -78,5 +79,14 @@ public abstract class DefaultBroadcastReceiverBinder {
     @ClassKey(PeopleSpaceWidgetPinnedReceiver.class)
     public abstract BroadcastReceiver bindPeopleSpaceWidgetPinnedReceiver(
             PeopleSpaceWidgetPinnedReceiver broadcastReceiver);
+
+    /**
+     *
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(PeopleSpaceWidgetProvider.class)
+    public abstract BroadcastReceiver bindPeopleSpaceWidgetProvider(
+            PeopleSpaceWidgetProvider broadcastReceiver);
 
 }
