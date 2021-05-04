@@ -4,7 +4,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.SystemBatteryConsumer;
 import android.os.UserHandle;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
@@ -31,9 +30,6 @@ public class MemoryPowerCalculator extends PowerCalculator {
                 BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah = calculatePower(batteryStats, rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED);
-        builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_MEMORY)
-                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MEMORY, durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MEMORY, powerMah);
         builder.getAggregateBatteryConsumerBuilder(
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MEMORY, durationMs)
