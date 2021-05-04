@@ -28,7 +28,7 @@ import java.util.concurrent.Executor;
 public interface UiTranslationStateCallback {
 
     /**
-     * @deprecated use {@link #onStarted(ULocale, ULocale)} instead.
+     * @removed use {@link #onStarted(ULocale, ULocale)} instead.
      */
     @Deprecated
     default void onStarted(@NonNull String sourceLocale, @NonNull String targetLocale) {
