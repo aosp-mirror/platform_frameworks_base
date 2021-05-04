@@ -200,6 +200,19 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
     };
 
+    private final PipAnimationController.PipTransactionHandler mPipTransactionHandler =
+            new PipAnimationController.PipTransactionHandler() {
+                @Override
+                public boolean handlePipTransaction(SurfaceControl leash,
+                        SurfaceControl.Transaction tx, Rect destinationBounds) {
+                    if (mPipMenuController.isMenuVisible()) {
+                        mPipMenuController.movePipMenu(leash, tx, destinationBounds);
+                        return true;
+                    }
+                    return false;
+                }
+            };
+
     private ActivityManager.RunningTaskInfo mTaskInfo;
     // To handle the edge case that onTaskInfoChanged callback is received during the entering
     // PiP transition, where we do not want to intercept the transition but still want to apply the
@@ -433,8 +446,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         // removePipImmediately is expected when the following animation finishes.
         ValueAnimator animator = mPipAnimationController
-                .getAnimator(mTaskInfo, mLeash, mPipBoundsState.getBounds(), 1f, 0f)
+                .getAnimator(mTaskInfo, mLeash, mPipBoundsState.getBounds(),
+                        1f /* alphaStart */, 0f /* alphaEnd */)
                 .setTransitionDirection(TRANSITION_DIRECTION_REMOVE_STACK)
+                .setPipTransactionHandler(mPipTransactionHandler)
                 .setPipAnimationCallback(mPipAnimationCallback);
         animator.setDuration(mExitAnimationDuration);
         animator.setInterpolator(Interpolators.ALPHA_OUT);
@@ -573,6 +588,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     .getAnimator(mTaskInfo, mLeash, destinationBounds, 0f, 1f)
                     .setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
                     .setPipAnimationCallback(mPipAnimationCallback)
+                    .setPipTransactionHandler(mPipTransactionHandler)
                     .setDuration(durationMs)
                     .start();
             // mState is set right after the animation is kicked off to block any resize
@@ -749,6 +765,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, mPipBoundsState.getBounds(), alphaStart, alphaEnd)
                 .setTransitionDirection(TRANSITION_DIRECTION_SAME)
+                .setPipTransactionHandler(mPipTransactionHandler)
                 .setDuration(show ? mEnterAnimationDuration : mExitAnimationDuration)
                 .start();
         mHasFadeOut = !show;
@@ -1226,6 +1243,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                         sourceHintRect, direction, startingAngle, rotationDelta);
         animator.setTransitionDirection(direction)
                 .setPipAnimationCallback(mPipAnimationCallback)
+                .setPipTransactionHandler(mPipTransactionHandler)
                 .setDuration(durationMs)
                 .start();
         if (rotationDelta != Surface.ROTATION_0 && direction == TRANSITION_DIRECTION_TO_PIP) {

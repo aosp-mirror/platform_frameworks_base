@@ -111,14 +111,14 @@ public class PipTransition extends PipTransitionController {
             final Rect sourceHintRect =
                     PipBoundsAlgorithm.getValidSourceHintRect(
                             taskInfo.pictureInPictureParams, currentBounds);
-            animator = mPipAnimationController.getAnimator(taskInfo, leash,
-                    currentBounds, currentBounds, destinationBounds, sourceHintRect,
-                    TRANSITION_DIRECTION_TO_PIP, 0 /* startingAngle */, Surface.ROTATION_0);
+            animator = mPipAnimationController.getAnimator(taskInfo, leash, currentBounds,
+                    currentBounds, destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,
+                    0 /* startingAngle */, Surface.ROTATION_0);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             t.setAlpha(leash, 0f);
             t.apply();
-            animator = mPipAnimationController.getAnimator(taskInfo, leash,
-                    destinationBounds, 0f, 1f);
+            animator = mPipAnimationController.getAnimator(taskInfo, leash, destinationBounds,
+                    0f, 1f);
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
         } else {
             throw new RuntimeException("Unrecognized animation type: "

@@ -419,13 +419,13 @@ public class PipResizeGestureHandler {
                 // Reset the down to begin resizing from this point
                 mDownPoint.set(mLastPoint);
                 mDownSecondPoint.set(mLastSecondPoint);
-            }
 
-            if (mThresholdCrossed) {
                 if (mPhonePipMenuController.isMenuVisible()) {
                     mPhonePipMenuController.hideMenu();
                 }
+            }
 
+            if (mThresholdCrossed) {
                 mAngle = mPinchResizingAlgorithm.calculateBoundsAndAngle(mDownPoint,
                         mDownSecondPoint, mLastPoint, mLastSecondPoint, mMinSize, mMaxSize,
                         mDownBounds, mLastResizeBounds);
