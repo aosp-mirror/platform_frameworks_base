@@ -251,7 +251,7 @@
     <integer name="def_accessibility_magnification_capabilities">3</integer>
 
     <!-- Default for Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW -->
-    <bool name="def_enable_non_resizable_multi_window">true</bool>
+    <bool name="def_enable_non_resizable_multi_window">false</bool>
 
     <!-- Default for Settings.Secure.ACCESSIBILITY_BUTTON_MODE -->
     <integer name="def_accessibility_button_mode">1</integer>

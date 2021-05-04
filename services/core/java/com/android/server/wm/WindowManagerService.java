@@ -947,7 +947,7 @@ public class WindowManagerService extends IWindowManager.Stub
         void updateDevEnableNonResizableMultiWindow() {
             ContentResolver resolver = mContext.getContentResolver();
             final boolean devEnableNonResizableMultiWindow = Settings.Global.getInt(resolver,
-                    DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 1) != 0;
+                    DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 0) != 0;
 
             mAtmService.mDevEnableNonResizableMultiWindow = devEnableNonResizableMultiWindow;
         }
