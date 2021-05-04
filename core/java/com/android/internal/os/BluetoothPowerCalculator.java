@@ -21,7 +21,6 @@ import android.os.BatteryStats.ControllerActivityCounter;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
-import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.util.Log;
@@ -58,19 +57,11 @@ public class BluetoothPowerCalculator extends PowerCalculator {
 
         final PowerAndDuration total = new PowerAndDuration();
 
-        SystemBatteryConsumer.Builder systemBatteryConsumerBuilder =
-                builder.getOrCreateSystemBatteryConsumerBuilder(
-                        SystemBatteryConsumer.DRAIN_TYPE_BLUETOOTH);
-
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
             calculateApp(app, total, query);
-            if (app.getUid() == Process.BLUETOOTH_UID) {
-                app.excludeFromBatteryUsageStats();
-                systemBatteryConsumerBuilder.addUidBatteryConsumer(app);
-            }
         }
 
         final long measuredChargeUC = batteryStats.getBluetoothMeasuredBatteryConsumptionUC();
@@ -87,12 +78,6 @@ public class BluetoothPowerCalculator extends PowerCalculator {
             Log.d(TAG, "Bluetooth active: time=" + (systemComponentDurationMs)
                     + " power=" + formatCharge(systemPowerMah));
         }
-        systemBatteryConsumerBuilder
-                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
-                        systemComponentDurationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
-                        Math.max(systemPowerMah, total.powerMah), powerModel)
-                .setPowerConsumedByApps(total.powerMah);
 
         builder.getAggregateBatteryConsumerBuilder(
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
