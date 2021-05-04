@@ -29,6 +29,8 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.statusbar.phone.StatusBarLocationPublisher
+import com.android.systemui.statusbar.phone.StatusBarMarginUpdatedListener
 
 import java.lang.IllegalStateException
 import java.util.concurrent.Executor
@@ -51,8 +53,9 @@ import javax.inject.Inject
 
 @SysUISingleton
 class PrivacyDotViewController @Inject constructor(
-    @Main val mainExecutor: Executor,
-    val animationScheduler: SystemStatusAnimationScheduler
+    @Main private val mainExecutor: Executor,
+    private val locationPublisher: StatusBarLocationPublisher,
+    private val animationScheduler: SystemStatusAnimationScheduler
 ) {
     private var rotation = 0
     private var leftSize = 0
@@ -80,12 +83,21 @@ class PrivacyDotViewController @Inject constructor(
     private val views: Sequence<View>
         get() = if (!this::tl.isInitialized) sequenceOf() else sequenceOf(tl, tr, br, bl)
 
+    init {
+        locationPublisher.addCallback(object : StatusBarMarginUpdatedListener {
+            override fun onStatusBarMarginUpdated(marginLeft: Int, marginRight: Int) {
+                setStatusBarMargins(marginLeft, marginRight)
+            }
+        })
+    }
+
     fun setUiExecutor(e: Executor) {
         uiExecutor = e
     }
 
     @UiThread
     fun updateRotation(rot: Int) {
+        dlog("updateRotation: ")
         if (rot == rotation) {
             return
         }
@@ -248,7 +260,7 @@ class PrivacyDotViewController @Inject constructor(
      * @param left the space between the status bar contents and the left side of the screen
      * @param right space between the status bar contents and the right side of the screen
      */
-    fun setStatusBarMargins(left: Int, right: Int) {
+    private fun setStatusBarMargins(left: Int, right: Int) {
         leftSize = left
         rightSize = right
 
@@ -262,6 +274,7 @@ class PrivacyDotViewController @Inject constructor(
     }
 
     private fun doUpdates(rot: Boolean, height: Boolean, width: Boolean) {
+        dlog("doUpdates: ")
         var newDesignatedCorner: View? = null
 
         if (rot) {
@@ -324,12 +337,19 @@ class PrivacyDotViewController @Inject constructor(
     }
 }
 
+private fun dlog(s: String) {
+    if (DEBUG) {
+        Log.d(TAG, s)
+    }
+}
+
 const val TOP_LEFT = 0
 const val TOP_RIGHT = 1
 const val BOTTOM_RIGHT = 2
 const val BOTTOM_LEFT = 3
 private const val DURATION = 160L
 private const val TAG = "PrivacyDotViewController"
+private const val DEBUG = false
 
 private fun Int.toGravity(): Int {
     return when (this) {
