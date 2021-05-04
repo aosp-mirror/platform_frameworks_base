@@ -36,7 +36,7 @@
     <include layout="@layout/quick_status_bar_header_date_privacy"/>
 
     <RelativeLayout
-        android:id="@+id/container"
+        android:id="@+id/qs_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
