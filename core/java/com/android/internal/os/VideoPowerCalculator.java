@@ -17,8 +17,10 @@ package com.android.internal.os;
 
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
+import android.util.SparseArray;
 
 /**
  * A {@link PowerCalculator} to calculate power consumed by video hardware.
@@ -28,18 +30,47 @@ import android.os.UidBatteryConsumer;
 public class VideoPowerCalculator extends PowerCalculator {
     private final UsageBasedPowerEstimator mPowerEstimator;
 
+    private static class PowerAndDuration {
+        public long durationMs;
+        public double powerMah;
+    }
+
     public VideoPowerCalculator(PowerProfile powerProfile) {
         mPowerEstimator = new UsageBasedPowerEstimator(
                 powerProfile.getAveragePower(PowerProfile.POWER_VIDEO));
     }
 
     @Override
-    protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        final PowerAndDuration total = new PowerAndDuration();
+
+        final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
+                builder.getUidBatteryConsumerBuilders();
+        for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
+            final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
+            calculateApp(app, total, app.getBatteryStatsUid(), rawRealtimeUs);
+        }
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_VIDEO, total.durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_VIDEO, total.powerMah);
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_VIDEO, total.durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_VIDEO, total.powerMah);
+    }
+
+    private void calculateApp(UidBatteryConsumer.Builder app, PowerAndDuration total,
+            BatteryStats.Uid u, long rawRealtimeUs) {
         final long durationMs = mPowerEstimator.calculateDuration(u.getVideoTurnedOnTimer(),
                 rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah = mPowerEstimator.calculatePower(durationMs);
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_VIDEO, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_VIDEO, powerMah);
+        total.durationMs += durationMs;
+        total.powerMah += powerMah;
     }
 }

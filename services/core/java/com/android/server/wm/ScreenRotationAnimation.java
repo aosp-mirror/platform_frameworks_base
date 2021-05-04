@@ -163,14 +163,8 @@ class ScreenRotationAnimation {
             originalWidth = displayInfo.logicalWidth;
             originalHeight = displayInfo.logicalHeight;
         }
-        if (realOriginalRotation == Surface.ROTATION_90
-                || realOriginalRotation == Surface.ROTATION_270) {
-            mWidth = originalHeight;
-            mHeight = originalWidth;
-        } else {
-            mWidth = originalWidth;
-            mHeight = originalHeight;
-        }
+        mWidth = originalWidth;
+        mHeight = originalHeight;
 
         mOriginalRotation = originalRotation;
         // If the delta is not zero, the rotation of display may not change, but we still want to
@@ -189,8 +183,14 @@ class ScreenRotationAnimation {
         final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
 
         try {
+            SurfaceControl.LayerCaptureArgs args =
+                    new SurfaceControl.LayerCaptureArgs.Builder(displayContent.getSurfaceControl())
+                            .setCaptureSecureLayers(true)
+                            .setAllowProtected(true)
+                            .setSourceCrop(new Rect(0, 0, mWidth, mHeight))
+                            .build();
             SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    mService.mDisplayManagerInternal.systemScreenshot(displayId);
+                    SurfaceControl.captureLayers(args);
             if (screenshotBuffer == null) {
                 Slog.w(TAG, "Unable to take screenshot of display " + displayId);
                 return;
@@ -236,9 +236,6 @@ class ScreenRotationAnimation {
 
             GraphicBuffer buffer = GraphicBuffer.createFromHardwareBuffer(
                     screenshotBuffer.getHardwareBuffer());
-            // Scale the layer to the display size.
-            float dsdx = (float) mWidth / hardwareBuffer.getWidth();
-            float dsdy = (float) mHeight / hardwareBuffer.getHeight();
 
             t.setLayer(mScreenshotLayer, SCREEN_FREEZE_LAYER_BASE);
             t.reparent(mBackColorSurface, displayContent.getSurfaceControl());
@@ -247,7 +244,6 @@ class ScreenRotationAnimation {
             t.setAlpha(mBackColorSurface, 1);
             t.setBuffer(mScreenshotLayer, buffer);
             t.setColorSpace(mScreenshotLayer, screenshotBuffer.getColorSpace());
-            t.setMatrix(mScreenshotLayer, dsdx, 0, 0, dsdy);
             t.show(mScreenshotLayer);
             t.show(mBackColorSurface);
 
@@ -330,9 +326,8 @@ class ScreenRotationAnimation {
         // Compute the transformation matrix that must be applied
         // to the snapshot to make it stay in the same original position
         // with the current screen rotation.
-        int delta = deltaRotation(rotation, Surface.ROTATION_0);
+        int delta = deltaRotation(rotation, mOriginalRotation);
         RotationAnimationUtils.createRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
-
         setRotationTransform(t, mSnapshotInitialMatrix);
     }
 

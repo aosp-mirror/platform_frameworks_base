@@ -123,6 +123,17 @@ public class WifiPowerCalculator extends PowerCalculator {
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI,
                         totalAppPowerMah + powerDurationAndTraffic.powerMah, powerModel)
                 .setPowerConsumedByApps(totalAppPowerMah);
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI,
+                        powerDurationAndTraffic.durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI,
+                        totalAppPowerMah + powerDurationAndTraffic.powerMah, powerModel);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI,
+                        totalAppPowerMah, powerModel);
     }
 
     /**

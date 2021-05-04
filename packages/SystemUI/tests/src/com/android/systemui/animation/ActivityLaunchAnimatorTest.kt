@@ -11,7 +11,8 @@ import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
-import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import junit.framework.Assert.assertFalse
@@ -36,8 +37,8 @@ import kotlin.concurrent.thread
 @RunWithLooper
 class ActivityLaunchAnimatorTest : SysuiTestCase() {
     private val activityLaunchAnimator = ActivityLaunchAnimator(mContext)
-    private val rootView = View(mContext)
-    @Spy private val controller = TestLaunchAnimatorController(rootView)
+    private val launchContainer = LinearLayout(mContext)
+    @Spy private val controller = TestLaunchAnimatorController(launchContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
 
     @get:Rule val rule = MockitoJUnit.rule()
@@ -146,10 +147,8 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
  * outside of the main thread.
  */
 private class TestLaunchAnimatorController(
-    private val rootView: View
+    override var launchContainer: ViewGroup
 ) : ActivityLaunchAnimator.Controller {
-    override fun getRootView(): View = rootView
-
     override fun createAnimatorState() = ActivityLaunchAnimator.State(
             top = 100,
             bottom = 200,

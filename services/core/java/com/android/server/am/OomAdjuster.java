@@ -80,6 +80,7 @@ import android.app.ApplicationExitInfo;
 import android.app.usage.UsageEvents;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -122,7 +123,7 @@ import java.util.Arrays;
 /**
  * All of the code required to compute proc states and oom_adj values.
  */
-public final class OomAdjuster {
+public class OomAdjuster {
     static final String TAG = "OomAdjuster";
     static final String OOM_ADJ_REASON_METHOD = "updateOomAdj";
     static final String OOM_ADJ_REASON_NONE = OOM_ADJ_REASON_METHOD + "_meh";
@@ -162,6 +163,14 @@ public final class OomAdjuster {
     @ChangeId
     @EnabledAfter(targetSdkVersion=android.os.Build.VERSION_CODES.Q)
     static final long CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID = 136219221L;
+
+    /**
+     * For apps targeting S+, this determines whether to use a shorter timeout before elevating the
+     * standby bucket to ACTIVE when apps start a foreground service.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.S)
+    static final long USE_SHORT_FGS_USAGE_INTERACTION_TIME = 183972877L;
 
     /**
      * For some direct access we need to power manager.
@@ -249,7 +258,9 @@ public final class OomAdjuster {
 
     private final PlatformCompatCache mPlatformCompatCache;
 
-    private static class PlatformCompatCache {
+    /** Overrideable by a test */
+    @VisibleForTesting
+    static class PlatformCompatCache {
         private final PlatformCompat mPlatformCompat;
         private final IPlatformCompat mIPlatformCompatProxy;
         private final LongSparseArray<CacheItem> mCaches = new LongSparseArray<>();
@@ -276,6 +287,20 @@ public final class OomAdjuster {
         boolean isChangeEnabled(long changeId, ApplicationInfo app) throws RemoteException {
             return mCacheEnabled ? mCaches.get(changeId).isChangeEnabled(app)
                     : mIPlatformCompatProxy.isChangeEnabled(changeId, app);
+        }
+
+        /**
+         * Same as {@link #isChangeEnabled(long, ApplicationInfo)} but instead of throwing a
+         * RemoteException from platform compat, it returns the default value provided.
+         */
+        boolean isChangeEnabled(long changeId, ApplicationInfo app, boolean defaultValue) {
+            try {
+                return mCacheEnabled ? mCaches.get(changeId).isChangeEnabled(app)
+                        : mIPlatformCompatProxy.isChangeEnabled(changeId, app);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Error reading platform compat change " + changeId, e);
+                return defaultValue;
+            }
         }
 
         void invalidate(ApplicationInfo app) {
@@ -335,6 +360,12 @@ public final class OomAdjuster {
         }
     }
 
+    /** Overrideable by a test */
+    @VisibleForTesting
+    protected PlatformCompatCache getPlatformCompatCache() {
+        return mPlatformCompatCache;
+    }
+
     OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids) {
         this(service, processList, activeUids, createAdjusterThread());
     }
@@ -383,7 +414,8 @@ public final class OomAdjuster {
         mNumSlots = ((ProcessList.CACHED_APP_MAX_ADJ - ProcessList.CACHED_APP_MIN_ADJ + 1) >> 1)
                 / ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
         mPlatformCompatCache = new PlatformCompatCache(new long[] {
-                PROCESS_CAPABILITY_CHANGE_ID, CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID
+                PROCESS_CAPABILITY_CHANGE_ID, CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID,
+                USE_SHORT_FGS_USAGE_INTERACTION_TIME
         });
     }
 
@@ -755,7 +787,7 @@ public final class OomAdjuster {
         if (app != null) {
             mPendingProcessSet.remove(app);
             if (procDied) {
-                mPlatformCompatCache.invalidate(app.info);
+                getPlatformCompatCache().invalidate(app.info);
             }
         }
     }
@@ -1924,7 +1956,7 @@ public final class OomAdjuster {
 
                     boolean enabled = false;
                     try {
-                        enabled = mPlatformCompatCache.isChangeEnabled(
+                        enabled = getPlatformCompatCache().isChangeEnabled(
                                 CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID, s.appInfo);
                     } catch (RemoteException e) {
                     }
@@ -2147,7 +2179,7 @@ public final class OomAdjuster {
                                 state.bumpAllowStartFgsState(PROCESS_STATE_BOUND_TOP);
                                 boolean enabled = false;
                                 try {
-                                    enabled = mPlatformCompatCache.isChangeEnabled(
+                                    enabled = getPlatformCompatCache().isChangeEnabled(
                                             PROCESS_CAPABILITY_CHANGE_ID, client.info);
                                 } catch (RemoteException e) {
                                 }
@@ -2787,15 +2819,27 @@ public final class OomAdjuster {
             } else {
                 state.setProcStateChanged(true);
             }
-        } else if (state.hasReportedInteraction() && (nowElapsed - state.getInteractionEventTime())
-                > mConstants.USAGE_STATS_INTERACTION_INTERVAL) {
+        } else if (state.hasReportedInteraction()) {
+            final boolean fgsInteractionChangeEnabled = getPlatformCompatCache().isChangeEnabled(
+                    USE_SHORT_FGS_USAGE_INTERACTION_TIME, app.info, false);
+            final long interactionThreshold = fgsInteractionChangeEnabled
+                    ? mConstants.USAGE_STATS_INTERACTION_INTERVAL_POST_S
+                    : mConstants.USAGE_STATS_INTERACTION_INTERVAL_PRE_S;
             // For apps that sit around for a long time in the interactive state, we need
             // to report this at least once a day so they don't go idle.
-            maybeUpdateUsageStatsLSP(app, nowElapsed);
-        } else if (!state.hasReportedInteraction() && (nowElapsed - state.getFgInteractionTime())
-                > mConstants.SERVICE_USAGE_INTERACTION_TIME) {
+            if ((nowElapsed - state.getInteractionEventTime()) > interactionThreshold) {
+                maybeUpdateUsageStatsLSP(app, nowElapsed);
+            }
+        } else {
+            final boolean fgsInteractionChangeEnabled = getPlatformCompatCache().isChangeEnabled(
+                    USE_SHORT_FGS_USAGE_INTERACTION_TIME, app.info, false);
+            final long interactionThreshold = fgsInteractionChangeEnabled
+                    ? mConstants.SERVICE_USAGE_INTERACTION_TIME_POST_S
+                    : mConstants.SERVICE_USAGE_INTERACTION_TIME_PRE_S;
             // For foreground services that sit around for a long time but are not interacted with.
-            maybeUpdateUsageStatsLSP(app, nowElapsed);
+            if ((nowElapsed - state.getFgInteractionTime()) > interactionThreshold) {
+                maybeUpdateUsageStatsLSP(app, nowElapsed);
+            }
         }
 
         if (state.getCurCapability() != state.getSetCapability()) {
@@ -2877,6 +2921,8 @@ public final class OomAdjuster {
         if (mService.mUsageStatsService == null) {
             return;
         }
+        final boolean fgsInteractionChangeEnabled = getPlatformCompatCache().isChangeEnabled(
+                USE_SHORT_FGS_USAGE_INTERACTION_TIME, app.info, false);
         boolean isInteraction;
         // To avoid some abuse patterns, we are going to be careful about what we consider
         // to be an app interaction.  Being the top activity doesn't count while the display
@@ -2890,18 +2936,22 @@ public final class OomAdjuster {
                 state.setFgInteractionTime(nowElapsed);
                 isInteraction = false;
             } else {
-                isInteraction = nowElapsed > state.getFgInteractionTime()
-                        + mConstants.SERVICE_USAGE_INTERACTION_TIME;
+                final long interactionTime = fgsInteractionChangeEnabled
+                        ? mConstants.SERVICE_USAGE_INTERACTION_TIME_POST_S
+                        : mConstants.SERVICE_USAGE_INTERACTION_TIME_PRE_S;
+                isInteraction = nowElapsed > state.getFgInteractionTime() + interactionTime;
             }
         } else {
             isInteraction =
                     state.getCurProcState() <= PROCESS_STATE_IMPORTANT_FOREGROUND;
             state.setFgInteractionTime(0);
         }
+        final long interactionThreshold = fgsInteractionChangeEnabled
+                ? mConstants.USAGE_STATS_INTERACTION_INTERVAL_POST_S
+                : mConstants.USAGE_STATS_INTERACTION_INTERVAL_PRE_S;
         if (isInteraction
                 && (!state.hasReportedInteraction()
-                    || (nowElapsed - state.getInteractionEventTime())
-                    > mConstants.USAGE_STATS_INTERACTION_INTERVAL)) {
+                    || (nowElapsed - state.getInteractionEventTime()) > interactionThreshold)) {
             state.setInteractionEventTime(nowElapsed);
             String[] packages = app.getPackageList();
             if (packages != null) {

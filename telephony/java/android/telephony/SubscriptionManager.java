@@ -3402,7 +3402,10 @@ public class SubscriptionManager {
      * Set uicc applications being enabled or disabled.
      * The value will be remembered on the subscription and will be applied whenever it's present.
      * If the subscription in currently present, it will also apply the setting to modem
-     * immediately.
+     * immediately (the setting in the modem will not change until the modem receives and responds
+     * to the request, but typically this should only take a few seconds. The user visible setting
+     * available from SubscriptionInfo.areUiccApplicationsEnabled() will be updated
+     * immediately.)
      *
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      *
