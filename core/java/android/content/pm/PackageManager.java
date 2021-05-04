@@ -8711,7 +8711,7 @@ public abstract class PackageManager {
      * @throws NameNotFoundException if a package with the given name cannot be found on the system.
      */
     public void requestChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Type int required, @NonNull List<Certificate> trustedInstallers,
+            @Checksum.TypeMask int required, @NonNull List<Certificate> trustedInstallers,
             @NonNull OnChecksumsReadyListener onChecksumsReadyListener)
             throws CertificateEncodingException, NameNotFoundException {
         throw new UnsupportedOperationException("requestChecksums not implemented in subclass");
