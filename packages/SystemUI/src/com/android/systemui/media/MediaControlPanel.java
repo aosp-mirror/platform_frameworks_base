@@ -265,9 +265,6 @@ public class MediaControlPanel {
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
 
-        mPlayerViewHolder.getPlayer().setBackgroundTintList(
-                ColorStateList.valueOf(mBackgroundColor));
-
         // Click action
         PendingIntent clickIntent = data.getClickIntent();
         if (clickIntent != null) {
@@ -465,14 +462,10 @@ public class MediaControlPanel {
     /** Bind this recommendation view based on the data given. */
     public void bindRecommendation(
             @NonNull SmartspaceTarget target,
-            @NonNull int primaryColor,
             @NonNull int backgroundColor) {
         if (mRecommendationViewHolder == null) {
             return;
         }
-
-        mRecommendationViewHolder.getCardIcon().setColorFilter(primaryColor);
-        mRecommendationViewHolder.getCardText().setTextColor(primaryColor);
 
         mInstanceId = target.getSmartspaceTargetId().hashCode();
         mRecommendationViewHolder.getRecommendations()

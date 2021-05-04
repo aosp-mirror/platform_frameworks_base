@@ -3,7 +3,6 @@ package com.android.systemui.media
 import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.util.Log
@@ -116,7 +115,6 @@ class MediaCarouselController @Inject constructor(
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
     private var bgColor = getBackgroundColor()
-    private var fgColor = getForegroundColor()
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -276,10 +274,6 @@ class MediaCarouselController @Inject constructor(
     }
 
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData) {
-        data.actions.forEach {
-            it.icon?.setTintList(ColorStateList.valueOf(fgColor))
-        }
-        data.appIcon?.setTintList(ColorStateList.valueOf(fgColor))
         val dataCopy = data.copy(backgroundColor = bgColor)
         val existingPlayer = MediaPlayerData.getMediaPlayer(key, oldKey)
         if (existingPlayer == null) {
@@ -328,7 +322,7 @@ class MediaCarouselController @Inject constructor(
         val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
-        newRecs.bindRecommendation(data, fgColor, bgColor)
+        newRecs.bindRecommendation(data, bgColor)
         MediaPlayerData.addMediaPlayer(key, newRecs)
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers()
@@ -368,8 +362,6 @@ class MediaCarouselController @Inject constructor(
 
     private fun recreatePlayers() {
         bgColor = getBackgroundColor()
-        fgColor = getForegroundColor()
-        pageIndicator.tintList = ColorStateList.valueOf(fgColor)
 
         MediaPlayerData.mediaData().forEach { (key, data) ->
             removePlayer(key, dismissMediaData = false)
@@ -379,11 +371,6 @@ class MediaCarouselController @Inject constructor(
 
     private fun getBackgroundColor(): Int {
         return context.getColor(android.R.color.system_accent2_50)
-    }
-
-    private fun getForegroundColor(): Int {
-        return com.android.settingslib.Utils.getColorAttr(context,
-                com.android.internal.R.attr.textColorPrimary).defaultColor
     }
 
     private fun updatePageIndicator() {
