@@ -21,6 +21,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.ICameraService;
 import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -75,7 +76,7 @@ class DisplayFoldController {
 
         DeviceStateManager deviceStateManager = context.getSystemService(DeviceStateManager.class);
         deviceStateManager.registerCallback(new HandlerExecutor(handler),
-                new DeviceStateListener(context));
+                new FoldStateListener(context, folded -> setDeviceFolded(folded)));
     }
 
     void finishedGoingToSleep() {
@@ -201,31 +202,5 @@ class DisplayFoldController {
 
         return new DisplayFoldController(context, windowManagerService, displayService,
                 cameraServiceProxy, displayId, foldedArea, DisplayThread.getHandler());
-    }
-
-    /**
-     * Listens to changes in device state and reports the state as folded if the device state
-     * matches the value in the {@link com.android.internal.R.integer.config_foldedDeviceState}
-     * resource.
-     */
-    private class DeviceStateListener implements DeviceStateManager.DeviceStateCallback {
-        private final int[] mFoldedDeviceStates;
-
-        DeviceStateListener(Context context) {
-            mFoldedDeviceStates = context.getResources().getIntArray(
-                    com.android.internal.R.array.config_foldedDeviceStates);
-        }
-
-        @Override
-        public void onStateChanged(int deviceState) {
-            boolean folded = false;
-            for (int i = 0; i < mFoldedDeviceStates.length; i++) {
-                if (deviceState == mFoldedDeviceStates[i]) {
-                    folded = true;
-                    break;
-                }
-            }
-            setDeviceFolded(folded);
-        }
     }
 }

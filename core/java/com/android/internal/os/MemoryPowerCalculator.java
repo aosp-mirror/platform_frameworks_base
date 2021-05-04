@@ -34,6 +34,10 @@ public class MemoryPowerCalculator extends PowerCalculator {
         builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_MEMORY)
                 .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MEMORY, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MEMORY, powerMah);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MEMORY, durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MEMORY, powerMah);
     }
 
     @Override

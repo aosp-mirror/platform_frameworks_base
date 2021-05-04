@@ -17,8 +17,10 @@ package com.android.internal.os;
 
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
+import android.util.SparseArray;
 
 /**
  * A {@link PowerCalculator} to calculate power consumed by audio hardware.
@@ -31,18 +33,47 @@ public class AudioPowerCalculator extends PowerCalculator {
     // TODO(b/175344313): improve the model by taking into account different audio routes
     private final UsageBasedPowerEstimator mPowerEstimator;
 
+    private static class PowerAndDuration {
+        public long durationMs;
+        public double powerMah;
+    }
+
     public AudioPowerCalculator(PowerProfile powerProfile) {
         mPowerEstimator = new UsageBasedPowerEstimator(
                 powerProfile.getAveragePower(PowerProfile.POWER_AUDIO));
     }
 
     @Override
-    protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        final PowerAndDuration total = new PowerAndDuration();
+
+        final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
+                builder.getUidBatteryConsumerBuilders();
+        for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
+            final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
+            calculateApp(app, total, app.getBatteryStatsUid(), rawRealtimeUs);
+        }
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO, total.durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_AUDIO, total.powerMah);
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO, total.durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_AUDIO, total.powerMah);
+    }
+
+    private void calculateApp(UidBatteryConsumer.Builder app, PowerAndDuration total,
+            BatteryStats.Uid u, long rawRealtimeUs) {
         final long durationMs = mPowerEstimator.calculateDuration(u.getAudioTurnedOnTimer(),
                 rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah = mPowerEstimator.calculatePower(durationMs);
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_AUDIO, powerMah);
+        total.durationMs += durationMs;
+        total.powerMah += powerMah;
     }
 }

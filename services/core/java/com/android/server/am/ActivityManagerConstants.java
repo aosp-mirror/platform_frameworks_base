@@ -73,10 +73,16 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_POWER_CHECK_MAX_CPU_2 = "power_check_max_cpu_2";
     private static final String KEY_POWER_CHECK_MAX_CPU_3 = "power_check_max_cpu_3";
     private static final String KEY_POWER_CHECK_MAX_CPU_4 = "power_check_max_cpu_4";
-    private static final String KEY_SERVICE_USAGE_INTERACTION_TIME
-            = "service_usage_interaction_time";
-    private static final String KEY_USAGE_STATS_INTERACTION_INTERVAL
-            = "usage_stats_interaction_interval";
+    /** Used for all apps on R and earlier versions. */
+    private static final String KEY_SERVICE_USAGE_INTERACTION_TIME_PRE_S =
+            "service_usage_interaction_time";
+    private static final String KEY_SERVICE_USAGE_INTERACTION_TIME_POST_S =
+            "service_usage_interaction_time_post_s";
+    /** Used for all apps on R and earlier versions. */
+    private static final String KEY_USAGE_STATS_INTERACTION_INTERVAL_PRE_S =
+            "usage_stats_interaction_interval";
+    private static final String KEY_USAGE_STATS_INTERACTION_INTERVAL_POST_S =
+            "usage_stats_interaction_interval_post_s";
     private static final String KEY_IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES =
             "imperceptible_kill_exempt_packages";
     private static final String KEY_IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES =
@@ -120,8 +126,10 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final int DEFAULT_POWER_CHECK_MAX_CPU_2 = 25;
     private static final int DEFAULT_POWER_CHECK_MAX_CPU_3 = 10;
     private static final int DEFAULT_POWER_CHECK_MAX_CPU_4 = 2;
-    private static final long DEFAULT_SERVICE_USAGE_INTERACTION_TIME = 30*60*1000;
-    private static final long DEFAULT_USAGE_STATS_INTERACTION_INTERVAL = 2*60*60*1000L;
+    private static final long DEFAULT_SERVICE_USAGE_INTERACTION_TIME_PRE_S = 30 * 60 * 1000;
+    private static final long DEFAULT_SERVICE_USAGE_INTERACTION_TIME_POST_S = 60 * 1000;
+    private static final long DEFAULT_USAGE_STATS_INTERACTION_INTERVAL_PRE_S = 2 * 60 * 60 * 1000;
+    private static final long DEFAULT_USAGE_STATS_INTERACTION_INTERVAL_POST_S = 10 * 60 * 1000;
     private static final long DEFAULT_SERVICE_RESTART_DURATION = 1*1000;
     private static final long DEFAULT_SERVICE_RESET_RUN_DURATION = 60*1000;
     private static final int DEFAULT_SERVICE_RESTART_DURATION_FACTOR = 4;
@@ -303,11 +311,23 @@ final class ActivityManagerConstants extends ContentObserver {
 
     // This is the amount of time an app needs to be running a foreground service before
     // we will consider it to be doing interaction for usage stats.
-    long SERVICE_USAGE_INTERACTION_TIME = DEFAULT_SERVICE_USAGE_INTERACTION_TIME;
+    // Only used for apps targeting pre-S versions.
+    long SERVICE_USAGE_INTERACTION_TIME_PRE_S = DEFAULT_SERVICE_USAGE_INTERACTION_TIME_PRE_S;
+
+    // This is the amount of time an app needs to be running a foreground service before
+    // we will consider it to be doing interaction for usage stats.
+    // Only used for apps targeting versions S and above.
+    long SERVICE_USAGE_INTERACTION_TIME_POST_S = DEFAULT_SERVICE_USAGE_INTERACTION_TIME_POST_S;
 
     // Maximum amount of time we will allow to elapse before re-reporting usage stats
     // interaction with foreground processes.
-    long USAGE_STATS_INTERACTION_INTERVAL = DEFAULT_USAGE_STATS_INTERACTION_INTERVAL;
+    // Only used for apps targeting pre-S versions.
+    long USAGE_STATS_INTERACTION_INTERVAL_PRE_S = DEFAULT_USAGE_STATS_INTERACTION_INTERVAL_PRE_S;
+
+    // Maximum amount of time we will allow to elapse before re-reporting usage stats
+    // interaction with foreground processes.
+    // Only used for apps targeting versions S and above.
+    long USAGE_STATS_INTERACTION_INTERVAL_POST_S = DEFAULT_USAGE_STATS_INTERACTION_INTERVAL_POST_S;
 
     // How long a service needs to be running until restarting its process
     // is no longer considered to be a relaunch of the service.
@@ -460,7 +480,7 @@ final class ActivityManagerConstants extends ContentObserver {
      *
      * If the value is 0.1, 10% of the installed packages would be sampled.
      */
-    volatile float mDefaultFgsAtomSampleRate = DEFAULT_FGS_ATOM_SAMPLE_RATE;
+    volatile float mFgsAtomSampleRate = DEFAULT_FGS_ATOM_SAMPLE_RATE;
 
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
@@ -817,10 +837,18 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_POWER_CHECK_MAX_CPU_3);
             POWER_CHECK_MAX_CPU_4 = mParser.getInt(KEY_POWER_CHECK_MAX_CPU_4,
                     DEFAULT_POWER_CHECK_MAX_CPU_4);
-            SERVICE_USAGE_INTERACTION_TIME = mParser.getLong(KEY_SERVICE_USAGE_INTERACTION_TIME,
-                    DEFAULT_SERVICE_USAGE_INTERACTION_TIME);
-            USAGE_STATS_INTERACTION_INTERVAL = mParser.getLong(KEY_USAGE_STATS_INTERACTION_INTERVAL,
-                    DEFAULT_USAGE_STATS_INTERACTION_INTERVAL);
+            SERVICE_USAGE_INTERACTION_TIME_PRE_S = mParser.getLong(
+                    KEY_SERVICE_USAGE_INTERACTION_TIME_PRE_S,
+                    DEFAULT_SERVICE_USAGE_INTERACTION_TIME_PRE_S);
+            SERVICE_USAGE_INTERACTION_TIME_POST_S = mParser.getLong(
+                    KEY_SERVICE_USAGE_INTERACTION_TIME_POST_S,
+                    DEFAULT_SERVICE_USAGE_INTERACTION_TIME_POST_S);
+            USAGE_STATS_INTERACTION_INTERVAL_PRE_S = mParser.getLong(
+                    KEY_USAGE_STATS_INTERACTION_INTERVAL_PRE_S,
+                    DEFAULT_USAGE_STATS_INTERACTION_INTERVAL_PRE_S);
+            USAGE_STATS_INTERACTION_INTERVAL_POST_S = mParser.getLong(
+                    KEY_USAGE_STATS_INTERACTION_INTERVAL_POST_S,
+                    DEFAULT_USAGE_STATS_INTERACTION_INTERVAL_POST_S);
             SERVICE_RESTART_DURATION = mParser.getLong(KEY_SERVICE_RESTART_DURATION,
                     DEFAULT_SERVICE_RESTART_DURATION);
             SERVICE_RESET_RUN_DURATION = mParser.getLong(KEY_SERVICE_RESET_RUN_DURATION,
@@ -985,7 +1013,7 @@ final class ActivityManagerConstants extends ContentObserver {
     }
 
     private void updateFgsAtomSamplePercent() {
-        mDefaultFgsAtomSampleRate = DeviceConfig.getFloat(
+        mFgsAtomSampleRate = DeviceConfig.getFloat(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_FGS_ATOM_SAMPLE_RATE,
                 DEFAULT_FGS_ATOM_SAMPLE_RATE);
@@ -1135,10 +1163,14 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(POWER_CHECK_MAX_CPU_3);
         pw.print("  "); pw.print(KEY_POWER_CHECK_MAX_CPU_4); pw.print("=");
         pw.println(POWER_CHECK_MAX_CPU_4);
-        pw.print("  "); pw.print(KEY_SERVICE_USAGE_INTERACTION_TIME); pw.print("=");
-        pw.println(SERVICE_USAGE_INTERACTION_TIME);
-        pw.print("  "); pw.print(KEY_USAGE_STATS_INTERACTION_INTERVAL); pw.print("=");
-        pw.println(USAGE_STATS_INTERACTION_INTERVAL);
+        pw.print("  "); pw.print(KEY_SERVICE_USAGE_INTERACTION_TIME_PRE_S); pw.print("=");
+        pw.println(SERVICE_USAGE_INTERACTION_TIME_PRE_S);
+        pw.print("  "); pw.print(KEY_SERVICE_USAGE_INTERACTION_TIME_POST_S); pw.print("=");
+        pw.println(SERVICE_USAGE_INTERACTION_TIME_POST_S);
+        pw.print("  "); pw.print(KEY_USAGE_STATS_INTERACTION_INTERVAL_PRE_S); pw.print("=");
+        pw.println(USAGE_STATS_INTERACTION_INTERVAL_PRE_S);
+        pw.print("  "); pw.print(KEY_USAGE_STATS_INTERACTION_INTERVAL_POST_S); pw.print("=");
+        pw.println(USAGE_STATS_INTERACTION_INTERVAL_POST_S);
         pw.print("  "); pw.print(KEY_SERVICE_RESTART_DURATION); pw.print("=");
         pw.println(SERVICE_RESTART_DURATION);
         pw.print("  "); pw.print(KEY_SERVICE_RESET_RUN_DURATION); pw.print("=");
@@ -1204,7 +1236,7 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  "); pw.print(KEY_DEFAULT_FGS_STARTS_RESTRICTION_CHECK_CALLER_TARGET_SDK);
         pw.print("="); pw.println(mFgsStartRestrictionCheckCallerTargetSdk);
         pw.print("  "); pw.print(KEY_FGS_ATOM_SAMPLE_RATE);
-        pw.print("="); pw.println(mDefaultFgsAtomSampleRate);
+        pw.print("="); pw.println(mFgsAtomSampleRate);
         pw.print("  "); pw.print(KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR);
         pw.print("="); pw.println(mPushMessagingOverQuotaBehavior);
 

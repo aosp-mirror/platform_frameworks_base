@@ -19,6 +19,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
 import android.util.SparseArray;
@@ -38,12 +39,32 @@ public class SensorPowerCalculator extends PowerCalculator {
     }
 
     @Override
-    protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        double appsPowerMah = 0;
+        final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
+                builder.getUidBatteryConsumerBuilders();
+        for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
+            final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
+            appsPowerMah += calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs);
+        }
+
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS, appsPowerMah);
+        builder.getAggregateBatteryConsumerBuilder(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS, appsPowerMah);
+    }
+
+    private double calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
+            long rawRealtimeUs) {
+        final double powerMah = calculatePowerMah(u, rawRealtimeUs,
+                BatteryStats.STATS_SINCE_CHARGED);
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SENSORS,
                         calculateDuration(u, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED))
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS,
-                        calculatePowerMah(u, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED));
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS, powerMah);
+        return powerMah;
     }
 
     @Override

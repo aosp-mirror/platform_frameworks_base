@@ -171,8 +171,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             // client caching behavior is only enabled after seeing the first invalidate
             LocationManager.invalidateLocalLocationEnabledCaches();
             // disable caching for our own process
-            Objects.requireNonNull(getContext().getSystemService(LocationManager.class))
-                    .disableLocalLocationEnabledCaches();
+            LocationManager.disableLocalLocationEnabledCaches();
         }
 
         @Override

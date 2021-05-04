@@ -62,8 +62,8 @@ public class NavigationBarRotationContextTest extends SysuiTestCase {
 
         final View view = new View(mContext);
         mRotationButton = mock(RotationButton.class);
-        mRotationButtonController = spy(new RotationButtonController(mContext, 0, 0));
-        mRotationButtonController.setRotationButton(mRotationButton, (visibility) -> {});
+        mRotationButtonController = spy(new RotationButtonController(mContext, 0, 0,
+                mRotationButton, (visibility) -> {}));
         final KeyButtonDrawable kbd = mock(KeyButtonDrawable.class);
         doReturn(view).when(mRotationButton).getCurrentView();
         doReturn(true).when(mRotationButton).acceptRotationProposal();
