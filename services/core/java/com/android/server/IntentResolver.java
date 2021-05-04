@@ -839,33 +839,45 @@ public abstract class IntentResolver<F, R extends Object> {
         }
     };
 
+    // Method to take the snapshot of an F.
+    protected F snapshot(F f) {
+        return f;
+    }
+
     // Helper method to copy some of the maps.
-    private static <E> void copyInto(ArrayMap<String, E[]> l, ArrayMap<String, E[]> r) {
+    protected void copyInto(ArrayMap<String, F[]> l, ArrayMap<String, F[]> r) {
+        final int end = r.size();
+        l.clear();
+        l.ensureCapacity(end);
+        for (int i = 0; i < end; i++) {
+            final F[] val = r.valueAt(i);
+            final String key = r.keyAt(i);
+            final F[] newval = Arrays.copyOf(val, val.length);
+            for (int j = 0; j < newval.length; j++) {
+                newval[j] = snapshot(newval[j]);
+            }
+            l.put(key, newval);
+        }
+    }
+
+    protected void copyInto(ArraySet<F> l, ArraySet<F> r) {
+        l.clear();
         final int end = r.size();
         l.ensureCapacity(end);
         for (int i = 0; i < end; i++) {
-            final E[] val = r.valueAt(i);
-            final String key = r.keyAt(i);
-            l.put(key, Arrays.copyOf(val, val.length));
+            l.append(snapshot(r.valueAt(i)));
         }
     }
 
     // Make <this> a copy of <orig>.  The presumption is that <this> is empty but all
     // arrays are cleared out explicitly, just to be sure.
     protected void copyFrom(IntentResolver orig) {
-        mFilters.clear();
-        mFilters.addAll(orig.mFilters);
-        mTypeToFilter.clear();
+        copyInto(mFilters, orig.mFilters);
         copyInto(mTypeToFilter, orig.mTypeToFilter);
-        mBaseTypeToFilter.clear();
         copyInto(mBaseTypeToFilter, orig.mBaseTypeToFilter);
-        mWildTypeToFilter.clear();
         copyInto(mWildTypeToFilter, orig.mWildTypeToFilter);
-        mSchemeToFilter.clear();
         copyInto(mSchemeToFilter, orig.mSchemeToFilter);
-        mActionToFilter.clear();
         copyInto(mActionToFilter, orig.mActionToFilter);
-        mTypedActionToFilter.clear();
         copyInto(mTypedActionToFilter, orig.mTypedActionToFilter);
     }
 
