@@ -185,15 +185,6 @@ public class ActivityThreadTest {
     }
 
     @Test
-    public void testHandleActivity_assetsChanged() {
-        relaunchActivityAndAssertPreserveWindow(activity -> {
-            // Relaunches all activities.
-            activity.getActivityThread().handleApplicationInfoChanged(
-                    activity.getApplicationInfo());
-        });
-    }
-
-    @Test
     public void testRecreateActivity() {
         relaunchActivityAndAssertPreserveWindow(Activity::recreate);
     }
