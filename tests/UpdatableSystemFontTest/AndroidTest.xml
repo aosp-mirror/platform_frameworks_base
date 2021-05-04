@@ -21,6 +21,7 @@
 
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
+        <option name="test-file-name" value="UpdatableSystemFontTest.apk" />
         <option name="test-file-name" value="EmojiRenderingTestApp.apk" />
     </target_preparer>
 
@@ -37,7 +38,7 @@
         <option name="push" value="UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf.fsv_sig->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf.fsv_sig" />
     </target_preparer>
 
-    <test class="com.android.compatibility.common.tradefed.testtype.JarHostTest" >
-        <option name="jar" value="UpdatableSystemFontTest.jar" />
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
+        <option name="package" value="com.android.updatablesystemfont" />
     </test>
 </configuration>
