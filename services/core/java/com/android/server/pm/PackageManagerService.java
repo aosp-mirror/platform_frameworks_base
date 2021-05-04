@@ -134,6 +134,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTi
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.makeDirRecursive;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
+import static com.android.server.pm.parsing.PackageInfoUtils.checkUseInstalledOrHidden;
 
 import android.Manifest;
 import android.annotation.AppIdInt;
@@ -2510,8 +2511,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (DEBUG_PACKAGE_INFO) Log.v(TAG, "getActivityInfo " + component + ": " + a);
 
             AndroidPackage pkg = a == null ? null : mPackages.get(a.getPackageName());
+            PackageSetting ps = a == null ? null : mSettings.getPackageLPr(a.getPackageName());
             if (pkg != null && mSettings.isEnabledAndMatchLPr(pkg, a, flags, userId)) {
-                PackageSetting ps = mSettings.getPackageLPr(component.getPackageName());
                 if (ps == null) return null;
                 if (shouldFilterApplicationLocked(
                         ps, filterCallingUid, component, TYPE_ACTIVITY, userId)) {
@@ -2521,8 +2522,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         a, flags, ps.readUserState(userId), userId, ps);
             }
             if (resolveComponentName().equals(component)) {
-                return PackageParser.generateActivityInfo(
-                        mResolveActivity, flags, new PackageUserState(), userId);
+                return generateDelegateActivityInfo(pkg, ps, new PackageUserState(),
+                        mResolveActivity, flags, userId);
             }
             return null;
         }
@@ -3168,8 +3169,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return result;
             }
             final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
-            ephemeralInstaller.activityInfo = PackageParser.generateActivityInfo(
-                    instantAppInstallerActivity(), 0, ps.readUserState(userId), userId);
+            ephemeralInstaller.activityInfo = generateDelegateActivityInfo(ps.getPkg(), ps,
+                    ps.readUserState(userId), instantAppInstallerActivity(), 0 /*flags*/, userId);
             ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                     | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
             // add a non-generic filter
@@ -3253,7 +3254,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ai.flags = ps.pkgFlags;
                 ai.privateFlags = ps.pkgPrivateFlags;
                 pi.applicationInfo =
-                        PackageParser.generateApplicationInfo(ai, flags, state, userId);
+                        PackageInfoUtils.generateApplicationInfo(p, flags, state, userId, ps);
 
                 if (DEBUG_PACKAGE_INFO) Log.v(TAG, "ps.pkg is n/a for ["
                         + ps.name + "]. Provides a minimum info.");
@@ -3367,6 +3368,19 @@ public class PackageManagerService extends IPackageManager.Stub
                     false /* checkShell */, "get installed packages");
 
             return getInstalledPackagesBody(flags, userId, callingUid);
+        }
+
+        private static ActivityInfo generateDelegateActivityInfo(@Nullable AndroidPackage pkg,
+                @Nullable PackageSetting ps, @NonNull PackageUserState state,
+                @Nullable ActivityInfo activity, int flags, int userId) {
+            if (activity == null || pkg == null
+                    || !checkUseInstalledOrHidden(pkg, ps, state, flags)) {
+                return null;
+            }
+            final ActivityInfo info = new ActivityInfo(activity);
+            info.applicationInfo =
+                    PackageInfoUtils.generateApplicationInfo(pkg, flags, state, userId, ps);
+            return info;
         }
 
         public ParceledListSlice<PackageInfo> getInstalledPackagesBody(int flags, int userId,
@@ -23604,7 +23618,7 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean compatibilityModeEnabled = android.provider.Settings.Global.getInt(
                 mContext.getContentResolver(),
                 android.provider.Settings.Global.COMPATIBILITY_MODE, 1) == 1;
-        PackageParser.setCompatibilityModeEnabled(compatibilityModeEnabled);
+        ParsingPackageUtils.setCompatibilityModeEnabled(compatibilityModeEnabled);
 
         if (DEBUG_SETTINGS) {
             Log.d(TAG, "compatibility mode:" + compatibilityModeEnabled);
