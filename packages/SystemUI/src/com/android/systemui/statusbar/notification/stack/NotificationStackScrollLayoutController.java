@@ -1061,10 +1061,6 @@ public class NotificationStackScrollLayoutController {
         mView.setUnlockHintRunning(running);
     }
 
-    public float getPeekHeight() {
-        return mView.getPeekHeight();
-    }
-
     public boolean isFooterViewNotGone() {
         return mView.isFooterViewNotGone();
     }
