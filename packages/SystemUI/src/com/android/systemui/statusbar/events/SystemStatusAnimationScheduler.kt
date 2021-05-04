@@ -127,7 +127,6 @@ class SystemStatusAnimationScheduler @Inject constructor(
     }
 
     private fun isTooEarly(): Boolean {
-        Log.d(TAG, "time=> ${systemClock.uptimeMillis() - Process.getStartUptimeMillis()}")
         return systemClock.uptimeMillis() - Process.getStartUptimeMillis() < MIN_UPTIME
     }
 
