@@ -77,6 +77,7 @@ import android.os.test.TestLooper;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -98,6 +99,7 @@ import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -325,6 +327,17 @@ public class VcnManagementServiceTest {
         doAnswer(invocation -> {
             return subIdToGroupMap.get(invocation.getArgument(0));
         }).when(snapshot).getGroupForSubId(anyInt());
+
+        doAnswer(invocation -> {
+            final ParcelUuid subGrp = invocation.getArgument(0);
+            final Set<Integer> subIds = new ArraySet<>();
+            for (Entry<Integer, ParcelUuid> entry : subIdToGroupMap.entrySet()) {
+                if (entry.getValue().equals(subGrp)) {
+                    subIds.add(entry.getKey());
+                }
+            }
+            return subIds;
+        }).when(snapshot).getAllSubIdsInGroup(any());
 
         final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
         cb.onNewSnapshot(snapshot);
@@ -910,6 +923,18 @@ public class VcnManagementServiceTest {
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
         mVcnMgmtSvc.clearVcnConfig(TEST_UUID_2, TEST_PACKAGE_NAME);
+
+        verify(mMockPolicyListener).onPolicyChanged();
+    }
+
+    @Test
+    public void testVcnSubIdChangeUpdatesPolicyListener() throws Exception {
+        startAndGetVcnInstance(TEST_UUID_2);
+        mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+
+        triggerSubscriptionTrackerCbAndGetSnapshot(
+                Collections.singleton(TEST_UUID_2),
+                Collections.singletonMap(TEST_SUBSCRIPTION_ID, TEST_UUID_2));
 
         verify(mMockPolicyListener).onPolicyChanged();
     }
