@@ -16,6 +16,8 @@
 
 package com.android.systemui.util.concurrency;
 
+import android.os.Looper;
+
 import java.util.concurrent.Executor;
 
 /**
@@ -35,6 +37,11 @@ public class FakeThreadFactory implements ThreadFactory {
 
     @Override
     public DelayableExecutor buildDelayableExecutorOnNewThread(String threadName) {
+        return mFakeExecutor;
+    }
+
+    @Override
+    public DelayableExecutor buildDelayableExecutorOnLooper(Looper looper) {
         return mFakeExecutor;
     }
 }
