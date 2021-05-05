@@ -105,6 +105,7 @@ public class UiTranslationController {
                 || state == STATE_UI_TRANSLATION_RESUMED)) {
             return;
         }
+
         Log.i(TAG, "updateUiTranslationState state: " + stateToString(state)
                 + (DEBUG ? ", views: " + views : ""));
         synchronized (mLock) {
@@ -235,7 +236,9 @@ public class UiTranslationController {
     public void onTranslationCompleted(TranslationResponse response) {
         if (response == null || response.getTranslationStatus()
                 != TranslationResponse.TRANSLATION_STATUS_SUCCESS) {
-            Log.w(TAG, "Fail result from TranslationService, response: " + response);
+            Log.w(TAG, "Fail result from TranslationService, status=" + (response == null
+                    ? "null"
+                    : response.getTranslationStatus()));
             return;
         }
         final SparseArray<ViewTranslationResponse> translatedResult =
@@ -303,9 +306,8 @@ public class UiTranslationController {
                 final LongSparseArray<ViewTranslationResponse> virtualChildResponse =
                         translatedResult.valueAt(i);
                 if (DEBUG) {
-                    // TODO(b/182433547): remove before S release
-                    Log.v(TAG, "onVirtualViewTranslationCompleted: receive "
-                            + virtualChildResponse + " for AutofillId " + autofillId);
+                    Log.v(TAG, "onVirtualViewTranslationCompleted: received response for "
+                            + "AutofillId " + autofillId);
                 }
                 mActivity.runOnUiThread(() -> {
                     if (view.getViewTranslationCallback() == null) {
@@ -348,11 +350,12 @@ public class UiTranslationController {
                 final ViewTranslationResponse response = translatedResult.valueAt(i);
                 if (DEBUG) {
                     // TODO(b/182433547): remove before S release
-                    Log.v(TAG, "onTranslationCompleted: response= " + response);
+                    Log.v(TAG, "onTranslationCompleted: "
+                            + sanitizedViewTranslationResponse(response));
                 }
                 final AutofillId autofillId = response.getAutofillId();
                 if (autofillId == null) {
-                    Log.w(TAG, "No AutofillId is set in ViewTranslationResponse:" + response);
+                    Log.w(TAG, "No AutofillId is set in ViewTranslationResponse");
                     continue;
                 }
                 final View view = mViews.get(autofillId).get();
@@ -408,7 +411,13 @@ public class UiTranslationController {
                 .setViewTranslationRequests(requests)
                 .build();
         if (DEBUG) {
-            Log.d(TAG, "sendTranslationRequest: request= " + request);
+            StringBuilder msg = new StringBuilder("sendTranslationRequest:{requests=[");
+            for (ViewTranslationRequest viewRequest: requests) {
+                msg.append("{request=")
+                        .append(sanitizedViewTranslationRequest(viewRequest))
+                        .append("}, ");
+            }
+            Log.d(TAG, "sendTranslationRequest: " + msg.toString());
         }
         translator.requestUiTranslate(request, (r) -> r.run(), this::onTranslationCompleted);
     }
@@ -418,7 +427,7 @@ public class UiTranslationController {
      */
     private void onUiTranslationStarted(Translator translator, List<AutofillId> views) {
         synchronized (mLock) {
-            // Filter the request views's AutofillId
+            // Filter the request views' AutofillId
             SparseIntArray virtualViewChildCount = getRequestVirtualViewChildCount(views);
             Map<AutofillId, long[]> viewIds = new ArrayMap<>();
             Map<AutofillId, Integer> unusedIndices = null;
@@ -547,7 +556,7 @@ public class UiTranslationController {
                     }
                     if (view == null || view.getViewTranslationCallback() == null) {
                         if (DEBUG) {
-                            Log.d(TAG, "View was gone or ViewTranslationCallback for autofillid "
+                            Log.d(TAG, "View was gone or ViewTranslationCallback for autofillId "
                                     + "= " + views.keyAt(i));
                         }
                         continue;
@@ -602,5 +611,43 @@ public class UiTranslationController {
             default:
                 return "Unknown state (" + state + ")";
         }
+    }
+
+    // TODO(b/182433547): maybe remove below before S release
+
+    /**
+     * Returns a sanitized string representation of {@link ViewTranslationRequest};
+     */
+    private static String sanitizedViewTranslationRequest(@NonNull ViewTranslationRequest request) {
+        StringBuilder msg = new StringBuilder("ViewTranslationRequest:{values=[");
+        for (String key: request.getKeys()) {
+            final TranslationRequestValue value = request.getValue(key);
+            msg.append("{text=").append(value.getText() == null
+                    ? "null"
+                    : "string[" + value.getText().length() + "]}, ");
+        }
+        return msg.toString();
+    }
+
+    /**
+     * Returns a sanitized string representation of {@link ViewTranslationResponse};
+     */
+    private static String sanitizedViewTranslationResponse(
+            @NonNull ViewTranslationResponse response) {
+        StringBuilder msg = new StringBuilder("ViewTranslationResponse:{values=[");
+        for (String key: response.getKeys()) {
+            final TranslationResponseValue value = response.getValue(key);
+            msg.append("{status=").append(value.getStatusCode()).append(", ");
+            msg.append("text=").append(value.getText() == null
+                    ? "null"
+                    : "string[" + value.getText().length() + "], ");
+            msg.append("dict=").append(value.getDictionaryDescription() == null
+                    ? "null"
+                    : "string[" + value.getDictionaryDescription().length() + "], ");
+            msg.append("transliteration=").append(value.getTransliteration() == null
+                    ? "null"
+                    : "string[" + value.getTransliteration().length() + "]}, ");
+        }
+        return msg.toString();
     }
 }
