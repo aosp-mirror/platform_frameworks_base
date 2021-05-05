@@ -25,7 +25,7 @@
     <dimen name="circle_avatar_size">40dp</dimen>
 
     <!-- Height of a user icon view -->
-    <dimen name="user_icon_view_height">56dp</dimen>
+    <dimen name="user_icon_view_height">24dp</dimen>
     <!-- User spinner -->
     <dimen name="user_spinner_height">72dp</dimen>
     <dimen name="user_spinner_padding">4dp</dimen>
