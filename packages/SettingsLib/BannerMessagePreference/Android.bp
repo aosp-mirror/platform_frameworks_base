@@ -14,9 +14,10 @@ android_library {
     resource_dirs: ["res"],
 
     static_libs: [
-          "androidx.preference_preference",
+        "androidx.preference_preference",
+        "SettingsLibSettingsTheme",
     ],
 
     sdk_version: "system_current",
-    min_sdk_version: "21",
+    min_sdk_version: "28",
 }
