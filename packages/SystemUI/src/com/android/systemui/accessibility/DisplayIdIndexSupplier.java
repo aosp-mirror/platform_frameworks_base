@@ -63,17 +63,15 @@ abstract class DisplayIdIndexSupplier<T> {
     }
 
     /**
-     * Gets the object by the element index.
+     * Returns the object with the given display id.
      *
-     * <p> If the index is bigger than the array size, an {@link ArrayIndexOutOfBoundsException} is
-     * thrown for apps targeting {@link android.os.Build.VERSION_CODES#Q} and later </p>
      *
-     * @param index the element index
+     * @param displayId the logical display Id
      * @return T
-     * @see SparseArray#valueAt(int)
      */
-    public T valueAt(int index) {
-        return mSparseArray.valueAt(index);
+    @Nullable
+    public T valueAt(int displayId) {
+        return mSparseArray.get(displayId);
     }
 
     @NonNull

@@ -37,7 +37,8 @@ import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.model.SysUiState;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
@@ -67,9 +68,12 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     @Mock
     private ModeSwitchesController mModeSwitchesController;
     @Mock
-    private NavigationModeController mNavigationModeController;
+    private SysUiState mSysUiState;
     @Mock
     private IRemoteMagnificationAnimationCallback mAnimationCallback;
+    @Mock
+    private OverviewProxyService mOverviewProxyService;
+
     private IWindowMagnificationConnection mIWindowMagnificationConnection;
     private WindowMagnification mWindowMagnification;
 
@@ -83,8 +87,8 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         }).when(mAccessibilityManager).setWindowMagnificationConnection(
                 any(IWindowMagnificationConnection.class));
         mWindowMagnification = new WindowMagnification(getContext(),
-                getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
-                mNavigationModeController);
+                getContext().getMainThreadHandler(), mCommandQueue,
+                mModeSwitchesController, mSysUiState, mOverviewProxyService);
         mWindowMagnification.mAnimationControllerSupplier = new FakeAnimationControllerSupplier(
                 mContext.getSystemService(DisplayManager.class));
 

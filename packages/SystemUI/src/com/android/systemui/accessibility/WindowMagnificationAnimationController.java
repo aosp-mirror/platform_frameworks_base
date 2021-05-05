@@ -31,6 +31,7 @@ import android.view.animation.AccelerateInterpolator;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -267,6 +268,14 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         final float centerY =
                 mStartSpec.mCenterY + (mEndSpec.mCenterY - mStartSpec.mCenterY) * fract;
         mController.enableWindowMagnification(sentScale, centerX, centerY);
+    }
+
+    public void updateSysUiStateFlag() {
+        mController.updateSysUIStateFlag();
+    }
+
+    void dump(PrintWriter pw) {
+        mController.dump(pw);
     }
 
     private static ValueAnimator newValueAnimator(Resources resources) {

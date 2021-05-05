@@ -41,6 +41,7 @@ import androidx.test.filters.LargeTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.model.SysUiState;
 
 import org.junit.After;
 import org.junit.Before;
@@ -83,6 +84,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     IRemoteMagnificationAnimationCallback mAnimationCallback;
     @Mock
     IRemoteMagnificationAnimationCallback mAnimationCallback2;
+    @Mock
+    SysUiState mSysUiState;
     private SpyWindowMagnificationController mController;
     private WindowMagnificationController mSpyController;
     private WindowMagnificationAnimationController mWindowMagnificationAnimationController;
@@ -98,7 +101,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         mWaitIntermediateAnimationPeriod = ANIMATION_DURATION_MS / 2;
         mController = new SpyWindowMagnificationController(mContext, mHandler,
                 mSfVsyncFrameProvider, null, new SurfaceControl.Transaction(),
-                mWindowMagnifierCallback);
+                mWindowMagnifierCallback, mSysUiState);
         mSpyController = mController.getSpyController();
         mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
                 mContext, mController, newValueAnimator());
@@ -394,6 +397,13 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         verify(mSpyController).onConfigurationChanged(100);
     }
 
+    @Test
+    public void updateSysUiStateFlag_passThrough() {
+        mWindowMagnificationAnimationController.updateSysUiStateFlag();
+
+        verify(mSpyController).updateSysUIStateFlag();
+    }
+
     private void verifyFinalSpec(float expectedScale, float expectedCenterX,
             float expectedCenterY) {
         assertEquals(expectedScale, mController.getScale(), 0f);
@@ -440,9 +450,9 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         SpyWindowMagnificationController(Context context, Handler handler,
                 SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
                 MirrorWindowControl mirrorWindowControl, SurfaceControl.Transaction transaction,
-                WindowMagnifierCallback callback) {
+                WindowMagnifierCallback callback, SysUiState sysUiState) {
             super(context, handler, sfVsyncFrameProvider, mirrorWindowControl, transaction,
-                    callback);
+                    callback, sysUiState);
             mSpyController = Mockito.mock(WindowMagnificationController.class);
         }
 
