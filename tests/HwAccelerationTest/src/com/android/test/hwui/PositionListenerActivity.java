@@ -74,12 +74,10 @@ public class PositionListenerActivity extends Activity {
                 float maxStretchAmount = 100f;
                 // Although we could do this in a single call, the real one won't be - so mimic that
                 if (dir.x != 0f) {
-                    node.stretch(0f, 0f, (float) getWidth(), (float) getHeight(),
-                            dir.x, 0f, maxStretchAmount, maxStretchAmount);
+                    node.stretch(dir.x, 0f, maxStretchAmount, maxStretchAmount);
                 }
                 if (dir.y != 0f) {
-                    node.stretch(0f, 0f, (float) getWidth(), (float) getHeight(),
-                            0f, dir.y, maxStretchAmount, maxStretchAmount);
+                    node.stretch(0f, dir.y, maxStretchAmount, maxStretchAmount);
                 }
             }
         };
@@ -94,10 +92,13 @@ public class PositionListenerActivity extends Activity {
         int mCurrentCount = 0;
         int mTranslateY = 0;
         Rect mPosition = new Rect();
-        RectF mStretchArea = new RectF();
+        float mWidth = 0f;
+        float mHeight = 0f;
+        RectF mMappedBounds = new RectF();
         float mStretchX = 0.0f;
         float mStretchY = 0.0f;
-        float mStretchMax = 0.0f;
+        float mStretchMaxX = 0.0f;
+        float mStretchMaxY = 0.0f;
 
         MyPositionReporter(Context c) {
             super(c);
@@ -128,9 +129,12 @@ public class PositionListenerActivity extends Activity {
         }
 
         void updateText() {
-            setText(String.format("%d: Position %s, stretch area %s, vec %f,%f, amount %f",
-                    mCurrentCount, mPosition.toShortString(), mStretchArea.toShortString(),
-                    mStretchX, mStretchY, mStretchMax));
+            String posText =
+              "%d: Position %s, stretch width %f, height %f, vec %f,%f, amountX %f amountY %f mappedBounds %s";
+            setText(String.format(posText,
+                    mCurrentCount, mPosition.toShortString(), mWidth, mHeight,
+                    mStretchX, mStretchY, mStretchMaxX, mStretchMaxY,
+                    mMappedBounds.toShortString()));
         }
 
         @Override
@@ -143,13 +147,19 @@ public class PositionListenerActivity extends Activity {
         }
 
         @Override
-        public void applyStretch(long frameNumber, float left, float top, float right, float bottom,
-                float vecX, float vecY, float maxStretch) {
+        public void applyStretch(long frameNumber, float width, float height,
+                float vecX, float vecY,
+                float maxStretchX, float maxStretchY, float childRelativeLeft,
+                float childRelativeTop, float childRelativeRight, float childRelativeBottom) {
             getHandler().postAtFrontOfQueue(() -> {
-                mStretchArea.set(left, top, right, bottom);
+                mWidth = width;
+                mHeight = height;
                 mStretchX = vecX;
                 mStretchY = vecY;
-                mStretchMax = maxStretch;
+                mStretchMaxX = maxStretchX;
+                mStretchMaxY = maxStretchY;
+                mMappedBounds.set(childRelativeLeft, childRelativeTop, childRelativeRight,
+                        childRelativeBottom);
                 updateText();
             });
         }

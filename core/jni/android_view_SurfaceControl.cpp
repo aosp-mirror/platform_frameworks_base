@@ -626,12 +626,24 @@ static void nativeSetBlurRegions(JNIEnv* env, jclass clazz, jlong transactionObj
 }
 
 static void nativeSetStretchEffect(JNIEnv* env, jclass clazz, jlong transactionObj,
-                                   jlong nativeObject, jfloat left, jfloat top, jfloat right,
-                                   jfloat bottom, jfloat vecX, jfloat vecY,
-                                   jfloat maxStretchAmount) {
+                                   jlong nativeObject, jfloat width, jfloat height,
+                                   jfloat vecX, jfloat vecY,
+                                   jfloat maxStretchAmountX, jfloat maxStretchAmountY,
+                                   jfloat childRelativeLeft, jfloat childRelativeTop,
+                                   jfloat childRelativeRight, jfloat childRelativeBottom) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
-    transaction->setStretchEffect(ctrl, left, top, right, bottom, vecX, vecY, maxStretchAmount);
+    auto* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    auto stretch = StretchEffect{
+      .width = width,
+      .height = height,
+      .vectorX = vecX,
+      .vectorY = vecY,
+      .maxAmountX = maxStretchAmountX,
+      .maxAmountY = maxStretchAmountY,
+      .mappedChildBounds = FloatRect(
+          childRelativeLeft, childRelativeTop, childRelativeRight, childRelativeBottom)
+    };
+    transaction->setStretchEffect(ctrl, stretch);
 }
 
 static void nativeSetSize(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1829,7 +1841,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetLayerStack },
     {"nativeSetBlurRegions", "(JJ[[FI)V",
             (void*)nativeSetBlurRegions },
-    {"nativeSetStretchEffect", "(JJFFFFFFF)V",
+    {"nativeSetStretchEffect", "(JJFFFFFFFFFF)V",
             (void*) nativeSetStretchEffect },
     {"nativeSetShadowRadius", "(JJF)V",
             (void*)nativeSetShadowRadius },
