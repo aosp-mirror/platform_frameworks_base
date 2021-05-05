@@ -43,8 +43,8 @@ inline infix fun Int.times(action: () -> Unit) {
  * cccc dd
  */
 fun Iterable<Pair<String, String>>.columnize(separator: String = " | "): String {
-    val col1w = map { (a, _) -> a.length }.max()!!
-    val col2w = map { (_, b) -> b.length }.max()!!
+    val col1w = map { (a, _) -> a.length }.maxOrNull()!!
+    val col2w = map { (_, b) -> b.length }.maxOrNull()!!
     return map { it.first.padEnd(col1w) + separator + it.second.padEnd(col2w) }.joinToString("\n")
 }
 
