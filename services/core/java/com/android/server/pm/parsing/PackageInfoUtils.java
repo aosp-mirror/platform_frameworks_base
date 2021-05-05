@@ -417,7 +417,7 @@ public class PackageInfoUtils {
      * Returns true if the package is installed and not hidden, or if the caller
      * explicitly wanted all uninstalled and hidden packages as well.
      */
-    public static boolean checkUseInstalledOrHidden(AndroidPackage pkg,
+    private static boolean checkUseInstalledOrHidden(AndroidPackage pkg,
             PackageSetting pkgSetting, PackageUserState state,
             @PackageManager.PackageInfoFlags int flags) {
         // Returns false if the package is hidden system app until installed.
