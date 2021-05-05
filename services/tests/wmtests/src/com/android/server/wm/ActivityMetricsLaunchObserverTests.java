@@ -77,6 +77,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     private ActivityRecord mTopActivity;
     private ActivityOptions mActivityOptions;
     private boolean mLaunchTopByTrampoline;
+    private boolean mNewActivityCreated = true;
 
     @Before
     public void setUpAMLO() {
@@ -187,6 +188,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 .isEqualTo(WaitResult.LAUNCH_STATE_WARM);
 
         mTopActivity.app = app;
+        mNewActivityCreated = false;
         assertWithMessage("Hot launch").that(launchTemplate.applyAsInt(false /* doRelaunch */))
                 .isEqualTo(WaitResult.LAUNCH_STATE_HOT);
 
@@ -194,6 +196,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 .isEqualTo(WaitResult.LAUNCH_STATE_RELAUNCH);
 
         mTopActivity.app = null;
+        mNewActivityCreated = true;
         doReturn(null).when(mAtm).getProcessController(app.mName, app.mUid);
         assertWithMessage("Cold launch").that(launchTemplate.applyAsInt(false /* doRelaunch */))
                 .isEqualTo(WaitResult.LAUNCH_STATE_COLD);
@@ -313,8 +316,8 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     }
 
     private void notifyActivityLaunched(int resultCode, ActivityRecord activity) {
-        mActivityMetricsLogger.notifyActivityLaunched(mLaunchingState, resultCode, activity,
-                mActivityOptions);
+        mActivityMetricsLogger.notifyActivityLaunched(mLaunchingState, resultCode,
+                mNewActivityCreated, activity, mActivityOptions);
     }
 
     private void notifyTransitionStarting(ActivityRecord activity) {
