@@ -870,7 +870,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         verify(secondaryTaskContainer, times(2)).createRootTask(anyInt(), anyInt(), anyBoolean());
         // The metrics logger should receive the same result and non-null options.
         verify(mActivityMetricsLogger).notifyActivityLaunched(any() /* launchingState */,
-                eq(result), eq(singleTaskActivity), notNull() /* options */);
+                eq(result), eq(false) /* newActivityCreated */, eq(singleTaskActivity),
+                notNull() /* options */);
     }
 
     @Test
