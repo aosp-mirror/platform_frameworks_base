@@ -585,38 +585,30 @@ public class RootTaskTests extends WindowTestsBase {
 
     @Test
     public void testShouldBeVisible_SplitScreen() {
-        final Task homeRootTask = createTaskForShouldBeVisibleTest(mDefaultTaskDisplayArea,
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
-        // Home root task should always be fullscreen for this test.
-        doReturn(false).when(homeRootTask).supportsSplitScreenWindowingMode();
+        // task not supporting split should be fullscreen for this test.
+        final Task notSupportingSplitTask = createTaskForShouldBeVisibleTest(
+                mDefaultTaskDisplayArea, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
+                true /* onTop */);
+        doReturn(false).when(notSupportingSplitTask).supportsSplitScreenWindowingMode();
         final Task splitScreenPrimary = createTaskForShouldBeVisibleTest(mDefaultTaskDisplayArea,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final Task splitScreenSecondary = createTaskForShouldBeVisibleTest(mDefaultTaskDisplayArea,
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
-        // Home root task shouldn't be visible if both halves of split-screen are opaque.
+        // root task not supporting split shouldn't be visible if both halves of split-screen are
+        // opaque.
         doReturn(false).when(splitScreenPrimary).isTranslucent(any());
         doReturn(false).when(splitScreenSecondary).isTranslucent(any());
-        assertFalse(homeRootTask.shouldBeVisible(null /* starting */));
+        assertFalse(notSupportingSplitTask.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
-        assertEquals(TASK_VISIBILITY_INVISIBLE, homeRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
-                splitScreenPrimary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
-                splitScreenSecondary.getVisibility(null /* starting */));
 
-        // Home root task should be visible if one of the halves of split-screen is translucent.
+        // root task not supporting split shouldn't be visible if one of the halves of split-screen
+        // is translucent.
         doReturn(true).when(splitScreenPrimary).isTranslucent(any());
-        assertTrue(homeRootTask.shouldBeVisible(null /* starting */));
+        assertFalse(notSupportingSplitTask.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
-                homeRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
-                splitScreenPrimary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
-                splitScreenSecondary.getVisibility(null /* starting */));
 
         final Task splitScreenSecondary2 = createTaskForShouldBeVisibleTest(mDefaultTaskDisplayArea,
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);

@@ -4340,7 +4340,12 @@ class Task extends WindowContainer<WindowContainer> {
             case WINDOWING_MODE_FULLSCREEN:
                 if (gotTranslucentSplitScreenPrimary || gotTranslucentSplitScreenSecondary) {
                     // At least one of the split-screen stacks that covers this one is translucent.
-                    return TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
+                    // When in split mode, home task will be reparented to the secondary split while
+                    // leaving tasks not supporting split below. Due to
+                    // TaskDisplayArea#assignRootTaskOrdering always adjusts home surface layer to
+                    // the bottom, this makes sure tasks not in split roots won't occlude home task
+                    // unexpectedly.
+                    return TASK_VISIBILITY_INVISIBLE;
                 }
                 break;
             case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
