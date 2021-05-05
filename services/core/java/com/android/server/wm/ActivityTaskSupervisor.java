@@ -2542,7 +2542,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     targetActivity.applyOptionsAnimation();
                 } finally {
                     mActivityMetricsLogger.notifyActivityLaunched(launchingState,
-                            START_TASK_TO_FRONT, targetActivity, activityOptions);
+                            START_TASK_TO_FRONT, false /* newActivityCreated */, targetActivity,
+                            activityOptions);
                 }
 
                 mService.getActivityStartController().postStartActivityProcessingForLastStarter(
