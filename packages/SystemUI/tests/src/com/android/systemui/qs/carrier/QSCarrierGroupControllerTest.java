@@ -37,6 +37,7 @@ import com.android.keyguard.CarrierTextManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.os.FakeHandler;
 
@@ -66,6 +67,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
     private CarrierTextManager.Builder mCarrierTextControllerBuilder;
     @Mock
     private CarrierTextManager mCarrierTextManager;
+    @Mock
+    private CarrierConfigTracker mCarrierConfigTracker;
     private TestableLooper mTestableLooper;
 
     @Before
@@ -99,7 +102,7 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
 
         mQSCarrierGroupController = new QSCarrierGroupController.Builder(
                 mActivityStarter, handler, TestableLooper.get(this).getLooper(),
-                mNetworkController, mCarrierTextControllerBuilder, mContext)
+                mNetworkController, mCarrierTextControllerBuilder, mContext, mCarrierConfigTracker)
                 .setQSCarrierGroup(mQSCarrierGroup)
                 .build();
 

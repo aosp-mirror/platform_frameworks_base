@@ -25,6 +25,7 @@ import android.util.Log;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
@@ -33,12 +34,16 @@ import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.CarrierConfigTracker;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.inject.Inject;
 
+/** Controls the signal policies for icons shown in the StatusBar. **/
+@SysUISingleton
 public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallback,
         SecurityController.SecurityControllerCallback, Tunable {
     private static final String TAG = "StatusBarSignalPolicy";
@@ -57,6 +62,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private final NetworkController mNetworkController;
     private final SecurityController mSecurityController;
     private final Handler mHandler = Handler.getMain();
+    private final CarrierConfigTracker mCarrierConfigTracker;
 
     private boolean mHideAirplane;
     private boolean mHideMobile;
@@ -75,7 +81,9 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             new ArrayList<CallIndicatorIconState>();
     private WifiIconState mWifiIconState = new WifiIconState();
 
-    public StatusBarSignalPolicy(Context context, StatusBarIconController iconController) {
+    @Inject
+    public StatusBarSignalPolicy(Context context, StatusBarIconController iconController,
+            CarrierConfigTracker carrierConfigTracker) {
         mContext = context;
 
         mSlotAirplane = mContext.getString(com.android.internal.R.string.status_bar_airplane);
@@ -95,6 +103,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
         mNetworkController.addCallback(this);
         mSecurityController.addCallback(this);
+        mCarrierConfigTracker = carrierConfigTracker;
     }
 
     public void destroy() {
@@ -215,8 +224,12 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             state.callStrengthResId = statusIcon.icon;
             state.callStrengthDescription = statusIcon.contentDescription;
         }
-        mIconController.setCallStrengthIcons(mSlotCallStrength,
-                CallIndicatorIconState.copyStates(mCallIndicatorStates));
+        if (mCarrierConfigTracker.getCallStrengthConfig(subId)) {
+            mIconController.setCallStrengthIcons(mSlotCallStrength,
+                    CallIndicatorIconState.copyStates(mCallIndicatorStates));
+        } else {
+            mIconController.removeIcon(mSlotCallStrength, subId);
+        }
         mIconController.setNoCallingIcons(mSlotNoCalling,
                 CallIndicatorIconState.copyStates(mCallIndicatorStates));
     }

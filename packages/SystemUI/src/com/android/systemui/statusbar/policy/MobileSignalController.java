@@ -61,6 +61,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.util.CarrierConfigTracker;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -78,6 +79,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     private static final int IMS_TYPE_WLAN = 2;
     private static final int IMS_TYPE_WLAN_CROSS_SIM = 3;
     private final TelephonyManager mPhone;
+    private final CarrierConfigTracker mCarrierConfigTracker;
     private final ImsMmTelManager mImsMmTelManager;
     private final SubscriptionDefaults mDefaults;
     private final String mNetworkNameDefault;
@@ -123,10 +125,12 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     public MobileSignalController(Context context, Config config, boolean hasMobileData,
             TelephonyManager phone, CallbackHandler callbackHandler,
             NetworkControllerImpl networkController, SubscriptionInfo info,
-            SubscriptionDefaults defaults, Looper receiverLooper) {
+            SubscriptionDefaults defaults, Looper receiverLooper,
+            CarrierConfigTracker carrierConfigTracker) {
         super("MobileSignalController(" + info.getSubscriptionId() + ")", context,
                 NetworkCapabilities.TRANSPORT_CELLULAR, callbackHandler,
                 networkController);
+        mCarrierConfigTracker = carrierConfigTracker;
         mConfig = config;
         mPhone = phone;
         mDefaults = defaults;
@@ -583,7 +587,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mTelephonyDisplayInfo = mobileStatus.telephonyDisplayInfo;
         int lastVoiceState = mServiceState != null ? mServiceState.getState() : -1;
         mServiceState = mobileStatus.serviceState;
-        int currentVoiceState =  mServiceState != null ? mServiceState.getState() : -1;
+        int currentVoiceState = mServiceState != null ? mServiceState.getState() : -1;
         // Only update the no calling Status in the below scenarios
         // 1. The first valid voice state has been received
         // 2. The voice state has been changed and either the last or current state is
@@ -594,10 +598,27 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                         || (lastVoiceState == ServiceState.STATE_IN_SERVICE
                                 || currentVoiceState == ServiceState.STATE_IN_SERVICE))) {
             boolean isNoCalling = currentVoiceState != ServiceState.STATE_IN_SERVICE;
-            IconState statusIcon = new IconState(isNoCalling, R.drawable.ic_qs_no_calling_sms,
+            isNoCalling &= !hideNoCalling();
+            IconState statusIcon = new IconState(isNoCalling,
+                    R.drawable.ic_qs_no_calling_sms,
                     getTextIfExists(AccessibilityContentDescriptions.NO_CALLING).toString());
             notifyCallStateChange(statusIcon, mSubscriptionInfo.getSubscriptionId());
         }
+    }
+
+    void updateNoCallingState() {
+        int currentVoiceState = mServiceState != null ? mServiceState.getState() : -1;
+        boolean isNoCalling = currentVoiceState != ServiceState.STATE_IN_SERVICE;
+        isNoCalling &= !hideNoCalling();
+        IconState statusIcon = new IconState(isNoCalling,
+                R.drawable.ic_qs_no_calling_sms,
+                getTextIfExists(AccessibilityContentDescriptions.NO_CALLING).toString());
+        notifyCallStateChange(statusIcon, mSubscriptionInfo.getSubscriptionId());
+    }
+
+    private boolean hideNoCalling() {
+        return mNetworkController.hasDefaultNetwork()
+                && mCarrierConfigTracker.getNoCallingConfig(mSubscriptionInfo.getSubscriptionId());
     }
 
     private int getCallStrengthIcon(int level, boolean isWifi) {
@@ -616,7 +637,9 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     void refreshCallIndicator(SignalCallback callback) {
         boolean isNoCalling = mServiceState != null
                 && mServiceState.getState() != ServiceState.STATE_IN_SERVICE;
-        IconState statusIcon = new IconState(isNoCalling, R.drawable.ic_qs_no_calling_sms,
+        isNoCalling &= !hideNoCalling();
+        IconState statusIcon = new IconState(isNoCalling,
+                R.drawable.ic_qs_no_calling_sms,
                 getTextIfExists(AccessibilityContentDescriptions.NO_CALLING).toString());
         callback.setCallIndicator(statusIcon, mSubscriptionInfo.getSubscriptionId());
 
@@ -646,7 +669,6 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         if (!mProviderModel) {
             return;
         }
-        Log.d("mTag", "notifyWifiLevelChange " + mImsType);
         mLastWlanLevel = level;
         if (mImsType != IMS_TYPE_WLAN) {
             return;
@@ -662,7 +684,6 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         if (!mProviderModel) {
             return;
         }
-        Log.d("mTag", "notifyDefaultMobileLevelChange " + mImsType);
         mLastWlanCrossSimLevel = level;
         if (mImsType != IMS_TYPE_WLAN_CROSS_SIM) {
             return;
@@ -681,7 +702,6 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         int newLevel = getSignalLevel(signalStrength);
         if (newLevel != mLastLevel) {
             mLastLevel = newLevel;
-            Log.d("mTag", "notifyMobileLevelChangeIfNecessary " + mImsType);
             mLastWwanLevel = newLevel;
             if (mImsType == IMS_TYPE_WWAN) {
                 IconState statusIcon = new IconState(

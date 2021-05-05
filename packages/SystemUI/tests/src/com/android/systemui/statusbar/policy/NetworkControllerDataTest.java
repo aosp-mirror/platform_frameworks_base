@@ -21,6 +21,7 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
+import com.android.systemui.util.CarrierConfigTracker;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -111,7 +112,8 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class),
                 mock(DataUsageController.class), mMockSubDefaults,
-                mock(DeviceProvisionedController.class), mMockBd, mDemoModeController);
+                mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
+                mock(CarrierConfigTracker.class));
         setupNetworkController();
 
         setupDefaultSignal();
