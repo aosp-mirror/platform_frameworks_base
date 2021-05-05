@@ -346,7 +346,7 @@ public final class HdmiControlManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface HdmiCecControl {}
 
-    // -- Supported HDM-CEC versions.
+    // -- Supported HDMI-CEC versions.
     /**
      * Version constant for HDMI-CEC v1.4b.
      *
@@ -370,6 +370,31 @@ public final class HdmiControlManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface HdmiCecVersion {}
+
+    // -- Whether the Routing Control feature is enabled or disabled.
+    /**
+     * Routing Control feature enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ROUTING_CONTROL_ENABLED = 1;
+    /**
+     * Routing Control feature disabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ROUTING_CONTROL_DISABLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "ROUTING_CONTROL_" }, value = {
+            ROUTING_CONTROL_ENABLED,
+            ROUTING_CONTROL_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RoutingControl {}
 
     // -- Scope of CEC power control messages sent by a playback device.
     /**
@@ -754,6 +779,13 @@ public final class HdmiControlManager {
      */
     @SystemApi
     public static final String CEC_SETTING_NAME_HDMI_CEC_VERSION = "hdmi_cec_version";
+    /**
+     * Name of a setting deciding whether the Routing Control feature is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CEC_SETTING_NAME_ROUTING_CONTROL = "routing_control";
     /**
      * Name of a setting deciding on the power control mode.
      *
@@ -2069,6 +2101,56 @@ public final class HdmiControlManager {
         }
         try {
             return mService.getCecSettingIntValue(CEC_SETTING_NAME_HDMI_CEC_VERSION);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the status of Routing Control feature.
+     *
+     * <p>This allows to enable/disable Routing Control on the device.
+     * If enabled, the switch device will route to the correct input source on
+     * receiving Routing Control related messages. If disabled, you can only
+     * switch the input via controls on this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setRoutingControl(@NonNull @RoutingControl int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_ROUTING_CONTROL, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current status of Routing Control feature.
+     *
+     * <p>Reflects whether Routing Control is currently enabled on the device.
+     * If enabled, the switch device will route to the correct input source on
+     * receiving Routing Control related messages. If disabled, you can only
+     * switch the input via controls on this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RoutingControl
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getRoutingControl() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_ROUTING_CONTROL);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

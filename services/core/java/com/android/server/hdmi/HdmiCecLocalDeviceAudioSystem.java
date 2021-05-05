@@ -34,7 +34,6 @@ import android.media.tv.TvContract;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager.TvInputCallback;
 import android.os.SystemProperties;
-import android.provider.Settings.Global;
 import android.sysprop.HdmiProperties;
 import android.util.Slog;
 
@@ -108,8 +107,9 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mRoutingControlFeatureEnabled =
-            mService.readBooleanSetting(Global.HDMI_CEC_SWITCH_ENABLED, false);
+        mRoutingControlFeatureEnabled = mService.getHdmiCecConfig().getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL)
+                    == HdmiControlManager.ROUTING_CONTROL_ENABLED;
         mSystemAudioControlFeatureEnabled = mService.getHdmiCecConfig().getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL)
                     == HdmiControlManager.SYSTEM_AUDIO_CONTROL_ENABLED;
@@ -874,7 +874,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     @ServiceThreadOnly
-    void setRoutingControlFeatureEnables(boolean enabled) {
+    void setRoutingControlFeatureEnabled(boolean enabled) {
         assertRunOnServiceThread();
         synchronized (mLock) {
             mRoutingControlFeatureEnabled = enabled;

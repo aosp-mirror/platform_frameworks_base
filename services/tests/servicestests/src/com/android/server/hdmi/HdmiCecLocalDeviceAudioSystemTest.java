@@ -212,7 +212,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceAudioSystem);
         mLocalDevices.add(mHdmiCecLocalDevicePlayback);
-        mHdmiCecLocalDeviceAudioSystem.setRoutingControlFeatureEnables(true);
+        mHdmiCecLocalDeviceAudioSystem.setRoutingControlFeatureEnabled(true);
         mHdmiPortInfo = new HdmiPortInfo[4];
         mHdmiPortInfo[0] =
             new HdmiPortInfo(

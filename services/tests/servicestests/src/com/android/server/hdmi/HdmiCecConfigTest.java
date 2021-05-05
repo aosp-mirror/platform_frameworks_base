@@ -82,6 +82,7 @@ public final class HdmiCecConfigTest {
         assertThat(hdmiCecConfig.getAllSettings())
                 .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                    HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                     HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
@@ -104,6 +105,7 @@ public final class HdmiCecConfigTest {
         assertThat(hdmiCecConfig.getUserSettings())
                 .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                     HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                    HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                     HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
@@ -127,6 +129,7 @@ public final class HdmiCecConfigTest {
         assertThat(hdmiCecConfig.getUserSettings())
                 .containsExactly(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                    HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL,
                     HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
                     HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
                     HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
