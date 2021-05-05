@@ -1471,10 +1471,13 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
 
         @Override
-        public void applyStretch(long frameNumber, float left, float top, float right,
-                float bottom, float vecX, float vecY, float maxStretch) {
-            mRtTransaction.setStretchEffect(mSurfaceControl, left, top, right, bottom, vecX, vecY,
-                    maxStretch);
+        public void applyStretch(long frameNumber, float width, float height,
+                float vecX, float vecY, float maxStretchX, float maxStretchY,
+                float childRelativeLeft, float childRelativeTop, float childRelativeRight,
+                float childRelativeBottom) {
+            mRtTransaction.setStretchEffect(mSurfaceControl, width, height, vecX, vecY,
+                    maxStretchX, maxStretchY, childRelativeLeft, childRelativeTop,
+                    childRelativeRight, childRelativeBottom);
             applyOrMergeTransaction(mRtTransaction, frameNumber);
         }
 
