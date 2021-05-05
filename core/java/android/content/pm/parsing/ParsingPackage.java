@@ -338,6 +338,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setTheme(int theme);
 
+    ParsingPackage setRequestForegroundServiceExemption(boolean requestForegroundServiceExemption);
+
     ParsingPackage setUpgradeKeySets(@NonNull Set<String> upgradeKeySets);
 
     ParsingPackage setUse32BitAbi(boolean use32BitAbi);

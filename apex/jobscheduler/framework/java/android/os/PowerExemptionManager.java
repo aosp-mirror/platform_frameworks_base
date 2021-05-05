@@ -338,6 +338,9 @@ public class PowerExemptionManager {
      */
     public static final int REASON_MEDIA_SESSION_CALLBACK = 317;
 
+    /** @hide The app requests out-out. */
+    public static final int REASON_OPT_OUT_REQUESTED = 1000;
+
     /**
      * The list of BG-FGS-Launch and temp-allow-list reason code.
      * @hide
@@ -404,6 +407,7 @@ public class PowerExemptionManager {
             REASON_EVENT_MMS,
             REASON_SHELL,
             REASON_MEDIA_SESSION_CALLBACK,
+            REASON_OPT_OUT_REQUESTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}
@@ -700,6 +704,8 @@ public class PowerExemptionManager {
                 return "SHELL";
             case REASON_MEDIA_SESSION_CALLBACK:
                 return "MEDIA_SESSION_CALLBACK";
+            case REASON_OPT_OUT_REQUESTED:
+                return "REASON_OPT_OUT_REQUESTED";
             default:
                 return "(unknown:" + reasonCode + ")";
         }
