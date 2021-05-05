@@ -29,7 +29,6 @@
 #include "utils/Trace.h"
 
 #include "android_content_res_ApkAssets.h"
-#include "android_util_AssetManager_private.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
 #include "nativehelper/ScopedUtfChars.h"
@@ -473,8 +472,9 @@ static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring fil
   const auto buffer = asset->getIncFsBuffer(true /* aligned */);
   const size_t length = asset->getLength();
   if (!buffer.convert<uint8_t>().verify(length)) {
-    jniThrowException(env, kResourcesNotFound, kIOErrorMessage);
-    return 0;
+      jniThrowException(env, "java/io/FileNotFoundException",
+                        "File not fully present due to incremental installation");
+      return 0;
   }
 
   // DynamicRefTable is only needed when looking up resource references. Opening an XML file
