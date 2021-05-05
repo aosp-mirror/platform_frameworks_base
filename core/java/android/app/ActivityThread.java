@@ -5613,7 +5613,7 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     /** Performs the activity relaunch locally vs. requesting from system-server. */
-    private void handleRelaunchActivityLocally(IBinder token) {
+    public void handleRelaunchActivityLocally(IBinder token) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r == null) {
             Log.w(TAG, "Activity to relaunch no longer exists");
@@ -5977,20 +5977,6 @@ public final class ActivityThread extends ClientTransactionHandler
             // Update all affected Resources objects to use new ResourcesImpl
             mResourcesManager.applyNewResourceDirsLocked(ai, oldResDirs);
         }
-
-        ApplicationPackageManager.configurationChanged();
-
-        // Trigger a regular Configuration change event, only with a different assetsSeq number
-        // so that we actually call through to all components.
-        // TODO(adamlesinski): Change this to make use of ActivityManager's upcoming ability to
-        // store configurations per-process.
-        final Configuration config = mConfigurationController.getConfiguration();
-        Configuration newConfig = new Configuration();
-        newConfig.assetsSeq = (config != null ? config.assetsSeq : 0) + 1;
-        mConfigurationController.handleConfigurationChanged(newConfig, null /* compat */);
-
-        // Preserve windows to avoid black flickers when overlays change.
-        relaunchAllActivities(true /* preserveWindows */, "handleApplicationInfoChanged");
     }
 
     /**

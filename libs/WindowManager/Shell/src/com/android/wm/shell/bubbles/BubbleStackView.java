@@ -2487,7 +2487,7 @@ public class BubbleStackView extends FrameLayout
         // name and icon.
         if (show && mBubbleData.hasBubbleInStackWithKey(mExpandedBubble.getKey())) {
             final Bubble bubble = mBubbleData.getBubbleInStackWithKey(mExpandedBubble.getKey());
-            mManageSettingsIcon.setImageDrawable(bubble.getAppBadge());
+            mManageSettingsIcon.setImageBitmap(bubble.getAppBadge());
             mManageSettingsText.setText(getResources().getString(
                     R.string.bubbles_app_settings, bubble.getAppName()));
         }
@@ -2683,7 +2683,7 @@ public class BubbleStackView extends FrameLayout
             Log.d(TAG, "updateExpandedView: mIsExpanded=" + mIsExpanded);
         }
         boolean isOverflowExpanded = mExpandedBubble != null
-                && mBubbleOverflow.KEY.equals(mExpandedBubble.getKey());
+                && BubbleOverflow.KEY.equals(mExpandedBubble.getKey());
         int[] paddings = mPositioner.getExpandedViewPadding(
                 mStackAnimationController.isStackOnLeftSide(), isOverflowExpanded);
         mExpandedViewContainer.setPadding(paddings[0], 0, paddings[1], 0);
@@ -2695,6 +2695,7 @@ public class BubbleStackView extends FrameLayout
             mExpandedViewContainer.setTranslationX(0f);
             mExpandedBubble.getExpandedView().updateView(
                     mExpandedViewContainer.getLocationOnScreen());
+            updatePointerPosition();
         }
 
         mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
@@ -2732,27 +2733,7 @@ public class BubbleStackView extends FrameLayout
             return;
         }
         float bubblePosition = mExpandedAnimationController.getBubbleXOrYForOrientation(index);
-        float expandedViewY = mPositioner.getExpandedViewY();
-        if (mPositioner.showBubblesVertically()) {
-            float x = mStackOnLeftOrWillBe
-                    ? mPositioner.getAvailableRect().left
-                    : mPositioner.getAvailableRect().right
-                            - mExpandedViewContainer.getPaddingRight()
-                            - mPointerHeight;
-            float bubbleCenter = bubblePosition - expandedViewY + (mBubbleSize / 2f);
-            mExpandedBubble.getExpandedView().setPointerPosition(
-                    x,
-                    bubbleCenter,
-                    true,
-                    mStackOnLeftOrWillBe);
-        } else {
-            float bubbleCenter = bubblePosition + (mBubbleSize / 2f);
-            mExpandedBubble.getExpandedView().setPointerPosition(
-                    bubbleCenter,
-                    expandedViewY,
-                    false,
-                    mStackOnLeftOrWillBe);
-        }
+        mExpandedBubble.getExpandedView().setPointerPosition(bubblePosition, mStackOnLeftOrWillBe);
     }
 
     /**

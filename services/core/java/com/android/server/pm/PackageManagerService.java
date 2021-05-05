@@ -134,6 +134,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTi
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.makeDirRecursive;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
+import static com.android.server.pm.parsing.PackageInfoUtils.checkUseInstalledOrHidden;
 
 import android.Manifest;
 import android.annotation.AppIdInt;
@@ -1483,7 +1484,9 @@ public class PackageManagerService extends IPackageManager.Stub
     // Internal interface for permission manager
     private final PermissionManagerServiceInternal mPermissionManager;
 
+    @Watched
     private final ComponentResolver mComponentResolver;
+
     // List of packages names to keep cached, even if they are uninstalled for all users
     private List<String> mKeepUninstalledPackages;
 
@@ -1826,6 +1829,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public final ApplicationInfo androidApplication;
         public final String appPredictionServicePackage;
         public final AppsFilter appsFilter;
+        public final ComponentResolver componentResolver;
         public final PackageManagerService service;
 
         Snapshot(int type) {
@@ -1851,6 +1855,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         : new ApplicationInfo(mAndroidApplication);
                 appPredictionServicePackage = mAppPredictionServicePackage;
                 appsFilter = mAppsFilter.snapshot();
+                componentResolver = mComponentResolver.snapshot();
             } else if (type == Snapshot.LIVE) {
                 settings = mSettings;
                 isolatedOwners = mIsolatedOwners;
@@ -1867,6 +1872,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 androidApplication = mAndroidApplication;
                 appPredictionServicePackage = mAppPredictionServicePackage;
                 appsFilter = mAppsFilter;
+                componentResolver = mComponentResolver;
             } else {
                 throw new IllegalArgumentException();
             }
@@ -1956,8 +1962,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 int callingUid);
         ResolveInfo createForwardingResolveInfo(CrossProfileIntentFilter filter, Intent intent,
                 String resolvedType, int flags, int sourceUserId);
-        ResolveInfo createForwardingResolveInfoUnchecked(IntentFilter filter, int sourceUserId,
-                int targetUserId);
+        ResolveInfo createForwardingResolveInfoUnchecked(WatchedIntentFilter filter,
+                int sourceUserId, int targetUserId);
         ResolveInfo queryCrossProfileIntents(List<CrossProfileIntentFilter> matchingFilters,
                 Intent intent, String resolvedType, int flags, int sourceUserId,
                 boolean matchInCurrentProfile);
@@ -2114,6 +2120,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mInstantAppRegistry = args.instantAppRegistry;
             mLocalAndroidApplication = args.androidApplication;
             mAppsFilter = args.appsFilter;
+            mComponentResolver = args.componentResolver;
 
             mAppPredictionServicePackage = args.appPredictionServicePackage;
 
@@ -2124,7 +2131,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mContext = args.service.mContext;
             mInjector = args.service.mInjector;
             mApexManager = args.service.mApexManager;
-            mComponentResolver = args.service.mComponentResolver;
             mInstantAppResolverConnection = args.service.mInstantAppResolverConnection;
             mDefaultAppProvider = args.service.mDefaultAppProvider;
             mDomainVerificationManager = args.service.mDomainVerificationManager;
@@ -2511,8 +2517,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (DEBUG_PACKAGE_INFO) Log.v(TAG, "getActivityInfo " + component + ": " + a);
 
             AndroidPackage pkg = a == null ? null : mPackages.get(a.getPackageName());
+            PackageSetting ps = a == null ? null : mSettings.getPackageLPr(a.getPackageName());
             if (pkg != null && mSettings.isEnabledAndMatchLPr(pkg, a, flags, userId)) {
-                PackageSetting ps = mSettings.getPackageLPr(component.getPackageName());
                 if (ps == null) return null;
                 if (shouldFilterApplicationLocked(
                         ps, filterCallingUid, component, TYPE_ACTIVITY, userId)) {
@@ -2522,8 +2528,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         a, flags, ps.readUserState(userId), userId, ps);
             }
             if (resolveComponentName().equals(component)) {
-                return PackageParser.generateActivityInfo(
-                        mResolveActivity, flags, new PackageUserState(), userId);
+                return generateDelegateActivityInfo(pkg, ps, new PackageUserState(),
+                        mResolveActivity, flags, userId);
             }
             return null;
         }
@@ -2860,8 +2866,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 if (result == null) {
                     result = new CrossProfileDomainInfo();
-                    result.resolveInfo = createForwardingResolveInfoUnchecked(new IntentFilter(),
-                            sourceUserId, parentUserId);
+                    result.resolveInfo = createForwardingResolveInfoUnchecked(
+                            new WatchedIntentFilter(), sourceUserId, parentUserId);
                 }
 
                 result.highestApprovalLevel = Math.max(mDomainVerificationManager
@@ -3169,8 +3175,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 return result;
             }
             final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
-            ephemeralInstaller.activityInfo = PackageParser.generateActivityInfo(
-                    instantAppInstallerActivity(), 0, ps.readUserState(userId), userId);
+            ephemeralInstaller.activityInfo = generateDelegateActivityInfo(ps.getPkg(), ps,
+                    ps.readUserState(userId), instantAppInstallerActivity(), 0 /*flags*/, userId);
             ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                     | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
             // add a non-generic filter
@@ -3254,7 +3260,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ai.flags = ps.pkgFlags;
                 ai.privateFlags = ps.pkgPrivateFlags;
                 pi.applicationInfo =
-                        PackageParser.generateApplicationInfo(ai, flags, state, userId);
+                        PackageInfoUtils.generateApplicationInfo(p, flags, state, userId, ps);
 
                 if (DEBUG_PACKAGE_INFO) Log.v(TAG, "ps.pkg is n/a for ["
                         + ps.name + "]. Provides a minimum info.");
@@ -3370,6 +3376,19 @@ public class PackageManagerService extends IPackageManager.Stub
             return getInstalledPackagesBody(flags, userId, callingUid);
         }
 
+        private static ActivityInfo generateDelegateActivityInfo(@Nullable AndroidPackage pkg,
+                @Nullable PackageSetting ps, @NonNull PackageUserState state,
+                @Nullable ActivityInfo activity, int flags, int userId) {
+            if (activity == null || pkg == null
+                    || !checkUseInstalledOrHidden(pkg, ps, state, flags)) {
+                return null;
+            }
+            final ActivityInfo info = new ActivityInfo(activity);
+            info.applicationInfo =
+                    PackageInfoUtils.generateApplicationInfo(pkg, flags, state, userId, ps);
+            return info;
+        }
+
         public ParceledListSlice<PackageInfo> getInstalledPackagesBody(int flags, int userId,
                                                                           int callingUid) {
             // writer
@@ -3456,15 +3475,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (int i = resultTargetUser.size() - 1; i >= 0; i--) {
                     if ((resultTargetUser.get(i).activityInfo.applicationInfo.flags
                             & ApplicationInfo.FLAG_SUSPENDED) == 0) {
-                        return createForwardingResolveInfoUnchecked(filter, sourceUserId,
-                                targetUserId);
+                        return createForwardingResolveInfoUnchecked(filter,
+                              sourceUserId, targetUserId);
                     }
                 }
             }
             return null;
         }
 
-        public ResolveInfo createForwardingResolveInfoUnchecked(IntentFilter filter,
+        public ResolveInfo createForwardingResolveInfoUnchecked(WatchedIntentFilter filter,
                 int sourceUserId, int targetUserId) {
             ResolveInfo forwardingResolveInfo = new ResolveInfo();
             final long ident = Binder.clearCallingIdentity();
@@ -3494,7 +3513,7 @@ public class PackageManagerService extends IPackageManager.Stub
             forwardingResolveInfo.preferredOrder = 0;
             forwardingResolveInfo.match = 0;
             forwardingResolveInfo.isDefault = true;
-            forwardingResolveInfo.filter = filter;
+            forwardingResolveInfo.filter = new IntentFilter(filter.getIntentFilter());
             forwardingResolveInfo.targetUserId = targetUserId;
             return forwardingResolveInfo;
         }
@@ -4239,11 +4258,11 @@ public class PackageManagerService extends IPackageManager.Stub
             // reader
             final AndroidPackage p = mPackages.get(packageName);
             if (p != null && AndroidPackageUtils.isMatchForSystemOnly(p, flags)) {
-                PackageSetting ps = getPackageSettingInternal(p.getPackageName(), callingUid);
-                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    return -1;
+                final PackageSetting ps = getPackageSettingInternal(p.getPackageName(), callingUid);
+                if (ps != null && ps.getInstalled(userId)
+                        && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                    return UserHandle.getUid(userId, p.getUid());
                 }
-                return UserHandle.getUid(userId, p.getUid());
             }
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.getPackageLPr(packageName);
@@ -5694,8 +5713,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void requestChecksums(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Type int optional,
-            @Checksum.Type int required, @Nullable List trustedInstallers,
+            @Checksum.TypeMask int optional,
+            @Checksum.TypeMask int required, @Nullable List trustedInstallers,
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId) {
         requestChecksumsInternal(packageName, includeSplits, optional, required, trustedInstallers,
                 onChecksumsReadyListener, userId, mInjector.getBackgroundExecutor(),
@@ -5703,7 +5722,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void requestChecksumsInternal(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Type int optional, @Checksum.Type int required,
+            @Checksum.TypeMask int optional, @Checksum.TypeMask int required,
             @Nullable List trustedInstallers,
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId,
             @NonNull Executor executor, @NonNull Handler handler) {
@@ -6131,6 +6150,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstantAppRegistry.registerObserver(mWatcher);
         mSettings.registerObserver(mWatcher);
         mIsolatedOwners.registerObserver(mWatcher);
+        mComponentResolver.registerObserver(mWatcher);
         // If neither "build" attribute is true then this may be a mockito test, and verification
         // can fail as a false positive.
         Watchable.verifyWatchedAttributes(this, mWatcher, !(mIsEngBuild || mIsUserDebugBuild));
@@ -7963,13 +7983,11 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             final AndroidPackage p = mPackages.get(packageName);
             if (p != null && AndroidPackageUtils.isMatchForSystemOnly(p, flags)) {
-                PackageSetting ps = getPackageSetting(p.getPackageName());
-                if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    return null;
+                final PackageSetting ps = getPackageSetting(p.getPackageName());
+                if (ps != null && ps.getInstalled(userId)
+                        && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
+                    return mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
                 }
-                // TODO: Shouldn't this be checking for package installed state for userId and
-                // return null?
-                return mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
             }
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.getPackageLPr(packageName);
@@ -9445,6 +9463,15 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void setLastChosenActivity(Intent intent, String resolvedType, int flags,
             IntentFilter filter, int match, ComponentName activity) {
+        setLastChosenActivity(intent, resolvedType, flags,
+                              new WatchedIntentFilter(filter), match, activity);
+    }
+
+    /**
+     * Variant that takes a {@link WatchedIntentFilter}
+     */
+    public void setLastChosenActivity(Intent intent, String resolvedType, int flags,
+            WatchedIntentFilter filter, int match, ComponentName activity) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return;
         }
@@ -9465,7 +9492,7 @@ public class PackageManagerService extends IPackageManager.Stub
         findPreferredActivityNotLocked(
                 intent, resolvedType, flags, query, 0, false, true, false, userId);
         // Add the new activity as the last chosen for this filter
-        addPreferredActivityInternal(filter, match, null, activity, false, userId,
+        addPreferredActivity(filter, match, null, activity, false, userId,
                 "Setting last chosen", false);
     }
 
@@ -10181,12 +10208,6 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int sourceUserId) {
         return liveComputer().createForwardingResolveInfo(filter, intent,
                 resolvedType, flags, sourceUserId);
-    }
-
-    private ResolveInfo createForwardingResolveInfoUnchecked(IntentFilter filter,
-            int sourceUserId, int targetUserId) {
-        return liveComputer().createForwardingResolveInfoUnchecked(filter,
-                sourceUserId, targetUserId);
     }
 
     @Override
@@ -16467,7 +16488,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return new ParceledListSlice<IntentFilter>(result) {
                 @Override
                 protected void writeElement(IntentFilter parcelable, Parcel dest, int callFlags) {
-                    // IntentFilter has final Parcelable methods, so redirect to the subclass
+                    // WatchedIntentFilter has final Parcelable methods, so redirect to the subclass
                     ((ParsedIntentInfo) parcelable).writeIntentInfoToParcel(dest,
                             callFlags);
                 }
@@ -21951,11 +21972,14 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void addPreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId, boolean removeExisting) {
-        addPreferredActivityInternal(filter, match, set, activity, true, userId,
+        addPreferredActivity(new WatchedIntentFilter(filter), match, set, activity, true, userId,
                 "Adding preferred", removeExisting);
     }
 
-    private void addPreferredActivityInternal(IntentFilter filter, int match,
+    /**
+     * Variant that takes a {@link WatchedIntentFilter}
+     */
+    public void addPreferredActivity(WatchedIntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, boolean always, int userId,
             String opname, boolean removeExisting) {
         // writer
@@ -22020,6 +22044,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void replacePreferredActivity(IntentFilter filter, int match,
+            ComponentName[] set, ComponentName activity, int userId) {
+        replacePreferredActivity(new WatchedIntentFilter(filter), match,
+                                 set, activity, userId);
+    }
+
+    /**
+     * Variant that takes a {@link WatchedIntentFilter}
+     */
+    public void replacePreferredActivity(WatchedIntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId) {
         if (filter.countActions() != 1) {
             throw new IllegalArgumentException(
@@ -22093,7 +22126,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
         }
-        addPreferredActivityInternal(filter, match, set, activity, true, userId,
+        addPreferredActivity(filter, match, set, activity, true, userId,
                 "Replacing preferred", false);
     }
 
@@ -22200,6 +22233,22 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int getPreferredActivities(List<IntentFilter> outFilters,
             List<ComponentName> outActivities, String packageName) {
+        List<WatchedIntentFilter> temp =
+                WatchedIntentFilter.toWatchedIntentFilterList(outFilters);
+        final int result = getPreferredActivitiesInternal(
+                temp, outActivities, packageName);
+        outFilters.clear();
+        for (int i = 0; i < temp.size(); i++) {
+            outFilters.add(temp.get(i).getIntentFilter());
+        }
+        return result;
+    }
+
+    /**
+     * Variant that takes a {@link WatchedIntentFilter}
+     */
+    public int getPreferredActivitiesInternal(List<WatchedIntentFilter> outFilters,
+            List<ComponentName> outActivities, String packageName) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return 0;
         }
@@ -22216,7 +22265,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             || (pa.mPref.mComponent.getPackageName().equals(packageName)
                                     && pa.mPref.mAlways)) {
                         if (outFilters != null) {
-                            outFilters.add(new IntentFilter(pa));
+                            outFilters.add(new WatchedIntentFilter(pa.getIntentFilter()));
                         }
                         if (outActivities != null) {
                             outActivities.add(pa.mPref.mComponent);
@@ -22231,6 +22280,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void addPersistentPreferredActivity(IntentFilter filter, ComponentName activity,
+            int userId) {
+        addPersistentPreferredActivity(new WatchedIntentFilter(filter), activity, userId);
+    }
+
+    /**
+     * Variant that takes a {@link WatchedIntentFilter}
+     */
+    public void addPersistentPreferredActivity(WatchedIntentFilter filter, ComponentName activity,
             int userId) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != Process.SYSTEM_UID) {
@@ -22475,6 +22532,15 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void addCrossProfileIntentFilter(IntentFilter intentFilter, String ownerPackage,
             int sourceUserId, int targetUserId, int flags) {
+        addCrossProfileIntentFilter(new WatchedIntentFilter(intentFilter), ownerPackage,
+                                    sourceUserId, targetUserId, flags);
+    }
+
+    /**
+     * Variant that takes a {@link WatchedIntentFilter}
+     */
+    public void addCrossProfileIntentFilter(WatchedIntentFilter intentFilter, String ownerPackage,
+            int sourceUserId, int targetUserId, int flags) {
         mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         int callingUid = Binder.getCallingUid();
@@ -22604,8 +22670,8 @@ public class PackageManagerService extends IPackageManager.Stub
         return liveComputer().getHomeIntent();
     }
 
-    private IntentFilter getHomeFilter() {
-        IntentFilter filter = new IntentFilter(Intent.ACTION_MAIN);
+    private WatchedIntentFilter getHomeFilter() {
+        WatchedIntentFilter filter = new WatchedIntentFilter(Intent.ACTION_MAIN);
         filter.addCategory(Intent.CATEGORY_HOME);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         return filter;
@@ -23586,7 +23652,7 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean compatibilityModeEnabled = android.provider.Settings.Global.getInt(
                 mContext.getContentResolver(),
                 android.provider.Settings.Global.COMPATIBILITY_MODE, 1) == 1;
-        PackageParser.setCompatibilityModeEnabled(compatibilityModeEnabled);
+        ParsingPackageUtils.setCompatibilityModeEnabled(compatibilityModeEnabled);
 
         if (DEBUG_SETTINGS) {
             Log.d(TAG, "compatibility mode:" + compatibilityModeEnabled);
@@ -26040,18 +26106,29 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public String[] getNamesForUids(int[] uids) throws RemoteException {
-            if (uids == null || uids.length == 0) {
-                return null;
-            }
-            final String[] names = PackageManagerService.this.getNamesForUids(uids);
-            final String[] results = (names != null) ? names : new String[uids.length];
-            // massage results so they can be parsed by the native binder
-            for (int i = results.length - 1; i >= 0; --i) {
-                if (results[i] == null) {
-                    results[i] = "";
+            String[] names = null;
+            String[] results = null;
+            try {
+                if (uids == null || uids.length == 0) {
+                    return null;
                 }
+                names = PackageManagerService.this.getNamesForUids(uids);
+                results = (names != null) ? names : new String[uids.length];
+                // massage results so they can be parsed by the native binder
+                for (int i = results.length - 1; i >= 0; --i) {
+                    if (results[i] == null) {
+                        results[i] = "";
+                    }
+                }
+                return results;
+            } catch (Throwable t) {
+                // STOPSHIP(186558987): revert addition of try/catch/log
+                Slog.e(TAG, "uids: " + Arrays.toString(uids));
+                Slog.e(TAG, "names: " + Arrays.toString(names));
+                Slog.e(TAG, "results: " + Arrays.toString(results));
+                Slog.e(TAG, "throwing exception", t);
+                throw t;
             }
-            return results;
         }
 
         // NB: this differentiates between preloads and sideloads
@@ -27244,7 +27321,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public void requestChecksums(@NonNull String packageName, boolean includeSplits,
-                @Checksum.Type int optional, @Checksum.Type int required,
+                @Checksum.TypeMask int optional, @Checksum.TypeMask int required,
                 @Nullable List trustedInstallers,
                 @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId,
                 @NonNull Executor executor, @NonNull Handler handler) {

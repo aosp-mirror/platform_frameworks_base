@@ -123,7 +123,7 @@ import static com.android.server.utils.PriorityDump.PRIORITY_ARG_NORMAL;
 
 import android.Manifest;
 import android.Manifest.permission;
-import android.annotation.CallbackExecutor;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -492,7 +492,7 @@ public class NotificationManagerService extends SystemService {
     private DeviceIdleManager mDeviceIdleManager;
     private IUriGrantsManager mUgm;
     private UriGrantsManagerInternal mUgmInternal;
-    private RoleObserver mRoleObserver;
+    private volatile RoleObserver mRoleObserver;
     private UserManager mUm;
     private IPlatformCompat mPlatformCompat;
     private ShortcutHelper mShortcutHelper;
@@ -629,6 +629,8 @@ public class NotificationManagerService extends SystemService {
     static class Archive {
         final SparseArray<Boolean> mEnabled;
         final int mBufferSize;
+        final Object mBufferLock = new Object();
+        @GuardedBy("mBufferLock")
         final LinkedList<Pair<StatusBarNotification, Integer>> mBuffer;
 
         public Archive(int size) {
@@ -651,14 +653,16 @@ public class NotificationManagerService extends SystemService {
             if (!mEnabled.get(sbn.getNormalizedUserId(), false)) {
                 return;
             }
-            if (mBuffer.size() == mBufferSize) {
-                mBuffer.removeFirst();
-            }
+            synchronized (mBufferLock) {
+                if (mBuffer.size() == mBufferSize) {
+                    mBuffer.removeFirst();
+                }
 
-            // We don't want to store the heavy bits of the notification in the archive,
-            // but other clients in the system process might be using the object, so we
-            // store a (lightened) copy.
-            mBuffer.addLast(new Pair<>(sbn.cloneLight(), reason));
+                // We don't want to store the heavy bits of the notification in the archive,
+                // but other clients in the system process might be using the object, so we
+                // store a (lightened) copy.
+                mBuffer.addLast(new Pair<>(sbn.cloneLight(), reason));
+            }
         }
 
         public Iterator<Pair<StatusBarNotification, Integer>> descendingIterator() {
@@ -666,27 +670,31 @@ public class NotificationManagerService extends SystemService {
         }
 
         public StatusBarNotification[] getArray(int count, boolean includeSnoozed) {
-            if (count == 0) count = mBufferSize;
-            List<StatusBarNotification> a = new ArrayList();
-            Iterator<Pair<StatusBarNotification, Integer>> iter = descendingIterator();
-            int i=0;
-            while (iter.hasNext() && i < count) {
-                Pair<StatusBarNotification, Integer> pair = iter.next();
-                if (pair.second != REASON_SNOOZED || includeSnoozed) {
-                    i++;
-                    a.add(pair.first);
+            synchronized (mBufferLock) {
+                if (count == 0) count = mBufferSize;
+                List<StatusBarNotification> a = new ArrayList();
+                Iterator<Pair<StatusBarNotification, Integer>> iter = descendingIterator();
+                int i = 0;
+                while (iter.hasNext() && i < count) {
+                    Pair<StatusBarNotification, Integer> pair = iter.next();
+                    if (pair.second != REASON_SNOOZED || includeSnoozed) {
+                        i++;
+                        a.add(pair.first);
+                    }
                 }
+                return a.toArray(new StatusBarNotification[a.size()]);
             }
-            return  a.toArray(new StatusBarNotification[a.size()]);
         }
 
         public void updateHistoryEnabled(@UserIdInt int userId, boolean enabled) {
             mEnabled.put(userId, enabled);
 
             if (!enabled) {
-                for (int i = mBuffer.size() - 1; i >= 0; i--) {
-                    if (userId == mBuffer.get(i).first.getNormalizedUserId()) {
-                        mBuffer.remove(i);
+                synchronized (mBufferLock) {
+                    for (int i = mBuffer.size() - 1; i >= 0; i--) {
+                        if (userId == mBuffer.get(i).first.getNormalizedUserId()) {
+                            mBuffer.remove(i);
+                        }
                     }
                 }
             }
@@ -695,15 +703,18 @@ public class NotificationManagerService extends SystemService {
         // Remove notifications with the specified user & channel ID.
         public void removeChannelNotifications(String pkg, @UserIdInt int userId,
                 String channelId) {
-            Iterator<Pair<StatusBarNotification, Integer>> bufferIter = mBuffer.iterator();
-            while (bufferIter.hasNext()) {
-                final Pair<StatusBarNotification, Integer> pair = bufferIter.next();
-                if (pair.first != null
-                        && userId == pair.first.getNormalizedUserId()
-                        && pkg != null && pkg.equals(pair.first.getPackageName())
-                        && pair.first.getNotification() != null
-                        && Objects.equals(channelId, pair.first.getNotification().getChannelId())) {
-                    bufferIter.remove();
+            synchronized (mBufferLock) {
+                Iterator<Pair<StatusBarNotification, Integer>> bufferIter = descendingIterator();
+                while (bufferIter.hasNext()) {
+                    final Pair<StatusBarNotification, Integer> pair = bufferIter.next();
+                    if (pair.first != null
+                            && userId == pair.first.getNormalizedUserId()
+                            && pkg != null && pkg.equals(pair.first.getPackageName())
+                            && pair.first.getNotification() != null
+                            && Objects.equals(channelId,
+                            pair.first.getNotification().getChannelId())) {
+                        bufferIter.remove();
+                    }
                 }
             }
         }
@@ -2642,6 +2653,11 @@ public class NotificationManagerService extends SystemService {
 
     @Override
     public void onBootPhase(int phase) {
+        onBootPhase(phase, Looper.getMainLooper());
+    }
+
+    @VisibleForTesting
+    void onBootPhase(int phase, Looper mainLooper) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             // no beeping until we're basically done booting
             mSystemReady = true;
@@ -2651,9 +2667,11 @@ public class NotificationManagerService extends SystemService {
             mAudioManagerInternal = getLocalService(AudioManagerInternal.class);
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mZenModeHelper.onSystemReady();
-            mRoleObserver = new RoleObserver(getContext().getSystemService(RoleManager.class),
-                    mPackageManager, getContext().getMainExecutor());
-            mRoleObserver.init();
+            RoleObserver roleObserver = new RoleObserver(getContext(),
+                    getContext().getSystemService(RoleManager.class),
+                    mPackageManager, mainLooper);
+            roleObserver.init();
+            mRoleObserver = roleObserver;
             LauncherApps launcherApps =
                     (LauncherApps) getContext().getSystemService(Context.LAUNCHER_APPS_SERVICE);
             mShortcutHelper = new ShortcutHelper(launcherApps, mShortcutListener, getLocalService(
@@ -10679,26 +10697,40 @@ public class NotificationManagerService extends SystemService {
         // Role name : user id : list of approved packages
         private ArrayMap<String, ArrayMap<Integer, ArraySet<String>>> mNonBlockableDefaultApps;
 
+        /**
+         * Writes should be pretty rare (only when default browser changes) and reads are done
+         * during activity start code-path, so we're optimizing for reads. This means this set is
+         * immutable once written and we'll recreate the set every time there is a role change and
+         * then assign that new set to the volatile below, so reads can be done without needing to
+         * hold a lock. Every write is done on the main-thread, so write atomicity is guaranteed.
+         *
+         * Didn't use unmodifiable set to enforce immutability to avoid iterating via iterators.
+         */
+        private volatile ArraySet<Integer> mTrampolineExemptUids = new ArraySet<>();
+
         private final RoleManager mRm;
         private final IPackageManager mPm;
         private final Executor mExecutor;
+        private final Looper mMainLooper;
 
-        RoleObserver(@NonNull RoleManager roleManager,
-                @NonNull IPackageManager pkgMgr,
-                @NonNull @CallbackExecutor Executor executor) {
+        RoleObserver(Context context, @NonNull RoleManager roleManager,
+                @NonNull IPackageManager pkgMgr, @NonNull Looper mainLooper) {
             mRm = roleManager;
             mPm = pkgMgr;
-            mExecutor = executor;
+            mExecutor = context.getMainExecutor();
+            mMainLooper = mainLooper;
         }
 
+        /** Should be called from the main-thread. */
+        @MainThread
         public void init() {
-            List<UserInfo> users = mUm.getUsers();
+            List<UserHandle> users = mUm.getUserHandles(/* excludeDying */ true);
             mNonBlockableDefaultApps = new ArrayMap<>();
             for (int i = 0; i < NON_BLOCKABLE_DEFAULT_ROLES.length; i++) {
                 final ArrayMap<Integer, ArraySet<String>> userToApprovedList = new ArrayMap<>();
                 mNonBlockableDefaultApps.put(NON_BLOCKABLE_DEFAULT_ROLES[i], userToApprovedList);
                 for (int j = 0; j < users.size(); j++) {
-                    Integer userId = users.get(j).getUserHandle().getIdentifier();
+                    Integer userId = users.get(j).getIdentifier();
                     ArraySet<String> approvedForUserId = new ArraySet<>(mRm.getRoleHoldersAsUser(
                             NON_BLOCKABLE_DEFAULT_ROLES[i], UserHandle.of(userId)));
                     ArraySet<Pair<String, Integer>> approvedAppUids = new ArraySet<>();
@@ -10709,13 +10741,18 @@ public class NotificationManagerService extends SystemService {
                     mPreferencesHelper.updateDefaultApps(userId, null, approvedAppUids);
                 }
             }
-
+            updateTrampolineExemptUidsForUsers(users.toArray(new UserHandle[0]));
             mRm.addOnRoleHoldersChangedListenerAsUser(mExecutor, this, UserHandle.ALL);
         }
 
         @VisibleForTesting
         public boolean isApprovedPackageForRoleForUser(String role, String pkg, int userId) {
             return mNonBlockableDefaultApps.get(role).get(userId).contains(pkg);
+        }
+
+        @VisibleForTesting
+        public boolean isUidExemptFromTrampolineRestrictions(int uid) {
+            return mTrampolineExemptUids.contains(uid);
         }
 
         /**
@@ -10727,6 +10764,12 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
+            onRoleHoldersChangedForNonBlockableDefaultApps(roleName, user);
+            onRoleHoldersChangedForTrampolines(roleName, user);
+        }
+
+        private void onRoleHoldersChangedForNonBlockableDefaultApps(@NonNull String roleName,
+                @NonNull UserHandle user) {
             // we only care about a couple of the roles they'll tell us about
             boolean relevantChange = false;
             for (int i = 0; i < NON_BLOCKABLE_DEFAULT_ROLES.length; i++) {
@@ -10772,6 +10815,41 @@ public class NotificationManagerService extends SystemService {
 
             // RoleManager is the source of truth for this data so we don't need to trigger a
             // write of the notification policy xml for this change
+        }
+
+        private void onRoleHoldersChangedForTrampolines(@NonNull String roleName,
+                @NonNull UserHandle user) {
+            if (!RoleManager.ROLE_BROWSER.equals(roleName)) {
+                return;
+            }
+            updateTrampolineExemptUidsForUsers(user);
+        }
+
+        private void updateTrampolineExemptUidsForUsers(UserHandle... users) {
+            Preconditions.checkState(mMainLooper.isCurrentThread());
+            ArraySet<Integer> oldUids = mTrampolineExemptUids;
+            ArraySet<Integer> newUids = new ArraySet<>();
+            // Add the uids from previous set for the users that we won't update.
+            for (int i = 0, n = oldUids.size(); i < n; i++) {
+                int uid = oldUids.valueAt(i);
+                UserHandle user = UserHandle.of(UserHandle.getUserId(uid));
+                if (!ArrayUtils.contains(users, user)) {
+                    newUids.add(uid);
+                }
+            }
+            // Now lookup the new uids for the users that we want to update.
+            for (int i = 0, n = users.length; i < n; i++) {
+                UserHandle user = users[i];
+                for (String pkg : mRm.getRoleHoldersAsUser(RoleManager.ROLE_BROWSER, user)) {
+                    int uid = getUidForPackage(pkg, user.getIdentifier());
+                    if (uid != -1) {
+                        newUids.add(uid);
+                    } else {
+                        Slog.e(TAG, "Bad uid (-1) for browser package " + pkg);
+                    }
+                }
+            }
+            mTrampolineExemptUids = newUids;
         }
 
         private int getUidForPackage(String pkg, int userId) {
@@ -10938,7 +11016,7 @@ public class NotificationManagerService extends SystemService {
             }
             String logcatMessage =
                     "Indirect notification activity start (trampoline) from " + packageName;
-            if (CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid)) {
+            if (blockTrampoline(uid)) {
                 // Post toast() call to mHandler to offload PM lookup from the activity start path
                 mHandler.post(() -> toast(packageName, uid));
                 Slog.e(TAG, logcatMessage + " blocked");
@@ -10947,6 +11025,13 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, logcatMessage + ", this should be avoided for performance reasons");
                 return true;
             }
+        }
+
+        private boolean blockTrampoline(int uid) {
+            if (mRoleObserver != null && mRoleObserver.isUidExemptFromTrampolineRestrictions(uid)) {
+                return false;
+            }
+            return CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
         }
 
         @Override

@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.BatteryConsumer;
 import android.os.Process;
-import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 import android.util.SparseLongArray;
 
@@ -67,15 +66,6 @@ public class CustomMeasuredPowerCalculatorTest {
         assertThat(uid.getConsumedPowerForCustomComponent(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1))
                 .isWithin(PRECISION).of(33.33333);
-
-        SystemBatteryConsumer systemConsumer = mStatsRule.getSystemBatteryConsumer(
-                SystemBatteryConsumer.DRAIN_TYPE_CUSTOM);
-        assertThat(systemConsumer.getConsumedPowerForCustomComponent(
-                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID))
-                .isWithin(PRECISION).of(27.77777);
-        assertThat(systemConsumer.getConsumedPowerForCustomComponent(
-                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1))
-                .isWithin(PRECISION).of(55.55555);
 
         final BatteryConsumer deviceBatteryConsumer = mStatsRule.getDeviceBatteryConsumer();
         assertThat(deviceBatteryConsumer.getConsumedPowerForCustomComponent(

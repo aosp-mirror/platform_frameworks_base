@@ -429,7 +429,6 @@ package android.app {
     field public static final int ROTATION_UNDEFINED = -1; // 0xffffffff
     field public static final int WINDOWING_MODE_FREEFORM = 5; // 0x5
     field public static final int WINDOWING_MODE_FULLSCREEN = 1; // 0x1
-    field public static final int WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY = 4; // 0x4
     field public static final int WINDOWING_MODE_MULTI_WINDOW = 6; // 0x6
     field public static final int WINDOWING_MODE_PINNED = 2; // 0x2
     field public static final int WINDOWING_MODE_SPLIT_SCREEN_PRIMARY = 3; // 0x3
@@ -1821,6 +1820,7 @@ package android.os {
 
   public class VintfObject {
     method public static String[] getHalNamesAndVersions();
+    method @NonNull public static String getPlatformSepolicyVersion();
     method public static String getSepolicyVersion();
     method public static Long getTargetFrameworkCompatibilityMatrixVersion();
     method public static java.util.Map<java.lang.String,java.lang.String[]> getVndkSnapshots();

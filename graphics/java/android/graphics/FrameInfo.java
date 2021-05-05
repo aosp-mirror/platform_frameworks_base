@@ -46,7 +46,7 @@ public final class FrameInfo {
     public static final int FLAGS = 0;
 
     // Is this the first-draw following a window layout?
-    public static final long FLAG_WINDOW_LAYOUT_CHANGED = 1;
+    public static final long FLAG_WINDOW_VISIBILITY_CHANGED = 1;
 
     // A renderer associated with just a Surface, not with a ViewRootImpl instance.
     public static final long FLAG_SURFACE_CANVAS = 1 << 2;
@@ -56,7 +56,7 @@ public final class FrameInfo {
     public static final long INVALID_VSYNC_ID = -1;
 
     @LongDef(flag = true, value = {
-            FLAG_WINDOW_LAYOUT_CHANGED, FLAG_SURFACE_CANVAS })
+            FLAG_WINDOW_VISIBILITY_CHANGED, FLAG_SURFACE_CANVAS })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrameInfoFlags {}
 

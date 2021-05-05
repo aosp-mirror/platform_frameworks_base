@@ -394,8 +394,15 @@ static const char* toString(IncrementalService::BindKind kind) {
 }
 
 template <class Duration>
-static long elapsedMcs(Duration start, Duration end) {
+static int64_t elapsedMcs(Duration start, Duration end) {
     return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+}
+
+int64_t IncrementalService::elapsedUsSinceMonoTs(uint64_t monoTsUs) {
+    const auto now = mClock->now();
+    const auto nowUs = static_cast<uint64_t>(
+            duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count());
+    return nowUs - monoTsUs;
 }
 
 void IncrementalService::onDump(int fd) {
@@ -415,6 +422,8 @@ void IncrementalService::onDump(int fd) {
         } else {
             dprintf(fd, "    mountId: %d\n", mnt.mountId);
             dprintf(fd, "    root: %s\n", mnt.root.c_str());
+            const auto metricsInstanceName = path::basename(ifs->root);
+            dprintf(fd, "    metrics instance name: %s\n", path::c_str(metricsInstanceName).get());
             dprintf(fd, "    nextStorageDirNo: %d\n", mnt.nextStorageDirNo.load());
             dprintf(fd, "    flags: %d\n", int(mnt.flags));
             if (mnt.startLoadingTs.time_since_epoch() == Clock::duration::zero()) {
@@ -442,6 +451,45 @@ void IncrementalService::onDump(int fd) {
                 dprintf(fd, "        savedFilename: %s\n", bind.savedFilename.c_str());
                 dprintf(fd, "        sourceDir: %s\n", bind.sourceDir.c_str());
                 dprintf(fd, "        kind: %s\n", toString(bind.kind));
+            }
+            dprintf(fd, "    }\n");
+
+            dprintf(fd, "    incfsMetrics: {\n");
+            const auto incfsMetrics = mIncFs->getMetrics(metricsInstanceName);
+            if (incfsMetrics) {
+                dprintf(fd, "      readsDelayedMin: %d\n", incfsMetrics.value().readsDelayedMin);
+                dprintf(fd, "      readsDelayedMinUs: %lld\n",
+                        (long long)incfsMetrics.value().readsDelayedMinUs);
+                dprintf(fd, "      readsDelayedPending: %d\n",
+                        incfsMetrics.value().readsDelayedPending);
+                dprintf(fd, "      readsDelayedPendingUs: %lld\n",
+                        (long long)incfsMetrics.value().readsDelayedPendingUs);
+                dprintf(fd, "      readsFailedHashVerification: %d\n",
+                        incfsMetrics.value().readsFailedHashVerification);
+                dprintf(fd, "      readsFailedOther: %d\n", incfsMetrics.value().readsFailedOther);
+                dprintf(fd, "      readsFailedTimedOut: %d\n",
+                        incfsMetrics.value().readsFailedTimedOut);
+            } else {
+                dprintf(fd, "      Metrics not available. Errno: %d\n", errno);
+            }
+            dprintf(fd, "    }\n");
+
+            const auto lastReadError = mIncFs->getLastReadError(ifs->control);
+            const auto errorNo = errno;
+            dprintf(fd, "    lastReadError: {\n");
+            if (lastReadError) {
+                if (lastReadError->timestampUs == 0) {
+                    dprintf(fd, "      No read errors.\n");
+                } else {
+                    dprintf(fd, "      fileId: %s\n",
+                            IncFsWrapper::toString(lastReadError->id).c_str());
+                    dprintf(fd, "      time: %llu microseconds ago\n",
+                            (unsigned long long)elapsedUsSinceMonoTs(lastReadError->timestampUs));
+                    dprintf(fd, "      blockIndex: %d\n", lastReadError->block);
+                    dprintf(fd, "      errno: %d\n", lastReadError->errorNo);
+                }
+            } else {
+                dprintf(fd, "      Info not available. Errno: %d\n", errorNo);
             }
             dprintf(fd, "    }\n");
         }
@@ -582,7 +630,7 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
         if (!mkdirOrLog(path::join(backing, ".incomplete"), 0777)) {
             return kInvalidStorageId;
         }
-        auto status = mVold->mountIncFs(backing, mountTarget, 0, &controlParcel);
+        auto status = mVold->mountIncFs(backing, mountTarget, 0, mountKey, &controlParcel);
         if (!status.isOk()) {
             LOG(ERROR) << "Vold::mountIncFs() failed: " << status.toString8();
             return kInvalidStorageId;
@@ -1590,9 +1638,10 @@ void IncrementalService::mountExistingImages(
 bool IncrementalService::mountExistingImage(std::string_view root) {
     auto mountTarget = path::join(root, constants().mount);
     const auto backing = path::join(root, constants().backing);
+    std::string mountKey(path::basename(path::dirname(mountTarget)));
 
     IncrementalFileSystemControlParcel controlParcel;
-    auto status = mVold->mountIncFs(backing, mountTarget, 0, &controlParcel);
+    auto status = mVold->mountIncFs(backing, mountTarget, 0, mountKey, &controlParcel);
     if (!status.isOk()) {
         LOG(ERROR) << "Vold::mountIncFs() failed: " << status.toString8();
         return false;
@@ -2403,10 +2452,37 @@ void IncrementalService::getMetrics(StorageId storageId, android::os::Persistabl
         LOG(ERROR) << "getMetrics failed, invalid storageId: " << storageId;
         return;
     }
-    const auto kMetricsReadLogsEnabled =
+    const auto& kMetricsReadLogsEnabled =
             os::incremental::BnIncrementalService::METRICS_READ_LOGS_ENABLED();
-    result->putBoolean(String16(kMetricsReadLogsEnabled.data()), ifs->readLogsEnabled() != 0);
-
+    result->putBoolean(String16(kMetricsReadLogsEnabled.c_str()), ifs->readLogsEnabled() != 0);
+    const auto incfsMetrics = mIncFs->getMetrics(path::basename(ifs->root));
+    if (incfsMetrics) {
+        const auto& kMetricsTotalDelayedReads =
+                os::incremental::BnIncrementalService::METRICS_TOTAL_DELAYED_READS();
+        const auto totalDelayedReads =
+                incfsMetrics->readsDelayedMin + incfsMetrics->readsDelayedPending;
+        result->putInt(String16(kMetricsTotalDelayedReads.c_str()), totalDelayedReads);
+        const auto& kMetricsTotalFailedReads =
+                os::incremental::BnIncrementalService::METRICS_TOTAL_FAILED_READS();
+        const auto totalFailedReads = incfsMetrics->readsFailedTimedOut +
+                incfsMetrics->readsFailedHashVerification + incfsMetrics->readsFailedOther;
+        result->putInt(String16(kMetricsTotalFailedReads.c_str()), totalFailedReads);
+        const auto& kMetricsTotalDelayedReadsMillis =
+                os::incremental::BnIncrementalService::METRICS_TOTAL_DELAYED_READS_MILLIS();
+        const int64_t totalDelayedReadsMillis =
+                (incfsMetrics->readsDelayedMinUs + incfsMetrics->readsDelayedPendingUs) / 1000;
+        result->putLong(String16(kMetricsTotalDelayedReadsMillis.c_str()), totalDelayedReadsMillis);
+    }
+    const auto lastReadError = mIncFs->getLastReadError(ifs->control);
+    if (lastReadError && lastReadError->timestampUs != 0) {
+        const auto& kMetricsMillisSinceLastReadError =
+                os::incremental::BnIncrementalService::METRICS_MILLIS_SINCE_LAST_READ_ERROR();
+        result->putLong(String16(kMetricsMillisSinceLastReadError.c_str()),
+                        (int64_t)elapsedUsSinceMonoTs(lastReadError->timestampUs) / 1000);
+        const auto& kMetricsLastReadErrorNo =
+                os::incremental::BnIncrementalService::METRICS_LAST_READ_ERROR_NUMBER();
+        result->putInt(String16(kMetricsLastReadErrorNo.c_str()), lastReadError->errorNo);
+    }
     std::unique_lock l(ifs->lock);
     if (!ifs->dataLoaderStub) {
         return;
@@ -2953,24 +3029,24 @@ BootClockTsUs IncrementalService::DataLoaderStub::getOldestTsFromLastPendingRead
 void IncrementalService::DataLoaderStub::getMetrics(android::os::PersistableBundle* result) {
     const auto duration = elapsedMsSinceOldestPendingRead();
     if (duration >= 0) {
-        const auto kMetricsMillisSinceOldestPendingRead =
+        const auto& kMetricsMillisSinceOldestPendingRead =
                 os::incremental::BnIncrementalService::METRICS_MILLIS_SINCE_OLDEST_PENDING_READ();
-        result->putLong(String16(kMetricsMillisSinceOldestPendingRead.data()), duration);
+        result->putLong(String16(kMetricsMillisSinceOldestPendingRead.c_str()), duration);
     }
-    const auto kMetricsStorageHealthStatusCode =
+    const auto& kMetricsStorageHealthStatusCode =
             os::incremental::BnIncrementalService::METRICS_STORAGE_HEALTH_STATUS_CODE();
-    result->putInt(String16(kMetricsStorageHealthStatusCode.data()), mHealthStatus);
-    const auto kMetricsDataLoaderStatusCode =
+    result->putInt(String16(kMetricsStorageHealthStatusCode.c_str()), mHealthStatus);
+    const auto& kMetricsDataLoaderStatusCode =
             os::incremental::BnIncrementalService::METRICS_DATA_LOADER_STATUS_CODE();
-    result->putInt(String16(kMetricsDataLoaderStatusCode.data()), mCurrentStatus);
-    const auto kMetricsMillisSinceLastDataLoaderBind =
+    result->putInt(String16(kMetricsDataLoaderStatusCode.c_str()), mCurrentStatus);
+    const auto& kMetricsMillisSinceLastDataLoaderBind =
             os::incremental::BnIncrementalService::METRICS_MILLIS_SINCE_LAST_DATA_LOADER_BIND();
-    result->putLong(String16(kMetricsMillisSinceLastDataLoaderBind.data()),
-                    (long)(elapsedMcs(mPreviousBindTs, mService.mClock->now()) / 1000));
-    const auto kMetricsDataLoaderBindDelayMillis =
+    result->putLong(String16(kMetricsMillisSinceLastDataLoaderBind.c_str()),
+                    elapsedMcs(mPreviousBindTs, mService.mClock->now()) / 1000);
+    const auto& kMetricsDataLoaderBindDelayMillis =
             os::incremental::BnIncrementalService::METRICS_DATA_LOADER_BIND_DELAY_MILLIS();
-    result->putLong(String16(kMetricsDataLoaderBindDelayMillis.data()),
-                    (long)(mPreviousBindDelay.count()));
+    result->putLong(String16(kMetricsDataLoaderBindDelayMillis.c_str()),
+                    mPreviousBindDelay.count());
 }
 
 long IncrementalService::DataLoaderStub::elapsedMsSinceOldestPendingRead() {

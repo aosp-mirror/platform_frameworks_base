@@ -35,7 +35,7 @@ class ViewFrameInfoTest {
     fun setUp() {
         mViewFrameInfo.reset()
         mViewFrameInfo.setInputEvent(139)
-        mViewFrameInfo.flags = mViewFrameInfo.flags or FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED
+        mViewFrameInfo.flags = mViewFrameInfo.flags or FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED
         mTimeStarted = SystemClock.uptimeNanos()
         mViewFrameInfo.markDrawStart()
     }
@@ -43,7 +43,7 @@ class ViewFrameInfoTest {
     @Test
     fun testPopulateFields() {
         assertThat(mViewFrameInfo.drawStart).isGreaterThan(mTimeStarted)
-        assertThat(mViewFrameInfo.flags).isEqualTo(FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED)
+        assertThat(mViewFrameInfo.flags).isEqualTo(FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED)
     }
 
     @Test
@@ -66,7 +66,7 @@ class ViewFrameInfoTest {
         mViewFrameInfo.populateFrameInfo(frameInfo)
         assertThat(frameInfo.frameInfo[FrameInfo.INPUT_EVENT_ID]).isEqualTo(139)
         assertThat(frameInfo.frameInfo[FrameInfo.FLAGS]).isEqualTo(
-                FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED)
+                FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED)
         assertThat(frameInfo.frameInfo[FrameInfo.DRAW_START]).isGreaterThan(mTimeStarted)
     }
 }

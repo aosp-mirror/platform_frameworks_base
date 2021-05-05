@@ -89,8 +89,6 @@ public final class MetricsTimeZoneDetectorState {
             @Nullable TelephonyTimeZoneSuggestion latestTelephonySuggestion,
             @Nullable GeolocationTimeZoneSuggestion latestGeolocationSuggestion) {
 
-        // TODO(b/172934905) Add logic to canonicalize the time zone IDs to Android's preferred IDs
-        //  so that the ordinals will match even when the ID is not identical, just equivalent.
         int deviceTimeZoneIdOrdinal =
                 tzIdOrdinalGenerator.ordinal(Objects.requireNonNull(deviceTimeZoneId));
         MetricsTimeZoneSuggestion latestObfuscatedManualSuggestion =

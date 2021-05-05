@@ -14831,7 +14831,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new IllegalArgumentException("null fd");
             }
 
-            synchronized (mProcLock) {
+            synchronized (this) {
                 ProcessRecord proc = findProcessLOSP(process, userId, "dumpHeap");
                 IApplicationThread thread;
                 if (proc == null || (thread = proc.getThread()) == null) {

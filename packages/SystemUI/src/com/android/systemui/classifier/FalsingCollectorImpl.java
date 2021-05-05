@@ -361,7 +361,7 @@ class FalsingCollectorImpl implements FalsingCollector {
     private void onProximityEvent(ThresholdSensor.ThresholdSensorEvent proximityEvent) {
         // TODO: some of these classifiers might allow us to abort early, meaning we don't have to
         // make these calls.
-        mFalsingManager.onProximityEvent(proximityEvent);
+        mFalsingManager.onProximityEvent(new ProximityEventImpl(proximityEvent));
     }
 
 
@@ -372,6 +372,23 @@ class FalsingCollectorImpl implements FalsingCollector {
     static void logDebug(String msg, Throwable throwable) {
         if (DEBUG) {
             Log.d(TAG, msg, throwable);
+        }
+    }
+
+    private static class ProximityEventImpl implements FalsingManager.ProximityEvent {
+        private ThresholdSensor.ThresholdSensorEvent mThresholdSensorEvent;
+
+        ProximityEventImpl(ThresholdSensor.ThresholdSensorEvent thresholdSensorEvent) {
+            mThresholdSensorEvent = thresholdSensorEvent;
+        }
+        @Override
+        public boolean getCovered() {
+            return mThresholdSensorEvent.getBelow();
+        }
+
+        @Override
+        public long getTimestampNs() {
+            return mThresholdSensorEvent.getTimestampNs();
         }
     }
 }

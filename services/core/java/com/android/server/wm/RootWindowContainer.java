@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -2931,17 +2930,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // could be incompatible with the given windowing mode and activity type.
                 if (rootTask.isCompatible(windowingMode, activityType)
                         || rootTask.mCreatedByOrganizer) {
-                    return rootTask;
-                }
-                if (windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY
-                        && container.getRootSplitScreenPrimaryTask() == rootTask
-                        && candidateTask == rootTask.getTopMostTask()) {
-                    // This is a special case when we try to launch an activity that is currently on
-                    // top of root split-screen primary task, but is targeting split-screen
-                    // secondary.
-                    // In this case we don't want to move it to another root task.
-                    // TODO(b/78788972): Remove after differentiating between preferred and required
-                    // launch options.
                     return rootTask;
                 }
             }

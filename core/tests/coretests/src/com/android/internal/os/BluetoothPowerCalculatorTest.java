@@ -64,7 +64,9 @@ public class BluetoothPowerCalculatorTest {
 
         mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
 
-        assertThat(mStatsRule.getUidBatteryConsumer(Process.BLUETOOTH_UID)).isNull();
+        assertBluetoothPowerAndDuration(
+                mStatsRule.getUidBatteryConsumer(Process.BLUETOOTH_UID),
+                0.11388, 6000, BatteryConsumer.POWER_MODEL_POWER_PROFILE);
         assertBluetoothPowerAndDuration(
                 mStatsRule.getUidBatteryConsumer(APP_UID),
                 0.24722, 15000, BatteryConsumer.POWER_MODEL_POWER_PROFILE);
@@ -95,7 +97,9 @@ public class BluetoothPowerCalculatorTest {
 
         mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
 
-        assertThat(mStatsRule.getUidBatteryConsumer(Process.BLUETOOTH_UID)).isNull();
+        assertBluetoothPowerAndDuration(
+                mStatsRule.getUidBatteryConsumer(Process.BLUETOOTH_UID),
+                0.1, 6000, BatteryConsumer.POWER_MODEL_POWER_PROFILE);
         assertBluetoothPowerAndDuration(
                 mStatsRule.getUidBatteryConsumer(APP_UID),
                 0.2, 15000, BatteryConsumer.POWER_MODEL_POWER_PROFILE);
@@ -123,7 +127,9 @@ public class BluetoothPowerCalculatorTest {
         mStatsRule.apply(new BatteryUsageStatsQuery.Builder().includePowerModels().build(),
                 calculator);
 
-        assertThat(mStatsRule.getUidBatteryConsumer(Process.BLUETOOTH_UID)).isNull();
+        assertBluetoothPowerAndDuration(
+                mStatsRule.getUidBatteryConsumer(Process.BLUETOOTH_UID),
+                0.10378, 3583, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
         assertBluetoothPowerAndDuration(
                 mStatsRule.getUidBatteryConsumer(APP_UID),
                 0.22950, 8416, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);

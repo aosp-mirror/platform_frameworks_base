@@ -3,7 +3,6 @@ package com.android.systemui.media
 import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.util.Log
@@ -20,6 +19,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
+import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.Utils
@@ -115,7 +115,6 @@ class MediaCarouselController @Inject constructor(
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
     private var bgColor = getBackgroundColor()
-    private var fgColor = getForegroundColor()
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -155,6 +154,13 @@ class MediaCarouselController @Inject constructor(
             inflateSettingsButton()
         }
     }
+
+    var visibleToUser: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+            }
+        }
 
     init {
         mediaFrame = inflateMediaCarousel()
@@ -203,6 +209,9 @@ class MediaCarouselController @Inject constructor(
             override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
                 Log.d(TAG, "My Smartspace media update is here")
                 addSmartspaceMediaRecommendations(key, data)
+                if (visibleToUser) {
+                    logSmartspaceImpression()
+                }
             }
 
             override fun onMediaDataRemoved(key: String) {
@@ -265,10 +274,6 @@ class MediaCarouselController @Inject constructor(
     }
 
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData) {
-        data.actions.forEach {
-            it.icon?.setTintList(ColorStateList.valueOf(fgColor))
-        }
-        data.appIcon?.setTintList(ColorStateList.valueOf(fgColor))
         val dataCopy = data.copy(backgroundColor = bgColor)
         val existingPlayer = MediaPlayerData.getMediaPlayer(key, oldKey)
         if (existingPlayer == null) {
@@ -317,7 +322,7 @@ class MediaCarouselController @Inject constructor(
         val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
         newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
-        newRecs.bindRecommendation(data, fgColor, bgColor)
+        newRecs.bindRecommendation(data, bgColor)
         MediaPlayerData.addMediaPlayer(key, newRecs)
         updatePlayerToState(newRecs, noAnimation = true)
         reorderAllPlayers()
@@ -357,8 +362,6 @@ class MediaCarouselController @Inject constructor(
 
     private fun recreatePlayers() {
         bgColor = getBackgroundColor()
-        fgColor = getForegroundColor()
-        pageIndicator.tintList = ColorStateList.valueOf(fgColor)
 
         MediaPlayerData.mediaData().forEach { (key, data) ->
             removePlayer(key, dismissMediaData = false)
@@ -368,11 +371,6 @@ class MediaCarouselController @Inject constructor(
 
     private fun getBackgroundColor(): Int {
         return context.getColor(android.R.color.system_accent2_50)
-    }
-
-    private fun getForegroundColor(): Int {
-        return com.android.settingslib.Utils.getColorAttr(context,
-                com.android.internal.R.attr.textColorPrimary).defaultColor
     }
 
     private fun updatePageIndicator() {
@@ -565,6 +563,29 @@ class MediaCarouselController @Inject constructor(
             mediaCarousel.layout(0, 0, width, mediaCarousel.measuredHeight)
             // Update the padding after layout; view widths are used in RTL to calculate scrollX
             mediaCarouselScrollHandler.playerWidthPlusPadding = playerWidthPlusPadding
+        }
+    }
+
+    /**
+     * Log the user impression for media card.
+     */
+    fun logSmartspaceImpression() {
+        MediaPlayerData.players().forEach {
+            // Log every impression of media recommendation card since it will only be shown
+            // for 1 minute after each connection.
+            if (it.recommendationViewHolder?.recommendations?.visibility == View.VISIBLE) {
+                /* ktlint-disable max-line-length */
+                SysUiStatsLog.write(SysUiStatsLog.SMARTSPACE_CARD_REPORTED,
+                        800, // SMARTSPACE_CARD_SEEN
+                        it.getInstanceId(),
+                        SysUiStatsLog.SMART_SPACE_CARD_REPORTED__CARD_TYPE__HEADPHONE_MEDIA_RECOMMENDATIONS,
+                        it.getSurfaceForSmartspaceLogging(),
+                        /* rank */ 0,
+                        /* cardinality */ 1)
+                /* ktlint-disable max-line-length */
+            }
+
+            // TODO(shijieru): add logging for media control card
         }
     }
 }

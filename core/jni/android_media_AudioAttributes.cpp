@@ -171,10 +171,6 @@ jint JNIAudioAttributeHelper::getJavaArray(
 /*
  * JNI registration.
  */
-static const JNINativeMethod gMethods[] = {
-    // n/a
-};
-
 int register_android_media_AudioAttributes(JNIEnv *env)
 {
     jclass audioAttributesClass = FindClassOrDie(env, kClassPathName);
@@ -218,5 +214,5 @@ int register_android_media_AudioAttributes(JNIEnv *env)
 
     env->DeleteLocalRef(audioAttributesClass);
 
-    return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
+    return 0;
 }
