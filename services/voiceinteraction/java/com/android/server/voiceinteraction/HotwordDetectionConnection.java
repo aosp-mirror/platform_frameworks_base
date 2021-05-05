@@ -270,14 +270,9 @@ final class HotwordDetectionConnection {
         if (DEBUG) {
             Slog.d(TAG, "startListeningFromExternalSource");
         }
-
-        ParcelFileDescriptor.AutoCloseInputStream audioReader =
-                new ParcelFileDescriptor.AutoCloseInputStream(audioStream);
-
-        handleSoftwareHotwordDetection(
+        handleExternalSourceHotwordDetection(
+                audioStream,
                 audioFormat,
-                AudioReader.createFromInputStream(audioReader),
-                AUDIO_SOURCE_EXTERNAL,
                 options,
                 callback);
     }
@@ -556,14 +551,18 @@ final class HotwordDetectionConnection {
         }
     }
 
-    private void handleSoftwareHotwordDetection(
+    private void handleExternalSourceHotwordDetection(
+            ParcelFileDescriptor audioStream,
             AudioFormat audioFormat,
-            AudioReader audioSource,
-            int audioSourceValue,
             @Nullable PersistableBundle options,
             IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
-        Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
+        if (DEBUG) {
+            Slog.d(TAG, "#handleExternalSourceHotwordDetection");
+        }
+        AudioReader audioSource = AudioReader.createFromInputStream(
+                new ParcelFileDescriptor.AutoCloseInputStream(audioStream));
 
+        Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
         if (clientPipe == null) {
             // TODO: Need to propagate as unknown error or something?
             return;
@@ -579,8 +578,8 @@ final class HotwordDetectionConnection {
             try (AudioReader source = audioSource;
                  OutputStream fos =
                          new ParcelFileDescriptor.AutoCloseOutputStream(serviceAudioSink)) {
-                byte[] buffer = new byte[1024];
 
+                byte[] buffer = new byte[1024];
                 while (true) {
                     int bytesRead = source.read(buffer, 0, 1024);
 
@@ -608,76 +607,32 @@ final class HotwordDetectionConnection {
                 service -> service.detectFromMicrophoneSource(
                         serviceAudioSource,
                         // TODO: consider making a proxy callback + copy of audio format
-                        audioSourceValue, audioFormat, options,
+                        AUDIO_SOURCE_EXTERNAL,
+                        audioFormat,
+                        options,
                         new IDspHotwordDetectionCallback.Stub() {
                             @Override
                             public void onRejected(@Nullable HotwordRejectedResult result)
                                     throws RemoteException {
+                                bestEffortClose(serviceAudioSink);
+                                bestEffortClose(serviceAudioSource);
+                                bestEffortClose(audioSource);
+
                                 // TODO: Propagate the HotwordRejectedResult.
                             }
 
                             @Override
                             public void onDetected(@Nullable HotwordDetectedResult triggerResult)
                                     throws RemoteException {
-                                // Stop
                                 bestEffortClose(serviceAudioSink);
-
-                                if (audioSourceValue == AUDIO_SOURCE_EXTERNAL) {
-                                    callback.onDetected(triggerResult, null, null);
-                                    // TODO: Add a delay before closing.
-                                    bestEffortClose(audioSource);
-                                }
-
-                                Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe =
-                                        createPipe();
-
-                                if (clientPipe == null) {
-                                    // Error.
-                                    // Need to propagate as unknown error or something?
-                                    return;
-                                }
-                                ParcelFileDescriptor callbackAudioSink = clientPipe.second;
-                                ParcelFileDescriptor callbackClientRead = clientPipe.first;
-
-                                mAudioCopyExecutor.execute(() -> {
-                                    try (AudioReader source = audioSource;
-                                         OutputStream fos =
-                                                 new ParcelFileDescriptor.AutoCloseOutputStream(
-                                                         callbackAudioSink)) {
-
-                                        // TODO: get ring buffer suffix here
-                                        // fos.write(lastSeveralSeconds);
-
-                                        byte[] buffer = new byte[1024];
-                                        while (true) {
-                                            int bytesRead = source.read(buffer, 0, 1024);
-
-                                            if (bytesRead < 0) {
-                                                break;
-                                            }
-
-                                            fos.write(buffer, 0, bytesRead);
-                                        }
-                                    } catch (IOException e) {
-                                        Slog.w(TAG, "Failed supplying audio data to validator", e);
-                                    } finally {
-                                        synchronized (mLock) {
-                                            mCurrentAudioSink = null;
-                                        }
-                                    }
-                                });
-
+                                bestEffortClose(serviceAudioSource);
                                 // TODO: noteOp here.
-                                // Remove hotword offset from trigger result
-                                // TODO: consider propagating only capture session.
-                                callback.onDetected(triggerResult, null, callbackClientRead);
+                                callback.onDetected(triggerResult, null /* audioFormat */,
+                                        null /* audioStream */);
                                 // TODO: Add a delay before closing.
-                                bestEffortClose(callbackClientRead);
+                                bestEffortClose(audioSource);
                             }
                         }));
-
-        // TODO: verify this is the right thing to do here.
-        bestEffortClose(serviceAudioSource);
     }
 
     private static void bestEffortClose(Closeable closeable) {
