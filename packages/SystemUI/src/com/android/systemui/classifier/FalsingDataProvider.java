@@ -49,7 +49,7 @@ public class FalsingDataProvider {
 
     private TimeLimitedMotionEventBuffer mRecentMotionEvents =
             new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
-    private List<MotionEvent> mPriorMotionEvents;
+    private List<MotionEvent> mPriorMotionEvents = new ArrayList<>();
 
     private boolean mDirty = true;
 
