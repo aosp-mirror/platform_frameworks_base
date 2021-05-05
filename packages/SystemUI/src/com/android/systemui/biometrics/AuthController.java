@@ -53,14 +53,16 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
+import com.android.systemui.assist.ui.DisplayUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.doze.DozeReceiver;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -78,13 +80,14 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final CommandQueue mCommandQueue;
-    private final StatusBarStateController mStatusBarStateController;
     private final ActivityTaskManager mActivityTaskManager;
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
     private final Provider<SidefpsController> mSidefpsControllerFactory;
     @Nullable private final PointF mFaceAuthSensorLocation;
+    @Nullable private final PointF mFingerprintLocation;
+    private final Set<Callback> mCallbacks = new HashSet<>();
 
     // TODO: These should just be saved from onSaveState
     private SomeArgs mCurrentDialogArgs;
@@ -141,6 +144,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     if (mSidefpsProps != null) {
                         mSidefpsController = mSidefpsControllerFactory.get();
                     }
+
+                    for (Callback cb : mCallbacks) {
+                        cb.onAllAuthenticatorsRegistered();
+                    }
                 }
             };
 
@@ -192,6 +199,20 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 Log.e(TAG, "Remote exception", e);
             }
         }
+    }
+
+    /**
+     * Adds a callback. See {@link Callback}.
+     */
+    public void addCallback(@NonNull Callback callback) {
+        mCallbacks.add(callback);
+    }
+
+    /**
+     * Removes a callback. See {@link Callback}.
+     */
+    public void removeCallback(@NonNull Callback callback) {
+        mCallbacks.remove(callback);
     }
 
     @Override
@@ -320,6 +341,17 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     /**
+     * @return where the fingerprint sensor exists in pixels in portrait mode. devices without an
+     * overridden value will use the default value even if they don't have a fingerprint sensor
+     */
+    @Nullable public PointF getFingerprintSensorLocation() {
+        if (getUdfpsSensorLocation() != null) {
+            return getUdfpsSensorLocation();
+        }
+        return mFingerprintLocation;
+    }
+
+    /**
      * @return where the face authentication sensor exists relative to the screen in pixels in
      * portrait mode.
      */
@@ -372,7 +404,6 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     @Inject
     public AuthController(Context context, CommandQueue commandQueue,
-            StatusBarStateController statusBarStateController,
             ActivityTaskManager activityTaskManager,
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
@@ -380,7 +411,6 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             Provider<SidefpsController> sidefpsControllerFactory) {
         super(context);
         mCommandQueue = commandQueue;
-        mStatusBarStateController = statusBarStateController;
         mActivityTaskManager = activityTaskManager;
         mFingerprintManager = fingerprintManager;
         mFaceManager = faceManager;
@@ -398,6 +428,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     (float) faceAuthLocation[0],
                     (float) faceAuthLocation[1]);
         }
+
+        mFingerprintLocation = new PointF(DisplayUtils.getWidth(mContext) / 2,
+                mContext.getResources().getDimensionPixelSize(
+                com.android.systemui.R.dimen.physical_fingerprint_sensor_center_screen_location_y));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -674,5 +708,13 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 .setSkipIntro(skipIntro)
                 .setOperationId(operationId)
                 .build(sensorIds, credentialAllowed, mFpProps, mFaceProps);
+    }
+
+    interface Callback {
+        /**
+         * Called when authenticators are registered. If authenticators are already
+         * registered before this call, this callback will never be triggered.
+         */
+        void onAllAuthenticatorsRegistered();
     }
 }

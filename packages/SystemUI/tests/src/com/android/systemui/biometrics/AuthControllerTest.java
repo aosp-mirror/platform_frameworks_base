@@ -60,7 +60,6 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
@@ -93,8 +92,6 @@ public class AuthControllerTest extends SysuiTestCase {
     private AuthDialog mDialog2;
     @Mock
     private CommandQueue mCommandQueue;
-    @Mock
-    private StatusBarStateController mStatusBarStateController;
     @Mock
     private ActivityTaskManager mActivityTaskManager;
     @Mock
@@ -150,7 +147,7 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(props);
 
         mAuthController = new TestableAuthController(context, mCommandQueue,
-                mStatusBarStateController, mActivityTaskManager, mFingerprintManager, mFaceManager,
+                mActivityTaskManager, mFingerprintManager, mFaceManager,
                 () -> mUdfpsController, () -> mSidefpsController);
 
         mAuthController.start();
@@ -558,13 +555,12 @@ public class AuthControllerTest extends SysuiTestCase {
         private PromptInfo mLastBiometricPromptInfo;
 
         TestableAuthController(Context context, CommandQueue commandQueue,
-                StatusBarStateController statusBarStateController,
                 ActivityTaskManager activityTaskManager,
                 FingerprintManager fingerprintManager,
                 FaceManager faceManager,
                 Provider<UdfpsController> udfpsControllerFactory,
                 Provider<SidefpsController> sidefpsControllerFactory) {
-            super(context, commandQueue, statusBarStateController, activityTaskManager,
+            super(context, commandQueue, activityTaskManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
                     sidefpsControllerFactory);
         }
