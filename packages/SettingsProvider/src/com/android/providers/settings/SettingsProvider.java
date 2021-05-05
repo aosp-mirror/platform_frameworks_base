@@ -1873,6 +1873,9 @@ public class SettingsProvider extends ContentProvider {
                 // The calling package is already verified.
                 PackageInfo packageInfo = getCallingPackageInfoOrThrow(userId);
 
+                if (packageInfo.applicationInfo == null) {
+                    return;
+                }
                 // Privileged apps can do whatever they want.
                 if ((packageInfo.applicationInfo.privateFlags
                         & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
@@ -1892,6 +1895,10 @@ public class SettingsProvider extends ContentProvider {
 
                 // The calling package is already verified.
                 PackageInfo packageInfo = getCallingPackageInfoOrThrow(userId);
+
+                if (packageInfo.applicationInfo == null) {
+                    return;
+                }
 
                 // Privileged apps can do whatever they want.
                 if ((packageInfo.applicationInfo.privateFlags &
@@ -2577,6 +2584,9 @@ public class SettingsProvider extends ContentProvider {
             final String ssaid = HexEncoding.encodeToString(m.doFinal(), false /* upperCase */)
                     .substring(0, 16);
 
+            if (callingPkg.applicationInfo == null) {
+                throw new IllegalStateException("Application info not accessible");
+            }
             // Save the ssaid in the ssaid table.
             final String uid = Integer.toString(callingPkg.applicationInfo.uid);
             final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
@@ -2604,6 +2614,9 @@ public class SettingsProvider extends ContentProvider {
                 }
                 final Set<String> appUids = new HashSet<>();
                 for (PackageInfo info : packages) {
+                    if (info == null || info.applicationInfo == null) {
+                        continue;
+                    }
                     appUids.add(Integer.toString(info.applicationInfo.uid));
                 }
 
@@ -3804,6 +3817,9 @@ public class SettingsProvider extends ContentProvider {
 
                         final SettingsState ssaidSettings = getSsaidSettingsLocked(userId);
                         for (PackageInfo info : packages) {
+                            if (info == null || info.applicationInfo == null) {
+                                continue;
+                            }
                             // Check if the UID already has an entry in the table.
                             final String uid = Integer.toString(info.applicationInfo.uid);
                             final Setting ssaid = ssaidSettings.getSettingLocked(uid);
