@@ -51,6 +51,9 @@
                 <xs:element type="sensorDetails" name="lightSensor">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="sensorDetails" name="proxSensor">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>

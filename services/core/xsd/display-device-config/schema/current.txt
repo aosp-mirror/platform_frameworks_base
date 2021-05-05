@@ -5,6 +5,7 @@ package com.android.server.display.config {
     ctor public DisplayConfiguration();
     method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
     method public final com.android.server.display.config.SensorDetails getLightSensor();
+    method public final com.android.server.display.config.SensorDetails getProxSensor();
     method public com.android.server.display.config.DisplayQuirks getQuirks();
     method @NonNull public final java.math.BigDecimal getScreenBrightnessDefault();
     method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
@@ -14,6 +15,7 @@ package com.android.server.display.config {
     method public final java.math.BigDecimal getScreenBrightnessRampSlowIncrease();
     method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
     method public final void setLightSensor(com.android.server.display.config.SensorDetails);
+    method public final void setProxSensor(com.android.server.display.config.SensorDetails);
     method public void setQuirks(com.android.server.display.config.DisplayQuirks);
     method public final void setScreenBrightnessDefault(@NonNull java.math.BigDecimal);
     method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
