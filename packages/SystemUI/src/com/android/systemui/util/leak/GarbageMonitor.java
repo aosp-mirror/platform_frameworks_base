@@ -34,7 +34,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -60,7 +59,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -491,16 +489,12 @@ public class GarbageMonitor implements Dumpable {
                     ? "Dumping..."
                     : mContext.getString(R.string.heap_dump_tile_name);
             if (pmi != null) {
-                final long views = Debug.countInstancesOfClass(View.class);
-                final long enrs = Debug.countInstancesOfClass(ExpandableNotificationRow.class);
-                Log.v(TAG, String.format("updating tile state; rss=%d", pmi.currentRss));
-                Log.v(TAG, String.format("views: %d; ExpandableNotificationRows: %d", views, enrs));
                 icon.setRss(pmi.currentRss);
                 state.secondaryLabel =
                         String.format(
-                                "rss=%s views=%d\nenr=%d",
+                                "rss: %s / %s",
                                 formatBytes(pmi.currentRss * 1024),
-                                views, enrs);
+                                formatBytes(gm.mHeapLimit * 1024));
             } else {
                 icon.setRss(0);
                 state.secondaryLabel = null;

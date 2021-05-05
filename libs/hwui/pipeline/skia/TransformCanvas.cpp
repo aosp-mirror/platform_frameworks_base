@@ -28,8 +28,8 @@ void TransformCanvas::onDrawAnnotation(const SkRect& rect, const char* key, SkDa
         SkRRect roundRect = SkRRect::MakeRectXY(rect, radiusX, radiusY);
 
         SkPaint paint;
-        paint.setColor(0);
-        paint.setBlendMode(SkBlendMode::kClear);
+        paint.setColor(SkColors::kBlack);
+        paint.setBlendMode(mHolePunchBlendMode);
         mWrappedCanvas->drawRRect(roundRect, paint);
     }
 }

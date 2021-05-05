@@ -42,6 +42,7 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
@@ -85,6 +86,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -455,7 +457,7 @@ public class AccountManagerService
 
     @Override
     public boolean addAccountExplicitlyWithVisibility(Account account, String password,
-            Bundle extras, Map packageToVisibility) {
+            Bundle extras, Map packageToVisibility, String opPackageName) {
         Bundle.setDefusable(extras, true);
         int callingUid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
@@ -480,7 +482,7 @@ public class AccountManagerService
         try {
             UserAccounts accounts = getUserAccounts(userId);
             return addAccountInternal(accounts, account, password, extras, callingUid,
-                    (Map<String, Integer>) packageToVisibility);
+                    (Map<String, Integer>) packageToVisibility, opPackageName);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -1649,8 +1651,10 @@ public class AccountManagerService
     }
 
     @Override
-    public boolean addAccountExplicitly(Account account, String password, Bundle extras) {
-        return addAccountExplicitlyWithVisibility(account, password, extras, null);
+    public boolean addAccountExplicitly(
+            Account account, String password, Bundle extras, String opPackageName) {
+        return addAccountExplicitlyWithVisibility(
+                account, password, extras, /* packageToVisibility= */ null, opPackageName);
     }
 
     @Override
@@ -1806,7 +1810,8 @@ public class AccountManagerService
     }
 
     private boolean addAccountInternal(UserAccounts accounts, Account account, String password,
-            Bundle extras, int callingUid, Map<String, Integer> packageToVisibility) {
+            Bundle extras, int callingUid, Map<String, Integer> packageToVisibility,
+            String opPackageName) {
         Bundle.setDefusable(extras, true);
         if (account == null) {
             return false;
@@ -1878,7 +1883,57 @@ public class AccountManagerService
         // Only send LOGIN_ACCOUNTS_CHANGED when the database changed.
         sendAccountsChangedBroadcast(accounts.userId);
 
+        logAddAccountExplicitlyMetrics(opPackageName, account.type, packageToVisibility);
         return true;
+    }
+
+    private void logAddAccountExplicitlyMetrics(
+            String callerPackage, String accountType,
+            @Nullable Map<String, Integer> accountVisibility) {
+        // Although this is not a 'device policy' API, enterprise is the current use case.
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.ADD_ACCOUNT_EXPLICITLY)
+                .setStrings(
+                        TextUtils.emptyIfNull(accountType),
+                        TextUtils.emptyIfNull(callerPackage),
+                        findPackagesPerVisibility(accountVisibility))
+                .write();
+    }
+
+    private String[] findPackagesPerVisibility(@Nullable Map<String, Integer> accountVisibility) {
+        Map<Integer, Set<String>> packagesPerVisibility = new HashMap<>();
+        if (accountVisibility != null) {
+            for (Entry<String, Integer> entry : accountVisibility.entrySet()) {
+                if (!packagesPerVisibility.containsKey(entry.getValue())) {
+                    packagesPerVisibility.put(entry.getValue(), new HashSet<>());
+                }
+                packagesPerVisibility.get(entry.getValue()).add(entry.getKey());
+            }
+        }
+
+        String[] packagesPerVisibilityStr = new String[5];
+        packagesPerVisibilityStr[AccountManager.VISIBILITY_UNDEFINED] = getPackagesForVisibilityStr(
+                AccountManager.VISIBILITY_UNDEFINED, packagesPerVisibility);
+        packagesPerVisibilityStr[AccountManager.VISIBILITY_VISIBLE] = getPackagesForVisibilityStr(
+                AccountManager.VISIBILITY_VISIBLE, packagesPerVisibility);
+        packagesPerVisibilityStr[AccountManager.VISIBILITY_USER_MANAGED_VISIBLE] =
+                getPackagesForVisibilityStr(
+                        AccountManager.VISIBILITY_USER_MANAGED_VISIBLE, packagesPerVisibility);
+        packagesPerVisibilityStr[AccountManager.VISIBILITY_NOT_VISIBLE] =
+                getPackagesForVisibilityStr(
+                        AccountManager.VISIBILITY_NOT_VISIBLE, packagesPerVisibility);
+        packagesPerVisibilityStr[AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE] =
+                getPackagesForVisibilityStr(
+                        AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE, packagesPerVisibility);
+        return packagesPerVisibilityStr;
+    }
+
+    private String getPackagesForVisibilityStr(
+            int visibility, Map<Integer, Set<String>> packagesPerVisibility) {
+        return visibility + ":"
+                + (packagesPerVisibility.containsKey(visibility)
+                    ? TextUtils.join(",", packagesPerVisibility.get(visibility))
+                    : "");
     }
 
     private boolean isLocalUnlockedUser(int userId) {
@@ -2897,6 +2952,7 @@ public class AccountManagerService
             if (!customTokens && permissionGranted) {
                 String authToken = readAuthTokenInternal(accounts, account, authTokenType);
                 if (authToken != null) {
+                    logGetAuthTokenMetrics(callerPkg, account.type);
                     Bundle result = new Bundle();
                     result.putString(AccountManager.KEY_AUTHTOKEN, authToken);
                     result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
@@ -2919,6 +2975,7 @@ public class AccountManagerService
                         callerPkg,
                         callerPkgSigDigest);
                 if (token != null) {
+                    logGetAuthTokenMetrics(callerPkg, account.type);
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Log.v(TAG, "getAuthToken: cache hit ofr custom token authenticator.");
                     }
@@ -2957,6 +3014,7 @@ public class AccountManagerService
                         mAuthenticator.getAuthTokenLabel(this, authTokenType);
                     } else {
                         mAuthenticator.getAuthToken(this, account, authTokenType, loginOptions);
+                        logGetAuthTokenMetrics(callerPkg, account.type);
                     }
                 }
 
@@ -3037,6 +3095,16 @@ public class AccountManagerService
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private void logGetAuthTokenMetrics(final String callerPackage, String accountType) {
+        // Although this is not a 'device policy' API, enterprise is the current use case.
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.GET_ACCOUNT_AUTH_TOKEN)
+                .setStrings(
+                        TextUtils.emptyIfNull(callerPackage),
+                        TextUtils.emptyIfNull(accountType))
+                .write();
     }
 
     private byte[] calculatePackageSignatureDigest(String callerPkg) {
@@ -3188,38 +3256,8 @@ public class AccountManagerService
                     userId);
             return;
         }
-
-        final int pid = Binder.getCallingPid();
-        final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
-        options.putInt(AccountManager.KEY_CALLER_UID, uid);
-        options.putInt(AccountManager.KEY_CALLER_PID, pid);
-
-        int usrId = UserHandle.getCallingUserId();
-        final long identityToken = clearCallingIdentity();
-        try {
-            UserAccounts accounts = getUserAccounts(usrId);
-            logRecordWithUid(
-                    accounts, AccountsDb.DEBUG_ACTION_CALLED_ACCOUNT_ADD, AccountsDb.TABLE_ACCOUNTS,
-                    uid);
-            new Session(accounts, response, accountType, expectActivityLaunch,
-                    true /* stripAuthTokenFromResult */, null /* accountName */,
-                    false /* authDetailsRequired */, true /* updateLastAuthenticationTime */) {
-                @Override
-                public void run() throws RemoteException {
-                    mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
-                            options);
-                }
-
-                @Override
-                protected String toDebugString(long now) {
-                    return super.toDebugString(now) + ", addAccount"
-                            + ", accountType " + accountType
-                            + ", requiredFeatures " + Arrays.toString(requiredFeatures);
-                }
-            }.bind();
-        } finally {
-            restoreCallingIdentity(identityToken);
-        }
+        addAccountAndLogMetrics(response, accountType, authTokenType, requiredFeatures,
+                expectActivityLaunch, optionsIn, userId);
     }
 
     @Override
@@ -3269,7 +3307,14 @@ public class AccountManagerService
                     userId);
             return;
         }
+        addAccountAndLogMetrics(response, accountType, authTokenType, requiredFeatures,
+                expectActivityLaunch, optionsIn, userId);
+    }
 
+    private void addAccountAndLogMetrics(
+            IAccountManagerResponse response, String accountType,
+            String authTokenType, String[] requiredFeatures,
+            boolean expectActivityLaunch, Bundle optionsIn, int userId) {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
@@ -3287,8 +3332,12 @@ public class AccountManagerService
                     false /* authDetailsRequired */, true /* updateLastAuthenticationTime */) {
                 @Override
                 public void run() throws RemoteException {
-                    mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
-                            options);
+                    mAuthenticator.addAccount(
+                            this, mAccountType, authTokenType, requiredFeatures, options);
+                    String callerPackage = options.getString(
+                            AccountManager.KEY_ANDROID_PACKAGE_NAME);
+                    logAddAccountMetrics(
+                            callerPackage, accountType, requiredFeatures, authTokenType);
                 }
 
                 @Override
@@ -3297,13 +3346,29 @@ public class AccountManagerService
                             + ", accountType " + accountType
                             + ", requiredFeatures "
                             + (requiredFeatures != null
-                              ? TextUtils.join(",", requiredFeatures)
-                              : null);
+                            ? TextUtils.join(",", requiredFeatures)
+                            : null);
                 }
             }.bind();
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private void logAddAccountMetrics(
+            String callerPackage, String accountType, String[] requiredFeatures,
+            String authTokenType) {
+        // Although this is not a 'device policy' API, enterprise is the current use case.
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.ADD_ACCOUNT)
+                .setStrings(
+                        TextUtils.emptyIfNull(accountType),
+                        TextUtils.emptyIfNull(callerPackage),
+                        TextUtils.emptyIfNull(authTokenType),
+                        requiredFeatures == null
+                                ? ""
+                                : TextUtils.join(";", requiredFeatures))
+                .write();
     }
 
     @Override
@@ -3377,6 +3442,7 @@ public class AccountManagerService
                 public void run() throws RemoteException {
                     mAuthenticator.startAddAccountSession(this, mAccountType, authTokenType,
                             requiredFeatures, options);
+                    logAddAccountMetrics(callerPkg, accountType, requiredFeatures, authTokenType);
                 }
 
                 @Override

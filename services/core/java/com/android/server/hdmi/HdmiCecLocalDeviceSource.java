@@ -300,6 +300,15 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         // do nothing
     }
 
+    @Override
+    @ServiceThreadOnly
+    protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
+        removeAction(OneTouchPlayAction.class);
+        removeAction(DevicePowerStatusAction.class);
+
+        super.disableDevice(initiatedByCec, callback);
+    }
+
     // Update the power status of the devices connected to the current device.
     // This only works if the current device is a switch and keeps tracking the device info
     // of the device connected to it.

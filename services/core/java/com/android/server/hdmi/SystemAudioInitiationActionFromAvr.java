@@ -143,8 +143,4 @@ public class SystemAudioInitiationActionFromAvr extends HdmiCecFeatureAction {
                     }
                 });
     }
-
-    private void switchToRelevantInputForDeviceAt(int physicalAddress) {
-        // TODO(shubang): implement this method
-    }
 }
