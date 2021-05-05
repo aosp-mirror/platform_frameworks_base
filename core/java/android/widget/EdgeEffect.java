@@ -594,14 +594,10 @@ public class EdgeEffect {
             boolean hasValidVectors = Float.isFinite(vecX) && Float.isFinite(vecY);
             if (right > left && bottom > top && mWidth > 0 && mHeight > 0 && hasValidVectors) {
                 renderNode.stretch(
-                        left,
-                        top,
-                        right,
-                        bottom,
-                        vecX,
-                        vecY,
-                        mWidth,
-                        mHeight
+                        vecX, // horizontal stretch intensity
+                        vecY, // vertical stretch intensity
+                        mWidth, // max horizontal stretch in pixels
+                        mHeight // max vertical stretch in pixels
                 );
             }
         } else {

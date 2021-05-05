@@ -467,6 +467,7 @@ cc_defaults {
         "pipeline/skia/HolePunch.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
         "pipeline/skia/SkiaRecordingCanvas.cpp",
+        "pipeline/skia/StretchMask.cpp",
         "pipeline/skia/RenderNodeDrawable.cpp",
         "pipeline/skia/ReorderBarrierDrawables.cpp",
         "pipeline/skia/TransformCanvas.cpp",

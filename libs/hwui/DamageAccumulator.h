@@ -21,6 +21,7 @@
 
 #include <SkMatrix.h>
 #include <SkRect.h>
+#include <effects/StretchEffect.h>
 
 #include "utils/Macros.h"
 
@@ -35,7 +36,6 @@ namespace uirenderer {
 struct DirtyStack;
 class RenderNode;
 class Matrix4;
-class StretchEffect;
 
 class DamageAccumulator {
     PREVENT_COPY_AND_ASSIGN(DamageAccumulator);
@@ -63,7 +63,29 @@ public:
 
     void finish(SkRect* totalDirty);
 
-    const StretchEffect* findNearestStretchEffect() const;
+    struct StretchResult {
+        /**
+         * Stretch parameters configured on the stretch container
+         */
+        const StretchEffect* stretchEffect;
+
+        /**
+         * Bounds of the child relative to the stretch container
+         */
+        const SkRect childRelativeBounds;
+
+        /**
+         * Width of the stretch container
+         */
+        const float width;
+
+        /**
+         * Height of the stretch container
+         */
+        const float height;
+    };
+
+    [[nodiscard]] StretchResult findNearestStretchEffect() const;
 
 private:
     void pushCommon();
