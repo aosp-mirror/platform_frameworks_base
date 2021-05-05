@@ -23553,6 +23553,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mStateListAnimator.setState(state);
         }
 
+        if (!isAggregatedVisible()) {
+            // If we're not visible, skip any animated changes
+            jumpDrawablesToCurrentState();
+        }
+
         if (changed) {
             invalidate();
         }
