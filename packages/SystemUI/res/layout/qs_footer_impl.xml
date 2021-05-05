@@ -50,7 +50,6 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:singleLine="true"
-                android:textColor="?android:attr/textColorSecondary"
                 android:textAppearance="@style/TextAppearance.QS.Build"
                 android:visibility="gone" />
 
