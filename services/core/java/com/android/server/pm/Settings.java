@@ -3026,8 +3026,9 @@ public final class Settings implements Watchable, Snappable {
                         = ps.pkg.getPreferredActivityFilters();
                 for (int i=0; i<intents.size(); i++) {
                     Pair<String, ParsedIntentInfo> pair = intents.get(i);
-                    applyDefaultPreferredActivityLPw(pmInternal, pair.second, new ComponentName(
-                            ps.name, pair.first), userId);
+                    applyDefaultPreferredActivityLPw(pmInternal,
+                            new WatchedIntentFilter(pair.second),
+                            new ComponentName(ps.name, pair.first), userId);
                 }
             }
         }
@@ -3097,7 +3098,7 @@ public final class Settings implements Watchable, Snappable {
     }
 
     static void removeFilters(@NonNull PreferredIntentResolver pir,
-            @NonNull IntentFilter filter, @NonNull List<PreferredActivity> existing) {
+            @NonNull WatchedIntentFilter filter, @NonNull List<PreferredActivity> existing) {
         if (PackageManagerService.DEBUG_PREFERRED) {
             Slog.i(TAG, existing.size() + " preferred matches for:");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
@@ -3112,8 +3113,8 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    private void applyDefaultPreferredActivityLPw(
-            PackageManagerInternal pmInternal, IntentFilter tmpPa, ComponentName cn, int userId) {
+    private void applyDefaultPreferredActivityLPw(PackageManagerInternal pmInternal,
+            WatchedIntentFilter tmpPa, ComponentName cn, int userId) {
         // The initial preferences only specify the target activity
         // component and intent-filter, not the set of matches.  So we
         // now need to query for the matches to build the correct
@@ -3284,7 +3285,7 @@ public final class Settings implements Watchable, Snappable {
             haveNonSys = null;
         }
         if (haveAct && haveNonSys == null) {
-            IntentFilter filter = new IntentFilter();
+            WatchedIntentFilter filter = new WatchedIntentFilter();
             if (intent.getAction() != null) {
                 filter.addAction(intent.getAction());
             }

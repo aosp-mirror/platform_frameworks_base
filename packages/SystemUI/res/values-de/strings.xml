@@ -1087,10 +1087,8 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Wischen, um weitere zu sehen"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Empfehlungen werden geladen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medien"</string>
-    <!-- no translation found for controls_media_close_session (1193000643003066508) -->
-    <skip />
-    <!-- no translation found for controls_media_active_session (3146882316024153337) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="1193000643003066508">"Diese Mediensitzung ausblenden?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Die Mediensitzung kann nicht ausgeblendet werden."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ablehnen"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
@@ -1156,6 +1154,5 @@
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"Fingerabdrucksensor ist deaktiviert"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"zu authentifizieren"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"das Gerät einzugeben"</string>
-    <!-- no translation found for keyguard_try_fingerprint (2825130772993061165) -->
-    <skip />
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Mit Fingerabdruck öffnen"</string>
 </resources>

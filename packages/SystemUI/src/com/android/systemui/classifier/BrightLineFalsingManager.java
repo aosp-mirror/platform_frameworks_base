@@ -35,7 +35,6 @@ import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.sensors.ThresholdSensor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -317,7 +316,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public void onProximityEvent(ThresholdSensor.ThresholdSensorEvent proximityEvent) {
+    public void onProximityEvent(ProximityEvent proximityEvent) {
         // TODO: some of these classifiers might allow us to abort early, meaning we don't have to
         // make these calls.
         mClassifiers.forEach((classifier) -> classifier.onProximityEvent(proximityEvent));

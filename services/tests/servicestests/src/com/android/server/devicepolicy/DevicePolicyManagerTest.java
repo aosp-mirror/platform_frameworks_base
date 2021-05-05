@@ -30,6 +30,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
+import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_NO_ERROR;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.PasswordMetrics.computeForPasswordOrPin;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
@@ -7331,6 +7332,48 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mockVendorPolicyExemptApps("16", "15", "4");
 
         assertThat(dpm.getPolicyExemptApps()).containsExactly("4", "8", "15", "16", "23", "42");
+    }
+
+    @Test
+    public void testSetGlobalPrivateDnsModeOpportunistic_asDeviceOwner() throws Exception {
+        setDeviceOwner();
+        // setUp() adds a secondary user for CALLER_USER_HANDLE. Remove it as otherwise the
+        // feature is disabled because there are non-affiliated secondary users.
+        getServices().removeUser(CALLER_USER_HANDLE);
+        clearInvocations(getServices().settings);
+
+        int result = dpm.setGlobalPrivateDnsModeOpportunistic(admin1);
+
+        assertThat(result).isEqualTo(PRIVATE_DNS_SET_NO_ERROR);
+    }
+
+    @Test
+    public void testSetGlobalPrivateDnsModeOpportunistic_hasUnaffiliatedUsers() throws Exception {
+        setDeviceOwner();
+        setAsProfileOwner(admin2);
+
+        assertThrows(SecurityException.class,
+                () -> dpm.setGlobalPrivateDnsModeOpportunistic(admin1));
+    }
+
+    @Test
+    public void testSetRecommendedGlobalProxy_asDeviceOwner() throws Exception {
+        setDeviceOwner();
+        // setUp() adds a secondary user for CALLER_USER_HANDLE. Remove it as otherwise the
+        // feature is disabled because there are non-affiliated secondary users.
+        getServices().removeUser(CALLER_USER_HANDLE);
+
+        dpm.setRecommendedGlobalProxy(admin1, null);
+
+        verify(getServices().connectivityManager).setGlobalProxy(null);
+    }
+
+    @Test
+    public void testSetRecommendedGlobalProxy_hasUnaffiliatedUsers() throws Exception {
+        setDeviceOwner();
+        setAsProfileOwner(admin2);
+
+        assertThrows(SecurityException.class, () -> dpm.setRecommendedGlobalProxy(admin1, null));
     }
 
     private void setUserUnlocked(int userHandle, boolean unlocked) {

@@ -55,9 +55,13 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     private TouchAnimator mAlphaAnimator;
     private TouchAnimator mTranslationAnimator;
+    private TouchAnimator mIconsAlphaAnimator;
+    private TouchAnimator mIconsAlphaAnimatorFixed;
 
     protected QuickQSPanel mHeaderQsPanel;
     private View mDatePrivacyView;
+    private View mDateView;
+    private View mSecurityHeaderView;
     private View mClockIconsView;
     private View mContainer;
 
@@ -66,7 +70,7 @@ public class QuickStatusBarHeader extends FrameLayout {
     private Space mSpace;
     private BatteryMeterView mBatteryRemainingIcon;
     private StatusIconContainer mIconContainer;
-
+    private View mPrivacyChip;
 
     private TintedIconManager mTintedIconManager;
     private QSExpansionPathInterpolator mQSExpansionPathInterpolator;
@@ -79,7 +83,6 @@ public class QuickStatusBarHeader extends FrameLayout {
     private int mCutOutPaddingLeft;
     private int mCutOutPaddingRight;
     private float mClockIconsAlpha = 1.0f;
-    private float mDatePrivacyAlpha = 1.0f;
     private float mKeyguardExpansionFraction;
     private int mTextColorPrimary = Color.TRANSPARENT;
     private int mTopViewMeasureHeight;
@@ -111,8 +114,11 @@ public class QuickStatusBarHeader extends FrameLayout {
         mDatePrivacyView = findViewById(R.id.quick_status_bar_date_privacy);
         mClockIconsView = findViewById(R.id.quick_qs_status_icons);
         mQSCarriers = findViewById(R.id.carrier_group);
-        mContainer = findViewById(R.id.container);
+        mContainer = findViewById(R.id.qs_container);
         mIconContainer = findViewById(R.id.statusIcons);
+        mPrivacyChip = findViewById(R.id.privacy_chip);
+        mDateView = findViewById(R.id.date);
+        mSecurityHeaderView = findViewById(R.id.header_text_container);
 
         mClockView = findViewById(R.id.clock);
         mSpace = findViewById(R.id.space);
@@ -126,6 +132,11 @@ public class QuickStatusBarHeader extends FrameLayout {
         // QS will always show the estimate, and BatteryMeterView handles the case where
         // it's unavailable or charging
         mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
+
+        mIconsAlphaAnimatorFixed = new TouchAnimator.Builder()
+                .addFloat(mIconContainer, "alpha", 0, 1)
+                .addFloat(mBatteryRemainingIcon, "alpha", 0, 1)
+                .build();
     }
 
     void onAttach(TintedIconManager iconManager,
@@ -226,8 +237,12 @@ public class QuickStatusBarHeader extends FrameLayout {
         StatusBarIconView callStrengthIcon =
                 ((StatusBarIconView) mIconContainer.getViewForSlot(mCallStrengthSlotName));
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
-                .addFloat(mQSCarriers, "alpha", 0, 1)
-                .addFloat(mDatePrivacyView, "alpha", 0, mDatePrivacyAlpha);
+                // The following two views have to be hidden manually, so as not to hide the
+                // Privacy chip in QQS
+                .addFloat(mDateView, "alpha", 0, 1)
+                .addFloat(mSecurityHeaderView, "alpha", 0, 1)
+                .addFloat(mQSCarriers, "alpha", 0, 1);
+
         if (noCallingIcon != null || callStrengthIcon != null) {
             if (noCallingIcon != null) {
                 builder.addFloat(noCallingIcon, "alpha", 1, 0);
@@ -259,6 +274,20 @@ public class QuickStatusBarHeader extends FrameLayout {
         mAlphaAnimator = builder.build();
     }
 
+    void setChipVisibility(boolean visibility) {
+        mPrivacyChip.setVisibility(visibility ? View.VISIBLE : View.GONE);
+        if (visibility) {
+            // Animates the icons and battery indicator from alpha 0 to 1, when the chip is visible
+            mIconsAlphaAnimator = mIconsAlphaAnimatorFixed;
+            mIconsAlphaAnimator.setPosition(mKeyguardExpansionFraction);
+        } else {
+            mIconsAlphaAnimator = null;
+            mIconContainer.setAlpha(1);
+            mBatteryRemainingIcon.setAlpha(1);
+        }
+
+    }
+
     /** */
     public void setExpanded(boolean expanded, QuickQSPanelController quickQSPanelController) {
         if (mExpanded == expanded) return;
@@ -284,6 +313,9 @@ public class QuickStatusBarHeader extends FrameLayout {
         }
         if (mTranslationAnimator != null) {
             mTranslationAnimator.setPosition(keyguardExpansionFraction);
+        }
+        if (mIconsAlphaAnimator != null) {
+            mIconsAlphaAnimator.setPosition(keyguardExpansionFraction);
         }
         // If forceExpanded (we are opening QS from lockscreen), the animators have been set to
         // position = 1f.

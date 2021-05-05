@@ -135,6 +135,7 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
+import com.android.server.wm.WindowProcessController;
 
 import dalvik.system.VMRuntime;
 
@@ -4626,6 +4627,7 @@ public final class ProcessList {
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     void updateApplicationInfoLOSP(List<String> packagesToUpdate, int userId,
             boolean updateFrameworkRes) {
+        final ArrayList<WindowProcessController> targetProcesses = new ArrayList<>();
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             final ProcessRecord app = mLruProcesses.get(i);
             if (app.getThread() == null) {
@@ -4646,6 +4648,7 @@ public final class ProcessList {
                             if (ai.packageName.equals(app.info.packageName)) {
                                 app.info = ai;
                             }
+                            targetProcesses.add(app.getWindowProcessController());
                         }
                     } catch (RemoteException e) {
                         Slog.w(TAG, String.format("Failed to update %s ApplicationInfo for %s",
@@ -4654,6 +4657,9 @@ public final class ProcessList {
                 }
             });
         }
+
+        mService.mActivityTaskManager.updateAssetConfiguration(
+                updateFrameworkRes ? null : targetProcesses);
     }
 
     @GuardedBy("mService")

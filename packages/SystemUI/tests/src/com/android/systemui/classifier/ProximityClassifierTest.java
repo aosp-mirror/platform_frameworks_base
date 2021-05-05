@@ -29,8 +29,8 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.util.DeviceConfigProxyFake;
-import com.android.systemui.util.sensors.ProximitySensor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -149,8 +149,17 @@ public class ProximityClassifierTest extends ClassifierTest {
         motionEvent.recycle();
     }
 
-    private ProximitySensor.ThresholdSensorEvent createSensorEvent(
-            boolean covered, long timestampMs) {
-        return new ProximitySensor.ThresholdSensorEvent(covered, timestampMs * NS_PER_MS);
+    private FalsingManager.ProximityEvent createSensorEvent(boolean covered, long timestampMs) {
+        return new FalsingManager.ProximityEvent() {
+            @Override
+            public boolean getCovered() {
+                return covered;
+            }
+
+            @Override
+            public long getTimestampNs() {
+                return timestampMs * NS_PER_MS;
+            }
+        };
     }
 }

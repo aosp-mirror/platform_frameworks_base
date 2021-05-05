@@ -19,6 +19,7 @@ package com.android.server.app;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -32,8 +33,10 @@ import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
+import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -140,15 +143,19 @@ public class GameManagerServiceTests {
         applicationInfo.category = ApplicationInfo.CATEGORY_GAME;
         final PackageInfo pi = new PackageInfo();
         pi.packageName = mPackageName;
+        pi.applicationInfo = applicationInfo;
         final List<PackageInfo> packages = new ArrayList<>();
         packages.add(pi);
-        when(mMockPackageManager.getInstalledPackages(anyInt())).thenReturn(packages);
+        when(mMockPackageManager.getInstalledPackagesAsUser(anyInt(), anyInt()))
+                .thenReturn(packages);
         when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
     }
 
     @After
     public void tearDown() throws Exception {
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.disableCompatScale(mPackageName);
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
@@ -165,57 +172,95 @@ public class GameManagerServiceTests {
     }
 
     private void mockDeviceConfigDefault() {
-        DeviceConfig.Properties properties = new DeviceConfig.Properties.Builder(
-                DeviceConfig.NAMESPACE_GAME_OVERLAY).setString(mPackageName, "").build();
-        when(DeviceConfig.getProperties(anyString(), anyString()))
-                .thenReturn(properties);
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn("");
     }
 
     private void mockDeviceConfigNone() {
-        DeviceConfig.Properties properties = new DeviceConfig.Properties.Builder(
-                DeviceConfig.NAMESPACE_GAME_OVERLAY).build();
-        when(DeviceConfig.getProperties(anyString(), anyString()))
-                .thenReturn(properties);
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(null);
     }
 
     private void mockDeviceConfigPerformance() {
         String configString = "mode=2,downscaleFactor=0.5";
-        DeviceConfig.Properties properties = new DeviceConfig.Properties.Builder(
-                DeviceConfig.NAMESPACE_GAME_OVERLAY).setString(mPackageName, configString).build();
-        when(DeviceConfig.getProperties(anyString(), anyString()))
-                .thenReturn(properties);
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
     }
 
     private void mockDeviceConfigBattery() {
         String configString = "mode=3,downscaleFactor=0.7";
-        DeviceConfig.Properties properties = new DeviceConfig.Properties.Builder(
-                DeviceConfig.NAMESPACE_GAME_OVERLAY).setString(mPackageName, configString).build();
-        when(DeviceConfig.getProperties(anyString(), anyString()))
-                .thenReturn(properties);
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
     }
 
     private void mockDeviceConfigAll() {
         String configString = "mode=3,downscaleFactor=0.7:mode=2,downscaleFactor=0.5";
-        DeviceConfig.Properties properties = new DeviceConfig.Properties.Builder(
-                DeviceConfig.NAMESPACE_GAME_OVERLAY).setString(mPackageName, configString).build();
-        when(DeviceConfig.getProperties(anyString(), anyString()))
-                .thenReturn(properties);
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
     }
 
     private void mockDeviceConfigInvalid() {
         String configString = "mode=2,downscaleFactor=0.55";
-        DeviceConfig.Properties properties = new DeviceConfig.Properties.Builder(
-                DeviceConfig.NAMESPACE_GAME_OVERLAY).setString(mPackageName, configString).build();
-        when(DeviceConfig.getProperties(anyString(), anyString()))
-                .thenReturn(properties);
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
     }
 
     private void mockDeviceConfigMalformed() {
         String configString = "adsljckv=nin3rn9hn1231245:8795tq=21ewuydg";
-        DeviceConfig.Properties properties = new DeviceConfig.Properties.Builder(
-                DeviceConfig.NAMESPACE_GAME_OVERLAY).setString(mPackageName, configString).build();
-        when(DeviceConfig.getProperties(anyString(), anyString()))
-                .thenReturn(properties);
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
+    }
+
+    private void mockGameModeOptInAll() throws Exception {
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        Bundle metaDataBundle = new Bundle();
+        metaDataBundle.putBoolean(
+                GameManagerService.GamePackageConfiguration.METADATA_PERFORMANCE_MODE_ENABLE, true);
+        metaDataBundle.putBoolean(
+                GameManagerService.GamePackageConfiguration.METADATA_BATTERY_MODE_ENABLE, true);
+        applicationInfo.metaData = metaDataBundle;
+        when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(applicationInfo);
+    }
+
+    private void mockGameModeOptInPerformance() throws Exception {
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        Bundle metaDataBundle = new Bundle();
+        metaDataBundle.putBoolean(
+                GameManagerService.GamePackageConfiguration.METADATA_PERFORMANCE_MODE_ENABLE, true);
+        applicationInfo.metaData = metaDataBundle;
+        when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(applicationInfo);
+    }
+
+    private void mockGameModeOptInBattery() throws Exception {
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        Bundle metaDataBundle = new Bundle();
+        metaDataBundle.putBoolean(
+                GameManagerService.GamePackageConfiguration.METADATA_BATTERY_MODE_ENABLE, true);
+        applicationInfo.metaData = metaDataBundle;
+        when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(applicationInfo);
+    }
+
+    private void mockInterventionAllowDownscaleTrue() throws Exception {
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        Bundle metaDataBundle = new Bundle();
+        metaDataBundle.putBoolean(
+                GameManagerService.GamePackageConfiguration.METADATA_WM_ALLOW_DOWNSCALE, true);
+        applicationInfo.metaData = metaDataBundle;
+        when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(applicationInfo);
+    }
+
+    private void mockInterventionAllowDownscaleFalse() throws Exception {
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        Bundle metaDataBundle = new Bundle();
+        metaDataBundle.putBoolean(
+                GameManagerService.GamePackageConfiguration.METADATA_WM_ALLOW_DOWNSCALE, false);
+        applicationInfo.metaData = metaDataBundle;
+        when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(applicationInfo);
     }
 
     /**
@@ -353,136 +398,209 @@ public class GameManagerServiceTests {
                 gameManagerService.getGameMode(mPackageName, USER_ID_2));
     }
 
+    private void checkReportedModes(int ...requiredModes) {
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onUserStarting(USER_ID_1);
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        ArraySet<Integer> reportedModes = new ArraySet<>();
+        int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
+        for (int mode : modes) {
+            reportedModes.add(mode);
+        }
+        assertEquals(requiredModes.length, reportedModes.size());
+        for (int requiredMode : reportedModes) {
+            assertTrue("Required game mode not supported: " + requiredMode,
+                    reportedModes.contains(requiredMode));
+        }
+    }
+
+    private void checkDownscaling(int gameMode, String scaling) {
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onUserStarting(USER_ID_1);
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        GameManagerService.GamePackageConfiguration config =
+                gameManagerService.getConfig(mPackageName);
+        assertEquals(config.getGameModeConfiguration(gameMode).getScaling(), scaling);
+    }
+
     /**
-     * Phonesky device config exists, but is only propagating the default value.
+     * Phenotype device config exists, but is only propagating the default value.
      */
     @Test
     public void testDeviceConfigDefault() {
         mockDeviceConfigDefault();
         mockModifyGameModeGranted();
-        GameManagerService gameManagerService = new GameManagerService(mMockContext);
-        gameManagerService.onUserStarting(USER_ID_1);
-        gameManagerService.loadDeviceConfigLocked();
-
-        int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
-        assertEquals(modes.length, 1);
-        assertEquals(modes[0], GameManager.GAME_MODE_UNSUPPORTED);
+        checkReportedModes(GameManager.GAME_MODE_UNSUPPORTED);
     }
 
     /**
-     * Phonesky device config does not exists.
+     * Phenotype device config does not exists.
      */
     @Test
     public void testDeviceConfigNone() {
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        GameManagerService gameManagerService = new GameManagerService(mMockContext);
-        gameManagerService.onUserStarting(USER_ID_1);
-        gameManagerService.loadDeviceConfigLocked();
-
-        int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
-        assertEquals(modes.length, 1);
-        assertEquals(modes[0], GameManager.GAME_MODE_UNSUPPORTED);
+        checkReportedModes(GameManager.GAME_MODE_UNSUPPORTED);
     }
 
     /**
-     * Phonesky device config for performance mode exists and is valid.
+     * Phenotype device config for performance mode exists and is valid.
      */
     @Test
     public void testDeviceConfigPerformance() {
         mockDeviceConfigPerformance();
         mockModifyGameModeGranted();
-        GameManagerService gameManagerService = new GameManagerService(mMockContext);
-        gameManagerService.onUserStarting(USER_ID_1);
-        gameManagerService.loadDeviceConfigLocked();
-
-        boolean perfModeExists = false;
-        int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
-        for (int mode : modes) {
-            if (mode == GameManager.GAME_MODE_PERFORMANCE) {
-                perfModeExists = true;
-            }
-        }
-        assertEquals(modes.length, 1);
-        assertTrue(perfModeExists);
+        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD);
     }
 
     /**
-     * Phonesky device config for battery mode exists and is valid.
+     * Phenotype device config for battery mode exists and is valid.
      */
     @Test
     public void testDeviceConfigBattery() {
         mockDeviceConfigBattery();
         mockModifyGameModeGranted();
-        GameManagerService gameManagerService = new GameManagerService(mMockContext);
-        gameManagerService.onUserStarting(USER_ID_1);
-        gameManagerService.loadDeviceConfigLocked();
-
-        boolean batteryModeExists = false;
-        int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
-        for (int mode : modes) {
-            if (mode == GameManager.GAME_MODE_BATTERY) {
-                batteryModeExists = true;
-            }
-        }
-        assertEquals(modes.length, 1);
-        assertTrue(batteryModeExists);
+        checkReportedModes(GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
     }
 
     /**
-     * Phonesky device configs for both battery and performance modes exists and are valid.
+     * Phenotype device configs for both battery and performance modes exists and are valid.
      */
     @Test
     public void testDeviceConfigAll() {
         mockDeviceConfigAll();
         mockModifyGameModeGranted();
-        GameManagerService gameManagerService = new GameManagerService(mMockContext);
-        gameManagerService.onUserStarting(USER_ID_1);
-        gameManagerService.loadDeviceConfigLocked();
-
-        boolean batteryModeExists = false;
-        boolean perfModeExists = false;
-        int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
-        for (int mode : modes) {
-            if (mode == GameManager.GAME_MODE_BATTERY) {
-                batteryModeExists = true;
-            } else if (mode == GameManager.GAME_MODE_PERFORMANCE) {
-                perfModeExists = true;
-            }
-        }
-        assertTrue(batteryModeExists);
-        assertTrue(perfModeExists);
+        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD);
     }
 
     /**
-     * Phonesky device config contains values that parse correctly but are not valid in game mode.
+     * Phenotype device config contains values that parse correctly but are not valid in game mode.
      */
     @Test
     public void testDeviceConfigInvalid() {
         mockDeviceConfigInvalid();
         mockModifyGameModeGranted();
-        GameManagerService gameManagerService = new GameManagerService(mMockContext);
-        gameManagerService.onUserStarting(USER_ID_1);
-        gameManagerService.loadDeviceConfigLocked();
-
-        int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
-        assertEquals(modes.length, 1);
-        assertEquals(modes[0], GameManager.GAME_MODE_UNSUPPORTED);
+        checkReportedModes(GameManager.GAME_MODE_UNSUPPORTED);
     }
 
     /**
-     * Phonesky device config is garbage.
+     * Phenotype device config is garbage.
      */
     @Test
     public void testDeviceConfigMalformed() {
         mockDeviceConfigMalformed();
         mockModifyGameModeGranted();
+        checkReportedModes(GameManager.GAME_MODE_UNSUPPORTED);
+    }
+
+    /**
+     * Game modes are made available only through app manifest opt-in.
+     */
+    @Test
+    public void testGameModeOptInAll() throws Exception {
+        mockGameModeOptInAll();
+        mockDeviceConfigNone();
+        mockModifyGameModeGranted();
+        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD);
+    }
+
+    /**
+     * BATTERY game mode is available through the app manifest opt-in.
+     */
+    @Test
+    public void testGameModeOptInBattery() throws Exception {
+        mockGameModeOptInBattery();
+        mockDeviceConfigNone();
+        mockModifyGameModeGranted();
+        checkReportedModes(GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
+    }
+
+    /**
+     * PERFORMANCE game mode is available through the app manifest opt-in.
+     */
+    @Test
+    public void testGameModeOptInPerformance() throws Exception {
+        mockGameModeOptInPerformance();
+        mockDeviceConfigNone();
+        mockModifyGameModeGranted();
+        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD);
+    }
+
+    /**
+     * BATTERY game mode is available through the app manifest opt-in and PERFORMANCE game mode is
+     * available through Phenotype.
+     */
+    @Test
+    public void testGameModeOptInBatteryMixed() throws Exception {
+        mockGameModeOptInBattery();
+        mockDeviceConfigPerformance();
+        mockModifyGameModeGranted();
+        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD);
+    }
+
+    /**
+     * PERFORMANCE game mode is available through the app manifest opt-in and BATTERY game mode is
+     * available through Phenotype.
+     */
+    @Test
+    public void testGameModeOptInPerformanceMixed() throws Exception {
+        mockGameModeOptInPerformance();
+        mockDeviceConfigBattery();
+        mockModifyGameModeGranted();
+        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD);
+    }
+
+    /**
+     * PERFORMANCE game mode is configured through Phenotype. The app hasn't specified any metadata.
+     */
+    @Test
+    public void testInterventionAllowScalingDefault() throws Exception {
+        mockDeviceConfigPerformance();
+        mockModifyGameModeGranted();
+        checkDownscaling(GameManager.GAME_MODE_PERFORMANCE, "0.5");
+    }
+
+    /**
+     * PERFORMANCE game mode is configured through Phenotype. The app has opted-out of scaling.
+     */
+    @Test
+    public void testInterventionAllowDownscaleFalse() throws Exception {
+        mockDeviceConfigPerformance();
+        mockInterventionAllowDownscaleFalse();
+        mockModifyGameModeGranted();
+        checkDownscaling(GameManager.GAME_MODE_PERFORMANCE, "1.0");
+    }
+
+    /**
+     * PERFORMANCE game mode is configured through Phenotype. The app has redundantly specified
+     * the downscaling metadata default value of "true".
+     */
+    @Test
+    public void testInterventionAllowDownscaleTrue() throws Exception {
+        mockDeviceConfigPerformance();
+        mockInterventionAllowDownscaleTrue();
+        mockModifyGameModeGranted();
+        checkDownscaling(GameManager.GAME_MODE_PERFORMANCE, "0.5");
+    }
+
+    /**
+     * PERFORMANCE game mode is configured through Phenotype, but the app has also opted into the
+     * same mode. No interventions for this game mode should be available in this case.
+     */
+    @Test
+    public void testDeviceConfigOptInOverlap() throws Exception {
+        mockDeviceConfigPerformance();
+        mockGameModeOptInPerformance();
+        mockModifyGameModeGranted();
         GameManagerService gameManagerService = new GameManagerService(mMockContext);
         gameManagerService.onUserStarting(USER_ID_1);
-        gameManagerService.loadDeviceConfigLocked();
-
-        int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
-        assertEquals(modes.length, 1);
-        assertEquals(modes[0], GameManager.GAME_MODE_UNSUPPORTED);
+        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        GameManagerService.GamePackageConfiguration config =
+                gameManagerService.getConfig(mPackageName);
+        assertNull(config.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 }

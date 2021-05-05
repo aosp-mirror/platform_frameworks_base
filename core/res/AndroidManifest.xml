@@ -3947,11 +3947,11 @@
 
     <!-- This permission is required among systems services when accessing
          tuner resource management related APIs or information.
-         <p>Protection level: signature|privileged
-         <p>Not for use by third-party applications.
+         <p>Protection level: signature|privileged|vendorPrivileged
+         <p>This should only be used by the OEM TvInputService.
          @hide -->
     <permission android:name="android.permission.TUNER_RESOURCE_ACCESS"
-         android:protectionLevel="signature|privileged" />
+         android:protectionLevel="signature|privileged|vendorPrivileged" />
 
     <!-- This permission is required by Media Resource Manager Service when
          accessing its overridePid Api.

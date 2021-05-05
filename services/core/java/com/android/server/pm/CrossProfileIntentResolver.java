@@ -21,6 +21,7 @@ import android.content.IntentFilter;
 
 import com.android.server.WatchedIntentResolver;
 import com.android.server.utils.Snappable;
+import com.android.server.utils.SnapshotCache;
 
 import java.util.List;
 
@@ -47,7 +48,34 @@ class CrossProfileIntentResolver
 
     @Override
     protected IntentFilter getIntentFilter(@NonNull CrossProfileIntentFilter input) {
-        return input;
+        return input.getIntentFilter();
+    }
+
+    CrossProfileIntentResolver() {
+        mSnapshot = makeCache();
+    }
+
+    // Take the snapshot of F
+    protected CrossProfileIntentFilter snapshot(CrossProfileIntentFilter f) {
+        return (f == null) ? null : f.snapshot();
+    }
+
+    // Copy constructor used only to create a snapshot.
+    private CrossProfileIntentResolver(CrossProfileIntentResolver f) {
+        copyFrom(f);
+        mSnapshot = new SnapshotCache.Sealed();
+    }
+
+    // The cache for snapshots, so they are not rebuilt if the base object has not
+    // changed.
+    final SnapshotCache<CrossProfileIntentResolver> mSnapshot;
+
+    private SnapshotCache makeCache() {
+        return new SnapshotCache<CrossProfileIntentResolver>(this, this) {
+            @Override
+            public CrossProfileIntentResolver createSnapshot() {
+                return new CrossProfileIntentResolver(mSource);
+            }};
     }
 
     /**
@@ -56,8 +84,6 @@ class CrossProfileIntentResolver
      * @return A snapshot of the current object.
      */
     public CrossProfileIntentResolver snapshot() {
-        CrossProfileIntentResolver result = new CrossProfileIntentResolver();
-        result.copyFrom(this);
-        return result;
+        return mSnapshot.snapshot();
     }
 }

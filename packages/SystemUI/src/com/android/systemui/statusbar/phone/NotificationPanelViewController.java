@@ -22,7 +22,6 @@ import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 import static androidx.constraintlayout.widget.ConstraintSet.START;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
@@ -1730,7 +1729,6 @@ public class NotificationPanelViewController extends PanelViewController {
             return;
         }
         mExpectingSynthesizedDown = true;
-        InteractionJankMonitor.getInstance().begin(mView, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         onTrackingStarted();
         updatePanelExpanded();
     }
@@ -2075,20 +2073,18 @@ public class NotificationPanelViewController extends PanelViewController {
         setQsExpansionEnabled(mAmbientState.getScrollY() == 0);
 
         int radius = mScrimCornerRadius;
-        if (visible || !mShouldUseSplitNotificationShade) {
-            if (!mShouldUseSplitNotificationShade) {
-                top = (int) Math.min(qsPanelBottomY, notificationTop);
-                bottom = getView().getBottom();
-                left = getView().getLeft();
-                right = getView().getRight();
-                radius = (int) MathUtils.lerp(mScreenCornerRadius, mScrimCornerRadius,
-                        Math.min(top / (float) mScrimCornerRadius, 1f));
-            } else {
-                top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
-                bottom = mNotificationStackScrollLayoutController.getHeight();
-                left = mNotificationStackScrollLayoutController.getLeft();
-                right = mNotificationStackScrollLayoutController.getRight();
-            }
+        if (!mShouldUseSplitNotificationShade) {
+            top = (int) Math.min(qsPanelBottomY, notificationTop);
+            bottom = getView().getBottom();
+            left = getView().getLeft();
+            right = getView().getRight();
+            radius = (int) MathUtils.lerp(mScreenCornerRadius, mScrimCornerRadius,
+                    Math.min(top / (float) mScrimCornerRadius, 1f));
+        } else if (qsPanelBottomY > 0) { // so bounds are empty on lockscreen
+            top = Math.min(qsPanelBottomY, mSplitShadeNotificationsTopPadding);
+            bottom = mNotificationStackScrollLayoutController.getHeight();
+            left = mNotificationStackScrollLayoutController.getLeft();
+            right = mNotificationStackScrollLayoutController.getRight();
         }
 
         // Fancy clipping for quick settings
@@ -2698,6 +2694,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mConversationNotificationManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());
         mIsExpanding = false;
         mMediaHierarchyManager.setCollapsingShadeFromQS(false);
+        mMediaHierarchyManager.setQsExpanded(mQsExpanded);
         if (isFullyCollapsed()) {
             DejankUtils.postAfterTraversal(new Runnable() {
                 @Override
@@ -2831,15 +2828,6 @@ public class NotificationPanelViewController extends PanelViewController {
     protected void onUnlockHintStarted() {
         super.onUnlockHintStarted();
         mNotificationStackScrollLayoutController.setUnlockHintRunning(true);
-    }
-
-    @Override
-    protected float getPeekHeight() {
-        if (mNotificationStackScrollLayoutController.getNotGoneChildCount() > 0) {
-            return mNotificationStackScrollLayoutController.getPeekHeight();
-        } else {
-            return mQsMinExpansionHeight;
-        }
     }
 
     @Override
@@ -3709,6 +3697,12 @@ public class NotificationPanelViewController extends PanelViewController {
 
         @Override
         public void flingTopOverscroll(float velocity, boolean open) {
+            // in split shade mode we want to expand/collapse QS only when touch happens within QS
+            if (mShouldUseSplitNotificationShade
+                    && (mInitialTouchX < mQsFrame.getX()
+                        || mInitialTouchX > mQsFrame.getX() + mQsFrame.getWidth())) {
+                return;
+            }
             mLastOverscroll = 0f;
             mQsExpansionFromOverscroll = false;
             setQsExpansion(mQsExpansionHeight);

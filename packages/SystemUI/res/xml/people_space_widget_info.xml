@@ -26,5 +26,5 @@
     android:previewLayout="@layout/people_space_placeholder_layout"
     android:resizeMode="horizontal|vertical"
     android:configure="com.android.systemui.people.PeopleSpaceActivity"
-    android:initialLayout="@layout/people_space_initial_layout">
+    android:initialLayout="@layout/people_tile_empty_layout">
 </appwidget-provider>

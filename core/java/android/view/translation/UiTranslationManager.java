@@ -315,6 +315,8 @@ public final class UiTranslationManager {
     private static class UiTranslationStateRemoteCallback extends IRemoteCallback.Stub {
         private final Executor mExecutor;
         private final UiTranslationStateCallback mCallback;
+        private ULocale mSourceLocale;
+        private ULocale mTargetLocale;
 
         UiTranslationStateRemoteCallback(Executor executor,
                 UiTranslationStateCallback callback) {
@@ -331,10 +333,12 @@ public final class UiTranslationManager {
             int state = bundle.getInt(EXTRA_STATE);
             switch (state) {
                 case STATE_UI_TRANSLATION_STARTED:
+                    mSourceLocale = (ULocale) bundle.getSerializable(EXTRA_SOURCE_LOCALE);
+                    mTargetLocale = (ULocale) bundle.getSerializable(EXTRA_TARGET_LOCALE);
+                    mCallback.onStarted(mSourceLocale, mTargetLocale);
+                    break;
                 case STATE_UI_TRANSLATION_RESUMED:
-                    mCallback.onStarted(
-                            (ULocale) bundle.getSerializable(EXTRA_SOURCE_LOCALE),
-                            (ULocale) bundle.getSerializable(EXTRA_TARGET_LOCALE));
+                    mCallback.onStarted(mSourceLocale, mTargetLocale);
                     break;
                 case STATE_UI_TRANSLATION_PAUSED:
                     mCallback.onPaused();

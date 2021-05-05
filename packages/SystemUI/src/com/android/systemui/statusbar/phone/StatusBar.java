@@ -209,7 +209,6 @@ import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.charging.WiredChargingRippleController;
-import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -429,7 +428,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationsController mNotificationsController;
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
-    private final PrivacyDotViewController mDotViewController;
+    private final StatusBarLocationPublisher mStatusBarLocationPublisher;
 
     // expanded notifications
     // the sliding/resizing panel within the notification window
@@ -799,7 +798,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             WiredChargingRippleController chargingRippleAnimationController,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
-            PrivacyDotViewController dotViewController,
+            StatusBarLocationPublisher locationPublisher,
             FeatureFlags featureFlags,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         super(context);
@@ -882,7 +881,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mChargingRippleAnimationController = chargingRippleAnimationController;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
-        mDotViewController = dotViewController;
+        mStatusBarLocationPublisher = locationPublisher;
         mFeatureFlags = featureFlags;
 
         mExpansionChangedListeners = new ArrayList<>();
@@ -1175,7 +1174,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         new CollapsedStatusBarFragment(
                                 mOngoingCallController,
                                 mAnimationScheduler,
-                                mDotViewController,
+                                mStatusBarLocationPublisher,
                                 mNotificationIconAreaController),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
@@ -3095,19 +3094,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    void handlePeekToExpandTransistion() {
-        try {
-            // consider the transition from peek to expanded to be a panel open,
-            // but not one that clears notification effects.
-            int notificationLoad = mNotificationsController.getActiveNotificationsCount();
-            mBarService.onPanelRevealed(false, notificationLoad);
-        } catch (RemoteException ex) {
-            // Won't fail unless the world has ended.
-        }
-    }
-
     // Visibility reporting
-
     void handleVisibleToUserChangedImpl(boolean visibleToUser) {
         if (visibleToUser) {
             /* The LEDs are turned off when the notification panel is shown, even just a little bit.

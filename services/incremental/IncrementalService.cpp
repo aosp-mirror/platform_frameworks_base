@@ -398,6 +398,15 @@ static long elapsedMcs(Duration start, Duration end) {
     return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 }
 
+static uint64_t elapsedUsSinceMonoTs(uint64_t monoTsUs) {
+    timespec now;
+    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
+        return 0;
+    }
+    uint64_t nowUs = now.tv_sec * 1000000LL + now.tv_nsec / 1000;
+    return nowUs - monoTsUs;
+}
+
 void IncrementalService::onDump(int fd) {
     dprintf(fd, "Incremental is %s\n", incfs::enabled() ? "ENABLED" : "DISABLED");
     dprintf(fd, "IncFs features: 0x%x\n", int(mIncFs->features()));
@@ -415,6 +424,8 @@ void IncrementalService::onDump(int fd) {
         } else {
             dprintf(fd, "    mountId: %d\n", mnt.mountId);
             dprintf(fd, "    root: %s\n", mnt.root.c_str());
+            const auto metricsInstanceName = path::basename(ifs->root);
+            dprintf(fd, "    metrics instance name: %s\n", path::c_str(metricsInstanceName).get());
             dprintf(fd, "    nextStorageDirNo: %d\n", mnt.nextStorageDirNo.load());
             dprintf(fd, "    flags: %d\n", int(mnt.flags));
             if (mnt.startLoadingTs.time_since_epoch() == Clock::duration::zero()) {
@@ -442,6 +453,45 @@ void IncrementalService::onDump(int fd) {
                 dprintf(fd, "        savedFilename: %s\n", bind.savedFilename.c_str());
                 dprintf(fd, "        sourceDir: %s\n", bind.sourceDir.c_str());
                 dprintf(fd, "        kind: %s\n", toString(bind.kind));
+            }
+            dprintf(fd, "    }\n");
+
+            dprintf(fd, "    incfsMetrics: {\n");
+            const auto incfsMetrics = mIncFs->getMetrics(metricsInstanceName);
+            if (incfsMetrics) {
+                dprintf(fd, "      readsDelayedMin: %d\n", incfsMetrics.value().readsDelayedMin);
+                dprintf(fd, "      readsDelayedMinUs: %lld\n",
+                        (long long)incfsMetrics.value().readsDelayedMinUs);
+                dprintf(fd, "      readsDelayedPending: %d\n",
+                        incfsMetrics.value().readsDelayedPending);
+                dprintf(fd, "      readsDelayedPendingUs: %lld\n",
+                        (long long)incfsMetrics.value().readsDelayedPendingUs);
+                dprintf(fd, "      readsFailedHashVerification: %d\n",
+                        incfsMetrics.value().readsFailedHashVerification);
+                dprintf(fd, "      readsFailedOther: %d\n", incfsMetrics.value().readsFailedOther);
+                dprintf(fd, "      readsFailedTimedOut: %d\n",
+                        incfsMetrics.value().readsFailedTimedOut);
+            } else {
+                dprintf(fd, "      Metrics not available. Errno: %d\n", errno);
+            }
+            dprintf(fd, "    }\n");
+
+            const auto lastReadError = mIncFs->getLastReadError(ifs->control);
+            const auto errorNo = errno;
+            dprintf(fd, "    lastReadError: {\n");
+            if (lastReadError) {
+                if (lastReadError->timestampUs == 0) {
+                    dprintf(fd, "      No read errors.\n");
+                } else {
+                    dprintf(fd, "      fileId: %s\n",
+                            IncFsWrapper::toString(lastReadError->id).c_str());
+                    dprintf(fd, "      time: %llu microseconds ago\n",
+                            (unsigned long long)elapsedUsSinceMonoTs(lastReadError->timestampUs));
+                    dprintf(fd, "      blockIndex: %d\n", lastReadError->block);
+                    dprintf(fd, "      errno: %d\n", lastReadError->errorNo);
+                }
+            } else {
+                dprintf(fd, "      Info not available. Errno: %d\n", errorNo);
             }
             dprintf(fd, "    }\n");
         }
@@ -582,7 +632,7 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
         if (!mkdirOrLog(path::join(backing, ".incomplete"), 0777)) {
             return kInvalidStorageId;
         }
-        auto status = mVold->mountIncFs(backing, mountTarget, 0, &controlParcel);
+        auto status = mVold->mountIncFs(backing, mountTarget, 0, mountKey, &controlParcel);
         if (!status.isOk()) {
             LOG(ERROR) << "Vold::mountIncFs() failed: " << status.toString8();
             return kInvalidStorageId;
@@ -1590,9 +1640,10 @@ void IncrementalService::mountExistingImages(
 bool IncrementalService::mountExistingImage(std::string_view root) {
     auto mountTarget = path::join(root, constants().mount);
     const auto backing = path::join(root, constants().backing);
+    std::string mountKey(path::basename(path::dirname(mountTarget)));
 
     IncrementalFileSystemControlParcel controlParcel;
-    auto status = mVold->mountIncFs(backing, mountTarget, 0, &controlParcel);
+    auto status = mVold->mountIncFs(backing, mountTarget, 0, mountKey, &controlParcel);
     if (!status.isOk()) {
         LOG(ERROR) << "Vold::mountIncFs() failed: " << status.toString8();
         return false;

@@ -17,7 +17,6 @@
 package com.android.systemui.media
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
@@ -219,17 +218,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state, PACKAGE)
         assertThat(titleText.getText()).isEqualTo(TITLE)
         assertThat(artistText.getText()).isEqualTo(ARTIST)
-    }
-
-    @Test
-    fun bindBackgroundColor() {
-        player.attachPlayer(holder)
-        val state = MediaData(USER_ID, true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, device, true, null)
-        player.bindPlayer(state, PACKAGE)
-        val list = ArgumentCaptor.forClass(ColorStateList::class.java)
-        verify(view).setBackgroundTintList(list.capture())
-        assertThat(list.value).isEqualTo(ColorStateList.valueOf(BG_COLOR))
     }
 
     @Test

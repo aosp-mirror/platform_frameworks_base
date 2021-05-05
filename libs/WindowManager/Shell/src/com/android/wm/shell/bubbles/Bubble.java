@@ -104,9 +104,10 @@ public class Bubble implements BubbleViewProvider {
     }
 
     private FlyoutMessage mFlyoutMessage;
-    private Drawable mBadgeDrawable;
-    // Bitmap with no badge, no dot
+    // The developer provided image for the bubble
     private Bitmap mBubbleBitmap;
+    // The app badge for the bubble
+    private Bitmap mBadgeBitmap;
     private int mDotColor;
     private Path mDotPath;
     private int mFlags;
@@ -242,8 +243,8 @@ public class Bubble implements BubbleViewProvider {
     }
 
     @Override
-    public Drawable getAppBadge() {
-        return mBadgeDrawable;
+    public Bitmap getAppBadge() {
+        return mBadgeBitmap;
     }
 
     @Override
@@ -398,7 +399,7 @@ public class Bubble implements BubbleViewProvider {
         mAppName = info.appName;
         mFlyoutMessage = info.flyoutMessage;
 
-        mBadgeDrawable = info.badgeDrawable;
+        mBadgeBitmap = info.badgeBitmap;
         mBubbleBitmap = info.bubbleBitmap;
 
         mDotColor = info.dotColor;

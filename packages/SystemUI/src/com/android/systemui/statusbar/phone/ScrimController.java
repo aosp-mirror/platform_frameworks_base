@@ -163,7 +163,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final float mDefaultScrimAlpha;
 
     // Assuming the shade is expanded during initialization
-    private float mExpansionFraction = 1f;
+    private float mPanelExpansion = 1f;
     private float mQsExpansion;
     private boolean mQsBottomVisible;
 
@@ -487,8 +487,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (isNaN(fraction)) {
             throw new IllegalArgumentException("Fraction should not be NaN");
         }
-        if (mExpansionFraction != fraction) {
-            mExpansionFraction = fraction;
+        if (mPanelExpansion != fraction) {
+            mPanelExpansion = fraction;
 
             boolean relevantState = (mState == ScrimState.UNLOCKED
                     || mState == ScrimState.KEYGUARD
@@ -641,7 +641,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mBehindTint = Color.BLACK;
             } else {
                 mBehindAlpha = backAlpha;
-                mNotificationsAlpha = Math.max(1.0f - getInterpolatedFraction(), mQsExpansion);
+                if (mState == ScrimState.SHADE_LOCKED) {
+                    // going from KEYGUARD to SHADE_LOCKED state
+                    mNotificationsAlpha = getInterpolatedFraction();
+                } else {
+                    mNotificationsAlpha = Math.max(1.0f - getInterpolatedFraction(), mQsExpansion);
+                }
                 mBehindTint = backTint;
             }
         }
@@ -805,7 +810,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private float getInterpolatedFraction() {
-        float frac = mExpansionFraction;
+        float frac = mPanelExpansion;
         // let's start this 20% of the way down the screen
         frac = frac * 1.2f - 0.2f;
         if (frac <= 0) {
@@ -1165,7 +1170,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         pw.print("  mDefaultScrimAlpha=");
         pw.println(mDefaultScrimAlpha);
         pw.print("  mExpansionFraction=");
-        pw.println(mExpansionFraction);
+        pw.println(mPanelExpansion);
     }
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {

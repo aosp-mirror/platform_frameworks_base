@@ -225,7 +225,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
     private void setChipVisibility(boolean chipVisible) {
         if (chipVisible && getChipEnabled()) {
-            mPrivacyChip.setVisibility(View.VISIBLE);
             mPrivacyLogger.logChipVisible(true);
             // Makes sure that the chip is logged as viewed at most once each time QS is opened
             // mListening makes sure that the callback didn't return after the user closed QS
@@ -235,8 +234,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             }
         } else {
             mPrivacyLogger.logChipVisible(false);
-            mPrivacyChip.setVisibility(View.GONE);
         }
+        mView.setChipVisibility(chipVisible);
     }
 
     private List<String> getIgnoredIconSlots() {

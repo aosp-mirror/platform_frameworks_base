@@ -2285,7 +2285,7 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"सेन्सरसम्बन्धी गोपनीयता"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"एप जनाउने आइकन"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"एपको ब्रान्डिङ फोटो"</string>
-    <string name="view_and_control_notification_title" msgid="4300765399209912240">"हेराइ र नियन्त्रणसम्बन्धी सेटिङ जाँच्नुहोस्"</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"भ्यु र नियन्त्रणसम्बन्धी सेटिङ जाँच्नुहोस्"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> तपाईंको स्क्रिन हेर्न र नियन्त्रण गर्न सक्छ। सेटिङ मिलाउन ट्याप गर्नुहोस्।"</string>
     <!-- no translation found for ui_translation_accessibility_translated_text (3197547218178944544) -->
     <skip />

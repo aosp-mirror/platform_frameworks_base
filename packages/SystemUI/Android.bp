@@ -50,13 +50,6 @@ java_library {
     srcs: ["src/com/android/systemui/EventLogTags.logtags"],
 }
 
-java_library {
-    name: "SystemUI-sensors",
-    srcs: [
-        "src/com/android/systemui/util/sensors/ThresholdSensor.java",
-    ],
-}
-
 android_library {
     name: "SystemUI-core",
     srcs: [
