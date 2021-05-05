@@ -87,6 +87,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -429,6 +430,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         public void onNewSnapshot(@NonNull TelephonySubscriptionSnapshot snapshot) {
             // Startup VCN instances
             synchronized (mLock) {
+                final TelephonySubscriptionSnapshot oldSnapshot = mLastSnapshot;
                 mLastSnapshot = snapshot;
 
                 // Start any VCN instances as necessary
@@ -476,8 +478,26 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         entry.getValue().updateSubscriptionSnapshot(mLastSnapshot);
                     }
                 }
+
+                final Map<ParcelUuid, Set<Integer>> oldSubGrpMappings =
+                        getSubGroupToSubIdMappings(oldSnapshot);
+                final Map<ParcelUuid, Set<Integer>> currSubGrpMappings =
+                        getSubGroupToSubIdMappings(mLastSnapshot);
+                if (!currSubGrpMappings.equals(oldSubGrpMappings)) {
+                    notifyAllPolicyListenersLocked();
+                }
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    private Map<ParcelUuid, Set<Integer>> getSubGroupToSubIdMappings(
+            @NonNull TelephonySubscriptionSnapshot snapshot) {
+        final Map<ParcelUuid, Set<Integer>> subGrpMappings = new ArrayMap<>();
+        for (ParcelUuid subGrp : mVcns.keySet()) {
+            subGrpMappings.put(subGrp, snapshot.getAllSubIdsInGroup(subGrp));
+        }
+        return subGrpMappings;
     }
 
     @GuardedBy("mLock")
@@ -813,6 +833,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             if (isVcnManagedNetwork) {
                 ncBuilder.removeCapability(
                         NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
+            } else {
+                ncBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
             }
 
             if (isRestrictedCarrierWifi) {
