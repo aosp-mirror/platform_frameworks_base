@@ -82,7 +82,7 @@ public final class OneHandedAccessibilityUtil {
 
     public void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
-        pw.println(TAG + "States: ");
+        pw.println(TAG);
         pw.print(innerPrefix + "mPackageName=");
         pw.println(mPackageName);
         pw.print(innerPrefix + "mDescription=");

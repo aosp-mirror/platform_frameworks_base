@@ -18,7 +18,6 @@
 <!-- Layout for media controls inside QSPanel carousel -->
 <com.android.systemui.util.animation.TransitionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/qs_media_controls"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -26,7 +25,8 @@
     android:clipToPadding="false"
     android:gravity="center_horizontal|fill_vertical"
     android:forceHasOverlappingRendering="false"
-    android:background="@drawable/qs_media_background">
+    android:background="@drawable/qs_media_background"
+    android:theme="@style/MediaPlayer">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/center_vertical_guideline"
@@ -55,7 +55,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
-            android:textColor="?android:attr/textColorPrimary"
             android:gravity="start"
             android:textSize="12sp" />
 
@@ -65,7 +64,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
-            android:textColor="?android:attr/textColorPrimary"
             android:gravity="end"
             android:textSize="12sp" />
     </FrameLayout>
@@ -86,31 +84,31 @@
 
     <ImageButton
         android:id="@+id/action0"
-        style="@style/MediaPlayer.Button"
+        style="@style/MediaPlayer.Action"
         android:layout_width="48dp"
         android:layout_height="48dp" />
 
     <ImageButton
         android:id="@+id/action1"
-        style="@style/MediaPlayer.Button"
+        style="@style/MediaPlayer.Action"
         android:layout_width="48dp"
         android:layout_height="48dp" />
 
     <ImageButton
         android:id="@+id/action2"
-        style="@style/MediaPlayer.Button"
+        style="@style/MediaPlayer.Action"
         android:layout_width="48dp"
         android:layout_height="48dp" />
 
     <ImageButton
         android:id="@+id/action3"
-        style="@style/MediaPlayer.Button"
+        style="@style/MediaPlayer.Action"
         android:layout_width="48dp"
         android:layout_height="48dp" />
 
     <ImageButton
         android:id="@+id/action4"
-        style="@style/MediaPlayer.Button"
+        style="@style/MediaPlayer.Action"
         android:layout_width="48dp"
         android:layout_height="48dp" />
 
@@ -120,8 +118,8 @@
         android:layout_width="@dimen/qs_media_album_size"
         android:layout_height="@dimen/qs_media_album_size"
         android:layout_gravity="center_vertical"
+        style="@style/MediaPlayer.Album"
         android:background="@drawable/qs_media_art_background"
-        android:backgroundTint="?androidprv:attr/colorAccentSecondary"
         android:clipToOutline="true" />
 
     <!-- Seamless Output Switcher -->
@@ -138,6 +136,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="@dimen/qs_seamless_height"
+            android:theme="@style/MediaPlayer.SolidButton"
             android:background="@drawable/qs_media_seamless_background"
             android:orientation="horizontal"
             android:contentDescription="@string/quick_settings_media_device_label">
@@ -146,7 +145,6 @@
                 android:layout_width="@dimen/qs_seamless_icon_size"
                 android:layout_height="@dimen/qs_seamless_icon_size"
                 android:layout_gravity="center"
-                android:tint="?android:attr/colorPrimary"
                 android:src="@*android:drawable/ic_media_seamless" />
             <TextView
                 android:id="@+id/media_seamless_text"
@@ -157,7 +155,6 @@
                 android:fontFamily="@*android:string/config_headlineFontFamily"
                 android:singleLine="true"
                 android:text="@*android:string/ext_media_seamless_action"
-                android:textColor="?android:attr/colorPrimary"
                 android:textDirection="locale"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -171,7 +168,7 @@
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginStart="@dimen/qs_center_guideline_padding"
         android:layout_marginEnd="@dimen/qs_seamless_fallback_margin"
-        android:tint="?android:attr/textColorPrimary"
+        android:tint="?android:attr/textColor"
         android:src="@drawable/ic_cast_connected"
         android:forceHasOverlappingRendering="false" />
 
@@ -179,17 +176,13 @@
     <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
     <SeekBar
         android:id="@+id/media_progress_bar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
+        style="@style/MediaPlayer.ProgressBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:clickable="true"
         android:maxHeight="@dimen/qs_media_enabled_seekbar_height"
         android:paddingTop="@dimen/qs_media_enabled_seekbar_vertical_padding"
         android:layout_marginTop="-22dp"
         android:paddingBottom="0dp"
-        android:thumbTint="?android:attr/textColorPrimary"
-        android:progressTint="?android:attr/textColorPrimary"
-        android:progressBackgroundTint="?android:attr/textColorTertiary"
         android:splitTrack="false" />
 
     <!-- Song name -->
@@ -199,7 +192,6 @@
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         android:singleLine="true"
-        android:textColor="?android:attr/textColorPrimary"
         android:textSize="16sp" />
 
     <!-- Artist name -->
@@ -209,16 +201,14 @@
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
-        android:textColor="?android:attr/textColorSecondary"
+        style="@style/MediaPlayer.Subtitle"
         android:textSize="14sp" />
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/icon"
-        android:tint="?android:attr/colorAccent"
+        style="@style/MediaPlayer.AppIcon"
         android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
-        android:background="@drawable/qs_media_icon_background"
-    />
+        android:layout_height="@dimen/qs_media_icon_size" />
 
     <!-- Long press menu -->
     <TextView
@@ -230,7 +220,6 @@
         android:id="@+id/remove_text"
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
-        android:textColor="?android:attr/textColorPrimary"
         android:text="@string/controls_media_close_session"
         android:gravity="center_horizontal|top"
         app:layout_constraintTop_toTopOf="parent"
@@ -255,9 +244,7 @@
             android:layout_gravity="bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/qs_media_button_background"
-            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textColor="?android:attr/textColorPrimary"
+            style="@style/MediaPlayer.OutlineButton"
             android:text="@string/controls_media_settings_button" />
     </FrameLayout>
 
@@ -278,9 +265,7 @@
             android:layout_gravity="bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/qs_media_button_background"
-            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textColor="?android:attr/textColorPrimary"
+            style="@style/MediaPlayer.OutlineButton"
             android:text="@string/cancel" />
     </FrameLayout>
 
@@ -301,9 +286,7 @@
             android:layout_gravity="bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/qs_media_button_background"
-            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textColor="?android:attr/textColorPrimary"
+            style="@style/MediaPlayer.OutlineButton"
             android:text="@string/controls_media_dismiss_button"
         />
     </FrameLayout>

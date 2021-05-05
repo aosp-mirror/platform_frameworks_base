@@ -1723,6 +1723,15 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         assertFalse(display.hasTopFixedRotationLaunchingApp());
         assertFalse(activity.hasFixedRotationTransform());
+
+        // Simulate that the activity requests the same orientation as display.
+        activity.setOrientation(display.getConfiguration().orientation);
+        // Skip the real freezing.
+        activity.mVisibleRequested = false;
+        clearInvocations(activity);
+        activity.onCancelFixedRotationTransform(originalRotation);
+        // The implementation of cancellation must be executed.
+        verify(activity).startFreezingScreen(originalRotation);
     }
 
     @Test

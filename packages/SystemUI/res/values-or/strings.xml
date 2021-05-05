@@ -1044,8 +1044,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ନିମ୍ନ ଡାହାଣକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ଧାରକୁ ମୁଭ୍ କରି ଲୁଚାନ୍ତୁ"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ଧାର ବାହାରକୁ ମୁଭ୍ କରି ଦେଖାନ୍ତୁ"</string>
-    <!-- no translation found for accessibility_floating_button_action_double_tap_to_toggle (7976492639670692037) -->
-    <skip />
+    <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ଟୋଗଲ୍ କରନ୍ତୁ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ଆପଣଙ୍କ ସଂଯୁକ୍ତ ଡିଭାଇସଗୁଡ଼ିକ ପାଇଁ ନିୟନ୍ତ୍ରଣ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
@@ -1087,15 +1086,12 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ଅଧିକ ଦେଖିବାକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ସୁପାରିଶଗୁଡ଼ିକ ଲୋଡ୍ କରାଯାଉଛି"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ମିଡିଆ"</string>
-    <!-- no translation found for controls_media_close_session (1193000643003066508) -->
-    <skip />
-    <!-- no translation found for controls_media_active_session (3146882316024153337) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="1193000643003066508">"ଏହି ମିଡିଆ ସେସନକୁ ଲୁଚାଇବେ?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"ବର୍ତ୍ତମାନର ମିଡିଆ ସେସନକୁ ଲୁଚାଯାଇପାରିବ ନାହିଁ।"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ସେଟିଂସ୍"</string>
-    <!-- no translation found for controls_media_smartspace_rec_title (1699818353932537407) -->
-    <skip />
+    <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ଚଲାନ୍ତୁ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ତ୍ରୁଟି, ପୁଣି ଚେଷ୍ଟା କରୁଛି…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳିଲା ନାହିଁ"</string>
@@ -1156,6 +1152,5 @@
     <string name="accessibility_udfps_disabled_button" msgid="4284034245130239384">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ପ୍ରମାଣୀକରଣ କରନ୍ତୁ"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ଡିଭାଇସ୍ ବିଷୟରେ ସୂଚନା ଲେଖନ୍ତୁ"</string>
-    <!-- no translation found for keyguard_try_fingerprint (2825130772993061165) -->
-    <skip />
+    <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ଖୋଲିବାକୁ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
 </resources>

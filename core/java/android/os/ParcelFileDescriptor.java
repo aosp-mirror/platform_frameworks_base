@@ -31,7 +31,6 @@ import static android.system.OsConstants.S_ISLNK;
 import static android.system.OsConstants.S_ISREG;
 import static android.system.OsConstants.S_IWOTH;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -64,8 +63,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.nio.ByteOrder;
@@ -112,20 +109,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     private volatile boolean mClosed;
 
     private final CloseGuard mGuard = CloseGuard.get();
-
-    /** @hide */
-    @IntDef(prefix = {"MODE_"}, value = {
-            MODE_WORLD_READABLE,
-            MODE_WORLD_WRITEABLE,
-            MODE_READ_ONLY,
-            MODE_WRITE_ONLY,
-            MODE_READ_WRITE,
-            MODE_CREATE,
-            MODE_TRUNCATE,
-            MODE_APPEND,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Mode { }
 
     /**
      * For use with {@link #open}: if {@link #MODE_CREATE} has been supplied and
@@ -244,8 +227,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      *             be opened with the requested mode.
      * @see #parseMode(String)
      */
-    public static ParcelFileDescriptor open(File file, @Mode int mode)
-            throws FileNotFoundException {
+    public static ParcelFileDescriptor open(File file, int mode) throws FileNotFoundException {
         final FileDescriptor fd = openInternal(file, mode);
         if (fd == null) return null;
 
@@ -277,7 +259,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     // We can't accept a generic Executor here, since we need to use
     // MessageQueue.addOnFileDescriptorEventListener()
     @SuppressLint("ExecutorRegistration")
-    public static ParcelFileDescriptor open(File file, @Mode int mode, Handler handler,
+    public static ParcelFileDescriptor open(File file, int mode, Handler handler,
             final OnCloseListener listener) throws IOException {
         if (handler == null) {
             throw new IllegalArgumentException("Handler must not be null");
@@ -348,8 +330,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         return pfd;
     }
 
-    private static FileDescriptor openInternal(File file, @Mode int mode)
-            throws FileNotFoundException {
+    private static FileDescriptor openInternal(File file, int mode) throws FileNotFoundException {
         final int flags = FileUtils.translateModePfdToPosix(mode) | ifAtLeastQ(O_CLOEXEC);
 
         int realMode = S_IRWXU | S_IRWXG;
@@ -642,36 +623,15 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     }
 
     /**
-     * Converts a string representing a file mode, such as "rw", into a bitmask
-     * suitable for use with {@link #open}.
+     * Converts a string representing a file mode, such as "rw", into a bitmask suitable for use
+     * with {@link #open}.
      * <p>
-     * The argument must define at least one of the following base access modes:
-     * <ul>
-     * <li>"r" indicates the file should be opened in read-only mode, equivalent
-     * to {@link OsConstants#O_RDONLY}.
-     * <li>"w" indicates the file should be opened in write-only mode,
-     * equivalent to {@link OsConstants#O_WRONLY}.
-     * <li>"rw" indicates the file should be opened in read-write mode,
-     * equivalent to {@link OsConstants#O_RDWR}.
-     * </ul>
-     * In addition to a base access mode, the following additional modes may
-     * requested:
-     * <ul>
-     * <li>"a" indicates the file should be opened in append mode, equivalent to
-     * {@link OsConstants#O_APPEND}. Before each write, the file offset is
-     * positioned at the end of the file.
-     * <li>"t" indicates the file should be opened in truncate mode, equivalent
-     * to {@link OsConstants#O_TRUNC}. If the file already exists and is a
-     * regular file and is opened for writing, it will be truncated to length 0.
-     * </ul>
-     *
-     * @param mode The string representation of the file mode. Can be "r", "w",
-     *            "wt", "wa", "rw" or "rwt".
+     * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
+     *             or "rwt".
      * @return A bitmask representing the given file mode.
-     * @throws IllegalArgumentException if the given string does not match a
-     *             known file mode.
+     * @throws IllegalArgumentException if the given string does not match a known file mode.
      */
-    public static @Mode int parseMode(String mode) {
+    public static int parseMode(String mode) {
         return FileUtils.translateModePosixToPfd(FileUtils.translateModeStringToPosix(mode));
     }
 

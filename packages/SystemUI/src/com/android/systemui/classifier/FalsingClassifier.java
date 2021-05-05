@@ -18,7 +18,7 @@ package com.android.systemui.classifier;
 
 import android.view.MotionEvent;
 
-import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.plugins.FalsingManager;
 
 import java.util.List;
 
@@ -110,7 +110,7 @@ public abstract class FalsingClassifier {
     /**
      * Called when a ProximityEvent occurs (change in near/far).
      */
-    void onProximityEvent(ProximitySensor.ThresholdSensorEvent proximityEvent) {}
+    void onProximityEvent(FalsingManager.ProximityEvent proximityEvent) {}
 
     /**
      * The phone screen has turned on and we need to begin falsing detection.

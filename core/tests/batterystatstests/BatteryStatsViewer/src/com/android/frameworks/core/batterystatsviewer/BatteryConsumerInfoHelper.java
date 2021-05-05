@@ -23,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.os.BatteryConsumer;
 import android.os.BatteryUsageStats;
 import android.os.Process;
-import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 import android.util.DebugUtils;
 
@@ -112,20 +111,6 @@ class BatteryConsumerInfoHelper {
                 } catch (PackageManager.NameNotFoundException nameNotFoundException) {
                     // Won't happen
                 }
-            }
-        } else if (batteryConsumer instanceof SystemBatteryConsumer) {
-            final SystemBatteryConsumer systemBatteryConsumer =
-                    (SystemBatteryConsumer) batteryConsumer;
-            final int drainType = systemBatteryConsumer.getDrainType();
-            String name = DebugUtils.constantToString(SystemBatteryConsumer.class, "DRAIN_TYPE_",
-                    drainType);
-            info.label = name.charAt(0) + name.substring(1).toLowerCase().replace('_', ' ');
-            info.isSystemBatteryConsumer = true;
-            try {
-                info.iconInfo =
-                        packageManager.getApplicationInfo(SYSTEM_SERVER_PACKAGE_NAME, 0);
-            } catch (PackageManager.NameNotFoundException nameNotFoundException) {
-                // Won't happen
             }
         } else {
             for (int scope = 0;

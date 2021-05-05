@@ -6614,27 +6614,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Returns the {@link EdgeEffect#getType()} for the edge effects.
-     * @return the {@link EdgeEffect#getType()} for the edge effects.
-     * @attr ref android.R.styleable#EdgeEffect_edgeEffectType
-     */
-    @EdgeEffect.EdgeEffectType
-    public int getEdgeEffectType() {
-        return mEdgeGlowTop.getType();
-    }
-
-    /**
-     * Sets the {@link EdgeEffect#setType(int)} for the edge effects.
-     * @param type The edge effect type to use for the edge effects.
-     * @attr ref android.R.styleable#EdgeEffect_edgeEffectType
-     */
-    public void setEdgeEffectType(@EdgeEffect.EdgeEffectType int type) {
-        mEdgeGlowTop.setType(type);
-        mEdgeGlowBottom.setType(type);
-        invalidate();
-    }
-
-    /**
      * Sets the recycler listener to be notified whenever a View is set aside in
      * the recycler for later reuse. This listener can be used to free resources
      * associated to the View.

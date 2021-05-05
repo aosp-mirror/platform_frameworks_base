@@ -19,6 +19,7 @@ package com.android.server.accessibility.magnification;
 import static java.lang.Math.abs;
 
 import android.annotation.NonNull;
+import android.annotation.UiContext;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
@@ -63,8 +64,8 @@ class PanningScalingHandler extends
     private boolean mScaling;
     private boolean mEnable;
 
-    PanningScalingHandler(Context context, float maxScale, float minScale, boolean blockScroll,
-            @NonNull MagnificationDelegate magnificationDelegate) {
+    PanningScalingHandler(@UiContext Context context, float maxScale, float minScale,
+            boolean blockScroll, @NonNull MagnificationDelegate magnificationDelegate) {
         mDisplayId = context.getDisplayId();
         mMaxScale = maxScale;
         mMinScale = minScale;
