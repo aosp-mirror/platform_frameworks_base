@@ -296,7 +296,13 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             // TODO: move isWithinSensorArea to UdfpsController.
             return udfpsView.isWithinSensorArea(x, y);
         }
-        return getSensorLocation().contains(x, y);
+
+        if (mView == null || mView.getAnimationViewController() == null) {
+            return false;
+        }
+
+        return !mView.getAnimationViewController().shouldPauseAuth()
+                && getSensorLocation().contains(x, y);
     }
 
     private boolean onTouch(View view, MotionEvent event, boolean fromUdfpsView) {
@@ -529,7 +535,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         final int paddingY = animation != null ? animation.getPaddingY() : 0;
 
         mCoreLayoutParams.flags = getCoreLayoutParamFlags();
-        if (animation.listenForTouchesOutsideView()) {
+        if (animation != null && animation.listenForTouchesOutsideView()) {
             mCoreLayoutParams.flags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
         }
 
