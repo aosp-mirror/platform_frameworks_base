@@ -70,12 +70,12 @@ import android.transition.TransitionInflater;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.AndroidRuntimeException;
+import android.view.AttachedSurfaceControl;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.TypedValue;
-import android.view.ViewRoot;
 import android.view.ContextThemeWrapper;
 import android.view.CrossWindowBlurListeners;
 import android.view.Gravity;
@@ -3984,7 +3984,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public ViewRoot getViewRoot() {
+    public AttachedSurfaceControl getRootSurfaceControl() {
         return getViewRootImplOrNull();
     }
 }

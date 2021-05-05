@@ -224,7 +224,8 @@ import java.util.concurrent.CountDownLatch;
  */
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
 public final class ViewRootImpl implements ViewParent,
-        View.AttachInfo.Callbacks, ThreadedRenderer.DrawCallbacks, ViewRoot {
+        View.AttachInfo.Callbacks, ThreadedRenderer.DrawCallbacks,
+        AttachedSurfaceControl {
     private static final String TAG = "ViewRootImpl";
     private static final boolean DBG = false;
     private static final boolean LOCAL_LOGV = false;
