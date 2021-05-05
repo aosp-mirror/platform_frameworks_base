@@ -55,6 +55,7 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
@@ -109,6 +110,11 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     private final DisplayImeController mDisplayImeController;
     private final SplitScreenTransitions mSplitTransitions;
     private boolean mExitSplitScreenOnHide = true;
+
+    // TODO(b/187041611): remove this flag after totally deprecated legacy split
+    /** Whether the device is supporting legacy split or not. */
+    private boolean mUseLegacySplit;
+
 
     @SplitScreen.StageType int mDismissTop = NO_DISMISS;
     private final Runnable mOnTransitionAnimationComplete = () -> {
@@ -334,10 +340,17 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
 
     private void onStageRootTaskAppeared(StageListenerImpl stageListener) {
         if (mMainStageListener.mHasRootTask && mSideStageListener.mHasRootTask) {
+            mUseLegacySplit = mContext.getResources().getBoolean(R.bool.config_useLegacySplit);
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             // Make the stages adjacent to each other so they occlude what's behind them.
             wct.setAdjacentRoots(mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
-            wct.setLaunchAdjacentFlagRoot(mSideStage.mRootTaskInfo.token);
+
+            // Only sets side stage as launch-adjacent-flag-root when the device is not using legacy
+            // split to prevent new split behavior confusing users.
+            if (!mUseLegacySplit) {
+                wct.setLaunchAdjacentFlagRoot(mSideStage.mRootTaskInfo.token);
+            }
+
             mTaskOrganizer.applyTransaction(wct);
         }
     }
@@ -347,7 +360,11 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             // Deactivate the main stage if it no longer has a root task.
             mMainStage.deactivate(wct);
-            wct.clearLaunchAdjacentFlagRoot(mSideStage.mRootTaskInfo.token);
+
+            if (!mUseLegacySplit) {
+                wct.clearLaunchAdjacentFlagRoot(mSideStage.mRootTaskInfo.token);
+            }
+
             mTaskOrganizer.applyTransaction(wct);
         }
     }
