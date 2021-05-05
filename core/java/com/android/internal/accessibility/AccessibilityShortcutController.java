@@ -80,6 +80,8 @@ public class AccessibilityShortcutController {
             "com.android.server.accessibility.MagnificationController";
     public static final ComponentName MAGNIFICATION_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "Magnification");
+    public static final ComponentName ONE_HANDED_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "OneHandedMode");
     public static final ComponentName REDUCE_BRIGHT_COLORS_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "ReduceBrightColors");
 
@@ -117,7 +119,7 @@ public class AccessibilityShortcutController {
     public static Map<ComponentName, ToggleableFrameworkFeatureInfo>
         getFrameworkShortcutFeaturesMap() {
         if (sFrameworkShortcutFeaturesMap == null) {
-            Map<ComponentName, ToggleableFrameworkFeatureInfo> featuresMap = new ArrayMap<>(2);
+            Map<ComponentName, ToggleableFrameworkFeatureInfo> featuresMap = new ArrayMap<>(4);
             featuresMap.put(COLOR_INVERSION_COMPONENT_NAME,
                     new ToggleableFrameworkFeatureInfo(
                             Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
@@ -128,6 +130,11 @@ public class AccessibilityShortcutController {
                             Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
                             "1" /* Value to enable */, "0" /* Value to disable */,
                             R.string.color_correction_feature_name));
+            featuresMap.put(ONE_HANDED_COMPONENT_NAME,
+                    new ToggleableFrameworkFeatureInfo(
+                            Settings.Secure.ONE_HANDED_MODE_ACTIVATED,
+                            "1" /* Value to enable */, "0" /* Value to disable */,
+                            R.string.one_handed_mode_feature_name));
             featuresMap.put(REDUCE_BRIGHT_COLORS_COMPONENT_NAME,
                     new ToggleableFrameworkFeatureInfo(
                             Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
