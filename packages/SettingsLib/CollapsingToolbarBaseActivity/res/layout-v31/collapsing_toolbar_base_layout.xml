@@ -30,7 +30,7 @@
         android:fitsSystemWindows="true"
         android:outlineAmbientShadowColor="@android:color/transparent"
         android:outlineSpotShadowColor="@android:color/transparent"
-        android:background="@android:color/transparent"
+        android:background="?android:attr/colorPrimary"
         android:theme="@style/Theme.CollapsingToolbar.Settings">
 
         <com.android.settingslib.collapsingtoolbar.AdjustableToolbarLayout
