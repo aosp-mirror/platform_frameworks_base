@@ -1134,6 +1134,48 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testIsConversation_shortcutHasOneBot_targetsR() {
+        StatusBarNotification sbn = getMessagingStyleNotification(PKG_R);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        ShortcutInfo shortcutMock = mock(ShortcutInfo.class);
+        when(shortcutMock.getPersons()).thenReturn(new Person[]{
+                new Person.Builder().setName("Bot").setBot(true).build()
+        });
+        record.setShortcutInfo(shortcutMock);
+
+        assertFalse(record.isConversation());
+    }
+
+    @Test
+    public void testIsConversation_shortcutHasOnePerson_targetsR() {
+        StatusBarNotification sbn = getMessagingStyleNotification(PKG_R);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        ShortcutInfo shortcutMock = mock(ShortcutInfo.class);
+        when(shortcutMock.getPersons()).thenReturn(new Person[]{
+                new Person.Builder().setName("Person").setBot(false).build()
+        });
+        record.setShortcutInfo(shortcutMock);
+
+        assertTrue(record.isConversation());
+        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS, record.getNotificationType());
+    }
+
+    @Test
+    public void testIsConversation_shortcutHasOneBotOnePerson_targetsR() {
+        StatusBarNotification sbn = getMessagingStyleNotification(PKG_R);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        ShortcutInfo shortcutMock = mock(ShortcutInfo.class);
+        when(shortcutMock.getPersons()).thenReturn(new Person[]{
+                new Person.Builder().setName("Bot").setBot(true).build(),
+                new Person.Builder().setName("Person").setBot(false).build()
+        });
+        record.setShortcutInfo(shortcutMock);
+
+        assertTrue(record.isConversation());
+        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS, record.getNotificationType());
+    }
+
+    @Test
     public void testIsConversation_noShortcut() {
         StatusBarNotification sbn = getMessagingStyleNotification();
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
