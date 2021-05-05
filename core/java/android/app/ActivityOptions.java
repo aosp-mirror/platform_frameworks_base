@@ -327,6 +327,9 @@ public class ActivityOptions {
     private static final String KEY_LAUNCHED_FROM_BUBBLE =
             "android.activity.launchTypeBubble";
 
+    /** See {@link #setTransientLaunch()}. */
+    private static final String KEY_TRANSIENT_LAUNCH = "android.activity.transientLaunch";
+
     /**
      * @see #setLaunchCookie
      * @hide
@@ -414,6 +417,7 @@ public class ActivityOptions {
     private int mSplashScreenThemeResId;
     private boolean mRemoveWithTaskOrganizer;
     private boolean mLaunchedFromBubble;
+    private boolean mTransientLaunch;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -1166,6 +1170,7 @@ public class ActivityOptions {
         mSplashScreenThemeResId = opts.getInt(KEY_SPLASH_SCREEN_THEME);
         mRemoveWithTaskOrganizer = opts.getBoolean(KEY_REMOVE_WITH_TASK_ORGANIZER);
         mLaunchedFromBubble = opts.getBoolean(KEY_LAUNCHED_FROM_BUBBLE);
+        mTransientLaunch = opts.getBoolean(KEY_TRANSIENT_LAUNCH);
     }
 
     /**
@@ -1663,6 +1668,28 @@ public class ActivityOptions {
     }
 
     /**
+     * Sets whether the activity launch is part of a transient operation. If it is, it will not
+     * cause lifecycle changes in existing activities even if it were to occlude them (ie. other
+     * activities occluded by this one will not be paused or stopped until the launch is committed).
+     * As a consequence, it will start immediately since it doesn't need to wait for other
+     * lifecycles to evolve. Current user is recents.
+     * @hide
+     */
+    public ActivityOptions setTransientLaunch() {
+        mTransientLaunch = true;
+        return this;
+    }
+
+    /**
+     * @see #setTransientLaunch()
+     * @return whether the activity launch is part of a transient operation.
+     * @hide
+     */
+    public boolean getTransientLaunch() {
+        return mTransientLaunch;
+    }
+
+    /**
      * Update the current values in this ActivityOptions from those supplied
      * in <var>otherOptions</var>.  Any values
      * defined in <var>otherOptions</var> replace those in the base options.
@@ -1901,6 +1928,9 @@ public class ActivityOptions {
         }
         if (mLaunchedFromBubble) {
             b.putBoolean(KEY_LAUNCHED_FROM_BUBBLE, mLaunchedFromBubble);
+        }
+        if (mTransientLaunch) {
+            b.putBoolean(KEY_TRANSIENT_LAUNCH, mTransientLaunch);
         }
         return b;
     }

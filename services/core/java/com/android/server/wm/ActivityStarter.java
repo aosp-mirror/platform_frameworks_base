@@ -192,6 +192,7 @@ class ActivityStarter {
     private boolean mKeepCurTransition;
     private boolean mAvoidMoveToFront;
     private boolean mFrozeTaskList;
+    private boolean mTransientLaunch;
 
     // We must track when we deliver the new intent since multiple code paths invoke
     // {@link #deliverNewIntent}. This is due to early returns in the code path. This flag is used
@@ -1792,7 +1793,7 @@ class ActivityStarter {
                     mTargetRootTask.moveToFront("startActivityInner");
                 }
                 mRootWindowContainer.resumeFocusedTasksTopActivities(
-                        mTargetRootTask, mStartActivity, mOptions);
+                        mTargetRootTask, mStartActivity, mOptions, mTransientLaunch);
             }
         }
         mRootWindowContainer.updateUserRootTask(mStartActivity.mUserId, mTargetRootTask);
@@ -2209,6 +2210,7 @@ class ActivityStarter {
         mKeepCurTransition = false;
         mAvoidMoveToFront = false;
         mFrozeTaskList = false;
+        mTransientLaunch = false;
 
         mVoiceSession = null;
         mVoiceInteractor = null;
@@ -2311,6 +2313,7 @@ class ActivityStarter {
                 mDoResume = false;
                 mAvoidMoveToFront = true;
             }
+            mTransientLaunch = mOptions.getTransientLaunch();
             mTargetRootTask = Task.fromWindowContainerToken(mOptions.getLaunchRootTask());
         }
 
@@ -2642,7 +2645,7 @@ class ActivityStarter {
             }
             if (mTargetRootTask.isFocusable()) {
                 mRootWindowContainer.resumeFocusedTasksTopActivities(mTargetRootTask, null,
-                        mOptions);
+                        mOptions, mTransientLaunch);
             } else {
                 mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             }

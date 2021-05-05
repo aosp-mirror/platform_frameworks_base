@@ -560,7 +560,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         // Verify the target task should resume its activity.
         verify(rootTask, times(1)).resumeTopActivityUncheckedLocked(
-                eq(activity), eq(null /* targetOptions */));
+                eq(activity), eq(null /* targetOptions */), eq(false));
     }
 
     /**
