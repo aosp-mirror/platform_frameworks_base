@@ -18,6 +18,8 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -59,27 +61,32 @@ public abstract class BatteryConsumer {
     public static @interface PowerComponent {
     }
 
-    public static final int POWER_COMPONENT_SCREEN = 0;
-    public static final int POWER_COMPONENT_CPU = 1;
-    public static final int POWER_COMPONENT_BLUETOOTH = 2;
-    public static final int POWER_COMPONENT_CAMERA = 3;
-    public static final int POWER_COMPONENT_AUDIO = 4;
-    public static final int POWER_COMPONENT_VIDEO = 5;
-    public static final int POWER_COMPONENT_FLASHLIGHT = 6;
-    public static final int POWER_COMPONENT_SYSTEM_SERVICES = 7;
-    public static final int POWER_COMPONENT_MOBILE_RADIO = 8;
-    public static final int POWER_COMPONENT_SENSORS = 9;
-    public static final int POWER_COMPONENT_GNSS = 10;
-    public static final int POWER_COMPONENT_WIFI = 11;
-    public static final int POWER_COMPONENT_WAKELOCK = 12;
-    public static final int POWER_COMPONENT_MEMORY = 13;
-    public static final int POWER_COMPONENT_PHONE = 14;
-    public static final int POWER_COMPONENT_AMBIENT_DISPLAY = 15;
-    public static final int POWER_COMPONENT_IDLE = 16;
+    public static final int POWER_COMPONENT_SCREEN = OsProtoEnums.POWER_COMPONENT_SCREEN; // 0
+    public static final int POWER_COMPONENT_CPU = OsProtoEnums.POWER_COMPONENT_CPU; // 1
+    public static final int POWER_COMPONENT_BLUETOOTH = OsProtoEnums.POWER_COMPONENT_BLUETOOTH; // 2
+    public static final int POWER_COMPONENT_CAMERA = OsProtoEnums.POWER_COMPONENT_CAMERA; // 3
+    public static final int POWER_COMPONENT_AUDIO = OsProtoEnums.POWER_COMPONENT_AUDIO; // 4
+    public static final int POWER_COMPONENT_VIDEO = OsProtoEnums.POWER_COMPONENT_VIDEO; // 5
+    public static final int POWER_COMPONENT_FLASHLIGHT =
+            OsProtoEnums.POWER_COMPONENT_FLASHLIGHT; // 6
+    public static final int POWER_COMPONENT_SYSTEM_SERVICES =
+            OsProtoEnums.POWER_COMPONENT_SYSTEM_SERVICES; // 7
+    public static final int POWER_COMPONENT_MOBILE_RADIO =
+            OsProtoEnums.POWER_COMPONENT_MOBILE_RADIO; // 8
+    public static final int POWER_COMPONENT_SENSORS = OsProtoEnums.POWER_COMPONENT_SENSORS; // 9
+    public static final int POWER_COMPONENT_GNSS = OsProtoEnums.POWER_COMPONENT_GNSS; // 10
+    public static final int POWER_COMPONENT_WIFI = OsProtoEnums.POWER_COMPONENT_WIFI; // 11
+    public static final int POWER_COMPONENT_WAKELOCK = OsProtoEnums.POWER_COMPONENT_WAKELOCK; // 12
+    public static final int POWER_COMPONENT_MEMORY = OsProtoEnums.POWER_COMPONENT_MEMORY; // 13
+    public static final int POWER_COMPONENT_PHONE = OsProtoEnums.POWER_COMPONENT_PHONE; // 14
+    public static final int POWER_COMPONENT_AMBIENT_DISPLAY =
+            OsProtoEnums.POWER_COMPONENT_AMBIENT_DISPLAY; // 15
+    public static final int POWER_COMPONENT_IDLE = OsProtoEnums.POWER_COMPONENT_IDLE; // 16
     // Power that is re-attributed to other battery consumers. For example, for System Server
     // this represents the power attributed to apps requesting system services.
     // The value should be negative or zero.
-    public static final int POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS = 17;
+    public static final int POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS =
+            OsProtoEnums.POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS; // 17
 
     public static final int POWER_COMPONENT_COUNT = 18;
 
@@ -262,6 +269,54 @@ public abstract class BatteryConsumer {
      * @param skipEmptyComponents if true, omit any power components with a zero amount.
      */
     public abstract void dump(PrintWriter pw, boolean skipEmptyComponents);
+
+    /** Returns whether there are any atoms.proto BATTERY_CONSUMER_DATA data to write to a proto. */
+    boolean hasStatsProtoData() {
+        return writeStatsProtoImpl(null, /* Irrelevant fieldId: */ 0);
+    }
+
+    /** Writes the atoms.proto BATTERY_CONSUMER_DATA for this BatteryConsumer to the given proto. */
+    void writeStatsProto(@NonNull ProtoOutputStream proto, long fieldId) {
+        writeStatsProtoImpl(proto, fieldId);
+    }
+
+    /**
+     * Returns whether there are any atoms.proto BATTERY_CONSUMER_DATA data to write to a proto,
+     * and writes it to the given proto if it is non-null.
+     */
+    private boolean writeStatsProtoImpl(@Nullable ProtoOutputStream proto, long fieldId) {
+        final long totalConsumedPowerDeciCoulombs = convertMahToDeciCoulombs(getConsumedPower());
+
+        if (totalConsumedPowerDeciCoulombs == 0) {
+            // NOTE: Strictly speaking we should also check !mPowerComponents.hasStatsProtoData().
+            // However, that call is a bit expensive (a for loop). And the only way that
+            // totalConsumedPower can be 0 while mPowerComponents.hasStatsProtoData() is true is
+            // if POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS (which is the only negative
+            // allowed) happens to exactly equal the sum of all other components, which
+            // can't really happen in practice.
+            // So we'll just adopt the rule "if total==0, don't write any details".
+            // If negative values are used for other things in the future, this can be revisited.
+            return false;
+        }
+        if (proto == null) {
+            // We're just asked whether there is data, not to actually write it. And there is.
+            return true;
+        }
+
+        final long token = proto.start(fieldId);
+        proto.write(
+                BatteryUsageStatsAtomsProto.BatteryConsumerData.TOTAL_CONSUMED_POWER_DECI_COULOMBS,
+                totalConsumedPowerDeciCoulombs);
+        mPowerComponents.writeStatsProto(proto);
+        proto.end(token);
+
+        return true;
+    }
+
+    /** Converts charge from milliamp hours (mAh) to decicoulombs (dC). */
+    static long convertMahToDeciCoulombs(double powerMah) {
+        return (long) (powerMah * (10 * 3600 / 1000) + 0.5);
+    }
 
     protected abstract static class BaseBuilder<T extends BaseBuilder<?>> {
         final PowerComponents.Builder mPowerComponentsBuilder;
