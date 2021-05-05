@@ -167,6 +167,9 @@ public class QSFooterView extends FrameLayout {
 
     private void updateResources() {
         updateFooterAnimator();
+        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        lp.bottomMargin = getResources().getDimensionPixelSize(R.dimen.qs_footers_margin_bottom);
+        setLayoutParams(lp);
         mTunerIconTranslation = mContext.getResources()
                 .getDimensionPixelOffset(R.dimen.qs_footer_tuner_icon_translation);
         mTunerIcon.setTranslationX(isLayoutRtl() ? -mTunerIconTranslation : mTunerIconTranslation);

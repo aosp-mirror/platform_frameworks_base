@@ -23,7 +23,7 @@
     android:padding="@dimen/qs_footer_padding"
     android:gravity="center_vertical"
     android:layout_gravity="center_vertical|center_horizontal"
-    android:layout_marginVertical="@dimen/qs_security_footer_vertical_margin"
+    android:layout_marginBottom="@dimen/qs_footers_margin_bottom"
     android:background="@drawable/qs_security_footer_background"
     systemui:singleLineHeight="@dimen/qs_security_footer_single_line_height"
     systemui:textViewId="@id/footer_text"

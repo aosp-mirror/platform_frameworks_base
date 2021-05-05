@@ -616,7 +616,7 @@
     <dimen name="qs_footer_padding">20dp</dimen>
     <dimen name="qs_security_footer_height">88dp</dimen>
     <dimen name="qs_security_footer_single_line_height">48dp</dimen>
-    <dimen name="qs_security_footer_vertical_margin">8dp</dimen>
+    <dimen name="qs_footers_margin_bottom">8dp</dimen>
     <dimen name="qs_security_footer_background_inset">0dp</dimen>
     <dimen name="qs_security_footer_corner_radius">28dp</dimen>
 
