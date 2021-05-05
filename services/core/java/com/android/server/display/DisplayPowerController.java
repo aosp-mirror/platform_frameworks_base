@@ -584,15 +584,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBrightnessBucketsInDozeConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_displayBrightnessBucketsInDoze);
 
-        if (mDisplayId == Display.DEFAULT_DISPLAY && !DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
-            // TODO: b/178385123 Once there are sensor associations, we can enable proximity for
-            // non-default displays.
-            mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-            if (mProximitySensor != null) {
-                mProximityThreshold = Math.min(mProximitySensor.getMaximumRange(),
-                        TYPICAL_PROXIMITY_THRESHOLD);
-            }
-        }
+        loadProximitySensor();
+
         mCurrentScreenBrightnessSetting = getScreenBrightnessSetting();
         mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
@@ -658,7 +651,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBrightnessMapper.recalculateSplines(mCdsi.isReduceBrightColorsActivated(), adjustedNits);
     }
 
-    private Sensor findSensor(String sensorType, String sensorName, int fallbackType) {
+    private Sensor findSensor(String sensorType, String sensorName, int fallbackType,
+            boolean useFallback) {
         final boolean isNameSpecified = !TextUtils.isEmpty(sensorName);
         final boolean isTypeSpecified = !TextUtils.isEmpty(sensorType);
         List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
@@ -670,7 +664,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 }
             }
         }
-        return mSensorManager.getDefaultSensor(fallbackType);
+        if (useFallback) {
+            return mSensorManager.getDefaultSensor(fallbackType);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -806,6 +804,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mDisplayDeviceConfig = config;
 
             loadAmbientLightSensor();
+            loadProximitySensor();
             mHbmController.resetHbmData(token, config.getHighBrightnessModeData());
         });
     }
@@ -1614,7 +1613,24 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayDeviceConfig.getAmbientLightSensor();
         String lightSensorName = lightSensor.name;
         String lightSensorType = lightSensor.type;
-        mLightSensor = findSensor(lightSensorType, lightSensorName, Sensor.TYPE_LIGHT);
+        mLightSensor = findSensor(lightSensorType, lightSensorName, Sensor.TYPE_LIGHT,
+                mDisplayId == Display.DEFAULT_DISPLAY);
+    }
+
+    private void loadProximitySensor() {
+        if (DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
+            return;
+        }
+        final DisplayDeviceConfig.SensorIdentifier proxSensor =
+                mDisplayDeviceConfig.getProximitySensor();
+        final String proxSensorName = proxSensor.name;
+        final String proxSensorType = proxSensor.type;
+        mProximitySensor = findSensor(proxSensorType, proxSensorName, Sensor.TYPE_PROXIMITY,
+                mDisplayId == Display.DEFAULT_DISPLAY);
+        if (mProximitySensor != null) {
+            mProximityThreshold = Math.min(mProximitySensor.getMaximumRange(),
+                    TYPICAL_PROXIMITY_THRESHOLD);
+        }
     }
 
     private float clampScreenBrightnessForVr(float value) {
