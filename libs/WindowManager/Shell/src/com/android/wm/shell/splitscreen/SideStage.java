@@ -18,6 +18,7 @@ package com.android.wm.shell.splitscreen;
 
 import android.app.ActivityManager;
 import android.graphics.Rect;
+import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -33,8 +34,9 @@ class SideStage extends StageTaskListener {
     private static final String TAG = SideStage.class.getSimpleName();
 
     SideStage(ShellTaskOrganizer taskOrganizer, int displayId,
-            StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue) {
-        super(taskOrganizer, displayId, callbacks, syncQueue);
+            StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
+            SurfaceSession surfaceSession) {
+        super(taskOrganizer, displayId, callbacks, syncQueue, surfaceSession);
     }
 
     void addTask(ActivityManager.RunningTaskInfo task, Rect rootBounds,

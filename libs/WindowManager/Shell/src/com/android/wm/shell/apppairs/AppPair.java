@@ -25,6 +25,7 @@ import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -35,6 +36,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.SurfaceUtils;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitLayout;
 
@@ -54,6 +56,9 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
     private SurfaceControl mTaskLeash1;
     private ActivityManager.RunningTaskInfo mTaskInfo2;
     private SurfaceControl mTaskLeash2;
+    private SurfaceControl mDimLayer1;
+    private SurfaceControl mDimLayer2;
+    private final SurfaceSession mSurfaceSession = new SurfaceSession();
 
     private final AppPairsController mController;
     private final SyncTransactionQueue mSyncQueue;
@@ -153,9 +158,13 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
         } else if (taskInfo.taskId == getTaskId1()) {
             mTaskInfo1 = taskInfo;
             mTaskLeash1 = leash;
+            mSyncQueue.runInSync(t -> mDimLayer1 =
+                    SurfaceUtils.makeDimLayer(t, mTaskLeash1, "Dim layer", mSurfaceSession));
         } else if (taskInfo.taskId == getTaskId2()) {
             mTaskInfo2 = taskInfo;
             mTaskLeash2 = leash;
+            mSyncQueue.runInSync(t -> mDimLayer2 =
+                    SurfaceUtils.makeDimLayer(t, mTaskLeash2, "Dim layer", mSurfaceSession));
         } else {
             throw new IllegalStateException("Unknown task=" + taskInfo.taskId);
         }
@@ -212,8 +221,12 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
         if (taskInfo.taskId == getRootTaskId()) {
             // We don't want to release this object back to the pool since the root task went away.
             mController.unpair(mRootTaskInfo.taskId, false /* releaseToPool */);
-        } else if (taskInfo.taskId == getTaskId1() || taskInfo.taskId == getTaskId2()) {
+        } else if (taskInfo.taskId == getTaskId1()) {
             mController.unpair(mRootTaskInfo.taskId);
+            mSyncQueue.runInSync(t -> t.remove(mDimLayer1));
+        } else if (taskInfo.taskId == getTaskId2()) {
+            mController.unpair(mRootTaskInfo.taskId);
+            mSyncQueue.runInSync(t -> t.remove(mDimLayer2));
         }
     }
 

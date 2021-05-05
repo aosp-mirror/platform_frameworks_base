@@ -47,6 +47,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.window.DisplayAreaInfo;
 import android.window.IRemoteTransition;
@@ -92,6 +93,8 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     /** internal value for mDismissTop that represents no dismiss */
     private static final int NO_DISMISS = -2;
 
+    private final SurfaceSession mSurfaceSession = new SurfaceSession();
+
     private final MainStage mMainStage;
     private final StageListenerImpl mMainStageListener = new StageListenerImpl();
     private final SideStage mSideStage;
@@ -116,8 +119,8 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     /** Whether the device is supporting legacy split or not. */
     private boolean mUseLegacySplit;
 
-
     @SplitScreen.StageType int mDismissTop = NO_DISMISS;
+
     private final Runnable mOnTransitionAnimationComplete = () -> {
         // If still playing, let it finish.
         if (!isSplitScreenVisible()) {
@@ -138,8 +141,18 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
         mSyncQueue = syncQueue;
         mRootTDAOrganizer = rootTDAOrganizer;
         mTaskOrganizer = taskOrganizer;
-        mMainStage = new MainStage(mTaskOrganizer, mDisplayId, mMainStageListener, mSyncQueue);
-        mSideStage = new SideStage(mTaskOrganizer, mDisplayId, mSideStageListener, mSyncQueue);
+        mMainStage = new MainStage(
+                mTaskOrganizer,
+                mDisplayId,
+                mMainStageListener,
+                mSyncQueue,
+                mSurfaceSession);
+        mSideStage = new SideStage(
+                mTaskOrganizer,
+                mDisplayId,
+                mSideStageListener,
+                mSyncQueue,
+                mSurfaceSession);
         mDisplayImeController = displayImeController;
         mRootTDAOrganizer.registerListener(displayId, this);
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,

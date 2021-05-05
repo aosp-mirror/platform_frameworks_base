@@ -22,6 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.ActivityManager;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -36,7 +37,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 /** Tests for {@link MainStage} */
 @SmallTest
@@ -47,14 +47,16 @@ public class MainStageTests {
     @Mock private SyncTransactionQueue mSyncQueue;
     @Mock private ActivityManager.RunningTaskInfo mRootTaskInfo;
     @Mock private SurfaceControl mRootLeash;
-    @Spy private WindowContainerTransaction mWct;
+    private WindowContainerTransaction mWct = new WindowContainerTransaction();
+    private SurfaceSession mSurfaceSession = new SurfaceSession();
     private MainStage mMainStage;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
-        mMainStage = new MainStage(mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks, mSyncQueue);
+        mMainStage = new MainStage(mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks, mSyncQueue,
+                mSurfaceSession);
         mMainStage.onTaskAppeared(mRootTaskInfo, mRootLeash);
     }
 

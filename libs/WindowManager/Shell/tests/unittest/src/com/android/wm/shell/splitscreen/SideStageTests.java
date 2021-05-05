@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -52,13 +53,15 @@ public class SideStageTests {
     @Mock private ActivityManager.RunningTaskInfo mRootTask;
     @Mock private SurfaceControl mRootLeash;
     @Spy private WindowContainerTransaction mWct;
+    private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SideStage mSideStage;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mRootTask = new TestRunningTaskInfoBuilder().build();
-        mSideStage = new SideStage(mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks, mSyncQueue);
+        mSideStage = new SideStage(mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks, mSyncQueue,
+                mSurfaceSession);
         mSideStage.onTaskAppeared(mRootTask, mRootLeash);
     }
 

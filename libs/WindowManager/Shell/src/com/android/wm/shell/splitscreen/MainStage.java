@@ -19,6 +19,7 @@ package com.android.wm.shell.splitscreen;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import android.graphics.Rect;
+import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -36,8 +37,9 @@ class MainStage extends StageTaskListener {
     private boolean mIsActive = false;
 
     MainStage(ShellTaskOrganizer taskOrganizer, int displayId,
-            StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue) {
-        super(taskOrganizer, displayId, callbacks, syncQueue);
+            StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
+            SurfaceSession surfaceSession) {
+        super(taskOrganizer, displayId, callbacks, syncQueue, surfaceSession);
     }
 
     boolean isActive() {
