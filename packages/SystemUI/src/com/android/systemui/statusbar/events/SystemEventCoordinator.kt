@@ -92,9 +92,6 @@ class SystemEventCoordinator @Inject constructor(
         var currentPrivacyItems = listOf<PrivacyItem>()
 
         override fun onPrivacyItemsChanged(privacyItems: List<PrivacyItem>) {
-            if (privacyItems.isNotEmpty() && currentPrivacyItems.containsAll(privacyItems)) {
-                return
-            }
             currentPrivacyItems = privacyItems
             notifyListeners()
         }
