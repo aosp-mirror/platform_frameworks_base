@@ -90,7 +90,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
         coordinator.attachScheduler(this)
     }
 
-    fun onStatusEvent(event: StatusEvent) {
+    fun onStatusEvent(event: StatusEvent, showAnimation: Boolean = true) {
         // Ignore any updates until the system is up and running
         if (isTooEarly() || !isImmersiveIndicatorEnabled()) {
             return
@@ -103,7 +103,12 @@ class SystemStatusAnimationScheduler @Inject constructor(
             if (DEBUG) {
                 Log.d(TAG, "scheduling event $event")
             }
-            scheduleEvent(event)
+            if (showAnimation) {
+                scheduleEvent(event)
+            } else if (event.forceVisible) {
+                hasPersistentDot = true
+                notifyTransitionToPersistentDot(showAnimation = false)
+            }
         } else {
             if (DEBUG) {
                 Log.d(TAG, "ignoring event $event")
@@ -197,7 +202,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
 
                 aSet2.play(chipAnimator).before(systemAnimator)
                 if (hasPersistentDot) {
-                    val dotAnim = notifyTransitionToPersistentDot()
+                    val dotAnim = notifyTransitionToPersistentDot(showAnimation = true)
                     if (dotAnim != null) aSet2.playTogether(systemAnimator, dotAnim)
                 }
 
@@ -209,9 +214,9 @@ class SystemStatusAnimationScheduler @Inject constructor(
         }, DELAY)
     }
 
-    private fun notifyTransitionToPersistentDot(): Animator? {
+    private fun notifyTransitionToPersistentDot(showAnimation: Boolean): Animator? {
         val anims: List<Animator> = listeners.mapNotNull {
-            it.onSystemStatusAnimationTransitionToPersistentDot()
+            it.onSystemStatusAnimationTransitionToPersistentDot(showAnimation)
         }
         if (anims.isNotEmpty()) {
             val aSet = AnimatorSet()
@@ -321,7 +326,9 @@ interface SystemStatusAnimationCallback {
     @JvmDefault fun onSystemChromeAnimationEnd() {}
 
     // Best method name, change my mind
-    @JvmDefault fun onSystemStatusAnimationTransitionToPersistentDot(): Animator? { return null }
+    @JvmDefault fun onSystemStatusAnimationTransitionToPersistentDot(
+        showAnimation: Boolean
+    ): Animator? { return null }
     @JvmDefault fun onHidePersistentDot(): Animator? { return null }
 }
 
