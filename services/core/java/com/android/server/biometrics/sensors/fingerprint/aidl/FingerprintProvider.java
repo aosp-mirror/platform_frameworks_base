@@ -300,7 +300,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             final FingerprintGenerateChallengeClient client =
                     new FingerprintGenerateChallengeClient(mContext,
                             mSensors.get(sensorId).getLazySession(), token,
-                            new ClientMonitorCallbackConverter(receiver), opPackageName,
+                            new ClientMonitorCallbackConverter(receiver), userId, opPackageName,
                             sensorId);
             scheduleForSensor(sensorId, client);
         });
@@ -313,7 +313,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             final FingerprintRevokeChallengeClient client =
                     new FingerprintRevokeChallengeClient(mContext,
                             mSensors.get(sensorId).getLazySession(), token,
-                            opPackageName, sensorId, challenge);
+                            userId, opPackageName, sensorId, challenge);
             scheduleForSensor(sensorId, client);
         });
     }
