@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 /**
@@ -73,7 +75,15 @@ abstract class UdfpsAnimationView extends FrameLayout {
     }
 
     protected void updateAlpha() {
-        getDrawable().setAlpha(calculateAlpha());
+        int alpha = calculateAlpha();
+        getDrawable().setAlpha(alpha);
+
+        // this is necessary so that touches won't be intercepted if udfps is paused:
+        if (mPauseAuth && alpha == 0 && getParent() != null) {
+            ((ViewGroup) getParent()).setVisibility(View.INVISIBLE);
+        } else {
+            ((ViewGroup) getParent()).setVisibility(View.VISIBLE);
+        }
     }
 
     int calculateAlpha() {
